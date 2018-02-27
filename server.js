@@ -17,37 +17,78 @@
  * This file defines and implements the MBEE server functionality.
  */
 
-// Node.js Modules 
+
+/**************************************
+ *  Node.js Built-in Modules          *
+ **************************************/
+
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
 const util = require('util');
 
-// Third-party modules 
-const express = require('express');
+/**************************************
+ *  Third-party modules               *
+ **************************************/
 
-// Local Modules 
+const express = require('express');
+const passport = require('passport');
+
+
+/**************************************
+ *  Helper Functions                  *
+ **************************************/
+
+function getControllerPath(name) {
+    return path.join(__dirname, config.server.app, 'controllers', name)
+}
+
+
+/**************************************
+ *  Local Modules                     *          
+ **************************************/
+
 const config = require(path.join(__dirname,'config.json'))
 
-var controllersDir = path.join(__dirname, config.server.app, 'controllers');
-const UIController = require(path.join(controllersDir, 'UIController'));
-const APIController = require(path.join(controllersDir, 'APIController'));
+const APIController = require(getControllerPath('APIController'));
+const AuthController = require(getControllerPath('AuthController'));
+const UIController = require(getControllerPath('UIController'));
 
-// Configure Application
+
+/**************************************
+ *  Configuration & Middleware        *          
+ **************************************/
+
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')))
+
+/**************************************
+ *  View Middleware                   *          
+ **************************************/
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname , config.server.app, 'views'));
 
-// Load SSL certs
-if (config.server.ssl) {
-    var keyPath = path.join('certs', util.format('%s.key', config.server.ssl_cert_name));
-    var crtPath = path.join('certs', util.format('%s.crt', config.server.ssl_cert_name));
-    var privateKey  = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
-    var certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
-    var credentials = {key: privateKey, cert: certificate};
-}
+/**************************************
+ *  Authentication Middleware         *          
+ **************************************/
+
+app.use(passport.initialize());
+passport.use(new AuthController(config.auth.strategy));
+// Passport - user serialization
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+// Passport user deserialization
+passport.deserializeUser(function(id, done) {
+    // do deserialization
+});
+
+
+/**************************************
+ *  Routes                            *          
+ **************************************/
 
 // UI Routes
 app.get('/', UIController.home);
@@ -56,6 +97,7 @@ app.get('/login', UIController.login);
 // API Routes
 var api = express.Router()
 api.get('/version', APIController.version);
+api.post('/login', passport.authenticate(config.auth.strategy), APIController.version);
 app.use('/api', api);
 
 // Admin Routes
@@ -63,9 +105,26 @@ var admin = express.Router()
 admin.get('/console', UIController.admin)
 app.use('/admin', admin);
 
-// Run server
+
+/**************************************
+ *  Server                            *          
+ **************************************/
+
+// Read TLS/SSL certs
+if (config.server.ssl) {
+    var keyPath = path.join('certs', util.format('%s.key', config.server.ssl_cert_name));
+    var crtPath = path.join('certs', util.format('%s.crt', config.server.ssl_cert_name));
+    var privateKey  = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
+    var certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
+    var credentials = {key: privateKey, cert: certificate};
+}
+
+// Run HTTPSserver
 var httpServer = http.createServer(app);
 httpServer.listen(8080, () => console.log('MBEE server listening on port 8080!'));
+
+
+// Run HTTPS Server
 if (config.ssl) {
     var httpsServer = https.createServer(credentials, app);
     httpsServer.listen(8443, () => console.log('MBEE server listening on port 8443!'));
