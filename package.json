@@ -23,9 +23,12 @@
     "bootstrap": "^4.0.0"
   },
   "scripts": {
-    "full-clean": "rm -rf public/* node_modules",
-    "clean": "gulp clean",
     "build": "gulp",
+    "clean": "gulp clean",
+    "docker-build": "gulp clean && gulp && docker build -t mbee .",
+    "docker-clean": "docker stop mbee; docker rm mbee;",
+    "docker-run": "docker run -d -it -p 8080:8080 --name mbee mbee",
+    "full-clean": "rm -rf public/* node_modules",
     "start": "node server.js"
   }
 }
