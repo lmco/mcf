@@ -1,0 +1,31 @@
+{
+  "name": "mbee",
+  "version": "0.1.0",
+  "description": "Model-Based Engineering Environment",
+  "main": "server.js",
+  "repository": "https://gitlab.lmms.lmco.com/mbee/mbee.git",
+  "author": "Josh Kaplan <joshua.d.kaplan@lmco.com>",
+  "license": "LMPI",
+  "private": true,
+  "dependencies": {
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
+  },
+  "devDependencies": {
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-react": "^3.1.0",
+    "gulp-sass": "^3.1.0",
+    "jquery": "^3.3.1",
+    "bootstrap": "^4.0.0"
+  },
+  "scripts": {
+    "full-clean": "rm -rf public/* node_modules",
+    "clean": "gulp clean",
+    "build": "gulp",
+    "start": "node server.js"
+  }
+}

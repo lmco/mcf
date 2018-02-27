@@ -1,0 +1,24 @@
+{
+    "server": {
+        "app": "app",
+        "ssl": false,
+        "ssl_cert_name": "dev.mbee.us.lmco.com",
+        "json": {
+            "indent": 4
+        }
+    },
+    "auth": {
+        "type": "ldap",
+        "groups": ["SSC.MBEE", "SSC.MBEE.Dev"]
+    },
+    "ui": {
+        "banner": {
+            "on": true,
+            "message": "Lockheed Martin Proprietary Information",
+            "color": "#fff",
+            "background": "#0d47a1",
+            "bold": true,
+            "border": "1px solid #0d47a1"
+        }
+    }
+}
