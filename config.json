@@ -8,7 +8,7 @@
         }
     },
     "auth": {
-        "type": "ldap",
+        "strategy": "test-token-auth",
         "groups": ["SSC.MBEE", "SSC.MBEE.Dev"]
     },
     "ui": {
