@@ -16,12 +16,14 @@ Run `brew install node`
 Run `brew install yarn`
 
 When on the Lockeed Martin Intranet, you'll need to set up the proxy:
-    - Run `yarn config set "http-proxy" http://proxy-lmi.global.lmco.com`
-    - Run `yarn config set "https-proxy" http://proxy-lmi.global.lmco.com`
 
-You'll also need to download and set up the certificate authority.
-    - Download the ca file from `https://sscgit.ast.lmco.com/projects/CP/repos/openstack-hot/browse/PEM_LMChain_20160721.pem?raw`
-    - Run `yarn config set "cafile" /path/to/your/cafile.pem`
+- Run `yarn config set "http-proxy" http://proxy-lmi.global.lmco.com`
+- Run `yarn config set "https-proxy" http://proxy-lmi.global.lmco.com`
+
+You'll also need to download and set up the certificate authority:
+
+- Download the ca file from `https://sscgit.ast.lmco.com/projects/CP/repos/openstack-hot/browse/PEM_LMChain_20160721.pem?raw`
+- Run `yarn config set "cafile" /path/to/your/cafile.pem`
 
 ### Get the Code 
 
