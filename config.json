@@ -8,8 +8,18 @@
         }
     },
     "auth": {
-        "strategy": "test-token-auth",
-        "groups": ["SSC.MBEE", "SSC.MBEE.Dev"]
+        "strategy": "TestTokenStrategy",
+        "ldap": {
+            "server": "ldaps://usadc43.us.lmco.com:3269",
+            "ca": [
+                "./certs/LockheedMartinRootCertificationAuthority.pem",
+                "./certs/LockheedMartinRootCertificationAuthority2.pem",
+                "./certs/LockheedMartinRootCertificationAuthority3.pem"
+            ],
+            "bind_dn": "mbee-query@us.lmco.com",
+            "bind_dn_pass": "SuaIZh4oIPCRD9g",
+            "groups": ["SSC.MBEE", "SSC.MBEE.Dev"]
+        }
     },
     "ui": {
         "banner": {

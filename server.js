@@ -50,11 +50,11 @@ function getControllerPath(name) {
  **************************************/
 
 const config = require(path.join(__dirname,'config.json'))
-
 const APIController = require(getControllerPath('APIController'));
-const AuthController = require(getControllerPath('AuthController'));
 const UIController = require(getControllerPath('UIController'));
 
+const AuthStrategy = require(getControllerPath(path.join('auth', config.auth.strategy)));
+const AuthController = new AuthStrategy();
 
 /**************************************
  *  Configuration & Middleware        *          
@@ -75,7 +75,7 @@ app.set('views', path.join(__dirname , config.server.app, 'views'));
  **************************************/
 
 app.use(passport.initialize());
-passport.use(new AuthController(config.auth.strategy));
+passport.use(AuthController);
 // Passport - user serialization
 passport.serializeUser(function(user, done) {
     done(null, user);
@@ -97,7 +97,7 @@ app.get('/login', UIController.login);
 // API Routes
 var api = express.Router()
 api.get('/version', APIController.version);
-api.post('/login', passport.authenticate(config.auth.strategy), APIController.version);
+api.post('/login', passport.authenticate(AuthController.name), APIController.version);
 app.use('/api', api);
 
 // Admin Routes
