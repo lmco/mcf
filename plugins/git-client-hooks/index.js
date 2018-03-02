@@ -32,6 +32,7 @@ var hooksDir = path.join(__dirname, 'hooks');
 ['commit-msg', 'pre-push'].forEach(function(f) {
     var target = path.join(hooksDir, f); 
     var src = path.join(gitHooksDir, f);
+    fs.unlinkSync(src);
     fs.symlinkSync(target, src);  
-})
+});
 
