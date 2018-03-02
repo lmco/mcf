@@ -27,13 +27,21 @@ var react   = require('gulp-react');
 var concat  = require('gulp-concat');
 var del     = require('del');
 
-gulp.task('default', ['copy-react', 'copy-react-dom','sass', 'react', 'react-dom']);
 gulp.task('clean', cleanTask);
 gulp.task('sass', sassTask);
 gulp.task('react', compileReactTask);
 gulp.task('react-dom', compileReactDomTask);
 gulp.task('copy-react', copyReactTask);
 gulp.task('copy-react-dom', copyReactDomTask);
+gulp.task('copy-images', copyImages);
+gulp.task('default', [
+    'copy-images',
+    'copy-react', 
+    'copy-react-dom',
+    'sass', 
+    'react', 
+    'react-dom'
+]);
 
 /**
  * Removes directories created during build.
@@ -53,6 +61,14 @@ function sassTask() {
     .pipe(gulp.dest('./public/css'));
 }
 
+/**
+ * Copies all images from ui/img to public/img
+ */
+function copyImages() {
+    return gulp.src('./ui/img/**/*')
+    .pipe(gulp.dest('public/img'));
+
+}
 
 /**
  * Copies react.production.js from node_modules into public/js/react.js
@@ -85,7 +101,6 @@ function compileReactTask() {
     .pipe(react())
     .pipe(concat('mbee.js'))
     .pipe(gulp.dest('public/js'));
-
 }
 
 
