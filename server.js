@@ -52,6 +52,8 @@ function getControllerPath(name) {
 const config = require(path.join(__dirname,'config.json'))
 const APIController = require(getControllerPath('APIController'));
 const UIController = require(getControllerPath('UIController'));
+const OrgController = require(getControllerPath('OrganizationController'));
+const ProjectController = require(getControllerPath('ProjectController'));
 
 const AuthStrategy = require(getControllerPath(path.join('auth', config.auth.strategy)));
 const AuthController = new AuthStrategy();
@@ -61,30 +63,9 @@ const AuthController = new AuthStrategy();
  **************************************/
 
 const app = express();
-app.use(express.static(path.join(__dirname, 'public')))
-
-/**************************************
- *  View Middleware                   *          
- **************************************/
-
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname , config.server.app, 'views'));
-
-/**************************************
- *  Authentication Middleware         *          
- **************************************/
-
-app.use(passport.initialize());
-passport.use(AuthController);
-// Passport - user serialization
-passport.serializeUser(function(user, done) {
-    done(null, user);
-});
-// Passport user deserialization
-passport.deserializeUser(function(id, done) {
-    // do deserialization
-});
-
 
 /**************************************
  *  Routes                            *          
@@ -96,8 +77,31 @@ app.get('/login', UIController.login);
 
 // API Routes
 var api = express.Router()
-api.get('/version', APIController.version);
-api.post('/login', passport.authenticate(AuthController.name), APIController.version);
+api.route('/version')
+    .get   (AuthController.authenticate, APIController.version);
+api.route('/login')
+    .post  (AuthController.authenticate, AuthController.doLogin)
+    .get   (AuthController.authenticate, AuthController.doLogin);
+api.route('/orgs')
+    .get   (AuthController.authenticate, OrgController.getOrgs)
+    .post  (AuthController.authenticate, OrgController.postOrgs)
+    .put   (AuthController.authenticate, OrgController.putOrgs)
+    .delete(AuthController.authenticate, OrgController.deleteOrgs);
+api.route('/orgs/:orgid')
+    .get   (AuthController.authenticate, OrgController.getOrg)
+    .post  (AuthController.authenticate, OrgController.postOrg)
+    .put   (AuthController.authenticate, OrgController.putOrg)
+    .delete(AuthController.authenticate, OrgController.deleteOrg);
+api.route('/orgs/:orgid/projects')
+    .get   (AuthController.authenticate, OrgController.getOrgProjects)
+    .post  (AuthController.authenticate, OrgController.postOrgProjects)
+    .put   (AuthController.authenticate, OrgController.putOrgProjects)
+    .delete(AuthController.authenticate, OrgController.deleteOrgProjects);
+api.route('/projects')
+    .get   (AuthController.authenticate, ProjectController.getProjects)
+    .post  (AuthController.authenticate, ProjectController.postProjects)
+    .put   (AuthController.authenticate, ProjectController.putProjects)
+    .delete(AuthController.authenticate, ProjectController.deleteProjects);
 app.use('/api', api);
 
 // Admin Routes
