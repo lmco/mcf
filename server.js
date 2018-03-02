@@ -105,6 +105,20 @@ var admin = express.Router()
 admin.get('/console', UIController.admin)
 app.use('/admin', admin);
 
+// Plugin Routes
+fs.readdir(path.join(__dirname, 'plugins'), function (err, files) {
+
+    files.forEach(function(f) {
+        
+        var plugin_path = path.join(__dirname, 'plugins', f);
+        var namespace = util.format('/plugins/%s', f.toLowerCase());
+
+        if (fs.lstatSync(plugin_path).isDirectory()) {
+            app.use(namespace, require(plugin_path));
+        }
+    })
+});
+
 
 /**************************************
  *  Server                            *          
