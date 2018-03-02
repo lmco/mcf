@@ -98,7 +98,7 @@ module.exports = class TestLdapStrategy extends Strategy
                 doAuthentication(entry.object, password);
             });
 
-            // TODO - Read LDAP.js documentation and figure out
+            // TODO - Read LDAP.js documentation and figure this out
             res.on('searchReference', function(referral) {
                 console.log('referral: ' + referral.uris.join());
             });
@@ -213,6 +213,7 @@ module.exports = class TestLdapStrategy extends Strategy
 
         // Bind the resource account we will use to do our lookups
         // The initCallback function kicks off the search/auth process
+        // TODO - Figure out how we want to handle auth
         client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_dn_pass, initCallback);        
     }
 
