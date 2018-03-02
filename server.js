@@ -52,6 +52,8 @@ function getControllerPath(name) {
 const config = require(path.join(__dirname,'config.json'))
 const APIController = require(getControllerPath('APIController'));
 const UIController = require(getControllerPath('UIController'));
+const OrgController = require(getControllerPath('OrganizationController'));
+const ProjectController = require(getControllerPath('ProjectController'));
 
 const AuthStrategy = require(getControllerPath(path.join('auth', config.auth.strategy)));
 const AuthController = new AuthStrategy();
@@ -61,32 +63,9 @@ const AuthController = new AuthStrategy();
  **************************************/
 
 const app = express();
-app.use(express.static(path.join(__dirname, 'public')))
-
-/**************************************
- *  View Middleware                   *          
- **************************************/
-
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname , config.server.app, 'views'));
-
-/**************************************
- *  Authentication Middleware         *          
- **************************************/
-
-app.use(passport.initialize());
-passport.use(AuthController);
-// Passport - user serialization
-passport.serializeUser(function(user, done) {
-    done(null, user);
-});
-// Passport user deserialization
-passport.deserializeUser(function(id, done) {
-    // do deserialization
-});
-
-var authenticate = passport.authenticate(AuthController.name);
-
 
 /**************************************
  *  Routes                            *          
@@ -99,33 +78,30 @@ app.get('/login', UIController.login);
 // API Routes
 var api = express.Router()
 api.route('/version')
-    .get(APIController.version);
-
+    .get   (AuthController.authenticate, APIController.version);
 api.route('/login')
-    .post  (authenticate, APIController.version)
-    .get   (authenticate, APIController.version);
+    .post  (AuthController.authenticate, AuthController.doLogin)
+    .get   (AuthController.authenticate, AuthController.doLogin);
 api.route('/orgs')
-    .get   (authenticate, OrgController.getOrgs)
-    .post  (authenticate, OrgController.postOrgs)
-    .put   (authenticate, OrgController.putOrgs)
-    .delete(authenticate, OrgController.deleteOrgs);
+    .get   (AuthController.authenticate, OrgController.getOrgs)
+    .post  (AuthController.authenticate, OrgController.postOrgs)
+    .put   (AuthController.authenticate, OrgController.putOrgs)
+    .delete(AuthController.authenticate, OrgController.deleteOrgs);
 api.route('/orgs/:orgid')
-    .get   (authenticate, OrgController.getOrg)
-    .post  (authenticate, OrgController.postOrg)
-    .put   (authenticate, OrgController.putOrg)
-    .delete(authenticate, OrgController.deleteOrg);
+    .get   (AuthController.authenticate, OrgController.getOrg)
+    .post  (AuthController.authenticate, OrgController.postOrg)
+    .put   (AuthController.authenticate, OrgController.putOrg)
+    .delete(AuthController.authenticate, OrgController.deleteOrg);
 api.route('/orgs/:orgid/projects')
-    .get   (authenticate, OrgController.getOrgProjects)
-    .post  (authenticate, OrgController.postOrgProjects)
-    .put   (authenticate, OrgController.putOrgProjects)
-    .delete(authenticate, OrgController.deleteOrgProjects);
+    .get   (AuthController.authenticate, OrgController.getOrgProjects)
+    .post  (AuthController.authenticate, OrgController.postOrgProjects)
+    .put   (AuthController.authenticate, OrgController.putOrgProjects)
+    .delete(AuthController.authenticate, OrgController.deleteOrgProjects);
 api.route('/projects')
-    .get   (authenticate, ProjectController.getProjects)
-    .post  (authenticate, ProjectController.postProjects)
-    .put   (authenticate, ProjectController.putProjects)
-    .delete(authenticate, ProjectController.deleteProjects);
-
-
+    .get   (AuthController.authenticate, ProjectController.getProjects)
+    .post  (AuthController.authenticate, ProjectController.postProjects)
+    .put   (AuthController.authenticate, ProjectController.putProjects)
+    .delete(AuthController.authenticate, ProjectController.deleteProjects);
 app.use('/api', api);
 
 // Admin Routes
