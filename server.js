@@ -85,6 +85,8 @@ passport.deserializeUser(function(id, done) {
     // do deserialization
 });
 
+var authenticate = passport.authenticate(AuthController.name);
+
 
 /**************************************
  *  Routes                            *          
@@ -96,8 +98,34 @@ app.get('/login', UIController.login);
 
 // API Routes
 var api = express.Router()
-api.get('/version', APIController.version);
-api.post('/login', passport.authenticate(AuthController.name), APIController.version);
+api.route('/version')
+    .get(APIController.version);
+
+api.route('/login')
+    .post  (authenticate, APIController.version)
+    .get   (authenticate, APIController.version);
+api.route('/orgs')
+    .get   (authenticate, OrgController.getOrgs)
+    .post  (authenticate, OrgController.postOrgs)
+    .put   (authenticate, OrgController.putOrgs)
+    .delete(authenticate, OrgController.deleteOrgs);
+api.route('/orgs/:orgid')
+    .get   (authenticate, OrgController.getOrg)
+    .post  (authenticate, OrgController.postOrg)
+    .put   (authenticate, OrgController.putOrg)
+    .delete(authenticate, OrgController.deleteOrg);
+api.route('/orgs/:orgid/projects')
+    .get   (authenticate, OrgController.getOrgProjects)
+    .post  (authenticate, OrgController.postOrgProjects)
+    .put   (authenticate, OrgController.putOrgProjects)
+    .delete(authenticate, OrgController.deleteOrgProjects);
+api.route('/projects')
+    .get   (authenticate, ProjectController.getProjects)
+    .post  (authenticate, ProjectController.postProjects)
+    .put   (authenticate, ProjectController.putProjects)
+    .delete(authenticate, ProjectController.deleteProjects);
+
+
 app.use('/api', api);
 
 // Admin Routes
