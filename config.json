@@ -5,10 +5,12 @@
         "ssl_cert_name": "dev.mbee.us.lmco.com",
         "json": {
             "indent": 4
-        }
+        },
+        "http_port": 8080,
+        "https_port": 8443
     },
     "auth": {
-        "strategy": "TestTokenStrategy",
+        "strategy": "TestLdapStrategy",
         "ldap": {
             "server": "ldaps://usadc43.us.lmco.com:3269",
             "ca": [
@@ -18,12 +20,22 @@
             ],
             "bind_dn": "mbee-query@us.lmco.com",
             "bind_dn_pass": "SuaIZh4oIPCRD9g",
-            "groups": ["SSC.MBEE", "SSC.MBEE.Dev"]
+            "groups": ["SSC.MBEE", "SSC.MBEE.Dev"],
+            "attributes": [
+                "dn",
+                "sAMAccountName", 
+                "lmcPreferredFirstName",
+                "givenName", 
+                "sn", 
+                "mail"
+            ],
+            "username_attribute": "sAMAccountName",
+            "group_search_dn": "ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com"
         }
     },
     "ui": {
         "banner": {
-            "on": true,
+            "on": false,
             "message": "Lockheed Martin Proprietary Information",
             "color": "#fff",
             "background": "#0d47a1",

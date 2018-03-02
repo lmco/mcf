@@ -76,7 +76,6 @@ module.exports = class LMICloudStrategy extends Strategy
         /**************************************************************/
 
         var appRoot = require(path.join(__dirname, '..', '..'))
-
         var ca_certs = [];
         config.auth.ldap.ca.forEach(function(element) {
             cacerts.push( fs.readFileSync(path.join(appRoot, element)) )
@@ -99,7 +98,7 @@ module.exports = class LMICloudStrategy extends Strategy
             }
             // Do the ldap search
             else {
-                doSearch()
+                doSearch(username)
             }
         });
 
@@ -117,7 +116,11 @@ module.exports = class LMICloudStrategy extends Strategy
     }
 
 
-    doSearch() {
+    /**
+     * Searches LDAP for a given user that meets our search criteria.
+     * Returns the user data as JSON.
+     */
+    doSearch(username) {
         // Build the groups part of the query
         var groups = config.auth.ldap.groups;
         var group_fmt_s = '(memberOf=CN=%s,ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com)';
@@ -125,6 +128,7 @@ module.exports = class LMICloudStrategy extends Strategy
         if (groups.length == 1) {
             var groups_query = util.format(group_fmt_s, groups[0]);
         } 
+        // For multiple groups
         else {
             var groups_query = '(|';
             for (var i = 0; i < groups.length; i++) {
@@ -136,7 +140,7 @@ module.exports = class LMICloudStrategy extends Strategy
         var filter = '(&'
                    + '(objectclass\=person)'
                    + '(sAMAccountName=' + username + ')'
-                   + '(memberOf=CN=SSC.MBEE.Dev,ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com)'
+                   + groups_query
                    + ')';
         // Search options
         var opts = {
@@ -171,11 +175,11 @@ module.exports = class LMICloudStrategy extends Strategy
         client.bind(dn, password, function(err) {
             if (err) {
                 console.log('An error has occured:', err);
-                process.exit(1);
+                this.fail(null, 401)
             } 
             else {
                 console.log('User authenticated!');
-                process.exit(0);
+                this.success(user)
             }
         });
     }
