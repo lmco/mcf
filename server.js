@@ -122,9 +122,7 @@ fs.readdir(path.join(__dirname, 'plugins'), function (err, files) {
         // Install dependencies
         var package_json = require(path.join(plugin_path, 'package.json'));
         for (dep in package_json['dependencies']) {
-            
             console.log('Installing dependency', dep, '...');
-
             // Make sure the package name is valid.
             // This is also used to protect against command injection.
             if (RegExp('^([a-z-_])+$').test(dep)) {
@@ -134,8 +132,6 @@ fs.readdir(path.join(__dirname, 'plugins'), function (err, files) {
             else {
                 throw new Error('Error: Failed to install plugin dependency.');
             }
-
-            
         }
         
         // Install the plugin within our app under it's namespace
