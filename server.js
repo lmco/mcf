@@ -128,7 +128,7 @@ fs.readdir(path.join(__dirname, 'plugins'), function (err, files) {
             // Make sure the package name is valid.
             // This is also used to protect against command injection.
             if (RegExp('^([a-z-_])+$').test(dep)) {
-                var stdout = execSync(util.format('yarn add %s', dep));
+                var stdout = execSync(util.format('yarn add --peer %s', dep));
                 console.log(stdout.toString());
             } 
             else {
