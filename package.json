@@ -32,5 +32,8 @@
     "docker-run": "docker run -d -it -p 8080:8080 --name mbee mbee",
     "full-clean": "rm -rf public/* node_modules",
     "start": "node server.js"
+  },
+  "peerDependencies": {
+    "pug": "^2.0.0"
   }
 }
