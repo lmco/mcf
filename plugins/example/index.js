@@ -18,10 +18,19 @@
  * See the plugin's README.md file for a more detailed description.
  */
 
+const path = require('path');
 const express = require('express');
 
 // The plugin should use an express router.
-plugin = express.Router()
+plugin = express();
+
+plugin.set('view engine', 'pug');
+plugin.set('views', path.join(__dirname , 'views'));
+
+// The plugin route `/` returns a home page. 
+plugin.get('/', function(req, res) {
+    res.render('home')
+});
 
 // The plugin route `/version` returns JSON containing the version
 plugin.get('/version', function(req, res) {

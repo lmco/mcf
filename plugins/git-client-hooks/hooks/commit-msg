@@ -17,7 +17,7 @@
 
 # This example catches duplicate Signed-off-by lines.
 
-grep '\(References\|Refs\|Ref\) #[0-9]\{1,16\}' "$1"
+grep '\(References\|Refs\|Ref\|references\|refs\|ref\) #[0-9]\{1,16\}' "$1"
 if [ $? -ne 0 ]; then
 	echo >&2 "Commit does not reference an issue".
 	exit 1

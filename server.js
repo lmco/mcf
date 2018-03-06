@@ -27,13 +27,14 @@ const http = require('http');
 const https = require('https');
 const path = require('path');
 const util = require('util');
+const { execSync } = require('child_process');
+
 
 /**************************************
  *  Third-party modules               *
  **************************************/
 
 const express = require('express');
-const passport = require('passport');
 
 
 /**************************************
@@ -58,6 +59,7 @@ const ProjectController = require(getControllerPath('ProjectController'));
 const AuthStrategy = require(getControllerPath(path.join('auth', config.auth.strategy)));
 const AuthController = new AuthStrategy();
 
+
 /**************************************
  *  Configuration & Middleware        *          
  **************************************/
@@ -66,6 +68,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname , config.server.app, 'views'));
+
 
 /**************************************
  *  Routes                            *          
@@ -111,12 +114,28 @@ app.use('/admin', admin);
 
 // Plugin Routes
 fs.readdir(path.join(__dirname, 'plugins'), function (err, files) {
-
     files.forEach(function(f) {
-        
-        var plugin_path = path.join(__dirname, 'plugins', f);
-        var namespace = util.format('/plugins/%s', f.toLowerCase());
 
+        // The full path to the plugin
+        var plugin_path = path.join(__dirname, 'plugins', f);
+
+        // Install dependencies
+        var package_json = require(path.join(plugin_path, 'package.json'));
+        for (dep in package_json['dependencies']) {
+            console.log('Installing dependency', dep, '...');
+            // Make sure the package name is valid.
+            // This is also used to protect against command injection.
+            if (RegExp('^([a-z-_])+$').test(dep)) {
+                var stdout = execSync(util.format('yarn add --peer %s', dep));
+                console.log(stdout.toString());
+            } 
+            else {
+                throw new Error('Error: Failed to install plugin dependency.');
+            }
+        }
+        
+        // Install the plugin within our app under it's namespace
+        var namespace = util.format('/plugins/%s', f.toLowerCase());
         if (fs.lstatSync(plugin_path).isDirectory()) {
             app.use(namespace, require(plugin_path));
         }
@@ -140,7 +159,6 @@ if (config.server.ssl) {
 // Run HTTPSserver
 var httpServer = http.createServer(app);
 httpServer.listen(config.server.http_port, () => console.log('MBEE server listening on port ' + config.server.http_port + '!'));
-
 
 // Run HTTPS Server
 if (config.ssl) {
