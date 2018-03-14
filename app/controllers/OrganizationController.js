@@ -10,6 +10,12 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 
+const path = require('path');
+
+const config = require(path.join(__dirname, '..', '..', 'config.json'))
+
+const modelsPath = path.join(__dirname, '..', 'models');
+const Organization = require(path.join(modelsPath, 'Organization'));
 
 /**
  * OrganizationController.js
@@ -30,7 +36,15 @@ class OrganizationController
 
     static getOrgs(req, res) 
     {
-        res.send('Method not implemented for route.');
+        Organization.find(function(err, orgs) {
+            if (err) {
+                return res.status(500).send('Internal Server Error');
+            }
+
+            return res.send(
+                JSON.stringify(orgs, null, config.server.json.indent)
+            );
+        });
     }
 
 
