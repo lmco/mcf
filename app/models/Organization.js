@@ -19,7 +19,7 @@
  * This is a placeholder class for a future model.
  */
 
-class Organization
+module.exports = class Organization
 {
 
     /**
@@ -27,8 +27,9 @@ class Organization
      */
     constructor(_obj) 
     {
-        this.data = _obj
-        console.log('Creating a new Organization with data:', this.data)
+        this.id = _obj['id'];
+        this.name = _obj['name'];
+        console.log('Creating a new Organization with data:', _obj);
     }
 
 
@@ -37,14 +38,14 @@ class Organization
      */
     save() 
     {
-        console.log('Saving object: ', this.data)
+        console.log('Saving object: ', this.data);
     }
 
 
     /**
      * A placeholder method for the find method.
      */
-    find(_search_obj, callback) 
+    static find(_search_obj, callback) 
     {   
         // Make sure we got at least one argument
         if (_search_obj === undefined) {
@@ -59,20 +60,43 @@ class Organization
 
         console.log('Executing search ...')
 
-        if (_search_obj !== undefined) {
+        if (_search_obj === undefined) {
             callback(null, [
-                {"id": "org1", "name": "Org 1"},
-                {"id": "org2", "name": "Org 2"}
+                new Organization({"id": "org1", "name": "Org 1"}),
+                new Organization({"id": "org2", "name": "Org 2"}),
+                new Organization({"id": "org3", "name": "Org 3"})
             ]);
         }
         else {
-            callback(null, [
-                {"id": "org1", "name": "Org 1"},
-                {"id": "org2", "name": "Org 2"},
-                {"id": "org3", "name": "Org 3"}
-            ]);    
-        }
-        
+            if (_search_obj['id'] == 'org1') {
+                callback(null, [
+                    new Organization({"id": "org1", "name": "Org 1"})
+                ]);
+            }
+            else if (_search_obj['id'] == 'org2') {
+                callback(null, [
+                    new Organization({"id": "org2", "name": "Org 2"})
+                ]);
+            }
+            else if (_search_obj['id'] == 'org3') {
+                callback(null, [
+                    new Organization({"id": "org3", "name": "Org 3"})
+                ]);
+            }
+            else {
+                callback(null, []);   
+            }  
+        }   
+    }
+
+
+    /**
+     * Does a mock delete of an item by ID.
+     */
+    static findByIdAndRemove(id, callback) 
+    {   
+        console.log('Mock delete of', id, '...');
+        callback(null);
     }
 
 

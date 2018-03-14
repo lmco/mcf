@@ -35,6 +35,7 @@ const { execSync } = require('child_process');
  **************************************/
 
 const express = require('express');
+const bodyParser = require('body-parser');
 
 
 /**************************************
@@ -64,10 +65,15 @@ const AuthController = new AuthStrategy();
  *  Configuration & Middleware        *          
  **************************************/
 
-const app = express();
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname , config.server.app, 'views'));
+const app = express();              // Initializes our application
+
+const viewsDir = path.join(__dirname , config.server.app, 'views');
+const publicDir = path.join(__dirname, 'public');
+
+app.use(express.static(publicDir)); // Sets our static/public directory
+app.use(bodyParser.json());         // This allows us to receive JSON data in the  request body
+app.set('view engine', 'ejs');      // Sets our view engine to EJS
+app.set('views', viewsDir);         // Sets our view directory
 
 
 /**************************************
@@ -121,7 +127,15 @@ fs.readdir(path.join(__dirname, 'plugins'), function (err, files) {
 
         // Install dependencies
         var package_json = require(path.join(plugin_path, 'package.json'));
+        var peer_deps = require(path.join(__dirname, 'package.json'))['peerDependencies'];
+        peer_deps = Object.keys(peer_deps);
         for (dep in package_json['dependencies']) {
+            
+            // Skip if already in peer deps
+            if (peer_deps.includes(dep)) {
+                continue;
+            }
+
             console.log('Installing dependency', dep, '...');
             // Make sure the package name is valid.
             // This is also used to protect against command injection.

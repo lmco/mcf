@@ -19,7 +19,7 @@
  * This is a placeholder class for a future model.
  */
 
-class Project
+module.exports = class Project
 {
 
     /**
@@ -44,7 +44,7 @@ class Project
     /**
      * A placeholder method for the find method.
      */
-    find(_search_obj, callback) 
+    static find(_search_obj, callback) 
     {   
         // Make sure we got at least one argument
         if (_search_obj === undefined) {

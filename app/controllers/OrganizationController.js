@@ -10,12 +10,17 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 
+/* Node.js Modules */
 const path = require('path');
 
-const config = require(path.join(__dirname, '..', '..', 'config.json'))
+/* Third-party modules */
+const htmlspecialchars = require('htmlspecialchars');
 
+/* Local Modules */
+const config = require(path.join(__dirname, '..', '..', 'config.json'))
 const modelsPath = path.join(__dirname, '..', 'models');
 const Organization = require(path.join(modelsPath, 'Organization'));
+
 
 /**
  * OrganizationController.js
@@ -50,12 +55,61 @@ class OrganizationController
 
     /**
      * Takes a list of orgs in the request body and creates those orgs.
-     * If the any of the orgs already exist, 
+     * If the any of the orgs fail, the whole request fails.
+     * If any of the orgs already exist, the request fails.
      */
 
     static postOrgs(req, res) 
     {
-        res.send('Method not implemented for route.');
+        var orgs = req.body;
+        var new_orgs = [];
+        for (var i = 0; i < orgs.length; i++) {
+            // Try to create each org
+            try {
+                // If org already exists, throw an error
+                // TODO (jk) - Determine if asynch will cause problems here
+                Organization.find({
+                    'id': htmlspecialchars(orgs[i]['id'])
+                }, function(err, found) {
+                    if (found.length >= 1) {
+                        var id_string = orgs[i]['id'].toString();
+                        throw new Error('Org with id ' + id_string + ' already exists');
+                    }
+                });
+
+                // Push onto new orgs list
+                new_orgs.push(
+                    new Organization({
+                        id: htmlspecialchars(orgs[i]['id']),
+                        name: htmlspecialchars(orgs[i]['name'])
+                    })
+                );
+            } 
+            // Catch errors and return 500 if anything goes wrong
+            catch (error) {
+                console.log(error);
+                return res.status(500).send('Internal Server Error');
+            }
+        }
+
+        // This should never happen but is here for extra safe error checking.
+        if (new_orgs.length !== orgs.length) {
+            console.log('Error: new_orgs.length does not match orgs.length');
+            return res.status(500).send('Internal Server Error');
+        }
+
+        // If all went well, save new orgs
+        for (var i = 0; i < new_orgs.length; i++) {
+            new_orgs[i].save()
+        }
+
+        // Return success message and org objects
+        res.send(
+            JSON.stringify({
+                "message": "New orgs successfully created", 
+                "orgs": new_orgs
+            }, null, config.server.json.indent)
+        );
     }
 
 
@@ -72,7 +126,67 @@ class OrganizationController
 
     static putOrgs(req, res) 
     {
-        res.send('Method not implemented for route.');
+        var orgs = req.body;
+        var updated_orgs = [];
+        for (var i = 0; i < orgs.length; i++) {
+            // Try to create each org
+            try {
+                // If org already exists, throw an error
+                // TODO (jk) - Determine if asynch will cause problems here 
+                // and find cleaner way to write this
+                Organization.find({
+                    'id': htmlspecialchars(orgs[i]['id'])
+                }, function(err, found) {
+
+                    // This should never happen, the data model should prevent it.
+                    // But just in case...we check for it.
+                    if (found.length > 1) {
+                        throw new Error('Critical Error: Multiple orgs found with same ID.');
+                    }
+                    // If org not found
+                    else if (found.length < 1) {
+                        throw new Error('Org already exists. Request failed.');
+                    }
+                    // We found one org - this is what would be expected for a proper request
+                    else {
+                        // Update the org data
+                        var org = found[0];                 // the existing org
+                        var props = Object.keys(orgs[i]);   // properties in the passed-in JSON org
+                        // Update each property for the existing org
+                        // Note: if the existing org doesn't already have that property, this will fail
+                        for (var j = 0; j < props.length; j++) {
+                            org[props[j]] = htmlspecialchars(orgs[i][props[j]]);   
+                        }
+                        // push to our updated orgs array
+                        updated_orgs.push(org);
+                    }
+                });
+            } 
+            // Catch errors and return 500 if anything goes wrong
+            catch (error) {
+                console.log(error);
+                return res.status(500).send('Internal Server Error');
+            }
+        }
+
+        // This should never happen but is here for extra safe error checking.
+        if (updated_orgs.length !== orgs.length) {
+            console.log('Error: new_orgs.length does not match orgs.length');
+            return res.status(500).send('Internal Server Error');
+        }
+
+        // If all went well, save new orgs
+        for (var i = 0; i < updated_orgs.length; i++) {
+            updated_orgs[i].save()
+        }
+
+        // Return success message and org objects
+        res.send(
+            JSON.stringify({
+                "message": "Orgs successfully updated.", 
+                "orgs": updated_orgs
+            }, null, config.server.json.indent)
+        );
     }
 
 
@@ -83,14 +197,62 @@ class OrganizationController
      * 
      * See also: DeleteOrg for the singular instance.
      *
-     * TODO (jk) - Discuss the possibility of batch delete of orgs by passing 
-     * a list of existing orgs. Must define behavior for this will work (e.g. if
-     * some deletions succeed and others don't).
+     * TODO (jk) - Discuss  anddefine behavior for this will work (e.g. if
+     * some deletions succeed and others don't). 
      */
 
     static deleteOrgs(req, res) 
     {
-        res.send('Method not implemented for route.');
+        var orgs = req.body;
+        var deleted_orgs = [];
+        var errors = false;
+
+        // Do the deletion
+        for (var i = 0; i < orgs.length; i++) {
+            Organization.findByIdAndRemove(
+                htmlspecialchars(orgs[i]['id']), 
+                function (err) {
+                    if (err) {
+                        console.log(err);
+                        errors = true;
+                        return res.status(500).send('Internal Server Error');
+                    }
+                    deleted_orgs.push(orgs[i]);
+                }
+            );
+        }
+
+        // Verify deletion occured
+        for (var i = 0; i < orgs.length; i++) {
+            Organization.find({
+                "id": htmlspecialchars(orgs[i]['id'])
+            }, 
+            function (err, found) {
+                if (err) {
+                    console.log(err);
+                    errors = true;
+                    return res.status(500).send('Internal Server Error');
+                }
+                if (found.length >= 1) {
+                    console.log('Org did not get deleted.');
+                    errors = true;
+                    return res.status(500).send('Internal Server Error');
+                }
+            });
+        }
+
+
+        // FIXME: This is sort of a workaround for the scope problem introduced
+        // by the returns occuring in callbacks. Fix this.
+        if (!errors) {
+            // Return success message and org objects
+            res.send(
+                JSON.stringify({
+                    "message": "Orgs removed.", 
+                    "orgs": deleted_orgs
+                }, null, config.server.json.indent)
+            );
+        }
     }
 
 
