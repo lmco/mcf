@@ -20,6 +20,7 @@ const htmlspecialchars = require('htmlspecialchars');
 const config = require(path.join(__dirname, '..', '..', 'config.json'))
 const modelsPath = path.join(__dirname, '..', 'models');
 const Organization = require(path.join(modelsPath, 'Organization'));
+const Project = require(path.join(modelsPath, 'Project'));
 
 
 /**
@@ -72,7 +73,7 @@ class OrganizationController
                     'id': htmlspecialchars(orgs[i]['id'])
                 }, function(err, found) {
                     if (found.length >= 1) {
-                        var id_string = orgs[i]['id'].toString();
+                        var id_string = htmlspecialchars(orgs[i]['id']).toString();
                         throw new Error('Org with id ' + id_string + ' already exists');
                     }
                 });
@@ -127,6 +128,7 @@ class OrganizationController
     static putOrgs(req, res) 
     {
         var orgs = req.body;
+        console.log(orgs);
         var updated_orgs = [];
         for (var i = 0; i < orgs.length; i++) {
             // Try to create each org
@@ -136,7 +138,8 @@ class OrganizationController
                 // and find cleaner way to write this
                 Organization.find({
                     'id': htmlspecialchars(orgs[i]['id'])
-                }, function(err, found) {
+                }, 
+                function(err, found) {
 
                     // This should never happen, the data model should prevent it.
                     // But just in case...we check for it.
@@ -145,7 +148,7 @@ class OrganizationController
                     }
                     // If org not found
                     else if (found.length < 1) {
-                        throw new Error('Org already exists. Request failed.');
+                        throw new Error('Org not found. Request failed.');
                     }
                     // We found one org - this is what would be expected for a proper request
                     else {
@@ -223,7 +226,7 @@ class OrganizationController
         }
 
         // Verify deletion occured
-        for (var i = 0; i < orgs.length; i++) {
+        for (var i = 0; i < deleted_orgs.length; i++) {
             Organization.find({
                 "id": htmlspecialchars(orgs[i]['id'])
             }, 
@@ -263,7 +266,30 @@ class OrganizationController
 
     static getOrg(req, res) 
     {
-        res.send('Method not implemented for route.');     
+        // For now, I'm using the find method because that was the interface
+        // that Jake and I agreed on. If we use mongoose, we can use something 
+        // like a "findOne" method
+        // TODO (jk) - Replace this with proper method call once module is decided.
+        Organization.find({
+            "id": htmlspecialchars(req.params['orgid'])
+        },
+        function(err, orgs) {
+            if (err) {
+                return res.status(500).send('Internal Server Error');
+            }
+
+            if (orgs.length == 1) {
+                return res.send(
+                    JSON.stringify(orgs[0], null, config.server.json.indent)
+                );
+            }
+            else {
+                return res.status(500).send('Internal Server Error');
+            }
+
+            
+        });   
+
     }
 
 
@@ -275,7 +301,49 @@ class OrganizationController
 
     static postOrg(req, res) 
     {
-        res.send('Method not implemented for route.');
+        // Error check
+        var params_id = htmlspecialchars(req.params['orgid']);
+        var body_id = htmlspecialchars(req.body['id']); 
+        if (params_id != body_id) {
+            console.log('Body does not match URI');
+            return res.status(400).send('Bad Request');
+        }
+
+        var org = req.body;
+        
+        // This try catch will handle things like invalid body format/data as
+        // well as errors thrown in the callback or other method errors.
+        try {
+            // TODO (jk) - Determine if asynch will cause problems here
+            Organization.find({
+                'id': htmlspecialchars(org['id'])
+            }, function(err, found) {
+                // If org already exists, throw an error
+                if (found.length >= 1) {
+                    var id_string = htmlspecialchars(org['id']).toString();
+                    throw new Error('Org with id ' + id_string + ' already exists');
+                }
+
+                // Create the new org and save it
+                var new_org = new Organization({
+                    id: htmlspecialchars(org['id']),
+                    name: htmlspecialchars(org['name'])
+                });
+                new_org.save()
+
+                // Return the response message
+                return res.send(
+                    JSON.stringify({
+                        "message": "New org successfully created", 
+                        "orgs": new_org
+                    }, null, config.server.json.indent)
+                );
+            });
+        } 
+        catch (error) {
+            console.log(error);
+            return res.status(500).send('Internal Server Error');
+        }
     }
 
 
@@ -290,7 +358,46 @@ class OrganizationController
 
     static putOrg(req, res) 
     {
-        res.send('Method not implemented for route.');
+        var org = req.body;
+        // This try catch will handle things like invalid body format/data as
+        // well as errors thrown in the callback or other method errors.
+        try {
+            // TODO (jk) - Determine if asynch will cause problems here
+            Organization.find({
+                'id': htmlspecialchars(req.params['orgid'])
+            }, function(err, found) {
+                // If org already exists, throw an error
+                if (found.length > 1) {
+                    throw new Error('Too many orgs found with same ID');
+                }
+                else if (found.length < 1) {
+                    var id_string = htmlspecialchars(req.params['orgid']).toString();
+                    throw new Error('Org with id ' + id_string + ' does not exist.');
+                } 
+
+                // Update properties and save
+                var updated = found[0];            // the existing org
+                var props = Object.keys(org);      // properties in the passed-in JSON org
+                // Update each property for the existing org
+                // Note: if the existing org doesn't already have that property, this will fail
+                for (var j = 0; j < props.length; j++) {
+                    updated[props[j]] = htmlspecialchars(org[props[j]]);   
+                }
+                updated.save()
+
+                // Return the response message
+                return res.send(
+                    JSON.stringify({
+                        "message": "Org successfully updated", 
+                        "orgs": updated
+                    }, null, config.server.json.indent)
+                );
+            });
+        } 
+        catch (error) {
+            console.log(error);
+            return res.status(500).send('Internal Server Error');
+        }
     }
 
 
@@ -302,7 +409,46 @@ class OrganizationController
 
     static deleteOrg(req, res) 
     {
-        res.send('Method not implemented for route.');
+        var orgid = htmlspecialchars(req.params['orgid']);
+        var deleted_orgs = [];
+        var errors = false;
+
+        // Do the deletion
+        Organization.findByIdAndRemove(orgid, function (err) {
+            if (err) {
+                console.log(err);
+                errors = true;
+                return res.status(500).send('Internal Server Error');
+            }
+        });
+        
+        // Verify deletion occured
+        Organization.find({"id": orgid}, function (err, found) {
+            if (err) {
+                console.log(err);
+                errors = true;
+                return res.status(500).send('Internal Server Error');
+            }
+            if (found.length >= 1) {
+                console.log('Org did not get deleted.');
+                errors = true;
+                return res.status(500).send('Internal Server Error');
+            }
+        });
+        
+
+
+        // FIXME: This is sort of a workaround for the scope problem introduced
+        // by the returns occuring in callbacks. Fix this.
+        if (!errors) {
+            // Return success message and org objects
+            return res.send(
+                JSON.stringify({
+                    "message": "Org removed.", 
+                    "org": orgid
+                }, null, config.server.json.indent)
+            );
+        }
     }
 
 
@@ -314,7 +460,15 @@ class OrganizationController
 
     static getOrgProjects(req, res) 
     {
-        res.send('Method not implemented for route.');
+        var orgid = htmlspecialchars(req.params['orgid']);
+        Project.find({'orgid': orgid}, function(err, projects) {
+            if (err) {
+                return res.status(500).send('Internal Server Error');
+            }
+            return res.send(
+                JSON.stringify(projects, null, config.server.json.indent)
+            );
+        });
     }
 
 
@@ -326,7 +480,65 @@ class OrganizationController
 
     static postOrgProjects(req, res) 
     {
-        res.send('Method not implemented for route.');
+        var orgid = htmlspecialchars(req.params['orgid']);
+        var projects = req.body;
+        
+        try {
+            // Find the org first
+            Organization.find({'id': orgid}, function(err, orgs) {
+
+                // Error check
+                if (err) {
+                    throw new Error('An error occured finding Org by ID');
+                }
+                // Error check - make sure we only get one org
+                if (orgs.length != 1) {
+                    throw new Error('Error: Unexpected number of orgs found.')
+                }
+
+                // For convenience
+                var org = orgs[0];
+
+                // Loop over projects
+                var new_projects = [];
+                for (var i = 0; i < projects.length; i++) {
+                    // Get and sanitize user input
+                    var project = projects[i];
+                    var project_id = htmlspecialchars(project['id']);
+                    var project_name = htmlspecialchars(project['name']);
+                    var project_orgid = org['id'];
+
+                    // Create the new project object and push it to our new projects list
+                    var new_project = new Project({
+                        'id': project_id,
+                        'name': project_name,
+                        'orgid': project_orgid
+                    });
+                    new_projects.push(new_project);
+                    org.projects.push(project_id); // Update org accordingly 
+                } 
+
+                // Save changes and return results
+                for (var i = 0; i < new_projects.length; i++) {
+                    new_projects[i].save();
+                }
+                org.save();
+
+                // Return results
+                return res.send(
+                    JSON.stringify({
+                        "message": "Projects added successfully",
+                        "projects": new_projects
+                    }, null, config.server.json.indent)
+                );
+
+            });
+        
+        }
+        catch (error) {
+            console.log(error);
+            return res.status(500).send('Internal Server Error');
+        }        
     }
 
 
@@ -334,11 +546,81 @@ class OrganizationController
      * This function is not intented to be implemented. It is defined here so that 
      * calls to the corresponding route can be caught and error messages returned 
      * rather than throwing a 500 server error.
+     *
+     * TODO (jk) - Figure out how we want to handle a change to an orgid.
+     * For now, this assumes orgid won't change and stuff will break if it does
      */
 
     static putOrgProjects(req, res) 
     {
-        res.send('Method not implemented for route.');
+        var orgid = htmlspecialchars(req.params['orgid']);
+        var projects = req.body;
+        
+        try {
+            // Find the org first
+            Organization.find({'id': orgid}, function(err, orgs) {
+
+                // Error check
+                if (err) {
+                    throw new Error('An error occured finding Org by ID');
+                }
+                // Error check - make sure we only get one org
+                if (orgs.length != 1) {
+                    throw new Error('Error: Unexpected number of orgs found.')
+                }
+
+                // For convenience
+                var org = orgs[0];
+
+                // Loop over projects
+                var updated_projects = [];
+                for (var i = 0; i < projects.length; i++) {
+                    // Get and sanitize user input
+                    var project = projects[i];
+                    var project_id = htmlspecialchars(project['id']);;
+
+                    // Only remove if project is under this org
+                    if (org.projects.includes(project_id)) {
+                        // find and remove
+                        Project.find({'id': project_id}, function(err, found) {
+                            if (err) {
+                                console.log(err);
+                                return res.status(500).send('Internal Server Error');
+                            }
+
+                            // Update each project
+                            for (var j = 0; j < found.length; j++) {
+                                var updated_project = found[j];
+                                var props = Object.keys(projects[i]);   // properties in the passed-in JSON org
+                                // Update each property for the existing org
+                                // Note: if the existing org doesn't already have that property, this will fail
+                                for (var k = 0; k < props.length; k++) {
+                                    updated_project[props[k]] = htmlspecialchars(projects[i][props[k]]);   
+                                }
+                                updated_projects.push(updated_project);
+                            }
+                        });
+                    }
+                } 
+
+                // Save changes and return results
+                for (var i = 0; i < updated_projects.length; i++) {
+                    updated_projects[i].save();
+                }
+
+                // Return results
+                return res.send(
+                    JSON.stringify({
+                        "message": "Projects updated successfully",
+                        "projects": updated_projects
+                    }, null, config.server.json.indent)
+                );
+            });
+        }
+        catch (error) {
+            console.log(error);
+            return res.status(500).send('Internal Server Error');
+        } 
     }
 
 
@@ -346,11 +628,81 @@ class OrganizationController
      * This function is not intented to be implemented. It is defined here so that 
      * calls to the corresponding route can be caught and error messages returned 
      * rather than throwing a 500 server error.
+     *
+     * TODO (jk) - This may be one of the ugliest functions I've ever written. Fix it.
      */
 
     static deleteOrgProjects(req, res) 
     {
-        res.send('Method not implemented for route.');
+        var orgid = htmlspecialchars(req.params['orgid']);
+        var projects = req.body;
+
+        try {
+            Organization.find({'id': orgid}, function(err, orgs) {
+                // Error check
+                if (err) {
+                    throw new Error('An error occured finding Org by ID');
+                }
+                // Error check - make sure we only get one org
+                if (orgs.length != 1) {
+                    throw new Error('Error: Unexpected number of orgs found.')
+                }
+                // For convenience
+                var org = orgs[0];
+                // Loop over projects and remove them
+                var deleted_projects = [];
+                var errors = false;
+                for (var i = 0; i < projects.length; i++) {
+
+                    var project_id = htmlspecialchars(projects[i]['id']);
+
+                    // Only remove if project is under this org
+                    if (org.projects.includes(project_id)) {
+                        // find and remove
+                        Project.findByIdAndRemove(project_id, function(err) {
+                            if (err) {
+                                console.log(err);
+                                errors = true;
+                                return res.status(500).send('Internal Server Error');
+                            }
+
+                            // Verify deletion occured
+                            Project.find({"id": project_id}, function (err, found) {
+                                if (err) {
+                                    console.log(err);
+                                    errors = true;
+                                    return res.status(500).send('Internal Server Error');
+                                }
+                                if (found.length >= 1) {
+                                    console.log('Project did not get deleted.');
+                                    errors = true;
+                                    return res.status(500).send('Internal Server Error');
+                                }
+                            });
+
+                            // add to deleted projects
+                            deleted_projects.push(project_id);
+                        })
+                    }
+
+                    // Remove the project from the org
+                    org.projects.splice(org.projects.indexOf(project_id), 1);
+                    org.save();
+                } 
+
+                // Return results
+                return res.send(
+                    JSON.stringify({
+                        "message": "Projects removed",
+                        "projects": deleted_projects
+                    }, null, config.server.json.indent)
+                );
+            });
+        }
+        catch (error) {
+            console.log(error);
+            return res.status(500).send('Internal Server Error');
+        }        
     }
 
 }

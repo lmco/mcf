@@ -19,7 +19,7 @@
  * This is a placeholder class for a future model.
  */
 
-module.exports = class Project
+class Project
 {
 
     /**
@@ -27,8 +27,10 @@ module.exports = class Project
      */
     constructor(_obj) 
     {
-        this.data = _obj
-        console.log('Creating a new Project with data:', this.data)
+        this.id = _obj['id'];
+        this.name = _obj['name'];
+        this.orgid = _obj['orgid'];
+        console.log('Creating a new Project with data:', _obj);
     }
 
 
@@ -37,7 +39,18 @@ module.exports = class Project
      */
     save() 
     {
-        console.log('Saving object: ', this.data)
+        console.log('Saving', this.id, '...');
+
+        var updated = false;
+        for (var i = 0; i < ProjData.length; i++) {
+            if (ProjData[i]['id'] == this.id) {
+                ProjData.splice(i, 1, this);
+                updated = true;
+            }
+        }
+        if (!updated) {
+            ProjData.push(this)
+        }
     }
 
 
@@ -59,23 +72,85 @@ module.exports = class Project
 
         console.log('Executing search ...')
 
-        if (_search_obj !== undefined) {
-            callback(null, [
-                {"id": "proj1", "name": "Project 1"},
-                {"id": "proj2", "name": "Project 2"}
-            ]);
+        if (_search_obj === undefined) {
+            callback(null, OrgData);
         }
         else {
-            callback(null, [
-                {"id": "proj1", "name": "Project 1"},
-                {"id": "proj2", "name": "Project 2"},
-                {"id": "proj3", "name": "Project 3"}
-            ]);    
+            if (_search_obj['id'] != undefined) { 
+                var callback_executed = false;
+                for (var i = 0; i < ProjData.length; i++) {
+                    if (ProjData[i]['id'] == _search_obj['id']) {
+                        callback(null, [
+                            new Project({
+                                id: ProjData[i]['id'],
+                                name: ProjData[i]['name'],
+                                orgid: ProjData[i]['orgid']
+                            })
+                        ]);
+                        callback_executed = true;
+                    }
+                } 
+                if (!callback_executed) {
+                    callback(null, []);
+                }
+            }
+            else if (_search_obj['orgid'] != undefined) {
+                var projects = [];
+               
+                for (var i = 0; i < ProjData.length; i++) {
+                    if (ProjData[i]['orgid'] == _search_obj['orgid']) {
+                        projects.push(ProjData[i]);
+                    }
+                } 
+                callback(null, projects);
+            }
+        }   
+    }
+
+
+    /**
+     * Does a mock delete of an item by ID.
+     */
+    static findByIdAndRemove(id, callback) 
+    {   
+        var callback_executed = false;
+        console.log('Deleting', id, '...');
+        for (var i = 0; i < ProjData.length; i++) {
+            if (ProjData[i]['id'] == id) {
+                ProjData.splice(i, 1);
+                callback(null);
+                callback_executed = true;
+            }
+        }
+        if (!callback_executed) {
+            callback('An error occurred');
         }
         
     }
 
-
 }
+
+
+// This is a mockup of the org data
+var ProjData = [
+    new Project({
+        "id": "proj1a", 
+        "name": "Project 1a",
+        "orgid": "org1"
+    }), 
+    new Project({
+        "id": "proj1b", 
+        "name": "Project 1b",
+        "orgid": "org1"
+    }), 
+    new Project({
+        "id": "proj2a", 
+        "name": "Project 2a",
+        "orgid": "org2"
+    })
+];
+
+
+module.exports = Project;
 
 

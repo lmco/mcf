@@ -19,7 +19,7 @@
  * This is a placeholder class for a future model.
  */
 
-module.exports = class Organization
+class Organization
 {
 
     /**
@@ -29,6 +29,7 @@ module.exports = class Organization
     {
         this.id = _obj['id'];
         this.name = _obj['name'];
+        this.projects = _obj['projects'] || [];
         console.log('Creating a new Organization with data:', _obj);
     }
 
@@ -38,7 +39,19 @@ module.exports = class Organization
      */
     save() 
     {
-        console.log('Saving object: ', this.data);
+        console.log('Saving', this.id, '...');
+
+
+        var updated = false;
+        for (var i = 0; i < OrgData.length; i++) {
+            if (OrgData[i]['id'] == this.id) {
+                OrgData.splice(i, 1, this);
+                updated = true;
+            }
+        }
+        if (!updated) {
+            OrgData.push(this)
+        }
     }
 
 
@@ -61,31 +74,24 @@ module.exports = class Organization
         console.log('Executing search ...')
 
         if (_search_obj === undefined) {
-            callback(null, [
-                new Organization({"id": "org1", "name": "Org 1"}),
-                new Organization({"id": "org2", "name": "Org 2"}),
-                new Organization({"id": "org3", "name": "Org 3"})
-            ]);
+            callback(null, OrgData);
         }
         else {
-            if (_search_obj['id'] == 'org1') {
-                callback(null, [
-                    new Organization({"id": "org1", "name": "Org 1"})
-                ]);
+            var callback_executed = false;
+            for (var i = 0; i < OrgData.length; i++) {
+                if (OrgData[i]['id'] == _search_obj['id']) {
+                    var org_copy = new Organization({
+                        id: OrgData[i]['id'],
+                        name: OrgData[i]['name'],
+                        projects: OrgData[i]['projects']
+                    });
+                    callback(null, [org_copy]);
+                    callback_executed = true;
+                }
+            } 
+            if (!callback_executed) {
+                callback(null, []);
             }
-            else if (_search_obj['id'] == 'org2') {
-                callback(null, [
-                    new Organization({"id": "org2", "name": "Org 2"})
-                ]);
-            }
-            else if (_search_obj['id'] == 'org3') {
-                callback(null, [
-                    new Organization({"id": "org3", "name": "Org 3"})
-                ]);
-            }
-            else {
-                callback(null, []);   
-            }  
         }   
     }
 
@@ -95,11 +101,44 @@ module.exports = class Organization
      */
     static findByIdAndRemove(id, callback) 
     {   
-        console.log('Mock delete of', id, '...');
-        callback(null);
+        var callback_executed = false;
+        console.log('Deleting', id, '...');
+        for (var i = 0; i < OrgData.length; i++) {
+            if (OrgData[i]['id'] == id) {
+                OrgData.splice(i, 1);
+                callback(null);
+                callback_executed = true;
+            }
+        }
+        if (!callback_executed) {
+            callback('An error occurred');
+        }
+        
     }
 
-
 }
+
+
+// This is a mockup of the org data
+var OrgData = [
+    new Organization({
+        "id": "org1", 
+        "name": "Org 1",
+        "projects": ["proj1a", "proj1b"]
+    }), 
+    new Organization({
+        "id": "org2", 
+        "name": "Org 2",
+        "projects": ["proj2a"]
+    }), 
+    new Organization({
+        "id": "org3", 
+        "name": "Org 3",
+        "projects": []
+    })
+];
+
+
+module.exports = Organization;
 
 
