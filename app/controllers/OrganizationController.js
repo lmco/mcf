@@ -52,10 +52,13 @@ class OrganizationController
 
     static postOrgs(req, res) 
     {
-        Organization.save(orgList,function(err, orgs) {
+        var org = new Organization(req.body);
+
+        org.save(function(err) {
             if (err)
-                res.send(err)
-            res.send("Organizations Saved To Database.")
+                res.send(err);
+            else
+                res.send("Organizations Saved To Database.");
         });
     }
 
@@ -102,7 +105,12 @@ class OrganizationController
 
     static getOrg(req, res) 
     {
-        res.send('Method not implemented for route.');     
+
+        Organization.find({'id': req.params['orgid']},function(err, orgs) {
+            if (err)
+                res.send(err);
+            res.json(orgs)
+        });
     }
 
 

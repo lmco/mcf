@@ -43,7 +43,7 @@ var Schema = mongoose.Schema;
 // projects = Organization the project belongs to referenced from the
 //            Organization Model
 var ProjectSchema = new Schema({
-    _id: String,
+    id: String,
     name: String,
     org: {
         type: mongoose.Schema.Types.ObjectId, 

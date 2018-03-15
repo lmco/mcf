@@ -35,6 +35,7 @@ const { execSync } = require('child_process');
  **************************************/
 
 const express = require('express');
+const bodyParser = require('body-parser');
 
 
 /**************************************
@@ -66,6 +67,7 @@ const AuthController = new AuthStrategy();
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname , config.server.app, 'views'));
 
