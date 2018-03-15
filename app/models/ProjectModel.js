@@ -21,15 +21,16 @@
  */
 
 
-// Allocate database credentials
-// TODO (JU) - Implement a system to pull database info from a configuration file
+// Requirements
 const mongoose = require('mongoose')
 
+// Declare database credentials
+// TODO (JU) - Implement a system to pull database info from a configuration file
 const url = 'mongodb://localhost:27017/';
 const dbName = 'mms';
 
 
-// Connect to Data basee
+// Connect to Data base
 mongoose.connect(url + dbName);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -38,8 +39,8 @@ db.on('error', console.error.bind(console, 'connection error:'));
 // Create Project Model Schema:
 var Schema = mongoose.Schema;
 
-// _id      = Primary Key
-// name     = Name of project for VE
+// id       = Primary Key
+// name     = Name of project
 // projects = Organization the project belongs to referenced from the
 //            Organization Model
 var ProjectSchema = new Schema({
