@@ -26,7 +26,7 @@
 const mongoose = require('mongoose')
 
 const url = 'mongodb://localhost:27017/';
-const dbName = 'testDB';
+const dbName = 'mms';
 
 
 // Connect to Data basee
@@ -42,7 +42,7 @@ var Schema = mongoose.Schema;
 // name     = Name of Org for VE
 // projects = Array of Projects which are referenced from the Projet Model
 var OrganizationSchema = new Schema({
-    _id: String,
+    id: String,
     name: String,
     projects: [{
         type: mongoose.Schema.Types.ObjectId, 
