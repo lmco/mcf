@@ -111,7 +111,7 @@ api.route('/orgs/:orgid/projects')
 //    .post  (AuthController.authenticate, ProjectController.postProjects)
 //    .put   (AuthController.authenticate, ProjectController.putProjects)
 //    .delete(AuthController.authenticate, ProjectController.deleteProjects);
-//api.route('/projects')
+//api.route('/projects/:projectid')
 //    .get   (AuthController.authenticate, ProjectController.getProject)
 //    .post  (AuthController.authenticate, ProjectController.postProject)
 //    .put   (AuthController.authenticate, ProjectController.putProject)

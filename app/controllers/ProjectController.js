@@ -10,11 +10,23 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 
+/* Node.js Modules */
+const path = require('path');
+
+/* Third-party modules */
+const htmlspecialchars = require('htmlspecialchars');
+
+/* Local Modules */
+const config = require(path.join(__dirname, '..', '..', 'config.json'))
+const modelsPath = path.join(__dirname, '..', 'models');
+const Organization = require(path.join(modelsPath, 'Organization'));
+const Project = require(path.join(modelsPath, 'Project'));
+
 
 /**
  * ProjectController.js
  *
- * Josh Kaplan <joshua.d.kaplan@lmco.com
+ * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * The ProjectController class defines static methods for 
  * project-related API routes.
@@ -29,7 +41,14 @@ class ProjectController
 
     static getProjects(req, res) 
     {
-        res.send('Method not implemented for route.');
+        Project.find(function(err, projects) {
+            if (err) {
+                return res.status(500).send('Internal Server Error');
+            }
+            return res.send(
+                JSON.stringify(projects, null, config.server.json.indent)
+            );
+        });
     }
 
 
