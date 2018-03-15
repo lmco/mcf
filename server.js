@@ -102,20 +102,15 @@ api.route('/orgs/:orgid')
     .put   (AuthController.authenticate, OrgController.putOrg)
     .delete(AuthController.authenticate, OrgController.deleteOrg);
 api.route('/orgs/:orgid/projects')
-    .get   (AuthController.authenticate, OrgController.getOrgProjects)
-    .post  (AuthController.authenticate, OrgController.postOrgProjects)
-    .put   (AuthController.authenticate, OrgController.putOrgProjects)
-    .delete(AuthController.authenticate, OrgController.deleteOrgProjects);
-//api.route('/projects')
-//    .get   (AuthController.authenticate, ProjectController.getProjects)
-//    .post  (AuthController.authenticate, ProjectController.postProjects)
-//    .put   (AuthController.authenticate, ProjectController.putProjects)
-//    .delete(AuthController.authenticate, ProjectController.deleteProjects);
-//api.route('/projects/:projectid')
-//    .get   (AuthController.authenticate, ProjectController.getProject)
-//    .post  (AuthController.authenticate, ProjectController.postProject)
-//    .put   (AuthController.authenticate, ProjectController.putProject)
-//    .delete(AuthController.authenticate, ProjectController.deleteProject);
+    .get   (AuthController.authenticate, OrgController.getProjects)
+    .post  (AuthController.authenticate, OrgController.postProjects)
+    .put   (AuthController.authenticate, OrgController.putProjects)
+    .delete(AuthController.authenticate, OrgController.deleteProjects);
+api.route('/orgs/:orgid/projects/:projectid')
+    .get   (AuthController.authenticate, ProjectController.getProject)
+    .post  (AuthController.authenticate, ProjectController.postProject)
+    .put   (AuthController.authenticate, ProjectController.putProject)
+    .delete(AuthController.authenticate, ProjectController.deleteProject);
 app.use('/api', api);
 
 // Admin Routes
