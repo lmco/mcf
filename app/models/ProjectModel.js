@@ -39,6 +39,8 @@ db.on('error', console.error.bind(console, 'connection error:'));
 // Create Project Model Schema:
 var Schema = mongoose.Schema;
 
+// TODO (JU) - Discuss use of '_id' vs 'id'
+//
 // id       = Primary Key
 // name     = Name of project
 // projects = Organization the project belongs to referenced from the
