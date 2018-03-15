@@ -20,6 +20,12 @@
  * organization-related API routes.
  */
 
+
+var mongoose = require('mongoose');
+
+require('../models/OrganizationModel')
+var Organization = mongoose.model('Organization');
+
 class OrganizationController 
 {
 
@@ -30,7 +36,12 @@ class OrganizationController
 
     static getOrgs(req, res) 
     {
-        res.send('Method not implemented for route.');
+
+        Organization.find(function(err, orgs) {
+            if (err)
+                res.send(err);
+            res.json(orgs)
+        });
     }
 
 
@@ -41,7 +52,11 @@ class OrganizationController
 
     static postOrgs(req, res) 
     {
-        res.send('Method not implemented for route.');
+        Organization.save(orgList,function(err, orgs) {
+            if (err)
+                res.send(err)
+            res.send("Organizations Saved To Database.")
+        });
     }
 
 
