@@ -39,7 +39,9 @@ class APIController
      */
     static swaggerDoc(req, res) 
     {
-        return res.render('swagger', {swagger: APIController.swaggerSpec()});
+        return res.render('swagger', {
+            swagger: APIController.swaggerSpec()
+        });
     }
 
 
@@ -63,7 +65,7 @@ class APIController
         return swaggerJSDoc({
             swaggerDefinition: {
                 info: {
-                    title:  'MBEE API',                  // Title (required)
+                    title:  'MBEE API Documentation',    // Title (required)
                     version: package_json['version'],    // Version (required)
                 },
             },
