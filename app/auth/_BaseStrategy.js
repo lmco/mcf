@@ -9,17 +9,17 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-
-
 /**
- * _BaseStrategy.js
+ * @module  auth/_BaseStrategy.js
  * 
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 
  * This implements a BaseStrategy class that defines the interface expected
  * from an authentication controller.
  */
-module.exports = class BaseStrategy 
+
+
+class BaseStrategy 
 {
 
     /**
@@ -52,3 +52,5 @@ module.exports = class BaseStrategy
     }
 
 }
+
+module.exports = BaseStrategy;

@@ -26,6 +26,7 @@ var sass    = require('gulp-sass');
 var react   = require('gulp-react');
 var concat  = require('gulp-concat');
 var del     = require('del');
+var jsdoc   = require('gulp-jsdoc3');
 
 gulp.task('clean', cleanTask);
 gulp.task('sass', sassTask);
@@ -34,22 +35,32 @@ gulp.task('react-dom', compileReactDomTask);
 gulp.task('copy-react', copyReactTask);
 gulp.task('copy-react-dom', copyReactDomTask);
 gulp.task('copy-images', copyImages);
+gulp.task('copy-swagger-css', copySwaggerCSS);
+gulp.task('copy-swagger-js', copySwaggerJS);
+gulp.task('jsdoc', generateJSDoc);
+
 gulp.task('default', [
     'copy-images',
     'copy-react', 
     'copy-react-dom',
     'sass', 
     'react', 
-    'react-dom'
+    'react-dom',
+    'copy-swagger-css',
+    'copy-swagger-js'
 ]);
 
 /**
  * Removes directories created during build.
  */
 function cleanTask() {
-    return del(['public/css', 'public/js']);
+    return del(['public', 'docs']);
 }
 
+function generateJSDoc() {
+    gulp.src(['README.md', 'doc/**/*.md', './app/**/*.js'], {read: false})
+        .pipe(jsdoc());
+}
 
 /**
  * Compiles UI Sass files into static CSS in public.
@@ -113,4 +124,20 @@ function compileReactDomTask() {
     .pipe(gulp.dest('public/js'));
 }
 
+
+/**
+ * Copies swagger CSS files into public
+ */
+function copySwaggerCSS() {
+    return gulp.src('./node_modules/swagger-ui-express/static/*.css')
+    .pipe(gulp.dest('public/css'));
+}
+
+/**
+ * Copies swagger JS files into public
+ */
+function copySwaggerJS() {
+    return gulp.src('./node_modules/swagger-ui-express/static/*.js')
+    .pipe(gulp.dest('public/js'));
+}
 

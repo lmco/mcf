@@ -9,23 +9,21 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-
-const path = require('path');
-const config = require(path.join(__dirname, '..', '..', '..', 'config.json'));
-const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
-
-
 /**
- * TestBasicStrategy.js
+ * @module  auth/TestStrategy.js
  * 
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 
  * This implements a Passport.js strategy to test basic auth. It uses the 
  * hard-coded credentials admin/admin to test basic auth without the need 
  * to interface with a database. This should be used for TESTING ONLY.
  */
 
-module.exports = class TestStrategy extends BaseStrategy
+const path = require('path');
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
+
+class TestStrategy extends BaseStrategy
 {
 
     /**
@@ -111,3 +109,5 @@ module.exports = class TestStrategy extends BaseStrategy
     }
 
 }
+
+module.exports = TestStrategy;

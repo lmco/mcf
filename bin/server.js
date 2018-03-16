@@ -35,14 +35,15 @@ const { execSync } = require('child_process');
  **************************************/
 
 const express = require('express');
+const bodyParser = require('body-parser');
 
 
 /**************************************
- *  Helper Functions                  *
+ *  Helpers                           *
  **************************************/
 
 function getControllerPath(name) {
-    return path.join(__dirname, config.server.app, 'controllers', name)
+    return path.join(__dirname, '..', config.server.app, 'controllers', name);
 }
 
 
@@ -50,78 +51,57 @@ function getControllerPath(name) {
  *  Local Modules                     *          
  **************************************/
 
-const config = require(path.join(__dirname,'config.json'))
-const APIController = require(getControllerPath('APIController'));
+// Config
+const config = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
+
+// Module paths
+const APIRoutesPath = path.join(__dirname, '..', config.server.app, 'api_routes.js');
+const AuthControllerPath = path.join(__dirname, '..', config.server.app, 'auth', 'auth');
+
+// Actual module imports
+const APIRouter = require(APIRoutesPath);
+const AuthController = require(AuthControllerPath);
 const UIController = require(getControllerPath('UIController'));
-const OrgController = require(getControllerPath('OrganizationController'));
-const ProjectController = require(getControllerPath('ProjectController'));
-
-const AuthStrategy = require(getControllerPath(path.join('auth', config.auth.strategy)));
-const AuthController = new AuthStrategy();
-
 
 /**************************************
  *  Configuration & Middleware        *          
  **************************************/
 
-const app = express();
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname , config.server.app, 'views'));
+const app = express();              // Initializes our application
+const viewsDir = path.join(__dirname , '..', config.server.app, 'views');
+const publicDir = path.join(__dirname, '..', 'public');
+app.use(express.static(publicDir)); // Sets our static/public directory
+app.use(bodyParser.json());         // This allows us to receive JSON data in the  request body
+app.set('view engine', 'ejs');      // Sets our view engine to EJS
+app.set('views', viewsDir);         // Sets our view directory
 
 
 /**************************************
  *  Routes                            *          
  **************************************/
 
-// UI Routes
+// Routes
 app.get('/', UIController.home);
 app.get('/login', UIController.login);
+app.get('/admin/console', UIController.admin)
 
 // API Routes
-var api = express.Router()
-api.route('/version')
-    .get   (AuthController.authenticate, APIController.version);
-api.route('/login')
-    .post  (AuthController.authenticate, AuthController.doLogin)
-    .get   (AuthController.authenticate, AuthController.doLogin);
-api.route('/orgs')
-    .get   (AuthController.authenticate, OrgController.getOrgs)
-    .post  (AuthController.authenticate, OrgController.postOrgs)
-    .put   (AuthController.authenticate, OrgController.putOrgs)
-    .delete(AuthController.authenticate, OrgController.deleteOrgs);
-api.route('/orgs/:orgid')
-    .get   (AuthController.authenticate, OrgController.getOrg)
-    .post  (AuthController.authenticate, OrgController.postOrg)
-    .put   (AuthController.authenticate, OrgController.putOrg)
-    .delete(AuthController.authenticate, OrgController.deleteOrg);
-api.route('/orgs/:orgid/projects')
-    .get   (AuthController.authenticate, OrgController.getOrgProjects)
-    .post  (AuthController.authenticate, OrgController.postOrgProjects)
-    .put   (AuthController.authenticate, OrgController.putOrgProjects)
-    .delete(AuthController.authenticate, OrgController.deleteOrgProjects);
-api.route('/projects')
-    .get   (AuthController.authenticate, ProjectController.getProjects)
-    .post  (AuthController.authenticate, ProjectController.postProjects)
-    .put   (AuthController.authenticate, ProjectController.putProjects)
-    .delete(AuthController.authenticate, ProjectController.deleteProjects);
-app.use('/api', api);
-
-// Admin Routes
-var admin = express.Router()
-admin.get('/console', UIController.admin)
-app.use('/admin', admin);
+app.use('/api', APIRouter);
 
 // Plugin Routes
-fs.readdir(path.join(__dirname, 'plugins'), function (err, files) {
+fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
     files.forEach(function(f) {
-
         // The full path to the plugin
-        var plugin_path = path.join(__dirname, 'plugins', f);
-
+        var plugin_path = path.join(__dirname, '..', 'plugins', f);
         // Install dependencies
         var package_json = require(path.join(plugin_path, 'package.json'));
+        var peer_deps = require(path.join(__dirname, '..', 'package.json'))['peerDependencies'];
+        peer_deps = Object.keys(peer_deps);
         for (dep in package_json['dependencies']) {
+            // Skip if already in peer deps
+            if (peer_deps.includes(dep)) {
+                continue;
+            }
             console.log('Installing dependency', dep, '...');
             // Make sure the package name is valid.
             // This is also used to protect against command injection.
@@ -133,7 +113,6 @@ fs.readdir(path.join(__dirname, 'plugins'), function (err, files) {
                 throw new Error('Error: Failed to install plugin dependency.');
             }
         }
-        
         // Install the plugin within our app under it's namespace
         var namespace = util.format('/plugins/%s', f.toLowerCase());
         if (fs.lstatSync(plugin_path).isDirectory()) {
