@@ -1,17 +1,14 @@
 # MBEE.js
 
 ## Getting started
-
 This assumes developers are working in OSX.
 
 ### Prerequisites
-Ensure that Git and Homebrew are installed.
 
-**Install Node.js**
-Run `brew install node`
-
-**Install Yarn** 
-Run `brew install yarn`
+1. Git
+2. Homebrew
+3. Node.js - Run `brew install node`
+4. Yarn - Run `brew install yarn`
 
 **Configuration for the LMI**
 When on the Lockheed Martin Intranet, you'll need to set up the proxy:
