@@ -9,51 +9,24 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-
+/**
+ * @module auth/auth.js
+ * 
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * This file loads and instantiates the authentication strategy as a controller.
+ * It ensures that the auth strategy defined in the config.json 
+ */
+ 
 const path = require('path');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
 
-/**
- * UIController.js
- *
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
- *
- * Defines UI-related control functionality.
- */
-class UIController 
-{
+const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
+const AuthStrategy = require(path.join(__dirname, config.auth.strategy));
+const AuthController = new AuthStrategy();
 
-    /**
-     * Renders the home page.
-     */
-    static home(req, res) 
-    {
-        return res.render('home', {
-            'ui': config.ui, 
-            'renderer': 'mbee-renderer'
-        });
-    }
+if (!(AuthController instanceof BaseStrategy)) {
+    throw new Error('Error: Authentication strategy does not extend BaseStrategy class!')
+} 
 
-
-    /**
-     * Renders the admin console.
-     */
-    static admin(req, res) 
-    {
-        return res.render('home', {
-            'ui': config.ui, 
-            'renderer': 'admin-renderer'
-        });
-    }
-
-
-    /**
-     * Renders the login screen.
-     */
-    static login(req, res) 
-    {
-        return res.render('login', {'ui': config.ui})
-    }
-}
-
-module.exports = UIController;
+module.exports = AuthController;

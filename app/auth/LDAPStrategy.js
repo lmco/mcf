@@ -9,25 +9,23 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
-const ldap = require('ldapjs');
-const config = require(path.join(__dirname, '..', '..', '..', 'config.json'));
-const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
-
-
 /**
- * TestLdapStrategy.js
+ * @module  auth/LDAPStrategy.js
  * 
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 
  * This implements an authentication strategy for LDAP authentication. 
  * It uses the LDAP configuration parameters from the config.json. 
  */
 
-module.exports = class LDAPStrategy extends BaseStrategy
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const ldap = require('ldapjs');
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
+
+class LDAPStrategy extends BaseStrategy
 {
 
     /**
@@ -234,4 +232,6 @@ module.exports = class LDAPStrategy extends BaseStrategy
     } 
 
 }
+
+module.exports = LDAPStrategy;
 

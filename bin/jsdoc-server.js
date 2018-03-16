@@ -9,51 +9,26 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-
-const path = require('path');
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
-
-/**
- * UIController.js
- *
+/*
+ * jsdoc-server.js
+ * 
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines UI-related control functionality.
+ * This file runs a server to statically serve JSDOC.
  */
-class UIController 
-{
 
-    /**
-     * Renders the home page.
-     */
-    static home(req, res) 
-    {
-        return res.render('home', {
-            'ui': config.ui, 
-            'renderer': 'mbee-renderer'
-        });
-    }
+const http = require('http');
+const path = require('path');
 
+const express = require('express');
+const app = express();     
 
-    /**
-     * Renders the admin console.
-     */
-    static admin(req, res) 
-    {
-        return res.render('home', {
-            'ui': config.ui, 
-            'renderer': 'admin-renderer'
-        });
-    }
+var staticPath = path.join(__dirname, '..', 'docs', 'gen');
+app.use(express.static(staticPath)); 
 
+// Run HTTPSserver
+var httpServer = http.createServer(app);
+httpServer.listen(3000, function() {
+    console.log('MBEE server listening on port 3000!');
+});
 
-    /**
-     * Renders the login screen.
-     */
-    static login(req, res) 
-    {
-        return res.render('login', {'ui': config.ui})
-    }
-}
-
-module.exports = UIController;

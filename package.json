@@ -15,27 +15,83 @@
     "ldapjs": "^1.0.2",
     "popper.js": "^1.12.9",
     "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react-dom": "^16.2.0",
+    "swagger-jsdoc": "^1.9.7",
+    "swagger-ui-express": "^2.0.15"
   },
   "devDependencies": {
     "bootstrap": "^4.0.0",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
+    "gulp-jsdoc3": "^1.0.1",
     "gulp-react": "^3.1.0",
     "gulp-sass": "^3.1.0",
     "jquery": "^3.3.1"
   },
+  "peerDependencies": {
+    "pug": "^2.0.1"
+  },
+  "globalDependencies": {
+    "gulp": "^3.9.1",
+    "jsdoc": "^3.5.5"
+  },
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",
+    "clean-all": "rm -rf public/ node_modules/ docs/",
     "docker-build": "gulp clean && gulp && docker build -t mbee .",
     "docker-clean": "docker stop mbee; docker rm mbee;",
     "docker-run": "docker run -d -it -p 8080:8080 --name mbee mbee",
-    "full-clean": "rm -rf public/* node_modules",
-    "start": "node server.js"
-  },
-  "peerDependencies": {
-    "pug": "^2.0.1"
-  }
+    "jsdoc-gen": "gulp jsdoc",
+    "jsdoc": "gulp jsdoc && node ./bin/jsdoc-server.js",
+    "server": "node ./bin/server.js",
+    "start": "yarn install && yarn run build && yarn run server"
+  }, 
+  "mbee-config": {
+    "server": {
+      "app": "app",
+      "ssl": false,
+      "ssl_cert_name": "dev.mbee.us.lmco.com",
+      "json": {
+        "indent": 4
+      },
+      "http_port": 8080,
+      "https_port": 8443
+    },
+    "auth": {
+      "strategy": "TestStrategy",
+      "ldap": {
+          "server": "ldaps://usadc43.us.lmco.com:3269",
+          "ca": [
+            "./certs/LockheedMartinRootCertificationAuthority.pem",
+            "./certs/LockheedMartinRootCertificationAuthority2.pem",
+            "./certs/LockheedMartinRootCertificationAuthority3.pem"
+          ],
+          "bind_dn": "mbee-query@us.lmco.com",
+          "bind_dn_pass": "SuaIZh4oIPCRD9g",
+          "groups": ["SSC.MBEE", "SSC.MBEE.Dev"],
+          "attributes": [
+            "dn",
+            "sAMAccountName", 
+            "lmcPreferredFirstName",
+            "givenName", 
+            "sn", 
+            "mail"
+          ],
+          "username_attribute": "sAMAccountName",
+          "group_search_dn": "ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com"
+      }
+    },
+    "ui": {
+      "banner": {
+        "on": false,
+        "message": "Lockheed Martin Proprietary Information",
+        "color": "#fff",
+        "background": "#0d47a1",
+        "bold": true,
+        "border": "1px solid #0d47a1"
+      }
+    }
+}
 }

@@ -9,21 +9,21 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-
-const path = require('path');
-const Strategy = require('passport-strategy');
-const ldap = require('ldapjs');
-const config = require(path.join(__dirname, '..', '..', '..', 'config.json'));
-
-
-/**
+/*
  * LMICloudStrategy.js
  * 
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 
  * This implements a custom Passport.js strategy that uses
  */
-module.exports = class LMICloudStrategy extends Strategy
+
+const path = require('path');
+const Strategy = require('passport-strategy');
+const ldap = require('ldapjs');
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+
+
+class LMICloudStrategy extends Strategy
 {
 
     /**
@@ -184,5 +184,7 @@ module.exports = class LMICloudStrategy extends Strategy
         });
     }
 }
+
+module.exports = LMICloudStrategy;
 
 
