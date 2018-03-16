@@ -32,19 +32,15 @@
   "peerDependencies": {
     "pug": "^2.0.1"
   },
-  "globalDependencies": {
-    "gulp": "^3.9.1",
-    "jsdoc": "^3.5.5"
-  },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
+    "build": "./node_modules/gulp/bin/gulp.js",
+    "clean": "./node_modules/gulp/bin/gulp.js clean",
     "clean-all": "rm -rf public/ node_modules/ docs/",
-    "docker-build": "gulp clean && gulp && docker build -t mbee .",
+    "docker-build": "yarn run clean && yarn run build && docker build -t mbee .",
     "docker-clean": "docker stop mbee; docker rm mbee;",
     "docker-run": "docker run -d -it -p 8080:8080 --name mbee mbee",
-    "jsdoc-gen": "gulp jsdoc",
-    "jsdoc": "gulp jsdoc && node ./bin/jsdoc-server.js",
+    "jsdoc-gen": "./node_modules/gulp/bin/gulp.js jsdoc",
+    "jsdoc": "./node_modules/gulp/bin/gulp.js jsdoc && node ./bin/jsdoc-server.js",
     "server": "node ./bin/server.js",
     "start": "yarn install && yarn run build && yarn run server"
   }, 
