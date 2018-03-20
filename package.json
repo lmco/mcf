@@ -94,8 +94,8 @@
       "dbName": "mbee",
       "url": "localhost",
       "port": "27017",
-      "username": "",
-      "password": ""
+      "username": "mbee",
+      "password": "mbee"
     }
   }
 }

@@ -1,5 +1,8 @@
 *.DS_Store
 node_modules/
 public/
+db/
+docs/
+keys/
 yarn.lock
 
