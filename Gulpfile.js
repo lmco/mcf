@@ -108,7 +108,7 @@ function copyReactDomTask() {
  * Compiles all react JSX components into a single mbee.js file.
  */
 function compileReactTask() {
-    return gulp.src('./ui/components/**/*.jsx')
+    return gulp.src('./ui/react-components/**/*.jsx')
     .pipe(react())
     .pipe(concat('mbee.js'))
     .pipe(gulp.dest('public/js'));
@@ -119,7 +119,7 @@ function compileReactTask() {
  * Compiles react-dom JSX renderers into a single mbee-renderer.js file.
  */
 function compileReactDomTask() {
-    return gulp.src('./ui/react/**/*.jsx')
+    return gulp.src('./ui/react-renderers/**/*.jsx')
     .pipe(react())
     .pipe(gulp.dest('public/js'));
 }

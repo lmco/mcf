@@ -30,6 +30,7 @@ class APIController
     static version(req, res) 
     {
         var obj = {'version': package_json['version']};
+        res.header('Content-Type', 'application/json');
         return res.send(APIController.formatJSON(obj));
     }
 

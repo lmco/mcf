@@ -2,7 +2,7 @@
   "name": "mbee",
   "version": "0.1.0",
   "description": "Model-Based Engineering Environment",
-  "main": "server.js",
+  "main": "bin/server.js",
   "repository": "https://gitlab.lmms.lmco.com/mbee/mbee.git",
   "author": "Josh Kaplan <joshua.d.kaplan@lmco.com>",
   "license": "LMPI",
