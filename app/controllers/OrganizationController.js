@@ -20,8 +20,8 @@ const htmlspecialchars = require('htmlspecialchars');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
 const API = require(path.join(__dirname, 'APIController'));
 const modelsPath = path.join(__dirname, '..', 'models');
-const Organization = require(path.join(modelsPath, 'Organization'));
-const Project = require(path.join(modelsPath, 'Project'));
+const Organization = require(path.join(modelsPath, 'OrganizationModel'));
+const Project = require(path.join(modelsPath, 'ProjectModel'));
 
 
 /**

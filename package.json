@@ -89,6 +89,13 @@
         "bold": true,
         "border": "1px solid #0d47a1"
       }
+    },
+    "database": {
+      "dbName": "mbee",
+      "url": "localhost",
+      "port": "27017",
+      "username": "",
+      "password": ""
     }
-}
+  }
 }

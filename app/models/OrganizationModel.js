@@ -24,18 +24,6 @@
 // Requirements
 const mongoose = require('mongoose')
 
-// Declare database credentials
-// TODO (JU) - Implement a system to pull database info from a configuration file
-const url = 'mongodb://localhost:27017/';
-const dbName = 'mms';
-
-
-// Connect to Data base
-mongoose.connect(url + dbName);
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-
-
 // Create Organization Model Schema:
 var Schema = mongoose.Schema;
 
