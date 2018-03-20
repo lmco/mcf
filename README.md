@@ -21,6 +21,26 @@ You'll also need to download and set up the certificate authority:
 - Download the ca file from `https://sscgit.ast.lmco.com/projects/CP/repos/openstack-hot/browse/PEM_LMChain_20160721.pem?raw`
 - Run `yarn config set "cafile" /path/to/your/cafile.pem`
 
+### Database
+The current database used for MBEE is [mongoDB](https://www.mongodb.com/).
+mongoDB will need to be installed either locally or on a linux machine.
+- Run `brew install mongodb`
+
+To get the database up and running, set up a database folder for mongoDB to use and then
+start up the database.
+- RUN `mkdir /Path/To/Your/DB/Folder`
+- Run `mongod --dbpath /Path/To/Your/DB/Folder`
+
+If you would like to set up authentication, follow the directions found 
+[here](https://docs.mongodb.com/manual/tutorial/enable-authentication/).
+The command for starting the database with authentication is found below.
+- Run `mongod --auth --dbpath /Path/To/Your/DB/Folder`
+
+The database configuration can be set up in the package.json file under mbee-config.database.
+The URL, Port, Database name, and Username and Password for authentication can be configured here.
+
+Note: If the database is not using authentication, leave username and password as empty strings ('').
+
 ### Get the Code, Build, and Run 
 1. Clone the repository: `git clone https://git.lmms.lmco.com/mbee/mbee.git && cd mbee`
 1. Build and Run MBEE: `yarn run start`
