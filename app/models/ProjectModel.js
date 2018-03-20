@@ -22,7 +22,7 @@
 
 
 // Requirements
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 // Create Project Model Schema:
 var Schema = mongoose.Schema;
