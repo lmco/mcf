@@ -48,10 +48,11 @@ RUN yarn config set "http-proxy" $HTTP_PROXY \
 ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Install dependencies
-RUN yarn install 
+RUN yarn install
+RUN yarn build 
 
 # Expose ports
 EXPOSE 8080 8443
 
 # Run server
-CMD ["yarn", "run", "start"]
+CMD ["yarn", "run", "server"]

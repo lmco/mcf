@@ -64,12 +64,6 @@ class OrganizationController
 
     /**
      * TODO (jk) - Discuss the possibility of batch creation of orgs.
-     * 
-     * @req.params
-     *     N/A
-     *
-     * @req.body
-     *     N/A
      */
 
     static postOrgs(req, res) 

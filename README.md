@@ -23,7 +23,7 @@ You'll also need to download and set up the certificate authority:
 
 ### Get the Code, Build, and Run 
 1. Clone the repository: `git clone https://git.lmms.lmco.com/mbee/mbee.git && cd mbee`
-1. Build and Run MBEE: `yarn run start`
+2. Build and Run MBEE: `yarn run start`
 
 Your server should now be running on port 8080. Try the following URLs to test 
 it:
