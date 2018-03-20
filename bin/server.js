@@ -136,7 +136,7 @@ var connectURL = 'mongodb://';
 
 // Create connection with or without authentication
 if (dbUsername != '' && dbPassword != ''){
-    connectURL = connectURL + dbUsername + ':' + dbPassword + '@'
+    connectURL = connectURL + dbUsername + ':' + dbPassword + '@';
 }
 connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
 
