@@ -56,6 +56,7 @@ class OrganizationController
                 console.log(err);
                 return res.status(500).send('Internal Server Error');
             }
+
             // Otherwise return 200 and the orgs
             res.header('Content-Type', 'application/json');
             return res.status(200).send(API.formatJSON(orgs));
@@ -192,8 +193,8 @@ class OrganizationController
         var createOrganization = function() {
             // Create the new org and save it
             var new_org = new Organization({
-                id: htmlspecialchars(req.body['id']),
-                name: htmlspecialchars(req.body['name'])
+                id: htmlspecialchars(orgId),
+                name: htmlspecialchars(orgName)
             });
             new_org.save()
 
@@ -309,7 +310,10 @@ class OrganizationController
         var orgid = htmlspecialchars(req.params['orgid']);
 
         // Do the deletion
-        Organization.findByIdAndRemove(orgid, function (err) {
+        Organization.findOneAndRemove({
+            'id': orgid
+        }, 
+        function (err) {
             if (err) {
                 console.log(err);
                 return res.status(500).send('Internal Server Error');
