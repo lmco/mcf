@@ -20,8 +20,8 @@ const htmlspecialchars = require('htmlspecialchars');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
 const modelsPath = path.join(__dirname, '..', 'models');
 const API = require(path.join(__dirname, 'APIController'));
-const Organization = require(path.join(modelsPath, 'Organization'));
-const Project = require(path.join(modelsPath, 'Project'));
+const Organization = require(path.join(modelsPath, 'OrganizationModel'));
+const Project = require(path.join(modelsPath, 'ProjectModel'));
 
 
 /**
@@ -164,7 +164,7 @@ class ProjectController
         var projectName = htmlspecialchars(project['name']);
 
         // Error check - Make sure project name is valid
-        if (!RegExp('^([a-zA-Z0-9-\s])+$').test(projectName)) {
+        if (!RegExp('^([a-zA-Z0-9-\\s])+$').test(projectName)) {
             console.log('Project name is not valid.');
             return res.status(400).send('Bad Request');
         }

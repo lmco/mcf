@@ -9,6 +9,7 @@ This assumes developers are working in OSX.
 2. Homebrew
 3. Node.js - Run `brew install node`
 4. Yarn - Run `brew install yarn`
+5. MongoDB - Run `brew install mongodb`
 
 **Configuration for the LMI**
 When on the Lockheed Martin Intranet, you'll need to set up the proxy:
@@ -20,6 +21,51 @@ You'll also need to download and set up the certificate authority:
 
 - Download the ca file from `https://sscgit.ast.lmco.com/projects/CP/repos/openstack-hot/browse/PEM_LMChain_20160721.pem?raw`
 - Run `yarn config set "cafile" /path/to/your/cafile.pem`
+
+### Database Set Up
+The current database used for MBEE is [mongoDB](https://www.mongodb.com/). To 
+get the database up and running, set up a database folder for mongoDB to use and
+then start up the database.
+
+- Make the database directory `mkdir -p /Path/To/Your/DB/Folder`
+- Start mongo with `mongod --dbpath /Path/To/Your/DB/Folder`
+- Then create the default users:
+
+```mongodb
+use admin
+db.createUser(
+  {
+    user: "admin",
+    pwd: "admin",
+    roles: [{ 
+        role: "userAdminAnyDatabase", 
+        db: "admin" 
+    }]
+  }
+)
+
+use mbee
+db.createUser({
+    user: "mbee", 
+    pwd: "mbee", 
+    roles: [{
+        role: "readWrite", 
+        db: "mbee"
+    }]
+})
+```
+
+- Shutdown mongo and restart it with `mongod --auth --dbpath /Path/To/Your/DB/Folder`.
+
+For additional information on setting up authentication, follow the directions 
+found [here](https://docs.mongodb.com/manual/tutorial/enable-authentication/).
+
+The database configuration can be set up in the package.json file under 
+mbee-config.database. The URL, Port, Database name, and Username and Password 
+for authentication can be configured here.
+
+Note: If the database is not using authentication, leave username and password 
+as empty strings ('').
 
 ### Get the Code, Build, and Run 
 1. Clone the repository: `git clone https://git.lmms.lmco.com/mbee/mbee.git && cd mbee`
