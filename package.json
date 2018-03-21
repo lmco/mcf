@@ -42,6 +42,7 @@
     "build": "./node_modules/.bin/gulp",
     "clean": "./node_modules/.bin/gulp clean",
     "clean-all": "rm -rf public/ node_modules/ docs/",
+    "db": "mongod --auth --dbpath ./db/mbee",
     "docker-build": "yarn run clean && yarn run build && docker build -t mbee .",
     "docker-clean": "docker stop mbee; docker rm mbee;",
     "docker-run": "docker run -d -it -p 8080:8080 --name mbee mbee",

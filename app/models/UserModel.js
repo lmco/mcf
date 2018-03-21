@@ -72,9 +72,8 @@ var UserSchema = new mongoose.Schema({
      */
     fname: {
         type: String,
-        required: true,
-        maxlength: [36, 'Too many characters in first name'],
-        minlength: [1,  'Too few characters in first name']
+        default: '',
+        maxlength: [36, 'Too many characters in first name']
     },
 
     /*
@@ -82,9 +81,8 @@ var UserSchema = new mongoose.Schema({
      */
     lname: {
         type: String,
-        required: true,
-        maxlength: [36, 'Too many characters in last name'],
-        minlength: [1,  'Too few characters in last name']
+        default: '',
+        maxlength: [36, 'Too many characters in last name']
     },
 
     /*
@@ -94,7 +92,6 @@ var UserSchema = new mongoose.Schema({
     name: {
         type: String,
         maxlength: [72, 'Name too long'],
-        minlength: [0,  'Name too short'],
         default: function() { 
             return this.fname + ' ' + this.lname
         },
