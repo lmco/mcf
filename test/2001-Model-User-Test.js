@@ -44,7 +44,7 @@ class UserModelTests
             // the tests
             it('Create a user', UserModelTests.createUser);
             it('Get a user', UserModelTests.getUser);
-            //it('Delete a user', UserModelTests.deleteUser);
+            it('Delete a user', UserModelTests.deleteUser);
         });
 
     }

@@ -49,7 +49,7 @@
     "jsdoc": "./node_modules/.bin/gulp jsdoc && node ./bin/jsdoc-server.js",
     "server": "node ./bin/server.js",
     "start": "yarn install && yarn run build && yarn run server",
-    "test": "./node_modules/.bin/mocha test/_orchestrator.js"
+    "test": "./node_modules/.bin/mocha test/_orchestrator.js --slow 19"
   },
   "mbee-config": {
     "server": {
