@@ -56,10 +56,12 @@ function getControllerPath(name) {
 const config = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
 
 // Module paths
+const RoutesPath = path.join(__dirname, '..', config.server.app, 'routes.js');
 const APIRoutesPath = path.join(__dirname, '..', config.server.app, 'api_routes.js');
 const AuthControllerPath = path.join(__dirname, '..', config.server.app, 'auth', 'auth');
 
 // Actual module imports
+const Router = require(RoutesPath);
 const APIRouter = require(APIRoutesPath);
 const AuthController = require(AuthControllerPath);
 const UIController = require(getControllerPath('UIController'));
@@ -108,9 +110,10 @@ mongoose.connect(connectURL, function(err,msg){
  **************************************/
 
 // Routes
-app.get('/', UIController.home);
-app.get('/login', UIController.login);
-app.get('/admin/console', UIController.admin)
+app.use('/', Router);
+//app.get('/', UIController.home);
+//app.get('/login', UIController.login);
+//app.get('/admin/console', UIController.admin)
 
 // API Routes
 app.use('/api', APIRouter);

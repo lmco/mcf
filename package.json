@@ -13,6 +13,7 @@
     "express": "^4.16.2",
     "htmlspecialchars": "^1.0.5",
     "ldapjs": "^1.0.2",
+    "mongodb": "^3.0.4",
     "mongoose": "^5.0.10",
     "popper.js": "^1.12.9",
     "react": "^16.2.0",
@@ -22,29 +23,33 @@
   },
   "devDependencies": {
     "bootstrap": "^4.0.0",
+    "chai": "^4.1.2",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-jsdoc3": "^1.0.1",
     "gulp-react": "^3.1.0",
     "gulp-sass": "^3.1.0",
-    "jquery": "^3.3.1"
+    "jquery": "^3.3.1",
+    "mocha": "^5.0.4",
+    "request": "^2.85.0"
   },
   "peerDependencies": {
     "pug": "^2.0.1"
   },
   "scripts": {
-    "build": "./node_modules/gulp/bin/gulp.js",
-    "clean": "./node_modules/gulp/bin/gulp.js clean",
+    "build": "./node_modules/.bin/gulp",
+    "clean": "./node_modules/.bin/gulp clean",
     "clean-all": "rm -rf public/ node_modules/ docs/",
     "docker-build": "yarn run clean && yarn run build && docker build -t mbee .",
     "docker-clean": "docker stop mbee; docker rm mbee;",
     "docker-run": "docker run -d -it -p 8080:8080 --name mbee mbee",
-    "jsdoc-gen": "./node_modules/gulp/bin/gulp.js jsdoc",
-    "jsdoc": "./node_modules/gulp/bin/gulp.js jsdoc && node ./bin/jsdoc-server.js",
+    "jsdoc-gen": "./node_modules/.bin/gulp jsdoc",
+    "jsdoc": "./node_modules/.bin/gulp jsdoc && node ./bin/jsdoc-server.js",
     "server": "node ./bin/server.js",
-    "start": "yarn install && yarn run build && yarn run server"
-  }, 
+    "start": "yarn install && yarn run build && yarn run server",
+    "test": "./node_modules/.bin/mocha test/_orchestrator.js"
+  },
   "mbee-config": {
     "server": {
       "app": "app",
@@ -59,25 +64,28 @@
     "auth": {
       "strategy": "TestStrategy",
       "ldap": {
-          "server": "ldaps://usadc43.us.lmco.com:3269",
-          "ca": [
-            "./certs/LockheedMartinRootCertificationAuthority.pem",
-            "./certs/LockheedMartinRootCertificationAuthority2.pem",
-            "./certs/LockheedMartinRootCertificationAuthority3.pem"
-          ],
-          "bind_dn": "mbee-query@us.lmco.com",
-          "bind_dn_pass": "SuaIZh4oIPCRD9g",
-          "groups": ["SSC.MBEE", "SSC.MBEE.Dev"],
-          "attributes": [
-            "dn",
-            "sAMAccountName", 
-            "lmcPreferredFirstName",
-            "givenName", 
-            "sn", 
-            "mail"
-          ],
-          "username_attribute": "sAMAccountName",
-          "group_search_dn": "ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com"
+        "server": "ldaps://usadc43.us.lmco.com:3269",
+        "ca": [
+          "./certs/LockheedMartinRootCertificationAuthority.pem",
+          "./certs/LockheedMartinRootCertificationAuthority2.pem",
+          "./certs/LockheedMartinRootCertificationAuthority3.pem"
+        ],
+        "bind_dn": "mbee-query@us.lmco.com",
+        "bind_dn_pass": "SuaIZh4oIPCRD9g",
+        "groups": [
+          "SSC.MBEE",
+          "SSC.MBEE.Dev"
+        ],
+        "attributes": [
+          "dn",
+          "sAMAccountName",
+          "lmcPreferredFirstName",
+          "givenName",
+          "sn",
+          "mail"
+        ],
+        "username_attribute": "sAMAccountName",
+        "group_search_dn": "ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com"
       }
     },
     "ui": {

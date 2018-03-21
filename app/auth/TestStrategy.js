@@ -47,13 +47,13 @@ class TestStrategy extends BaseStrategy
         // Get authorization header
         var authorization = req.headers['authorization'];
         if (!authorization) {
-            return res.status(400).send('Bad Request (1)');
+            return res.status(400).send('Bad Request');
         }
       
         // Check it is a valid auth header
         var parts = authorization.split(' ');
         if (parts.length < 2) {
-            return res.status(400).send('Bad Request (2)'); 
+            return res.status(400).send('Bad Request'); 
         }
 
         // Basic Auth
@@ -61,12 +61,12 @@ class TestStrategy extends BaseStrategy
             // Get credentials    
             var credentials = new Buffer(parts[1], 'base64').toString().split(':');
             if (credentials.length < 2) {
-                return res.status(400).send('Bad Request (4)');
+                return res.status(400).send('Bad Request');
             }
             var username = credentials[0];
             var password = credentials[1];
             if (!username || !password) {
-                return res.status(401).send('Unauthorized (1)');
+                return res.status(401).send('Unauthorized');
             }
           
             // Check if valid user
@@ -74,7 +74,7 @@ class TestStrategy extends BaseStrategy
                 next();
             }
             else {
-                return res.status(401).send('Unauthorized (2)');
+                return res.status(401).send('Unauthorized');
             }
         }
         // Token Auth
@@ -90,12 +90,12 @@ class TestStrategy extends BaseStrategy
                 next();
             }
             else { 
-                return res.status(401).send('Bad Request (5)');
+                return res.status(401).send('Unauthorized');
             }
         }
         // Unknown auth scheme
         else {
-            return res.status(400).send('Bad Request (6)');
+            return res.status(400).send('Bad Request');
         }
     }
 
