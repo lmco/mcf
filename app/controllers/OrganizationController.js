@@ -213,7 +213,7 @@ class OrganizationController
             if (orgs.length >= 1) {
                 console.log('Organization already exists.');
                 return res.status(500).send('Internal Server Error');
-            }  
+            } 
             createOrganization();
         });
     }

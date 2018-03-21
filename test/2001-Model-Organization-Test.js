@@ -68,10 +68,9 @@ class OrgModelTests
         connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
 
         // Connect to Data base
-        mongoose.connect(connectURL, function(err,msg){
-            if (err) {
-                console.log(err) 
-            }
+        mongoose.connect(connectURL, function(err, msg) {
+            chai.expect(err).to.equal(null); 
+            mongoose.connection.close();
             done();
         });
     }
@@ -98,9 +97,9 @@ class OrgModelTests
             id: 'org1',    
         }, function(err) {
             chai.expect(err).to.equal(null); 
-            done();
+            
         });
-        
+        done();
     }
 }
 
