@@ -36,6 +36,7 @@ const { execSync } = require('child_process');
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 
 /**************************************
@@ -76,6 +77,32 @@ app.use(express.static(publicDir)); // Sets our static/public directory
 app.use(bodyParser.json());         // This allows us to receive JSON data in the  request body
 app.set('view engine', 'ejs');      // Sets our view engine to EJS
 app.set('views', viewsDir);         // Sets our view directory
+
+
+/**************************************
+ *  Database                          *          
+ **************************************/
+
+// Declare varaibels for mongoose connection
+var dbName     = config.database.dbName;
+var url        = config.database.url;
+var dbPort     = config.database.port;
+var dbUsername = config.database.username;
+var dbPassword = config.database.password;
+var connectURL = 'mongodb://';
+
+// Create connection with or without authentication
+if (dbUsername != '' && dbPassword != ''){
+    connectURL = connectURL + dbUsername + ':' + dbPassword + '@';
+}
+connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
+
+// Connect to Data base
+mongoose.connect(connectURL, function(err,msg){
+    if (err) {
+        console.log(err) 
+    }
+});
 
 
 /**************************************

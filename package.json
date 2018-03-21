@@ -13,6 +13,8 @@
     "express": "^4.16.2",
     "htmlspecialchars": "^1.0.5",
     "ldapjs": "^1.0.2",
+    "mongodb": "^3.0.4",
+    "mongoose": "^5.0.10",
     "popper.js": "^1.12.9",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
@@ -46,7 +48,7 @@
     "jsdoc": "./node_modules/.bin/gulp jsdoc && node ./bin/jsdoc-server.js",
     "server": "node ./bin/server.js",
     "start": "yarn install && yarn run build && yarn run server",
-    "test": "./node_modules/.bin/mocha test/execute_all.js"
+    "test": "./node_modules/.bin/mocha test/_orchestrator.js"
   },
   "mbee-config": {
     "server": {
@@ -95,6 +97,13 @@
         "bold": true,
         "border": "1px solid #0d47a1"
       }
+    },
+    "database": {
+      "dbName": "mbee",
+      "url": "localhost",
+      "port": "27017",
+      "username": "mbee",
+      "password": "mbee"
     }
   }
 }

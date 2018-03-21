@@ -20,8 +20,8 @@ const htmlspecialchars = require('htmlspecialchars');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
 const API = require(path.join(__dirname, 'APIController'));
 const modelsPath = path.join(__dirname, '..', 'models');
-const Organization = require(path.join(modelsPath, 'Organization'));
-const Project = require(path.join(modelsPath, 'Project'));
+const Organization = require(path.join(modelsPath, 'OrganizationModel'));
+const Project = require(path.join(modelsPath, 'ProjectModel'));
 
 
 /**
@@ -32,6 +32,7 @@ const Project = require(path.join(modelsPath, 'Project'));
  * @classdesc The OrganizationController class defines static methods for handling
  * organization-related API routes.
  */
+
 
 class OrganizationController
 {
@@ -55,6 +56,7 @@ class OrganizationController
                 console.log(err);
                 return res.status(500).send('Internal Server Error');
             }
+
             // Otherwise return 200 and the orgs
             res.header('Content-Type', 'application/json');
             return res.status(200).send(API.formatJSON(orgs));
@@ -191,8 +193,8 @@ class OrganizationController
         var createOrganization = function() {
             // Create the new org and save it
             var new_org = new Organization({
-                id: htmlspecialchars(req.body['id']),
-                name: htmlspecialchars(req.body['name'])
+                id: htmlspecialchars(orgId),
+                name: htmlspecialchars(orgName)
             });
             new_org.save()
 
@@ -211,7 +213,7 @@ class OrganizationController
             if (orgs.length >= 1) {
                 console.log('Organization already exists.');
                 return res.status(500).send('Internal Server Error');
-            }  
+            } 
             createOrganization();
         });
     }
@@ -308,7 +310,10 @@ class OrganizationController
         var orgid = htmlspecialchars(req.params['orgid']);
 
         // Do the deletion
-        Organization.findByIdAndRemove(orgid, function (err) {
+        Organization.findOneAndRemove({
+            'id': orgid
+        }, 
+        function (err) {
             if (err) {
                 console.log(err);
                 return res.status(500).send('Internal Server Error');
