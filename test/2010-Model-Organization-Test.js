@@ -49,7 +49,7 @@ class OrgModelTests
 
     
     /**
-     * Runs an empty test case.
+     * Connects to the database.
      */
     static dbConnect(done)
     {
@@ -76,7 +76,7 @@ class OrgModelTests
     }
 
     /**
-     * Runs some simple assertions
+     * Creates an Organization
      */
     static createOrganization(done)
     {
@@ -89,7 +89,7 @@ class OrgModelTests
     }
 
     /**
-     * Runs some simple assertions
+     * Deletes the organization.
      */
     static deleteOrganization(done)
     {
