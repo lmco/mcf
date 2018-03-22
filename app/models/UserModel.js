@@ -110,5 +110,6 @@ UserSchema.methods.getFullName = function() {
     return this.fname + ' ' + this.lname;
 };
 
+
 // Export mongoose model as "Organization"
 module.exports = mongoose.model('User', UserSchema);

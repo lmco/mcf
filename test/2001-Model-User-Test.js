@@ -44,6 +44,8 @@ class UserModelTests
             // the tests
             it('Create a user', UserModelTests.createUser);
             it('Get a user', UserModelTests.getUser);
+            it('Update a user', UserModelTests.updateUser);
+            it('Verify the user update', UserModelTests.checkUserUpdate);
             it('Delete a user', UserModelTests.deleteUser);
         });
 
@@ -61,16 +63,13 @@ class UserModelTests
         var dbUsername = config.database.username;
         var dbPassword = config.database.password;
         var connectURL = 'mongodb://';
-
         // Create connection with or without authentication
         if (dbUsername != '' && dbPassword != ''){
             connectURL = connectURL + dbUsername + ':' + dbPassword + '@';
         }
         connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
-
         // Connect to Data base
         mongoose.connect(connectURL);
-
     }
 
     
@@ -125,6 +124,53 @@ class UserModelTests
     }
 
     /**
+     * Updates a user's username.
+     */
+    static updateUser(done)
+    {
+        User.findOne({
+            username:   'lskywalker0'
+        }, function(err, user) {
+            // Make sure there are no errors
+            chai.expect(err).to.equal(null);
+
+            // Grab the hashed passord
+            user.password = 'r3d5jediknight';
+            user.save(function(err) {
+                chai.expect(err).to.equal(null);
+                done();
+            })
+        });
+    }
+
+    /**
+     * Checks that the user update worked.
+     */
+    static checkUserUpdate(done)
+    {
+        User.findOne({
+            username:   'lskywalker0'
+        }, function(err, user) {
+            // Make sure there are no errors
+            chai.expect(err).to.equal(null);
+
+            // Check basic user data
+            chai.expect(user.username).to.equal('lskywalker0');
+            chai.expect(user.fname).to.equal('Luke');
+            chai.expect(user.lname).to.equal('Skywalker');
+            chai.expect(user.getFullName()).to.equal('Luke Skywalker');
+            chai.expect(user.name).to.equal('Luke Skywalker');
+
+            // Grab the hashed passord
+            var expectedHash = '47e25ba587d8d649f56a24c07b0c03062d6d68ea9082326e067248b3c774ba9e';
+            chai.expect(user.password).to.equal(expectedHash);
+
+            done();
+        });
+        
+    }
+
+    /**
      * Deletes the user.
      */
     static deleteUser(done)
@@ -136,6 +182,7 @@ class UserModelTests
             done(); 
         });
     }
+
 }
 
 module.exports = UserModelTests;
