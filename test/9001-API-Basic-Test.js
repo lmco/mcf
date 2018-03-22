@@ -40,7 +40,8 @@ class TestAPIBasic
     static run() 
     {
         describe('API Basic Test Suite', function() {
-            it('Login', TestAPIBasic.doLoginWithBasicAuth);
+            it('Login with basic auth', TestAPIBasic.doLoginWithBasicAuth);
+            it('Login with token auth', TestAPIBasic.doLoginWithTokenAuth);
             it('Version Check', TestAPIBasic.getVersion);
         });
     }
@@ -96,6 +97,45 @@ class TestAPIBasic
         });
     }
 
+
+    /**
+     * First authenticates with basic auth to get a token, then authenticates
+     * again with that token. 
+     */
+    static doLoginWithTokenAuth(done)
+    {
+        request({
+            url:        'http://localhost:8080/api/login',
+            method:     'POST',
+            headers:    TestAPIBasic.getHeaders()
+        }, 
+        function(error, response, body) {
+            // Check status code
+            chai.expect(response.statusCode).to.equal(200);
+            
+            // Grab token data
+            var token = JSON.parse(body)['token']
+            
+            request({
+                url:        'http://localhost:8080/api/login',
+                method:     'POST',
+                headers:    {
+                    authorization: 'Bearer ' + token
+                }
+            }, 
+            function(error, response, body) {
+                // Check status code
+                chai.expect(response.statusCode).to.equal(200);
+
+                // Check username from token
+                var data = libCrypto.inspectToken(JSON.parse(body)['token']);
+                chai.expect(data.username).to.equal('lskywalker0')
+
+                done();
+            });
+        });
+
+    }
 
     /*----------( Helper Functions )----------*/
 

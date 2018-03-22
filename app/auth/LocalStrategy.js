@@ -125,7 +125,43 @@ class LocalStrategy extends BaseStrategy
 
         // Authenticate the user with token auth
         else if (RegExp('Bearer').test(scheme)) {
-            return res.status(501).send('Not implemented');
+            var token = new Buffer(parts[1], 'utf8').toString();
+
+            // Try to decrypt the token
+            try {
+                token = libCrypto.inspectToken(token);
+            }
+            // If it cannot be decrypted, it is not valid and the 
+            // user is not authorized
+            catch (error) {
+                console.log(error);
+                return res.status(401).send('Unauthorized');
+            }
+
+            // Make sure the token is not expired
+            if (Date.now() < Date.parse(token.expires)) {
+
+                // Lookup user
+                User.findOne({
+                    'username': sanitize(token.username)
+                }, function(err, user) {
+                    // Make sure no errors occur
+                    if (err) {
+                        console.log(err);
+                        return res.status(401).send('Unauthorized');
+                    }
+                    // If no errors, set the user and call next
+                    else {
+                        req.user = user;
+                        next();
+                    }
+                });
+            }
+            // If token is expired user is unauthorized
+            else {
+                return res.status(401).send('Unauthorized');
+            }
+            
         }
 
         // Unknown authentication scheme
