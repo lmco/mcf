@@ -13,6 +13,7 @@
     "express": "^4.16.2",
     "htmlspecialchars": "^1.0.5",
     "ldapjs": "^1.0.2",
+    "mongo-sanitize": "^1.0.0",
     "mongodb": "^3.0.4",
     "mongoose": "^5.0.10",
     "popper.js": "^1.12.9",
@@ -41,6 +42,7 @@
     "build": "./node_modules/.bin/gulp",
     "clean": "./node_modules/.bin/gulp clean",
     "clean-all": "rm -rf public/ node_modules/ docs/",
+    "db": "mongod --auth --dbpath ./db/mbee",
     "docker-build": "yarn run clean && yarn run build && docker build -t mbee .",
     "docker-clean": "docker stop mbee; docker rm mbee;",
     "docker-run": "docker run -d -it -p 8080:8080 --name mbee mbee",
@@ -48,7 +50,7 @@
     "jsdoc": "./node_modules/.bin/gulp jsdoc && node ./bin/jsdoc-server.js",
     "server": "node ./bin/server.js",
     "start": "yarn install && yarn run build && yarn run server",
-    "test": "./node_modules/.bin/mocha test/_orchestrator.js"
+    "test": "./node_modules/.bin/mocha test/_orchestrator.js --slow 19"
   },
   "mbee-config": {
     "server": {
