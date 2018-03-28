@@ -25,6 +25,7 @@ var getController       = (x) => path.join(__dirname, 'controllers', x);
 const APIController     = require(getController('APIController'));
 const OrgController     = require(getController('OrganizationController'));
 const ProjectController = require(getController('ProjectController'));
+const UserController    = require(getController('UserController'));
 const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var api = express.Router();
@@ -596,7 +597,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         description: Not Implemented
  */
 api.route('/users')
-    .get   (AuthController.authenticate, APIController.notImplemented)
+    .get   (AuthController.authenticate, UserController.getUsers)
     .post  (AuthController.authenticate, APIController.notImplemented)
     .put   (AuthController.authenticate, APIController.notImplemented)
     .delete(AuthController.authenticate, APIController.notImplemented);

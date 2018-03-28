@@ -1,0 +1,108 @@
+/*****************************************************************************
+ * Classification: UNCLASSIFIED                                              *
+ *                                                                           *
+ * Copyright (C) 2018, Lockheed Martin Corporation                           *
+ *                                                                           *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
+ * It is not approved for public release or redistribution.                  *
+ *                                                                           *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export *
+ * control laws. Contact legal and export compliance prior to distribution.  *
+ *****************************************************************************/
+
+const path = require('path');
+
+const package_json = require(path.join(__dirname, '..', '..', 'package.json'));
+const config = package_json['mbee-config'];
+
+const API = require(path.join(__dirname, 'APIController'));
+const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
+
+/**
+ * UserController.js
+ *
+ * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * Defines User-related control functionality. Specifically, this
+ * controller defines the implementation of /users/* API endpoints. 
+ */
+class UserController 
+{
+
+    /**
+     * 
+     */
+    static getUsers(req, res)
+    {
+        User.find(function(err, users) {
+            // Check if error occured
+            if (err) {
+                console.log(err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Convert to public user data
+            var publicUsers = [];
+            for (var i = 0; i < users.length; i++) {
+                publicUsers.push(users[i].getPublicData());
+            }
+
+            // Otherwise return 200 and the users JSON
+            res.header('Content-Type', 'application/json');
+            return res.status(200).send(API.formatJSON(publicUsers));
+        });
+
+    }
+
+    /**
+     * 
+     */
+    static getUser(req, res) 
+    {
+
+
+    }
+
+
+    /**
+     * Creates a user. Expects the user data to be in the request body.
+     */
+    static postUser(req, res) 
+    {
+        // Error check - make sure the user is defined
+        if (!req.user) {
+            console.log('Error: req.user is not defined.');
+            return req.status(500).send('Internal Server Error');
+        }
+
+        // Make sure user is an admin
+        if (!req.user.admin) {
+            console.log('User is not an admin.');
+            return req.status(403).send('Forbidden');
+        }
+
+        return req.status(501).send('Not Implemented');
+
+    }
+
+
+    /**
+     * 
+     */
+    static putUser(req, res)
+    {
+
+    }
+
+
+    /**
+     * Deletes a user.
+     */
+    static deleteUser(req, res)
+    {
+
+    }
+
+}
+
+module.exports = UserController;
