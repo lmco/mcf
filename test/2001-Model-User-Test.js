@@ -190,46 +190,15 @@ class UserModelTests
      */
     static createManyUsers(done)
     {
-        var user_data = [{
-            'username': 'lskywalker0',
-            'password': 'r3d5jediknight',
-            'fname': 'Luke',
-            'lname': 'Skywalker',
-        }, {
-            'username': 'han',
-            'password': 'iSh0tFir$t',
-            'fname': 'Han',
-            'lname': 'Solo',
-        }, {
-            'username': 'princess',
-            'password': 'youremyonlyhope',
-            'fname': 'Leia',
-            'lname': 'Organa',
-        }, {
-            'username': 'vader',
-            'password': 'padme',
-            'email': 'vader@empire.gov',
-            'fname': 'Darth',
-            'lname': 'Vader' 
-        }, {
-            'username': 'tk421',
-            'password': 'stormtrooper',
-            'fname': 'Stormtrooper',
-            'lname': 'TK421'
-        }, {
-            'username': 'fn2187',
-            'password': 'stormtrooper',
-            'fname': 'Stormtrooper',
-            'lname': 'FN2187'
-        }];
-
+        var userData = require(path.join(__dirname, '_data.json'))['users'];
+        console.log(userData);
         var counter = 0;
-        for (var i = 0; i < user_data.length; i++) {
-            var user = new User(user_data[i]);
+        for (var i = 0; i < userData.length; i++) {
+            var user = new User(userData[i]);
             user.save(function (err) {
                 chai.expect(err).to.equal(null);
                 counter++;
-                if (counter == user_data.length) {
+                if (counter == userData.length) {
                     console.log('Done');
                     done();
                 }
