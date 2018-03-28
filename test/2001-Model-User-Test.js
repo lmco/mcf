@@ -48,6 +48,7 @@ class UserModelTests
             it('Verify the user update', UserModelTests.checkUserUpdate);
             it('Delete a user', UserModelTests.deleteUser);
             it('Create many users', UserModelTests.createManyUsers);
+            //it('Delete many users', UserModelTests.deleteManyUsers);
         });
 
     }
@@ -186,12 +187,11 @@ class UserModelTests
 
 
     /**
-     * Deletes the user.
+     * Creates many users.
      */
     static createManyUsers(done)
     {
         var userData = require(path.join(__dirname, '_data.json'))['users'];
-        console.log(userData);
         var counter = 0;
         for (var i = 0; i < userData.length; i++) {
             var user = new User(userData[i]);
@@ -199,12 +199,38 @@ class UserModelTests
                 chai.expect(err).to.equal(null);
                 counter++;
                 if (counter == userData.length) {
-                    console.log('Done');
+                    //console.log('Done');
                     done();
                 }
             });
         }
-        console.log('After loop');
+        //console.log('After loop');
+    }
+
+    /**
+     * Deletes many users.
+     */
+    static deleteManyUsers(done)
+    {
+        var userData = require(path.join(__dirname, '_data.json'))['users'];
+        var counter = 0;
+        for (var i = 0; i < userData.length; i++) {
+
+            var user = new User(userData[i]);
+
+            User.findOneAndRemove({
+                "username": user.username
+            }, function (err) {
+                // expect no error to occur
+                chai.expect(err).to.equal(null);
+                counter++;
+                if (counter == userData.length) {
+                    //console.log('Done');
+                    done();
+                }
+            });
+        }
+        //console.log('After loop');
     }
 }
 
