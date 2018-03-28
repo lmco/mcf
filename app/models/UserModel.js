@@ -39,7 +39,7 @@ var UserSchema = new mongoose.Schema({
         index: true,
         unique: true,
         maxlength: [36, 'Too many characters in username'],
-        minlength: [8, 'Too few characters in username'],
+        minlength: [3, 'Too few characters in username'],
         match: RegExp('^([a-z])([a-z0-9_]){0,}$')
     },
 
@@ -51,10 +51,11 @@ var UserSchema = new mongoose.Schema({
         required: true,
         maxlength: [64, 'Password hash too long'],
         minlength: [64, 'Password hash too short'],
-        set: (pwd) => {
-            var hash = crypto.createHash('sha256')
-            hash.update(pwd)
-            return hash.digest().toString('hex')
+        set: function(pwd) {
+            var hash = crypto.createHash('sha256');
+            hash.update(this._id.toString());
+            hash.update(pwd);
+            return hash.digest().toString('hex');
         }
     },
 
@@ -92,15 +93,23 @@ var UserSchema = new mongoose.Schema({
     name: {
         type: String,
         maxlength: [72, 'Name too long'],
+        trim: true,
         default: function() { 
-            return this.fname + ' ' + this.lname
+            return (this.fname + ' ' + this.lname).trim()
         },
         set: function() {
-            return this.fname + ' ' + this.lname
-        },
-        get: function() { 
-            return this.fname + ' ' + this.lname
+            return (this.fname + ' ' + this.lname).trim()
         }
+    },
+
+
+    /**
+     * The `admin` property defines whether or not the user is an admin.
+     * This refers to whether or not the user is a site-wide admin.
+     */
+    admin: {
+        type: Boolean,
+        default: false
     }
 
 });
@@ -108,6 +117,16 @@ var UserSchema = new mongoose.Schema({
 
 UserSchema.methods.getFullName = function() {
     return this.fname + ' ' + this.lname;
+};
+
+UserSchema.methods.getPublicData = function() {
+    return {
+        'username': this.username,
+        'name': this.name,
+        'fname': this.fname,
+        'lname': this.lname,
+        'email': this.email
+    }
 };
 
 

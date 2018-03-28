@@ -19,9 +19,9 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 
-
-var files = fs.readdirSync(__dirname);  // Read the tests directory
-var suites = [];                        // Array to contain test suites
+var unitTestsPath = path.join(__dirname);
+var files = fs.readdirSync(unitTestsPath);  // Read the tests directory
+var suites = [];                            // Array to contain test suites
 
 console.log('-'.repeat(40));
 console.log(' MBEE Test Collection')
@@ -38,7 +38,7 @@ for (var i = 0; i < files.length; i++) {
     // collection of test suites.
     if (files[i].toString().endsWith('Test.js')) {
         // Require the module
-        var modulePath = path.join(__dirname, files[i]);
+        var modulePath = path.join(unitTestsPath, files[i]);
         var suite = require(modulePath);
         // Error check - suite must have a run method and it must be a function
         if (!suite.hasOwnProperty('run') || typeof(suite.run) !== typeof(()=>{})) {
