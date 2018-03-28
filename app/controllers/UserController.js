@@ -12,6 +12,9 @@
 
 const path = require('path');
 
+const htmlspecialchars = require('htmlspecialchars');
+const sanitize = require('mongo-sanitize');
+
 const package_json = require(path.join(__dirname, '..', '..', 'package.json'));
 const config = package_json['mbee-config'];
 
@@ -30,7 +33,8 @@ class UserController
 {
 
     /**
-     * 
+     * Gets a list of all users and returns their public data in
+     * JSON format.
      */
     static getUsers(req, res)
     {
@@ -47,19 +51,34 @@ class UserController
                 publicUsers.push(users[i].getPublicData());
             }
 
-            // Otherwise return 200 and the users JSON
+            // Otherwise return 200 and the users' public JSON
             res.header('Content-Type', 'application/json');
             return res.status(200).send(API.formatJSON(publicUsers));
         });
 
     }
 
+
     /**
-     * 
+     * Gets a user by username and returns the user's public JSON data.
      */
     static getUser(req, res) 
     {
+        var username = sanitize(htmlspecialchars(req.params['username']));
 
+        User.findOne({
+            "username": username
+        }, function(err, user) {
+            // Check if error occured
+            if (err) {
+                console.log(err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Otherwise return 200 and the user's public JSON
+            res.header('Content-Type', 'application/json');
+            return res.status(200).send(API.formatJSON(user.getPublicData()));
+        });
 
     }
 

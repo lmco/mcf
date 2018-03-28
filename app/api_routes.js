@@ -576,10 +576,25 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  * @swagger
  * /users:
  *   get:
- *     description: Not implemented, reserved for future use.
+ *     description: Gets a list of all users. Returns a list of JSON objects 
+ *     containing public user data.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - N/A
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - All users should be returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  *   post:
  *     description: Not implemented, reserved for future use.
  *     responses:
@@ -605,12 +620,31 @@ api.route('/users')
 
 /**
  * @swagger
- * /users/:id:
+ * /users/:username:
  *   get:
- *     description: Not implemented, reserved for future use.
+ *     description: Gets a user by username.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to get. Note: it is possible 
+ *                      for usernames to be changed.
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The user was retieved and the public user 
+ *                      object should be returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  *   post:
  *     description: Not implemented, reserved for future use.
  *     responses:
@@ -627,8 +661,8 @@ api.route('/users')
  *       501:
  *         description: Not Implemented
  */
-api.route('/users/:id')
-    .get   (AuthController.authenticate, APIController.notImplemented)
+api.route('/users/:username')
+    .get   (AuthController.authenticate, UserController.getUser)
     .post  (AuthController.authenticate, APIController.notImplemented)
     .put   (AuthController.authenticate, APIController.notImplemented)
     .delete(AuthController.authenticate, APIController.notImplemented);
@@ -657,7 +691,7 @@ api.route('/users/:id')
  *       501:
  *         description: Not Implemented
  */
-api.route('/users/:id/roles')
+api.route('/users/:username/roles')
     .get   (AuthController.authenticate, APIController.notImplemented)
     .post  (AuthController.authenticate, APIController.notImplemented)
     .put   (AuthController.authenticate, APIController.notImplemented)
@@ -688,7 +722,7 @@ api.route('/users/:id/roles')
  *       501:
  *         description: Not Implemented
  */
-api.route('/users/:id/groups')
+api.route('/users/:username/groups')
     .get   (AuthController.authenticate, APIController.notImplemented)
     .post  (AuthController.authenticate, APIController.notImplemented)
     .put   (AuthController.authenticate, APIController.notImplemented)
