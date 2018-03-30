@@ -613,10 +613,9 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  */
 api.route('/users')
     .get   (AuthController.authenticate, UserController.getUsers)
-    .post  (AuthController.authenticate, APIController.notImplemented)
-    .put   (AuthController.authenticate, APIController.notImplemented)
-    .delete(AuthController.authenticate, APIController.notImplemented);
-
+    .post  (AuthController.authenticate, UserController.postUsers)
+    .put   (AuthController.authenticate, UserController.putUsers)
+    .delete(AuthController.authenticate, UserController.deleteUsers);
 
 /**
  * @swagger
@@ -646,10 +645,39 @@ api.route('/users')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   post:
- *     description: Not implemented, reserved for future use.
+ *     description: Gets a user by username.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to create. 
+ *         required: true
+ *         type: string
+ *         in: URI
+ *       - name: username
+ *         description: The username of the user to create. 
+ *         required: false
+ *         type: string
+ *         in: body
+ *       - name: password
+ *         description: The username of the user to create. 
+ *         required: true
+ *         type: string
+ *         in: body
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The user was retieved and the public user 
+ *                      object should be returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  *   put:
  *     description: Not implemented, reserved for future use. 
  *     responses:
@@ -663,9 +691,9 @@ api.route('/users')
  */
 api.route('/users/:username')
     .get   (AuthController.authenticate, UserController.getUser)
-    .post  (AuthController.authenticate, APIController.notImplemented)
-    .put   (AuthController.authenticate, APIController.notImplemented)
-    .delete(AuthController.authenticate, APIController.notImplemented);
+    .post  (AuthController.authenticate, UserController.postUser)
+    .put   (AuthController.authenticate, UserController.putUser)
+    .delete(AuthController.authenticate, UserController.deleteUser);
 
 /**
  * @swagger

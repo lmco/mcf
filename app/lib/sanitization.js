@@ -18,18 +18,18 @@
  */
 
 const path = require('path');
-const crypto = require('crypto');
+
+const htmlspecialchars = require('htmlspecialchars');
+const sanitize = require('mongo-sanitize');
 
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
-
 
 
 /**
  * Generates a token from user data.
  */
-module.exports.isAdmin = function(user) {
-    var string_data = decrypt(token);
-    return JSON.parse(string_data);
+module.exports.sanitize = function(s) {
+    return sanitize(htmlspecialchars(s));
 }
 
 
