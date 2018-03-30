@@ -27,18 +27,32 @@ const mongoose = require('mongoose');
 // Create Organization Model Schema:
 var Schema = mongoose.Schema;
 
-// TODO (JU) - Discuss use of '_id' vs 'id''
-//
+
 // id       = Primary Key
 // name     = Name of Org
 // projects = Array of Projects which are referenced from the Projet Model
 var OrganizationSchema = new Schema({
-    id: String,
-    name: String,
+    id: {
+        type: String,
+        require: true,
+        index: true,
+        unique: true,
+        match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
+        maxlength: [36, 'Too many characters in username'],
+    },
+
+    name: {
+    	type: String,
+        requite: true,
+        unique: true,
+        match: RegExp('^([a-zA-Z0-9-\\s])+$')
+	},
+
     projects: [{
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Project'
-        }]
+    }]
+
 });
 
 
