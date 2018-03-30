@@ -12,6 +12,12 @@
         "orgid": "empire"
     }],
     "users": [{
+        "username": "admin",
+        "password": "admin",
+        "fname": "Admin",
+        "lname": "",
+        "admin": true
+    }, {
         "username": "lskywalker0",
         "password": "r3d5jediknight",
         "fname": "Luke",
