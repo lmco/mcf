@@ -626,8 +626,9 @@ api.route('/users')
  *       - application/json
  *     parameters:
  *       - name: username
- *         description: The username of the user to get. Note: it is possible 
- *                      for usernames to be changed.
+ *         description: The username of the user to get. Note: While it is 
+ *                      currently prevented, in the future, usernames may be 
+ *                      allowed to change and should not be considered static.
  *         required: true
  *         type: string
  *     responses:
@@ -737,10 +738,27 @@ api.route('/users')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   delete:
- *     description: Not implemented, reserved for future use.
+ *     description: Deletes the user.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to delete. 
+ *         required: true
+ *         type: string
+ *         in: URI
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The user was deleted.
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  */
 api.route('/users/:username')
     .get   (AuthController.authenticate, UserController.getUser)
