@@ -34,12 +34,49 @@ var Schema = mongoose.Schema;
 // projects = Organization the project belongs to referenced from the
 //            Organization Model
 var ProjectSchema = new Schema({
-    id: String,
-    name: String,
+    id: {
+        type: String,
+        require: true,
+        index: true,
+        unique: true,
+        match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
+        maxlength: [36, 'Too many characters in username'],
+    }
+
+    name: {
+    	type: String,
+        requite: true,
+        unique: true,
+        match: RegExp('^([a-zA-Z0-9-\\s])+$')
+	},
+
     org: {
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Organization'
+        ref: 'Organization',
+        require: true
         }
+
+    users: {
+        read: [{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User',
+            index: true
+        }],
+
+        write: [{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User',
+            index: true
+        }],
+
+        admin: [{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User',
+            index: true
+        }],
+    }
+
+
 });
 
 // Export mongoose model as "Project"

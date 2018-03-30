@@ -28,9 +28,10 @@ const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 
-// id       = Primary Key
-// name     = Name of Org
-// projects = Array of Projects which are referenced from the Projet Model
+// id       = Primary Key.
+// name     = Name of Org.
+// projects = Array of Projects which are referenced from the Projet Model.
+// users    = Array of users containing both admin or members of the organization.
 var OrganizationSchema = new Schema({
     id: {
         type: String,
@@ -51,7 +52,21 @@ var OrganizationSchema = new Schema({
     projects: [{
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Project'
-    }]
+    }],
+
+    users: {
+        members: [{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User',
+            index: true
+        }],
+
+        admin: [{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User',
+            index: true
+        }]
+    }
 
 });
 
