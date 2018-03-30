@@ -645,7 +645,7 @@ api.route('/users')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   post:
- *     description: Gets a user by username.
+ *     description: Creates a user.
  *     produces:
  *       - application/json
  *     parameters:
@@ -655,7 +655,8 @@ api.route('/users')
  *         type: string
  *         in: URI
  *       - name: username
- *         description: The username of the user to create. 
+ *         description: The username of the user to create. If provided, this 
+ *                      must match the username provided in the URI.
  *         required: false
  *         type: string
  *         in: body
@@ -664,10 +665,20 @@ api.route('/users')
  *         required: true
  *         type: string
  *         in: body
+ *       - name: fname
+ *         description: The user's first name. 
+ *         required: false
+ *         type: string
+ *         in: body
+ *       - name: lname
+ *         description: The user's last name. 
+ *         required: false
+ *         type: string
+ *         in: body
  *     responses:
  *       200:
- *         description: Success - The user was retieved and the public user 
- *                      object should be returned as JSON.
+ *         description: Success - The user was created. The newly created user
+ *                      is returned as a JSON-encoded object.
  *       400:
  *         description: Bad Request - This implies that the request is invalid 
  *                      or malformed.
@@ -679,10 +690,52 @@ api.route('/users')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   put:
- *     description: Not implemented, reserved for future use. 
+ *     description: Creates or updates user. If the user already exists it will
+ *                  be updated. In this case, any valid fields that are given 
+ *                  in the request body will replace the existing field values.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to create. 
+ *         required: true
+ *         type: string
+ *         in: URI
+ *       - name: username
+ *         description: The username of the user to create. If provided, this 
+ *                      must match the username provided in the URI.
+ *         required: false
+ *         type: string
+ *         in: body
+ *       - name: password
+ *         description: The username of the user to create. 
+ *         required: true
+ *         type: string
+ *         in: body
+ *       - name: fname
+ *         description: The user's first name. 
+ *         required: false
+ *         type: string
+ *         in: body
+ *       - name: lname
+ *         description: The user's last name. 
+ *         required: false
+ *         type: string
+ *         in: body
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The user was created. The newly created user
+ *                      is returned as a JSON-encoded object.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  *   delete:
  *     description: Not implemented, reserved for future use.
  *     responses:

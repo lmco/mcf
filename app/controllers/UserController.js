@@ -120,72 +120,21 @@ class UserController
         // Error check - make sure the user is defined
         if (!req.user) {
             console.log('Error: req.user is not defined.');
-            return req.status(500).send('Internal Server Error');
+            return res.status(500).send('Internal Server Error');
         }
 
         // Make sure user is an admin
         if (!req.user.admin) {
             console.log('User is not an admin.');
-            return req.status(403).send('Forbidden');
+            return res.status(403).send('Forbidden');
         }
 
-        var newUserData = {};
-
-        // Handle username
-        if (req.params.hasOwnProperty('username')) {
-            // Sanitize the username
-            var username = sani.sanitize(req.params['username']);
-
-            // Error check - make sure if username in body it matches params
-            if (req.body.hasOwnProperty('username')) {
-                if (username != sani.sanitize(req.body['username'])) {
-                    console.log('Username in body does not match params.');
-                    return req.status(400).send('Bad Request');
-                }
-            }
-
-            // Error check - make sure username is valid
-            if (!RegExp(validators.user.username).test(username)) {
-                console.log('Username in req.params is invalid.');
-                return req.status(400).send('Bad Request');
-            }
-
-            newUserData['username'] = username;
-            
-        }
-        else {
-            console.log('Request params does not include a username.');
-            return req.status(400).send('Bad Request');
-        }
-
-        // Handle password
-        if (req.body.hasOwnProperty('password')) {
-
-            // Sanitize the password
-            var password = sani.sanitize(req.body['password']);
-
-            // Error check - make sure password is valid
-            if (!validators.user.password(password)) {
-                console.log('Password is invalid.');
-                return req.status(400).send('Bad Request');
-            }
-
-            newUserData['password'] = password;
-        }
-        else {
-            console.log('Request body does not include a password.');
-            return req.status(400).send('Bad Request');
-        } 
-
-
-        // Handle first name
-        if (req.body.hasOwnProperty('fname')) {
-            newUserData['fname'] = sani.sanitize(req.body['fname']);
-        }
-
-        // Handle last name
-        if (req.body.hasOwnProperty('lname')) {
-            newUserData['lname'] = sani.sanitize(req.body['lname']);
+        // Get the validated and sanitized user data from the request
+        // If data not retrieved, fail.
+        var newUserData = UserController.getUserData(req);
+        if (!newUserData) {
+            console.log('User data could not be extracted from the request.')
+            return res.status(400).send('Bad Request');
         }
 
         User.find({
@@ -193,7 +142,7 @@ class UserController
         }, function(err, users) {
             if (err) {
                 console.log(err);
-                return req.status(500).send('Internal Server Error');
+                return res.status(500).send('Internal Server Error');
             }
 
             // Make sure user doesn't already exist
@@ -202,20 +151,18 @@ class UserController
                 return res.status(500).send('Internal Server Error');
             }
 
-
-            var newUser = new User(newUserData);
-            newUser.save(function (err) {
+            // Create the new user
+            var user = new User(newUserData);
+            user.save(function (err) {
                 if (err) {
                     console.log(err);
                     return res.status(500).send('Internal Server Error');
                 }
-
-                var publicUserData = newUser.getPublicData();
+                var publicUserData = user.getPublicData();
                 res.header('Content-Type', 'application/json');
                 return res.status(200).send(API.formatJSON(publicUserData));
             })
         });
-
     }
 
 
@@ -224,7 +171,66 @@ class UserController
      */
     static putUser(req, res)
     {
+        // Error check - make sure the user is defined
+        if (!req.user) {
+            console.log('Error: req.user is not defined.');
+            return res.status(500).send('Internal Server Error');
+        }
 
+        // Make sure user is an admin
+        if (!req.user.admin) {
+            console.log('User is not an admin.');
+            return res.status(403).send('Forbidden');
+        }
+
+        // Get the validated and sanitized user data from the request
+        // If data not retrieved, fail.
+        var userData = UserController.getUserData(req);
+        if (!userData) {
+            console.log('User data could not be extracted from the request.')
+            return res.status(400).send('Bad Request');
+        }
+
+        // Check if user exists
+        User.find({'username': userData['username']}, function(err, users) {
+            // Error check
+            if (err) {
+                console.log('11111111')
+                console.log(err);
+                return res.status(500).send('Internal Server Error');
+            }
+            // Make sure user doesn't already exist
+            if (users.length > 1) {
+                console.log('User already exists.');
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // If user exists, update the existing user
+            if (users.length == 1) {
+                console.log('User found, updating existing user.');
+                var user = users[0];
+                var props = Object.keys(userData);
+                for (var i = 0; i < props.length; i++) {
+                    user[props[i]] = userData[props[i]];
+                }
+            }
+            // Otherwise (user does not exist), create the user
+            else {
+                console.log('User does not exist, creating user.');
+                var user = new User(userData);
+            }
+
+            // Save the user
+            user.save(function (err) {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).send('Internal Server Error');
+                }
+                var publicUserData = user.getPublicData();
+                res.header('Content-Type', 'application/json');
+                return res.status(200).send(API.formatJSON(publicUserData));
+            });       
+        });
     }
 
 
@@ -236,13 +242,13 @@ class UserController
         // Error check - make sure the user is defined
         if (!req.user) {
             console.log('Error: req.user is not defined.');
-            return req.status(500).send('Internal Server Error');
+            return res.status(500).send('Internal Server Error');
         }
 
         // Make sure user is an admin
         if (!req.user.admin) {
             console.log('User is not an admin.');
-            return req.status(403).send('Forbidden');
+            return res.status(403).send('Forbidden');
         }
 
         // Handle username
@@ -253,28 +259,82 @@ class UserController
             // Error check - make sure username is valid
             if (!RegExp(validators.user.username).test(username)) {
                 console.log('Username in req.params is invalid.');
-                return req.status(400).send('Bad Request');
+                return res.status(400).send('Bad Request');
             }
 
-            User.findOneAndRemove({
-                'username': username 
-            }, function(err) {
+            User.findOneAndRemove({'username': username}, function(err) {
                 if (err) {
                     console.log(err);
                     return res.status(500).send('Internal Server Error');
                 }
-                else {
-                    //res.header('Content-Type', 'application/json');
-                    return res.status(200).send('OK');
-                }
+                return res.status(200).send('OK');
             });
         }
         else {
             console.log('Request params does not include a username.');
-            return req.status(400).send('Bad Request');
+            return res.status(400).send('Bad Request');
         }
     }
 
+
+    /**
+     * Takes the request object with user data in the params and body.
+     * Validates and sanitizes that data and returns it as a JSON object.
+     */
+    static getUserData(req) 
+    {
+        var userData = {};
+
+        // Handle username
+        if (req.params.hasOwnProperty('username')) {
+            // Sanitize the username
+            var username = sani.sanitize(req.params['username']);
+            // Error check - make sure if username in body it matches params
+            if (req.body.hasOwnProperty('username')) {
+                if (username != sani.sanitize(req.body['username'])) {
+                    console.log('Username in body does not match params.');
+                    return null;
+                }
+            }
+            // Error check - make sure username is valid
+            if (!RegExp(validators.user.username).test(username)) {
+                console.log('Username in req.params is invalid.');
+                return res.status(400).send('Bad Request');
+            }
+            userData['username'] = username;      
+        }
+        else {
+            return null
+        }
+
+        // Handle password
+        if (req.body.hasOwnProperty('password')) {
+            // Sanitize the password
+            var password = sani.sanitize(req.body['password']);
+            // Error check - make sure password is valid
+            if (!validators.user.password(password)) {
+                console.log('Password is invalid.');
+                return res.status(400).send('Bad Request');
+            }
+            userData['password'] = password;
+        }
+        else {
+            return null;
+        } 
+
+
+        // Handle first name
+        if (req.body.hasOwnProperty('fname')) {
+            userData['fname'] = sani.sanitize(req.body['fname']);
+        }
+
+        // Handle last name
+        if (req.body.hasOwnProperty('lname')) {
+            userData['lname'] = sani.sanitize(req.body['lname']);
+        }
+
+        return userData;
+    }
 }
 
 module.exports = UserController;

@@ -99,6 +99,9 @@ var UserSchema = new mongoose.Schema({
         },
         set: function() {
             return (this.fname + ' ' + this.lname).trim()
+        },
+        get: function() {
+            return (this.fname + ' ' + this.lname).trim()
         }
     },
 
