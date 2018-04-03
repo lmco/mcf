@@ -138,6 +138,31 @@ var UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
         set: Date.now
+    },
+
+    /**
+     * The date on which the user was deleted.
+     * This is used to provide soft-delete functionality.
+     */
+    deletedOn: {
+        type: Date,
+        default: null
+    },
+
+
+    /**
+     * This is the Boolean value that tells us whether or not the user has
+     * been deleted. It just makes is easier to check if a user is deleted.
+     */
+    deleted: {
+        type: Boolean,
+        default: false,
+        set: function(v) {
+            return (this.deletedOn !== null);
+        },
+        get: function(v) {
+            return (this.deletedOn !== null); 
+        }
     }
 
 });
@@ -150,6 +175,7 @@ UserSchema.pre('save', function(next) {
     // Run our defined setters
     this.name = '';
     this.updatedOn = '';
+    this.deleted = '';
     next();
 });
 
@@ -172,7 +198,7 @@ UserSchema.methods.getPublicData = function() {
         'lname': this.lname,
         'email': this.email,
         'createdOn': this.createdOn,
-        'updatedOn': this.updatedOn,
+        'updatedOn': this.updatedOn
     }
 };
 
