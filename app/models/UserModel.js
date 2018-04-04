@@ -12,7 +12,7 @@
 /**
  * @module  UserModel.js
  *
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * This file creates a mongoose model to interact with the 
  * MongoDB Database in order to find, save, update, and delete organizations.

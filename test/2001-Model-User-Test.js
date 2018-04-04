@@ -47,7 +47,7 @@ class UserModelTests
             it('Update a user', UserModelTests.updateUser);
             it('Verify the user update', UserModelTests.checkUserUpdate);
             it('Delete a user', UserModelTests.deleteUser);
-            it('Create many users', UserModelTests.createManyUsers);
+            //it('Create many users', UserModelTests.createManyUsers);
             //it('Delete many users', UserModelTests.deleteManyUsers);
         });
 
@@ -82,10 +82,10 @@ class UserModelTests
     static createUser(done)
     {
         var user = new User({
-            username:   'lskywalker0',
-            password:   'password',
-            fname:      'Luke',
-            lname:      'Skywalker'
+            username:   'ackbar',
+            password:   'itsatrap',
+            fname:      'Admiral',
+            lname:      'Ackbar'
         });
         user.save(function(err) {
             if (err) {
@@ -103,7 +103,7 @@ class UserModelTests
     static getUser(done)
     {
         User.findOne({
-            username:   'lskywalker0'
+            username:   'ackbar'
         }, function(err, user) {
             // Make sure there are no errors
             chai.expect(err).to.equal(null);
@@ -113,12 +113,12 @@ class UserModelTests
             //chai.expect(user.password).to.equal(expectedHash);
 
             // Check first and last name
-            chai.expect(user.fname).to.equal('Luke');
-            chai.expect(user.lname).to.equal('Skywalker');
+            chai.expect(user.fname).to.equal('Admiral');
+            chai.expect(user.lname).to.equal('Ackbar');
             
             // Check the full name
-            chai.expect(user.getFullName()).to.equal('Luke Skywalker');
-            chai.expect(user.name).to.equal('Luke Skywalker');
+            chai.expect(user.getFullName()).to.equal('Admiral Ackbar');
+            chai.expect(user.name).to.equal('Admiral Ackbar');
 
             done();
         });
@@ -131,13 +131,13 @@ class UserModelTests
     static updateUser(done)
     {
         User.findOne({
-            username:   'lskywalker0'
+            username:   'ackbar'
         }, function(err, user) {
             // Make sure there are no errors
             chai.expect(err).to.equal(null);
 
             // Grab the hashed passord
-            user.password = 'r3d5jediknight';
+            user.password = '!ts@tr@p';
             user.save(function(err) {
                 chai.expect(err).to.equal(null);
                 done();
@@ -151,17 +151,17 @@ class UserModelTests
     static checkUserUpdate(done)
     {
         User.findOne({
-            username:   'lskywalker0'
+            username:   'ackbar'
         }, function(err, user) {
             // Make sure there are no errors
             chai.expect(err).to.equal(null);
 
             // Check basic user data
-            chai.expect(user.username).to.equal('lskywalker0');
-            chai.expect(user.fname).to.equal('Luke');
-            chai.expect(user.lname).to.equal('Skywalker');
-            chai.expect(user.getFullName()).to.equal('Luke Skywalker');
-            chai.expect(user.name).to.equal('Luke Skywalker');
+            chai.expect(user.username).to.equal('ackbar');
+            chai.expect(user.fname).to.equal('Admiral');
+            chai.expect(user.lname).to.equal('Ackbar');
+            chai.expect(user.getFullName()).to.equal('Admiral Ackbar');
+            chai.expect(user.name).to.equal('Admiral Ackbar');
 
             // Grab the hashed passord
            // var expectedHash = '47e25ba587d8d649f56a24c07b0c03062d6d68ea9082326e067248b3c774ba9e';
@@ -178,7 +178,7 @@ class UserModelTests
     static deleteUser(done)
     {
         User.findOneAndRemove({
-            username: 'lskywalker0',    
+            username: 'ackbar',    
         }, function(err) {
             chai.expect(err).to.equal(null); 
             done(); 
@@ -188,6 +188,7 @@ class UserModelTests
 
     /**
      * Creates many users.
+     * TODO - This test is disabled for now. Rewrite to work with init data.
      */
     static createManyUsers(done)
     {
@@ -209,6 +210,7 @@ class UserModelTests
 
     /**
      * Deletes many users.
+     * TODO - This test is disabled for now. Rewrite to work with init data.
      */
     static deleteManyUsers(done)
     {

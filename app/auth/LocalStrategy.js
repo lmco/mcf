@@ -95,6 +95,8 @@ class LocalStrategy extends BaseStrategy
                 return res.status(401).send('Unauthorized');
             }
 
+            console.log(username)
+
             // Find the user and authenticate them
             User.findOne({
                 'username': username
@@ -104,7 +106,7 @@ class LocalStrategy extends BaseStrategy
                     console.log(err);
                     return res.status(401).send('Unauthorized');
                 }
-
+                console.log(user)
                 // Compute the password hash on given password
                 var hash = crypto.createHash('sha256');
                 hash.update(user._id.toString());       // salt
