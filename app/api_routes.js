@@ -284,8 +284,7 @@ api.route('/orgs/:orgid')
  * @swagger
  * /orgs/:orgid/projects:
  *   get:
- *     description: Gets a list of all projects the user has access to within
- *                  an organization.
+ *     description: Gets a list of all projects the user has access to within an organization.
  *     produces:
  *       - application/json
  *     parameters:
@@ -424,9 +423,7 @@ api.route('/orgs/:orgid/projects')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   put:
- *     description: Creates or replaces a project. If the project does not yet 
- *                  exist, it will be created (just like a POST). If it does 
- *                  exist, the project will be replaced with data provided.
+ *     description: Creates or replaces a project. If the project does not yet exist, it will be created (just like a POST). If it does exist, the project will be replaced with data provided.
  *     produces:
  *       - application/json
  *     parameters:
@@ -576,8 +573,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  * @swagger
  * /users:
  *   get:
- *     description: Gets a list of all users. Returns a list of JSON objects 
- *     containing public user data.
+ *     description: Gets a list of all users. Returns a list of JSON objects containing public user data.
  *     produces:
  *       - application/json
  *     parameters:
@@ -626,7 +622,7 @@ api.route('/users')
  *       - application/json
  *     parameters:
  *       - name: username
- *         description: The username of the user to get. Note: While it is 
+ *         description: The username of the user to get. Note, While it is 
  *                      currently prevented, in the future, usernames may be 
  *                      allowed to change and should not be considered static.
  *         required: true
@@ -691,9 +687,7 @@ api.route('/users')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   put:
- *     description: Creates or updates user. If the user already exists it will
- *                  be updated. In this case, any valid fields that are given 
- *                  in the request body will replace the existing field values.
+ *     description: Creates or updates user. If the user already exists it will be updated. In this case, any valid fields that are given in the request body will replace the existing field values.
  *     produces:
  *       - application/json
  *     parameters:
@@ -750,6 +744,7 @@ api.route('/users')
  *     responses:
  *       200:
  *         description: Success - The user was deleted.
+ *       400:
  *         description: Bad Request - This implies that the request is invalid 
  *                      or malformed.
  *       401:
@@ -826,6 +821,25 @@ api.route('/users/:username/groups')
     .post  (AuthController.authenticate, APIController.notImplemented)
     .put   (AuthController.authenticate, APIController.notImplemented)
     .delete(AuthController.authenticate, APIController.notImplemented);
+
+
+/**
+ * @swagger
+ * /users/whoami:
+ *   get:
+ *     description: Returns the currently logged in user information
+ *     responses:
+ *       200: 
+ *         description: Success - The JSON-encoded user information is returned.
+ *       400:
+ *         description: Bad Request - Usually an authentication issue.
+ *       401:
+ *         description: Unauthorized - Failed to authenticate user.
+ *       500:
+ *         description: Internal Server Error
+ */
+api.route('/users/whoami')
+    .get(AuthController.authenticate, UserController.whoami);
 
 
 // Export the API router

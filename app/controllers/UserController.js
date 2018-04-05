@@ -38,7 +38,9 @@ class UserController
      */
     static getUsers(req, res)
     {
-        User.find(function(err, users) {
+        User.find({
+            deletedOn: null
+        },function(err, users) {
             // Check if error occured
             if (err) {
                 console.log(err);
@@ -96,7 +98,8 @@ class UserController
         var username = sanitize(htmlspecialchars(req.params['username']));
 
         User.findOne({
-            "username": username
+            'username': username,
+            'deletedOn':  null
         }, function(err, user) {
             // Check if error occured
             if (err) {
@@ -138,7 +141,7 @@ class UserController
         }
 
         User.find({
-            "id": newUserData['username']
+            'username': newUserData['username']
         }, function(err, users) {
             if (err) {
                 console.log(err);
@@ -192,10 +195,11 @@ class UserController
         }
 
         // Check if user exists
-        User.find({'username': userData['username']}, function(err, users) {
+        User.find({
+            'username': userData['username']
+        }, function(err, users) {
             // Error check
             if (err) {
-                console.log('11111111')
                 console.log(err);
                 return res.status(500).send('Internal Server Error');
             }
@@ -207,8 +211,17 @@ class UserController
 
             // If user exists, update the existing user
             if (users.length == 1) {
-                console.log('User found, updating existing user.');
+                console.log('User found.');
                 var user = users[0];
+
+                // Sanity check - if user is soft-deleted, we won't update them
+                if (user.deleted) {
+                    console.log('User exists, but is soft-deleted.');
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                console.log('Updating existing user.');
+
                 var props = Object.keys(userData);
                 for (var i = 0; i < props.length; i++) {
                     user[props[i]] = userData[props[i]];
@@ -262,12 +275,25 @@ class UserController
                 return res.status(400).send('Bad Request');
             }
 
-            User.findOneAndRemove({'username': username}, function(err) {
+            User.findOne({
+                'username': username,
+                'deletedOn': null
+            }, function(err, user) {
                 if (err) {
                     console.log(err);
                     return res.status(500).send('Internal Server Error');
                 }
-                return res.status(200).send('OK');
+
+                // Delete the user (soft-delete)
+                user.deletedOn = Date.now();
+                user.deleted = true;
+                user.save(function (err) {
+                    if (err) {
+                        console.log(err);
+                        return res.status(500).send('Internal Server Error');
+                    }
+                    return res.status(200).send('OK');
+                });
             });
         }
         else {
@@ -334,6 +360,35 @@ class UserController
         }
 
         return userData;
+    }
+
+
+    /**
+     * Returns the public information of the currently logged in user.
+     */
+    static whoami(req, res)
+    {
+        // Sanity check - make sure we have user with a username
+        if (!req.user || req.user.hasOwnProperty('username')) {
+            console.log('Invalid req.user object');
+            return res.status(500).send('Internal Server Error');
+        }
+        var username = sanitize(htmlspecialchars(req.user.username));
+
+        User.findOne({
+            'username': username,
+            'deletedOn':  null
+        }, function(err, user) {
+            // Check if error occured
+            if (err) {
+                console.log(err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Otherwise return 200 and the user's public JSON
+            res.header('Content-Type', 'application/json');
+            return res.status(200).send(API.formatJSON(user.getPublicData()));
+        });
     }
 }
 

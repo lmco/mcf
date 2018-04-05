@@ -12,7 +12,7 @@
 /**
  * @module  UserModel.js
  *
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * This file creates a mongoose model to interact with the 
  * MongoDB Database in order to find, save, update, and delete organizations.
@@ -113,22 +113,92 @@ var UserSchema = new mongoose.Schema({
     admin: {
         type: Boolean,
         default: false
+    },
+
+
+    /**
+     * The date on which the user was created. 
+     * The setter is defined to only ever re-set to the current value.
+     * This should prevent the created field from being overwritten.
+     */
+    createdOn: {
+        type: Date,
+        default: Date.now,
+        set: function(v) {
+            this.createdOn 
+        }
+    },
+
+
+    /**
+     * The date on which the user object was last updated.
+     * The setter is run using pre-save middleware.
+     */
+    updatedOn: {
+        type: Date,
+        default: Date.now,
+        set: Date.now
+    },
+
+    /**
+     * The date on which the user was deleted.
+     * This is used to provide soft-delete functionality.
+     */
+    deletedOn: {
+        type: Date,
+        default: null
+    },
+
+
+    /**
+     * This is the Boolean value that tells us whether or not the user has
+     * been deleted. It just makes is easier to check if a user is deleted.
+     */
+    deleted: {
+        type: Boolean,
+        default: false,
+        set: function(v) {
+            return (this.deletedOn !== null);
+        },
+        get: function(v) {
+            return (this.deletedOn !== null); 
+        }
     }
 
 });
 
 
+/**
+ * Run our pre-defined setters on save.
+ */
+UserSchema.pre('save', function(next) {
+    // Run our defined setters
+    this.name = '';
+    this.updatedOn = '';
+    this.deleted = '';
+    next();
+});
+
+
+/**
+ * Get the user's full name. This should be identical to user.name
+ */
 UserSchema.methods.getFullName = function() {
     return this.fname + ' ' + this.lname;
 };
 
+/**
+ * Returns the user's public data.
+ */
 UserSchema.methods.getPublicData = function() {
     return {
         'username': this.username,
         'name': this.name,
         'fname': this.fname,
         'lname': this.lname,
-        'email': this.email
+        'email': this.email,
+        'createdOn': this.createdOn,
+        'updatedOn': this.updatedOn
     }
 };
 
