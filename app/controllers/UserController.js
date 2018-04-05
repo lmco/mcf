@@ -361,6 +361,35 @@ class UserController
 
         return userData;
     }
+
+
+    /**
+     * Returns the public information of the currently logged in user.
+     */
+    static whoami(req, res)
+    {
+        // Sanity check - make sure we have user with a username
+        if (!req.user || req.user.hasOwnProperty('username')) {
+            console.log('Invalid req.user object');
+            return res.status(500).send('Internal Server Error');
+        }
+        var username = sanitize(htmlspecialchars(req.user.username));
+
+        User.findOne({
+            'username': username,
+            'deleted':  false
+        }, function(err, user) {
+            // Check if error occured
+            if (err) {
+                console.log(err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Otherwise return 200 and the user's public JSON
+            res.header('Content-Type', 'application/json');
+            return res.status(200).send(API.formatJSON(user.getPublicData()));
+        });
+    }
 }
 
 module.exports = UserController;

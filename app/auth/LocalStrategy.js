@@ -99,14 +99,22 @@ class LocalStrategy extends BaseStrategy
 
             // Find the user and authenticate them
             User.findOne({
-                'username': username
+                'username': username,
+                'deletedOn': null
             }, function(err, user) {
                 // Check for errors
                 if (err) {
                     console.log(err);
                     return res.status(401).send('Unauthorized');
                 }
-                console.log(user)
+                if (!user) {
+                    console.log('Could not find user');
+                    console.log(user)
+                    return res.status(500).send('Internal server error');
+                }
+                
+                console.log('Found', user)
+
                 // Compute the password hash on given password
                 var hash = crypto.createHash('sha256');
                 hash.update(user._id.toString());       // salt
@@ -145,7 +153,8 @@ class LocalStrategy extends BaseStrategy
 
                 // Lookup user
                 User.findOne({
-                    'username': sanitize(token.username)
+                    'username': sanitize(token.username),
+                    'deletedOn': null
                 }, function(err, user) {
                     // Make sure no errors occur
                     if (err) {

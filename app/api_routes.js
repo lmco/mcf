@@ -825,15 +825,21 @@ api.route('/users/:username/groups')
 
 /**
  * @swagger
- * /users/:id/groups:
+ * /users/whoami:
  *   get:
- *     description: Not implemented, reserved for future use.
+ *     description: Returns the currently logged in user information
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200: 
+ *         description: Success - The JSON-encoded user information is returned.
+ *       400:
+ *         description: Bad Request - Usually an authentication issue.
+ *       401:
+ *         description: Unauthorized - Failed to authenticate user.
+ *       500:
+ *         description: Internal Server Error
  */
 api.route('/users/whoami')
-    .get(AuthController.authenticate, APIController.notImplemented);
+    .get(AuthController.authenticate, UserController.whoami);
 
 
 // Export the API router

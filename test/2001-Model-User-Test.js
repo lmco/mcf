@@ -44,8 +44,10 @@ class UserModelTests
             // the tests
             it('Create a user', UserModelTests.createUser);
             it('Get a user', UserModelTests.getUser);
+            it('Get a user with deleted-status false', UserModelTests.getUserWithDeletedStatusFalse);
             it('Update a user', UserModelTests.updateUser);
             it('Verify the user update', UserModelTests.checkUserUpdate);
+            it('Soft delete a user', UserModelTests.softDeleteUser);
             it('Delete a user', UserModelTests.deleteUser);
             //it('Create many users', UserModelTests.createManyUsers);
             //it('Delete many users', UserModelTests.deleteManyUsers);
@@ -121,8 +123,26 @@ class UserModelTests
             chai.expect(user.name).to.equal('Admiral Ackbar');
 
             done();
-        });
-        
+        });   
+    }
+
+
+    /**
+     * Gets a user by username/deleted-status.
+     */
+    static getUserWithDeletedStatusFalse(done)
+    {
+        User.findOne({
+            username:   'ackbar',
+            deletedOn:  null
+        }, function(err, user) {
+            // Make sure there are no errors
+            chai.expect(err).to.equal(null);
+
+            console.log(user.deleted);
+
+            done();
+        });   
     }
 
     /**
@@ -172,6 +192,26 @@ class UserModelTests
         
     }
 
+    
+    /**
+     * Soft-deletes the user.
+     */
+    static softDeleteUser(done)
+    {
+        User.findOne({
+            username: 'ackbar',    
+        }, function(err, user) {
+            chai.expect(err).to.equal(null); 
+
+            user.deletedOn = Date.now();
+            user.save(function (err) {
+                chai.expect(err).to.equal(null); 
+                chai.expect(user.deleted).to.equal(true);
+                done();
+            });
+        });
+    }
+
     /**
      * Deletes the user.
      */
@@ -207,6 +247,7 @@ class UserModelTests
         }
         //console.log('After loop');
     }
+
 
     /**
      * Deletes many users.
