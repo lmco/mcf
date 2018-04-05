@@ -39,7 +39,7 @@ class UserController
     static getUsers(req, res)
     {
         User.find({
-            deleted: false
+            deletedOn: null
         },function(err, users) {
             // Check if error occured
             if (err) {
@@ -99,7 +99,7 @@ class UserController
 
         User.findOne({
             'username': username,
-            'deleted':  false
+            'deletedOn':  null
         }, function(err, user) {
             // Check if error occured
             if (err) {
@@ -141,7 +141,7 @@ class UserController
         }
 
         User.find({
-            'id': newUserData['username']
+            'username': newUserData['username']
         }, function(err, users) {
             if (err) {
                 console.log(err);
@@ -277,7 +277,7 @@ class UserController
 
             User.findOne({
                 'username': username,
-                'deleted': false
+                'deletedOn': null
             }, function(err, user) {
                 if (err) {
                     console.log(err);
@@ -377,7 +377,7 @@ class UserController
 
         User.findOne({
             'username': username,
-            'deleted':  false
+            'deletedOn':  null
         }, function(err, user) {
             // Check if error occured
             if (err) {
