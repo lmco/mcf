@@ -138,9 +138,6 @@ class UserModelTests
         }, function(err, user) {
             // Make sure there are no errors
             chai.expect(err).to.equal(null);
-
-            console.log(user.deleted);
-
             done();
         });   
     }
