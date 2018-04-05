@@ -17,6 +17,7 @@ const mongoose = require('mongoose');
 const config = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
 const User = require(path.join(__dirname, '..', 'app', 'models', 'UserModel'));
 
+
 /**
  * UserModelTests
  *
@@ -26,6 +27,7 @@ const User = require(path.join(__dirname, '..', 'app', 'models', 'UserModel'));
  */
 class UserModelTests
 {
+
     /**
      * This function runs our unit tests.
      */
