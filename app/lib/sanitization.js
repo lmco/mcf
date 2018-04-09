@@ -9,21 +9,28 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/**
- * @module  routes.js
+/*
+ * @module  lib/crypto.js
  *
- * Defines the MBEE routes mounted a '/'.
+ * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * Defines common cryptographic functions.
  */
 
-const path              = require('path');
-const express           = require('express');
-const config            = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
-var getController       = (x) => path.join(__dirname, 'controllers', x);
-const UIController      = require(getController('UIController'));
-const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
+const path = require('path');
 
-var router = express.Router();
-router.get('/', UIController.home);
-router.get('/login', UIController.login);
-router.get('/admin/console', UIController.admin);
-module.exports = router;
+const htmlspecialchars = require('htmlspecialchars');
+const sanitize = require('mongo-sanitize');
+
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+
+
+/**
+ * Generates a token from user data.
+ */
+module.exports.sanitize = function(s) {
+    return sanitize(htmlspecialchars(s));
+}
+
+
+
