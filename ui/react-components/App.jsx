@@ -22,7 +22,7 @@ class App extends React.Component {
         return (
             <div class="container-fluid">
             <h1><Welcome name={this.props.name} /></h1>
-            <OrgList/>
+            <VersionDiv />
             </div>
         );
     }

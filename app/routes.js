@@ -23,7 +23,11 @@ const UIController      = require(getController('UIController'));
 const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var router = express.Router();
-router.get('/', UIController.home);
-router.get('/login', UIController.login);
+router.get('/', AuthController.authenticate, UIController.home);
+router.route('/login')
+    .get(UIController.showLoginPage)
+    .post(AuthController.authenticate, AuthController.doLogin, UIController.login);
+
 router.get('/admin/console', UIController.admin);
+
 module.exports = router;

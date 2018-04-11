@@ -28,6 +28,15 @@ class UIController
      */
     static home(req, res) 
     {
+        console.log('/');
+        if (req.session.count) {
+            req.session.count++;
+        }
+        else {
+            req.session.count = 1;
+        }
+        console.log(req.session.count);
+        console.log(req.session.token);
         return res.render('home', {
             'ui': config.ui, 
             'renderer': 'mbee-renderer'
@@ -50,10 +59,53 @@ class UIController
     /**
      * Renders the login screen.
      */
-    static login(req, res) 
+    static showLoginPage(req, res) 
     {
         return res.render('login', {'ui': config.ui})
     }
+
+
+    /**
+     * Attempts to login the user. If successful, redirect them to the 
+     * homepage. Otherwise, send them back to the login screen with error 
+     * message.
+     */
+    static login(req, res) 
+    {
+        console.log('User authenticated via UI.')
+        res.redirect('/');
+    }
+
+
+    /**
+     * TODO can this be handled by the auth/BaseStrategy class?
+     */
+    static isLoggedIn(req, res, next) 
+    {
+
+        if (req.user) {
+            User.findOne({
+                'username': sani.sanitize(req.user.username)
+            }, function(err, user) {
+                if (err) {
+                    // handle error
+                    console.log(err);
+                    res.redirect('/login');
+                }
+                else if (!user) {
+                    // handle user not found
+                    console.log('ERROR: user object in req not found')
+                    res.redirect('/login');
+                }
+                else {
+                    // user is logged in, call next
+                    next();
+                }
+
+            })
+        }
+    }
+
 }
 
 module.exports = UIController;
