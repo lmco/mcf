@@ -23,10 +23,23 @@ const UIController      = require(getController('UIController'));
 const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var router = express.Router();
+
 router.get('/', AuthController.authenticate, UIController.home);
+
+
+/**
+ * GET shows the login page.
+ * POST is the route that actually logs in the user.
+ */
 router.route('/login')
     .get(UIController.showLoginPage)
     .post(AuthController.authenticate, AuthController.doLogin, UIController.login);
+
+/**
+ * Logs the user out by unsetting the req.user and req.session.token objects.
+ */
+router.route('/logout')
+    .post(AuthController.authenticate, UIController.logout);
 
 router.get('/admin/console', UIController.admin);
 

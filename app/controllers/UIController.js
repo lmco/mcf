@@ -78,34 +78,15 @@ class UIController
 
 
     /**
-     * TODO can this be handled by the auth/BaseStrategy class?
+     * Logs out the user by unsetting the req.user object and the 
+     * req.session.token object.
      */
-    static isLoggedIn(req, res, next) 
+    static logout(req, res) 
     {
-
-        if (req.user) {
-            User.findOne({
-                'username': sani.sanitize(req.user.username)
-            }, function(err, user) {
-                if (err) {
-                    // handle error
-                    console.log(err);
-                    res.redirect('/login');
-                }
-                else if (!user) {
-                    // handle user not found
-                    console.log('ERROR: user object in req not found')
-                    res.redirect('/login');
-                }
-                else {
-                    // user is logged in, call next
-                    next();
-                }
-
-            })
-        }
+        req.user = undefined;
+        req.session.token = undefined;
+        res.redirect('/login');
     }
-
 }
 
 module.exports = UIController;

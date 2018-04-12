@@ -36,7 +36,7 @@ const { execSync } = require('child_process');
 
 const express = require('express');
 const session = require('express-session');
-//const session = require('cookie-session');
+const MongoStore = require('connect-mongo')(session)
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -78,9 +78,11 @@ const viewsDir = path.join(__dirname , '..', config.server.app, 'views');
 const publicDir = path.join(__dirname, '..', 'public');
 app.use(express.static(publicDir)); // Sets our static/public directory
 app.use(session({ 
-    secret: 'CHANGEME', 
-    signed: false,
-    cookie: { maxAge: 60000 }
+    secret: config.secret, 
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 60000 },
+    store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
 app.use(cookieParser());
 app.use(bodyParser.json());         // This allows us to receive JSON data in the  request body
