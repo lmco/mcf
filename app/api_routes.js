@@ -89,8 +89,8 @@ api.route('/version')
  *         description: Internal Server Error
  */
 api.route('/login')
-    .get(AuthController.authenticate, AuthController.doLogin)
-    .post(AuthController.authenticate, AuthController.doLogin);
+    .get(AuthController.authenticate, AuthController.doLogin, APIController.login)
+    .post(AuthController.authenticate, AuthController.doLogin, APIController.login);
 
 
 /** 

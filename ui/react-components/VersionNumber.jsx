@@ -11,18 +11,41 @@
  *****************************************************************************/
 
 /**
- * App.jsx
+ * VerionNumber.jsx
  *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This defines the MBEE application.
+ * This is going to be used to start testing the API.
  */
-class App extends React.Component {
+class VersionNumber extends React.Component {
+
+    constructor() {
+        super();
+        this.state = {
+            version: null 
+        }
+    }
+
+    componentDidMount() {
+        fetch('http://localhost:8080/api/version', {
+            method: 'GET',
+            credentials: 'include'
+        }).then(response => {
+            console.log(response);
+            console.log(response.body);
+            return response.json();
+        }).then(data => {
+            console.log(data);
+            var mbee_version = data['version'];
+            console.log(mbee_version);
+            this.setState({version: mbee_version});
+        });
+    }
+
+
     render() {
         return (
-            <div class="container-fluid">
-            <h1><Welcome name={this.props.name} /></h1>
-            </div>
+            <span>{this.state.version}</span>
         );
     }
 }

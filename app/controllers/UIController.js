@@ -28,6 +28,15 @@ class UIController
      */
     static home(req, res) 
     {
+        console.log('/');
+        if (req.session.count) {
+            req.session.count++;
+        }
+        else {
+            req.session.count = 1;
+        }
+        console.log(req.session.count);
+        console.log(req.session.token);
         return res.render('home', {
             'ui': config.ui, 
             'renderer': 'mbee-renderer'
@@ -50,9 +59,33 @@ class UIController
     /**
      * Renders the login screen.
      */
-    static login(req, res) 
+    static showLoginPage(req, res) 
     {
         return res.render('login', {'ui': config.ui})
+    }
+
+
+    /**
+     * Attempts to login the user. If successful, redirect them to the 
+     * homepage. Otherwise, send them back to the login screen with error 
+     * message.
+     */
+    static login(req, res) 
+    {
+        console.log('User authenticated via UI.')
+        res.redirect('/');
+    }
+
+
+    /**
+     * Logs out the user by unsetting the req.user object and the 
+     * req.session.token object.
+     */
+    static logout(req, res) 
+    {
+        req.user = undefined;
+        req.session.token = undefined;
+        res.redirect('/login');
     }
 }
 

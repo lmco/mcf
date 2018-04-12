@@ -42,11 +42,17 @@ module.exports.encrypt = encrypt;
  * base64 encoded string format returned by the encrypt function.
  */
 function decrypt(data) {
-    let decipher = crypto.createDecipher('aes-256-cbc', config['secret']);
-    let hex_data = Buffer.from(data, 'base64').toString('hex');
-    let decrypted = decipher.update(hex_data, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
+    try {
+        let decipher = crypto.createDecipher('aes-256-cbc', config['secret']);
+        let hex_data = Buffer.from(data, 'base64').toString('hex');
+        let decrypted = decipher.update(hex_data, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    }
+    catch (error) {
+        console.log(error);
+        return '{}';
+    }
 };
 module.exports.decrypt = decrypt;
 
