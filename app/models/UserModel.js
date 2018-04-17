@@ -107,7 +107,7 @@ var UserSchema = new mongoose.Schema({
 
 
     /**
-     * The `admin` property defines whether or not the user is an admin.
+     * The `admin` property defines whether or not the user is a global admin.
      * This refers to whether or not the user is a site-wide admin.
      */
     admin: {

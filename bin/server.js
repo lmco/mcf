@@ -78,6 +78,7 @@ const viewsDir = path.join(__dirname , '..', config.server.app, 'views');
 const publicDir = path.join(__dirname, '..', 'public');
 app.use(express.static(publicDir)); // Sets our static/public directory
 app.use(session({ 
+    name: 'SESSION_ID',
     secret: config.secret, 
     resave: false,
     saveUninitialized: false,
