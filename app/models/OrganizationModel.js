@@ -32,6 +32,7 @@ var Schema = mongoose.Schema;
 // name     = Name of Org.
 // projects = Array of Projects which are referenced from the Projet Model.
 // users    = Array of users containing both admin or members of the organization.
+// rolls
 var OrganizationSchema = new Schema({
     id: {
         type: String,
