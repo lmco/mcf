@@ -9,20 +9,28 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-
-/**
- * App.jsx
+/*
+ * @module  lib/crypto.js
  *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This defines the MBEE application.
+ * Defines common cryptographic functions.
  */
-class App extends React.Component {
-    render() {
-        return (
-            <div class="container-fluid">
-            <h1><Welcome name={this.props.name} /></h1>
-            </div>
-        );
-    }
+
+const path = require('path');
+
+const htmlspecialchars = require('htmlspecialchars');
+const sanitize = require('mongo-sanitize');
+
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+
+
+/**
+ * Generates a token from user data.
+ */
+module.exports.sanitize = function(s) {
+    return sanitize(htmlspecialchars(s));
 }
+
+
+

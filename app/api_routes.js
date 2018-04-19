@@ -25,6 +25,7 @@ var getController       = (x) => path.join(__dirname, 'controllers', x);
 const APIController     = require(getController('APIController'));
 const OrgController     = require(getController('OrganizationController'));
 const ProjectController = require(getController('ProjectController'));
+const UserController    = require(getController('UserController'));
 const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var api = express.Router();
@@ -88,7 +89,8 @@ api.route('/version')
  *         description: Internal Server Error
  */
 api.route('/login')
-    .post  (AuthController.authenticate, AuthController.doLogin);
+    .get(AuthController.authenticate, AuthController.doLogin, APIController.login)
+    .post(AuthController.authenticate, AuthController.doLogin, APIController.login);
 
 
 /** 
@@ -282,8 +284,7 @@ api.route('/orgs/:orgid')
  * @swagger
  * /orgs/:orgid/projects:
  *   get:
- *     description: Gets a list of all projects the user has access to within
- *                  an organization.
+ *     description: Gets a list of all projects the user has access to within an organization.
  *     produces:
  *       - application/json
  *     parameters:
@@ -422,9 +423,7 @@ api.route('/orgs/:orgid/projects')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   put:
- *     description: Creates or replaces a project. If the project does not yet 
- *                  exist, it will be created (just like a POST). If it does 
- *                  exist, the project will be replaced with data provided.
+ *     description: Creates or replaces a project. If the project does not yet exist, it will be created (just like a POST). If it does exist, the project will be replaced with data provided.
  *     produces:
  *       - application/json
  *     parameters:
@@ -574,10 +573,24 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  * @swagger
  * /users:
  *   get:
- *     description: Not implemented, reserved for future use.
+ *     description: Gets a list of all users. Returns a list of JSON objects containing public user data.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - N/A
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - All users should be returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  *   post:
  *     description: Not implemented, reserved for future use.
  *     responses:
@@ -595,41 +608,158 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         description: Not Implemented
  */
 api.route('/users')
-    .get   (AuthController.authenticate, APIController.notImplemented)
-    .post  (AuthController.authenticate, APIController.notImplemented)
-    .put   (AuthController.authenticate, APIController.notImplemented)
-    .delete(AuthController.authenticate, APIController.notImplemented);
-
+    .get   (AuthController.authenticate, UserController.getUsers)
+    .post  (AuthController.authenticate, UserController.postUsers)
+    .put   (AuthController.authenticate, UserController.putUsers)
+    .delete(AuthController.authenticate, UserController.deleteUsers);
 
 /**
  * @swagger
- * /users/:id:
+ * /users/:username:
  *   get:
- *     description: Not implemented, reserved for future use.
+ *     description: Gets a user by username.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to get. Note, While it is 
+ *                      currently prevented, in the future, usernames may be 
+ *                      allowed to change and should not be considered static.
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The user was retieved and the public user 
+ *                      object should be returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  *   post:
- *     description: Not implemented, reserved for future use.
+ *     description: Creates a user.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to create. 
+ *         required: true
+ *         type: string
+ *         in: URI
+ *       - name: username
+ *         description: The username of the user to create. If provided, this 
+ *                      must match the username provided in the URI.
+ *         required: false
+ *         type: string
+ *         in: body
+ *       - name: password
+ *         description: The username of the user to create. 
+ *         required: true
+ *         type: string
+ *         in: body
+ *       - name: fname
+ *         description: The user's first name. 
+ *         required: false
+ *         type: string
+ *         in: body
+ *       - name: lname
+ *         description: The user's last name. 
+ *         required: false
+ *         type: string
+ *         in: body
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The user was created. The newly created user
+ *                      is returned as a JSON-encoded object.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  *   put:
- *     description: Not implemented, reserved for future use. 
+ *     description: Creates or updates user. If the user already exists it will be updated. In this case, any valid fields that are given in the request body will replace the existing field values.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to create. 
+ *         required: true
+ *         type: string
+ *         in: URI
+ *       - name: username
+ *         description: The username of the user to create. If provided, this 
+ *                      must match the username provided in the URI.
+ *         required: false
+ *         type: string
+ *         in: body
+ *       - name: password
+ *         description: The username of the user to create. 
+ *         required: true
+ *         type: string
+ *         in: body
+ *       - name: fname
+ *         description: The user's first name. 
+ *         required: false
+ *         type: string
+ *         in: body
+ *       - name: lname
+ *         description: The user's last name. 
+ *         required: false
+ *         type: string
+ *         in: body
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The user was created. The newly created user
+ *                      is returned as a JSON-encoded object.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  *   delete:
- *     description: Not implemented, reserved for future use.
+ *     description: Deletes the user.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to delete. 
+ *         required: true
+ *         type: string
+ *         in: URI
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The user was deleted.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid 
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not 
+ *                      authorized to perform this function or authentication 
+ *                      failed.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
  */
-api.route('/users/:id')
-    .get   (AuthController.authenticate, APIController.notImplemented)
-    .post  (AuthController.authenticate, APIController.notImplemented)
-    .put   (AuthController.authenticate, APIController.notImplemented)
-    .delete(AuthController.authenticate, APIController.notImplemented);
+api.route('/users/:username')
+    .get   (AuthController.authenticate, UserController.getUser)
+    .post  (AuthController.authenticate, UserController.postUser)
+    .put   (AuthController.authenticate, UserController.putUser)
+    .delete(AuthController.authenticate, UserController.deleteUser);
 
 /**
  * @swagger
@@ -655,7 +785,7 @@ api.route('/users/:id')
  *       501:
  *         description: Not Implemented
  */
-api.route('/users/:id/roles')
+api.route('/users/:username/roles')
     .get   (AuthController.authenticate, APIController.notImplemented)
     .post  (AuthController.authenticate, APIController.notImplemented)
     .put   (AuthController.authenticate, APIController.notImplemented)
@@ -686,11 +816,30 @@ api.route('/users/:id/roles')
  *       501:
  *         description: Not Implemented
  */
-api.route('/users/:id/groups')
+api.route('/users/:username/groups')
     .get   (AuthController.authenticate, APIController.notImplemented)
     .post  (AuthController.authenticate, APIController.notImplemented)
     .put   (AuthController.authenticate, APIController.notImplemented)
     .delete(AuthController.authenticate, APIController.notImplemented);
+
+
+/**
+ * @swagger
+ * /users/whoami:
+ *   get:
+ *     description: Returns the currently logged in user information
+ *     responses:
+ *       200: 
+ *         description: Success - The JSON-encoded user information is returned.
+ *       400:
+ *         description: Bad Request - Usually an authentication issue.
+ *       401:
+ *         description: Unauthorized - Failed to authenticate user.
+ *       500:
+ *         description: Internal Server Error
+ */
+api.route('/users/whoami')
+    .get(AuthController.authenticate, UserController.whoami);
 
 
 // Export the API router

@@ -50,7 +50,7 @@ class BaseStrategy
         // do nothing
         throw new Error('Error: doLogin() method not implemented.');
     }
-
+    
 }
 
 module.exports = BaseStrategy;

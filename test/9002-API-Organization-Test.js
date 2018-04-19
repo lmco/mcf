@@ -320,7 +320,7 @@ class APIOrgTest
     {
         return {
             'Content-Type': 'application/json',
-            'authorization': 'Bearer 123456ABCDEF'
+            'authorization': 'Bearer SiSyFQ06xzC6tTcgMjCsz/q3p0qwWtseGeL+9FNiYl8nn/X3WLHn3AjK0caYt1am9KYSBS1sAqauWeP1LPZbyqoha5BwAx10x8vUv0mKWk2QtS/Q8q4y0TumhHsGrJZ8uw6/so9xeY5FUv1xzexFoudYtcYU7K5XHTl/yd5pXCY='
         }
     }
 

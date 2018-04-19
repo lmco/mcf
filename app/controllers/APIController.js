@@ -29,8 +29,23 @@ class APIController
      */
     static version(req, res) 
     {
+        console.log('/api/version');
         var obj = {'version': package_json['version']};
+        res.header('Content-Type', 'application/json');
         return res.send(APIController.formatJSON(obj));
+    }
+
+
+    /**
+     * Returns the login token after AuthController.doLogin.
+     */
+    static login(req, res) 
+    {
+        console.log('In APIController.login ...');
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON({
+            "token": req.session.token
+        }));
     }
 
 

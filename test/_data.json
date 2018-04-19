@@ -1,0 +1,52 @@
+{
+    "orgs": [{
+        "id": "empire",
+        "name": "Empire"
+    }, {
+        "id": "rebels",
+        "name": "Rebel Alliance"
+    }],
+    "projects": [{
+        "id": "deathstar",
+        "name": "Death Star",
+        "orgid": "empire"
+    }],
+    "users": [{
+        "username": "admin",
+        "password": "admin",
+        "fname": "Admin",
+        "lname": "",
+        "admin": true
+    }, {
+        "username": "lskywalker0",
+        "password": "r3d5jediknight",
+        "fname": "Luke",
+        "lname": "Skywalker"
+    }, {
+        "username": "han",
+        "password": "iSh0tFir$t",
+        "fname": "Han",
+        "lname": "Solo"
+    }, {
+        "username": "princess",
+        "password": "youremyonlyhope",
+        "fname": "Leia",
+        "lname": "Organa"
+    }, {
+        "username": "vader",
+        "password": "padme",
+        "email": "vader@empire.gov",
+        "fname": "Darth",
+        "lname": "Vader" 
+    }, {
+        "username": "tk421",
+        "password": "stormtrooper",
+        "fname": "Stormtrooper",
+        "lname": "TK421"
+    }, {
+        "username": "fn2187",
+        "password": "stormtrooper",
+        "fname": "Stormtrooper",
+        "lname": "FN2187"
+    }]
+}

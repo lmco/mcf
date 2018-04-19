@@ -308,6 +308,7 @@ class OrganizationController
     static deleteOrg(req, res) 
     {
         var orgid = htmlspecialchars(req.params['orgid']);
+        console.log('Attempting delete of', orgid, '...')
 
         // Do the deletion
         Organization.findOneAndRemove({

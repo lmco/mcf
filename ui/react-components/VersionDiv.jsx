@@ -9,18 +9,20 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/*
- * variables.scss
+
+/**
+ * VerionDiv.jsx
  *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This defines the Sass variables.
+ * This is going to be used to start testing the API.
  */
+class VersionDiv extends React.Component {
 
-$primary-color: #333;
-$navbar-light-brand-color: #333; /*#5472d3;*/
-
-$swagger-border-color-get:      #9a9a9a;
-$swagger-border-color-post:     #9a9a9a;
-$swagger-border-color-put:      #9a9a9a;
-$swagger-border-color-delete:   #9a9a9a;
+    render() {
+        return (
+            <div>Version: <VersionNumber/></div>
+        );
+    }
+    
+}
