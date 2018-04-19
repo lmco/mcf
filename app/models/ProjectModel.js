@@ -56,23 +56,25 @@ var ProjectSchema = new Schema({
         require: true
         }
 
-    users: {
+    members: {
+    	type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User'
+    }
+
+    permissions: {
         read: [{
             type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User',
-            index: true
+            ref: 'User'
         }],
 
         write: [{
             type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User',
-            index: true
+            ref: 'User'
         }],
 
         admin: [{
             type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User',
-            index: true
+            ref: 'User'
         }],
     }
 

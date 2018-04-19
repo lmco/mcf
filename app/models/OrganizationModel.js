@@ -54,17 +54,20 @@ var OrganizationSchema = new Schema({
         ref: 'Project'
     }],
 
-    users: {
-        members: [{
+    memebers: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User'
+    }
+
+    permissions: {
+        write: [{
             type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User',
-            index: true
+            ref: 'User'
         }],
 
         admin: [{
             type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User',
-            index: true
+            ref: 'User'
         }]
     }
 
