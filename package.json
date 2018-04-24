@@ -67,6 +67,9 @@
       "http_port": 9080,
       "https_port": 9443
     },
+    "test": {
+      "url": "https://localhost:9443"
+    },
     "auth": {
       "strategy": "LocalStrategy",
       "ldap": {

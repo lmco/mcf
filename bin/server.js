@@ -206,5 +206,5 @@ httpServer.listen(config.server.http_port, () => console.log('MBEE server listen
 // Run HTTPS Server
 if (config.server.ssl) {
     var httpsServer = https.createServer(credentials, app);
-    httpsServer.listen(config.server.https_port, () => console.log('MBEE server listening on port 8443!'));
+    httpsServer.listen(config.server.https_port, () => console.log('MBEE server listening on port ' + config.server.https_port + '!'));
 }

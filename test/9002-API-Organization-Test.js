@@ -24,6 +24,7 @@ const request = require('request');
 
 
 const package_json = require(path.join(__dirname, '..', 'package.json'));
+const config = package_json['config'];
 
 /**
  * APIOrgTest
@@ -66,7 +67,7 @@ class APIOrgTest
     static getOrgs01(done)
     {
         request({
-            url: 'http://localhost:8080/api/orgs',
+            url: config.test.url + '/api/orgs',
             headers: APIOrgTest.getHeaders()
         }, 
         function(error, response, body) {
@@ -83,7 +84,7 @@ class APIOrgTest
     static getOrgs02(done)
     {
         request({
-            url: 'http://localhost:8080/api/orgs',
+            url: config.test.url + '/api/orgs',
             headers: APIOrgTest.getHeaders()
         }, 
         function(error, response, body) {
@@ -101,7 +102,7 @@ class APIOrgTest
     static getOrgs03(done)
     {
         request({
-            url: 'http://localhost:8080/api/orgs',
+            url: config.test.url + '/api/orgs',
             headers: APIOrgTest.getHeaders()
         }, 
         function(error, response, body) {
@@ -120,7 +121,7 @@ class APIOrgTest
     static postOrg01(done)
     {
         request({
-            url:        'http://localhost:8080/api/orgs/org1',
+            url:        config.test.url + '/api/orgs/org1',
             headers:    APIOrgTest.getHeaders(),
             method:     'POST',
             body:       JSON.stringify({
@@ -146,7 +147,7 @@ class APIOrgTest
     static postOrg02(done)
     {
         request({
-            url:        'http://localhost:8080/api/orgs/org1',
+            url:        config.test.url + '/api/orgs/org1',
             headers:    APIOrgTest.getHeaders(),
             method:     'POST',
             body:       JSON.stringify({
@@ -170,7 +171,7 @@ class APIOrgTest
     static postOrg03(done)
     {
         request({
-            url:        'http://localhost:8080/api/orgs/!nvalid0rgId',
+            url:        config.test.url + '/api/orgs/!nvalid0rgId',
             headers:    APIOrgTest.getHeaders(),
             method:     'POST',
             body:       JSON.stringify({
@@ -192,7 +193,7 @@ class APIOrgTest
     static postOrg04(done)
     {
         request({
-            url:        'http://localhost:8080/api/orgs/org2',
+            url:        config.test.url + '/api/orgs/org2',
             headers:    APIOrgTest.getHeaders(),
             method:     'POST',
             body:       JSON.stringify({
@@ -214,7 +215,7 @@ class APIOrgTest
     static postOrg05(done)
     {
         request({
-            url:        'http://localhost:8080/api/orgs/org2',
+            url:        config.test.url + '/api/orgs/org2',
             headers:    APIOrgTest.getHeaders(),
             method:     'POST',
             body:       JSON.stringify({
@@ -235,7 +236,7 @@ class APIOrgTest
     static postOrg06(done)
     {
         request({
-            url:        'http://localhost:8080/api/orgs/org2',
+            url:        config.test.url + '/api/orgs/org2',
             headers:    APIOrgTest.getHeaders(),
             method:     'POST',
             body:       JSON.stringify({
@@ -260,7 +261,7 @@ class APIOrgTest
     static postOrg07(done)
     {
         request({
-            url:        'http://localhost:8080/api/orgs/org2',
+            url:        config.test.url + '/api/orgs/org2',
             headers:    APIOrgTest.getHeaders(),
             method:     'POST',
             body:       JSON.stringify({
@@ -281,7 +282,7 @@ class APIOrgTest
     static deleteOrg01(done)
     {
         request({
-            url:        'http://localhost:8080/api/orgs/org1',
+            url:        config.test.url + '/api/orgs/org1',
             headers:    APIOrgTest.getHeaders(),
             method:     'DELETE'
         }, 
@@ -299,7 +300,7 @@ class APIOrgTest
     static deleteOrg02(done)
     {
         request({
-            url:        'http://localhost:8080/api/orgs/org2',
+            url:        config.test.url + '/api/orgs/org2',
             headers:    APIOrgTest.getHeaders(),
             method:     'DELETE'
         }, 
