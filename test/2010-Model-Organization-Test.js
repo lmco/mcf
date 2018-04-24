@@ -18,6 +18,7 @@
  * Executes tests of the test framework itself.
  */
 
+const fs = require('fs');
 const path = require('path');
 const chai  = require('chai');
 const mongoose = require('mongoose');
