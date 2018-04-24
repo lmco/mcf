@@ -68,7 +68,7 @@
       "https_port": 9443
     },
     "test": {
-      "url": "https://localhost:9443"
+      "url": "http://dev.mbee.us.lmco.com:9080"
     },
     "auth": {
       "strategy": "LocalStrategy",

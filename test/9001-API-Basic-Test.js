@@ -17,6 +17,7 @@
  * Tests Basic API functionality.
  */
 
+const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const chai  = require('chai');

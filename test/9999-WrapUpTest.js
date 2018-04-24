@@ -37,19 +37,17 @@ class WrapUp
 
             // runs before all tests in this block
             before(function() {
-                var dbName     = config.database.dbName;
-                var url        = config.database.url;
-                var dbPort     = config.database.port;
-                var dbUsername = config.database.username;
-                var dbPassword = config.database.password;
+                var dbName     = config.db.name;
+                var url        = config.db.url;
+                var dbPort     = config.db.port;
+                var dbUsername = config.db.username;
+                var dbPassword = config.db.password;
                 var connectURL = 'mongodb://';
                 // Create connection with or without authentication
                 if (dbUsername != '' && dbPassword != ''){
                     connectURL = connectURL + dbUsername + ':' + dbPassword + '@';
                 }
                 connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
-                // Connect to Data base
-                mongoose.connect(connectURL);
 
                 var options = {};
 
@@ -89,6 +87,8 @@ class WrapUp
      */
     static deleteUsers(done)
     {
+        this.timeout(2500);
+        
         var userData = data['users'];
         var counter = 0;
         for (var i = 0; i < userData.length; i++) {
