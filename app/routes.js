@@ -25,7 +25,9 @@ const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 var router = express.Router();
 
 router.get('/', function(req, res) {
-    res.render('home');
+    return res.render('home', {
+        'ui': config.ui
+    });
 });
 router.get('/home', AuthController.authenticate, UIController.home);
 
