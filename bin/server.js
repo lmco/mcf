@@ -192,8 +192,8 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
 
 // Read TLS/SSL certs
 if (config.server.ssl) {
-    var keyPath = path.join('certs', util.format('%s.key', config.server.ssl_cert_name));
-    var crtPath = path.join('certs', util.format('%s.crt', config.server.ssl_cert_name));
+    var keyPath = path.join('..', 'certs', util.format('%s.key', config.server.ssl_cert_name));
+    var crtPath = path.join('..', 'certs', util.format('%s.crt', config.server.ssl_cert_name));
     var privateKey  = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
     var certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
     var credentials = {key: privateKey, cert: certificate};
