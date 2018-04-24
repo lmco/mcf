@@ -26,9 +26,9 @@ pipeline {
         HTTPS_PROXY = "http://proxy-lmi.global.lmco.com:80"
         http_proxy = "http://proxy-lmi.global.lmco.com:80"
         https_proxy = "http://proxy-lmi.global.lmco.com:80"
-        NO_PROXY = 127.0.0.1,localhost,*.lmco.com
-        NODE_ENV = production
-        NODE_TLS_REJECT_UNAUTHORIZED = 0
+        NO_PROXY = "127.0.0.1,localhost,*.lmco.com"
+        NODE_ENV = "production"
+        NODE_TLS_REJECT_UNAUTHORIZED = "0"
     }
 
     stages {
