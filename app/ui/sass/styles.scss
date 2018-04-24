@@ -43,3 +43,15 @@ body {
     border-bottom: 1px solid #656565;
     padding: .5rem 1rem .3rem 1rem;
 }
+
+.form-control {
+    background: #343a40,
+    color: #FFF
+    border: 1px solid #495057;
+}
+
+.form-control:focus {
+    background: #343a40,
+    color: #FFF
+    border: 1px solid #495057;
+}
