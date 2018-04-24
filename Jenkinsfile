@@ -52,8 +52,7 @@ pipeline {
          */
         stage('Build') {
             steps {
-                sh 'yarn install'
-                sh 'yarn build' 
+                sh 'yarn docker:build'
             }
         }
 
@@ -69,7 +68,8 @@ pipeline {
                  * doesn't fail is the stop/remove commands fail when container
                  * isn't currently running.
                  */
-                sh '$(yarn docker:clean) || $(exit 0);' 
+                sh 'docker stop mbee || $(exit 0);'
+                sh 'docker rm mbee || $(exit 0);' 
 
                 /* Runs the container in the background. */
                 sh 'yarn docker:run'
