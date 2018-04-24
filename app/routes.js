@@ -29,6 +29,7 @@ router.get('/', function(req, res) {
         'ui': config.ui
     });
 });
+
 router.get('/home', AuthController.authenticate, UIController.home);
 
 /**
@@ -45,6 +46,6 @@ router.route('/login')
 router.route('/logout')
     .post(AuthController.authenticate, UIController.logout);
 
-router.get('/admin/console', UIController.admin);
+router.get('/admin/console', AuthController.authenticate, UIController.admin);
 
 module.exports = router;

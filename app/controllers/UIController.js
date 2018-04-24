@@ -26,7 +26,7 @@ class UIController
     /**
      * Renders the home page.
      */
-    static mbeeHome(req, res) 
+    static home(req, res) 
     {
         console.log('/');
         if (req.session.count) {
