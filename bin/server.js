@@ -148,6 +148,12 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
     files.forEach(function(f) {
         // The full path to the plugin
         var plugin_path = path.join(__dirname, '..', 'plugins', f);
+
+        // if package.json doesn't exist, skip it
+        if (!fs.exists(path.join(plugin_path, 'package.json'))) {
+            continue;
+        }
+
         // Install dependencies
         var package_json = require(path.join(plugin_path, 'package.json'));
         var peer_deps = require(path.join(__dirname, '..', 'package.json'))['peerDependencies'];
