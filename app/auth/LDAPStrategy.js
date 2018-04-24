@@ -228,7 +228,15 @@ class LDAPStrategy extends BaseStrategy
 
     doLogin(req, res) 
     {
-        return res.status(200).send('Okay');
+        console.log('Logging in', req.user.username);
+        var token = libCrypto.generateToken({
+            'type':     'user',
+            'username': req.user.username,
+            'created':  (new Date(Date.now())).toUTCString(),
+            'expires':  (new Date(Date.now() + 1000*60*5)).toUTCString()
+        });
+        req.session.token = token;
+        next();
     } 
 
 }
