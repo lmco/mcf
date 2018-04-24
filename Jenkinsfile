@@ -41,8 +41,8 @@ pipeline {
                 sh 'echo $HTTP_PROXY'
 
                 // Yarn config
-                sh 'yarn config set "http-proxy" $HTTP_PROXY'
-                sh 'yarn config set "https-proxy" $HTTPS_PROXY'
+                sh 'yarn config set "http-proxy" "http://proxy-lmi.global.lmco.com:80"'
+                sh 'yarn config set "https-proxy" "http://proxy-lmi.global.lmco.com:80"'
                 sh 'yarn config set "strict-ssl" false'
                 sh 'yarn config set "cafile" ./certs/LockheedMartinRootCertificationAuthority.pem'
 
