@@ -27,8 +27,6 @@ pipeline {
         http_proxy = "http://proxy-lmi.global.lmco.com:80"
         https_proxy = "http://proxy-lmi.global.lmco.com:80"
         NO_PROXY = "127.0.0.1,localhost,*.lmco.com"
-        NODE_ENV = "production"
-        NODE_TLS_REJECT_UNAUTHORIZED = "0"
     }
 
     stages {
@@ -38,8 +36,6 @@ pipeline {
          */
         stage('Prepare') {
             steps {
-                sh 'echo $HTTP_PROXY'
-
                 // Yarn config
                 sh 'yarn config set "http-proxy" "http://proxy-lmi.global.lmco.com:80"'
                 sh 'yarn config set "https-proxy" "http://proxy-lmi.global.lmco.com:80"'
@@ -48,8 +44,6 @@ pipeline {
 
                 // Clean build env
                 sh 'yarn clean:all'
-
-                sh 'echo $HTTP_PROXY'
             }
         }
 
@@ -58,7 +52,6 @@ pipeline {
          */
         stage('Build') {
             steps {
-                sh 'echo $HTTP_PROXY'
                 sh 'yarn install'
                 sh 'yarn build' 
             }
