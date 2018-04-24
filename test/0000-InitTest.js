@@ -87,7 +87,7 @@ class Init
      */
     static createUsers(done)
     {
-        this.timeout(2500);
+        this.timeout(3000);
         var userData = data['users'];
         var counter = 0;
         for (var i = 0; i < userData.length; i++) {
