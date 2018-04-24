@@ -46,7 +46,7 @@
     "clean": "./node_modules/.bin/gulp clean",
     "clean:all": "rm -rf public/ node_modules/ docs/",
     "db": "mongod --auth --dbpath ./db/mbee",
-    "docker:build": "yarn install && yarn run build && docker build -t mbee .",
+    "docker:build": "yarn install && yarn build && docker build -t mbee .",
     "docker:clean": "docker stop mbee; docker rm mbee;",
     "docker:run": "docker run -d -it --restart=always -p 9080:8080 -p 9443:8443 --name mbee mbee",
     "jsdoc:gen": "./node_modules/.bin/gulp jsdoc",
@@ -64,8 +64,8 @@
       "json": {
         "indent": 4
       },
-      "http_port": 8080,
-      "https_port": 8443
+      "http_port": 9080,
+      "https_port": 9443
     },
     "auth": {
       "strategy": "LocalStrategy",
