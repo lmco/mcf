@@ -64,7 +64,6 @@ pipeline {
 
                 /* Runs the container in the background. */
                 sh 'yarn docker:run'
-                sh 'echo "Running new container"'
             }
         }
 
