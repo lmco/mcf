@@ -19,7 +19,7 @@
  */
  
 const path = require('path');
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 
 const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
 const AuthStrategy = require(path.join(__dirname, config.auth.strategy));

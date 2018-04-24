@@ -36,7 +36,7 @@ const { execSync } = require('child_process');
 
 const express = require('express');
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session)
+const MongoStore = require('connect-mongo')(session);
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -56,7 +56,7 @@ function getControllerPath(name) {
  **************************************/
 
 // Config
-const config = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', 'package.json'))['config'];
 
 // Module paths
 const RoutesPath = path.join(__dirname, '..', config.server.app, 'routes.js');
@@ -97,11 +97,11 @@ app.set('views', viewsDir);         // Sets our view directory
  **************************************/
 
 // Declare varaibels for mongoose connection
-var dbName     = config.database.dbName;
-var url        = config.database.url;
-var dbPort     = config.database.port;
-var dbUsername = config.database.username;
-var dbPassword = config.database.password;
+var dbName     = config.db.name;
+var url        = config.db.url;
+var dbPort     = config.db.port;
+var dbUsername = config.db.username;
+var dbPassword = config.db.password;
 var connectURL = 'mongodb://';
 
 // Create connection with or without authentication
@@ -110,8 +110,20 @@ if (dbUsername != '' && dbPassword != ''){
 }
 connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
 
-// Connect to Data base
-mongoose.connect(connectURL, function(err,msg){
+var options = {};
+
+// Configure an SSL connection to the database. This can be configured
+// in the package.json config. The 'ssl' field should be set to true
+// and the 'sslCAFile' must be provided and reference a file located in /certs. 
+if (config.db.ssl) {
+    connectURL += '?ssl=true';
+    var caPath = path.join(__dirname, '..', 'certs', config.db.sslCAFile);
+    var caFile = fs.readFileSync(caPath, 'utf8');
+    options['sslCA'] = caFile; 
+}
+
+// Connect to database
+mongoose.connect(connectURL, options, function(err,msg){
     if (err) {
         console.log(err) 
     }
@@ -148,12 +160,12 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
             console.log('Installing dependency', dep, '...');
             // Make sure the package name is valid.
             // This is also used to protect against command injection.
-            if (RegExp('^([a-z-_])+$').test(dep)) {
+            if (RegExp('^([a-z0-9\.\\-_])+$').test(dep)) {
                 var stdout = execSync(util.format('yarn add --peer %s', dep));
                 console.log(stdout.toString());
             } 
             else {
-                throw new Error('Error: Failed to install plugin dependency.');
+                throw new Error('Error: Failed to install plugin dependency');
             }
         }
         // Install the plugin within our app under it's namespace

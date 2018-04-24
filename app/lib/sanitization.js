@@ -22,7 +22,7 @@ const path = require('path');
 const htmlspecialchars = require('htmlspecialchars');
 const sanitize = require('mongo-sanitize');
 
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 
 
 /**
