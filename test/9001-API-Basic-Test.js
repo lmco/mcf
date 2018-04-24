@@ -17,12 +17,14 @@
  * Tests Basic API functionality.
  */
 
+const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const chai  = require('chai');
 const request = require('request');
 
 const package_json = require(path.join(__dirname, '..', 'package.json'));
+const config = package_json['config'];
 const libCrypto = require(path.join(__dirname, '..', 'app', 'lib', 'crypto.js'));
 
 /**
@@ -53,8 +55,8 @@ class TestAPIBasic
     static getVersion(done)
     {
         request({
-            url: 'http://localhost:8080/api/version',
-            headers: TestAPIBasic.getHeaders()
+            url:        config.test.url + '/api/version',
+            headers:    TestAPIBasic.getHeaders()
         }, 
         function(error, response, body) {
 
@@ -74,7 +76,7 @@ class TestAPIBasic
     static doLoginWithBasicAuth(done)
     {
         request({
-            url:        'http://localhost:8080/api/login',
+            url:        config.test.url + '/api/login',
             method:     'POST',
             headers:    TestAPIBasic.getHeaders()
         }, 
@@ -105,7 +107,7 @@ class TestAPIBasic
     static doLoginWithTokenAuth(done)
     {
         request({
-            url:        'http://localhost:8080/api/login',
+            url:        config.test.url + '/api/login',
             method:     'POST',
             headers:    TestAPIBasic.getHeaders()
         }, 
@@ -117,7 +119,7 @@ class TestAPIBasic
             var token = JSON.parse(body)['token']
             
             request({
-                url:        'http://localhost:8080/api/login',
+                url:        config.test.url + '/api/login',
                 method:     'POST',
                 headers:    {
                     authorization: 'Bearer ' + token

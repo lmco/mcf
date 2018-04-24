@@ -22,7 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const ldap = require('ldapjs');
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
 
 class LDAPStrategy extends BaseStrategy

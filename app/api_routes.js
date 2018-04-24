@@ -20,7 +20,7 @@
 const path              = require('path');
 const express           = require('express');
 const swaggerUi         = require('swagger-ui-express');
-const config            = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
+const config            = require(path.join(__dirname, '..', 'package.json'))['config'];
 var getController       = (x) => path.join(__dirname, 'controllers', x);
 const APIController     = require(getController('APIController'));
 const OrgController     = require(getController('OrganizationController'));

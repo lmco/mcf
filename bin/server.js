@@ -36,7 +36,7 @@ const { execSync } = require('child_process');
 
 const express = require('express');
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session)
+const MongoStore = require('connect-mongo')(session);
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -56,7 +56,7 @@ function getControllerPath(name) {
  **************************************/
 
 // Config
-const config = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', 'package.json'))['config'];
 
 // Module paths
 const RoutesPath = path.join(__dirname, '..', config.server.app, 'routes.js');
@@ -97,11 +97,11 @@ app.set('views', viewsDir);         // Sets our view directory
  **************************************/
 
 // Declare varaibels for mongoose connection
-var dbName     = config.database.dbName;
-var url        = config.database.url;
-var dbPort     = config.database.port;
-var dbUsername = config.database.username;
-var dbPassword = config.database.password;
+var dbName     = config.db.name;
+var url        = config.db.url;
+var dbPort     = config.db.port;
+var dbUsername = config.db.username;
+var dbPassword = config.db.password;
 var connectURL = 'mongodb://';
 
 // Create connection with or without authentication
@@ -110,8 +110,20 @@ if (dbUsername != '' && dbPassword != ''){
 }
 connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
 
-// Connect to Data base
-mongoose.connect(connectURL, function(err,msg){
+var options = {};
+
+// Configure an SSL connection to the database. This can be configured
+// in the package.json config. The 'ssl' field should be set to true
+// and the 'sslCAFile' must be provided and reference a file located in /certs. 
+if (config.db.ssl) {
+    connectURL += '?ssl=true';
+    var caPath = path.join(__dirname, '..', 'certs', config.db.sslCAFile);
+    var caFile = fs.readFileSync(caPath, 'utf8');
+    options['sslCA'] = caFile; 
+}
+
+// Connect to database
+mongoose.connect(connectURL, options, function(err,msg){
     if (err) {
         console.log(err) 
     }
@@ -136,9 +148,17 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
     files.forEach(function(f) {
         // The full path to the plugin
         var plugin_path = path.join(__dirname, '..', 'plugins', f);
-        // Install dependencies
+
+        // if package.json doesn't exist, skip it
+        if (!fs.existsSync(path.join(plugin_path, 'package.json'))) {
+            return;
+        }
+
+        // Get dependencies
         var package_json = require(path.join(plugin_path, 'package.json'));
         var peer_deps = require(path.join(__dirname, '..', 'package.json'))['peerDependencies'];
+
+        // Install dependencies
         peer_deps = Object.keys(peer_deps);
         for (dep in package_json['dependencies']) {
             // Skip if already in peer deps
@@ -148,12 +168,13 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
             console.log('Installing dependency', dep, '...');
             // Make sure the package name is valid.
             // This is also used to protect against command injection.
-            if (RegExp('^([a-z-_])+$').test(dep)) {
-                var stdout = execSync(util.format('yarn add --peer %s', dep));
+            if (RegExp('^([a-z0-9\.\\-_])+$').test(dep)) {
+                var cmd = util.format('yarn add --peer %s', dep);
+                var stdout = execSync(cmd);
                 console.log(stdout.toString());
             } 
             else {
-                throw new Error('Error: Failed to install plugin dependency.');
+                throw new Error('Error: Failed to install plugin dependency');
             }
         }
         // Install the plugin within our app under it's namespace
@@ -171,8 +192,8 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
 
 // Read TLS/SSL certs
 if (config.server.ssl) {
-    var keyPath = path.join('certs', util.format('%s.key', config.server.ssl_cert_name));
-    var crtPath = path.join('certs', util.format('%s.crt', config.server.ssl_cert_name));
+    var keyPath = path.join('..', 'certs', util.format('%s.key', config.server.ssl_cert_name));
+    var crtPath = path.join('..', 'certs', util.format('%s.crt', config.server.ssl_cert_name));
     var privateKey  = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
     var certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
     var credentials = {key: privateKey, cert: certificate};
@@ -183,7 +204,7 @@ var httpServer = http.createServer(app);
 httpServer.listen(config.server.http_port, () => console.log('MBEE server listening on port ' + config.server.http_port + '!'));
 
 // Run HTTPS Server
-if (config.ssl) {
+if (config.server.ssl) {
     var httpsServer = https.createServer(credentials, app);
-    httpsServer.listen(config.server.https_port, () => console.log('MBEE server listening on port 8443!'));
+    httpsServer.listen(config.server.https_port, () => console.log('MBEE server listening on port ' + config.server.https_port + '!'));
 }

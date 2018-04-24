@@ -13,7 +13,7 @@
 const path = require('path');
 
 const package_json = require(path.join(__dirname, '..', '..', 'package.json'));
-const config = package_json['mbee-config'];
+const config = package_json['config'];
 
 const API = require(path.join(__dirname, 'APIController'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel'));

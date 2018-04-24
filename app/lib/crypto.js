@@ -20,7 +20,7 @@
 const path = require('path');
 const crypto = require('crypto');
 
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 
 
 /**

@@ -10,11 +10,12 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 
+const fs = require('fs');
 const path = require('path');
 const chai  = require('chai');
 const mongoose = require('mongoose');
 
-const config = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', 'package.json'))['config'];
 const User = require(path.join(__dirname, '..', 'app', 'models', 'UserModel'));
 const data = require(path.join(__dirname, '_data.json'));
 
@@ -37,11 +38,11 @@ class Init
 
             // runs before all tests in this block
             before(function() {
-                var dbName     = config.database.dbName;
-                var url        = config.database.url;
-                var dbPort     = config.database.port;
-                var dbUsername = config.database.username;
-                var dbPassword = config.database.password;
+                var dbName     = config.db.name;
+                var url        = config.db.url;
+                var dbPort     = config.db.port;
+                var dbUsername = config.db.username;
+                var dbPassword = config.db.password;
                 var connectURL = 'mongodb://';
                 // Create connection with or without authentication
                 if (dbUsername != '' && dbPassword != ''){
@@ -49,7 +50,25 @@ class Init
                 }
                 // Connect to Data base
                 connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
-                mongoose.connect(connectURL);
+
+                var options = {};
+
+                // Configure an SSL connection to the database. This can be configured
+                // in the package.json config. The 'ssl' field should be set to true
+                // and the 'sslCAFile' must be provided and reference a file located in /certs. 
+                if (config.db.ssl) {
+                    connectURL += '?ssl=true';
+                    var caPath = path.join(__dirname, '..', 'certs', config.db.sslCAFile);
+                    var caFile = fs.readFileSync(caPath, 'utf8');
+                    options['sslCA'] = caFile; 
+                }
+
+                // Connect to database
+                mongoose.connect(connectURL, options, function(err,msg){
+                    if (err) {
+                        console.log(err) 
+                    }
+                });
             });
 
             // runs after all tests in this block
@@ -68,6 +87,7 @@ class Init
      */
     static createUsers(done)
     {
+        this.timeout(3000);
         var userData = data['users'];
         var counter = 0;
         for (var i = 0; i < userData.length; i++) {

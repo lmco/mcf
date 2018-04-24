@@ -5,4 +5,5 @@ db/
 docs/
 keys/
 yarn.lock
+yarn-error.log
 

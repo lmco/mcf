@@ -20,7 +20,7 @@
 const path = require('path');
 const Strategy = require('passport-strategy');
 const ldap = require('ldapjs');
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 
 
 class LMICloudStrategy extends Strategy
