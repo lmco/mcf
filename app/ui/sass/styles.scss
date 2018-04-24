@@ -34,15 +34,24 @@ body {
     font-weight: 300;
 }
 
-.container {
+.container,
+.container-fluid {
     min-height: 100%;
-    padding-top: 12%;
+    padding-top: 40px;
 }
 
 .navbar  {
     /*height: 40px;*/ 
     border-bottom: 1px solid #656565;
     padding: .5rem 1rem .3rem 1rem;
+}
+
+a {
+    color: #76b8ff;
+}
+
+a:hover {
+    color: #62aeff;
 }
 
 .form-control {
