@@ -17,17 +17,19 @@
 # This Dockerfile defines the Docker build for MBEE.
 #
 ###############################################################################
-FROM node:9.5.0-alpine
+FROM node:6.14.1-alpine
 MAINTAINER Josh Kaplan <joshua.d.kaplan@lmco.com>
 WORKDIR /lm/mbee
 
 RUN mkdir -p /lm/mbee/app \
+ && mkdir -p /lm/mbee/bin \
  && mkdir -p /lm/mbee/certs \
- && mkdir -p /lm/mbee/public \
- && mkdir -p /lm/mbee/bin
+ && mkdir -p /lm/mbee/plugins \
+ && mkdir -p /lm/mbee/public
 
 COPY ./app /lm/mbee/app
 COPY ./certs /lm/mbee/certs
+COPY ./plugins /lm/mbee/plugins
 COPY ./public /lm/mbee/public
 COPY ./bin/server.js /lm/mbee/bin/server.js
 COPY ./package.json /lm/mbee/package.json
@@ -49,7 +51,6 @@ RUN yarn config set "http-proxy" $HTTP_PROXY \
 
 # Install dependencies
 RUN yarn install
-RUN yarn build 
 
 # Expose ports
 EXPOSE 8080 8443
