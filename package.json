@@ -71,7 +71,7 @@
       "url": "http://dev.mbee.us.lmco.com:9080"
     },
     "auth": {
-      "strategy": "LDAPStrategy",
+      "strategy": "LocalStrategy",
       "ldap": {
         "server": "ldaps://usadc43.us.lmco.com:3269",
         "ca": [

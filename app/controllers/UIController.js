@@ -26,7 +26,7 @@ class UIController
     /**
      * Renders the home page.
      */
-    static home(req, res) 
+    static mbeeHome(req, res) 
     {
         console.log('/');
         if (req.session.count) {
@@ -37,7 +37,7 @@ class UIController
         }
         console.log(req.session.count);
         console.log(req.session.token);
-        return res.render('home', {
+        return res.render('mbee', {
             'ui': config.ui, 
             'renderer': 'mbee-renderer'
         });
