@@ -14,7 +14,7 @@ const path = require('path');
 const chai  = require('chai');
 const mongoose = require('mongoose');
 
-const config = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', 'package.json'))['config'];
 const User = require(path.join(__dirname, '..', 'app', 'models', 'UserModel'));
 const data = require(path.join(__dirname, '_data.json'));
 
@@ -49,6 +49,25 @@ class WrapUp
                 connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
                 // Connect to Data base
                 mongoose.connect(connectURL);
+
+                var options = {};
+
+                // Configure an SSL connection to the database. This can be configured
+                // in the package.json config. The 'ssl' field should be set to true
+                // and the 'sslCAFile' must be provided and reference a file located in /certs. 
+                if (config.db.ssl) {
+                    connectURL += '?ssl=true';
+                    var caPath = path.join(__dirname, '..', 'certs', config.db.sslCAFile);
+                    var caFile = fs.readFileSync(caPath, 'utf8');
+                    options['sslCA'] = caFile; 
+                }
+
+                // Connect to database
+                mongoose.connect(connectURL, options, function(err,msg){
+                    if (err) {
+                        console.log(err) 
+                    }
+                });
             });
 
             // runs after all tests in this block

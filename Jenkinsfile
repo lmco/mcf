@@ -48,10 +48,12 @@ pipeline {
         }
 
         /**
-         * First, stops and removes current container.
-         * Then runs the newly built docker container.
+         * Runs the development Docker container for testing. 
+         * The only differences between the dev and prod containers are:
+         *   - Dev runs on ports 9080 and 9443 instead of 80 and 443
+         *   - Dev names the container mbee-dev instead of mbee
          */
-        stage('Run') {
+        stage('Stage') {
             steps {
                 /* 
                  * Removes any existing running containers. 
@@ -59,8 +61,50 @@ pipeline {
                  * doesn't fail is the stop/remove commands fail when container
                  * isn't currently running.
                  */
+                sh 'docker stop mbee-dev || $(exit 0);'
+                sh 'docker rm mbee-dev || $(exit 0);' 
+
+                /* Runs the container in the background. */
+                sh 'yarn docker:run:dev'
+            }
+        }
+
+        /**
+         * Executes functional tests against the staged server.
+         */
+        stage('Test') {
+            steps {
+                /* 
+                 * Removes any existing running containers. 
+                 * This <command> || $(exit 0) approach is required so Jenkins
+                 * doesn't fail is the stop/remove commands fail when container
+                 * isn't currently running.
+                 */
+                sh 'yarn run test'
+            }
+        }
+
+        /**
+         * First, stops and removes current container.
+         * Then runs the newly built docker container.
+         */
+        stage('Run') {
+            steps {
+                /*
+                 * Removes the staged container
+                 */
+                sh 'docker stop mbee-dev || $(exit 0);'
+                sh 'docker rm mbee-dev || $(exit 0);'
+
+                /* 
+                 * Removes any existing running containers. 
+                 * This <command> || $(exit 0) approach is required so Jenkins
+                 * doesn't fail is the stop/remove commands fail when container
+                 * isn't currently running.
+                 */
                 sh 'docker stop mbee || $(exit 0);'
-                sh 'docker rm mbee || $(exit 0);' 
+                sh 'docker rm mbee || $(exit 0);'
+
 
                 /* Runs the container in the background. */
                 sh 'yarn docker:run'
