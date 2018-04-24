@@ -23,7 +23,7 @@ const chai  = require('chai');
 const request = require('request');
 
 const package_json = require(path.join(__dirname, '..', 'package.json'));
-const package_json = package_json['config'];
+const config = package_json['config'];
 const libCrypto = require(path.join(__dirname, '..', 'app', 'lib', 'crypto.js'));
 
 /**
