@@ -37,7 +37,8 @@ pipeline {
          */
         stage('Build') {
             steps {
-                sh 'yarn docker:build' 
+                sh 'yarn install'
+                sh 'yarn build' 
             }
         }
 
