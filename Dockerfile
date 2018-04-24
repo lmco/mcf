@@ -53,7 +53,7 @@ RUN yarn config set "http-proxy" $HTTP_PROXY \
 RUN yarn install
 
 # Expose ports
-EXPOSE 8080 8443
+EXPOSE 9080 9443
 
 # Run server
 CMD ["yarn", "run", "server"]
