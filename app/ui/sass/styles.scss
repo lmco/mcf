@@ -29,8 +29,8 @@ html, body {
 }
 body {
     min-height: 100vh;
-    background: #fff;
-    color: #333;
+    background: #333;
+    color: #FFF;
 }
 
 .container {
@@ -38,25 +38,8 @@ body {
     padding-top: 12%;
 }
 
-.navbar-light .navbar-brand {
-    color: $navbar-light-brand-color;
-    padding-top: 4px;
-}
-
-.navbar-light .navbar-brand > img {
-    padding-bottom: 4px;
-}
-
-.navbar-light .navbar-nav .nav-link {
-    /*color: #fff;*/
-}
-.navbar-light .navbar-nav .nav-link:hover {
-    /*color: #aaa;*/
-}
-
 .navbar  {
-    height: 40px; 
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #ccc;
+    /*height: 40px;*/ 
+    border-bottom: 1px solid #656565;
     padding: .5rem 1rem .3rem 1rem;
 }
