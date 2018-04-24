@@ -28,6 +28,7 @@ pipeline {
          */
         stage('Prepare') {
             steps {
+                sh 'echo $HTTP_PROXY'
 
                 // Environment variables
                 sh 'HTTP_PROXY="http://proxy-lmi.global.lmco.com:80"'
@@ -46,6 +47,8 @@ pipeline {
 
                 // Clean build env
                 sh 'yarn clean:all'
+
+                sh 'echo $HTTP_PROXY'
             }
         }
 
@@ -54,6 +57,7 @@ pipeline {
          */
         stage('Build') {
             steps {
+                sh 'echo $HTTP_PROXY'
                 sh 'yarn install'
                 sh 'yarn build' 
             }
