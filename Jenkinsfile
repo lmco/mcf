@@ -28,6 +28,23 @@ pipeline {
          */
         stage('Prepare') {
             steps {
+
+                // Environment variables
+                sh 'HTTP_PROXY="http://proxy-lmi.global.lmco.com:80"'
+                sh 'HTTPS_PROXY="http://proxy-lmi.global.lmco.com:80"'
+                sh 'http_proxy="http://proxy-lmi.global.lmco.com:80"'
+                sh 'https_proxy="http://proxy-lmi.global.lmco.com:80"'
+                sh 'NO_PROXY=127.0.0.1,localhost,*.lmco.com'
+                sh 'NODE_ENV=production'
+                sh 'NODE_TLS_REJECT_UNAUTHORIZED=0'
+
+                // Yarn config
+                sh 'yarn config set "http-proxy" $HTTP_PROXY'
+                sh 'yarn config set "https-proxy" $HTTPS_PROXY'
+                sh 'yarn config set "strict-ssl" false'
+                sh 'yarn config set "cafile" ./certs/LockheedMartinRootCertificationAuthority.pem'
+
+                // Clean build env
                 sh 'yarn clean:all'
             }
         }
