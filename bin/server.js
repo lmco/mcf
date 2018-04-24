@@ -150,13 +150,15 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
         var plugin_path = path.join(__dirname, '..', 'plugins', f);
 
         // if package.json doesn't exist, skip it
-        if (!fs.exists(path.join(plugin_path, 'package.json'))) {
-            continue;
+        if (!fs.existsSync(path.join(plugin_path, 'package.json'))) {
+            return;
         }
 
-        // Install dependencies
+        // Get dependencies
         var package_json = require(path.join(plugin_path, 'package.json'));
         var peer_deps = require(path.join(__dirname, '..', 'package.json'))['peerDependencies'];
+
+        // Install dependencies
         peer_deps = Object.keys(peer_deps);
         for (dep in package_json['dependencies']) {
             // Skip if already in peer deps
@@ -167,7 +169,8 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
             // Make sure the package name is valid.
             // This is also used to protect against command injection.
             if (RegExp('^([a-z0-9\.\\-_])+$').test(dep)) {
-                var stdout = execSync(util.format('yarn add --peer %s', dep));
+                var cmd = util.format('yarn add --peer %s', dep);
+                var stdout = execSync(cmd);
                 console.log(stdout.toString());
             } 
             else {
