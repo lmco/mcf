@@ -17,7 +17,7 @@ const path = require('path');
 const htmlspecialchars = require('htmlspecialchars');
 
 /* Local Modules */
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const API = require(path.join(__dirname, 'APIController'));
 const modelsPath = path.join(__dirname, '..', 'models');
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));

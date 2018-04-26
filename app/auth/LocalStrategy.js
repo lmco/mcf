@@ -25,7 +25,7 @@ const crypto = require('crypto');
 
 const sanitize = require('mongo-sanitize');
 
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
 const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));

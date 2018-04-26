@@ -27,7 +27,7 @@ class VersionNumber extends React.Component {
     }
 
     componentDidMount() {
-        fetch('http://localhost:8080/api/version', {
+        fetch('/api/version', {
             method: 'GET',
             credentials: 'include'
         }).then(response => {

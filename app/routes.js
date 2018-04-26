@@ -17,15 +17,20 @@
 
 const path              = require('path');
 const express           = require('express');
-const config            = require(path.join(__dirname, '..', 'package.json'))['mbee-config'];
+const config            = require(path.join(__dirname, '..', 'package.json'))['config'];
 var getController       = (x) => path.join(__dirname, 'controllers', x);
 const UIController      = require(getController('UIController'));
 const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var router = express.Router();
 
-router.get('/', AuthController.authenticate, UIController.home);
+router.get('/', function(req, res) {
+    return res.render('home', {
+        'ui': config.ui
+    });
+});
 
+router.get('/home', AuthController.authenticate, UIController.home);
 
 /**
  * GET shows the login page.
@@ -41,6 +46,6 @@ router.route('/login')
 router.route('/logout')
     .post(AuthController.authenticate, UIController.logout);
 
-router.get('/admin/console', UIController.admin);
+router.get('/admin/console', AuthController.authenticate, UIController.admin);
 
 module.exports = router;

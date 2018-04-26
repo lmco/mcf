@@ -17,42 +17,43 @@
 # This Dockerfile defines the Docker build for MBEE.
 #
 ###############################################################################
-FROM node:9.5.0-alpine
+FROM node:6.14.1-alpine
 MAINTAINER Josh Kaplan <joshua.d.kaplan@lmco.com>
-WORKDIR /opt/lm/mbee
+WORKDIR /lm/mbee
 
-RUN mkdir -p /opt/lm/mbee/app \
- && mkdir -p /opt/lm/mbee/certs \
- && mkdir -p /opt/lm/mbee/public
+RUN mkdir -p /lm/mbee/app \
+ && mkdir -p /lm/mbee/bin \
+ && mkdir -p /lm/mbee/certs \
+ && mkdir -p /lm/mbee/plugins \
+ && mkdir -p /lm/mbee/public
 
-COPY ./app /opt/lm/mbee/app
-COPY ./certs /opt/lm/mbee/certs
-COPY ./public /opt/lm/mbee/public
-COPY ./config.json /opt/lm/mbee/config.json
-COPY ./server.js /opt/lm/mbee/server.js
-COPY ./package.json /opt/lm/mbee/package.json
+COPY ./app /lm/mbee/app
+COPY ./certs /lm/mbee/certs
+COPY ./plugins /lm/mbee/plugins
+COPY ./public /lm/mbee/public
+COPY ./bin/server.js /lm/mbee/bin/server.js
+COPY ./package.json /lm/mbee/package.json
 
 # Set proxy environment variables
 ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     HTTPS_PROXY="http://proxy-lmi.global.lmco.com:80" \
     http_proxy="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
-    NO_PROXY=127.0.0.1,localhost
-ENV NODE_ENV=production
+    NO_PROXY=127.0.0.1,localhost,*.lmco.com \
+    NODE_ENV=production \
+    NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Yarn config
 RUN yarn config set "http-proxy" $HTTP_PROXY \
  && yarn config set "https-proxy" $HTTPS_PROXY \
  && yarn config set "strict-ssl" false \
  && yarn config set "cafile" ./certs/LockheedMartinRootCertificationAuthority.pem 
-ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Install dependencies
 RUN yarn install
-RUN yarn build 
 
 # Expose ports
-EXPOSE 8080 8443
+EXPOSE 9080 9443
 
 # Run server
 CMD ["yarn", "run", "server"]

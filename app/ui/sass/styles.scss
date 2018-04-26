@@ -10,35 +10,58 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /*
- * index.js
- * 
+ * styles.scss
+ *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This is an example MBEE plugin.
- * See the plugin's README.md file for a more detailed description.
+ * This defines the style and layout for MBEE.
  */
 
-const path = require('path');
-const express = require('express');
+@import 'variables';
 
-// The plugin should use an express router.
-plugin = express();
+h1 {
+    color: $primary-color;
+}
 
-plugin.set('view engine', 'pug');
-plugin.set('views', path.join(__dirname , 'views'));
+html, body {
+    min-height: 100%;
+    min-width: 100%;
+}
+body {
+    min-height: 100vh;
+    background: #333;
+    color: #FFF;
+    font-weight: 300;
+}
 
-// The plugin route `/` returns a home page. 
-plugin.get('/', function(req, res) {
-    res.render('home')
-});
+.container,
+.container-fluid {
+    min-height: 100%;
+    padding-top: 40px;
+}
 
-// The plugin route `/version` returns JSON containing the version
-plugin.get('/version', function(req, res) {
-    res.send(JSON.stringify({'version': '1.0.0'}, null, 4))
-});
+.navbar  {
+    /*height: 40px;*/ 
+    border-bottom: 1px solid #656565;
+    padding: .5rem 1rem .3rem 1rem;
+}
 
+a {
+    color: #76b8ff;
+}
 
-/**
- * The only object that should be exposed is the plugin router.
- */
-module.exports = plugin;
+a:hover {
+    color: #62aeff;
+}
+
+.form-control {
+    background: #343a40;
+    color: #FFF;
+    border: 1px solid #495057;
+}
+
+.form-control:focus {
+    background: #343a40;
+    color: #FFF;
+    border: 1px solid #495057;
+}

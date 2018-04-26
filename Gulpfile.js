@@ -66,7 +66,7 @@ function generateJSDoc() {
  * Compiles UI Sass files into static CSS in public.
  */
 function sassTask() {
-    return gulp.src('./ui/sass/**/*.scss')
+    return gulp.src('./app/ui/sass/**/*.scss')
     .pipe(sass({outputStyle: 'compressed'})
         .on('error', sass.logError))
     .pipe(gulp.dest('./public/css'));
@@ -76,7 +76,7 @@ function sassTask() {
  * Copies all images from ui/img to public/img
  */
 function copyImages() {
-    return gulp.src('./ui/img/**/*')
+    return gulp.src('./app/ui/img/**/*')
     .pipe(gulp.dest('public/img'));
 
 }
@@ -108,7 +108,7 @@ function copyReactDomTask() {
  * Compiles all react JSX components into a single mbee.js file.
  */
 function compileReactTask() {
-    return gulp.src('./ui/react-components/**/*.jsx')
+    return gulp.src('./app/ui/react-components/**/*.jsx')
     .pipe(react())
     .pipe(concat('mbee.js'))
     .pipe(gulp.dest('public/js'));
@@ -119,7 +119,7 @@ function compileReactTask() {
  * Compiles react-dom JSX renderers into a single mbee-renderer.js file.
  */
 function compileReactDomTask() {
-    return gulp.src('./ui/react-renderers/**/*.jsx')
+    return gulp.src('./app/ui/react-renderers/**/*.jsx')
     .pipe(react())
     .pipe(gulp.dest('public/js'));
 }

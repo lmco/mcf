@@ -11,7 +11,7 @@
  *****************************************************************************/
 
 const path = require('path');
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 
 /**
  * UIController.js
@@ -37,7 +37,7 @@ class UIController
         }
         console.log(req.session.count);
         console.log(req.session.token);
-        return res.render('home', {
+        return res.render('mbee', {
             'ui': config.ui, 
             'renderer': 'mbee-renderer'
         });
