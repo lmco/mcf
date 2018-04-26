@@ -531,11 +531,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *       501:
  *         description: Not Implemented
  */
-api.route('/orgs/:orgid/members')
-    .get   (AuthController.authenticate, APIController.notImplemented)
-    .post  (AuthController.authenticate, APIController.notImplemented)
-    .put   (AuthController.authenticate, APIController.notImplemented)
-    .delete(AuthController.authenticate, APIController.notImplemented);
+api.route('/orgs/:orgid/members/:role')
+    .get   (AuthController.authenticate, RoleController.getOrgRoles)
+    .post  (AuthController.authenticate, APIController.postOrgRoles)
+    .put   (AuthController.authenticate, APIController.putOrgRoles)
+    .delete(AuthController.authenticate, APIController.deleteOrgRoles);
 
 
 /**
@@ -562,7 +562,7 @@ api.route('/orgs/:orgid/members')
  *       501:
  *         description: Not Implemented
  */
-api.route('/orgs/:orgid/projects/:projectid/members')
+api.route('/orgs/:orgid/projects/:projectid/members/:role')
     .get   (AuthController.authenticate, APIController.notImplemented)
     .post  (AuthController.authenticate, APIController.notImplemented)
     .put   (AuthController.authenticate, APIController.notImplemented)

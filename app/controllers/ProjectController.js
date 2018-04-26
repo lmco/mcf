@@ -178,18 +178,23 @@ class ProjectController
         }
 
         // Create the callback function to create the project
-        var createProject = function() {
+        var createProject = function(orgs) {
             // Create the new project and save it
             var new_project = new Project({
                 'id': projectId,
                 'name': projectName,
-                'orgid': orgId
+                'org': orgs[0]._id
             });
-            new_project.save();
+            new_project.save(function (err, project){
+                if (err) {
+                    console.log(err);
+                    return res.status(500).send('Internal Server Error');
+                }
+                // Return success and the JSON object
+                res.header('Content-Type', 'application/json');
+                return res.status(201).send(API.formatJSON(new_project));
+            });
 
-            // Return success and the JSON object
-            res.header('Content-Type', 'application/json');
-            return res.status(201).send(API.formatJSON(new_project));
         }
 
         // Error check - Make sure the org exists
@@ -215,7 +220,7 @@ class ProjectController
                 }
 
                 // If the project does not exist, create it.
-                createProject();
+                createProject(orgs);
             });
         });
     }
@@ -278,12 +283,12 @@ class ProjectController
         }
 
         // Create the callback function to create the project
-        var createProject = function() {
+        var createProject = function(orgs) {
             // Create the new project and save it
             var new_project = new Project({
                 'id': projectId,
                 'name': projectName,
-                'orgid': orgId
+                'orgid': orgs[0]._id
             });
             new_project.save();
 
@@ -331,7 +336,7 @@ class ProjectController
                 }
 
                 // If the project does not exist, create it.
-                createProject();
+                createProject(orgs);
             });
         });
     }
@@ -354,7 +359,7 @@ class ProjectController
         var orgId = htmlspecialchars(req.params['orgid']);
         var projectId = htmlspecialchars(req.params['projectid']);
 
-        Project.find({'id': projectId}, function(err, projects) {
+        Project.find({'id': projectId}).populate('org').exec(function(err, projects) {
             if (err) {
                 console.log(err);
                 return res.status(500).send('Internal Server Error');
@@ -363,18 +368,24 @@ class ProjectController
                 console.log('Unexpected number of projects found');
                 return res.status(500).send('Internal Server Error');
             }
-            if (projects[0]['orgid'] != orgId) {
+            if (projects[0].org.id != orgId) {
                 console.log('Project OrgID does not match OrgID in URI.');
                 return res.status(500).send('Internal Server Error');   
             }
-            Project.findByIdAndRemove(projects[0]['id'], function(err) {
+            // Remove the Project
+            Project.findByIdAndRemove(projects[0]._id, function(err) {
                 if (err) {
                     console.log(err);
                     return res.status(500).send('Internal Server Error');
                 }
-                else {
+                // Remove the Organization reference to the project
+                Organization.findOneAndUpdate({id: orgId}, {$pull : {projects: projects[0]._id}}, function (err, deleted) {
+                    if (err) {
+                        console.log(err);
+                        return res.status(500).send('Internal Server Error');
+                    }
                     return res.status(200).send('OK');
-                }
+                });
             });
         });
     }

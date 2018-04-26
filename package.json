@@ -69,7 +69,7 @@
       "https_port": 8443
     },
     "auth": {
-      "strategy": "LocalStrategy",
+      "strategy": "TestStrategy",
       "ldap": {
         "server": "ldaps://usadc43.us.lmco.com:3269",
         "ca": [

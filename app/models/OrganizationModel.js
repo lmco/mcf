@@ -58,7 +58,7 @@ var OrganizationSchema = new Schema({
     memebers: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User'
-    }
+    },
 
     permissions: {
         write: [{

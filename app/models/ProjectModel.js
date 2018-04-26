@@ -24,6 +24,10 @@
 // Requirements
 const mongoose = require('mongoose');
 
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const Organization = require(path.join(modelsPath, 'OrganizationModel'));
+
 // Create Project Model Schema:
 var Schema = mongoose.Schema;
 
@@ -41,7 +45,7 @@ var ProjectSchema = new Schema({
         unique: true,
         match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
         maxlength: [36, 'Too many characters in username'],
-    }
+    },
 
     name: {
     	type: String,
@@ -54,12 +58,12 @@ var ProjectSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Organization',
         require: true
-        }
+    },
 
     members: {
     	type: mongoose.Schema.Types.ObjectId, 
         ref: 'User'
-    }
+    },
 
     permissions: {
         read: [{
@@ -80,6 +84,15 @@ var ProjectSchema = new Schema({
 
 
 });
+
+
+
+// Post hook to link refernece to organization upon save
+ ProjectSchema.post('save', function() {
+     Organization.findOneAndUpdate({_id: this.org}, {$push : {projects: this._id}}, function(err, org){
+        if (err){console.log(err)}
+    })
+})
 
 // Export mongoose model as "Project"
 module.exports = mongoose.model("Project", ProjectSchema)
