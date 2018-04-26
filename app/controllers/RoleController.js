@@ -56,16 +56,16 @@ class RoleController
         var RoleController  = htmlspecialchars(req.params['role']);
 
         // Build query to populate admin and permissions of the org
-        var popQuerry = 'permissions.admin'
+        var popQuery = 'permissions.admin'
         if (role != 'admin'){
-            var popQuerry = popQuerry + ' permissions.' + role
+            popQuerry = popQuery + ' permissions.' + role
         }
 
         // Search Mongo for the organizatiom
-        Organization.find({orgID: orgId}).
+        Organization.findOne({orgID: orgId}).
         // Select from users that have not been soft deleted
         populate({
-            path: popQuerry, 
+            path: popQuery, 
             match: {deleted: false}
         }).
         exec( function(err, org) {
@@ -78,7 +78,8 @@ class RoleController
             var adminList = org.permissions.admins.map(a => {return a.username})
             var user = req.user
             //If organization is found, return list of users with the specific 'role'
-            if (org.length == 1) {
+            // Todo - (Check Error for if statement)
+            if (org) {
                 // Check if user has access
                 if (user.admin || adminList.includes(user.username))
                 // Create Permisssions list containing only username, email, and name
