@@ -53,6 +53,16 @@ db.createUser({
         db: "mbee"
     }]
 })
+
+use wiki
+db.createUser({
+    user: "wiki", 
+    pwd: "relativeUniverse141", 
+    roles: [{
+        role: "readWrite", 
+        db: "wiki"
+    }]
+})
 ```
 
 - Shutdown mongo and restart it with `mongod --auth --dbpath /Path/To/Your/DB/Folder`.
