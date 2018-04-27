@@ -6,4 +6,6 @@ docs/
 keys/
 yarn.lock
 yarn-error.log
+logs/
+*.log
 

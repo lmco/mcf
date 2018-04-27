@@ -50,6 +50,10 @@ function getControllerPath(name) {
     return path.join(__dirname, '..', config.server.app, 'controllers', name);
 }
 
+function getLibPath(name) {
+    return path.join(__dirname, '..', config.server.app, 'lib', name);
+}
+
 
 /**************************************
  *  Local Modules                     *          
@@ -68,6 +72,9 @@ const Router = require(RoutesPath);
 const APIRouter = require(APIRoutesPath);
 const AuthController = require(AuthControllerPath);
 const UIController = require(getControllerPath('UIController'));
+
+const log = require(getLibPath('logger.js'));
+log.info('Winston logger loaded in server.js')
 
 /**************************************
  *  Configuration & Middleware        *          
@@ -190,6 +197,9 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
  *  Server                            *          
  **************************************/
 
+require('../app/lib/startup.js')();
+
+
 // Read TLS/SSL certs
 if (config.server.ssl) {
     var keyPath = path.join('..', 'certs', util.format('%s.key', config.server.ssl_cert_name));
@@ -201,10 +211,10 @@ if (config.server.ssl) {
 
 // Run HTTPSserver
 var httpServer = http.createServer(app);
-httpServer.listen(config.server.http_port, () => console.log('MBEE server listening on port ' + config.server.http_port + '!'));
+httpServer.listen(config.server.http_port, () => log.info('MBEE server listening on port ' + config.server.http_port + '!'));
 
 // Run HTTPS Server
 if (config.server.ssl) {
     var httpsServer = https.createServer(credentials, app);
-    httpsServer.listen(config.server.https_port, () => console.log('MBEE server listening on port ' + config.server.https_port + '!'));
+    httpsServer.listen(config.server.https_port, () => log.info('MBEE server listening on port ' + config.server.https_port + '!'));
 }
