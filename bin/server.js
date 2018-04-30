@@ -62,7 +62,7 @@ function getLibPath(name) {
 // Configuration and Logger
 const config = require(path.join(__dirname, '..', 'package.json'))['config'];
 const log = require(getLibPath('logger.js'));
-log.info('Winston logger loaded in server.js')
+log.debug('Winston logger loaded in server.js')
 
 
 // Module paths
