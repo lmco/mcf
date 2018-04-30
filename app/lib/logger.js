@@ -23,16 +23,22 @@
  *   - `log.error('An error has occured')`
  */
 
-const path = require('path');
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
-const winston = require('winston');
+const path        = require('path');
+const packageJSON = require(path.join(__dirname, '..', '..', 'package.json'));
+const config      = packageJSON['config'];
+const winston     = require('winston');
 const { combine, timestamp, label, printf, colorize } = winston.format;
 
-//const jsonPath = path.join(__dirname, '..', '..', 'package.json')
-//const config   = require(jsonPath)['config'];
 
-// This is our formatting function. This defines the log format.
+/**
+ * This is the formatting function for console output. To change how logs
+ * appear in the console, edit this function. Note, a separate function is used
+ * to define the format for the log files (the fileFormatter function).
+ */
 const formatter = printf(function(msg) {
+    // We want to capitalize the log level. You cannot string.toUpperCase here
+    // because the string includes the color formatter and toUpperCase will
+    // break the color formatting.
     msg.level = msg.level
                 .replace('critical', 'CRITICAL')
                 .replace('error',    'ERROR')
@@ -41,9 +47,11 @@ const formatter = printf(function(msg) {
                 .replace('verbose',  'VERBOSE')
                 .replace('debug',    'DEBUG')
 
+    // If we want colored logs, this is our return string
     if (config.log.colorize) {
         return `\u001b[30m${msg.timestamp}\u001b[39m [${msg.level}]: ${msg.message}`;
     }
+    // If colorize is false, we remove colors from the log level.
     else {
         msg.level = msg.level
             .replace('\u001b[30m', '')
@@ -60,7 +68,12 @@ const formatter = printf(function(msg) {
     }
 });
 
-// This is our formatting function. This defines the log format.
+
+/**
+ * This is the formatting function for log file output. To change how logs
+ * appear in the log files, edit this function. Note, a separate function 
+ * (formatter above) is used to define the format for the log console output. 
+ */
 const fileFormatter = printf(function(msg) {
     msg.level = msg.level
             .replace('\u001b[30m', '')
@@ -76,7 +89,10 @@ const fileFormatter = printf(function(msg) {
     return `${msg.timestamp} [${msg.level}]: ${msg.message}`;   
 });
 
-// This defines our log levels
+
+/* 
+ * This defines our log levels
+ */
 const levels = {
     critical: 0,
     error:    1, 
@@ -86,7 +102,9 @@ const levels = {
     debug:    5
 }
 
-// This colorizes the log levels
+/*
+ * This defines the colors for each log level
+ */
 const colors = {
     critical: 'red underline',
     error:    'red',
@@ -96,7 +114,13 @@ const colors = {
     debug:    'green'
 }
 
-// Create the logger
+/**
+ * This creates the logger. It defines the log level, as specified in the 
+ * config. Defines the levels and ordering from the level field above and 
+ * defines the log format and transports which tell the logger where to send 
+ * log info. By default we have three log transports: the console, an error 
+ * file, and a combined log. T
+ */
 const logger = winston.createLogger({
   level: config.log.level,
   levels: levels, 
@@ -107,9 +131,11 @@ const logger = winston.createLogger({
     formatter
   ),
   transports: [
-    // Write all logs to the console
+    // This is the console transport. It tells the logger to log things
+    // to the console. It uses the default format defined above.
     new winston.transports.Console(),
-    // Write all logs error (and below) to `error.log`
+    // This is the error log transport. It writes all logs of level error 
+    // (and below) to error log file. The file is defined in the config.
     new winston.transports.File({ 
         filename: config.log.error_file, 
         level: 'error',
@@ -119,9 +145,22 @@ const logger = winston.createLogger({
             fileFormatter
         )
     }),
-    // Write to all logs with level `info` and below to `combined.log`
+    // This is the combined log. It logs everything of the default level and 
+    // below to a combined log.
     new winston.transports.File({ 
         filename: config.log.file,
+        level: config.log.level,
+        format: combine(
+            label({ label: 'MBEE' }),
+            timestamp(),
+            fileFormatter
+        )
+    }),
+    // This is the combined log. It logs all log levels to the debug file
+    // defined in the config.
+    new winston.transports.File({ 
+        filename: config.log.debug_file,
+        level: 'debug',
         format: combine(
             label({ label: 'MBEE' }),
             timestamp(),
