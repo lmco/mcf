@@ -23,6 +23,7 @@
  *   - `log.error('An error has occured')`
  */
 
+const path = require('path');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const winston = require('winston');
 const { combine, timestamp, label, printf, colorize } = winston.format;
