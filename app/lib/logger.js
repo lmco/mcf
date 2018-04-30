@@ -31,9 +31,7 @@ const { combine, timestamp, label, printf, colorize } = winston.format;
 //const jsonPath = path.join(__dirname, '..', '..', 'package.json')
 //const config   = require(jsonPath)['config'];
 
-//
 // This is our formatting function. This defines the log format.
-// 
 const formatter = printf(function(msg) {
     msg.level = msg.level
                 .replace('critical', 'CRITICAL')
@@ -42,7 +40,40 @@ const formatter = printf(function(msg) {
                 .replace('info',     'INFO')
                 .replace('verbose',  'VERBOSE')
                 .replace('debug',    'DEBUG')
-    return `${msg.timestamp} [${msg.level}]: ${msg.message}`;
+
+    if (config.log.colorize) {
+        return `\u001b[30m${msg.timestamp}\u001b[39m [${msg.level}]: ${msg.message}`;
+    }
+    else {
+        msg.level = msg.level
+            .replace('\u001b[30m', '')
+            .replace('\u001b[31m', '')
+            .replace('\u001b[32m', '')
+            .replace('\u001b[33m', '')
+            .replace('\u001b[34m', '')
+            .replace('\u001b[35m', '')
+            .replace('\u001b[36m', '')
+            .replace('\u001b[37m', '')
+            .replace('\u001b[38m', '')
+            .replace('\u001b[39m', '')
+        return `${msg.timestamp} [${msg.level}]: ${msg.message}`;   
+    }
+});
+
+// This is our formatting function. This defines the log format.
+const fileFormatter = printf(function(msg) {
+    msg.level = msg.level
+            .replace('\u001b[30m', '')
+            .replace('\u001b[31m', '')
+            .replace('\u001b[32m', '')
+            .replace('\u001b[33m', '')
+            .replace('\u001b[34m', '')
+            .replace('\u001b[35m', '')
+            .replace('\u001b[36m', '')
+            .replace('\u001b[37m', '')
+            .replace('\u001b[38m', '')
+            .replace('\u001b[39m', '')
+    return `${msg.timestamp} [${msg.level}]: ${msg.message}`;   
 });
 
 // This defines our log levels
@@ -79,9 +110,24 @@ const logger = winston.createLogger({
     // Write all logs to the console
     new winston.transports.Console(),
     // Write all logs error (and below) to `error.log`
-    new winston.transports.File({ filename: config.log.error_file, level: 'error' }),
+    new winston.transports.File({ 
+        filename: config.log.error_file, 
+        level: 'error',
+        format: combine(
+            label({ label: 'MBEE' }),
+            timestamp(),
+            fileFormatter
+        )
+    }),
     // Write to all logs with level `info` and below to `combined.log`
-    new winston.transports.File({ filename: config.log.file })
+    new winston.transports.File({ 
+        filename: config.log.file,
+        format: combine(
+            label({ label: 'MBEE' }),
+            timestamp(),
+            fileFormatter
+        )
+    })
   ],
   exitOnError: false
 });

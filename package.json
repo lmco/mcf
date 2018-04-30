@@ -69,7 +69,8 @@
     "log": {
       "level": "info",
       "file": "mbee.log",
-      "error_file": "mbee-error.log"
+      "error_file": "mbee-error.log",
+      "colorize": true
     },
     "test": {
       "url": "http://dev.mbee.us.lmco.com:9080"
