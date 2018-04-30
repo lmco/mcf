@@ -66,6 +66,11 @@
       "http_port": 9080,
       "https_port": 9443
     },
+    "log": {
+      "level": "info",
+      "file": "mbee.log",
+      "error_file": ""
+    },
     "test": {
       "url": "http://dev.mbee.us.lmco.com:9080"
     },

@@ -23,6 +23,7 @@
  *   - `log.error('An error has occured')`
  */
 
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const winston = require('winston');
 const { combine, timestamp, label, printf, colorize } = winston.format;
 
@@ -65,7 +66,7 @@ const colors = {
 
 // Create the logger
 const logger = winston.createLogger({
-  level: 'debug',
+  level: config.log.level,
   levels: levels, 
   format: combine(
     label({ label: 'MBEE' }),
@@ -77,9 +78,9 @@ const logger = winston.createLogger({
     // Write all logs to the console
     new winston.transports.Console(),
     // Write all logs error (and below) to `error.log`
-    new winston.transports.File({ filename: 'mbee_error.log', level: 'error' }),
+    new winston.transports.File({ filename: config.log.error_file, level: 'error' }),
     // Write to all logs with level `info` and below to `combined.log`
-    new winston.transports.File({ filename: 'mbee.log' })
+    new winston.transports.File({ filename: config.log.file })
   ],
   exitOnError: false
 });
