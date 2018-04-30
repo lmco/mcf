@@ -118,8 +118,8 @@ const colors = {
  * This creates the logger. It defines the log level, as specified in the 
  * config. Defines the levels and ordering from the level field above and 
  * defines the log format and transports which tell the logger where to send 
- * log info. By default we have three log transports: the console, an error 
- * file, and a combined log. T
+ * log info. By default we have four log transports: the console, an error 
+ * file, a combined log, and a debug log.
  */
 const logger = winston.createLogger({
   level: config.log.level,
