@@ -25,6 +25,8 @@ const ldap = require('ldapjs');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
 
+const log = require(path.join(__dirname, '..', 'lib', 'logger'));
+
 class LDAPStrategy extends BaseStrategy
 {
 
@@ -54,11 +56,11 @@ class LDAPStrategy extends BaseStrategy
          */
         function doSearch() 
         { 
-            console.log('Executing search ...');
+            log.debug('Executing search ...');
 
             // Generate search filter
             var filter = buildSearchFilter()
-            console.log('Using search filter:', filter);
+            log.debug('Using search filter:', filter);
 
             // Search options
             var opts = {
@@ -81,26 +83,26 @@ class LDAPStrategy extends BaseStrategy
         {
             // If a search entry is found, attempt to authenticate the user
             result.on('searchEntry', function(entry) {
-                console.log('Found User:', JSON.stringify(entry.object, null, 2));
+                log.debug('Found User:', JSON.stringify(entry.object, null, 2));
                 doAuthentication(entry.object, password);
             });
 
             // TODO - Read LDAP.js documentation and figure this out
             result.on('searchReference', function(referral) {
-                console.log('referral: ' + referral.uris.join());
+                log.debug('referral: ' + referral.uris.join());
             });
 
             // Fail on error
             result.on('error', function(err) {
-                console.error('error: ' + err.message);
-                return res.status(401).send('Unauthorized (code 4c44415-00ac)');
+                log.error('error: ' + err.message);
+                return res.status(401).send('Unauthorized');
             });
 
             // TODO - Figure out the best way to handle the asyncronicity 
             // of this event (i.e. end can happen before auth).
             result.on('end', function(result) {
-                console.log('LDAP result end.')
-                console.log('status: ' + result.status);
+                log.debug('LDAP result end.')
+                log.debug('status: ' + result.status);
             });
         }
 
@@ -143,17 +145,17 @@ class LDAPStrategy extends BaseStrategy
          */
         function doAuthentication(user, password) 
         {
-            console.log('Authenticating', user.dn, '...')
+            log.verbose('Authenticating', user.dn, '...')
             client.bind(user.dn, password, function(err) {
 
                 // If an error occurs, fail.
                 if (err) {
-                    console.log('An error has occured on user bind:', err);
-                    return res.status(401).send('Unauthorized (code 4c44415-00E6)');
+                    log.error('An error has occured on user bind:', err);
+                    return res.status(401).send('Unauthorized');
                 } 
                 // If no error occurs, authenticate the user.
                 else {
-                    console.log('User authenticated!');
+                    log.verbose('User authenticated!');
                     next();
                 }
             });
@@ -188,8 +190,8 @@ class LDAPStrategy extends BaseStrategy
         var username = credentials[0];
         var password = credentials[1];
         if (!username || !password) {
-            console.log('Username or password not provided.')
-          return this.fail(null, 401);
+            log.error('Username or password not provided.')
+            return this.fail(null, 401);
         }
       
         // Read the CA certs
@@ -212,7 +214,7 @@ class LDAPStrategy extends BaseStrategy
         // TODO - Figure out how we want to handle auth
         client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_dn_pass, function(err) {
             if (err) {
-                console.log('An error has occured binding.');
+                log.error('An error has occured binding.');
                 throw new Error('An error has occured with the bind_dn.');
             }
             else {
@@ -228,7 +230,7 @@ class LDAPStrategy extends BaseStrategy
 
     doLogin(req, res) 
     {
-        console.log('Logging in', req.user.username);
+        log.verbose('Logging in', req.user.username);
         var token = libCrypto.generateToken({
             'type':     'user',
             'username': req.user.username,

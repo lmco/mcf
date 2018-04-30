@@ -13,6 +13,7 @@
 const path = require('path');
 const package_json = require(path.join(__dirname, '..', '..', 'package.json'));
 const config = package_json['config'];
+const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 
 /**
  * APIController.js
@@ -29,7 +30,7 @@ class APIController
      */
     static version(req, res) 
     {
-        console.log('/api/version');
+        log.info('/api/version');
         var obj = {'version': package_json['version']};
         res.header('Content-Type', 'application/json');
         return res.send(APIController.formatJSON(obj));
@@ -41,7 +42,7 @@ class APIController
      */
     static login(req, res) 
     {
-        console.log('In APIController.login ...');
+        log.debug('In APIController.login ...');
         res.header('Content-Type', 'application/json');
         return res.status(200).send(APIController.formatJSON({
             "token": req.session.token

@@ -21,6 +21,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
+const log = require(path.join(__dirname, 'logger.js'));
 
 
 /**
@@ -50,7 +51,7 @@ function decrypt(data) {
         return decrypted;
     }
     catch (error) {
-        console.log(error);
+        log.error(error);
         return '{}';
     }
 };

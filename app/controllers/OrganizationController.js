@@ -22,6 +22,7 @@ const API = require(path.join(__dirname, 'APIController'));
 const modelsPath = path.join(__dirname, '..', 'models');
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));
 const Project = require(path.join(modelsPath, 'ProjectModel'));
+const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 
 
 /**
@@ -53,7 +54,7 @@ class OrganizationController
         Organization.find(function(err, orgs) {
             // If error occurs, log error and return 500 status.
             if (err) {
-                console.log(err);
+                log.error(err);
                 return res.status(500).send('Internal Server Error');
             }
 
