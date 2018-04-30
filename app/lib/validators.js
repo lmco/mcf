@@ -52,7 +52,7 @@ module.exports.user = {
                 ? true : false;
         }
         catch (error) {
-            console.log(error);
+            log.error(error);
             return false;
         }
     }

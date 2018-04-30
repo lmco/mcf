@@ -14,14 +14,14 @@
  * 
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 
- * This implements a custom Passport.js strategy that uses
+ * TODO - This file is old and needs to be updated before use.
  */
 
 const path = require('path');
 const Strategy = require('passport-strategy');
 const ldap = require('ldapjs');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
-
+const config = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 
 class LMICloudStrategy extends Strategy
 {
@@ -93,7 +93,7 @@ class LMICloudStrategy extends Strategy
         // The initCallback function kicks off the search/auth process
         client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_pass, function() {
             if (err) {
-                console.log('An error has occured binding.');
+                log.error('An error has occured binding.');
                 throw new Error('An error has occured with the bind_dn.');
             }
             // Do the ldap search
@@ -106,7 +106,7 @@ class LMICloudStrategy extends Strategy
         
         // Check if valid user
         if (username == 'admin' && password == 'admin') {
-            console.log('Authorized');
+            log.verbose('Authorized');
             var user = 'admin';
             return this.success(user);
         }
@@ -150,18 +150,18 @@ class LMICloudStrategy extends Strategy
         };
         client.search('dc=us,dc=lmco,dc=com', opts, function(err, res) {
             res.on('searchEntry', function(entry) {
-                console.log('entry: ' + JSON.stringify(entry.object), null, 2);
+                log.debug('entry: ' + JSON.stringify(entry.object), null, 2);
                 AuthController.doLdapAuthentication(entry.object.dn, PASSWORD);
             });
 
             res.on('searchReference', function(referral) {
-                console.log('referral: ' + referral.uris.join());
+                log.debug('referral: ' + referral.uris.join());
             });
             res.on('error', function(err) {
-                console.error('error: ' + err.message);
+                log.error('error: ' + err.message);
             });
             res.on('end', function(result) {
-                console.log('status: ' + result.status);
+                log.debug('status: ' + result.status);
             });
         });
     }
@@ -171,14 +171,14 @@ class LMICloudStrategy extends Strategy
      */
     doAuthentication(dn, password) 
     {
-        console.log('Authenticating', dn, '...')
+        log.verbose('Authenticating', dn, '...')
         client.bind(dn, password, function(err) {
             if (err) {
-                console.log('An error has occured:', err);
+                log.error('An error has occured:', err);
                 this.fail(null, 401)
             } 
             else {
-                console.log('User authenticated!');
+                log.error('User authenticated!');
                 this.success(user)
             }
         });

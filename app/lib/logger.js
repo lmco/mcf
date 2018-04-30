@@ -95,5 +95,4 @@ winston.addColors(colors)
 //logger.verbose(testMsg);
 //logger.debug(testMsg);
 
-logger.info('Winston logger initialized')
 module.exports = logger;

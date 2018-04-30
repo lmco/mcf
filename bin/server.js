@@ -59,8 +59,11 @@ function getLibPath(name) {
  *  Local Modules                     *          
  **************************************/
 
-// Config
+// Configuration and Logger
 const config = require(path.join(__dirname, '..', 'package.json'))['config'];
+const log = require(getLibPath('logger.js'));
+log.info('Winston logger loaded in server.js')
+
 
 // Module paths
 const RoutesPath = path.join(__dirname, '..', config.server.app, 'routes.js');
@@ -73,8 +76,6 @@ const APIRouter = require(APIRoutesPath);
 const AuthController = require(AuthControllerPath);
 const UIController = require(getControllerPath('UIController'));
 
-const log = require(getLibPath('logger.js'));
-log.info('Winston logger loaded in server.js')
 
 /**************************************
  *  Configuration & Middleware        *          
@@ -132,7 +133,7 @@ if (config.db.ssl) {
 // Connect to database
 mongoose.connect(connectURL, options, function(err,msg){
     if (err) {
-        console.log(err) 
+        log.error(err) 
     }
 });
 
@@ -172,13 +173,13 @@ fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
             if (peer_deps.includes(dep)) {
                 continue;
             }
-            console.log('Installing dependency', dep, '...');
+            log.debug('Installing dependency', dep, '...');
             // Make sure the package name is valid.
             // This is also used to protect against command injection.
             if (RegExp('^([a-z0-9\.\\-_])+$').test(dep)) {
                 var cmd = util.format('yarn add --peer %s', dep);
                 var stdout = execSync(cmd);
-                console.log(stdout.toString());
+                log.debug(stdout.toString());
             } 
             else {
                 throw new Error('Error: Failed to install plugin dependency');
