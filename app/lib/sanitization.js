@@ -20,7 +20,7 @@
 const path = require('path');
 
 const htmlspecialchars = require('htmlspecialchars');
-const sanitize = require('mongo-sanitize');
+const mongosanitize = require('mongo-sanitize');
 
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 
@@ -29,7 +29,15 @@ const config = require(path.join(__dirname, '..', '..', 'package.json'))['config
  * Generates a token from user data.
  */
 module.exports.sanitize = function(s) {
-    return sanitize(htmlspecialchars(s));
+    return mongosanitize(htmlspecialchars(s));
+}
+
+module.exports.mongo = function(s) {
+    return mongosanitize();
+}
+
+module.exports.html = function(s) {
+    return htmlspecialchars(s);
 }
 
 

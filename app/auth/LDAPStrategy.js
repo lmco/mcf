@@ -25,7 +25,8 @@ const ldap = require('ldapjs');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
 
-const log = require(path.join(__dirname, '..', 'lib', 'logger'));
+const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
+const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
 
 class LDAPStrategy extends BaseStrategy
 {
@@ -38,189 +39,131 @@ class LDAPStrategy extends BaseStrategy
     {
         super();
         this.name = 'ldap-strategy';
+
+        // This is used to ensure that the `this` keyword references this
+        // object in all of the class methods.
+        this.authenticate.bind(this);
+        this.handleBasicAuth.bind(this);
+        this.handleTokenAuth.bind(this);
+        this.doSearch.bind(this);
+        this.doAuthentication.bind(this);
+        this.doLogin.bind(this);
+
+        // Read the CA certs
+        this.cacerts = [];
+        var projectRoot = path.join(__dirname, '..', '..')
+        for (var i = 0; i < config.auth.ldap.ca.length; i++) {
+            var fname = config.auth.ldap.ca[i];
+            var file = fs.readFileSync(path.join(projectRoot, fname));
+            this.cacerts.push(file)
+        }
+
+        // Initialize the LDAP TLS client
+        this.client = ldap.createClient({
+            url: config.auth.ldap.server,
+            tlsOptions: {
+                ca: this.cacerts
+            }
+        });
+
     }
 
 
     /**
-     * This is the function that gets called during authentication. 
+     * Handles basic-style authentication. This function gets called both for 
+     * the case of a basic auth header or for login form input. Either way
+     * the username and password is provided to this function for auth.
+     *
+     * If an error is passed into the callback, authentication fails. 
+     * If the callback is called with no parameters, the user is authenticated.
      */
     
-    authenticate(req, res, next) 
+    handleBasicAuth(username, password, cb) 
     {
-        /**
-         * Searches LDAP for a given user that meets our search criteria.
-         * When the user is found, calls doAuthentication().
-         *
-         * This is called from inside the `authenticate` method and has access to
-         * its variables including req, res, next, and self.
-         */
-        function doSearch() 
-        { 
-            log.debug('Executing search ...');
-
-            // Generate search filter
-            var filter = buildSearchFilter()
-            log.debug('Using search filter:', filter);
-
-            // Search options
-            var opts = {
-                filter: filter,
-                scope: 'sub',
-                attributes: config.auth.ldap.attributes
-            };
-
-            // Execute the search
-            client.search('dc=us,dc=lmco,dc=com', opts, searchCallback);
-        }
-
-
-        /** 
-         * Handles search events.
-         * This is called from inside the `authenticate` method and has access to
-         * its variables including req, res, next, and self.
-         */
-        function searchCallback(err, result) 
-        {
-            // If a search entry is found, attempt to authenticate the user
-            result.on('searchEntry', function(entry) {
-                log.debug('Found User:', JSON.stringify(entry.object, null, 2));
-                doAuthentication(entry.object, password);
-            });
-
-            // TODO - Read LDAP.js documentation and figure this out
-            result.on('searchReference', function(referral) {
-                log.debug('referral: ' + referral.uris.join());
-            });
-
-            // Fail on error
-            result.on('error', function(err) {
-                log.error('error: ' + err.message);
-                return res.status(401).send('Unauthorized');
-            });
-
-            // TODO - Figure out the best way to handle the asyncronicity 
-            // of this event (i.e. end can happen before auth).
-            result.on('end', function(result) {
-                log.debug('LDAP result end.')
-                log.debug('status: ' + result.status);
-            });
-        }
-
-
-        /**
-         * Build and return the search filter from the config.
-         * This is called from inside the `authenticate` method and has access to
-         * its variables including req, res, next, and self.
-         */
-        function buildSearchFilter() 
-        {
-            // Build the groups part of the query
-            var groups = config.auth.ldap.groups;
-            var group_fmt_s = '(memberOf=CN=%s,' + config.auth.ldap.group_search_dn + ')';
-            var groups_query = ''
-            if (groups.length > 1) {
-                groups_query += '(|';
-            }
-            for (var i = 0; i < groups.length; i++) {
-                groups_query += util.format(group_fmt_s, groups[i]);
-            }
-            if (groups.length > 1){
-                groups_query += ')';
-            }
-            return '(&'
-                 + '(objectclass\=person)'
-                 + '(' + config.auth.ldap.username_attribute + '=' + username + ')'
-                 + groups_query
-                 + ')';
-        }
-
-
-        /**
-         * Uses a simple bind the user to authenticate the user.
-         * This is called from inside the `authenticate` method and has access to
-         * its variables including req, res, next, and self.
-         * 
-         * TODO - Is there a way for no error to occur, but not
-         * successfully bind the user? If so, this could be a problem.
-         */
-        function doAuthentication(user, password) 
-        {
-            log.verbose('Authenticating', user.dn, '...')
-            client.bind(user.dn, password, function(err) {
-
-                // If an error occurs, fail.
-                if (err) {
-                    log.error('An error has occured on user bind:', err);
-                    return res.status(401).send('Unauthorized');
-                } 
-                // If no error occurs, authenticate the user.
-                else {
-                    log.verbose('User authenticated!');
-                    next();
-                }
-            });
-        }
-
+        // Okay, this is silly...I'm not sure I like Javascript OOP.
+        // In short, because doSearch is in an anonymous function, the this
+        // reference is once again undefined. So we set a variable `self`
+        // equal to this and because the anonymous function has access to this
+        // variable scope, we can call class methods using `self`.
+        // This is ugly. I don't like it.
         var self = this;
-        var _this = this;
-
-        // Get authorization header
-        var authorization = req.headers['authorization'];
-        if (!authorization) { 
-            return this.fail(null, 400);
-        }
-      
-        // Check it is a valid auth header
-        var parts = authorization.split(' ')
-        if (parts.length < 2) { 
-            return this.fail(null, 400); 
-        }
-      
-        // Get the auth scheme and check auth scheme is basic
-        var scheme = parts[0];
-        if (!RegExp('Basic').test(scheme)) {
-            return this.fail(null, 400)
-        }
-
-        // Get credentials    
-        var credentials = new Buffer(parts[1], 'base64').toString().split(':');
-        if (credentials.length < 2) { 
-            return this.fail(null, 400);
-        }
-        var username = credentials[0];
-        var password = credentials[1];
-        if (!username || !password) {
-            log.error('Username or password not provided.')
-            return this.fail(null, 401);
-        }
-      
-        // Read the CA certs
-        var projectRoot = path.join(__dirname, '..', '..', '..')
-        var cacerts = [];
-        config.auth.ldap.ca.forEach(function(element) {
-            cacerts.push( fs.readFileSync(path.join(projectRoot, element)) )
-        });
-
-        // Initialize the LDAP TLS client
-        var client = ldap.createClient({
-            url: config.auth.ldap.server,
-            tlsOptions: {
-                ca: cacerts
-            }
-        });
 
         // Bind the resource account we will use to do our lookups
         // The initCallback function kicks off the search/auth process
         // TODO - Figure out how we want to handle auth
-        client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_dn_pass, function(err) {
+        this.client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_dn_pass, function(err) {
             if (err) {
-                log.error('An error has occured binding.');
-                throw new Error('An error has occured with the bind_dn.');
+                cb('An error has occured binding to the LDAP server.')
             }
             else {
-                doSearch()
+                self.doSearch(username, password, cb, self.doAuthentication)
             }
-        });     
+        });  
+    }
+
+
+    /**
+     * Searches LDAP for a given user that meets our search criteria.
+     * When the user is found, calls doAuthentication().
+     *
+     * This is called from inside the `authenticate` method and has access to
+     * its variables including req, res, next, and self.
+     */
+    
+    doSearch(username, password, next, cb) 
+    { 
+        // Generate search filter
+        var filter = '(&'
+                 + '(objectclass\=person)'
+                 + '(' + config.auth.ldap.username_attribute + '=' + username + ')'
+                 + config.auth.ldap.filter
+                 + ')';
+        log.debug('Using search filter:', filter);
+        log.debug('Executing search ...');
+
+        var self = this;
+
+        var opts = {
+            filter: filter,
+            scope: 'sub',
+            attributes: config.auth.ldap.attributes
+        };
+
+        // Execute the search
+        this.client.search('dc=us,dc=lmco,dc=com', opts, function(err, result) {
+            result.on('searchEntry', function(entry) {
+                self.doAuthentication(entry.object, password, next);
+            });
+            result.on('error', function(err) {
+                next('error: ' + err.message);
+            });
+        });
+    }
+
+
+    /**
+     * Uses a simple bind the user to authenticate the user.
+     * This is called from inside the `authenticate` method and has access to
+     * its variables including req, res, next, and self.
+     * 
+     * TODO - Is there a way for no error to occur, but not
+     * successfully bind the user? If so, this could be a problem.
+     */
+    
+    doAuthentication(user, password, next) 
+    {
+        log.verbose('Authenticating', user.dn, '...')
+        this.client.bind(user.dn, password, function(err) {
+            // If an error occurs, fail.
+            if (err) {
+                next('An error has occured on user bind:' + err)
+            } 
+            // If no error occurs, authenticate the user.
+            else {
+                log.verbose('User authenticated!');
+                next(null, user);
+            }
+        });
     }
 
 
@@ -228,7 +171,7 @@ class LDAPStrategy extends BaseStrategy
      * TODO 
      */
 
-    doLogin(req, res) 
+    doLogin(req, res, next) 
     {
         log.verbose('Logging in', req.user.username);
         var token = libCrypto.generateToken({
