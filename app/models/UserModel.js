@@ -115,6 +115,15 @@ var UserSchema = new mongoose.Schema({
         default: false
     },
 
+    /**
+     * The `isLDAPUser` property defines whether or not the user is an LDAP 
+     * user. This impacts how the user is authenticated
+     */
+    isLDAPUser: {
+        type: Boolean,
+        default: false
+    },
+
 
     /**
      * The date on which the user was created. 

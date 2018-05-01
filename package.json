@@ -74,10 +74,10 @@
       "colorize": true
     },
     "test": {
-      "url": "http://dev.mbee.us.lmco.com:9080"
+      "url": "http://localhost:9080"
     },
     "auth": {
-      "strategy": "LDAPStrategy",
+      "strategy": "LMICloudStrategy",
       "ldap": {
         "server": "ldaps://usadc43.us.lmco.com:3269",
         "ca": [
@@ -111,11 +111,11 @@
     },
     "db": {
       "name": "mbee",
-      "url": "dev.mbee.us.lmco.com",
+      "url": "localhost",
       "port": "27017",
       "username": "mbee",
-      "password": "relativeUniverse141",
-      "ssl": true,
+      "password": "mbee",
+      "ssl": false,
       "sslCAFile": "LockheedMartinRootCertificationAuthority.pem"
     }
   }
