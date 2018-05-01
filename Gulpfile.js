@@ -54,7 +54,7 @@ gulp.task('default', [
  * Removes directories created during build.
  */
 function cleanTask() {
-    return del(['public', 'docs']);
+    return del(['public', 'docs', '*.log']);
 }
 
 function generateJSDoc() {

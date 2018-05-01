@@ -30,6 +30,7 @@ const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
 const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
 const API = require(path.join(__dirname, '..', 'controllers', 'APIController'));
+const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 
 /**
  * LocalStrategy
@@ -64,7 +65,7 @@ class LocalStrategy extends BaseStrategy
             // Check it is a valid auth header
             var parts = authorization.split(' ')
             if (parts.length < 2) { 
-                console.log('Parts length < 2');
+                log.debug('Parts length < 2');
                 return (req.originalUrl.startsWith('/api')) 
                     ? res.status(400).send('Bad Request')
                     : res.redirect('/login');
@@ -77,7 +78,7 @@ class LocalStrategy extends BaseStrategy
                 // Get credentials from the auth header    
                 var credentials = new Buffer(parts[1], 'base64').toString().split(':');
                 if (credentials.length < 2) { 
-                    console.log('Credentials length < 2');
+                    log.debug('Credentials length < 2');
                     return (req.originalUrl.startsWith('/api')) 
                         ? res.status(400).send('Bad Request')
                         : res.redirect('/login');
@@ -86,7 +87,7 @@ class LocalStrategy extends BaseStrategy
                 var password = credentials[1];
                 // Error check - make sure username/password are not empty
                 if (!username || !password || username == '' || password == '' ) {
-                    console.log('Username or password not provided.')
+                    log.verbose('Username or password not provided.')
                     return (req.originalUrl.startsWith('/api')) 
                         ? res.status(401).send('Unauthorized')
                         : res.redirect('/login');
@@ -94,13 +95,13 @@ class LocalStrategy extends BaseStrategy
                 // Handle basic auth
                 LocalStrategy.handleBasicAuth(username, password, function(err, user) {
                     if (err) {
-                        console.log(err);
+                        log.error(err);
                         return (req.originalUrl.startsWith('/api')) 
                             ? res.status(401).send('Unauthorized')
                             : res.redirect('/login');
                     } 
                     else {
-                        console.log('Authenticated user via basic auth:', user);
+                        log.verbose('Authenticated user via basic auth:', user);
                         req.user = user;
                         next();
                     }
@@ -108,17 +109,17 @@ class LocalStrategy extends BaseStrategy
             }
             // Handle token authentication
             else if (RegExp('Bearer').test(scheme)) {
-                console.log('Using auth token ...')
+                log.debug('Using auth token ...')
                 var token = new Buffer(parts[1], 'utf8').toString();
                 LocalStrategy.handleTokenAuth(token, function(err, user) {
                     if (err) {
-                        console.log(err);
+                        log.error(err);
                         return (req.originalUrl.startsWith('/api')) 
                             ? res.status(401).send('Unauthorized')
                             : res.redirect('/login');
                     } 
                     else {
-                        console.log('Authenticated user via token auth:', user);
+                        log.verbose('Authenticated user via token auth:', user);
                         req.user = user;
                         next();
                     }
@@ -126,7 +127,7 @@ class LocalStrategy extends BaseStrategy
             }
             // Other authorization header
             else {
-                console.log('Invalid authorization scheme.');
+                log.verbose('Invalid authorization scheme.');
                 return (req.originalUrl.startsWith('/api')) 
                     ? res.status(401).send('Unauthorized')
                     : res.redirect('/login');
@@ -134,17 +135,17 @@ class LocalStrategy extends BaseStrategy
         }
         // Authenticate using a stored session token
         else if (req.session.token) {
-            console.log('Using session token...')
+            log.verbose('Using session token...')
             var token = req.session.token;
             LocalStrategy.handleTokenAuth(token, function(err, user) {
                 if (err) {
-                    console.log(err);
+                    log.error(err);
                     return (req.originalUrl.startsWith('/api')) 
                         ? res.status(401).send('Unauthorized')
                         : res.redirect('/login');
                 } 
                 else {
-                    console.log('Authenticated user via session token:', user);
+                    log.verbose('Authenticated user via session token:', user);
                     req.user = user;
                     next();
                 }
@@ -156,27 +157,27 @@ class LocalStrategy extends BaseStrategy
             var password = req.body.password;
             // Error check - make sure username/password are not empty
             if (!username || !password || username == '' || password == '' ) {
-                console.log('Username or password not provided.')
+                log.verbose('Username or password not provided.')
                 return (req.originalUrl.startsWith('/api')) 
                     ? res.status(401).send('Unauthorized')
                     : res.redirect('/login');
             }
             LocalStrategy.handleBasicAuth(username, password, function(err, user) {
                 if (err) {
-                    console.log(err);
+                    log.error(err);
                     return (req.originalUrl.startsWith('/api')) 
                         ? res.status(401).send('Unauthorized')
                         : res.redirect('/login');
                 } 
                 else {
-                    console.log('Authenticated user via form auth:', user);
+                    log.verbose('Authenticated user via form auth:', user);
                     req.user = user;
                     next();
                 }
             })
         }
         else {
-            console.log('No valid authentication method provided.');
+            log.error('No valid authentication method provided.');
             return (req.originalUrl.startsWith('/api')) 
                 ? res.status(401).send('Unauthorized')
                 : res.redirect('/login');
@@ -274,7 +275,7 @@ class LocalStrategy extends BaseStrategy
 
     doLogin(req, res, next) 
     {
-        console.log('Logging in', req.user.username);
+        log.verbose('Logging in', req.user.username);
         var token = libCrypto.generateToken({
             'type':     'user',
             'username': req.user.username,
