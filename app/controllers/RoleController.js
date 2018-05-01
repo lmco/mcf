@@ -14,7 +14,7 @@
 const path = require('path');
 
 /* Third-party modules */
-const htmlspecialchars = require('htmlspecialchars');
+const LibSani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
 
 /* Local Modules */
 const config       = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
@@ -52,8 +52,8 @@ class RoleController
     static getOrgRoles(req, res)
     {
         // Sanitize url params
-        var orgId = htmlspecialchars(req.params['orgid']);
-        var RoleController  = htmlspecialchars(req.params['role']);
+        var orgId = LibSani.sanitize(req.params['orgid']);
+        var RoleController  = LibSani.sanitize(req.params['role']);
 
         // Build query to populate admin and permissions of the org
         var popQuery = 'permissions.admin'
@@ -79,34 +79,39 @@ class RoleController
             var user = req.user
             //If organization is found, return list of users with the specific 'role'
             // Todo - (Check Error for if statement)
-            if (org) {
-                // Check if user has access
-                if (user.admin || adminList.includes(user.username))
-                // Create Permisssions list containing only username, email, and name
-                var permissionList = org.permissions.map(a => {
-                    return {
-                        username: a.username, 
-                        email: a.email,
-                        name: a.name
-                    }
-                })
-                // Return user permission list as an array
-                res.header('Content-Type', 'application/json');
-                return res.status(200).send(API.formatJSON(permissionList));
-                else {
-                    return res.status(403).send('Unauthorized')
-                }
-            }
-            // If no organization is found, return error
-            else {
+            if (!org) {
                 return res.status(500).send('Internal Server Error');
             }
+
+            if(!user.admin || !adminList.includes(user.username)){
+                return res.status(403).send('Unauthorized')
+            }
+            
+            // Check if user has access
+            if (user.admin || adminList.includes(user.username))
+            // Create Permisssions list containing only username, email, and name
+            var permissionList = org.permissions.map(a => {
+                return {
+                    username: a.username, 
+                    email: a.email,
+                    name: a.name
+                }
+            })
+            // Return user permission list as an array
+            res.header('Content-Type', 'application/json');
+            return res.status(200).send(API.formatJSON(permissionList));
+
+
         })
     }
 
 
     static postOrgRoles(req, res)
     {
+        var orgId = LibSani.sanitize(req.params['orgid']);
+        var RoleController  = LibSani.sanitize(req.params['role']);
+
+
 
     }
 
