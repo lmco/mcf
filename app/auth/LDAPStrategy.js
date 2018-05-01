@@ -168,6 +168,37 @@ class LDAPStrategy extends BaseStrategy
 
 
     /**
+     * Handles token authentication. This function gets called both for 
+     * the case of a token auth header or a session token. Either way
+     * the token is provided to this function for auth.
+     *
+     * If an error is passed into the callback, authentication fails. 
+     * If the callback is called with no parameters, the user is authenticated.
+     */
+    handleTokenAuth(token, cb)
+    {
+        // Try to decrypt the token
+        try {
+            token = libCrypto.inspectToken(token);
+        }
+        // If it cannot be decrypted, it is not valid and the 
+        // user is not authorized
+        catch (error) {
+            cb(error);
+        }
+
+        // Make sure the token is not expired
+        if (Date.now() < Date.parse(token.expires)) {
+            cb(null, token.username);
+        }
+        // If token is expired user is unauthorized
+        else {
+            cb('Token is expired');
+        }
+    }
+
+
+    /**
      * TODO 
      */
 
