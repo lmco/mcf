@@ -24,6 +24,15 @@ const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
  */
 class APIController 
 {
+    /**
+     * Returns 200 to confirm the API is functional
+     */
+    static test(req, res) 
+    {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send('');
+    }
+
 
     /**
      * Returns the version number as JSON.

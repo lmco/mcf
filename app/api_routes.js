@@ -39,6 +39,22 @@ const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var api = express.Router();
 
+
+/** 
+ * @swagger
+ * /doc:
+ *   get:
+ *     description: This API endpoint should be used to test is the API is
+ *     functional.
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+api.get('/test', APIController.test);
+
+
 /** 
  * @swagger
  * /doc:
