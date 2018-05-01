@@ -67,7 +67,7 @@
       "https_port": 9443
     },
     "log": {
-      "level": "info",
+      "level": "debug",
       "file": "mbee.log",
       "error_file": "mbee-error.log",
       "debug_file": "mbee-debug.log",
@@ -77,7 +77,7 @@
       "url": "http://dev.mbee.us.lmco.com:9080"
     },
     "auth": {
-      "strategy": "LocalStrategy",
+      "strategy": "LDAPStrategy",
       "ldap": {
         "server": "ldaps://usadc43.us.lmco.com:3269",
         "ca": [
@@ -87,10 +87,8 @@
         ],
         "bind_dn": "mbee-query@us.lmco.com",
         "bind_dn_pass": "SuaIZh4oIPCRD9g",
-        "groups": [
-          "SSC.MBEE",
-          "SSC.MBEE.Dev"
-        ],
+        "username_attribute": "sAMAccountName",
+        "filter": "(memberOf=CN=SSC.MBEE.Dev,ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com)",
         "attributes": [
           "dn",
           "sAMAccountName",
@@ -98,9 +96,7 @@
           "givenName",
           "sn",
           "mail"
-        ],
-        "username_attribute": "sAMAccountName",
-        "group_search_dn": "ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com"
+        ]
       }
     },
     "ui": {
@@ -115,11 +111,11 @@
     },
     "db": {
       "name": "mbee",
-      "url": "dev.mbee.us.lmco.com",
+      "url": "localhost",
       "port": "27017",
       "username": "mbee",
-      "password": "relativeUniverse141",
-      "ssl": true,
+      "password": "mbee",
+      "ssl": false,
       "sslCAFile": "LockheedMartinRootCertificationAuthority.pem"
     }
   }
