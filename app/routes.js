@@ -24,13 +24,13 @@ const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var router = express.Router();
 
-router.get('/', function(req, res) {
+router.get('/', AuthController.authenticate.bind(Authcontroller), UIController.home);
+
+router.get('/dev/doc', function(req, res) {
     return res.render('home', {
         'ui': config.ui
     });
 });
-
-router.get('/home', AuthController.authenticate, UIController.home);
 
 /**
  * GET shows the login page.
@@ -38,14 +38,16 @@ router.get('/home', AuthController.authenticate, UIController.home);
  */
 router.route('/login')
     .get(UIController.showLoginPage)
-    .post(AuthController.authenticate, AuthController.doLogin, UIController.login);
+    .post(AuthController.authenticate.bind(Authcontroller), 
+          AuthController.doLogin, 
+          UIController.login);
 
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */
 router.route('/logout')
-    .post(AuthController.authenticate, UIController.logout);
+    .post(AuthController.authenticate.bind(Authcontroller), UIController.logout);
 
-router.get('/admin/console', AuthController.authenticate, UIController.admin);
+router.get('/admin/console', AuthController.authenticate.bind(Authcontroller), UIController.admin);
 
 module.exports = router;
