@@ -52,7 +52,7 @@ class TestAPI
     static getVersion(done)
     {
         request({
-            url:        config.test.url + '/api/test'
+            url: config.test.url + '/api/test'
         }, 
         function(error, response, body) {
             chai.expect(response.statusCode).to.equal(200);

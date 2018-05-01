@@ -24,13 +24,16 @@ const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var router = express.Router();
 
-router.get('/', AuthController.authenticate.bind(Authcontroller), UIController.home);
+router.get('/', AuthController.authenticate.bind(AuthController), UIController.home);
 
-router.get('/dev/doc', function(req, res) {
-    return res.render('home', {
-        'ui': config.ui
-    });
-});
+router.get('/dev/doc', 
+    AuthController.authenticate.bind(AuthController), 
+    function(req, res) {
+        return res.render('home', {
+            'ui': config.ui
+        });
+    }
+);
 
 /**
  * GET shows the login page.
@@ -38,7 +41,7 @@ router.get('/dev/doc', function(req, res) {
  */
 router.route('/login')
     .get(UIController.showLoginPage)
-    .post(AuthController.authenticate.bind(Authcontroller), 
+    .post(AuthController.authenticate.bind(AuthController), 
           AuthController.doLogin, 
           UIController.login);
 
@@ -46,8 +49,8 @@ router.route('/login')
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */
 router.route('/logout')
-    .post(AuthController.authenticate.bind(Authcontroller), UIController.logout);
+    .post(AuthController.authenticate.bind(AuthController), UIController.logout);
 
-router.get('/admin/console', AuthController.authenticate.bind(Authcontroller), UIController.admin);
+router.get('/admin/console', AuthController.authenticate.bind(AuthController), UIController.admin);
 
 module.exports = router;
