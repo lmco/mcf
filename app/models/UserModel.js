@@ -163,6 +163,24 @@ var UserSchema = new mongoose.Schema({
         get: function(v) {
             return (this.deletedOn !== null); 
         }
+    },
+
+    orgPermissions : {
+        member: [{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Organization'
+        }],
+
+        write: [{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Organization'
+        }],
+
+        admin: [{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Organization'
+        }]
+
     }
 
 });

@@ -53,26 +53,32 @@ var OrganizationSchema = new Schema({
     projects: [{
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Project'
-    }],
+    }]
+})
 
-    memebers: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User'
-    },
+OrganizationSchema.set('toJSON', { virtuals: true })
+OrganizationSchema.set('toObject', { virtuals: true })
 
-    permissions: {
-        write: [{
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User'
-        }],
+OrganizationSchema.virtual('members', {
+    ref: 'User',
+    localField: '_id',
+    foreignField: 'orgPermissions.member',
+    justOne: false
+})
 
-        admin: [{
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User'
-        }]
-    }
+OrganizationSchema.virtual('permissions.write', {
+    ref: 'User',
+    localField: '_id',
+    foreignField: 'orgPermissions.write',
+    justOne: false
+})
 
-});
+OrganizationSchema.virtual('permissions.admin', {
+    ref: 'User',
+    localField: '_id',
+    foreignField: 'orgPermissions.admin',
+    justOne: false
+})
 
 
 // Export mongoose model as "Organization"

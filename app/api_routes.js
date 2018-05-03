@@ -26,6 +26,7 @@ const APIController     = require(getController('APIController'));
 const OrgController     = require(getController('OrganizationController'));
 const ProjectController = require(getController('ProjectController'));
 const UserController    = require(getController('UserController'));
+const RoleController    = require(getController('RoleController'));
 const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var api = express.Router();
@@ -533,9 +534,9 @@ api.route('/orgs/:orgid/projects/:projectid')
  */
 api.route('/orgs/:orgid/members/:role')
     .get   (AuthController.authenticate, RoleController.getOrgRoles)
-    .post  (AuthController.authenticate, APIController.postOrgRoles)
-    .put   (AuthController.authenticate, APIController.putOrgRoles)
-    .delete(AuthController.authenticate, APIController.deleteOrgRoles);
+    .post  (AuthController.authenticate, RoleController.postOrgRoles)
+    .put   (AuthController.authenticate, RoleController.putOrgRoles)
+    .delete(AuthController.authenticate, RoleController.deleteOrgRoles);
 
 
 /**
