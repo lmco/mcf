@@ -77,7 +77,7 @@ class BaseStrategy
                             : res.redirect('/login');
                     } 
                     else {
-                        log.verbose('Authenticated user via basic auth:', user);
+                        log.verbose('Authenticated user via basic auth:', user.username);
                         req.user = user;
                         next();
                     }
@@ -95,7 +95,7 @@ class BaseStrategy
                             : res.redirect('/login');
                     } 
                     else {
-                        log.verbose('Authenticated user via token auth:', user);
+                        log.verbose('Authenticated user via token auth:', user).username;
                         req.user = user;
                         next();
                     }
@@ -121,7 +121,7 @@ class BaseStrategy
                         : res.redirect('/login');
                 } 
                 else {
-                    log.verbose('Authenticated user via session token:', user);
+                    log.verbose('Authenticated user via session token:', user.username);
                     req.user = user;
                     next();
                 }
@@ -146,14 +146,16 @@ class BaseStrategy
                         : res.redirect('/login');
                 } 
                 else {
-                    log.verbose('Authenticated user via form auth:', user);
+                    log.verbose('Authenticated user via form auth:', user.username);
+                    log.info('User logged in');
+                    log.info(user.username)
                     req.user = user;
                     next();
                 }
             })
         }
         else {
-            log.error('No valid authentication method provided.');
+            log.warn('No valid authentication method provided. Redirecting to /login ...');
             return (req.originalUrl.startsWith('/api')) 
                 ? res.status(401).send('Unauthorized')
                 : res.redirect('/login');

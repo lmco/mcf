@@ -29,6 +29,19 @@ const config      = packageJSON['config'];
 const winston     = require('winston');
 const { combine, timestamp, label, printf, colorize } = winston.format;
 
+var fmt = {
+    'color': {
+    'grey': '\u001b[30m',
+    'red': '\u001b[31m',
+    'green': '\u001b[32m',
+    'yellow': '\u001b[33m',
+    'blue': '\u001b[34m',
+    'magenta': '\u001b[35m',
+    'cyan': '\u001b[36m',
+    'light_grey': '\u001b[37m',
+    'esc': '\u001b[39m'
+    }
+}
 
 /**
  * This is the formatting function for console output. To change how logs
@@ -36,6 +49,17 @@ const { combine, timestamp, label, printf, colorize } = winston.format;
  * to define the format for the log files (the fileFormatter function).
  */
 const formatter = printf(function(msg) {
+    //
+    // This allows us to get the file, line, and column
+    var stack = new Error().stack
+    let split = stack.split('\n')[11]
+    let tmp = split.split('/mbee/')
+    let file = tmp[tmp.length-1].split(':')[0].replace(/\//g, '.');
+    let line = tmp[tmp.length-1].split(':')[1];
+    let col = tmp[tmp.length-1].split(':')[2].replace(')', '');
+
+    //console.log(stack)
+
     // We want to capitalize the log level. You cannot string.toUpperCase here
     // because the string includes the color formatter and toUpperCase will
     // break the color formatting.
@@ -49,7 +73,9 @@ const formatter = printf(function(msg) {
 
     // If we want colored logs, this is our return string
     if (config.log.colorize) {
-        return `\u001b[30m${msg.timestamp}\u001b[39m [${msg.level}]: ${msg.message}`;
+        var ts = `${fmt.color.grey}${msg.timestamp}${fmt.color.esc}` // timestamp
+        var f = `${fmt.color.cyan}${file}${fmt.color.esc}`           // file
+        return `${ts} [${msg.level}] ${f}\u001b[30m:${line} :\u001b[39m ${msg.message}`;
     }
     // If colorize is false, we remove colors from the log level.
     else {
@@ -109,7 +135,7 @@ const colors = {
     critical: 'red underline',
     error:    'red',
     warn:     'yellow',
-    info:     'cyan',
+    info:     'magenta',
     verbose:  'blue',
     debug:    'green'
 }

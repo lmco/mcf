@@ -12,6 +12,7 @@
 
 const path = require('path');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
+const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 
 /**
  * UIController.js
@@ -28,15 +29,6 @@ class UIController
      */
     static home(req, res) 
     {
-        console.log('/');
-        if (req.session.count) {
-            req.session.count++;
-        }
-        else {
-            req.session.count = 1;
-        }
-        console.log(req.session.count);
-        console.log(req.session.token);
         return res.render('mbee', {
             'ui': config.ui, 
             'renderer': 'mbee-renderer'
@@ -72,7 +64,7 @@ class UIController
      */
     static login(req, res) 
     {
-        console.log('User authenticated via UI.')
+        log.info('Request -> "/login" by ' + req.user.username.toString());
         res.redirect('/');
     }
 

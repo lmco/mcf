@@ -48,5 +48,46 @@
         "password": "stormtrooper",
         "fname": "Stormtrooper",
         "lname": "FN2187"
+    }],
+    "elements": [{
+        "id": "XWNG-PRT-0000",
+        "name": "X-Wing Root Element",
+        "text": "The root element of the X-Wing model.",
+        "project": "xwng"
+    }, {
+        "id": "XWNG-PRT-0001",
+        "name": "Engine",
+        "text": "The X-wing engine that allows the vehicle to fly",
+        "project": "xwng"
+    }, {
+        "id": "XWNG-PRT-0002",
+        "name": "Wing",
+        "text": "Four of them actually.",
+        "project": "xwng"
+    }, {
+        "id": "XWNG-PRT-0003",
+        "name": "Photon Torpedoes",
+        "text": "These go into thermal exhaust ports.",
+        "project": "xwng"
+    }, {
+        "id": "DTHSTR-PRT-0000",
+        "name": "Death Star Root Element",
+        "text": "The root element of the Death Star model",
+        "project": "dthstr"
+    }, {
+        "id": "DTHSTR-PRT-0001",
+        "name": "Core Reactor",
+        "text": "The core reactor for the Death Star. Not sure what it does, but is centrally located.",
+        "project": "dthstr"
+    }, {
+        "id": "DTHSTR-PRT-0002",
+        "name": "Tractor Beam",
+        "text": "Used for beaming people up. Or capturing aluminum falcons.",
+        "project": "dthstr"
+    }, {
+        "id": "DTHSTR-PRT-0003",
+        "name": "Thermal Exhaust Port",
+        "text": "Small thermal exhaust port for core reactor. Approx 2m wide opening in Death Star trench. Small one-man fighters are no threat.",
+        "project": "dthstr"
     }]
 }

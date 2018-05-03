@@ -49,7 +49,7 @@ router.route('/login')
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */
 router.route('/logout')
-    .post(AuthController.authenticate.bind(AuthController), UIController.logout);
+    .get(AuthController.authenticate.bind(AuthController), UIController.logout);
 
 router.get('/admin/console', AuthController.authenticate.bind(AuthController), UIController.admin);
 

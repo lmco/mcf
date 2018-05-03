@@ -116,7 +116,7 @@ class LMICloudStrategy extends BaseStrategy
             // User is not found locally 
             // or is found and is an LDAP user,
             // try LDAP authentication
-            else if (users.length == 0 || (users.length == 1 && !users[0].isLDAPUser) ) {
+            else if (users.length == 0 || (users.length == 1 && users[0].isLDAPUser) ) {
                 // Bind the resource account we will use to do our lookups
                 // The initCallback function kicks off the search/auth process
                 self.client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_dn_pass, function(err) {
@@ -130,6 +130,8 @@ class LMICloudStrategy extends BaseStrategy
             }
             // This should never actually be hit
             else {
+                log.debug('Found Users: ')
+                log.debug(users);
                 cb('Too many users found.');
             }
         });
@@ -275,7 +277,7 @@ class LMICloudStrategy extends BaseStrategy
 
     doLogin(req, res, next) 
     {
-        log.verbose('Logging in', req.user.username);
+        log.verbose('"/api/login"' + req.user.username.toString());
         var token = libCrypto.generateToken({
             'type':     'user',
             'username': req.user.username,
