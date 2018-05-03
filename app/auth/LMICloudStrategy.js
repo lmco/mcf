@@ -17,172 +17,275 @@
  * TODO - This file is old and needs to be updated before use.
  */
 
+const fs = require('fs');
 const path = require('path');
-const Strategy = require('passport-strategy');
+const util = require('util');
 const ldap = require('ldapjs');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
-const config = require(path.join(__dirname, '..', 'lib', 'logger.js'));
+const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
+const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
+const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
+const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
+const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
 
-class LMICloudStrategy extends Strategy
+class LMICloudStrategy extends BaseStrategy
 {
 
     /**
-     * The `TestBasicStrategy` constructor.
+     * The `LMICloudStrategy` constructor.
      */
+    
     constructor() 
     {
         super();
-        this.name = 'lmi-cloud';
+        this.name = 'lmi-cloud-strategy';
+
+        // This is used to ensure that the `this` keyword references this
+        // object in all of the class methods.
+        this.authenticate.bind(this);
+        this.handleBasicAuth.bind(this);
+        this.handleTokenAuth.bind(this);
+        this.doSearch.bind(this);
+        this.doAuthentication.bind(this);
+        this.doLogin.bind(this);
+
+        // Read the CA certs
+        this.cacerts = [];
+        var projectRoot = path.join(__dirname, '..', '..')
+        for (var i = 0; i < config.auth.ldap.ca.length; i++) {
+            var fname = config.auth.ldap.ca[i];
+            var file = fs.readFileSync(path.join(projectRoot, fname));
+            this.cacerts.push(file)
+        }
+
+        // Initialize the LDAP TLS client
+        this.client = ldap.createClient({
+            url: config.auth.ldap.server,
+            tlsOptions: {
+                ca: this.cacerts
+            }
+        });
+
     }
 
 
     /**
-     * This is the function that gets called during authentication. 
-     * It passes the request to the this._verify method which is defined
-     * by the constructor input.
+     * Handles basic-style authentication. This function gets called both for 
+     * the case of a basic auth header or for login form input. Either way
+     * the username and password is provided to this function for auth.
+     *
+     * If an error is passed into the callback, authentication fails. 
+     * If the callback is called with no parameters, the user is authenticated.
      */
-    authenticate(req) 
+    
+    handleBasicAuth(username, password, cb) 
     {
-        // Get authorization header
-        var authorization = req.headers['authorization'];
-        if (!authorization) { 
-            return this.fail(null, 400);
-        }
-      
-        // Check it is a valid auth header
-        var parts = authorization.split(' ')
-        if (parts.length < 2) { 
-            return this.fail(null, 400); 
-        }
-      
-        // Get the auth scheme and check auth scheme is basic
-        var scheme = parts[0];
-        if (!RegExp('Basic').test(scheme)) {
-            return this.fail(null, 400)
-        }
+        // Okay, this is silly...I'm not sure I like Javascript OOP.
+        // In short, because doSearch is in an anonymous function, the this
+        // reference is once again undefined. So we set a variable `self`
+        // equal to this and because the anonymous function has access to this
+        // variable scope, we can call class methods using `self`.
+        // This is ugly. I don't like it.
+        var self = this;
 
-        // Get credentials    
-        var credentials = new Buffer(parts[1], 'base64').toString().split(':');
-        if (credentials.length < 2) { 
-            return this.fail(null, 400);
-        }
-        var username = credentials[0];
-        var password = credentials[1];
-        if (!username || !password) {
-          return this.fail(null, 401);
-        }
-      
-
-        /**************************************************************/
-
-        var appRoot = require(path.join(__dirname, '..', '..'))
-        var ca_certs = [];
-        config.auth.ldap.ca.forEach(function(element) {
-            cacerts.push( fs.readFileSync(path.join(appRoot, element)) )
-        });
-
-        // Initialize the LDAP client to the LM active directory server
-        var client = ldap.createClient({
-            url: config.auth.ldap.server,
-            tlsOptions: {
-                ca: ca_certs
-            }
-        });
-
-        // Bind the resource account we will use to do our lookups
-        // The initCallback function kicks off the search/auth process
-        client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_pass, function() {
+        // Search locally for the user
+        User.find({
+            'username': username,
+            'deletedOn': null
+        }, function(err, users) {
+            // Check for errors
             if (err) {
-                log.error('An error has occured binding.');
-                throw new Error('An error has occured with the bind_dn.');
+                cb(err);
             }
-            // Do the ldap search
+            // If user found and not LDAP (e.g. a local user), 
+            // do local authentication
+            if (users.length == 1 && !users[0].isLDAPUser) { 
+                // Compute the password hash on given password
+                var hash = crypto.createHash('sha256');
+                hash.update(user._id.toString());       // salt
+                hash.update(password);                  // password
+                let pwdhash = hash.digest().toString('hex');
+                // Authenticate the user
+                if (user.password == pwdhash) {
+                    cb(null, user);
+                }
+                else {
+                    cb('Invalid password');
+                }
+            }
+            // User is not found locally 
+            // or is found and is an LDAP user,
+            // try LDAP authentication
+            else if (users.length == 0 || (users.length == 1 && !users[0].isLDAPUser) ) {
+                // Bind the resource account we will use to do our lookups
+                // The initCallback function kicks off the search/auth process
+                self.client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_dn_pass, function(err) {
+                    if (err) {
+                        cb('An error has occured binding to the LDAP server.')
+                    }
+                    else {
+                        self.doSearch(username, password, cb, self.doAuthentication)
+                    }
+                });  
+            }
+            // This should never actually be hit
             else {
-                doSearch(username)
+                cb('Too many users found.');
             }
         });
-
-        /**************************************************************/
-        
-        // Check if valid user
-        if (username == 'admin' && password == 'admin') {
-            log.verbose('Authorized');
-            var user = 'admin';
-            return this.success(user);
-        }
-        else {
-            return this.fail(null, 401);
-        }
     }
 
 
     /**
      * Searches LDAP for a given user that meets our search criteria.
-     * Returns the user data as JSON.
+     * When the user is found, calls doAuthentication().
+     *
+     * This is called from inside the `authenticate` method and has access to
+     * its variables including req, res, next, and self.
      */
-    doSearch(username) {
-        // Build the groups part of the query
-        var groups = config.auth.ldap.groups;
-        var group_fmt_s = '(memberOf=CN=%s,ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com)';
-        // For only one group
-        if (groups.length == 1) {
-            var groups_query = util.format(group_fmt_s, groups[0]);
-        } 
-        // For multiple groups
-        else {
-            var groups_query = '(|';
-            for (var i = 0; i < groups.length; i++) {
-                groups_query += util.format(group_fmt_s, groups[0]);
-            }
-            groups_query += ')';
-        } 
+    
+    doSearch(username, password, next, cb) 
+    { 
         // Generate search filter
         var filter = '(&'
-                   + '(objectclass\=person)'
-                   + '(sAMAccountName=' + username + ')'
-                   + groups_query
-                   + ')';
-        // Search options
+                 + '(objectclass\=person)'
+                 + '(' + config.auth.ldap.username_attribute + '=' + username + ')'
+                 + config.auth.ldap.filter
+                 + ')';
+        log.debug('Using search filter:', filter);
+        log.debug('Executing search ...');
+
+        var self = this;
+
         var opts = {
             filter: filter,
             scope: 'sub',
-            attributes: ['dn','sAMAccountName', 'lmcPreferredFirstName','givenName', 'sn', 'mail']
+            attributes: config.auth.ldap.attributes
         };
-        client.search('dc=us,dc=lmco,dc=com', opts, function(err, res) {
-            res.on('searchEntry', function(entry) {
-                log.debug('entry: ' + JSON.stringify(entry.object), null, 2);
-                AuthController.doLdapAuthentication(entry.object.dn, PASSWORD);
-            });
 
-            res.on('searchReference', function(referral) {
-                log.debug('referral: ' + referral.uris.join());
+        // Execute the search
+        this.client.search('dc=us,dc=lmco,dc=com', opts, function(err, result) {
+            result.on('searchEntry', function(entry) {
+                self.doAuthentication(entry.object, password, next);
             });
-            res.on('error', function(err) {
-                log.error('error: ' + err.message);
-            });
-            res.on('end', function(result) {
-                log.debug('status: ' + result.status);
+            result.on('error', function(err) {
+                next('error: ' + err.message);
             });
         });
     }
+
 
     /**
      * Uses a simple bind the user to authenticate the user.
+     * This is called from inside the `authenticate` method and has access to
+     * its variables including req, res, next, and self.
+     * 
+     * TODO - Is there a way for no error to occur, but not
+     * successfully bind the user? If so, this could be a problem.
      */
-    doAuthentication(dn, password) 
+    
+    doAuthentication(user, password, next) 
     {
-        log.verbose('Authenticating', dn, '...')
-        client.bind(dn, password, function(err) {
+        var self = this;
+
+        log.verbose('Authenticating', user.dn, '...')
+        this.client.bind(user.dn, password, function(err) {
+            // If an error occurs, fail.
             if (err) {
-                log.error('An error has occured:', err);
-                this.fail(null, 401)
+                next('An error has occured on user bind:' + err)
             } 
+            // If no error occurs, authenticate the user.
             else {
-                log.error('User authenticated!');
-                this.success(user)
+                log.verbose('User authenticated!');
+                self.syncLDAPUser(user, next)
+                
             }
         });
     }
+
+
+    /**
+     * This synchronizes just retrieved LDAP user with the local database.
+     */
+    syncLDAPUser(ldapUser, next) 
+    {
+        User.find({
+            'username': ldapUser[config.auth.ldap.username_attribute]
+        }, function(err, users) {
+            if (err) {
+                next(err);
+            }
+
+            var initData = {
+                username: ldapUser[config.auth.ldap.username_attribute],
+                password: 'NO_PASSWORD',
+                isLDAPUSer: true
+            };
+
+            var user = (users.length == 0) ? new User(initData) : users[0]; 
+            user.fname = ldapUser.givenName;
+            user.lname = ldapUser.sn;
+            user.email = ldapUser.mail;
+            user.save(function (err) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    next(null, user);
+                }
+            });
+        });
+    }
+
+
+    /**
+     * Handles token authentication. This function gets called both for 
+     * the case of a token auth header or a session token. Either way
+     * the token is provided to this function for auth.
+     *
+     * If an error is passed into the callback, authentication fails. 
+     * If the callback is called with no parameters, the user is authenticated.
+     */
+    handleTokenAuth(token, cb)
+    {
+        // Try to decrypt the token
+        try {
+            token = libCrypto.inspectToken(token);
+        }
+        // If it cannot be decrypted, it is not valid and the 
+        // user is not authorized
+        catch (error) {
+            cb(error);
+        }
+
+        // Make sure the token is not expired
+        if (Date.now() < Date.parse(token.expires)) {
+            cb(null, token.username);
+        }
+        // If token is expired user is unauthorized
+        else {
+            cb('Token is expired');
+        }
+    }
+
+
+    /**
+     * TODO 
+     */
+
+    doLogin(req, res, next) 
+    {
+        log.verbose('Logging in', req.user.username);
+        var token = libCrypto.generateToken({
+            'type':     'user',
+            'username': req.user.username,
+            'created':  (new Date(Date.now())).toUTCString(),
+            'expires':  (new Date(Date.now() + 1000*60*5)).toUTCString()
+        });
+        req.session.token = token;
+        next();
+    } 
+
 }
 
 module.exports = LMICloudStrategy;
