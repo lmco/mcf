@@ -20,6 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
+const crypto = require('crypto');
 const ldap = require('ldapjs');
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
@@ -102,12 +103,12 @@ class LMICloudStrategy extends BaseStrategy
             if (users.length == 1 && !users[0].isLDAPUser) { 
                 // Compute the password hash on given password
                 var hash = crypto.createHash('sha256');
-                hash.update(user._id.toString());       // salt
+                hash.update(users[0]._id.toString());       // salt
                 hash.update(password);                  // password
                 let pwdhash = hash.digest().toString('hex');
                 // Authenticate the user
-                if (user.password == pwdhash) {
-                    cb(null, user);
+                if (users[0].password == pwdhash) {
+                    cb(null, users[0]);
                 }
                 else {
                     cb('Invalid password');
@@ -124,7 +125,7 @@ class LMICloudStrategy extends BaseStrategy
                         cb('An error has occured binding to the LDAP server.')
                     }
                     else {
-                        self.doSearch(username, password, cb, self.doAuthentication)
+                        self.doSearch(username, password, cb)
                     }
                 });  
             }
@@ -144,7 +145,7 @@ class LMICloudStrategy extends BaseStrategy
      * its variables including req, res, next, and self.
      */
     
-    doSearch(username, password, next, cb) 
+    doSearch(username, password, next) 
     { 
         // Generate search filter
         var filter = '(&'
@@ -219,7 +220,7 @@ class LMICloudStrategy extends BaseStrategy
             var initData = {
                 username: ldapUser[config.auth.ldap.username_attribute],
                 password: 'NO_PASSWORD',
-                isLDAPUSer: true
+                isLDAPUser: true
             };
 
             var user = (users.length == 0) ? new User(initData) : users[0]; 
