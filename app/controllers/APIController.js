@@ -39,7 +39,7 @@ class APIController
      */
     static version(req, res) 
     {
-        log.info('/api/version');
+        log.info(`GET "/api/version" requested by ${req.user.username}`);
         var obj = {'version': package_json['version']};
         res.header('Content-Type', 'application/json');
         return res.send(APIController.formatJSON(obj));

@@ -117,7 +117,7 @@ class LMICloudStrategy extends BaseStrategy
             // User is not found locally 
             // or is found and is an LDAP user,
             // try LDAP authentication
-            else if (users.length == 0 || (users.length == 1 && !users[0].isLDAPUser) ) {
+            else if (users.length == 0 || (users.length == 1 && users[0].isLDAPUser) ) {
                 // Bind the resource account we will use to do our lookups
                 // The initCallback function kicks off the search/auth process
                 self.client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_dn_pass, function(err) {
@@ -131,6 +131,8 @@ class LMICloudStrategy extends BaseStrategy
             }
             // This should never actually be hit
             else {
+                log.debug('Found Users: ')
+                log.debug(users);
                 cb('Too many users found.');
             }
         });
@@ -153,7 +155,7 @@ class LMICloudStrategy extends BaseStrategy
                  + '(' + config.auth.ldap.username_attribute + '=' + username + ')'
                  + config.auth.ldap.filter
                  + ')';
-        log.debug('Using search filter:', filter);
+        log.debug('Using search filter: ' + filter);
         log.debug('Executing search ...');
 
         var self = this;
@@ -167,6 +169,7 @@ class LMICloudStrategy extends BaseStrategy
         // Execute the search
         this.client.search('dc=us,dc=lmco,dc=com', opts, function(err, result) {
             result.on('searchEntry', function(entry) {
+                log.debug('Search complete. Entry found.');
                 self.doAuthentication(entry.object, password, next);
             });
             result.on('error', function(err) {
@@ -189,7 +192,7 @@ class LMICloudStrategy extends BaseStrategy
     {
         var self = this;
 
-        log.verbose('Authenticating', user.dn, '...')
+        log.debug('Authenticating ' + user[config.auth.ldap.username_attribute]  + ' ...')
         this.client.bind(user.dn, password, function(err) {
             // If an error occurs, fail.
             if (err) {
@@ -197,7 +200,8 @@ class LMICloudStrategy extends BaseStrategy
             } 
             // If no error occurs, authenticate the user.
             else {
-                log.verbose('User authenticated!');
+                log.debug('User [' + user[config.auth.ldap.username_attribute] 
+                    + '] authenticated successfully via LDAP.');
                 self.syncLDAPUser(user, next)
                 
             }
@@ -261,7 +265,11 @@ class LMICloudStrategy extends BaseStrategy
 
         // Make sure the token is not expired
         if (Date.now() < Date.parse(token.expires)) {
-            cb(null, token.username);
+            User.findOne({
+                'username': sani.sanitize(token.username)
+            }, function(err, user) {
+                    cb((err) ? err : null, user);
+            });
         }
         // If token is expired user is unauthorized
         else {
@@ -276,7 +284,7 @@ class LMICloudStrategy extends BaseStrategy
 
     doLogin(req, res, next) 
     {
-        log.verbose('Logging in', req.user.username);
+        log.verbose('"/api/login" requested by ' + req.user.username.toString());
         var token = libCrypto.generateToken({
             'type':     'user',
             'username': req.user.username,
@@ -284,6 +292,7 @@ class LMICloudStrategy extends BaseStrategy
             'expires':  (new Date(Date.now() + 1000*60*5)).toUTCString()
         });
         req.session.token = token;
+        log.info('"/api/login" Logged in ' + req.user.username);
         next();
     } 
 

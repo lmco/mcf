@@ -113,7 +113,6 @@ class OrgModelTests
             id: 'org1',    
         }, function(err) {
             chai.expect(err).to.equal(null); 
-            
         });
         done();
     }

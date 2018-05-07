@@ -11,20 +11,40 @@
  *****************************************************************************/
 
 /**
- * App.jsx
+ * ProjectsList.jsx
  *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This defines the MBEE application.
+ * A list of the user's projects.
  */
-class App extends React.Component {
+
+class ProjectsList extends React.Component {
+
+    constructor() {
+        super();
+        this.state = {
+            orgs: null
+        }
+    }
+
+    componentDidMount() {
+        fetch('/api/orgs', {
+            method: 'GET',
+            credentials: 'include'
+        }).then(response => {
+            console.log(response);
+            console.log(response.body);
+            return response.json();
+        }).then(data => {
+            console.log(data);
+            this.setState({orgs: data});
+        });
+    }
+
+
     render() {
         return (
-            <div class="container-fluid">
-            <h1><Welcome name={this.props.name} /></h1>
-            <VersionDiv />
-            Projects List <ProjectsList />
-            </div>
+            <span>{this.state.orgs}</span>
         );
     }
 }

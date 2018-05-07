@@ -24,6 +24,30 @@ const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var router = express.Router();
 
+
+/**********************************************
+ * Unauthenticated Routes 
+ **********************************************/
+
+/* This renders the about page */
+router.get('/about', UIController.showAboutPage);
+
+/* GET /login shows the login page. */
+router.get('/login', UIController.showLoginPage);
+
+/* POST is the route that actually logs in the user. 
+ * It's the login form's submit action. */
+router.post('/login', 
+    AuthController.authenticate.bind(AuthController), 
+    AuthController.doLogin, 
+    UIController.login);
+
+
+/**********************************************
+/* Authenticated Routes 
+ **********************************************/
+
+/* This renders the home page for logged in users */
 router.get('/', AuthController.authenticate.bind(AuthController), UIController.home);
 
 router.get('/dev/doc', 
@@ -36,21 +60,12 @@ router.get('/dev/doc',
 );
 
 /**
- * GET shows the login page.
- * POST is the route that actually logs in the user.
- */
-router.route('/login')
-    .get(UIController.showLoginPage)
-    .post(AuthController.authenticate.bind(AuthController), 
-          AuthController.doLogin, 
-          UIController.login);
-
-/**
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */
 router.route('/logout')
-    .post(AuthController.authenticate.bind(AuthController), UIController.logout);
+    .get(AuthController.authenticate.bind(AuthController), UIController.logout);
 
+/* Renders the admin console */
 router.get('/admin/console', AuthController.authenticate.bind(AuthController), UIController.admin);
 
 module.exports = router;

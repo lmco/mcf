@@ -67,7 +67,7 @@
       "https_port": 9443
     },
     "log": {
-      "level": "debug",
+      "level": "info",
       "file": "mbee.log",
       "error_file": "mbee-error.log",
       "debug_file": "mbee-debug.log",

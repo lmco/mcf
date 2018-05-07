@@ -51,8 +51,17 @@ class BaseStrategy
             // Get the auth scheme and check auth scheme is basic
             var scheme = parts[0];
 
-            // Do basic authenication
+            /**********************************************************************
+             * Handle Basic Authentication
+             **********************************************************************
+             * This section authenticates a user via a basic auth.
+             * This is primarily used with the API. While it can be used for any
+             * API endpoint, the common approach is to pass credentials via 
+             * basic auth only for the "/api/login" route to retrieve a session
+             * token.
+             */ 
             if (RegExp('Basic').test(scheme)) {
+                log.verbose('Authenticating user via Basic Token ...')
                 // Get credentials from the auth header    
                 var credentials = new Buffer(parts[1], 'base64').toString().split(':');
                 if (credentials.length < 2) { 
@@ -77,15 +86,21 @@ class BaseStrategy
                             : res.redirect('/login');
                     } 
                     else {
-                        log.verbose('Authenticated user via basic auth:', user);
+                        log.verbose('Authenticated [' + user.username + '] via Basic Auth');
                         req.user = user;
                         next();
                     }
                 });
             }
-            // Handle token authentication
+            /**********************************************************************
+             * Handle Token Authentication
+             **********************************************************************
+             * This section authenticates a user via a bearer token.
+             * This is primarily used when the API is being called via a script
+             * or some other external method such as a microservice.
+             */ 
             else if (RegExp('Bearer').test(scheme)) {
-                log.debug('Using auth token ...')
+                log.debug('Authenticating user via Token Auth ...')
                 var token = new Buffer(parts[1], 'utf8').toString();
                 this.handleTokenAuth(token, function(err, user) {
                     if (err) {
@@ -95,7 +110,7 @@ class BaseStrategy
                             : res.redirect('/login');
                     } 
                     else {
-                        log.verbose('Authenticated user via token auth:', user);
+                        log.verbose('Authenticated [' + user.username + '] via Token Auth');
                         req.user = user;
                         next();
                     }
@@ -108,10 +123,16 @@ class BaseStrategy
                     ? res.status(401).send('Unauthorized')
                     : res.redirect('/login');
             }
-        }
-        // Authenticate using a stored session token
+        } /* end if (authorization) */
+
+        /**********************************************************************
+         * Handle Session Token Authentication
+         **********************************************************************
+         * This section authenticates a user via a stored session token.
+         * The user's credentials are passed to the handleTokenAuth function.
+         */ 
         else if (req.session.token) {
-            log.verbose('Using session token...')
+            log.verbose('Authenticating user via Session Token Auth...')
             var token = req.session.token;
             this.handleTokenAuth(token, function(err, user) {
                 if (err) {
@@ -121,14 +142,22 @@ class BaseStrategy
                         : res.redirect('/login');
                 } 
                 else {
-                    log.verbose('Authenticated user via session token:', user);
+                    log.verbose('Authenticated [' + user.username + '] via Session Token Auth');
                     req.user = user;
                     next();
                 }
             });
         }
-        // Accept form input 
+        /**********************************************************************
+         * Handle Form Input Authentication
+         **********************************************************************
+         * This section authenticates a user via form input. This is used
+         * when users log in via the login form.
+         * 
+         * The user's credentials are passed to the handleBasicAuth function.
+         */ 
         else if (req.body.username && req.body.password) {
+            log.verbose('Authenticating user via Form Input Auth ...')
             var username = req.body.username; 
             var password = req.body.password;
             // Error check - make sure username/password are not empty
@@ -146,14 +175,16 @@ class BaseStrategy
                         : res.redirect('/login');
                 } 
                 else {
-                    log.verbose('Authenticated user via form auth:', user);
+                    log.verbose('Authenticated [' + user.username + '] via Form Input Auth');
                     req.user = user;
                     next();
                 }
             })
         }
         else {
-            log.error('No valid authentication method provided.');
+            log.warn(`"${req.originalUrl}" requested with` 
+                    + ' no valid authentication method provided.' 
+                    + ' Redirecting to "/login" ...');
             return (req.originalUrl.startsWith('/api')) 
                 ? res.status(401).send('Unauthorized')
                 : res.redirect('/login');

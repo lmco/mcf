@@ -51,6 +51,7 @@ function decrypt(data) {
         return decrypted;
     }
     catch (error) {
+        log.warn('Decryption failed.')
         log.error(error);
         return '{}';
     }
