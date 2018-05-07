@@ -55,21 +55,34 @@ body.lm-light-theme {
     /*padding: .5rem 1rem .3rem 1rem;*/
 }
 
-a {
+.navbar-brand {
+    padding-bottom: 0rem;
+}
+
+.navbar-brand img {
+    position: relative;
+    top: -2px;
+}
+
+.lm-dark-theme a {
     color: #76b8ff;
 }
 
-a:hover {
+.lm-dark-theme a:hover {
     color: #62aeff;
 }
 
-.form-control {
+#login-form {
+    margin-top: 20%
+}
+
+.lm-dark-theme .form-control {
     background: #343a40;
     color: #FFF;
     border: 1px solid #495057;
 }
 
-.form-control:focus {
+.lm-dark-theme .form-control:focus {
     background: #343a40;
     color: #FFF;
     border: 1px solid #495057;
