@@ -49,16 +49,25 @@ var fmt = {
  * to define the format for the log files (the fileFormatter function).
  */
 const formatter = printf(function(msg) {
-    //
     // This allows us to get the file, line, and column
     var stack = new Error().stack
-    let split = stack.split('\n')[11]
-    let tmp = split.split('/mbee/')
+    var lines = stack.split('\n');
+    var reduced = [];
+    for (var i = 0; i < lines.length; i++) {
+        if( lines[i].includes('node_modules') 
+         || lines[i].includes('DerivedLogger')
+         || lines[i].includes('at doWrite')
+         || lines[i].includes('at writeOrBuffer ') ) {
+            continue
+        }
+        reduced.push(lines[i]);
+    }
+    
+    let tmp = reduced[2].split(process.cwd() + '/')
+    let func = reduced[2].split('at ')[1].split(' ')[0]
     let file = tmp[tmp.length-1].split(':')[0].replace(/\//g, '.');
     let line = tmp[tmp.length-1].split(':')[1];
     let col = tmp[tmp.length-1].split(':')[2].replace(')', '');
-
-    //console.log(stack)
 
     // We want to capitalize the log level. You cannot string.toUpperCase here
     // because the string includes the color formatter and toUpperCase will
@@ -90,7 +99,9 @@ const formatter = printf(function(msg) {
             .replace('\u001b[37m', '')
             .replace('\u001b[38m', '')
             .replace('\u001b[39m', '')
-        return `${msg.timestamp} [${msg.level}]: ${msg.message}`;   
+        var ts = `${msg.timestamp}` // timestamp
+        var f = `${file}`           // file
+        return `${ts} [${msg.level}] ${f}:${line} : ${msg.message}`;
     }
 });
 
@@ -101,6 +112,25 @@ const formatter = printf(function(msg) {
  * (formatter above) is used to define the format for the log console output. 
  */
 const fileFormatter = printf(function(msg) {
+    // This allows us to get the file, line, and column
+    var stack = new Error().stack
+    var lines = stack.split('\n');
+    var reduced = [];
+    for (var i = 0; i < lines.length; i++) {
+        if( lines[i].includes('node_modules') 
+         || lines[i].includes('DerivedLogger')
+         || lines[i].includes('at doWrite')
+         || lines[i].includes('at writeOrBuffer ') ) {
+            continue
+        }
+        reduced.push(lines[i]);
+    }
+    
+    let tmp = reduced[2].split(process.cwd() + '/')
+    let func = reduced[2].split('at ')[1].split(' ')[0]
+    let file = tmp[tmp.length-1].split(':')[0].replace(/\//g, '.');
+    let line = tmp[tmp.length-1].split(':')[1];
+    let col = tmp[tmp.length-1].split(':')[2].replace(')', '');
     msg.level = msg.level
             .replace('\u001b[30m', '')
             .replace('\u001b[31m', '')
@@ -112,7 +142,7 @@ const fileFormatter = printf(function(msg) {
             .replace('\u001b[37m', '')
             .replace('\u001b[38m', '')
             .replace('\u001b[39m', '')
-    return `${msg.timestamp} [${msg.level}]: ${msg.message}`;   
+    return `${msg.timestamp} [${msg.level}] ${file}:${line}: ${msg.message}`;   
 });
 
 
