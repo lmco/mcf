@@ -80,8 +80,35 @@ class UIController
                     'version': version
                 }
             })
+        });  
+    }
+
+
+    /**
+     * Shows the developer's documentation page.
+     */
+    static showDevelopersPage(req, res) {
+        let token = libCrypto.inspectToken(req.session.token);
+        User.findOne({
+            'username': sani.sanitize(token.username)
+        })
+        .exec(function(err, user) {
+            if (err) {
+                log.error(err);
+            }
+            else {
+                req.user = user
+            }
+            var user  = (req.user) ? req.user.username.toString() : 'anonymous';
+            log.info(`GET "/developers" requested by  ${user}`);
+            return res.render('developers', {
+                'ui': config.ui, 
+                'user': req.user,
+                'info': {
+                    'version': version
+                }
+            })
         });
-        
     }
 
 
