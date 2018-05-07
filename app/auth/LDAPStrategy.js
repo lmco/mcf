@@ -96,7 +96,7 @@ class LDAPStrategy extends BaseStrategy
                 cb('An error has occured binding to the LDAP server.')
             }
             else {
-                self.doSearch(username, password, cb, self.doAuthentication)
+                self.doSearch(username, password, cb)
             }
         });  
     }
@@ -110,7 +110,7 @@ class LDAPStrategy extends BaseStrategy
      * its variables including req, res, next, and self.
      */
     
-    doSearch(username, password, next, cb) 
+    doSearch(username, password, next) 
     { 
         // Generate search filter
         var filter = '(&'
