@@ -31,13 +31,9 @@ class VersionNumber extends React.Component {
             method: 'GET',
             credentials: 'include'
         }).then(response => {
-            console.log(response);
-            console.log(response.body);
             return response.json();
         }).then(data => {
-            console.log(data);
             var mbee_version = data['version'];
-            console.log(mbee_version);
             this.setState({version: mbee_version});
         });
     }

@@ -33,7 +33,19 @@ class UIController
      */
     static home(req, res) 
     {
-        log.info('GET "/" requested by ' + req.user.username)
+        log.info(`GET ${req.originalUrl} requested by ${req.user.username}`)
+        return res.render('home', {
+            'ui': config.ui, 
+            'user': req.user.getPublicData()
+        });
+    }
+
+    /**
+     * Renders the MBEE app page.
+     */
+    static mbee(req, res) 
+    {
+        log.info(`GET ${req.originalUrl} requested by ${req.user.username}`)
         return res.render('mbee', {
             'ui': config.ui, 
             'renderer': 'mbee-renderer',
