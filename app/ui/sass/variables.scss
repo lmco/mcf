@@ -17,9 +17,16 @@
  * This defines the Sass variables.
  */
 
-$primary-color: #333;
-$navbar-light-brand-color: #333; /*#5472d3;*/
 
+/* LM light theme colors */
+$lm-light-background: #FFF;
+$lm-light-color: #333; 
+
+/* LM dark theme colors*/
+$lm-dark-background: #333;
+$lm-dark-color: #FFF; 
+
+/* Swagger Colors */
 $swagger-border-color-get:      #9a9a9a;
 $swagger-border-color-post:     #9a9a9a;
 $swagger-border-color-put:      #9a9a9a;
