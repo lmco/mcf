@@ -50,13 +50,10 @@ router.post('/login',
 /* This renders the home page for logged in users */
 router.get('/', AuthController.authenticate.bind(AuthController), UIController.home);
 
-router.get('/dev/doc', 
+/* Renders the developers documentation page */
+router.get('/developers', 
     AuthController.authenticate.bind(AuthController), 
-    function(req, res) {
-        return res.render('home', {
-            'ui': config.ui
-        });
-    }
+    UIController.showDevelopersPage
 );
 
 /**
