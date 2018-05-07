@@ -19,10 +19,6 @@
 
 @import 'variables';
 
-h1 {
-    color: $primary-color;
-}
-
 html, body {
     min-height: 100%;
     min-width: 100%;
@@ -33,15 +29,61 @@ body {
     font-weight: 300;
 }
 
-body.lm-dark-theme {
-    background: #333;
-    color: #FFF;
-}
+/* 
+ * LM Light Theme (default) 
+ * This is the default color scheme.
+ */
 
 body.lm-light-theme {
-    background: #FFF;
-    color: #333;
+    background: $lm-light-background;
+    color: $lm-light-color;
 }
+
+.lm-light-theme.dropdown-menu {
+
+}
+
+
+
+/*
+ * LM Dark Theme 
+ * This defines the dark theme for MBEE.
+ */
+
+body.lm-dark-theme {
+    background: $lm-dark-background;
+    color: $lm-dark-color;
+}
+
+
+.lm-dark-theme .dropdown-menu {
+    background: $lm-dark-background;
+    color: $lm-dark-color;
+}
+
+.lm-dark-theme a {
+    color: #76b8ff;
+}
+
+.lm-dark-theme a:hover {
+    color: #62aeff;
+}
+
+.lm-dark-theme .form-control {
+    background: #343a40;
+    color: #FFF;
+    border: 1px solid #495057;
+}
+
+.lm-dark-theme .form-control:focus {
+    background: #343a40;
+    color: $lm-dark-color;
+    border: 1px solid #495057;
+}
+
+
+/* Other */
+
 
 .container,
 .container-fluid {
@@ -64,26 +106,10 @@ body.lm-light-theme {
     top: -2px;
 }
 
-.lm-dark-theme a {
-    color: #76b8ff;
-}
 
-.lm-dark-theme a:hover {
-    color: #62aeff;
-}
 
 #login-form {
     margin-top: 20%
 }
 
-.lm-dark-theme .form-control {
-    background: #343a40;
-    color: #FFF;
-    border: 1px solid #495057;
-}
 
-.lm-dark-theme .form-control:focus {
-    background: #343a40;
-    color: #FFF;
-    border: 1px solid #495057;
-}
