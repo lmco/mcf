@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /*
- * auth/LocalStrategy.js
+ * LocalStrategy.js
  * 
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 

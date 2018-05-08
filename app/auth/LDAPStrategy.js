@@ -9,8 +9,8 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/**
- * @module  auth/LDAPStrategy.js
+/*
+ * LDAPStrategy.js
  * 
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 

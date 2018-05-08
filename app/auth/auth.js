@@ -10,12 +10,12 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module auth/auth.js
+ * @module auth/auth
  * 
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This file loads and instantiates the authentication strategy as a controller.
- * It ensures that the auth strategy defined in the config.json 
+ * @description This file loads and instantiates the authentication strategy as 
+ * a controller. It ensures that the auth strategy defined in the config.json. 
  */
  
 const path = require('path');
