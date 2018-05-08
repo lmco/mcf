@@ -9,8 +9,8 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/**
- * @module  auth/_BaseStrategy.js
+/*
+ * auth/_BaseStrategy.js
  * 
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 
@@ -22,11 +22,14 @@ const path = require('path');
 const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
 const log  = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 
+
 class BaseStrategy 
 {
 
     /**
-     * The `BaseStrategy` constructor.
+     * @constructor BaseStrategy
+     * 
+     * @description  The `BaseStrategy` constructor.
      */
     constructor() 
     {

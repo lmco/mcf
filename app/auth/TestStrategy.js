@@ -9,14 +9,10 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/**
- * @module  auth/TestStrategy.js
+/*
+ * @module  auth/TestStrategy
  * 
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
- * 
- * This implements a Passport.js strategy to test basic auth. It uses the 
- * hard-coded credentials admin/admin to test basic auth without the need 
- * to interface with a database. This should be used for TESTING ONLY.
  */
 
 const path = require('path');

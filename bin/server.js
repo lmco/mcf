@@ -142,14 +142,11 @@ mongoose.connect(connectURL, options, function(err,msg){
  *  Routes                            *          
  **************************************/
 
-// Routes
-app.use('/', Router);
-//app.get('/', UIController.home);
-//app.get('/login', UIController.login);
-//app.get('/admin/console', UIController.admin)
-
 // API Routes
 app.use('/api', APIRouter);
+
+// Routes
+app.use('/', Router);
 
 // Plugin Routes
 fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {

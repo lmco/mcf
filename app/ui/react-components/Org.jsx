@@ -11,40 +11,38 @@
  *****************************************************************************/
 
 /**
- * ProjectsList.jsx
+ * Org.jsx
  *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * A list of the user's projects.
  */
 
-class ProjectsList extends React.Component {
+class Org extends React.Component {
 
     constructor() {
         super();
         this.state = {
-            orgs: null
+            name: null
         }
     }
 
     componentDidMount() {
-        fetch('/api/orgs', {
+        fetch('/api/orgs/' + this.props.id, {
             method: 'GET',
             credentials: 'include'
         }).then(response => {
-            console.log(response);
-            console.log(response.body);
             return response.json();
         }).then(data => {
-            console.log(data);
-            this.setState({orgs: data});
+            console.log(data)
+            this.setState({name: data['name']});
         });
     }
 
 
     render() {
         return (
-            <span>{this.state.orgs}</span>
+            <span>{this.state.name}</span>
         );
     }
 }

@@ -44,8 +44,7 @@ var api = express.Router();
  * @swagger
  * /doc:
  *   get:
- *     description: This API endpoint should be used to test is the API is
- *     functional.
+ *     description: This API endpoint should be used to test is the API is functional.
  *     produces:
  *       - application/json
  *     responses:

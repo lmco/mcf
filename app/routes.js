@@ -9,8 +9,8 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/**
- * @module  routes.js
+/*
+ * routes.js
  *
  * Defines the MBEE routes mounted a '/'.
  */
@@ -49,6 +49,12 @@ router.post('/login',
 
 /* This renders the home page for logged in users */
 router.get('/', AuthController.authenticate.bind(AuthController), UIController.home);
+
+/* This renders the home page for logged in users */
+router.get('/:org/:project', 
+    AuthController.authenticate.bind(AuthController), 
+    UIController.mbee
+);
 
 /* Renders the developers documentation page */
 router.get('/developers', 

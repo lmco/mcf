@@ -10,9 +10,9 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /*
- * LMICloudStrategy.js
+ * @module auth/LMICloudStrategy
  * 
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @authorized Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 
  * TODO - This file is old and needs to be updated before use.
  */
@@ -29,6 +29,13 @@ const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
 const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
 
+/**
+ * LMICloudStrategy
+ *
+ * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * @classdesc This class defines authentication in the LMI cloud environemnt.
+ */
 class LMICloudStrategy extends BaseStrategy
 {
 

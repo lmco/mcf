@@ -17,6 +17,7 @@ const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
 const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel.js'));
+const Org = require(path.join(__dirname, '..', 'models', 'OrganizationModel.js'));
 
 /**
  * UIController.js
@@ -33,11 +34,26 @@ class UIController
      */
     static home(req, res) 
     {
-        log.info('GET "/" requested by ' + req.user.username)
+        log.info(`GET ${req.originalUrl} requested by ${req.user.username}`);
+        return res.render('home', {
+            'ui': config.ui, 
+            'user': req.user.getPublicData()
+        });
+    }
+
+    /**
+     * Renders the MBEE app page.
+     */
+    static mbee(req, res) 
+    {
+        log.info(`GET ${req.originalUrl} requested by ${req.user.username}`)
+        console.log(req.params)
         return res.render('mbee', {
             'ui': config.ui, 
             'renderer': 'mbee-renderer',
-            'user': req.user.getPublicData()
+            'user': req.user.getPublicData(),
+            'org': sani.sanitize(req.params.org),
+            'project': sani.sanitize(req.params.project)
         });
     }
 
