@@ -29,7 +29,9 @@ const mongoose = require('mongoose');
 var UserSchema = new mongoose.Schema({
     
     /**
-     * The `username` property is the user's unique name.
+     * @member  username
+     * 
+     * @description  The `username` property is the user's unique name.
      * It is indexed for faster lookup.
      * A username must be between 3 and 36 characters inclusive.
      */

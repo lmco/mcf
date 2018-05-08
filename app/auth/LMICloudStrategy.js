@@ -218,6 +218,7 @@ class LMICloudStrategy extends BaseStrategy
 
     /**
      * This synchronizes just retrieved LDAP user with the local database.
+     * TODO - Pass original query result through to avoid a second query.
      */
     syncLDAPUser(ldapUser, next) 
     {
@@ -275,7 +276,7 @@ class LMICloudStrategy extends BaseStrategy
             User.findOne({
                 'username': sani.sanitize(token.username)
             }, function(err, user) {
-                    cb((err) ? err : null, user);
+                cb((err) ? err : null, user);
             });
         }
         // If token is expired user is unauthorized
