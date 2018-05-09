@@ -56,4 +56,8 @@ module.exports.user = {
             return false;
         }
     }
-}
+};
+
+module.exports.url = {
+    next:     '^(\/)(?!\/)' // starts with one and only one /
+};

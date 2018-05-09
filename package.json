@@ -99,6 +99,14 @@
           "sn",
           "mail"
         ]
+      },
+      "token": {
+        "expires": 10, 
+        "units": "MINUTES"
+      },
+      "session": {
+        "expires": 30,
+        "units":   "MINUTES"
       }
     },
     "ui": {

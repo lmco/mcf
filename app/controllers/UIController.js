@@ -16,6 +16,7 @@ const config = require(path.join(__dirname, '..', '..', 'package.json'))['config
 const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
 const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
+const validators = require(path.join(__dirname, '..', 'lib', 'validators.js'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel.js'));
 const Org = require(path.join(__dirname, '..', 'models', 'OrganizationModel.js'));
 
@@ -129,26 +130,54 @@ class UIController
 
 
     /**
-     * Renders the login screen.
+     * This page renders the login screen. If a get query parameter called 
+     * "next" is passed in the URL, the next url rendered as a hidden input
+     * to tell the login process where to redirect the user after a successful 
+     * login.
      */
     static showLoginPage(req, res) 
     {
+        // log the request
         var user  = (req.user) ? req.user.username.toString() : 'anonymous';
-        log.info(`GET "/login" requested by  ${user}`);
-        return res.render('login', {'ui': config.ui, 'user': ''})
+        log.info(`GET ${req.originalUrl} requested by  ${user}`);
+
+        // make sure the passed in "next" parameter is valid
+        if (RegExp(validators.url.next).test(req.query.next)) {
+            var next = req.query.next;
+        }
+        else {
+            var next = '';
+        }
+
+        // render the login page
+        return res.render('login', {
+            'ui': config.ui, 
+            'user': '', 
+            'next': next
+        })
     }
 
 
     /**
-     * Attempts to login the user. If successful, redirect them to the 
-     * homepage. Otherwise, send them back to the login screen with error 
-     * message.
+     * This is the final function in the UI authentication chain. First, 
+     * the authentication conroller's authenticate() and doLogin() functions
+     * are called. This function should only get called once login was 
+     * successful. It handles the appropriate redirect for the user.
      */
     static login(req, res) 
     {
         var user  = (req.user) ? req.user.username.toString() : 'anonymous';
-        log.info(`POST "/login" requested by ${user}. Redirecting to "/" ...`);
-        res.redirect('/');
+
+        // make sure the passed in "next" parameter is valid
+        if (RegExp(validators.url.next).test(req.body.next)) {
+            var next = req.body.next;
+        }
+        else {
+            var next = '/';
+        }
+        log.info(`POST ${req.originalUrl}" requested by ${user}.`);
+        log.info(`Redirecting to ${next} ...`);
+        res.redirect(next);
     }
 
 
@@ -160,8 +189,8 @@ class UIController
     {
         var user  = (req.user) ? req.user.username.toString() : 'anonymous';
         log.info(`GET "/logout" requested by ${user}`);
-        req.user = undefined;
-        req.session.token = undefined;
+        req.user = null;
+        req.session.destroy();
         res.redirect('/login');
     }
 }

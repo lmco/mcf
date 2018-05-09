@@ -78,15 +78,15 @@ class BaseStrategy
                     log.verbose('Username or password not provided.')
                     return (req.originalUrl.startsWith('/api')) 
                         ? res.status(401).send('Unauthorized')
-                        : res.redirect('/login');
+                        : res.redirect(`/login?next=${req.originalUrl}`);
                 }
                 // Handle basic auth
-                this.handleBasicAuth(username, password, function(err, user) {
+                this.handleBasicAuth(req, res, username, password, function(err, user) {
                     if (err) {
                         log.error(err);
                         return (req.originalUrl.startsWith('/api')) 
                             ? res.status(401).send('Unauthorized')
-                            : res.redirect('/login');
+                            : res.redirect(`/login?next=${req.originalUrl}`);
                     } 
                     else {
                         log.verbose('Authenticated [' + user.username + '] via Basic Auth');
@@ -105,12 +105,12 @@ class BaseStrategy
             else if (RegExp('Bearer').test(scheme)) {
                 log.debug('Authenticating user via Token Auth ...')
                 var token = new Buffer(parts[1], 'utf8').toString();
-                this.handleTokenAuth(token, function(err, user) {
+                this.handleTokenAuth(req, res, token, function(err, user) {
                     if (err) {
                         log.error(err);
                         return (req.originalUrl.startsWith('/api')) 
                             ? res.status(401).send('Unauthorized')
-                            : res.redirect('/login');
+                            : res.redirect(`/login?next=${req.originalUrl}`);
                     } 
                     else {
                         log.verbose('Authenticated [' + user.username + '] via Token Auth');
@@ -124,7 +124,7 @@ class BaseStrategy
                 log.verbose('Invalid authorization scheme.');
                 return (req.originalUrl.startsWith('/api')) 
                     ? res.status(401).send('Unauthorized')
-                    : res.redirect('/login');
+                    : res.redirect(`/login?next=${req.originalUrl}`);
             }
         } /* end if (authorization) */
 
@@ -137,12 +137,12 @@ class BaseStrategy
         else if (req.session.token) {
             log.verbose('Authenticating user via Session Token Auth...')
             var token = req.session.token;
-            this.handleTokenAuth(token, function(err, user) {
+            this.handleTokenAuth(req, res, token, function(err, user) {
                 if (err) {
                     log.error(err);
                     return (req.originalUrl.startsWith('/api')) 
                         ? res.status(401).send('Unauthorized')
-                        : res.redirect('/login');
+                        : res.redirect(`/login?next=${req.originalUrl}`);
                 } 
                 else {
                     log.verbose('Authenticated [' + user.username + '] via Session Token Auth');
@@ -168,14 +168,14 @@ class BaseStrategy
                 log.verbose('Username or password not provided.')
                 return (req.originalUrl.startsWith('/api')) 
                     ? res.status(401).send('Unauthorized')
-                    : res.redirect('/login');
+                    : res.redirect(`/login?next=${req.originalUrl}`);
             }
-            this.handleBasicAuth(username, password, function(err, user) {
+            this.handleBasicAuth(req, res, username, password, function(err, user) {
                 if (err) {
                     log.error(err);
                     return (req.originalUrl.startsWith('/api')) 
                         ? res.status(401).send('Unauthorized')
-                        : res.redirect('/login');
+                        : res.redirect(`/login?next=${req.originalUrl}`);
                 } 
                 else {
                     log.verbose('Authenticated [' + user.username + '] via Form Input Auth');
@@ -190,7 +190,7 @@ class BaseStrategy
                     + ' Redirecting to "/login" ...');
             return (req.originalUrl.startsWith('/api')) 
                 ? res.status(401).send('Unauthorized')
-                : res.redirect('/login');
+                : res.redirect(`/login?next=${req.originalUrl}`);
         }
     }
 
