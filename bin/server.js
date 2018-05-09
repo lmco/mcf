@@ -81,6 +81,15 @@ const UIController = require(getControllerPath('UIController'));
  *  Configuration & Middleware        *          
  **************************************/
 
+// Convenient conversions from ms to other times units
+var conversions = {
+    'MILLISECONDS': 1,
+    'SECONDS':      1000,
+    'MINUTES':      60*1000,
+    'HOURS':        60*60*1000,
+    'DAYS':         24*60*60*1000
+}
+
 const app = express();              // Initializes our application
 const viewsDir = path.join(__dirname , '..', config.server.app, 'views');
 const publicDir = path.join(__dirname, '..', 'public');
@@ -90,10 +99,12 @@ app.use(session({
     secret: config.secret, 
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 60000 },
+    cookie: { 
+        maxAge: config.auth.session.expires*conversions[config.auth.session.units]
+    },
     store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
-app.use(cookieParser());
+//app.use(cookieParser());
 app.use(bodyParser.json());         // This allows us to receive JSON data in the  request body
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');      // Sets our view engine to EJS
@@ -209,10 +220,14 @@ if (config.server.ssl) {
 
 // Run HTTPSserver
 var httpServer = http.createServer(app);
-httpServer.listen(config.server.http_port, () => log.info('MBEE server listening on port ' + config.server.http_port + '!'));
+httpServer.listen(config.server.http_port, function() {
+    log.info('MBEE server listening on port ' + config.server.http_port + '!')
+});
 
 // Run HTTPS Server
 if (config.server.ssl) {
     var httpsServer = https.createServer(credentials, app);
-    httpsServer.listen(config.server.https_port, () => log.info('MBEE server listening on port ' + config.server.https_port + '!'));
+    httpsServer.listen(config.server.https_port, function() {
+        log.info('MBEE server listening on port ' + config.server.https_port + '!')
+    });
 }

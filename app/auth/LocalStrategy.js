@@ -23,12 +23,12 @@ const path = require('path');
 const util = require('util');
 const crypto = require('crypto');
 
-const sanitize = require('mongo-sanitize');
 
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
 const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
+const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
 const API = require(path.join(__dirname, '..', 'controllers', 'APIController'));
 const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 
@@ -65,7 +65,7 @@ class LocalStrategy extends BaseStrategy
      * If an error is passed into the callback, authentication fails. 
      * If the callback is called with no parameters, the user is authenticated.
      */
-    handleBasicAuth(username, password, cb) 
+    handleBasicAuth(req, res, username, password, cb) 
     {
         User.findOne({
             'username': username,
@@ -102,7 +102,7 @@ class LocalStrategy extends BaseStrategy
      * If an error is passed into the callback, authentication fails. 
      * If the callback is called with no parameters, the user is authenticated.
      */
-    handleTokenAuth(token, cb)
+    handleTokenAuth(req, res, token, cb)
     {
         // Try to decrypt the token
         try {
@@ -114,26 +114,30 @@ class LocalStrategy extends BaseStrategy
             cb(error);
         }
 
-        // Make sure the token is not expired
-        if (Date.now() < Date.parse(token.expires)) {
-
-            // Lookup user
+        // If this is a session token, we can authenticate the user via
+        // a valid session ID.
+        if (req.session.user) {
             User.findOne({
-                'username': sanitize(token.username),
+                'username': sani.sanitize(req.session.user),
                 'deletedOn': null
             }, function(err, user) {
-                // Make sure no errors occur
-                if (err) {
-                    cb(err);
-                }
-                else {
-                    cb(null, user);
-                }
+                    cb((err) ? err : null, user);
+            });
+        }
+        // Otherwise, we must check the token (i.e. this was an API call or 
+        // used a token authorization header).
+        // In this case, we make sure the token is not expired.
+        else if (Date.now() < Date.parse(token.expires)) {
+            User.findOne({
+                'username': sani.sanitize(token.username),
+                'deletedOn': null
+            }, function(err, user) {
+                cb((err) ? err: null, user); 
             });
         }
         // If token is expired user is unauthorized
         else {
-            cb('Token is expired');
+            cb('Token is expired or session is invalid');
         }
     }
 
@@ -146,16 +150,29 @@ class LocalStrategy extends BaseStrategy
 
     doLogin(req, res, next) 
     {
-        log.verbose('Logging in', req.user.username);
+        log.info(`${req.originalUrl} requested by ${req.user.username}`);
+        
+        // Convenient conversions from ms
+        var conversions = {
+            'MILLISECONDS': 1,
+            'SECONDS':      1000,
+            'MINUTES':      60*1000,
+            'HOURS':        60*60*1000,
+            'DAYS':         24*60*60*1000
+        };
+        var dT = config.auth.token.expires*conversions[config.auth.token.units];
+        
+        // Generate the token and set the session token
         var token = libCrypto.generateToken({
             'type':     'user',
             'username': req.user.username,
             'created':  (new Date(Date.now())).toUTCString(),
-            'expires':  (new Date(Date.now() + 1000*60*5)).toUTCString()
+            'expires':  (new Date(Date.now() + dT)).toUTCString()
         });
+        req.session.user = req.user.username;
         req.session.token = token;
-        next();
-    } 
+        log.info(`${req.originalUrl} Logged in ${req.user.username}`);
+        next();    } 
 
 }
 
