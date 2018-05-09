@@ -69,7 +69,7 @@
       "https_port": 9443
     },
     "log": {
-      "level": "info",
+      "level": "debug",
       "file": "mbee.log",
       "error_file": "mbee-error.log",
       "debug_file": "mbee-debug.log",
@@ -101,12 +101,12 @@
         ]
       },
       "token": {
-        "expires": 10, 
+        "expires": 10,
         "units": "MINUTES"
       },
       "session": {
         "expires": 30,
-        "units":   "MINUTES"
+        "units": "MINUTES"
       }
     },
     "ui": {
