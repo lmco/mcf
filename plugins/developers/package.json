@@ -1,0 +1,11 @@
+{
+  "name": "mbee-plugin-developers",
+  "version": "1.0.0",
+  "description": "A plugin for developer documentation",
+  "main": "index.js",
+  "author": "Josh Kaplan",
+  "license": "LMPI",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}

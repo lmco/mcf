@@ -82,9 +82,10 @@ const formatter = printf(function(msg) {
         }
         reduced.push(lines[i]);
     }
-    
-    let tmp = reduced[2].split(process.cwd() + '/')
-    let func = reduced[2].split('at ')[1].split(' ')[0]
+
+    let index = (reduced.length > 2) ? 2 : 1;
+    let tmp = reduced[index].split(process.cwd() + '/')
+    let func = reduced[index].split('at ')[1].split(' ')[0]
     let file = tmp[tmp.length-1].split(':')[0].replace(/\//g, '.');
     let line = tmp[tmp.length-1].split(':')[1];
     let col = tmp[tmp.length-1].split(':')[2].replace(')', '');
