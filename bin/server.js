@@ -110,7 +110,6 @@ app.use(bodyParser.json());         // This allows us to receive JSON data in th
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');      // Sets our view engine to EJS
 app.set('views', viewsDir);         // Sets our view directory
-
 db.connect();
 
 
@@ -118,10 +117,87 @@ db.connect();
  *  Routes                            *          
  **************************************/
 
-app.use('/api', APIRouter);         // API Routes
-app.use('/ext', PluginRouter);      // Plugin routes
-app.use('/', Router);               // Other routes
+function mutuallyExclusive(args, list) {
+    var flags = 0;
+    for (var i = 0; i < list.length; i++) {
+        if (args.includes(list[i])) {
+            flags++;
+            if (flags > 1) {
+                throw new Error('Mutually exclusive arguments called together.')
+            }
+        }
+    }
+}
 
+function argParser(args) {
+    var args = process.argv;
+
+    mutuallyExclusive(args, [
+        '--api-only',
+        '--ui-only',
+        '--plugins-only'
+    ]);
+
+    mutuallyExclusive(args, [
+        '--api-only',
+        '--no-api'
+    ]);
+
+    mutuallyExclusive(args, [
+        '--ui-only',
+        '--no-ui'
+    ]);
+
+    mutuallyExclusive(args, [
+        '--plugins-only',
+        '--no-plugins'
+    ]);
+
+    var state = {
+        api: true,
+        ui: true,
+        plugins: true
+    }
+
+    if (args.includes('--api-only')) {
+        state.api = true;
+        state.ui = false;
+        state.plugins = false;
+    }
+    if (args.includes('--ui-only')) {
+        state.api = false;
+        state.ui = true;
+        state.plugins = false;
+    }
+    if (args.includes('--plugins-only')) {
+        state.api = false;
+        state.ui = false;
+        state.plugins = true;
+    }
+    if (args.includes('--no-api')) {
+        state.api = false;
+    }
+    if (args.includes('--no-ui')) {
+        state.ui = false;
+    }
+    if (args.includes('--no-plugins')) {
+        state.plugins = false;
+    }
+
+    return state;
+}
+
+var state = argParser(process.argv.slice(2))
+
+if (state.api) {
+    app.use('/api', APIRouter);         // API Routes
+}
+if (state.plugins){
+    app.use('/ext', PluginRouter);      // Plugin routes
+}
+if (state.ui) {
+    app.use('/', Router);               // Other routes
+}
 
 /**************************************
  *  Server                            *          
