@@ -22,8 +22,10 @@ const path = require('path');
 const util = require('util');
 const crypto = require('crypto');
 const ldap = require('ldapjs');
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
-const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
+const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
+const BaseStrategy = require(path.join(__dirname, 'BaseStrategy'));
+
 const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
 const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
@@ -60,15 +62,15 @@ class LMICloudStrategy extends BaseStrategy
         // Read the CA certs
         this.cacerts = [];
         var projectRoot = path.join(__dirname, '..', '..')
-        for (var i = 0; i < config.auth.ldap.ca.length; i++) {
-            var fname = config.auth.ldap.ca[i];
+        for (var i = 0; i < mbee.config.auth.ldap.ca.length; i++) {
+            var fname = mbee.config.auth.ldap.ca[i];
             var file = fs.readFileSync(path.join(projectRoot, fname));
             this.cacerts.push(file)
         }
 
         // Initialize the LDAP TLS client
         this.client = ldap.createClient({
-            url: config.auth.ldap.server,
+            url: mbee.config.auth.ldap.server,
             tlsOptions: {
                 ca: this.cacerts
             }
@@ -127,7 +129,7 @@ class LMICloudStrategy extends BaseStrategy
             else if (users.length == 0 || (users.length == 1 && users[0].isLDAPUser) ) {
                 // Bind the resource account we will use to do our lookups
                 // The initCallback function kicks off the search/auth process
-                self.client.bind(config.auth.ldap.bind_dn, config.auth.ldap.bind_dn_pass, function(err) {
+                self.client.bind(mbee.config.auth.ldap.bind_dn, mbee.config.auth.ldap.bind_dn_pass, function(err) {
                     if (err) {
                         cb('An error has occured binding to the LDAP server.')
                     }
@@ -159,8 +161,8 @@ class LMICloudStrategy extends BaseStrategy
         // Generate search filter
         var filter = '(&'
                  + '(objectclass\=person)'
-                 + '(' + config.auth.ldap.username_attribute + '=' + username + ')'
-                 + config.auth.ldap.filter
+                 + '(' + mbee.config.auth.ldap.username_attribute + '=' + username + ')'
+                 + mbee.config.auth.ldap.filter
                  + ')';
         log.debug('Using search filter: ' + filter);
         log.debug('Executing search ...');
@@ -170,7 +172,7 @@ class LMICloudStrategy extends BaseStrategy
         var opts = {
             filter: filter,
             scope: 'sub',
-            attributes: config.auth.ldap.attributes
+            attributes: mbee.config.auth.ldap.attributes
         };
 
         // Execute the search
@@ -199,7 +201,7 @@ class LMICloudStrategy extends BaseStrategy
     {
         var self = this;
 
-        log.debug('Authenticating ' + user[config.auth.ldap.username_attribute]  + ' ...')
+        log.debug('Authenticating ' + user[mbee.config.auth.ldap.username_attribute]  + ' ...')
         this.client.bind(user.dn, password, function(err) {
             // If an error occurs, fail.
             if (err) {
@@ -207,7 +209,7 @@ class LMICloudStrategy extends BaseStrategy
             } 
             // If no error occurs, authenticate the user.
             else {
-                log.debug('User [' + user[config.auth.ldap.username_attribute] 
+                log.debug('User [' + user[mbee.config.auth.ldap.username_attribute] 
                     + '] authenticated successfully via LDAP.');
                 self.syncLDAPUser(user, next)
                 
@@ -223,14 +225,14 @@ class LMICloudStrategy extends BaseStrategy
     syncLDAPUser(ldapUser, next) 
     {
         User.find({
-            'username': ldapUser[config.auth.ldap.username_attribute]
+            'username': ldapUser[mbee.config.auth.ldap.username_attribute]
         }, function(err, users) {
             if (err) {
                 next(err);
             }
 
             var initData = {
-                username: ldapUser[config.auth.ldap.username_attribute],
+                username: ldapUser[mbee.config.auth.ldap.username_attribute],
                 password: 'NO_PASSWORD',
                 isLDAPUser: true
             };
@@ -319,7 +321,7 @@ class LMICloudStrategy extends BaseStrategy
             'HOURS':        60*60*1000,
             'DAYS':         24*60*60*1000
         };
-        var dT = config.auth.token.expires*conversions[config.auth.token.units];
+        var dT = mbee.config.auth.token.expires*conversions[mbee.config.auth.token.units];
         
         // Generate the token and set the session token
         var token = libCrypto.generateToken({

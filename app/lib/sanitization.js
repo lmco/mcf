@@ -22,7 +22,7 @@ const path = require('path');
 const htmlspecialchars = require('htmlspecialchars');
 const mongosanitize = require('mongo-sanitize');
 
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
+const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 
 /**
@@ -39,6 +39,5 @@ module.exports.mongo = function(s) {
 module.exports.html = function(s) {
     return htmlspecialchars(s);
 }
-
 
 

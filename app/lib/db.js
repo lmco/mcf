@@ -22,20 +22,19 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 
-const ROOT = path.join(__dirname, '..', '..');
-const config = require(path.join(ROOT, 'package.json'))['config'];
-const log = require('./logger.js');
+const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
 
 /**
  * Created the connection to the database.
  */
 module.exports.connect = function() {
     // Declare varaibels for mongoose connection
-    var dbName     = config.db.name;
-    var url        = config.db.url;
-    var dbPort     = config.db.port;
-    var dbUsername = config.db.username;
-    var dbPassword = config.db.password;
+    var dbName     = mbee.config.db.name;
+    var url        = mbee.config.db.url;
+    var dbPort     = mbee.config.db.port;
+    var dbUsername = mbee.config.db.username;
+    var dbPassword = mbee.config.db.password;
     var connectURL = 'mongodb://';
 
     // Create connection with or without authentication
@@ -49,16 +48,16 @@ module.exports.connect = function() {
     // Configure an SSL connection to the database. This can be configured
     // in the package.json config. The 'ssl' field should be set to true
     // and the 'sslCAFile' must be provided and reference a file located in /certs. 
-    if (config.db.ssl) {
+    if (mbee.config.db.ssl) {
         connectURL += '?ssl=true';
-        var caPath = path.join(ROOT, 'certs', config.db.sslCAFile);
+        var caPath = path.join(__dirname, '..', '..', 'certs', mbee.config.db.ca);
         var caFile = fs.readFileSync(caPath, 'utf8');
         options['sslCA'] = caFile; 
     }
 
     mongoose.connect(connectURL, options, function(err,msg){
         if (err) {
-            log.error(err) 
+            mbee.log.error(err) 
         }
     });
 }

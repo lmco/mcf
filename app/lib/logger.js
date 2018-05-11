@@ -23,10 +23,9 @@
  *   - `log.error('An error has occured')`
  */
 
-const path        = require('path');
-const packageJSON = require(path.join(__dirname, '..', '..', 'package.json'));
-const config      = packageJSON['config'];
-const winston     = require('winston');
+const path = require('path');
+const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const winston = require('winston');
 const { combine, timestamp, label, printf, colorize } = winston.format;
 
 
@@ -102,7 +101,7 @@ const formatter = printf(function(msg) {
                 .replace('debug',    'DEBUG')
 
     // If we want colored logs, this is our return string
-    if (config.log.colorize) {
+    if (mbee.config.log.colorize) {
         var ts = `${fmt.color.grey}${msg.timestamp}${fmt.color.esc}` // timestamp
         var f = `${fmt.color.cyan}${file}${fmt.color.esc}`           // file
         return `${ts} [${msg.level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msg.message}`;
@@ -134,7 +133,7 @@ const formatter = printf(function(msg) {
  * file, a combined log, and a debug log.
  */
 const logger = winston.createLogger({
-  level: config.log.level,
+  level: mbee.config.log.level,
   levels: levels, 
   format: combine(
     label({ label: 'MBEE' }),
@@ -149,19 +148,19 @@ const logger = winston.createLogger({
     // This is the error log transport. It writes all logs of level error 
     // (and below) to error log file. The file is defined in the config.
     new winston.transports.File({ 
-        filename: config.log.error_file, 
+        filename: mbee.config.log.error_file, 
         level: 'error'
     }),
     // This is the combined log. It logs everything of the default level and 
     // below to a combined log.
     new winston.transports.File({ 
-        filename: config.log.file,
-        level: config.log.level
+        filename: mbee.config.log.file,
+        level: mbee.config.log.level
     }),
     // This is the combined log. It logs all log levels to the debug file
     // defined in the config.
     new winston.transports.File({ 
-        filename: config.log.debug_file,
+        filename: mbee.config.log.debug_file,
         level: 'debug'
     })
   ],

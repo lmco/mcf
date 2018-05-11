@@ -1,0 +1,28 @@
+{
+  "server": {
+    "ssl": true,
+    "ssl_cert_name": "dev.mbee.us.lmco.com",
+    "http_port": 9080,
+    "https_port": 9443
+  },
+  "api": {
+    "json": {
+      "indent": 4
+    }
+  },
+  "db": {
+    "name": "mbee",
+    "url": "dev.mbee.us.lmco.com",
+    "port": "27017",
+    "username": "mbee",
+    "password": "relativeUniverse141",
+    "ssl": true,
+    "sslCAFile": "LockheedMartinRootCertificationAuthority.pem"
+  }, 
+  "yarn": {
+    "http-proxy":  "http://proxy-lmi.global.lmco.com",
+    "https-proxy": "http://proxy-lmi.global.lmco.com",
+    "cafile":      "./cert/LockheedMartinRootCertificationAuthority.pem",
+    "strict-ssl":  "false"
+  }
+}

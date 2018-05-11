@@ -56,7 +56,7 @@
     "start": "yarn install && yarn run build && yarn run server",
     "test": "./node_modules/.bin/mocha test/_orchestrator.js --slow 19"
   },
-  "config": {
+  "config-legacy": {
     "secret": "CHANGE_ME",
     "server": {
       "app": "app",
@@ -70,9 +70,9 @@
     },
     "log": {
       "level": "debug",
-      "file": "mbee.log",
-      "error_file": "mbee-error.log",
-      "debug_file": "mbee-debug.log",
+      "file": "logs/mbee.log",
+      "error_file": "logs/mbee-error.log",
+      "debug_file": "logs/mbee-debug.log",
       "colorize": true
     },
     "test": {

@@ -22,6 +22,8 @@ You'll also need to download and set up the certificate authority:
 - Download the ca file from `https://sscgit.ast.lmco.com/projects/CP/repos/openstack-hot/browse/PEM_LMChain_20160721.pem?raw`
 - Run `yarn config set "cafile" /path/to/your/cafile.pem`
 
+- yarn config "strict-ssl" false
+
 ### Database Set Up
 The current database used for MBEE is [mongoDB](https://www.mongodb.com/). To 
 get the database up and running, set up a database folder for mongoDB to use and
@@ -52,6 +54,11 @@ db.createUser({
         role: "readWrite", 
         db: "mbee"
     }]
+})
+
+
+db.updateUser("mbee",{
+    pwd: "relativeUniverse141"
 })
 
 use admin

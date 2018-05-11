@@ -20,8 +20,10 @@
 const path = require('path');
 const crypto = require('crypto');
 
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
-const log = require(path.join(__dirname, 'logger.js'));
+const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
+//const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
+//const log = require(path.join(__dirname, 'logger.js'));
 
 
 /**
@@ -29,7 +31,8 @@ const log = require(path.join(__dirname, 'logger.js'));
  * encrypted data as a base64 encoded string.
  */
 function encrypt(data) {
-    let cipher = crypto.createCipher('aes-256-cbc', config['secret']);
+    let secret = mbee.config.server.secret;
+    let cipher = crypto.createCipher('aes-256-cbc', secret);
     let encrypted = cipher.update(data, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     let encBase64 = Buffer.from(encrypted, 'hex').toString('base64');
@@ -44,15 +47,16 @@ module.exports.encrypt = encrypt;
  */
 function decrypt(data) {
     try {
-        let decipher = crypto.createDecipher('aes-256-cbc', config['secret']);
+        let secret = mbee.config.server.secret;
+        let decipher = crypto.createDecipher('aes-256-cbc', secret);
         let hex_data = Buffer.from(data, 'base64').toString('hex');
         let decrypted = decipher.update(hex_data, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
     }
     catch (error) {
-        log.warn('Decryption failed.')
-        log.error(error);
+        mbee.log.warn('Decryption failed.')
+        mbee.log.error(error);
         return '{}';
     }
 };

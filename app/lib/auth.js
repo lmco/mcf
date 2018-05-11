@@ -19,10 +19,10 @@
  */
  
 const path = require('path');
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
+const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
-const AuthStrategy = require(path.join(__dirname, config.auth.strategy));
+const BaseStrategy = require(path.join(__dirname, '..', 'auth', 'BaseStrategy'));
+const AuthStrategy = require(path.join(__dirname, '..', 'auth', mbee.config.auth.strategy));
 const AuthController = new AuthStrategy();
 
 if (!(AuthController instanceof BaseStrategy)) {

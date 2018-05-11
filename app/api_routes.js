@@ -35,7 +35,7 @@ const APIController     = require(getController('APIController'));
 const OrgController     = require(getController('OrganizationController'));
 const ProjectController = require(getController('ProjectController'));
 const UserController    = require(getController('UserController'));
-const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
+const AuthController    = require(path.join(__dirname, 'lib', 'auth'));
 
 var api = express.Router();
 
