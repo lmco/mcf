@@ -79,7 +79,6 @@ function main()
         'configure': configure,
         'docker':    docker,
         'install':   install,
-        'server':    runServer,
         'start':     start,
         'test':      test
     };
@@ -233,7 +232,7 @@ function configure()
     let yarnPath = execSync('which yarn').toString().replace('\n', '');
     if(!fs.existsSync(yarnPath)) {
         console.log('Instaling yarn ...')
-        let cmd = spawnSync('npm', ['install', '-g', 'yarn']);
+        let cmd = spawnSync('npm', ['install', '-g', 'yarn'], {stdio: 'inherit'});
         if (cmd.stdout)
             console.log(cmd.stdout.toString());
         if (cmd.stderr && cmd.stderr.toString().trim() !== '') 
@@ -250,7 +249,7 @@ function configure()
             let val = mbee.config.yarn[key];
 
             // Check if config is already set, if so. Don't mess with it. 
-            let cmd = spawnSync('yarn', ['config', 'get', `${key}`]);
+            let cmd = spawnSync('yarn', ['config', 'get', `${key}`], {stdio: 'inherit'});
             if (cmd.stdout) 
                 if (cmd.stdout.toString().replace('\n', '').trim() == val)
                     continue;
@@ -260,7 +259,7 @@ function configure()
                 process.exit(cmd.status || -1);
 
             // Execute the 'yarn config' command
-            cmd = spawnSync('yarn', ['config', 'set', `${key}`, val]);
+            cmd = spawnSync('yarn', ['config', 'set', `${key}`, val], {stdio: 'inherit'});
             if (cmd.stdout)
                 console.log(cmd.stdout.toString());
             if (cmd.stderr && cmd.stderr.toString().trim() !== '')
@@ -298,7 +297,7 @@ function docker(args)
             '-f', mbee.config.docker.Dockerfile, 
             '-t', mbee.config.docker.image.name, '.'
         ];
-        let cmd = spawn('docker', buildArgs);       // Run the build process
+        let cmd = spawn('docker', buildArgs, {stdio: 'inherit'});       // Run the build process
         cmd.stdout.on('data', function (data) {     
             console.log(data.toString());           // Print stdout
         });
@@ -340,13 +339,9 @@ function docker(args)
         console.log(rargs)
 
         // Run the Docker container
-        let cmd = spawn('docker', rargs);
-        cmd.stdout.on('data', function (data) {
-            console.log(data.toString());
-        });
-        cmd.stderr.on('data', function (data) {
-            console.error(data.toString());
-        });
+        let cmd = spawn('docker', rargs, {stdio: 'inherit'});
+        cmd.stdout.on('data', (data) => { console.log(data.toString()); });
+        cmd.stderr.on('data', (data) => { console.error(data.toString()); });
         cmd.on('exit', function (code) {
             if (code != 0) {
                 mbee.log.error('Docker run failed');
@@ -374,7 +369,7 @@ function install(args)
         args = [];
     }
 
-    let cmd = spawnSync('yarn', ['install'].concat(args));
+    let cmd = spawnSync('yarn', ['install'].concat(args), {stdio: 'inherit'});
     if (cmd.stdout) {
         console.log(cmd.stdout.toString());
     }
@@ -397,7 +392,7 @@ function install(args)
  * config file. 
  */
 
-function runServer(args) 
+function start(args) 
 {
     mbee.log.debug(`+ mbee.js executed as ${process.argv.join(' ')} ` 
                     + `with env=${mbee.env} and configuration: ` 
@@ -440,27 +435,32 @@ function runServer(args)
 
 
 /**
- * "start": "yarn install && yarn run build && yarn run server",
- */
-function start(args) 
-{
-    build();
-    runServer();
-}
-
-
-/**
- * "test": "./node_modules/.bin/mocha test/_orchestrator.js --slow 19"
+ * Runs the Mocha test suite.
  */
 function test(args) 
 {
-    console.log(args)
+    let mocha = './node_modules/.bin/mocha';
+    let margs = ['test/_orchestrator.js', '--slow', '19'];
+    let cmd = spawn(mocha, margs, {stdio: 'inherit'});
+    cmd.stdout.on('data', function(data) { 
+        console.log(data.toString()); 
+    });
+    cmd.stderr.on('data', function(data) { 
+        console.error(data.toString()); 
+    });
+    cmd.on('exit', function (code) {
+        if (code != 0) {
+            mbee.log.error('Tests failed.');
+            process.exit(code);
+        }
+    });
 }
 
 
 /******************************************************************************
  * Helper Functions                                                           *
  ******************************************************************************/
+
 
 /**
  * This function can be used as a sanity check on mutually exclusive arguments.
@@ -475,13 +475,11 @@ function mutuallyExclusive(args, list) {
     for (let i = 0; i < list.length; i++) {
         if (args.includes(list[i])) {
             flags++;
-            if (flags > 1) {
-                throw new Error('Mutually exclusive arguments called together.')
-            }
+            if (flags > 1) 
+                throw new Error('Too many mutually exclusive arguments.');
         }
     }
 }
-
 
 
 /**

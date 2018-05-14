@@ -124,6 +124,33 @@ Run expects the following in the Docker section of the config:
 }
 ```
 
+## Tests
+
+Tests will be executed in order. To do this effectively without having to 
+rename the entire test collection when a new test suite is added somewhere in
+the middle, the following naming conventions are used to number tests:
+
+All tests will begin with a three digit number. The first two digits denote its
+category
+
+- **00X:** Reserved for future use of initialization tasks. These should not be 
+  used, but may be used later to perform pre-testing tasks.
+- **10X:** Tests of the test framework and basic infrastructure itself. These
+  should be used to identify basic configuration issues such as problems
+  with test tools like Mocha, Chai, or similar.
+- **20X:** These should be used for unit tests of libraries and helpers.
+- **30X:** These should be used for unit tests of data layer models.
+- **40X:** The should be used for controller tests.
+- **50X:** These should be used to unit test views.
+- **60X:** These should be used for API tests.
+- **70X:** These should be used for UI tests.
+- **80X:** These should be used for integration and system level tests.
+- **90X:** Reserved for future use of wrap-up tasks to be used in conjunction 
+  with *00* initialization tasks. 
+
+### Writing Tests
+
+Tests are written in the form of a *test suite*.
 
 ## Documentation
 

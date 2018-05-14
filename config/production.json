@@ -40,12 +40,8 @@
     "ca": "./LockheedMartinRootCertificationAuthority.pem"
   },
   "docker": {
-    "image": {
-      "name": "mbee"
-    },
-    "container": {
-      "name": "mbee"
-    },
+    "image": { "name": "mbee" },
+    "container": { "name": "mbee" },
     "http": {
       "enabled": true,
       "port": 80
