@@ -95,6 +95,35 @@ it:
 - http://localhost:8080/api/doc
 - http://localhost:8080/admin/console
 
+### The Config File
+
+Build expects the following in the Docker section of the config:
+
+```json
+{
+    "Dockerfile": "/a/relative/path/to/the/Dockerfile",
+    "image": {
+        "name": "<YOUR IMAGE NAME>"
+    }
+}
+```
+
+Run expects the following in the Docker section of the config:
+
+```json
+{
+    "container": { "name": "<YOUR CONTAINER NAME" },
+    "http": {
+        "enabled": true,
+        "port": 80
+    },
+    "https": {
+        "enabled": true,
+        "port": 443
+    }
+}
+```
+
 
 ## Documentation
 

@@ -6,6 +6,7 @@
   "author": "Josh Kaplan",
   "license": "LMPI",
   "dependencies": {
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "jsdoc": "^3.5.5"
   }
 }

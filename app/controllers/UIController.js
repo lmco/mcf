@@ -200,7 +200,7 @@ class UIController
      * Logs out the user by unsetting the req.user object and the 
      * req.session.token object.
      */
-    
+
     static logout(req, res) 
     {
         // log the request

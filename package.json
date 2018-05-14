@@ -19,11 +19,6 @@
     "mongo-sanitize": "^1.0.0",
     "mongodb": "^3.0.7",
     "mongoose": "^5.0.16",
-    "popper.js": "^1.12.9",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
-    "swagger-jsdoc": "^1.9.7",
-    "swagger-ui-express": "^2.0.15",
     "winston": "^3.0.0-rc5"
   },
   "devDependencies": {
@@ -37,7 +32,12 @@
     "gulp-sass": "^3.1.0",
     "jquery": "^3.3.1",
     "mocha": "^5.0.4",
+    "popper.js": "^1.12.9",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
     "request": "^2.85.0",
+    "swagger-jsdoc": "^1.9.7",
+    "swagger-ui-express": "^2.0.15",
     "ub-jsdoc": "^1.6.0"
   },
   "peerDependencies": {},
@@ -55,78 +55,5 @@
     "server:jsdoc": "./node_modules/.bin/gulp jsdoc && node ./bin/jsdoc-server.js",
     "start": "yarn install && yarn run build && yarn run server",
     "test": "./node_modules/.bin/mocha test/_orchestrator.js --slow 19"
-  },
-  "config-legacy": {
-    "secret": "CHANGE_ME",
-    "server": {
-      "app": "app",
-      "ssl": true,
-      "ssl_cert_name": "dev.mbee.us.lmco.com",
-      "json": {
-        "indent": 4
-      },
-      "http_port": 9080,
-      "https_port": 9443
-    },
-    "log": {
-      "level": "debug",
-      "file": "logs/mbee.log",
-      "error_file": "logs/mbee-error.log",
-      "debug_file": "logs/mbee-debug.log",
-      "colorize": true
-    },
-    "test": {
-      "url": "http://dev.mbee.us.lmco.com:9080"
-    },
-    "auth": {
-      "strategy": "LMICloudStrategy",
-      "ldap": {
-        "server": "ldaps://usadc43.us.lmco.com:3269",
-        "ca": [
-          "./certs/LockheedMartinRootCertificationAuthority.pem",
-          "./certs/LockheedMartinRootCertificationAuthority2.pem",
-          "./certs/LockheedMartinRootCertificationAuthority3.pem"
-        ],
-        "bind_dn": "mbee-query@us.lmco.com",
-        "bind_dn_pass": "SuaIZh4oIPCRD9g",
-        "username_attribute": "sAMAccountName",
-        "filter": "(memberOf=CN=SSC.MBEE.Dev,ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com)",
-        "attributes": [
-          "dn",
-          "sAMAccountName",
-          "lmcPreferredFirstName",
-          "givenName",
-          "sn",
-          "mail"
-        ]
-      },
-      "token": {
-        "expires": 10,
-        "units": "MINUTES"
-      },
-      "session": {
-        "expires": 30,
-        "units": "MINUTES"
-      }
-    },
-    "ui": {
-      "banner": {
-        "on": false,
-        "message": "Lockheed Martin Proprietary Information",
-        "color": "#FFF",
-        "background": "rgb(0, 52, 120)",
-        "bold": true,
-        "border": "1px solid #656565"
-      }
-    },
-    "db": {
-      "name": "mbee",
-      "url": "dev.mbee.us.lmco.com",
-      "port": "27017",
-      "username": "mbee",
-      "password": "relativeUniverse141",
-      "ssl": true,
-      "sslCAFile": "LockheedMartinRootCertificationAuthority.pem"
-    }
   }
 }
