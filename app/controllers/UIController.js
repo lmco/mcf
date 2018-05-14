@@ -45,7 +45,7 @@ class UIController
     {
         mbee.log.info(`GET ${req.originalUrl} requested by ${req.user.username}`);
         return res.render('home', {
-            'ui': mbee.config.ui, 
+            'ui': mbee.config.server.ui, 
             'user': req.user.getPublicData()
         });
     }
@@ -59,9 +59,9 @@ class UIController
     
     static mbee(req, res) 
     {
-        log.info(`GET ${req.originalUrl} requested by ${req.user.username}`)
+        mbee.log.info(`GET ${req.originalUrl} requested by ${req.user.username}`)
         return res.render('mbee', {
-            'ui': mbee.config.ui, 
+            'ui': mbee.config.server.ui, 
             'renderer': 'mbee-renderer',
             'user': req.user.getPublicData(),
             'org': mbee.lib.sani.sanitize(req.params.org),
@@ -79,7 +79,7 @@ class UIController
     static admin(req, res) 
     {
         return res.render('home', {
-            'ui': mbee.config.ui, 
+            'ui': mbee.config.server.ui, 
             'renderer': 'admin-renderer',
             'user': req.user.getPublicData()
         });
@@ -108,7 +108,7 @@ class UIController
             var user  = (req.user) ? req.user.username.toString() : 'anonymous';
             mbee.log.info(`GET "/about" requested by  ${user}`);
             return res.render('about', {
-                'ui': mbee.config.ui, 
+                'ui': mbee.config.server.ui, 
                 'user': req.user,
                 'info': {
                     'version': mbee.version
@@ -131,7 +131,7 @@ class UIController
 
         // render the developers page
         return res.render('developers', {
-            'ui': mbee.config.ui, 
+            'ui': mbee.config.server.ui, 
             'user': req.user,
             'info': {
                 'version': version
@@ -162,7 +162,7 @@ class UIController
 
         // render the login page
         return res.render('login', {
-            'ui': mbee.config.ui, 
+            'ui': mbee.config.server.ui, 
             'user': '', 
             'next': next
         })

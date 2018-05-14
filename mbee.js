@@ -100,7 +100,8 @@ function main()
  * Sass into CSS, building Javascript libraries into client-side code, and
  * building developer documentation. Installs dev dependencies first. Accepts
  * the following command-line parameters: `--copy-deps`, `--sass`, `--react`, 
- * `--jsdoc`, and `--all`. No arguments defaults to `--all`.
+ * `--jsdoc`, and `--all`. No arguments defaults to `--all` which does not 
+ * include JSDoc.
  */
 
 function build(args) 
@@ -164,12 +165,12 @@ function build(args)
     }
 
     // Build JSDoc
-    if (args.includes('--all') || args.includes('--jsdoc')) {
+    if (args.includes('--jsdoc')) {
         let jsdoc  = 'node_modules/jsdoc/jsdoc.js'; 
         let src    = 'out';
         let dst    = 'docs';
-        let tmpl   = '-t node_modules/ub-jsdoc/';
-        let files  = ['app/*'].join(' ');
+        let tmpl   = '-t plugins/developers'; //'-t node_modules/ub-jsdoc/';
+        let files  = ['app/**/*.js', 'README.md'].join(' ');
         let cmd    = [
             `node ${jsdoc} ${tmpl} ${files}`,
             `rm -rf ${dst}/*`,

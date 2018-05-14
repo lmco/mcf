@@ -110,7 +110,7 @@ class APIController
      */
     static formatJSON(obj) 
     {
-        return JSON.stringify(obj, null, mbee.config.server.json.indent);
+        return JSON.stringify(obj, null, mbee.config.server.api.json.indent);
     }
 
 

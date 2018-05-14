@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  models/UserModel
+ * @file  models/UserModel
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -23,13 +23,18 @@ const mongoose = require('mongoose');
 
 
 /**
- * Defines the User Schema
- * @constructor User
+ * @class  User
+ * 
+ * @author  Josh Kaplan
+ * @author  Jake Ursetta
+ *
+ * @classdesc Defines the User Schema
  */
 var UserSchema = new mongoose.Schema({
     
     /**
-     * @member  username
+     * @memberOf  User
+     * @property  username
      * 
      * @description  The `username` property is the user's unique name.
      * It is indexed for faster lookup.
@@ -46,6 +51,9 @@ var UserSchema = new mongoose.Schema({
     },
 
     /**
+     * @memberOf  User
+     * @property password
+     * 
      * The `password` property stores the user's hashed password.
      */
     password: {
@@ -62,6 +70,8 @@ var UserSchema = new mongoose.Schema({
     },
 
     /**
+     * @memberOf  User
+     * @property {String} [email] [description]
      * The `email` property is the user's email address.
      * RegEx Source: http://regexlib.com/Search.aspx?k=email
      */
@@ -71,6 +81,7 @@ var UserSchema = new mongoose.Schema({
     },
 
     /**
+     * @memberOf  User
      * The `fname` property is the user's first name.
      */
     fname: {
@@ -80,6 +91,7 @@ var UserSchema = new mongoose.Schema({
     },
 
     /**
+     * @memberOf  User
      * The `lname` property is the user's last name.
      */
     lname: {
@@ -89,6 +101,7 @@ var UserSchema = new mongoose.Schema({
     },
 
     /**
+     * @memberOf  User
      * The `name` property stores the user's full name.
      * It it set based on the fname and lname properties.
      */
@@ -109,6 +122,7 @@ var UserSchema = new mongoose.Schema({
 
 
     /**
+     * @memberOf  User
      * The `admin` property defines whether or not the user is a global admin.
      * This refers to whether or not the user is a site-wide admin.
      */
@@ -118,6 +132,7 @@ var UserSchema = new mongoose.Schema({
     },
 
     /**
+     * @memberOf  User
      * The `isLDAPUser` property defines whether or not the user is an LDAP 
      * user. This impacts how the user is authenticated
      */
@@ -128,6 +143,7 @@ var UserSchema = new mongoose.Schema({
 
 
     /**
+     * @memberOf  User
      * The date on which the user was created. 
      * The setter is defined to only ever re-set to the current value.
      * This should prevent the created field from being overwritten.
@@ -142,6 +158,7 @@ var UserSchema = new mongoose.Schema({
 
 
     /**
+     * @memberOf  User
      * The date on which the user object was last updated.
      * The setter is run using pre-save middleware.
      */
@@ -152,6 +169,7 @@ var UserSchema = new mongoose.Schema({
     },
 
     /**
+     * @memberOf  User
      * The date on which the user was deleted.
      * This is used to provide soft-delete functionality.
      */
@@ -162,6 +180,8 @@ var UserSchema = new mongoose.Schema({
 
 
     /**
+     * @memberOf  User
+     * 
      * This is the Boolean value that tells us whether or not the user has
      * been deleted. It just makes is easier to check if a user is deleted.
      */
@@ -180,6 +200,7 @@ var UserSchema = new mongoose.Schema({
 
 
 /**
+ * @memberOf  User
  * Run our pre-defined setters on save.
  */
 UserSchema.pre('save', function(next) {

@@ -40,7 +40,9 @@
     "swagger-ui-express": "^2.0.15",
     "ub-jsdoc": "^1.6.0"
   },
-  "peerDependencies": {},
+  "peerDependencies": {
+    "jsdoc": "^3.5.5"
+  },
   "scripts": {
     "build": "node mbee.js build",
     "clean": "node mbee.js clean",

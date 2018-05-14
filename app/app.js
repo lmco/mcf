@@ -33,11 +33,11 @@ app.use(bodyParser.json());  // Allows receiving JSON in the request body
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Sets our static/public directory
-app.use(express.static(path.join(__dirname, 'public'))); 
+app.use(express.static(path.join(__dirname, '..', 'public'))); 
 
 // Configures views/templates    
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname , 'app', 'views'));      
+app.set('views', path.join(__dirname , 'views'));      
 
 // Convenient conversions from ms to other times units
 var units = {

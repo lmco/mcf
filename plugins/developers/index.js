@@ -20,13 +20,15 @@
 const fs = require('fs')
 const path = require('path');
 const { execSync } = require('child_process');
-const config = require(__dirname + '/../../package.json')['config'];
-const ejs = require('ejs');
+
+const mbee = require(__dirname + '/../../mbee.js');
+
 const express = require('express');
+const ejs = require('ejs');
 var app = express();
 
 // Build the developer docs
-var cmd = `rm -rf ${__dirname}/docs; yarn build:jsdoc && mv docs ${__dirname}/docs`;
+var cmd = `rm -rf ${__dirname}/docs; node mbee build --jsdoc && mv docs ${__dirname}/docs`;
 var stdout = execSync(cmd);
 
 // Configure Views
@@ -35,9 +37,20 @@ app.set('view engine', 'ejs') // register the template engine
     
 app.get('/', function(req, res) {
     return res.render('render-doc', {
-        'ui': config.ui, 
+        'ui': mbee.config.server.ui, 
         'user': (req.user) ? req.user : '',
-        'url': 'index.html'
+        'content': fs.readFileSync(__dirname + '/docs/index.html', 'utf8')
+    })
+});
+
+
+app.get('/:page', function(req, res) {
+    var page = req.params.page;
+    console.log(page)
+    return res.render('render-doc', {
+        'ui': mbee.config.server.ui, 
+        'user': (req.user) ? req.user : '',
+        'content': fs.readFileSync(__dirname + '/docs/' + page, 'utf8')
     })
 });
 
