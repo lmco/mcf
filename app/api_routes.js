@@ -15,33 +15,33 @@
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * This file defines the API routes.
- * 
- * Note that all routes that require authentication have 
+ *
+ * Note that all routes that require authentication have
  * "AuthController.authenticate.bind(AuthController)" as the first function they
  * map to. This will do authentication and if the users is authenticated, the
  * next function is called.
  *
  * The ".bind(AuthController)" portion of that allows the `this` keyword within
- * the AuthController to reference the AuthController object rather than 
+ * the AuthController to reference the AuthController object rather than
  * being undefined.
  */
- 
+
 const path              = require('path');
 const express           = require('express');
 const swaggerUi         = require('swagger-ui-express');
-const config            = require(path.join(__dirname, '..', 'package.json'))['config'];
+const M = require(path.join(__dirname, '..', 'mbee.js'));
 var getController       = (x) => path.join(__dirname, 'controllers', x);
 const APIController     = require(getController('APIController'));
 const OrgController     = require(getController('OrganizationController'));
 const ProjectController = require(getController('ProjectController'));
 const UserController    = require(getController('UserController'));
 const RoleController    = require(getController('RoleController'));
-const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
+const AuthController = M.load('lib/auth');
 
 var api = express.Router();
 
 
-/** 
+/**
  * @swagger
  * /doc:
  *   get:
@@ -55,7 +55,7 @@ var api = express.Router();
 api.get('/test', APIController.test);
 
 
-/** 
+/**
  * @swagger
  * /doc:
  *   get:
@@ -68,7 +68,7 @@ api.get('/test', APIController.test);
  */
 api.get('/doc', APIController.swaggerDoc);
 
-/** 
+/**
  * @swagger
  * /doc/swagger.json:
  *   get:
@@ -81,7 +81,7 @@ api.get('/doc', APIController.swaggerDoc);
  */
 api.get('/doc/swagger.json', APIController.swaggerJSON);
 
-/** 
+/**
  * @swagger
  * /login:
  *   post:
@@ -97,15 +97,15 @@ api.get('/doc/swagger.json', APIController.swaggerJSON);
  *         description: Internal Server Error
  */
 api.route('/login')
-    .get(AuthController.authenticate.bind(AuthController), 
-         AuthController.doLogin, 
+    .get(AuthController.authenticate.bind(AuthController),
+         AuthController.doLogin,
          APIController.login)
-    .post(AuthController.authenticate.bind(AuthController), 
-          AuthController.doLogin, 
+    .post(AuthController.authenticate.bind(AuthController),
+          AuthController.doLogin,
           APIController.login);
 
 
-/** 
+/**
  * @swagger
  * /version:
  *   get:
@@ -124,7 +124,7 @@ api.route('/version')
 
 
 
-/** 
+/**
  * @swagger
  * /orgs:
  *   get:
@@ -162,7 +162,7 @@ api.route('/orgs')
     .delete(AuthController.authenticate.bind(AuthController), OrgController.deleteOrgs);
 
 
-/** 
+/**
  * @swagger
  * /orgs/:orgid:
  *   get:
@@ -179,12 +179,12 @@ api.route('/orgs')
  *       200:
  *         description: Success
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function. Either 
- *                      authentication failed or the user does not have 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
  *                      authorization to view this org.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -195,38 +195,38 @@ api.route('/orgs')
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization to create. A valid orgid must 
- *                      only contain lowercase letters, numbers, and dashes 
+ *         description: The ID of the organization to create. A valid orgid must
+ *                      only contain lowercase letters, numbers, and dashes
  *                      ("-") and must begin with a letter.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: id
- *         description: The ID of the organization to create. If provided, this 
- *                      must match the orgid provided in the URI. A valid orgid 
- *                      must only contain lowercase letters, numbers, and 
+ *         description: The ID of the organization to create. If provided, this
+ *                      must match the orgid provided in the URI. A valid orgid
+ *                      must only contain lowercase letters, numbers, and
  *                      dashes ("-") and must begin with a letter.
  *         in: body
  *         required: false
  *         type: string
  *       - name: name
  *         description: The name of the organization. A valid organization name
- *                      can only contain letters, numbers, dashes ("-"), and 
+ *                      can only contain letters, numbers, dashes ("-"), and
  *                      spaces.
  *         in: body
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The organization was successfully created. 
+ *         description: Success - The organization was successfully created.
  *                      The created organization is returned as JSON.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function. Either 
- *                      authentication failed or the user does not have 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
  *                      authorization to view this org.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -234,29 +234,29 @@ api.route('/orgs')
  *   put:
  *     description: Creates or updates an organization. If the organization does
  *                  not yet exist it will be created (this is the same as a POST
- *                  request). If the organization already exists, this will 
+ *                  request). If the organization already exists, this will
  *                  replace that organization.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization to update. A valid orgid must 
- *                      only contain lowercase letters, numbers, and dashes 
+ *         description: The ID of the organization to update. A valid orgid must
+ *                      only contain lowercase letters, numbers, and dashes
  *                      ("-") and must begin with a letter.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: id
- *         description: The ID of the organization to update. If provided, this 
- *                      must match the orgid provided in the URI. A valid orgid 
- *                      must only contain lowercase letters, numbers, and 
+ *         description: The ID of the organization to update. If provided, this
+ *                      must match the orgid provided in the URI. A valid orgid
+ *                      must only contain lowercase letters, numbers, and
  *                      dashes ("-") and must begin with a letter.
  *         in: body
  *         required: false
  *         type: string
  *       - name: name
  *         description: The name of the organization. A valid organization name
- *                      can only contain letters, numbers, dashes ("-"), and 
+ *                      can only contain letters, numbers, dashes ("-"), and
  *                      spaces.
  *         in: body
  *         required: true
@@ -265,14 +265,14 @@ api.route('/orgs')
  *       200:
  *         description: Success - The organization was successfully created or
  *                      updated. The new organization is returned as JSON.
- *                        
+ *
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function. Either 
- *                      authentication failed or the user does not have 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
  *                      authorization to view this org.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -283,8 +283,8 @@ api.route('/orgs')
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization to delete. A valid orgid must 
- *                      only contain lowercase letters, numbers, and dashes 
+ *         description: The ID of the organization to delete. A valid orgid must
+ *                      only contain lowercase letters, numbers, and dashes
  *                      ("-") and must begin with a letter.
  *         in: URI
  *         required: true
@@ -293,12 +293,12 @@ api.route('/orgs')
  *       200:
  *         description: Success - The organization was successfully removed.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function. Either 
- *                      authentication failed or the user does not have 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
  *                      authorization to view this org.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -311,7 +311,7 @@ api.route('/orgs/:orgid')
     .delete(AuthController.authenticate.bind(AuthController), OrgController.deleteOrg);
 
 
-/** 
+/**
  * @swagger
  * /orgs/:orgid/projects:
  *   get:
@@ -320,24 +320,24 @@ api.route('/orgs/:orgid')
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose projects to get. 
- *                      A valid orgid can only contain lowercase letters, 
- *                      numbers, and dashes (e.g. "-") and must begin with a 
+ *         description: The ID of the organization whose projects to get.
+ *                      A valid orgid can only contain lowercase letters,
+ *                      numbers, and dashes (e.g. "-") and must begin with a
  *                      letter.
  *         in: URI
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The projects were successfully retrieved.  
+ *         description: Success - The projects were successfully retrieved.
  *                      A list of projects is returned as JSON.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function. Either 
- *                      authentication failed or the user does not have 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
  *                      authorization to view this org.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -365,7 +365,7 @@ api.route('/orgs/:orgid/projects')
     .put   (AuthController.authenticate.bind(AuthController), ProjectController.putProjects)
     .delete(AuthController.authenticate.bind(AuthController), ProjectController.deleteProjects);
 
-/** 
+/**
  * @swagger
  * /orgs/:orgid/projects/:projectid:
  *   get:
@@ -388,12 +388,12 @@ api.route('/orgs/:orgid/projects')
  *         description: Success - The project was successfully retrieved.
  *                      The project is returned as JSON.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function. Either 
- *                      authentication failed or the user does not have 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
  *                      authorization to view this organization or project.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -409,31 +409,31 @@ api.route('/orgs/:orgid/projects')
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project. A valid project ID must consist 
- *                      of only lowercase letters, numbers, and dashes (e.g. 
+ *         description: The ID of the project. A valid project ID must consist
+ *                      of only lowercase letters, numbers, and dashes (e.g.
  *                      "-") and must begin with a letter.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: id
- *         description: The ID of the project. If this is provided, it must 
- *                      match the project ID provided in the URI. A valid 
- *                      project ID must consist of only lowercase letters, 
- *                      numbers, and dashes (e.g. "-") and must begin with a 
+ *         description: The ID of the project. If this is provided, it must
+ *                      match the project ID provided in the URI. A valid
+ *                      project ID must consist of only lowercase letters,
+ *                      numbers, and dashes (e.g. "-") and must begin with a
  *                      letter.
  *         in: body
  *         required: false
  *         type: string
  *       - name: name
  *         description: The name of the new project. A valid project name can
- *                      only consist of only letters, numbers, and dashes 
+ *                      only consist of only letters, numbers, and dashes
  *                      (e.g. "-").
  *         in: body
  *         required: true
  *         type: string
  *       - name: orgid
- *         description: The ID of the organization containing project. If this 
- *                      is provided, it must match the organization ID provided 
+ *         description: The ID of the organization containing project. If this
+ *                      is provided, it must match the organization ID provided
  *                      in the URI.
  *         in: body
  *         required: false
@@ -443,12 +443,12 @@ api.route('/orgs/:orgid/projects')
  *         description: Success - The project was successfully created.
  *                      The new project is returned as JSON.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function. Either 
- *                      authentication failed or the user does not have 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
  *                      authorization to view this org/project.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -464,24 +464,24 @@ api.route('/orgs/:orgid/projects')
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project to create/replace. A valid project 
- *                      ID must consist of only lowercase letters, numbers, and 
+ *         description: The ID of the project to create/replace. A valid project
+ *                      ID must consist of only lowercase letters, numbers, and
  *                      dashes (e.g. "-") and must begin with a letter.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: id
- *         description: The ID of the project. If this is provided, it must 
- *                      match the project ID provided in the URI. A valid 
- *                      project ID must consist of only lowercase letters, 
- *                      numbers, and dashes (e.g. "-") and must begin with a 
+ *         description: The ID of the project. If this is provided, it must
+ *                      match the project ID provided in the URI. A valid
+ *                      project ID must consist of only lowercase letters,
+ *                      numbers, and dashes (e.g. "-") and must begin with a
  *                      letter.
  *         in: body
  *         required: false
  *         type: string
  *       - name: name
  *         description: The name of the project. A valid project name can
- *                      only consist of only letters, numbers, and dashes 
+ *                      only consist of only letters, numbers, and dashes
  *                      (e.g. "-").
  *         in: body
  *         required: true
@@ -491,16 +491,16 @@ api.route('/orgs/:orgid/projects')
  *         description: Success - The project was successfully created.
  *                      The new project is returned as JSON.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function. Either 
- *                      authentication failed or the user does not have 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
  *                      authorization to view this organization or project.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs. 
+ *                      server side. Details may exist in the application logs.
  *   delete:
  *     description: Deletes a project
  *     produces:
@@ -521,12 +521,12 @@ api.route('/orgs/:orgid/projects')
  *         description: Success - The project was successfully created.
  *                      The new project is returned as JSON.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function. Either 
- *                      authentication failed or the user does not have 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
  *                      authorization to view this organization or project.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -552,7 +552,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *       501:
  *         description: Not Implemented
  *   put:
- *     description: Not implemented, reserved for future use. 
+ *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
@@ -583,7 +583,7 @@ api.route('/orgs/:orgid/members/:role')
  *       501:
  *         description: Not Implemented
  *   put:
- *     description: Not implemented, reserved for future use. 
+ *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
@@ -613,11 +613,11 @@ api.route('/orgs/:orgid/projects/:projectid/members/:role')
  *       200:
  *         description: Success - All users should be returned as JSON.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function or authentication 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function or authentication
  *                      failed.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -628,7 +628,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:role')
  *       501:
  *         description: Not Implemented
  *   put:
- *     description: Not implemented, reserved for future use. 
+ *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
@@ -653,21 +653,21 @@ api.route('/users')
  *       - application/json
  *     parameters:
  *       - name: username
- *         description: The username of the user to get. Note, While it is 
- *                      currently prevented, in the future, usernames may be 
+ *         description: The username of the user to get. Note, While it is
+ *                      currently prevented, in the future, usernames may be
  *                      allowed to change and should not be considered static.
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The user was retieved and the public user 
+ *         description: Success - The user was retieved and the public user
  *                      object should be returned as JSON.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function or authentication 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function or authentication
  *                      failed.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -678,28 +678,28 @@ api.route('/users')
  *       - application/json
  *     parameters:
  *       - name: username
- *         description: The username of the user to create. 
+ *         description: The username of the user to create.
  *         required: true
  *         type: string
  *         in: URI
  *       - name: username
- *         description: The username of the user to create. If provided, this 
+ *         description: The username of the user to create. If provided, this
  *                      must match the username provided in the URI.
  *         required: false
  *         type: string
  *         in: body
  *       - name: password
- *         description: The username of the user to create. 
+ *         description: The username of the user to create.
  *         required: true
  *         type: string
  *         in: body
  *       - name: fname
- *         description: The user's first name. 
+ *         description: The user's first name.
  *         required: false
  *         type: string
  *         in: body
  *       - name: lname
- *         description: The user's last name. 
+ *         description: The user's last name.
  *         required: false
  *         type: string
  *         in: body
@@ -708,11 +708,11 @@ api.route('/users')
  *         description: Success - The user was created. The newly created user
  *                      is returned as a JSON-encoded object.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function or authentication 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function or authentication
  *                      failed.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -723,28 +723,28 @@ api.route('/users')
  *       - application/json
  *     parameters:
  *       - name: username
- *         description: The username of the user to create. 
+ *         description: The username of the user to create.
  *         required: true
  *         type: string
  *         in: URI
  *       - name: username
- *         description: The username of the user to create. If provided, this 
+ *         description: The username of the user to create. If provided, this
  *                      must match the username provided in the URI.
  *         required: false
  *         type: string
  *         in: body
  *       - name: password
- *         description: The username of the user to create. 
+ *         description: The username of the user to create.
  *         required: true
  *         type: string
  *         in: body
  *       - name: fname
- *         description: The user's first name. 
+ *         description: The user's first name.
  *         required: false
  *         type: string
  *         in: body
  *       - name: lname
- *         description: The user's last name. 
+ *         description: The user's last name.
  *         required: false
  *         type: string
  *         in: body
@@ -753,11 +753,11 @@ api.route('/users')
  *         description: Success - The user was created. The newly created user
  *                      is returned as a JSON-encoded object.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function or authentication 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function or authentication
  *                      failed.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -768,7 +768,7 @@ api.route('/users')
  *       - application/json
  *     parameters:
  *       - name: username
- *         description: The username of the user to delete. 
+ *         description: The username of the user to delete.
  *         required: true
  *         type: string
  *         in: URI
@@ -776,11 +776,11 @@ api.route('/users')
  *       200:
  *         description: Success - The user was deleted.
  *       400:
- *         description: Bad Request - This implies that the request is invalid 
+ *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
  *       401:
- *         description: Unauthorized - This implies that the user is not 
- *                      authorized to perform this function or authentication 
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function or authentication
  *                      failed.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -806,7 +806,7 @@ api.route('/users/:username')
  *       501:
  *         description: Not Implemented
  *   put:
- *     description: Not implemented, reserved for future use. 
+ *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
@@ -837,7 +837,7 @@ api.route('/users/:username/roles')
  *       501:
  *         description: Not Implemented
  *   put:
- *     description: Not implemented, reserved for future use. 
+ *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
@@ -860,7 +860,7 @@ api.route('/users/:username/groups')
  *   get:
  *     description: Returns the currently logged in user information
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The JSON-encoded user information is returned.
  *       400:
  *         description: Bad Request - Usually an authentication issue.

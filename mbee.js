@@ -61,7 +61,6 @@ M.load = (m) => {return require(path.join(__dirname, 'app', m)) };
 // That means that modules should not try to call other modules when they are
 // loaded. They can, however, call other modules later because the 'mbee' object
 // is re-exported after the modules loading is complete (see below)
-//module.exports = mbee;
 module.exports = M;
 
 // If dependecies have been installed, initialize the MBEE helper object
@@ -70,22 +69,14 @@ if (fs.existsSync(__dirname + '/node_modules')) {
 }
 
 const build = require(__dirname + '/scripts/build');
+const clean = require(__dirname + '/scripts/clean');
+const docker = require(__dirname + '/scripts/docker');
 
 // Call main
 if (module.parent == null) {
-    //try {
-        main();
-    //}
-    //catch (error) {
-    //    console.log(error);
-    //    console.log('An error occurred. Try running "node mbee install".');
-    //    process.exit(1);
-    //}    
+  main();   
 } 
-// Re-export mbee after initialization
-else {
-    module.exports = M;
-}
+
 
 
 /******************************************************************************
@@ -112,135 +103,6 @@ function main()
 }
 
 
-/******************************************************************************
- *  Task Functions                                                            *
- ******************************************************************************/
-
-
-
-
-
-
-
-/**
- * Cleans project directory of non-persistent items. Removes the following 
- * artifacts of a build: the public directory, the docs directory, logs, and 
- * node_modules. The following flags are supported: `--logs`, `--docs`, 
- * `--public`, `--node-modules`, and `--all`. The default behavior if no 
- * arguments are given is to delete all items except the node_modules directory.
- *
- * TODO - Make this robust against missing node_modules directory and keep it
- * cross-platform.
- */
-
-function clean(args) 
-{
-    let del = require('del');
-
-    // Allow the function to be called with no parameters
-    // Set the default behavior to build all
-    if (args == undefined) 
-      args = [];
-
-    // Clean logs
-    if (args.length == 0 || args.includes('--all') || args.includes('--logs')) 
-      del.sync(['*.log', 'logs/*.logs']);
-
-    // Clean docs
-    if (args.length == 0 || args.includes('--all') || args.includes('--docs')) 
-      del.sync(['docs']);
-
-    // Clean public
-    if (args.length == 0 || args.includes('--all') || args.includes('--public')) 
-      del.sync(['public']);
-
-    // Clean node_modules
-    if (args.includes('--all') || args.includes('--node-modules')) 
-      del.sync(['node_modules']);
-}
-
-
-
-
-/**
- * The Docker command can be used to build a Docker image or run a Docker 
- * container. It supports the command line arguments `--build` and `--run` to 
- * build the image or run the conatiner respectively. Both of these options 
- * expect configuration parameters to be defined in the Docker section of the 
- * config.json file. The `--build` and `--run` commands are not mutually 
- * exclusive, if run together the Docker image is built and then the container
- * is run.
- */
-
-function docker(args) 
-{
-    // Build the Docker image
-    if (args.includes('--build')) {
-        build();  // First, build MBEE 
-        console.info('Building Docker Image ...');
-        
-        // Build docker by running: "docker build -f .../Dockerfile -t mbee ."
-        let buildArgs = [                           // Create the build args
-            'build', 
-            '-f', M.config.docker.Dockerfile, 
-            '-t', M.config.docker.image.name, '.'
-        ];
-        let cmd = spawn('docker', buildArgs, {stdio: 'inherit'});       // Run the build process
-        cmd.stdout.on('data', function (data) {     
-            console.log(data.toString());           // Print stdout
-        });
-        cmd.stderr.on('data', function (data) {
-            console.error(data.toString());         // Print stderr
-        });
-        cmd.on('exit', function (code) {            
-            if (code != 0) {                        // Fail if exit code != 0
-                console.log('Docker build failed');
-                process.exit(code);
-            }
-            else {                                  // Log successful build 
-                console.log('Docker Image Built.');
-            }
-        });
-    }
-
-    // Run the Docker container
-    if (args.includes('--run')) {
-        console.log('Running Docker Container ...');
-
-        // Build the "docker run" command
-        let server = mbee.config.server;
-        let docker = mbee.config.docker;
-        let rargs = [
-            'run', 
-            '-d',
-            '-it',
-            '--restart=always'
-        ];
-        if (server.http.enabled && docker.http.enabled) {
-            rargs = rargs.concat(['-p', `${docker.http.port}:${server.http.port}`]);
-        }
-        if (server.https.enabled && docker.https.enabled) {
-            rargs = runArgs.concat(['-p', `${docker.https.port}:${server.https.port}`]);
-        }
-        rargs = rargs.concat(['--name', mbee.config.docker.container.name])
-        rargs = rargs.concat([mbee.config.docker.image.name])
-        console.log(rargs)
-
-        // Run the Docker container
-        let cmd = spawn('docker', rargs, {stdio: 'inherit'});
-        cmd.stdout.on('data', (data) => { console.log(data.toString()); });
-        cmd.stderr.on('data', (data) => { console.error(data.toString()); });
-        cmd.on('exit', function (code) {
-            if (code != 0) {
-                console.log('Docker run failed');
-                process.exit(code);
-            }
-        });
-        console.log('Docker Container Running in Background.');
-    }
-}
-
-
 
 
 /**
@@ -251,15 +113,15 @@ function docker(args)
 function start(args) 
 {
     initialize();
-    mbee.log.debug(`+ mbee.js executed as ${process.argv.join(' ')} ` 
-                    + `with env=${mbee.env} and configuration: ` 
-                    + JSON.stringify(mbee.config));
+    M.log.debug(`+ mbee.js executed as ${process.argv.join(' ')} ` 
+                    + `with env=${M.env} and configuration: ` 
+                    + JSON.stringify(M.config));
 
     var app = require(__dirname + '/app/app.js');   // Import the app
-    mbee.lib.startup();                             // Print startup banner
+    M.lib.startup();                                // Print startup banner
 
     // Create HTTP Server
-    if (mbee.config.server.http.enabled) {
+    if (M.config.server.http.enabled) {
         var httpServer = http.createServer(app);
     }
 
@@ -274,18 +136,18 @@ function start(args)
     }
 
     // Run HTTP Server
-    if (mbee.config.server.http.enabled) {
-        httpServer.listen(mbee.config.server.http.port, function() {
-            let port = mbee.config.server.http.port;
-            mbee.log.info('MBEE server listening on port ' + port + '!')
+    if (M.config.server.http.enabled) {
+        httpServer.listen(M.config.server.http.port, function() {
+            let port = M.config.server.http.port;
+            M.log.info('MBEE server listening on port ' + port + '!')
         });
     }
 
     // Run HTTPS Server
-    if (mbee.config.server.ssl) {
-        httpsServer.listen(mbee.config.server.https.port, function() {
-            let port = mbee.config.server.https.port;
-            mbee.log.info('MBEE server listening on port ' + port + '!')
+    if (M.config.server.ssl) {
+        httpsServer.listen(M.config.server.https.port, function() {
+            let port = M.config.server.https.port;
+            M.log.info('MBEE server listening on port ' + port + '!')
         });   
     }
 }
@@ -297,29 +159,16 @@ function start(args)
  */
 function test(args) 
 {
-    let mocha = './node_modules/.bin/mocha';
-    let margs = ['test/runner.js', '--slow', '19'];
-
-    console.log(args);
-
-    mocha = 'ls'
-    margs = ['-lh']
-    let cmd = spawn(mocha, margs, {stdio: 'inherit'});
-
-    console.log(cmd)
-
-    cmd.stdout.on('data', function(data) { 
+    spawn('yarn', ['run', 'test'], {stdio: 'inherit'})
+      .on('data', function(data) { 
         console.log(data.toString()); 
-    });
-    cmd.stderr.on('data', function(data) { 
-        console.error(data.toString()); 
-    });
-    cmd.on('close', function (code) {
+      })
+      .on('exit', function (code) {
         if (code != 0) {
-            console.log('Tests failed.');
-            process.exit(code);
+          console.log('Tests failed.');
+          process.exit(code);
         }
-    });
+      });
 }
 
 
@@ -339,4 +188,6 @@ function initialize(args)
         startup:    M.load('lib/startup'),
         validators: M.load('lib/validators')
     }
+    // Re-export mbee after initialization
+    module.exports = M;
 }

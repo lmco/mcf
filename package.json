@@ -2,7 +2,7 @@
   "name": "mbee",
   "version": "0.1.0",
   "description": "Model-Based Engineering Environment",
-  "main": "bin/server.js",
+  "main": "mbee.js",
   "repository": "https://gitlab.lmms.lmco.com/mbee/mbee.git",
   "author": "Josh Kaplan <joshua.d.kaplan@lmco.com>",
   "license": "LMPI",
@@ -40,13 +40,15 @@
     "swagger-ui-express": "^2.0.15",
     "ub-jsdoc": "^1.6.0"
   },
-  "peerDependencies": {},
+  "peerDependencies": {
+    "jsdoc": "^3.5.5"
+  },
   "scripts": {
-    "build": "node scripts/build",
-    "clean": "node mbee.js clean",
+    "build": "node scripts/build.js",
+    "clean": "node scripts/clean.js",
     "docker": "node mbee.js docker",
     "lint": "eslint *.js app/**/*.js plugins/**/*.js scripts/**/*.js",
     "start": "node mbee.js start",
-    "test": "./node_modules/.bin/mocha test/runner.js"
+    "test": "./node_modules/.bin/mocha scripts/test.js"
   }
 }

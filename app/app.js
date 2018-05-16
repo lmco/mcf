@@ -13,7 +13,7 @@
  * app.js
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * 
+ *
  * Defines the MBEE App. This allows the app to be imported by other modules.
  * The app is imported by the mbee.js script which then runs the server.
  */
@@ -25,19 +25,19 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
 
-//const mbee = require(__dirname + '/../mbee.js');
+const M = require(__dirname + '/../mbee.js');
 
 const app = express();       // Initializes our application
-mbee.lib.db.connect();       // Connect to the database 
+M.lib.db.connect();       // Connect to the database
 app.use(bodyParser.json());  // Allows receiving JSON in the request body
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Sets our static/public directory
-app.use(express.static(path.join(__dirname, '..', 'public'))); 
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Configures views/templates    
+// Configures views/templates
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname , 'views'));      
+app.set('views', path.join(__dirname , 'views'));
 
 // Convenient conversions from ms to other times units
 var units = {
@@ -46,35 +46,35 @@ var units = {
     'MINUTES':      60*1000,
     'HOURS':        60*60*1000,
     'DAYS':         24*60*60*1000
-}[mbee.config.auth.session.units];
+}[M.config.auth.session.units];
 
 // Configure sessions
-app.use(session({ 
+app.use(session({
     name: 'SESSION_ID',
-    secret: mbee.config.server.secret, 
+    secret: M.config.server.secret,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: mbee.config.auth.session.expires * units },
+    cookie: { maxAge: M.config.auth.session.expires * units },
     store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
 
 // Load the API Routes
-if (mbee.config.server.api.enabled) {
+if (M.config.server.api.enabled) {
     const APIRoutesPath = path.join(__dirname, 'api_routes.js');
     const APIRouter = require(APIRoutesPath);
-    app.use('/api', APIRouter);         
+    app.use('/api', APIRouter);
 }
 // Load the plugin routes
-if (mbee.config.server.plugins.enabled) {
+if (M.config.server.plugins.enabled) {
     const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
     const PluginRouter = require(PluginRoutesPath);
-    app.use('/ext', PluginRouter);      
+    app.use('/plugins', PluginRouter);
 }
 // Load the UI/other routes
-if (mbee.config.server.ui.enabled) {
+if (M.config.server.ui.enabled) {
     const RoutesPath = path.join(__dirname, 'routes.js');
     const Router = require(RoutesPath);
-    app.use('/', Router);               
+    app.use('/', Router);
 }
 
 // Export the app
