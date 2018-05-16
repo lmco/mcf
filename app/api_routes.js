@@ -35,7 +35,8 @@ const APIController     = require(getController('APIController'));
 const OrgController     = require(getController('OrganizationController'));
 const ProjectController = require(getController('ProjectController'));
 const UserController    = require(getController('UserController'));
-const AuthController    = require(path.join(__dirname, 'lib', 'auth'));
+const RoleController    = require(getController('RoleController'));
+const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var api = express.Router();
 
@@ -561,11 +562,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *       501:
  *         description: Not Implemented
  */
-api.route('/orgs/:orgid/members')
-    .get   (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .post  (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .put   (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+api.route('/orgs/:orgid/members/:role')
+    .get   (AuthController.authenticate, RoleController.getOrgRoles)
+    .post  (AuthController.authenticate, RoleController.postOrgRoles)
+    .put   (AuthController.authenticate, RoleController.putOrgRoles)
+    .delete(AuthController.authenticate, RoleController.deleteOrgRoles);
 
 
 /**
@@ -592,11 +593,11 @@ api.route('/orgs/:orgid/members')
  *       501:
  *         description: Not Implemented
  */
-api.route('/orgs/:orgid/projects/:projectid/members')
-    .get   (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .post  (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .put   (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+api.route('/orgs/:orgid/projects/:projectid/members/:role')
+    .get   (AuthController.authenticate, APIController.notImplemented)
+    .post  (AuthController.authenticate, APIController.notImplemented)
+    .put   (AuthController.authenticate, APIController.notImplemented)
+    .delete(AuthController.authenticate, APIController.notImplemented);
 
 
 /**
