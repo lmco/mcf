@@ -121,11 +121,11 @@
     },
     "db": {
       "name": "mbee",
-      "url": "dev.mbee.us.lmco.com",
+      "url": "localhost",
       "port": "27017",
       "username": "mbee",
-      "password": "relativeUniverse141",
-      "ssl": true,
+      "password": "mbee",
+      "ssl": false,
       "sslCAFile": "LockheedMartinRootCertificationAuthority.pem"
     }
   }
