@@ -19,7 +19,7 @@
  */
  
 const path = require('path');
-const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+//const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 const BaseStrategy = require(path.join(__dirname, '..', 'auth', 'BaseStrategy'));
 const AuthStrategy = require(path.join(__dirname, '..', 'auth', mbee.config.auth.strategy));

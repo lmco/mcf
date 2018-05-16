@@ -25,7 +25,7 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
 
-const mbee = require(__dirname + '/../mbee.js');
+//const mbee = require(__dirname + '/../mbee.js');
 
 const app = express();       // Initializes our application
 mbee.lib.db.connect();       // Connect to the database 

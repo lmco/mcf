@@ -14,10 +14,10 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines the MBEE logger. The logger should be used everywhere instead of 
+ * Defines the MBEE logger. The logger should be used everywhere instead of
  * using `console.log`.
  *
- * To use the logger simple require this file (e.g. 
+ * To use the logger simple require this file (e.g.
  * `const log = require('logger.js')`. You can the use the logger:
  *   - `log.info('Hello World')`
  *   - `log.error('An error has occured')`
@@ -32,10 +32,10 @@ const { combine, timestamp, label, printf, colorize } = winston.format;
 /* This defines our log levels */
 const levels = {
     critical: 0,
-    error:    1, 
-    warn:     2, 
-    info:     3, 
-    verbose:  4, 
+    error:    1,
+    warn:     2,
+    info:     3,
+    verbose:  4,
     debug:    5
 }
 
@@ -73,7 +73,7 @@ const formatter = printf(function(msg) {
     var lines = stack.split('\n');
     var reduced = [];
     for (var i = 0; i < lines.length; i++) {
-        if( lines[i].includes('node_modules') 
+        if( lines[i].includes('node_modules')
          || lines[i].includes('DerivedLogger')
          || lines[i].includes('at doWrite')
          || lines[i].includes('at writeOrBuffer ') ) {
@@ -126,15 +126,15 @@ const formatter = printf(function(msg) {
 });
 
 /**
- * This creates the logger. It defines the log level, as specified in the 
- * config. Defines the levels and ordering from the level field above and 
- * defines the log format and transports which tell the logger where to send 
- * log info. By default we have four log transports: the console, an error 
+ * This creates the logger. It defines the log level, as specified in the
+ * config. Defines the levels and ordering from the level field above and
+ * defines the log format and transports which tell the logger where to send
+ * log info. By default we have four log transports: the console, an error
  * file, a combined log, and a debug log.
  */
 const logger = winston.createLogger({
   level: mbee.config.log.level,
-  levels: levels, 
+  levels: levels,
   format: combine(
     label({ label: 'MBEE' }),
     winston.format.colorize(),
@@ -145,21 +145,21 @@ const logger = winston.createLogger({
     // This is the console transport. It tells the logger to log things
     // to the console. It uses the default format defined above.
     new winston.transports.Console(),
-    // This is the error log transport. It writes all logs of level error 
+    // This is the error log transport. It writes all logs of level error
     // (and below) to error log file. The file is defined in the config.
-    new winston.transports.File({ 
-        filename: mbee.config.log.error_file, 
+    new winston.transports.File({
+        filename: mbee.config.log.error_file,
         level: 'error'
     }),
-    // This is the combined log. It logs everything of the default level and 
+    // This is the combined log. It logs everything of the default level and
     // below to a combined log.
-    new winston.transports.File({ 
+    new winston.transports.File({
         filename: mbee.config.log.file,
         level: mbee.config.log.level
     }),
     // This is the combined log. It logs all log levels to the debug file
     // defined in the config.
-    new winston.transports.File({ 
+    new winston.transports.File({
         filename: mbee.config.log.debug_file,
         level: 'debug'
     })
@@ -170,7 +170,7 @@ const logger = winston.createLogger({
 // This seems to be needed for our custom log levels
 winston.addColors(colors)
 
-//var testMsg = 'Test 1 2 3' 
+//var testMsg = 'Test 1 2 3'
 //logger.critical(testMsg);
 //logger.error(testMsg);
 //logger.warn(testMsg);

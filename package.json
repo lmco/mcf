@@ -8,7 +8,7 @@
   "license": "LMPI",
   "private": true,
   "dependencies": {
-    "body-parser": "^1.18.2",
+    "body-parser": "^1.18.3",
     "connect-mongo": "^2.0.1",
     "cookie-parser": "^1.4.3",
     "ejs": "^2.5.7",
@@ -17,8 +17,8 @@
     "htmlspecialchars": "^1.0.5",
     "ldapjs": "^1.0.2",
     "mongo-sanitize": "^1.0.0",
-    "mongodb": "^3.0.7",
-    "mongoose": "^5.0.16",
+    "mongodb": "^3.1.0-beta4",
+    "mongoose": "^5.1.1",
     "winston": "^3.0.0-rc5"
   },
   "devDependencies": {
@@ -35,19 +35,18 @@
     "popper.js": "^1.12.9",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "request": "^2.85.0",
+    "request": "^2.86.0",
     "swagger-jsdoc": "^1.9.7",
     "swagger-ui-express": "^2.0.15",
     "ub-jsdoc": "^1.6.0"
   },
-  "peerDependencies": {
-    "jsdoc": "^3.5.5"
-  },
+  "peerDependencies": {},
   "scripts": {
-    "build": "node mbee.js build",
+    "build": "node scripts/build",
     "clean": "node mbee.js clean",
     "docker": "node mbee.js docker",
+    "lint": "eslint *.js app/**/*.js plugins/**/*.js scripts/**/*.js",
     "start": "node mbee.js start",
-    "test": "./node_modules/.bin/mocha test/_orchestrator.js --slow 19"
+    "test": "./node_modules/.bin/mocha test/runner.js"
   }
 }

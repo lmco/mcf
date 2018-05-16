@@ -26,14 +26,34 @@ const path = require('path');
 const { execSync, spawn, spawnSync } = require('child_process');
 
 // Global MBEE helper object
-var mbee = { env: process.env.NODE_ENV || 'dev' };
-mbee.version = require(__dirname + '/package.json')['version'];
-mbee.config  = require(__dirname + `/config/${mbee.env}.json`);
-mbee.paths = {
-    lib:         (s) => {return path.join(__dirname, 'app', 'lib', s);},
-    controllers: (s) => {return path.join(__dirname, 'app', 'controllers', s);},
-    models:      (s) => {return path.join(__dirname, 'app', 'models', s);}
+var M = { env: process.env.NODE_ENV || 'dev' };
+M.version = require(__dirname + '/package.json')['version'];
+M.config  = require(__dirname + `/config/${M.env}.json`);
+M.root = __dirname;
+M.path = {
+    lib:         (s) => {return path.join(__dirname, 'app', 'lib', s)},
+    controllers: (s) => {return path.join(__dirname, 'app', 'controllers', s)},
+    models:      (s) => {return path.join(__dirname, 'app', 'models', s)}
 };
+
+//M.util = {
+//    /**
+//     * Takes a list of items, A, and a list of mutually exclusive items, B. 
+//     * Returns false if than one item from B is found in A, true otherwise.
+//     */
+//    mutuallyExclusive: (A, B) => {
+//        let flags = 0;
+//        for (let i = 0; i < list.length; i++) {
+//            if (args.includes(list[i])) {
+//                flags++;
+//                if (flags > 1) 
+//                    throw new Error('Too many mutually exclusive arguments.');
+//            }
+//        }
+//    }
+//}
+
+M.load = (m) => {return require(path.join(__dirname, 'app', m)) };
 
 // This exports the basic MBEE version and config data so that modules may
 // have access to that data when they are loaded. 
@@ -41,27 +61,30 @@ mbee.paths = {
 // That means that modules should not try to call other modules when they are
 // loaded. They can, however, call other modules later because the 'mbee' object
 // is re-exported after the modules loading is complete (see below)
-module.exports = mbee;
+//module.exports = mbee;
+module.exports = M;
 
 // If dependecies have been installed, initialize the MBEE helper object
 if (fs.existsSync(__dirname + '/node_modules')) {
     initialize()
 }
 
+const build = require(__dirname + '/scripts/build');
+
 // Call main
 if (module.parent == null) {
-    try {
+    //try {
         main();
-    }
-    catch (error) {
-        console.log(error);
-        console.log('An error occurred. Try running "node mbee install".');
-        process.exit(1);
-    }    
+    //}
+    //catch (error) {
+    //    console.log(error);
+    //    console.log('An error occurred. Try running "node mbee install".');
+    //    process.exit(1);
+    //}    
 } 
 // Re-export mbee after initialization
 else {
-    module.exports = mbee;
+    module.exports = M;
 }
 
 
@@ -74,11 +97,10 @@ function main()
     var subcommand = process.argv.slice(2,3)[0];
     var opts = process.argv.slice(3);
     var tasks = {
-        'build':     build,
+        'build':     build.build,
         'clean':     clean,
-        'configure': configure,
         'docker':    docker,
-        'install':   install,
+        'install':   build.install,
         'start':     start,
         'test':      test
     };
@@ -95,92 +117,9 @@ function main()
  ******************************************************************************/
 
 
-/**
- * Builds the project by copy dependencies to their final location, compiling 
- * Sass into CSS, building Javascript libraries into client-side code, and
- * building developer documentation. Installs dev dependencies first. Accepts
- * the following command-line parameters: `--copy-deps`, `--sass`, `--react`, 
- * `--jsdoc`, and `--all`. No arguments defaults to `--all` which does not 
- * include JSDoc.
- */
 
-function build(args) 
-{
-    install(['--dev']);                 // Install development dependencies
-    mbee.log.info('Building MBEE ...'); 
 
-    let gulp   = require('gulp');
-    let concat = require('gulp-concat');
-    let sass    = require('gulp-sass');
-    let react   = require('gulp-react');
 
-    // Allow the function to be called with no parameters
-    // Set the default behavior to build all
-    if (args == undefined || args.length == 0) {
-        args = ['--all'];
-    }
-
-    // This executes the default build process with Gulp.
-    if (args.includes('--all') || args.includes('--copy-deps')) {
-        // Copy images
-        gulp.src('./app/ui/img/**/*')
-            .pipe(gulp.dest('public/img'));
-        // Copy React
-        gulp.src('./node_modules/react/umd/react.production.min.js')
-            .pipe(react())
-            .pipe(concat('react.min.js'))
-            .pipe(gulp.dest('public/js'));
-        // Copy ReactDOM
-        gulp.src('./node_modules/react-dom/umd/react-dom.production.min.js')
-            .pipe(react())
-            .pipe(concat('react-dom.min.js'))
-            .pipe(gulp.dest('public/js'));
-        // Copy Swagger CSS
-        gulp.src('./node_modules/swagger-ui-express/static/*.css')
-            .pipe(gulp.dest('public/css'));
-        // Copy Swagger JS
-        gulp.src('./node_modules/swagger-ui-express/static/*.js')
-            .pipe(gulp.dest('public/js'));
-    }
-
-    // Build Sass into CSS
-    if (args.includes('--all') || args.includes('--sass')) {
-        gulp.src('./app/ui/sass/**/*.scss')
-            .pipe(sass({outputStyle: 'compressed'})
-            .on('error', sass.logError))
-            .pipe(gulp.dest('./public/css'));
-    }
-
-    // Builds the React libraries into client-side JS
-    if (args.includes('--all') || args.includes('--react')) {
-        // Build React
-        gulp.src('./app/ui/react-components/**/*.jsx')
-            .pipe(react())
-            .pipe(concat('mbee.js'))
-            .pipe(gulp.dest('public/js'));
-        // Build ReactDOM
-        gulp.src('./app/ui/react-renderers/**/*.jsx')
-            .pipe(react())
-            .pipe(gulp.dest('public/js')); 
-    }
-
-    // Build JSDoc
-    if (args.includes('--jsdoc')) {
-        let jsdoc  = 'node_modules/jsdoc/jsdoc.js'; 
-        let src    = 'out';
-        let dst    = 'docs';
-        let tmpl   = '-t plugins/developers'; //'-t node_modules/ub-jsdoc/';
-        let files  = ['app/**/*.js', 'README.md'].join(' ');
-        let cmd    = [
-            `node ${jsdoc} ${tmpl} ${files}`,
-            `rm -rf ${dst}/*`,
-            `mv ${src} ${dst}`
-        ].join(' && ');
-        let stdout = execSync(cmd);
-    }
-    mbee.log.info('Build Complete.');
-    return;
-}
 
 
 /**
@@ -189,6 +128,9 @@ function build(args)
  * node_modules. The following flags are supported: `--logs`, `--docs`, 
  * `--public`, `--node-modules`, and `--all`. The default behavior if no 
  * arguments are given is to delete all items except the node_modules directory.
+ *
+ * TODO - Make this robust against missing node_modules directory and keep it
+ * cross-platform.
  */
 
 function clean(args) 
@@ -198,105 +140,50 @@ function clean(args)
     // Allow the function to be called with no parameters
     // Set the default behavior to build all
     if (args == undefined) 
-        args = [];
+      args = [];
 
     // Clean logs
     if (args.length == 0 || args.includes('--all') || args.includes('--logs')) 
-        del.sync(['*.log', 'logs/*.logs']);
+      del.sync(['*.log', 'logs/*.logs']);
 
     // Clean docs
     if (args.length == 0 || args.includes('--all') || args.includes('--docs')) 
-        del.sync(['docs']);
+      del.sync(['docs']);
 
     // Clean public
     if (args.length == 0 || args.includes('--all') || args.includes('--public')) 
-        del.sync(['public']);
+      del.sync(['public']);
 
     // Clean node_modules
     if (args.includes('--all') || args.includes('--node-modules')) 
-        del.sync(['node_modules']);
+      del.sync(['node_modules']);
 }
 
 
-/**
- * Configures the system for build. The main purpose is to ensure that Yarn is 
- * installed. If not, it is installed using NPM. If Yarn configuration 
- * parameters are defined in the config.json file, Yarn is configured with 
- * those key/value pairs.
- */
-
-function configure() 
-{
-    console.log('Configuring build system ...');
-
-    // Make sure Yarn is installed
-    let yarnPath = execSync('which yarn').toString().replace('\n', '');
-    if(!fs.existsSync(yarnPath)) {
-        console.log('Instaling yarn ...')
-        let cmd = spawnSync('npm', ['install', '-g', 'yarn'], {stdio: 'inherit'});
-        if (cmd.stdout)
-            console.log(cmd.stdout.toString());
-        if (cmd.stderr && cmd.stderr.toString().trim() !== '') 
-            console.error(cmd.stderr.toString());
-        if (cmd.status != 0) 
-            process.exit(cmd.status || -1);
-    }
-
-    // Configure Yarn - loop over config options and configure Yarn
-    if (mbee.config.hasOwnProperty['yarn']) {
-        let keys = Object.keys(mbee.config.yarn);
-        for (let i = 0; i < keys.length; i++) {
-            let key = keys[i];
-            let val = mbee.config.yarn[key];
-
-            // Check if config is already set, if so. Don't mess with it. 
-            let cmd = spawnSync('yarn', ['config', 'get', `${key}`], {stdio: 'inherit'});
-            if (cmd.stdout) 
-                if (cmd.stdout.toString().replace('\n', '').trim() == val)
-                    continue;
-            if (cmd.stderr && cmd.stderr.toString().trim() !== '') 
-                console.log(cmd.stderr.toString());
-            if (cmd.status != 0)
-                process.exit(cmd.status || -1);
-
-            // Execute the 'yarn config' command
-            cmd = spawnSync('yarn', ['config', 'set', `${key}`, val], {stdio: 'inherit'});
-            if (cmd.stdout)
-                console.log(cmd.stdout.toString());
-            if (cmd.stderr && cmd.stderr.toString().trim() !== '')
-                console.log(cmd.stderr.toString());
-            if (cmd.status != 0)
-                process.exit(cmd.status || -1);
-        }
-    }
-    console.log('Configuration complete.');
-    return;
-}
 
 
 /**
  * The Docker command can be used to build a Docker image or run a Docker 
- * container. It supports the mutually exclusive command line arguments 
- * `--build` and `--run` to build the image or run the conatiner respectively.
- * Both of these options expect configuration parameters to be defined in the
- * Docker section of the config.json file.
+ * container. It supports the command line arguments `--build` and `--run` to 
+ * build the image or run the conatiner respectively. Both of these options 
+ * expect configuration parameters to be defined in the Docker section of the 
+ * config.json file. The `--build` and `--run` commands are not mutually 
+ * exclusive, if run together the Docker image is built and then the container
+ * is run.
  */
 
 function docker(args) 
 {
-    // Sanity check on mutually exclusive args
-    mutuallyExclusive(args, ['--build', '--run']);
-
     // Build the Docker image
     if (args.includes('--build')) {
         build();  // First, build MBEE 
-        mbee.log.info('Building Docker Image ...');
+        console.info('Building Docker Image ...');
         
         // Build docker by running: "docker build -f .../Dockerfile -t mbee ."
         let buildArgs = [                           // Create the build args
             'build', 
-            '-f', mbee.config.docker.Dockerfile, 
-            '-t', mbee.config.docker.image.name, '.'
+            '-f', M.config.docker.Dockerfile, 
+            '-t', M.config.docker.image.name, '.'
         ];
         let cmd = spawn('docker', buildArgs, {stdio: 'inherit'});       // Run the build process
         cmd.stdout.on('data', function (data) {     
@@ -307,18 +194,18 @@ function docker(args)
         });
         cmd.on('exit', function (code) {            
             if (code != 0) {                        // Fail if exit code != 0
-                mbee.log.error('Docker build failed');
+                console.log('Docker build failed');
                 process.exit(code);
             }
             else {                                  // Log successful build 
-                mbee.log.info('Docker Image Built.');
+                console.log('Docker Image Built.');
             }
         });
     }
 
     // Run the Docker container
-    else if (args.includes('--run')) {
-        mbee.log.info('Running Docker Container ...');
+    if (args.includes('--run')) {
+        console.log('Running Docker Container ...');
 
         // Build the "docker run" command
         let server = mbee.config.server;
@@ -345,47 +232,15 @@ function docker(args)
         cmd.stderr.on('data', (data) => { console.error(data.toString()); });
         cmd.on('exit', function (code) {
             if (code != 0) {
-                mbee.log.error('Docker run failed');
+                console.log('Docker run failed');
                 process.exit(code);
             }
         });
-        mbee.log.info('Docker Container Running in Background.');
+        console.log('Docker Container Running in Background.');
     }
 }
 
 
-/**
- * Installs dependencies for MBEE. First, Yarn is configured via the configure 
- * function. Then dependencies are installed via "yarn install". If the "--dev" 
- * argument is specified, development dependencies are also installed. 
- */
-
-function install(args) 
-{
-    console.log('Installing dependencies ...');
-    configure(); // Make sure Yarn is installed and configured
-
-    // Safely allow install to be called with no args
-    if (args == undefined) {
-        args = [];
-    }
-
-    let cmd = spawnSync('yarn', ['install'].concat(args), {stdio: 'inherit'});
-    if (cmd.stdout) {
-        console.log(cmd.stdout.toString());
-    }
-    if (cmd.stderr && cmd.stderr.toString().trim() !== '') {
-       console.error(cmd.stderr.toString());
-    }
-    if (cmd.status != 0) {  
-        process.exit(cmd.status || -1);
-    }
-
-    // Init the MBEE helper object and return.
-    initialize();
-    mbee.log.info('Dependencies installed succesfully.');
-    return;
-}
 
 
 /**
@@ -395,6 +250,7 @@ function install(args)
 
 function start(args) 
 {
+    initialize();
     mbee.log.debug(`+ mbee.js executed as ${process.argv.join(' ')} ` 
                     + `with env=${mbee.env} and configuration: ` 
                     + JSON.stringify(mbee.config));
@@ -408,9 +264,9 @@ function start(args)
     }
 
     // Create HTTPS Server
-    if (mbee.config.server.https.enabled) {
-        var keyPath = path.join('certs', `${mbee.config.server.https.sslCertName}.key`);
-        var crtPath = path.join('certs', `${mbee.config.server.https.sslCertName}.crt`);
+    if (M.config.server.https.enabled) {
+        var keyPath = path.join('certs', `${M.config.server.https.sslCertName}.key`);
+        var crtPath = path.join('certs', `${M.config.server.https.sslCertName}.crt`);
         var privateKey  = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
         var certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
         var credentials = {key: privateKey, cert: certificate};
@@ -436,50 +292,34 @@ function start(args)
 
 
 /**
- * Runs the Mocha test suite.
+ * Runs the collection of test suites by running the "test/runner.js" script
+ * with Mocha.
  */
 function test(args) 
 {
     let mocha = './node_modules/.bin/mocha';
-    let margs = ['test/_orchestrator.js', '--slow', '19'];
+    let margs = ['test/runner.js', '--slow', '19'];
+
+    console.log(args);
+
+    mocha = 'ls'
+    margs = ['-lh']
     let cmd = spawn(mocha, margs, {stdio: 'inherit'});
+
+    console.log(cmd)
+
     cmd.stdout.on('data', function(data) { 
         console.log(data.toString()); 
     });
     cmd.stderr.on('data', function(data) { 
         console.error(data.toString()); 
     });
-    cmd.on('exit', function (code) {
+    cmd.on('close', function (code) {
         if (code != 0) {
-            mbee.log.error('Tests failed.');
+            console.log('Tests failed.');
             process.exit(code);
         }
     });
-}
-
-
-/******************************************************************************
- * Helper Functions                                                           *
- ******************************************************************************/
-
-
-/**
- * This function can be used as a sanity check on mutually exclusive arguments.
- * The 'args' paramater is the full list of arguments that we need to verify.
- * The 'list' parameter is the list of mutually exclusive arguments. If two
- * arguments that are mutually exclusive are found in the args array, an error
- * is thrown.
- */
-
-function mutuallyExclusive(args, list) {
-    let flags = 0;
-    for (let i = 0; i < list.length; i++) {
-        if (args.includes(list[i])) {
-            flags++;
-            if (flags > 1) 
-                throw new Error('Too many mutually exclusive arguments.');
-        }
-    }
 }
 
 
@@ -491,12 +331,12 @@ function mutuallyExclusive(args, list) {
 
 function initialize(args) 
 {
-    mbee.log = require(mbee.paths.lib('logger.js'));
-    mbee.lib = {
-        crypto:     require(mbee.paths.lib('crypto.js')),
-        db:         require(mbee.paths.lib('db.js')),
-        sani:       require(mbee.paths.lib('sanitization.js')),
-        startup:    require(mbee.paths.lib('startup.js')),
-        validators: require(mbee.paths.lib('validators.js'))
+    M.log = M.load('lib/logger');
+    M.lib = {
+        crypto:     M.load('lib/crypto'),
+        db:         M.load('lib/db'),
+        sani:       M.load('lib/sanitization'),
+        startup:    M.load('lib/startup'),
+        validators: M.load('lib/validators')
     }
 }

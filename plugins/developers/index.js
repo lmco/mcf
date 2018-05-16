@@ -21,7 +21,7 @@ const fs = require('fs')
 const path = require('path');
 const { execSync } = require('child_process');
 
-const mbee = require(__dirname + '/../../mbee.js');
+//const mbee = require(__dirname + '/../../mbee.js');
 
 const express = require('express');
 const ejs = require('ejs');

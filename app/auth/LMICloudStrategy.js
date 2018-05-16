@@ -22,14 +22,11 @@ const path = require('path');
 const util = require('util');
 const crypto = require('crypto');
 const ldap = require('ldapjs');
-const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+//const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 const BaseStrategy = require(path.join(__dirname, 'BaseStrategy'));
 
 const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
-const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
-const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
-const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
 
 /**
  * LMICloudStrategy

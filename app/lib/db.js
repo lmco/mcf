@@ -22,7 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 
-const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+//const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 
 /**

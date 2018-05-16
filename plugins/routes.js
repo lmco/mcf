@@ -44,14 +44,16 @@ files.forEach(function(f) {
     log.info(`Loading plugin ${namespace} ...`)
 
     // Load the peer dependencies list
-    var peerDeps = require(path.join(__dirname, '..', 'package.json'))
-    peerDeps = peerDeps['peerDependencies'];
+    var packageJSON = require(path.join(__dirname, '..', 'package.json'))
+    var deps = packageJSON['dependencies'];;
+    var peerDeps = packageJSON['peerDependencies'];
+    deps = Object.keys(deps);
     peerDeps = Object.keys(peerDeps);
 
     // Install dependencies
     for (dep in plugin['dependencies']) {
         // Skip if already in peer deps
-        if (peerDeps.includes(dep)) {
+        if (peerDeps.includes(dep) || deps.includes(dep)) {
             continue;
         }
         // Make sure the package name is valid.
