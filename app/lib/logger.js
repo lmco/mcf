@@ -9,10 +9,10 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/*
- * @module  lib/logger.js
+/**
+ * @module lib/logger
  *
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * Defines the MBEE logger. The logger should be used everywhere instead of 
  * using `console.log`.
@@ -30,12 +30,66 @@ const winston     = require('winston');
 const { combine, timestamp, label, printf, colorize } = winston.format;
 
 
+/* This defines our log levels */
+const levels = {
+    critical: 0,
+    error:    1, 
+    warn:     2, 
+    info:     3, 
+    verbose:  4, 
+    debug:    5
+}
+
+/* This defines the colors for each log level */
+const colors = {
+    critical: 'red underline',
+    error:    'red',
+    warn:     'yellow',
+    info:     'magenta',
+    verbose:  'blue',
+    debug:    'green'
+}
+var fmt = {
+    'color': {
+    'grey': '\u001b[30m',
+    'red': '\u001b[31m',
+    'green': '\u001b[32m',
+    'yellow': '\u001b[33m',
+    'blue': '\u001b[34m',
+    'magenta': '\u001b[35m',
+    'cyan': '\u001b[36m',
+    'light_grey': '\u001b[37m',
+    'esc': '\u001b[39m'
+    }
+}
+
 /**
  * This is the formatting function for console output. To change how logs
  * appear in the console, edit this function. Note, a separate function is used
  * to define the format for the log files (the fileFormatter function).
  */
 const formatter = printf(function(msg) {
+    // This allows us to get the file, line, and column
+    var stack = new Error().stack
+    var lines = stack.split('\n');
+    var reduced = [];
+    for (var i = 0; i < lines.length; i++) {
+        if( lines[i].includes('node_modules') 
+         || lines[i].includes('DerivedLogger')
+         || lines[i].includes('at doWrite')
+         || lines[i].includes('at writeOrBuffer ') ) {
+            continue
+        }
+        reduced.push(lines[i]);
+    }
+
+    let index = (reduced.length > 2) ? 2 : 1;
+    let tmp = reduced[index].split(process.cwd() + '/')
+    let func = reduced[index].split('at ')[1].split(' ')[0]
+    let file = tmp[tmp.length-1].split(':')[0].replace(/\//g, '.');
+    let line = tmp[tmp.length-1].split(':')[1];
+    let col = tmp[tmp.length-1].split(':')[2].replace(')', '');
+
     // We want to capitalize the log level. You cannot string.toUpperCase here
     // because the string includes the color formatter and toUpperCase will
     // break the color formatting.
@@ -49,7 +103,9 @@ const formatter = printf(function(msg) {
 
     // If we want colored logs, this is our return string
     if (config.log.colorize) {
-        return `\u001b[30m${msg.timestamp}\u001b[39m [${msg.level}]: ${msg.message}`;
+        var ts = `${fmt.color.grey}${msg.timestamp}${fmt.color.esc}` // timestamp
+        var f = `${fmt.color.cyan}${file}${fmt.color.esc}`           // file
+        return `${ts} [${msg.level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msg.message}`;
     }
     // If colorize is false, we remove colors from the log level.
     else {
@@ -64,55 +120,11 @@ const formatter = printf(function(msg) {
             .replace('\u001b[37m', '')
             .replace('\u001b[38m', '')
             .replace('\u001b[39m', '')
-        return `${msg.timestamp} [${msg.level}]: ${msg.message}`;   
+        var ts = `${msg.timestamp}` // timestamp
+        var f = `${file}`           // file
+        return `${ts} [${msg.level}] ${f}:${line} -> ${msg.message}`;
     }
 });
-
-
-/**
- * This is the formatting function for log file output. To change how logs
- * appear in the log files, edit this function. Note, a separate function 
- * (formatter above) is used to define the format for the log console output. 
- */
-const fileFormatter = printf(function(msg) {
-    msg.level = msg.level
-            .replace('\u001b[30m', '')
-            .replace('\u001b[31m', '')
-            .replace('\u001b[32m', '')
-            .replace('\u001b[33m', '')
-            .replace('\u001b[34m', '')
-            .replace('\u001b[35m', '')
-            .replace('\u001b[36m', '')
-            .replace('\u001b[37m', '')
-            .replace('\u001b[38m', '')
-            .replace('\u001b[39m', '')
-    return `${msg.timestamp} [${msg.level}]: ${msg.message}`;   
-});
-
-
-/* 
- * This defines our log levels
- */
-const levels = {
-    critical: 0,
-    error:    1, 
-    warn:     2, 
-    info:     3, 
-    verbose:  4, 
-    debug:    5
-}
-
-/*
- * This defines the colors for each log level
- */
-const colors = {
-    critical: 'red underline',
-    error:    'red',
-    warn:     'yellow',
-    info:     'cyan',
-    verbose:  'blue',
-    debug:    'green'
-}
 
 /**
  * This creates the logger. It defines the log level, as specified in the 
@@ -138,34 +150,19 @@ const logger = winston.createLogger({
     // (and below) to error log file. The file is defined in the config.
     new winston.transports.File({ 
         filename: config.log.error_file, 
-        level: 'error',
-        format: combine(
-            label({ label: 'MBEE' }),
-            timestamp(),
-            fileFormatter
-        )
+        level: 'error'
     }),
     // This is the combined log. It logs everything of the default level and 
     // below to a combined log.
     new winston.transports.File({ 
         filename: config.log.file,
-        level: config.log.level,
-        format: combine(
-            label({ label: 'MBEE' }),
-            timestamp(),
-            fileFormatter
-        )
+        level: config.log.level
     }),
     // This is the combined log. It logs all log levels to the debug file
     // defined in the config.
     new winston.transports.File({ 
         filename: config.log.debug_file,
-        level: 'debug',
-        format: combine(
-            label({ label: 'MBEE' }),
-            timestamp(),
-            fileFormatter
-        )
+        level: 'debug'
     })
   ],
   exitOnError: false
@@ -182,4 +179,5 @@ winston.addColors(colors)
 //logger.verbose(testMsg);
 //logger.debug(testMsg);
 
+/* Export the logger object */
 module.exports = logger;

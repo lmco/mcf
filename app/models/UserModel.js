@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  UserModel.js
+ * @module  models/UserModel
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -28,8 +28,10 @@ const mongoose = require('mongoose');
  */
 var UserSchema = new mongoose.Schema({
     
-    /*
-     * The `username` property is the user's unique name.
+    /**
+     * @member  username
+     * 
+     * @description  The `username` property is the user's unique name.
      * It is indexed for faster lookup.
      * A username must be between 3 and 36 characters inclusive.
      */
@@ -43,7 +45,7 @@ var UserSchema = new mongoose.Schema({
         match: RegExp('^([a-z])([a-z0-9_]){0,}$')
     },
 
-    /*
+    /**
      * The `password` property stores the user's hashed password.
      */
     password: {
@@ -59,7 +61,7 @@ var UserSchema = new mongoose.Schema({
         }
     },
 
-    /*
+    /**
      * The `email` property is the user's email address.
      * RegEx Source: http://regexlib.com/Search.aspx?k=email
      */
@@ -68,7 +70,7 @@ var UserSchema = new mongoose.Schema({
         match: RegExp('^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$')
     },
 
-    /*
+    /**
      * The `fname` property is the user's first name.
      */
     fname: {
@@ -77,7 +79,7 @@ var UserSchema = new mongoose.Schema({
         maxlength: [36, 'Too many characters in first name']
     },
 
-    /*
+    /**
      * The `lname` property is the user's last name.
      */
     lname: {
@@ -86,7 +88,7 @@ var UserSchema = new mongoose.Schema({
         maxlength: [36, 'Too many characters in last name']
     },
 
-    /*
+    /**
      * The `name` property stores the user's full name.
      * It it set based on the fname and lname properties.
      */
@@ -111,6 +113,15 @@ var UserSchema = new mongoose.Schema({
      * This refers to whether or not the user is a site-wide admin.
      */
     admin: {
+        type: Boolean,
+        default: false
+    },
+
+    /**
+     * The `isLDAPUser` property defines whether or not the user is an LDAP 
+     * user. This impacts how the user is authenticated
+     */
+    isLDAPUser: {
         type: Boolean,
         default: false
     },

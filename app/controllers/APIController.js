@@ -24,13 +24,22 @@ const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
  */
 class APIController 
 {
+    /**
+     * Returns 200 to confirm the API is functional
+     */
+    static test(req, res) 
+    {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send('');
+    }
+
 
     /**
      * Returns the version number as JSON.
      */
     static version(req, res) 
     {
-        log.info('/api/version');
+        log.info(`GET "/api/version" requested by ${req.user.username}`);
         var obj = {'version': package_json['version']};
         res.header('Content-Type', 'application/json');
         return res.send(APIController.formatJSON(obj));

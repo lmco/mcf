@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /*
- * auth/LocalStrategy.js
+ * LocalStrategy.js
  * 
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * 
@@ -23,12 +23,12 @@ const path = require('path');
 const util = require('util');
 const crypto = require('crypto');
 
-const sanitize = require('mongo-sanitize');
 
 const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
 const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
+const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
 const API = require(path.join(__dirname, '..', 'controllers', 'APIController'));
 const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 
@@ -50,138 +50,10 @@ class LocalStrategy extends BaseStrategy
     {
         super();
         this.name = 'local-strategy';
-    }
-
-
-    /**
-     * This is the function that gets called during authentication. 
-     */
-    
-    authenticate(req, res, next) 
-    {
-
-        var authorization = req.headers['authorization'];
-        if (authorization) {
-            // Check it is a valid auth header
-            var parts = authorization.split(' ')
-            if (parts.length < 2) { 
-                log.debug('Parts length < 2');
-                return (req.originalUrl.startsWith('/api')) 
-                    ? res.status(400).send('Bad Request')
-                    : res.redirect('/login');
-            }
-            // Get the auth scheme and check auth scheme is basic
-            var scheme = parts[0];
-
-            // Do basic authenication
-            if (RegExp('Basic').test(scheme)) {
-                // Get credentials from the auth header    
-                var credentials = new Buffer(parts[1], 'base64').toString().split(':');
-                if (credentials.length < 2) { 
-                    log.debug('Credentials length < 2');
-                    return (req.originalUrl.startsWith('/api')) 
-                        ? res.status(400).send('Bad Request')
-                        : res.redirect('/login');
-                }
-                var username = sanitize(credentials[0]);
-                var password = credentials[1];
-                // Error check - make sure username/password are not empty
-                if (!username || !password || username == '' || password == '' ) {
-                    log.verbose('Username or password not provided.')
-                    return (req.originalUrl.startsWith('/api')) 
-                        ? res.status(401).send('Unauthorized')
-                        : res.redirect('/login');
-                }
-                // Handle basic auth
-                LocalStrategy.handleBasicAuth(username, password, function(err, user) {
-                    if (err) {
-                        log.error(err);
-                        return (req.originalUrl.startsWith('/api')) 
-                            ? res.status(401).send('Unauthorized')
-                            : res.redirect('/login');
-                    } 
-                    else {
-                        log.verbose('Authenticated user via basic auth:', user);
-                        req.user = user;
-                        next();
-                    }
-                });
-            }
-            // Handle token authentication
-            else if (RegExp('Bearer').test(scheme)) {
-                log.debug('Using auth token ...')
-                var token = new Buffer(parts[1], 'utf8').toString();
-                LocalStrategy.handleTokenAuth(token, function(err, user) {
-                    if (err) {
-                        log.error(err);
-                        return (req.originalUrl.startsWith('/api')) 
-                            ? res.status(401).send('Unauthorized')
-                            : res.redirect('/login');
-                    } 
-                    else {
-                        log.verbose('Authenticated user via token auth:', user);
-                        req.user = user;
-                        next();
-                    }
-                });
-            }
-            // Other authorization header
-            else {
-                log.verbose('Invalid authorization scheme.');
-                return (req.originalUrl.startsWith('/api')) 
-                    ? res.status(401).send('Unauthorized')
-                    : res.redirect('/login');
-            }
-        }
-        // Authenticate using a stored session token
-        else if (req.session.token) {
-            log.verbose('Using session token...')
-            var token = req.session.token;
-            LocalStrategy.handleTokenAuth(token, function(err, user) {
-                if (err) {
-                    log.error(err);
-                    return (req.originalUrl.startsWith('/api')) 
-                        ? res.status(401).send('Unauthorized')
-                        : res.redirect('/login');
-                } 
-                else {
-                    log.verbose('Authenticated user via session token:', user);
-                    req.user = user;
-                    next();
-                }
-            });
-        }
-        // Accept form input 
-        else if (req.body.username && req.body.password) {
-            var username = req.body.username; 
-            var password = req.body.password;
-            // Error check - make sure username/password are not empty
-            if (!username || !password || username == '' || password == '' ) {
-                log.verbose('Username or password not provided.')
-                return (req.originalUrl.startsWith('/api')) 
-                    ? res.status(401).send('Unauthorized')
-                    : res.redirect('/login');
-            }
-            LocalStrategy.handleBasicAuth(username, password, function(err, user) {
-                if (err) {
-                    log.error(err);
-                    return (req.originalUrl.startsWith('/api')) 
-                        ? res.status(401).send('Unauthorized')
-                        : res.redirect('/login');
-                } 
-                else {
-                    log.verbose('Authenticated user via form auth:', user);
-                    req.user = user;
-                    next();
-                }
-            })
-        }
-        else {
-            log.error('No valid authentication method provided.');
-            return (req.originalUrl.startsWith('/api')) 
-                ? res.status(401).send('Unauthorized')
-                : res.redirect('/login');
-        }
+        this.authenticate.bind(this);
+        this.handleBasicAuth.bind(this);
+        this.handleTokenAuth.bind(this);
+        this.doLogin.bind(this);
     }
 
 
@@ -193,7 +65,7 @@ class LocalStrategy extends BaseStrategy
      * If an error is passed into the callback, authentication fails. 
      * If the callback is called with no parameters, the user is authenticated.
      */
-    static handleBasicAuth(username, password, cb) 
+    handleBasicAuth(req, res, username, password, cb) 
     {
         User.findOne({
             'username': username,
@@ -219,7 +91,6 @@ class LocalStrategy extends BaseStrategy
                 cb('Invalid password');
             }
         });
-
     }
 
 
@@ -231,7 +102,7 @@ class LocalStrategy extends BaseStrategy
      * If an error is passed into the callback, authentication fails. 
      * If the callback is called with no parameters, the user is authenticated.
      */
-    static handleTokenAuth(token, cb)
+    handleTokenAuth(req, res, token, cb)
     {
         // Try to decrypt the token
         try {
@@ -243,26 +114,30 @@ class LocalStrategy extends BaseStrategy
             cb(error);
         }
 
-        // Make sure the token is not expired
-        if (Date.now() < Date.parse(token.expires)) {
-
-            // Lookup user
+        // If this is a session token, we can authenticate the user via
+        // a valid session ID.
+        if (req.session.user) {
             User.findOne({
-                'username': sanitize(token.username),
+                'username': sani.sanitize(req.session.user),
                 'deletedOn': null
             }, function(err, user) {
-                // Make sure no errors occur
-                if (err) {
-                    cb(err);
-                }
-                else {
-                    cb(null, user);
-                }
+                    cb((err) ? err : null, user);
+            });
+        }
+        // Otherwise, we must check the token (i.e. this was an API call or 
+        // used a token authorization header).
+        // In this case, we make sure the token is not expired.
+        else if (Date.now() < Date.parse(token.expires)) {
+            User.findOne({
+                'username': sani.sanitize(token.username),
+                'deletedOn': null
+            }, function(err, user) {
+                cb((err) ? err: null, user); 
             });
         }
         // If token is expired user is unauthorized
         else {
-            cb('Token is expired');
+            cb('Token is expired or session is invalid');
         }
     }
 
@@ -275,16 +150,29 @@ class LocalStrategy extends BaseStrategy
 
     doLogin(req, res, next) 
     {
-        log.verbose('Logging in', req.user.username);
+        log.info(`${req.originalUrl} requested by ${req.user.username}`);
+        
+        // Convenient conversions from ms
+        var conversions = {
+            'MILLISECONDS': 1,
+            'SECONDS':      1000,
+            'MINUTES':      60*1000,
+            'HOURS':        60*60*1000,
+            'DAYS':         24*60*60*1000
+        };
+        var dT = config.auth.token.expires*conversions[config.auth.token.units];
+        
+        // Generate the token and set the session token
         var token = libCrypto.generateToken({
             'type':     'user',
             'username': req.user.username,
             'created':  (new Date(Date.now())).toUTCString(),
-            'expires':  (new Date(Date.now() + 1000*60*5)).toUTCString()
+            'expires':  (new Date(Date.now() + dT)).toUTCString()
         });
+        req.session.user = req.user.username;
         req.session.token = token;
-        next();
-    } 
+        log.info(`${req.originalUrl} Logged in ${req.user.username}`);
+        next();    } 
 
 }
 

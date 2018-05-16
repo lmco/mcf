@@ -9,8 +9,8 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/**
- * @module  routes.js
+/*
+ * routes.js
  *
  * Defines the MBEE routes mounted a '/'.
  */
@@ -24,28 +24,51 @@ const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
 
 var router = express.Router();
 
-router.get('/', function(req, res) {
-    return res.render('home', {
-        'ui': config.ui
-    });
-});
 
-router.get('/home', AuthController.authenticate, UIController.home);
+/**********************************************
+ * Unauthenticated Routes 
+ **********************************************/
 
-/**
- * GET shows the login page.
- * POST is the route that actually logs in the user.
- */
-router.route('/login')
-    .get(UIController.showLoginPage)
-    .post(AuthController.authenticate, AuthController.doLogin, UIController.login);
+/* This renders the about page */
+router.get('/about', UIController.showAboutPage);
+
+/* GET /login shows the login page. */
+router.get('/login', UIController.showLoginPage);
+
+/* POST is the route that actually logs in the user. 
+ * It's the login form's submit action. */
+router.post('/login', 
+    AuthController.authenticate.bind(AuthController), 
+    AuthController.doLogin, 
+    UIController.login);
+
+
+/**********************************************
+/* Authenticated Routes 
+ **********************************************/
+
+/* This renders the home page for logged in users */
+router.get('/', AuthController.authenticate.bind(AuthController), UIController.home);
+
+/* This renders the home page for logged in users */
+router.get('/:org/:project', 
+    AuthController.authenticate.bind(AuthController), 
+    UIController.mbee
+);
+
+/* Renders the developers documentation page */
+router.get('/developers', 
+    AuthController.authenticate.bind(AuthController), 
+    UIController.showDevelopersPage
+);
 
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */
 router.route('/logout')
-    .post(AuthController.authenticate, UIController.logout);
+    .get(AuthController.authenticate.bind(AuthController), UIController.logout);
 
-router.get('/admin/console', AuthController.authenticate, UIController.admin);
+/* Renders the admin console */
+router.get('/admin/console', AuthController.authenticate.bind(AuthController), UIController.admin);
 
 module.exports = router;

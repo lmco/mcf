@@ -16,7 +16,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>MBEE | Model-Based Engineering Environment</title>
+    <title>Login | Model-Based Engineering Environment</title>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -35,8 +35,41 @@
 
     <%- include('_includes/nav'); %>
 
-    <div id="root">
-        If you can see this react isn't working.
+    <div class="container">
+        <h3>About MBEE</h3>
+
+        <p><b>Version:</b> <%= info.version%></p>
+
+        <p>The Model-Based Engineering Environment or MBEE is a platform that 
+        allows system models to be leveraged in a web-based user interface (UI) 
+        for  increased access and ease of use across disciplines and skill sets 
+        within an organization. MBEE provides a web-based UI for people to 
+        interact with system model data without needing to be a systems modeler 
+        themselves.</p> 
+        
+        <p>The goal of MBEE is to better communicate data across engineering 
+        organizations by implementing the core goals of model-based systems 
+        engineering through software tools. MBEE decreases ambiguity by making
+        a single-source of truth for data more achievable through its 
+        RESTful API, extensible plugins, and distributed microservices.</p>
+
+        <br/>
+
+        <h3>Our Team</h3>
+
+        <p>MBEE is being developed by the Software Engineering team in the Systems 
+        Engineering Modernization organization. </p>
+
+        <p>Our software team consists of:
+        <ul>  
+          <li>Josh Kaplan</li>
+          <li>Jake Ursetta</li>
+        </ul>
+        </p>
+
+        <p>To report an issue to our systems team, please visit our 
+          <a href="https://jira.us.lmco.com/servicedesk">JIRA Service Desk</a>.
+        </p>
     </div>
 
     <% if (ui.banner.on) { %>
@@ -45,19 +78,8 @@
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script src="/js/mbee.js" type="text/javascript"></script>
-    <script type="text/javascript">
-        ReactDOM.render(
-          React.createElement(App, {
-            name: "MBEE", 
-            org: "<%= org %>",
-            project: "<%= project %>"
-          }),
-          document.getElementById('root')
-        );
-    </script>
   </body>
 </html>

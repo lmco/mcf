@@ -54,14 +54,14 @@ db.createUser({
     }]
 })
 
-use wiki
-db.createUser({
-    user: "wiki", 
+use admin
+db.updateUser("admin", {
     pwd: "relativeUniverse141", 
-    roles: [{
-        role: "readWrite", 
-        db: "wiki"
-    }]
+    roles: [
+        "userAdminAnyDatabase",
+       "dbAdminAnyDatabase",
+       "readWriteAnyDatabase"
+    ]
 })
 ```
 

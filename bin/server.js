@@ -26,14 +26,11 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
-const util = require('util');
-const { execSync } = require('child_process');
 
 
 /**************************************
  *  Third-party modules               *
  **************************************/
-
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
@@ -68,18 +65,31 @@ log.debug('Winston logger loaded in server.js')
 // Module paths
 const RoutesPath = path.join(__dirname, '..', config.server.app, 'routes.js');
 const APIRoutesPath = path.join(__dirname, '..', config.server.app, 'api_routes.js');
+const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
 const AuthControllerPath = path.join(__dirname, '..', config.server.app, 'auth', 'auth');
+const libDBPath = getLibPath('db.js');
 
 // Actual module imports
 const Router = require(RoutesPath);
 const APIRouter = require(APIRoutesPath);
+const PluginRouter = require(PluginRoutesPath);
 const AuthController = require(AuthControllerPath);
 const UIController = require(getControllerPath('UIController'));
+const db = require(libDBPath);
 
 
 /**************************************
  *  Configuration & Middleware        *          
  **************************************/
+
+// Convenient conversions from ms to other times units
+var conversions = {
+    'MILLISECONDS': 1,
+    'SECONDS':      1000,
+    'MINUTES':      60*1000,
+    'HOURS':        60*60*1000,
+    'DAYS':         24*60*60*1000
+}
 
 const app = express();              // Initializes our application
 const viewsDir = path.join(__dirname , '..', config.server.app, 'views');
@@ -90,109 +100,104 @@ app.use(session({
     secret: config.secret, 
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 60000 },
+    cookie: { 
+        maxAge: config.auth.session.expires*conversions[config.auth.session.units]
+    },
     store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
-app.use(cookieParser());
+//app.use(cookieParser());
 app.use(bodyParser.json());         // This allows us to receive JSON data in the  request body
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');      // Sets our view engine to EJS
 app.set('views', viewsDir);         // Sets our view directory
-
-
-/**************************************
- *  Database                          *          
- **************************************/
-
-// Declare varaibels for mongoose connection
-var dbName     = config.db.name;
-var url        = config.db.url;
-var dbPort     = config.db.port;
-var dbUsername = config.db.username;
-var dbPassword = config.db.password;
-var connectURL = 'mongodb://';
-
-// Create connection with or without authentication
-if (dbUsername != '' && dbPassword != ''){
-    connectURL = connectURL + dbUsername + ':' + dbPassword + '@';
-}
-connectURL = connectURL + url + ':' + dbPort + '/' + dbName;
-
-var options = {};
-
-// Configure an SSL connection to the database. This can be configured
-// in the package.json config. The 'ssl' field should be set to true
-// and the 'sslCAFile' must be provided and reference a file located in /certs. 
-if (config.db.ssl) {
-    connectURL += '?ssl=true';
-    var caPath = path.join(__dirname, '..', 'certs', config.db.sslCAFile);
-    var caFile = fs.readFileSync(caPath, 'utf8');
-    options['sslCA'] = caFile; 
-}
-
-// Connect to database
-mongoose.connect(connectURL, options, function(err,msg){
-    if (err) {
-        log.error(err) 
-    }
-});
+db.connect();
 
 
 /**************************************
  *  Routes                            *          
  **************************************/
 
-// Routes
-app.use('/', Router);
-//app.get('/', UIController.home);
-//app.get('/login', UIController.login);
-//app.get('/admin/console', UIController.admin)
-
-// API Routes
-app.use('/api', APIRouter);
-
-// Plugin Routes
-fs.readdir(path.join(__dirname, '..', 'plugins'), function (err, files) {
-    files.forEach(function(f) {
-        // The full path to the plugin
-        var plugin_path = path.join(__dirname, '..', 'plugins', f);
-
-        // if package.json doesn't exist, skip it
-        if (!fs.existsSync(path.join(plugin_path, 'package.json'))) {
-            return;
-        }
-
-        // Get dependencies
-        var package_json = require(path.join(plugin_path, 'package.json'));
-        var peer_deps = require(path.join(__dirname, '..', 'package.json'))['peerDependencies'];
-
-        // Install dependencies
-        peer_deps = Object.keys(peer_deps);
-        for (dep in package_json['dependencies']) {
-            // Skip if already in peer deps
-            if (peer_deps.includes(dep)) {
-                continue;
-            }
-            log.debug('Installing dependency', dep, '...');
-            // Make sure the package name is valid.
-            // This is also used to protect against command injection.
-            if (RegExp('^([a-z0-9\.\\-_])+$').test(dep)) {
-                var cmd = util.format('yarn add --peer %s', dep);
-                var stdout = execSync(cmd);
-                log.debug(stdout.toString());
-            } 
-            else {
-                throw new Error('Error: Failed to install plugin dependency');
+function mutuallyExclusive(args, list) {
+    var flags = 0;
+    for (var i = 0; i < list.length; i++) {
+        if (args.includes(list[i])) {
+            flags++;
+            if (flags > 1) {
+                throw new Error('Mutually exclusive arguments called together.')
             }
         }
-        // Install the plugin within our app under it's namespace
-        var namespace = util.format('/plugins/%s', f.toLowerCase());
-        if (fs.lstatSync(plugin_path).isDirectory()) {
-            app.use(namespace, require(plugin_path));
-        }
-    })
-});
+    }
+}
 
+function argParser(args) {
+    var args = process.argv;
+
+    mutuallyExclusive(args, [
+        '--api-only',
+        '--ui-only',
+        '--plugins-only'
+    ]);
+
+    mutuallyExclusive(args, [
+        '--api-only',
+        '--no-api'
+    ]);
+
+    mutuallyExclusive(args, [
+        '--ui-only',
+        '--no-ui'
+    ]);
+
+    mutuallyExclusive(args, [
+        '--plugins-only',
+        '--no-plugins'
+    ]);
+
+    var state = {
+        api: true,
+        ui: true,
+        plugins: true
+    }
+
+    if (args.includes('--api-only')) {
+        state.api = true;
+        state.ui = false;
+        state.plugins = false;
+    }
+    if (args.includes('--ui-only')) {
+        state.api = false;
+        state.ui = true;
+        state.plugins = false;
+    }
+    if (args.includes('--plugins-only')) {
+        state.api = false;
+        state.ui = false;
+        state.plugins = true;
+    }
+    if (args.includes('--no-api')) {
+        state.api = false;
+    }
+    if (args.includes('--no-ui')) {
+        state.ui = false;
+    }
+    if (args.includes('--no-plugins')) {
+        state.plugins = false;
+    }
+
+    return state;
+}
+
+var state = argParser(process.argv.slice(2))
+
+if (state.api) {
+    app.use('/api', APIRouter);         // API Routes
+}
+if (state.plugins){
+    app.use('/ext', PluginRouter);      // Plugin routes
+}
+if (state.ui) {
+    app.use('/', Router);               // Other routes
+}
 
 /**************************************
  *  Server                            *          
@@ -203,8 +208,8 @@ require('../app/lib/startup.js')();
 
 // Read TLS/SSL certs
 if (config.server.ssl) {
-    var keyPath = path.join('..', 'certs', util.format('%s.key', config.server.ssl_cert_name));
-    var crtPath = path.join('..', 'certs', util.format('%s.crt', config.server.ssl_cert_name));
+    var keyPath = path.join('..', 'certs', `${config.server.ssl_cert_name}.key`);
+    var crtPath = path.join('..', 'certs', `${config.server.ssl_cert_name}.crt`);
     var privateKey  = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
     var certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
     var credentials = {key: privateKey, cert: certificate};
@@ -212,10 +217,14 @@ if (config.server.ssl) {
 
 // Run HTTPSserver
 var httpServer = http.createServer(app);
-httpServer.listen(config.server.http_port, () => log.info('MBEE server listening on port ' + config.server.http_port + '!'));
+httpServer.listen(config.server.http_port, function() {
+    log.info('MBEE server listening on port ' + config.server.http_port + '!')
+});
 
 // Run HTTPS Server
 if (config.server.ssl) {
     var httpsServer = https.createServer(credentials, app);
-    httpsServer.listen(config.server.https_port, () => log.info('MBEE server listening on port ' + config.server.https_port + '!'));
+    httpsServer.listen(config.server.https_port, function() {
+        log.info('MBEE server listening on port ' + config.server.https_port + '!')
+    });
 }

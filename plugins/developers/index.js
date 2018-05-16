@@ -9,36 +9,40 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/**
- * @module  lib/sanitization
+/*
+ * @module plugins/developers
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- *
- * Defines common cryptographic functions.
+ * 
+ * This plugin builds and serves up developer documentation.
  */
 
+const fs = require('fs')
 const path = require('path');
+const { execSync } = require('child_process');
+const config = require(__dirname + '/../../package.json')['config'];
+const ejs = require('ejs');
+const express = require('express');
+var app = express();
 
-const htmlspecialchars = require('htmlspecialchars');
-const mongosanitize = require('mongo-sanitize');
+// Build the developer docs
+var cmd = `rm -rf ${__dirname}/docs; yarn build:jsdoc && mv docs ${__dirname}/docs`;
+var stdout = execSync(cmd);
 
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
-
-
-/**
- * Generates a token from user data.
- */
-module.exports.sanitize = function(s) {
-    return mongosanitize(htmlspecialchars(s));
-}
-
-module.exports.mongo = function(s) {
-    return mongosanitize();
-}
-
-module.exports.html = function(s) {
-    return htmlspecialchars(s);
-}
+// Configure Views
+app.set('views', __dirname + '/views') // specify the views directory
+app.set('view engine', 'ejs') // register the template engine
+    
+app.get('/', function(req, res) {
+    return res.render('render-doc', {
+        'ui': config.ui, 
+        'user': (req.user) ? req.user : '',
+        'url': 'index.html'
+    })
+});
 
 
+// Sets our static/public directory
+app.use(express.static(path.join(__dirname,'docs'))); 
 
+module.exports = app;
