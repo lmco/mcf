@@ -11,7 +11,7 @@
 ###############################################################################
 #
 # Dockerfile
-# 
+#
 # Josh Kaplan <joshua.d.kaplan@lmco.com>
 #
 # This Dockerfile defines the Docker build for MBEE.
@@ -22,10 +22,10 @@ MAINTAINER Josh Kaplan <joshua.d.kaplan@lmco.com>
 WORKDIR /lm/mbee
 
 RUN mkdir -p app \
- && mkdir -p certs \
- && mkdir -p config \
- && mkdir -p plugins \
- && mkdir -p public
+    && mkdir -p certs \
+    && mkdir -p config \
+    && mkdir -p plugins \
+    && mkdir -p public
 
 COPY ./app  app
 COPY ./certs certs

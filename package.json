@@ -25,6 +25,7 @@
     "bootstrap": "^4.0.0",
     "chai": "^4.1.2",
     "del": "^3.0.0",
+    "eslint": "^4.19.1",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-jsdoc3": "^1.0.1",
@@ -46,9 +47,9 @@
   "scripts": {
     "build": "node scripts/build.js",
     "clean": "node scripts/clean.js",
-    "docker": "node mbee.js docker",
-    "lint": "eslint *.js app/**/*.js plugins/**/*.js scripts/**/*.js",
+    "docker": "node scripts/docker.js",
+    "lint": "node scripts/linter.js",
     "start": "node mbee.js start",
-    "test": "./node_modules/.bin/mocha scripts/test.js"
+    "test": "node scripts/test.js"
   }
 }

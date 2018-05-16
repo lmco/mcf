@@ -23,7 +23,6 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
-const { execSync, spawn, spawnSync } = require('child_process');
 
 // Global MBEE helper object
 var M = { env: process.env.NODE_ENV || 'dev' };
@@ -71,6 +70,8 @@ if (fs.existsSync(__dirname + '/node_modules')) {
 const build = require(__dirname + '/scripts/build');
 const clean = require(__dirname + '/scripts/clean');
 const docker = require(__dirname + '/scripts/docker');
+const lint = require(__dirname + '/scripts/linter');
+const test = require(__dirname + '/scripts/test');
 
 // Call main
 if (module.parent == null) {
@@ -92,6 +93,7 @@ function main()
         'clean':     clean,
         'docker':    docker,
         'install':   build.install,
+        'lint':      lint,
         'start':     start,
         'test':      test
     };
@@ -110,8 +112,7 @@ function main()
  * config file. 
  */
 
-function start(args) 
-{
+function start(args) {
     initialize();
     M.log.debug(`+ mbee.js executed as ${process.argv.join(' ')} ` 
                     + `with env=${M.env} and configuration: ` 
@@ -152,24 +153,6 @@ function start(args)
     }
 }
 
-
-/**
- * Runs the collection of test suites by running the "test/runner.js" script
- * with Mocha.
- */
-function test(args) 
-{
-    spawn('yarn', ['run', 'test'], {stdio: 'inherit'})
-      .on('data', function(data) { 
-        console.log(data.toString()); 
-      })
-      .on('exit', function (code) {
-        if (code != 0) {
-          console.log('Tests failed.');
-          process.exit(code);
-        }
-      });
-}
 
 
 /**
