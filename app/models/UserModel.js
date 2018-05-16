@@ -165,12 +165,12 @@ var UserSchema = new mongoose.Schema({
         }
     },
 
-    orgPermissions : {
-        member: [{
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'Organization'
-        }],
 
+    /**
+    * This holds a reference to the organizations that the user has
+    * either write or admin permissions to.
+    */
+    orgPermissions : {
         write: [{
             type: mongoose.Schema.Types.ObjectId, 
             ref: 'Organization'
@@ -185,6 +185,31 @@ var UserSchema = new mongoose.Schema({
 
 });
 
+/**
+* This is a getter which can be used in order to populate a list of
+* all organizations the user has write or admin permissions to.
+*/
+UserSchema.virtual('orgPermissions.member').get( function() {
+    var member = this.orgPermissions.write || [];
+    var admin = this.orgPermissions.admin || [];
+
+    memberList = member.map(a => {return a.id})
+
+    for (var i = 0; i < admin.length; i++){
+        if(!memberList.includes(admin[i].id)){
+            member.push(admin[i]);
+        }
+    }
+
+    return member;
+
+})
+
+// Necessary for virtual getters to be executed.
+UserSchema.set('toJSON', { virtuals: true })
+UserSchema.set('toObject', { virtuals: true })
+
+
 
 /**
  * Run our pre-defined setters on save.
@@ -196,6 +221,8 @@ UserSchema.pre('save', function(next) {
     this.deleted = '';
     next();
 });
+
+
 
 
 /**
@@ -219,6 +246,7 @@ UserSchema.methods.getPublicData = function() {
         'updatedOn': this.updatedOn
     }
 };
+
 
 
 // Export mongoose model as "Organization"
