@@ -47,6 +47,9 @@ function upTest(done) {
     url: `${M.config.test.url}/api/test`
   },
   function(error, response, body) {
+    if (error) {
+      console.log(error);
+    }
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
