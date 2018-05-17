@@ -1,0 +1,109 @@
+{
+  "auth": {
+    "strategy": "LMICloudStrategy",
+    "ldap": {
+      "server": "ldaps://usadc43.us.lmco.com:3269",
+      "ca": [
+        "./certs/LockheedMartinRootCertificationAuthority.pem",
+        "./certs/LockheedMartinRootCertificationAuthority2.pem",
+        "./certs/LockheedMartinRootCertificationAuthority3.pem"
+      ],
+      "bind_dn": "mbee-query@us.lmco.com",
+      "bind_dn_pass": "SuaIZh4oIPCRD9g",
+      "username_attribute": "sAMAccountName",
+      "filter": "(memberOf=CN=SSC.MBEE.Dev,ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com)",
+      "attributes": [
+        "dn",
+        "sAMAccountName",
+        "lmcPreferredFirstName",
+        "givenName",
+        "sn",
+        "mail"
+      ]
+    },
+    "token": {
+      "expires": 10,
+      "units": "MINUTES"
+    },
+    "session": {
+      "expires": 30,
+      "units": "MINUTES"
+    }
+  },
+  "db": {
+    "name": "stage",
+    "url": "dev.mbee.us.lmco.com",
+    "port": "27017",
+    "username": "mbee",
+    "password": "relativeUniverse141",
+    "ssl": true,
+    "ca": "./LockheedMartinRootCertificationAuthority.pem"
+  },
+  "docker": {
+    "image": {
+      "name": "mbee"
+    },
+    "container": {
+      "name": "mbee-dev"
+    },
+    "http": {
+      "enabled": true,
+      "port": 9080
+    },
+    "https": {
+      "enabled": true,
+      "port": 9443
+    },
+    "Dockerfile": "./config/Dockerfile"
+  },
+  "log": {
+    "level": "info",
+    "file": "logs/mbee.log",
+    "error_file": "logs/mbee-error.log",
+    "debug_file": "logs/mbee-debug.log",
+    "colorize": true
+  },
+  "server": {
+    "http": {
+      "enabled": true,
+      "port": 9080
+    },
+    "https": {
+      "enabled": true,
+      "port": 9443,
+      "sslCertName": "dev.mbee.us.lmco.com"
+    },
+    "api": {
+      "enabled": true,
+      "json": {
+        "indent": 4
+      }
+    },
+    "plugins": {
+      "enabled": true,
+      "plugin_repo": "https://gitlab.lmms.lmco.com/mbee/plugins-repo"
+    },
+    "ui": {
+      "enabled": true,
+      "banner": {
+        "on": false,
+        "message": "Lockheed Martin Proprietary Information",
+        "color": "#FFF",
+        "background": "rgb(0, 52, 120)",
+        "bold": true,
+        "border": "1px solid #656565"
+      },
+      "apiUrl": "/"
+    },
+    "secret": "RANDOM"
+  },
+  "test": {
+    "url": "http://dev.mbee.us.lmco.com:9080"
+  },
+  "yarn": {
+    "http-proxy":  "http://proxy-lmi.global.lmco.com",
+    "https-proxy": "http://proxy-lmi.global.lmco.com",
+    "cafile":      "./certs/LockheedMartinRootCertificationAuthority.pem",
+    "strict-ssl":  "false"
+  }
+}

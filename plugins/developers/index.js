@@ -13,36 +13,54 @@
  * @module plugins/developers
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * 
+ *
  * This plugin builds and serves up developer documentation.
  */
 
 const fs = require('fs')
 const path = require('path');
 const { execSync } = require('child_process');
-const config = require(__dirname + '/../../package.json')['config'];
-const ejs = require('ejs');
+
+const M = require(__dirname + '/../../mbee.js');
+
 const express = require('express');
+const ejs = require('ejs');
 var app = express();
 
 // Build the developer docs
-var cmd = `rm -rf ${__dirname}/docs; yarn build:jsdoc && mv docs ${__dirname}/docs`;
-var stdout = execSync(cmd);
+let jsdoc  = 'node_modules/jsdoc/jsdoc.js';
+let src    = 'out';
+let dst    = 'docs';
+let tmpl   = '-t plugins/developers'; //'-t node_modules/ub-jsdoc/';
+let files  = ['app/**/*.js', 'README.md'].join(' ');
+let cmd    = [
+    `node ${jsdoc} ${tmpl} ${files}`,
+    `rm -rf ${dst}/*`,
+    `mv ${src} ${dst}`
+].join(' && ');
+let stdout = execSync(cmd);
+
 
 // Configure Views
 app.set('views', __dirname + '/views') // specify the views directory
 app.set('view engine', 'ejs') // register the template engine
-    
+
 app.get('/', function(req, res) {
+    return res.redirect('developers/index.html')
+});
+
+app.get('/:page', function(req, res) {
+    var page = req.params.page;
+    console.log(page)
     return res.render('render-doc', {
-        'ui': config.ui, 
+        'ui': M.config.server.ui,
         'user': (req.user) ? req.user : '',
-        'url': 'index.html'
+        'content': fs.readFileSync(__dirname + '/docs/' + page, 'utf8')
     })
 });
 
 
 // Sets our static/public directory
-app.use(express.static(path.join(__dirname,'docs'))); 
+app.use(express.static(path.join(__dirname,'docs')));
 
 module.exports = app;

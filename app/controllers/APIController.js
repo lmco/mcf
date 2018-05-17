@@ -11,9 +11,12 @@
  *****************************************************************************/
 
 const path = require('path');
-const package_json = require(path.join(__dirname, '..', '..', 'package.json'));
-const config = package_json['config'];
-const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
+
+const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
+//const package_json = require(path.join(__dirname, '..', '..', 'package.json'));
+//const config = package_json['config'];
+//const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
 
 /**
  * APIController.js
@@ -39,8 +42,8 @@ class APIController
      */
     static version(req, res) 
     {
-        log.info(`GET "/api/version" requested by ${req.user.username}`);
-        var obj = {'version': package_json['version']};
+        mbee.log.info(`GET "/api/version" requested by ${req.user.username}`);
+        var obj = {'version': mbee.version};
         res.header('Content-Type', 'application/json');
         return res.send(APIController.formatJSON(obj));
     }
@@ -51,7 +54,7 @@ class APIController
      */
     static login(req, res) 
     {
-        log.debug('In APIController.login ...');
+        mbee.log.debug('In APIController.login ...');
         res.header('Content-Type', 'application/json');
         return res.status(200).send(APIController.formatJSON({
             "token": req.session.token
@@ -91,7 +94,7 @@ class APIController
             swaggerDefinition: {
                 info: {
                     title:  'MBEE API Documentation',    // Title (required)
-                    version: package_json['version'],    // Version (required)
+                    version: mbee.version,    // Version (required)
                 },
             },
             apis: [
@@ -107,7 +110,7 @@ class APIController
      */
     static formatJSON(obj) 
     {
-        return JSON.stringify(obj, null, config.server.json.indent);
+        return JSON.stringify(obj, null, mbee.config.server.api.json.indent);
     }
 
 

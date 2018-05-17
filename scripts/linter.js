@@ -10,23 +10,45 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module auth/auth
- * 
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * scripts/linter.js
  *
- * @description This file loads and instantiates the authentication strategy as 
- * a controller. It ensures that the auth strategy defined in the config.json. 
+ * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * Runs the ESLint tool against all Javascript code.
  */
- 
-const path = require('path');
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
 
-const BaseStrategy = require(path.join(__dirname, '_BaseStrategy'));
-const AuthStrategy = require(path.join(__dirname, config.auth.strategy));
-const AuthController = new AuthStrategy();
+const {spawn} = require('child_process');
+const M = require(__dirname + '/../mbee.js');
 
-if (!(AuthController instanceof BaseStrategy)) {
-    throw new Error('Error: Authentication strategy does not extend BaseStrategy class!')
-} 
+if (module.parent == null) {
+  lint(process.argv.slice(2))
+}
+else {
+  module.exports = lint;
+}
 
-module.exports = AuthController;
+
+/**
+ * Runs ESLint against the primary Javascript directories.
+ */
+function lint(_args)
+{
+  var args = [
+    `${M.root}/*.js`,
+    `${M.root}/app/**/*.js`,
+    `${M.root}/plugins/**/*.js`,
+    `${M.root}/scripts/**/*.js`,
+    `${M.root}/test/**/*.js`
+  ].concat(_args)
+
+  spawn(`${M.root}/node_modules/.bin/eslint`, args, {stdio: 'inherit'})
+    .on('data', function(data) {
+      console.log(data.toString());
+    })
+    .on('exit', function (code) {
+      if (code != 0) {
+        console.log('Tests failed.');
+        process.exit(code);
+      }
+     });
+}

@@ -20,7 +20,7 @@ const express           = require('express');
 const config            = require(path.join(__dirname, '..', 'package.json'))['config'];
 var getController       = (x) => path.join(__dirname, 'controllers', x);
 const UIController      = require(getController('UIController'));
-const AuthController    = require(path.join(__dirname, 'auth', 'auth'));
+const AuthController    = require(path.join(__dirname, 'lib', 'auth'));
 
 var router = express.Router();
 

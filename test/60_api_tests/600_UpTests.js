@@ -10,55 +10,46 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  TestAPIBasic.js
+ * @module  Project Model Tests
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Tests API is functional.
+ * @description  Tests the project model
  */
 
 const fs = require('fs');
 const path = require('path');
-const util = require('util');
 const chai  = require('chai');
 const request = require('request');
 
-const package_json = require(path.join(__dirname, '..', 'package.json'));
-const config = package_json['config'];
+const fname = module.filename;
+const name = fname.split('/')[fname.split('/').length - 1];
+
+const M = require(__dirname + '/../../mbee.js');
+
+
+/*----------( Main )----------*/
+
+
+describe(name, function() {
+  it('should confirm that the API is up', upTest);
+});
+
+
+/*----------( Test Functions )----------*/
 
 
 /**
- * TestAPI
- *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- *
- * @classdesc This class defines a basic check to confirm that the API is up.
+ * Tests that the API is running.
  */
-class TestAPI
-{
-    /**
-     * This function runs our unit tests.
-     */
-    static run() 
-    {
-        describe('API Test Suite', function() {
-            it('should receive 200 status showing API is up', TestAPI.getVersion);
-        });
-    }
-
-    /**
-     * Makes a GET request to /api/test and expects a 200 response.
-     */
-    static getVersion(done)
-    {
-        request({
-            url: config.test.url + '/api/test'
-        }, 
-        function(error, response, body) {
-            chai.expect(response.statusCode).to.equal(200);
-            done();
-        });
-    }
+function upTest(done) {
+  request({
+    url: `${M.config.test.url}/api/test`
+  },
+  function(error, response, body) {
+    chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
 }
 
-module.exports = TestAPI;
+

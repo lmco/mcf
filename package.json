@@ -1,14 +1,14 @@
 {
   "name": "mbee",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Model-Based Engineering Environment",
-  "main": "bin/server.js",
+  "main": "mbee.js",
   "repository": "https://gitlab.lmms.lmco.com/mbee/mbee.git",
   "author": "Josh Kaplan <joshua.d.kaplan@lmco.com>",
   "license": "LMPI",
   "private": true,
   "dependencies": {
-    "body-parser": "^1.18.2",
+    "body-parser": "^1.18.3",
     "connect-mongo": "^2.0.1",
     "cookie-parser": "^1.4.3",
     "ejs": "^2.5.7",
@@ -17,116 +17,37 @@
     "htmlspecialchars": "^1.0.5",
     "ldapjs": "^1.0.2",
     "mongo-sanitize": "^1.0.0",
-    "mongodb": "^3.0.7",
-    "mongoose": "^5.0.16",
-    "popper.js": "^1.12.9",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
+    "mongodb": "^3.1.0-beta4",
+    "mongoose": "^5.1.1",
     "swagger-jsdoc": "^1.9.7",
-    "swagger-ui-express": "^2.0.15",
     "winston": "^3.0.0-rc5"
   },
   "devDependencies": {
     "bootstrap": "^4.0.0",
     "chai": "^4.1.2",
     "del": "^3.0.0",
+    "eslint": "^4.19.1",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-jsdoc3": "^1.0.1",
     "gulp-react": "^3.1.0",
     "gulp-sass": "^3.1.0",
     "jquery": "^3.3.1",
+    "jsdoc": "^3.5.5",
     "mocha": "^5.0.4",
-    "request": "^2.85.0",
+    "popper.js": "^1.12.9",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "request": "^2.86.0",
+    "swagger-ui-express": "^2.0.15",
     "ub-jsdoc": "^1.6.0"
   },
-  "peerDependencies": {},
   "scripts": {
-    "build": "./node_modules/.bin/gulp",
-    "build:jsdoc": "node node_modules/jsdoc/jsdoc.js -t node_modules/ub-jsdoc/ app/* && mv out docs",
-    "build:jsdoc-old": "./node_modules/.bin/gulp jsdoc",
-    "clean": "./node_modules/.bin/gulp clean",
-    "clean:all": "rm -rf public/ node_modules/ docs/",
-    "db": "mongod --auth --dbpath ./db/mbee",
-    "docker:build": "yarn install && yarn build && docker build -t mbee .",
-    "docker:run:dev": "docker run -d -it --restart=always -p 9080:9080 -p 9443:9443 --name mbee-dev mbee",
-    "docker:run": "docker run -d -it --restart=always -p 80:9080 -p 443:9443 --name mbee mbee",
-    "server": "node ./bin/server.js",
-    "server:jsdoc": "./node_modules/.bin/gulp jsdoc && node ./bin/jsdoc-server.js",
-    "start": "yarn install && yarn run build && yarn run server",
-    "test": "./node_modules/.bin/mocha test/_orchestrator.js --slow 19"
-  },
-  "config": {
-    "secret": "CHANGE_ME",
-    "server": {
-      "app": "app",
-      "ssl": true,
-      "ssl_cert_name": "dev.mbee.us.lmco.com",
-      "json": {
-        "indent": 4
-      },
-      "http_port": 9080,
-      "https_port": 9443
-    },
-    "log": {
-      "level": "debug",
-      "file": "mbee.log",
-      "error_file": "mbee-error.log",
-      "debug_file": "mbee-debug.log",
-      "colorize": true
-    },
-    "test": {
-      "url": "http://dev.mbee.us.lmco.com:9080"
-    },
-    "auth": {
-      "strategy": "LMICloudStrategy",
-      "ldap": {
-        "server": "ldaps://usadc43.us.lmco.com:3269",
-        "ca": [
-          "./certs/LockheedMartinRootCertificationAuthority.pem",
-          "./certs/LockheedMartinRootCertificationAuthority2.pem",
-          "./certs/LockheedMartinRootCertificationAuthority3.pem"
-        ],
-        "bind_dn": "mbee-query@us.lmco.com",
-        "bind_dn_pass": "SuaIZh4oIPCRD9g",
-        "username_attribute": "sAMAccountName",
-        "filter": "(memberOf=CN=SSC.MBEE.Dev,ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com)",
-        "attributes": [
-          "dn",
-          "sAMAccountName",
-          "lmcPreferredFirstName",
-          "givenName",
-          "sn",
-          "mail"
-        ]
-      },
-      "token": {
-        "expires": 10,
-        "units": "MINUTES"
-      },
-      "session": {
-        "expires": 30,
-        "units": "MINUTES"
-      }
-    },
-    "ui": {
-      "banner": {
-        "on": false,
-        "message": "Lockheed Martin Proprietary Information",
-        "color": "#FFF",
-        "background": "rgb(0, 52, 120)",
-        "bold": true,
-        "border": "1px solid #656565"
-      }
-    },
-    "db": {
-      "name": "mbee",
-      "url": "localhost",
-      "port": "27017",
-      "username": "mbee",
-      "password": "mbee",
-      "ssl": false,
-      "sslCAFile": "LockheedMartinRootCertificationAuthority.pem"
-    }
+    "build": "node scripts/build.js",
+    "clean": "node scripts/clean.js",
+    "docker": "node scripts/docker.js",
+    "lint": "node scripts/linter.js",
+    "start": "node mbee.js start",
+    "test": "node scripts/test.js"
   }
 }

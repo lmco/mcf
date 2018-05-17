@@ -11,12 +11,15 @@
  *****************************************************************************/
 
 const path = require('path');
-const version = require(path.join(__dirname, '..', '..', 'package.json'))['version'];
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
-const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
-const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
-const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
-const validators = require(path.join(__dirname, '..', 'lib', 'validators.js'));
+
+const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
+//const version = require(path.join(__dirname, '..', '..', 'package.json'))['version'];
+//const config = require(path.join(__dirname, '..', '..', 'package.json'))['config'];
+//const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
+//const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
+//const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
+//const validators = require(path.join(__dirname, '..', 'lib', 'validators.js'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel.js'));
 const Org = require(path.join(__dirname, '..', 'models', 'OrganizationModel.js'));
 
@@ -40,9 +43,9 @@ class UIController
     
     static home(req, res) 
     {
-        log.info(`GET ${req.originalUrl} requested by ${req.user.username}`);
+        mbee.log.info(`GET ${req.originalUrl} requested by ${req.user.username}`);
         return res.render('home', {
-            'ui': config.ui, 
+            'ui': mbee.config.server.ui, 
             'user': req.user.getPublicData()
         });
     }
@@ -56,13 +59,13 @@ class UIController
     
     static mbee(req, res) 
     {
-        log.info(`GET ${req.originalUrl} requested by ${req.user.username}`)
+        mbee.log.info(`GET ${req.originalUrl} requested by ${req.user.username}`)
         return res.render('mbee', {
-            'ui': config.ui, 
+            'ui': mbee.config.server.ui, 
             'renderer': 'mbee-renderer',
             'user': req.user.getPublicData(),
-            'org': sani.sanitize(req.params.org),
-            'project': sani.sanitize(req.params.project)
+            'org': mbee.lib.sani.sanitize(req.params.org),
+            'project': mbee.lib.sani.sanitize(req.params.project)
         });
     }
 
@@ -76,7 +79,7 @@ class UIController
     static admin(req, res) 
     {
         return res.render('home', {
-            'ui': config.ui, 
+            'ui': mbee.config.server.ui, 
             'renderer': 'admin-renderer',
             'user': req.user.getPublicData()
         });
@@ -91,24 +94,24 @@ class UIController
     
     static showAboutPage(req, res) 
     {
-        let token = libCrypto.inspectToken(req.session.token);
+        let token = mbee.lib.crypto.inspectToken(req.session.token);
         User.findOne({
-            'username': sani.sanitize(token.username)
+            'username': mbee.lib.sani.sanitize(token.username)
         })
         .exec(function(err, user) {
             if (err) {
-                log.error(err);
+                mbee.log.error(err);
             }
             else {
                 req.user = user
             }
             var user  = (req.user) ? req.user.username.toString() : 'anonymous';
-            log.info(`GET "/about" requested by  ${user}`);
+            mbee.log.info(`GET "/about" requested by  ${user}`);
             return res.render('about', {
-                'ui': config.ui, 
+                'ui': mbee.config.server.ui, 
                 'user': req.user,
                 'info': {
-                    'version': version
+                    'version': mbee.version
                 }
             })
         });  
@@ -124,11 +127,11 @@ class UIController
     {
         // log the request
         var user  = (req.user) ? req.user.username.toString() : 'anonymous';
-        log.info(`GET "/developers" requested by  ${user}`);
+        mbee.log.info(`GET "/developers" requested by  ${user}`);
 
         // render the developers page
         return res.render('developers', {
-            'ui': config.ui, 
+            'ui': mbee.config.server.ui, 
             'user': req.user,
             'info': {
                 'version': version
@@ -147,10 +150,10 @@ class UIController
     {
         // log the request
         var user  = (req.user) ? req.user.username.toString() : 'anonymous';
-        log.info(`GET ${req.originalUrl} requested by  ${user}`);
+        mbee.log.info(`GET ${req.originalUrl} requested by  ${user}`);
 
         // make sure the passed in "next" parameter is valid
-        if (RegExp(validators.url.next).test(req.query.next)) {
+        if (RegExp(mbee.lib.validators.url.next).test(req.query.next)) {
             var next = req.query.next;
         }
         else {
@@ -159,7 +162,7 @@ class UIController
 
         // render the login page
         return res.render('login', {
-            'ui': config.ui, 
+            'ui': mbee.config.server.ui, 
             'user': '', 
             'next': next
         })
@@ -177,10 +180,10 @@ class UIController
     {
         // log the request
         var user  = (req.user) ? req.user.username.toString() : 'anonymous';
-        log.info(`POST ${req.originalUrl}" requested by ${user}.`);
+        mbee.log.info(`POST ${req.originalUrl}" requested by ${user}.`);
 
         // make sure the passed in "next" parameter is valid
-        if (RegExp(validators.url.next).test(req.body.next)) {
+        if (RegExp(mbee.lib.validators.url.next).test(req.body.next)) {
             var next = req.body.next;
         }
         else {
@@ -188,7 +191,7 @@ class UIController
         }
         
         // handle the redirect
-        log.info(`Redirecting to ${next} ...`);
+        mbee.log.info(`Redirecting to ${next} ...`);
         res.redirect(next);
     }
 
@@ -197,12 +200,12 @@ class UIController
      * Logs out the user by unsetting the req.user object and the 
      * req.session.token object.
      */
-    
+
     static logout(req, res) 
     {
         // log the request
         var user  = (req.user) ? req.user.username.toString() : 'anonymous';
-        log.info(`GET "/logout" requested by ${user}`);
+        mbee.log.info(`GET "/logout" requested by ${user}`);
 
         // destroy the session
         req.user = null;

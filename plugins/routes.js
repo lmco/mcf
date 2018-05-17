@@ -31,7 +31,7 @@ var pluginRouter = express.Router();
 var files = fs.readdirSync(__dirname);
 files.forEach(function(f) {
     // If package.json doesn't exist, skip it
-    var pluginPath = path.join(__dirname, f); 
+    var pluginPath = path.join(__dirname, f);
     if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
         return;
     }
@@ -41,33 +41,18 @@ files.forEach(function(f) {
     var name = plugin['name'];
     var entrypoint = path.join(pluginPath, plugin['main']);
     var namespace = f.toLowerCase();
-    log.info(`Loading plugin ${namespace} ...`)
+    log.info(`Loading plugin '${namespace}'' ...`)
 
-    // Load the peer dependencies list
-    var peerDeps = require(path.join(__dirname, '..', 'package.json'))
-    peerDeps = peerDeps['peerDependencies'];
-    peerDeps = Object.keys(peerDeps);
+    var commands = [
+      `cd ${pluginPath}`,
+      `yarn install --modules-folder ../../node_modules`,
+      `echo $?`
+    ];
 
-    // Install dependencies
-    for (dep in plugin['dependencies']) {
-        // Skip if already in peer deps
-        if (peerDeps.includes(dep)) {
-            continue;
-        }
-        // Make sure the package name is valid.
-        // This is also used to protect against command injection.
-        log.debug(`Installing dependency ${dep} ...`);
-        if (RegExp('^([a-z0-9\.\\-_])+$').test(dep)) {
-            var cmd = util.format(`yarn add --peer ${dep}`);
-            var stdout = execSync(cmd);
-            log.debug(stdout.toString());
-        } 
-        else {
-            log.error(`Failed to install plugin dependency: ${dep}`);
-        }
-    }
+    var stdout = execSync(commands.join('; '))
+    log.verbose(stdout.toString());
 
-    // Install the plugin 
+    // Install the plugin
     pluginRouter.use(`/${namespace}`, require(entrypoint));
     log.info(`Plugin ${namespace} installed.`)
 });

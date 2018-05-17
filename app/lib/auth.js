@@ -9,26 +9,24 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/*
- * jsdoc-server.js
- * 
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+/**
+ * @module auth/auth
  *
- * This file runs a server to statically serve JSDOC.
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * @description This file loads and instantiates the authentication strategy as
+ * a controller. It ensures that the auth strategy defined in the config.json.
  */
 
-const http = require('http');
 const path = require('path');
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-const express = require('express');
-const app = express();     
+const BaseStrategy = require(path.join(__dirname, '..', 'auth', 'BaseStrategy'));
+const AuthStrategy = require(path.join(__dirname, '..', 'auth', M.config.auth.strategy));
+const AuthController = new AuthStrategy();
 
-var staticPath = path.join(__dirname, '..', 'docs');
-app.use(express.static(staticPath)); 
+if (!(AuthController instanceof BaseStrategy)) {
+    throw new Error('Error: Authentication strategy does not extend BaseStrategy class!')
+}
 
-// Run HTTPSserver
-var httpServer = http.createServer(app);
-httpServer.listen(3000, function() {
-    console.log('MBEE server listening on port 3000!');
-});
-
+module.exports = AuthController;

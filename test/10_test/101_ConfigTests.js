@@ -10,54 +10,36 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Test-Framework-Test.js
+ * @module  Test Framework Test
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * 
  * Executes tests of the test framework itself.
  */
+
 var chai  = require('chai');
 var request = require('request');
 
+const fname = module.filename;
+const name = fname.split('/')[fname.split('/').length - 1];
+
+/*----------( Main )----------*/
+
+describe(name, function() {
+  it('should check the version', versionCheck);
+});
+
+
+/*----------( Test Functions )----------*/
+
+
 /**
- * TestTests
- *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- *
- * @classdesc This class defines ...
+ * Checks the MBEE runtime version against that in the package.json file.
  */
-class TestTests
-{
-    /**
-     * This function runs our unit tests.
-     */
-    static run() 
-    {
-        describe('Test Framework Test Suite', function() {
-            it('should run an empty test case', TestTests.emptyTest);
-            it('should run simple assertions', TestTests.assertionsTest);
-        });
-
-    }
-
-    
-    /**
-     * Runs an empty test case.
-     */
-    static emptyTest(done)
-    {
-        done();
-    }
-
-    /**
-     * Runs some simple assertions
-     */
-    static assertionsTest(done)
-    {
-        chai.expect(2).to.equal(2);
-        done();
-    }
+function versionCheck(done) {
+  const version = require(__dirname + '/../../package.json')['version']
+  const M = require(__dirname + '/../../mbee.js');
+  chai.expect(M.version).to.equal(version);
+  done();
 }
 
-module.exports = TestTests;

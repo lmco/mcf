@@ -10,28 +10,42 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * test/_execute_all.js
- * 
- * This file orchestrates the execution of unit tests.
+ * @module  Framework Tests
+ *
+ * @description  <TEST SUITE DESCRIPTION
  */
 
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+const chai  = require('chai');
+const request = require('request');
+const fname = module.filename;
+const name = fname.split('/')[fname.split('/').length - 1];
 
-var unitTestsPath = path.join(__dirname);
-var files = fs.readdirSync(unitTestsPath);  // Read the tests directory
-var suites = [];                            // Array to contain test suites
 
-console.log('-'.repeat(40));
-console.log(' Initializing Test Data')
-const now = new Date(Date.now());
-console.log('', now.toUTCString());
+/*----------( Main )----------*/
 
-var modulePath = path.join(unitTestsPath, '0000-InitTest.js');
-var suite = require(modulePath);
-suite.run()
+describe(name, function() {
+  it('should run an empty test case', emptyTest);
+  it('should run simple assertions', assertionsTest);
+});
 
+
+/*----------( Test Functions )----------*/
+
+
+/**
+ * Runs an empty test case.
+ */
+function emptyTest(done) {
+  done();
+}
+
+/**
+ * Runs some simple assertions
+ */
+function assertionsTest(done) {
+  chai.expect(2).to.equal(2);
+  done();
+}
 
 
 
