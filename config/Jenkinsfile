@@ -44,7 +44,6 @@ pipeline {
                 sh 'NODE_ENV=production node mbee build'
 
                 // Verify build
-                //sh 'sleep 10'
                 sh 'ls -l'
 
                 // Build the docker image
