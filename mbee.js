@@ -118,8 +118,9 @@ function start(args) {
                     + `with env=${M.env} and configuration: `
                     + JSON.stringify(M.config));
 
-    var app = require(__dirname + '/app/app.js');   // Import the app
     M.lib.startup();                                // Print startup banner
+    var app = require(__dirname + '/app/app.js');   // Import the app
+
 
     // Create HTTP Server
     if (M.config.server.http.enabled) {
