@@ -63,7 +63,6 @@ function docker(args) {
 
     // Build the Docker image
     if (args.includes('--build')) {
-        build();  // First, build MBEE
         console.info('Building Docker Image ...');
 
         // Build docker by running: "docker build -f .../Dockerfile -t mbee ."

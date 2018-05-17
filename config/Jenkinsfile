@@ -32,10 +32,6 @@ pipeline {
                 sh 'rm -rf public'
                 sh 'rm -rf logs/*'
                 sh 'rm -rf *.log'
-
-                // Verify build
-                sh 'sleep 10'
-                sh 'ls -l'
             }
         }
 
@@ -44,7 +40,14 @@ pipeline {
          */
         stage('Build') {
             steps {
+                // Build
+                sh 'NODE_ENV=production node mbee build'
+
+                // Verify build
+                //sh 'sleep 10'
                 sh 'ls -l'
+
+                // Build the docker image
                 sh 'NODE_ENV=production node mbee docker --build'
             }
         }
