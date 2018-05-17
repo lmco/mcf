@@ -59,6 +59,8 @@ function build(args)
 
     // This executes the default build process with Gulp.
     if (args.includes('--all') || args.includes('--copy-deps')) {
+      console.log('Copying dependencies ...');
+
         // Copy images
         gulp.src('./app/ui/img/**/*')
             .pipe(gulp.dest('public/img'));
@@ -94,6 +96,7 @@ function build(args)
 
     // Build Sass into CSS
     if (args.includes('--all') || args.includes('--sass')) {
+      console.log('Building sass ...');
         gulp.src('./app/ui/sass/**/*.scss')
             .pipe(sass({outputStyle: 'compressed'})
             .on('error', sass.logError))
@@ -102,6 +105,7 @@ function build(args)
 
     // Builds the React libraries into client-side JS
     if (args.includes('--all') || args.includes('--react')) {
+      console.log('Building react ...');
         // Build React
         gulp.src('./app/ui/react-components/**/*.jsx')
             .pipe(react())
@@ -115,6 +119,7 @@ function build(args)
 
     // Build JSDoc
     if (args.includes('--jsdoc')) {
+      console.log('Building jsdoc ...');
         let jsdoc  = 'node_modules/jsdoc/jsdoc.js';
         let src    = 'out';
         let dst    = 'docs';
