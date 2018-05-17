@@ -44,10 +44,9 @@ files.forEach(function(f) {
     log.info(`Loading plugin '${namespace}'' ...`)
 
     var commands = [
-      `pushd ${pluginPath}`,
+      `cd ${pluginPath}`,
       `yarn install --modules-folder ../../node_modules`,
-      `echo $?`,
-      `popd`
+      `echo $?`
     ];
 
     var stdout = execSync(commands.join('; '))
