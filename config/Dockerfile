@@ -48,7 +48,7 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Install dependencies
-RUN apk upgrade && apk update && apk add git && apk add ssh
+RUN apk upgrade && apk update && apk add git && apk add openssh-client
 RUN mkdir logs
 RUN node mbee.js install
 
