@@ -127,6 +127,9 @@ function build(args)
         ].join(' && ');
         let stdout = execSync(cmd);
     }
+
+    let stdout = execSync('pwd; ls -l');
+    console.log(stdout.toString());
     console.log('+ Build Complete.');
     return;
 }
