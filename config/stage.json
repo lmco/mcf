@@ -81,7 +81,11 @@
     },
     "plugins": {
       "enabled": true,
-      "plugin_repo": "https://gitlab.lmms.lmco.com/mbee/plugins-repo"
+      "plugins": [{
+        "name": "developers",
+        "repository": "git@gitlab.lmms.lmco.com:mbee/plugin-developers.git",
+        "deployKey": "./certs/gitlab-plugins-developers.key"
+      }]
     },
     "ui": {
       "enabled": true,

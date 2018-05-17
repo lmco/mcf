@@ -1,6 +1,6 @@
 {
   "name": "mbee",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Model-Based Engineering Environment",
   "main": "mbee.js",
   "repository": "https://gitlab.lmms.lmco.com/mbee/mbee.git",
