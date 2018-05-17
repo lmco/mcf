@@ -53,7 +53,7 @@ RUN apk upgrade && \
     apk add git && \
     apk add openssh-client && \
     chmod 400 certs/* && \
-    mkdir logs &&
+    mkdir logs
 RUN node mbee.js install
 
 
