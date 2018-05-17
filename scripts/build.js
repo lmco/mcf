@@ -92,6 +92,7 @@ function build(args)
         // Copy Popper JS
         gulp.src('./node_modules/popper.js/dist/popper.min.js')
             .pipe(gulp.dest('public/js'));
+
     }
 
     // Build Sass into CSS
@@ -133,8 +134,6 @@ function build(args)
         let stdout = execSync(cmd);
     }
 
-    let stdout = execSync('pwd; ls -l');
-    console.log(stdout.toString());
     console.log('+ Build Complete.');
     return;
 }
