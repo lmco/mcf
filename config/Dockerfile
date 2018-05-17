@@ -25,15 +25,18 @@ RUN mkdir -p app \
     && mkdir -p certs \
     && mkdir -p config \
     && mkdir -p plugins \
-    && mkdir -p public
+    && mkdir -p public \
+    && mkdir -p scripts
 
 COPY ./app  app
 COPY ./certs certs
 COPY ./config/production.json config/
 COPY ./plugins plugins
 COPY ./public public
+COPY ./scripts scripts
 COPY ./package.json package.json
 COPY ./mbee.js mbee.js
+COPY ./README.md README.md
 
 # Set proxy environment variables
 ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
@@ -45,7 +48,8 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Install dependencies
+RUN mkdir logs
 RUN node mbee.js install
 
 # Run server
-CMD ["node", "mbee.js", "serve"]
+CMD ["node", "mbee.js", "start"]

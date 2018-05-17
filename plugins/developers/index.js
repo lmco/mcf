@@ -28,8 +28,18 @@ const ejs = require('ejs');
 var app = express();
 
 // Build the developer docs
-var cmd = `rm -rf ${__dirname}/docs; node mbee build --jsdoc && mv docs ${__dirname}/docs`;
-var stdout = execSync(cmd);
+let jsdoc  = 'node_modules/jsdoc/jsdoc.js';
+let src    = 'out';
+let dst    = 'docs';
+let tmpl   = '-t plugins/developers'; //'-t node_modules/ub-jsdoc/';
+let files  = ['app/**/*.js', 'README.md'].join(' ');
+let cmd    = [
+    `node ${jsdoc} ${tmpl} ${files}`,
+    `rm -rf ${dst}/*`,
+    `mv ${src} ${dst}`
+].join(' && ');
+let stdout = execSync(cmd);
+
 
 // Configure Views
 app.set('views', __dirname + '/views') // specify the views directory

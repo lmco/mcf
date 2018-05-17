@@ -18,8 +18,10 @@
  * process is parameterized by the configuration.
  */
 
+const { execSync, spawn, spawnSync } = require('child_process');
+
 const M = require(__dirname + '/../mbee.js');
-const build = require(`${M.root}/scripts/build`);
+const build = require(`${M.root}/scripts/build`).build;
 
 if (module.parent == null) {
   docker(process.argv.slice(2))
@@ -31,16 +33,34 @@ else {
 
 /**
  * The Docker command can be used to build a Docker image or run a Docker
- * container. It supports the command line arguments `--build` and `--run` to
- * build the image or run the conatiner respectively. Both of these options
- * expect configuration parameters to be defined in the Docker section of the
- * config.json file. The `--build` and `--run` commands are not mutually
- * exclusive, if run together the Docker image is built and then the container
+ * container. It supports the command line arguments `--clean`, `--build`, and
+ * `--run` to clean the previous docker container, build the Docker image, or
+ * run the container, respectively. All of these options expect configuration
+ * parameters to be defined in the Docker section of the config.json file.
+ * The commands are not mutually exclusive, if run together the previous Docker
+ * container is stopped and removed, the image is built and then the container
  * is run.
  */
 
-function docker(args)
-{
+function docker(args) {
+    // Removes the previous docker build.
+    if (args.includes('--clean')) {
+      let cmd = null;
+
+      // Stop the running container
+      cmd = spawnSync('docker', ['stop', M.config.docker.container.name], {stdio: 'inherit'});
+      console.log('stdout:', cmd.stdout);
+      console.log('stderr:', cmd.stderr);
+      console.log('Docker container stopped');
+
+      // Remove the container
+      cmd = spawnSync('docker', ['rm', M.config.docker.container.name], {stdio: 'inherit'});
+      console.log('stdout:', cmd.stdout);
+      console.log('stderr:', cmd.stderr);
+      console.log('Docker container removed');
+
+    }
+
     // Build the Docker image
     if (args.includes('--build')) {
         build();  // First, build MBEE
@@ -53,11 +73,8 @@ function docker(args)
             '-t', M.config.docker.image.name, '.'
         ];
         let cmd = spawn('docker', buildArgs, {stdio: 'inherit'});       // Run the build process
-        cmd.stdout.on('data', function (data) {
+        cmd.on('data', function (data) {
             console.log(data.toString());           // Print stdout
-        });
-        cmd.stderr.on('data', function (data) {
-            console.error(data.toString());         // Print stderr
         });
         cmd.on('exit', function (code) {
             if (code != 0) {                        // Fail if exit code != 0
@@ -87,7 +104,7 @@ function docker(args)
             rargs = rargs.concat(['-p', `${docker.http.port}:${server.http.port}`]);
         }
         if (server.https.enabled && docker.https.enabled) {
-            rargs = runArgs.concat(['-p', `${docker.https.port}:${server.https.port}`]);
+            rargs = rargs.concat(['-p', `${docker.https.port}:${server.https.port}`]);
         }
         rargs = rargs.concat(['--name', M.config.docker.container.name])
         rargs = rargs.concat([M.config.docker.image.name])
@@ -95,8 +112,7 @@ function docker(args)
 
         // Run the Docker container
         let cmd = spawn('docker', rargs, {stdio: 'inherit'});
-        cmd.stdout.on('data', (data) => { console.log(data.toString()); });
-        cmd.stderr.on('data', (data) => { console.error(data.toString()); });
+        cmd.on('data', (data) => { console.log(data.toString()); });
         cmd.on('exit', function (code) {
             if (code != 0) {
                 console.log('Docker run failed');

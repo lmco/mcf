@@ -44,7 +44,7 @@
       "name": "mbee"
     },
     "container": {
-      "name": "mbee"
+      "name": "mbee-dev"
     },
     "http": {
       "enabled": true,

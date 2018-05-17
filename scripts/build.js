@@ -41,8 +41,10 @@ else {
 
 function build(args)
 {
-    install(['--dev']);                 // Install development dependencies
-    console.log('Building MBEE ...');
+    console.log('+ Building MBEE ...');
+
+    // Install development dependencies
+    install(['--dev']);
 
     let gulp   = require('gulp');
     let concat = require('gulp-concat');
@@ -113,7 +115,7 @@ function build(args)
         ].join(' && ');
         let stdout = execSync(cmd);
     }
-    console.log('Build Complete.');
+    console.log('+ Build Complete.');
     return;
 }
 
@@ -126,31 +128,47 @@ function build(args)
 
 function install(args)
 {
-    console.log('Installing dependencies ...');
-    configure(); // Make sure Yarn is installed and configured
+  console.log('+ Installing dependencies ...');
+  configure(); // Make sure Yarn is installed and configured
 
-    // Safely allow install to be called with no args
-    if (args == undefined) {
-        args = [];
-    }
+  // Safely allow install to be called with no args
+  if (args == undefined) {
+      args = [];
+  }
 
-    let cmd = spawnSync('yarn', ['install'].concat(args), {stdio: 'inherit'});
-    if (cmd.stdout) {
-        console.log(cmd.stdout.toString());
-    }
-    if (cmd.stderr && cmd.stderr.toString().trim() !== '') {
-       console.error(cmd.stderr.toString());
-    }
-    if (cmd.status != 0) {
-        process.exit(cmd.status || -1);
-    }
+  // Here, we temporarily swap our environment to dev to install development
+  // dependencies. This MUST happen after configure() is called because
+  // configure relies on the config.json and we don't want to have unexpected
+  // behavior there. Also, we must swap back to the original environment after
+  // the 'yarn install' command.
+  if (args.includes('--dev')) {
+    var ENV = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'dev';
+    console.log(`++ Temporarily swapping from '${ENV}' to 'dev' to install dependencies`)
+  }
 
-    // Init the MBEE helper object and return.
-    console.log('Dependencies installed succesfully.');
-    return;
+  let cmd = spawnSync('yarn', ['install'].concat(args), {stdio: 'inherit'});
+  if (cmd.stdout) {
+      console.log('+++', cmd.stdout.toString());
+  }
+  if (cmd.stderr && cmd.stderr.toString().trim() !== '') {
+     console.error('+++', cmd.stderr.toString());
+  }
+  if (cmd.status != 0) {
+      process.exit(cmd.status || -1);
+  }
+
+  // Swap back to the original environment
+  if (args.includes('--dev')) {
+    console.log(`++ Swapping back from 'dev' environment to '${ENV}' ...`)
+    process.env.NODE_ENV = ENV;
+    console.log(`++ Now running in '${process.env.NODE_ENV}' environment.`)
+  }
+
+  // Init the MBEE helper object and return.
+  console.log('+ Dependencies installed succesfully.');
+  return;
 }
-
-
 
 
 /**
@@ -162,12 +180,12 @@ function install(args)
 
 function configure()
 {
-    console.log('Configuring build system ...');
+    console.log('+ Configuring build system ...');
 
     // Make sure Yarn is installed
     let yarnPath = execSync('which yarn').toString().replace('\n', '');
     if(!fs.existsSync(yarnPath)) {
-        console.log('Instaling yarn ...')
+        console.log('++ Instaling yarn ...')
         let cmd = spawnSync('npm', ['install', '-g', 'yarn'], {stdio: 'inherit'});
         if (cmd.stdout)
             console.log(cmd.stdout.toString());
@@ -178,7 +196,7 @@ function configure()
     }
 
     // Configure Yarn - loop over config options and configure Yarn
-    if (M.config.hasOwnProperty['yarn']) {
+    if (M.config.hasOwnProperty('yarn')) {
         let keys = Object.keys(M.config.yarn);
         for (let i = 0; i < keys.length; i++) {
             let key = keys[i];
@@ -191,7 +209,7 @@ function configure()
                     continue;
 
             if (cmd.stderr && cmd.stderr.toString().trim() !== '')
-                console.log(cmd.stderr.toString());
+                console.log('+++', cmd.stderr.toString());
 
             if (cmd.status != 0)
                 process.exit(cmd.status || -1);
@@ -208,6 +226,9 @@ function configure()
                 process.exit(cmd.status || -1);
         }
     }
-    console.log('Configuration complete.');
+    else {
+      console.log('++ No yarn section provided in config file. Skipping ...')
+    }
+    console.log('+ Configuration complete.');
     return;
 }

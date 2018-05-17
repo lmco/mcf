@@ -28,7 +28,6 @@
 
 const path              = require('path');
 const express           = require('express');
-const swaggerUi         = require('swagger-ui-express');
 const M = require(path.join(__dirname, '..', 'mbee.js'));
 var getController       = (x) => path.join(__dirname, 'controllers', x);
 const APIController     = require(getController('APIController'));
