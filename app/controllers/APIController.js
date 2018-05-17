@@ -68,7 +68,9 @@ class APIController
     static swaggerDoc(req, res) 
     {
         return res.render('swagger', {
-            swagger: APIController.swaggerSpec()
+            swagger: APIController.swaggerSpec(),
+            ui: mbee.config.server.ui,
+            user: null
         });
     }
 

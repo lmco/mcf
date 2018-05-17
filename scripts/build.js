@@ -78,6 +78,18 @@ function build(args)
         // Copy Swagger JS
         gulp.src('./node_modules/swagger-ui-express/static/*.js')
             .pipe(gulp.dest('public/js'));
+        // Copy Bootstrap CSS
+        gulp.src('./node_modules/bootstrap/dist/css/bootstrap.min.css')
+            .pipe(gulp.dest('public/css'));
+        // Copy Bootstrap JS
+        gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
+            .pipe(gulp.dest('public/js'));
+        // Copy Jquery JS
+        gulp.src('./node_modules/jquery/dist/jquery.min.js')
+            .pipe(gulp.dest('public/js'));
+        // Copy Popper JS
+        gulp.src('./node_modules/popper.js/dist/popper.min.js')
+            .pipe(gulp.dest('public/js'));
     }
 
     // Build Sass into CSS
