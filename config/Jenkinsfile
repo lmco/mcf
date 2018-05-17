@@ -32,6 +32,10 @@ pipeline {
                 sh 'rm -rf public'
                 sh 'rm -rf logs/*'
                 sh 'rm -rf *.log'
+
+                // Verify build
+                sh 'sleep 10'
+                sh 'ls -l'
             }
         }
 
