@@ -1,0 +1,55 @@
+<%
+/*****************************************************************************
+ * Classification: UNCLASSIFIED                                              *
+ *                                                                           *
+ * Copyright (C) 2018, Lockheed Martin Corporation                           *
+ *                                                                           *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
+ * It is not approved for public release or redistribution.                  *
+ *                                                                           *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export *
+ * control laws. Contact legal and export compliance prior to distribution.  *
+ *****************************************************************************/
+ %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>MBEE | Model-Based Engineering Environment</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="/css/styles.css"/>
+
+    <!-- React.js -->
+    <script src="/js/react.min.js"></script>
+    <script src="/js/react-dom.min.js"></script>
+
+  </head>
+  <body class="lm-light-theme">
+    <% if (ui.banner.on) { %>
+    <%- include('_includes/banner-header'); %>
+    <% } %>
+
+    <%- include('_includes/nav'); %>
+
+    <div id="root">
+        <div class="container-fluid">
+            <%- body %>
+        </div>
+    </div>
+
+    <% if (ui.banner.on) { %>
+    <%- include('_includes/banner-footer'); %>
+    <% } %>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mbee.js" type="text/javascript"></script>
+  </body>
+</html>
