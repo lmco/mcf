@@ -34,7 +34,7 @@ pipeline {
                 sh 'yarn config set "cafile" ./certs/LockheedMartinRootCertificationAuthority.pem'
 
                 // Clean build env
-                sh 'yarn clean:all'
+                sh 'rm -rf node_modules public logs/* *.log'
             }
         }
 
@@ -48,21 +48,21 @@ pipeline {
         }
 
         /**
-         * Runs the development Docker container for testing. 
+         * Runs the development Docker container for testing.
          * The only differences between the dev and prod containers are:
          *   - Dev runs on ports 9080 and 9443 instead of 80 and 443
          *   - Dev names the container mbee-dev instead of mbee
          */
         stage('Stage') {
             steps {
-                /* 
-                 * Removes any existing running containers. 
+                /*
+                 * Removes any existing running containers.
                  * This <command> || $(exit 0) approach is required so Jenkins
                  * doesn't fail is the stop/remove commands fail when container
                  * isn't currently running.
                  */
                 sh 'docker stop mbee-dev || $(exit 0);'
-                sh 'docker rm mbee-dev || $(exit 0);' 
+                sh 'docker rm mbee-dev || $(exit 0);'
 
                 /* Runs the container in the background. */
                 sh 'yarn docker:run:dev'
@@ -74,8 +74,8 @@ pipeline {
          */
         stage('Test') {
             steps {
-                /* 
-                 * Removes any existing running containers. 
+                /*
+                 * Removes any existing running containers.
                  * This <command> || $(exit 0) approach is required so Jenkins
                  * doesn't fail is the stop/remove commands fail when container
                  * isn't currently running.
@@ -96,8 +96,8 @@ pipeline {
                 sh 'docker stop mbee-dev || $(exit 0);'
                 sh 'docker rm mbee-dev || $(exit 0);'
 
-                /* 
-                 * Removes any existing running containers. 
+                /*
+                 * Removes any existing running containers.
                  * This <command> || $(exit 0) approach is required so Jenkins
                  * doesn't fail is the stop/remove commands fail when container
                  * isn't currently running.
