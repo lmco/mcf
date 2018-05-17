@@ -12,13 +12,13 @@
  *****************************************************************************/
 /*
  * mbee.js
- * 
+ *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * This file defines and implements the MBEE server functionality.
  */
 
-// Node.js Built-in Modules 
+// Node.js Built-in Modules
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
@@ -37,7 +37,7 @@ M.path = {
 
 //M.util = {
 //    /**
-//     * Takes a list of items, A, and a list of mutually exclusive items, B. 
+//     * Takes a list of items, A, and a list of mutually exclusive items, B.
 //     * Returns false if than one item from B is found in A, true otherwise.
 //     */
 //    mutuallyExclusive: (A, B) => {
@@ -45,7 +45,7 @@ M.path = {
 //        for (let i = 0; i < list.length; i++) {
 //            if (args.includes(list[i])) {
 //                flags++;
-//                if (flags > 1) 
+//                if (flags > 1)
 //                    throw new Error('Too many mutually exclusive arguments.');
 //            }
 //        }
@@ -55,7 +55,7 @@ M.path = {
 M.load = (m) => {return require(path.join(__dirname, 'app', m)) };
 
 // This exports the basic MBEE version and config data so that modules may
-// have access to that data when they are loaded. 
+// have access to that data when they are loaded.
 // Other MBEE modules like lib and controllers are loaded after this.
 // That means that modules should not try to call other modules when they are
 // loaded. They can, however, call other modules later because the 'mbee' object
@@ -75,8 +75,8 @@ const test = require(__dirname + '/scripts/test');
 
 // Call main
 if (module.parent == null) {
-  main();   
-} 
+  main();
+}
 
 
 
@@ -84,7 +84,7 @@ if (module.parent == null) {
  *  Main Function                                                             *
  ******************************************************************************/
 
-function main() 
+function main()
 {
     var subcommand = process.argv.slice(2,3)[0];
     var opts = process.argv.slice(3);
@@ -99,7 +99,7 @@ function main()
     };
 
     if (tasks.hasOwnProperty(subcommand))
-        tasks[subcommand](opts) 
+        tasks[subcommand](opts)
     else
         console.log('Unknown command.')
 }
@@ -109,13 +109,13 @@ function main()
 
 /**
  * Runs the MBEE server based on the configuration provided in the environment
- * config file. 
+ * config file.
  */
 
 function start(args) {
     initialize();
-    M.log.debug(`+ mbee.js executed as ${process.argv.join(' ')} ` 
-                    + `with env=${M.env} and configuration: ` 
+    M.log.debug(`+ mbee.js executed as ${process.argv.join(' ')} `
+                    + `with env=${M.env} and configuration: `
                     + JSON.stringify(M.config));
 
     var app = require(__dirname + '/app/app.js');   // Import the app
@@ -145,23 +145,23 @@ function start(args) {
     }
 
     // Run HTTPS Server
-    if (M.config.server.ssl) {
+    if (M.config.server.https.enabled) {
         httpsServer.listen(M.config.server.https.port, function() {
             let port = M.config.server.https.port;
             M.log.info('MBEE server listening on port ' + port + '!')
-        });   
+        });
     }
 }
 
 
 
 /**
- * Initializes the global MBEE helper object. This is defined in it's own 
+ * Initializes the global MBEE helper object. This is defined in it's own
  * function because it may be called at the end of install to re-load the MBEE
  * global helper object.
  */
 
-function initialize(args) 
+function initialize(args)
 {
     M.log = M.load('lib/logger');
     M.lib = {
