@@ -101,7 +101,9 @@ pipeline {
         success {
             emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - SUCCESS: \
                 \
-                Check console output at ${env.BUILD_URL} to view the results.",
+                Check console output at ${env.BUILD_URL} to view the results.\
+                <br/>\
+                View Git commit at ${env.GIT_URL} -  ${env.GIT_COMMIT}.",
                 mimeType: 'text/html',
                 subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - SUCCESS!",
                 to: "joshua.d.kaplan@lmco.com",
@@ -111,8 +113,10 @@ pipeline {
         }
         failure {
             emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: \
-                \
-                Check console output at ${env.BUILD_URL} to view the results.",
+                <br/>\
+                Check console output at ${env.BUILD_URL} to view the results.\
+                <br/>\
+                View Git commit at ${env.GIT_URL} -  ${env.GIT_COMMIT}.",
                 mimeType: 'text/html',
                 subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!",
                 to: "joshua.d.kaplan@lmco.com",
