@@ -99,29 +99,23 @@ pipeline {
      */
     post {
         success {
-            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - SUCCESS: \
-                <br/><br/>\
-                Check console output at ${env.BUILD_URL} to view the results.\
-                <br/><br/>\
-                View Git commit at <a \
-                href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
-                https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}</a>.",
+            emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
+                <br/><br/>No further action is required.",
                 mimeType: 'text/html',
-                subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - SUCCESS!",
-                to: "joshua.d.kaplan@lmco.com",
+                subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - SUCCESS!",
+                to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
                 replyTo: "mbee-service.fc-ssc@lmco.com",
-                from: "mbee-service.fc-ssc@lmco.com",
-                attachLog: true
+                from: "mbee-service.fc-ssc@lmco.com"
         }
         failure {
-            emailext body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: \
+            emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - FAILED: \
                 <br/><br/>Check console output at ${env.BUILD_URL} to view the results.\
-                <br/><br/>View Git commit at <a \
+                <br/><br/>View the Git commit on <a \
                 href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
-                https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}</a>.",
+                GitLab</a>.",
                 mimeType: 'text/html',
-                subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!",
-                to: "joshua.d.kaplan@lmco.com",
+                subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - FAILURE!",
+                to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
                 replyTo: "mbee-service.fc-ssc@lmco.com",
                 from: "mbee-service.fc-ssc@lmco.com",
                 attachLog: true
