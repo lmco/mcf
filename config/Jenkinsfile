@@ -106,7 +106,7 @@ pipeline {
                 subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - SUCCESS!",
                 to: "joshua.d.kaplan@lmco.com",
                 replyTo: "mbee-service.fc-ssc@lmco.com",
-                from: "mbee-service.fc-ssc@lmco.com".
+                from: "mbee-service.fc-ssc@lmco.com",
                 attachLog: true
         }
         failure {
@@ -117,7 +117,7 @@ pipeline {
                 subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!",
                 to: "joshua.d.kaplan@lmco.com",
                 replyTo: "mbee-service.fc-ssc@lmco.com",
-                from: "mbee-service.fc-ssc@lmco.com".
+                from: "mbee-service.fc-ssc@lmco.com",
                 attachLog: true
         }
     }
