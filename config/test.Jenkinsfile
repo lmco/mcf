@@ -106,7 +106,7 @@ pipeline {
                 href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
                 GitLab</a>.",
                 mimeType: 'text/html',
-                subject: "[jenkins] ${env.JOB_NAME} ${env.GIT_BRANCH} FAILURE",
+                subject: "[jenkins] ${env.gitlabMergeRequestTitle} ${env.JOB_NAME} ${env.GIT_BRANCH} FAILURE",
                 to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
                 replyTo: "mbee-service.fc-ssc@lmco.com",
                 from: "mbee-service.fc-ssc@lmco.com",
