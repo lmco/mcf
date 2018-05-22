@@ -87,7 +87,6 @@ pipeline {
                 // Removes any existing production running containers
                 sh 'NODE_ENV=production node mbee docker --clean'
 
-
                 // Runs the production container in the background
                 sh 'NODE_ENV=production node mbee docker --run'
             }
@@ -101,7 +100,7 @@ pipeline {
     post {
         always {
             emailext body: '''
-                ${PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - $BUILD_STATUS:
+                $PROJECT_NAME - Build # ${env.BUILD_NUMBER} - $BUILD_STATUS:
 
                 Check console output at $BUILD_URL to view the results.''',
                 mimeType: 'text/html',
