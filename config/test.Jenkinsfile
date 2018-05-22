@@ -71,6 +71,8 @@ pipeline {
                 // Wait to be sure server is up
                 sh 'sleep 10'
                 // Runs the basic test suite against the running stage container
+                sh 'NODE_ENV=test node mbee lint'
+                // Runs the basic test suite against the running stage container
                 sh 'NODE_ENV=test node mbee test --grep "^[0-6]"'
             }
         }
