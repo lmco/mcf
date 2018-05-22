@@ -89,7 +89,7 @@ OrganizationSchema.virtual('permissions.admin', {
 * The 'permissions.member' is a virtual getter to users with admin
 * and/or write permissions to the organization
 */
-OrganizationSchema.virtual('permissions.member').get(function() {
+OrganizationSchema.virtual('permissions.member').get(() => {
   const member = this.permissions.write || [];
   const admin = this.permissions.admin || [];
 

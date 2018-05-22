@@ -45,7 +45,7 @@ function upTest(done) {
   },
   (error, response, body) => {
     if (error) {
-      console.error(error);
+      console.error(error);  // eslint-disable-line no-console
     }
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(body).to.equal('');

@@ -83,7 +83,7 @@ const ProjectSchema = new Schema({
 });
 
 // Post hook to link refernece to organization upon save
-ProjectSchema.post('save', function() {
+ProjectSchema.post('save', () => {
   Organization.findOneAndUpdate({
     _id: this.org
   }, {                            // eslint is catching the following line by mistake, disabling

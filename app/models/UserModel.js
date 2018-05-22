@@ -153,7 +153,7 @@ const UserSchema = new mongoose.Schema({
   createdOn: {
     type: Date,
     default: Date.now,
-    set: (v) => {
+    set: (v) => { // eslint-disable-line no-unused-vars, arrow-body-style
       return this.createdOn;
     }
   },
@@ -190,10 +190,10 @@ const UserSchema = new mongoose.Schema({
   deleted: {
     type: Boolean,
     default: false,
-    set: (v) => {  // eslint-disable-rule no-unused-vars
+    set: (v) => {  // eslint-disable-line no-unused-vars, arrow-body-style
       return (this.deletedOn !== null);
     },
-    get: (v) => {
+    get: (v) => { // eslint-disable-line no-unused-vars, arrow-body-style
       return (this.deletedOn !== null);
     }
   },
@@ -222,7 +222,7 @@ const UserSchema = new mongoose.Schema({
 * This is a getter which can be used in order to populate a list of
 * all organizations the user has write or admin permissions to.
 */
-UserSchema.virtual('orgPermissions.member').get(function() {
+UserSchema.virtual('orgPermissions.member').get(() => {
   const member = this.orgPermissions.write || [];
   const admin = this.orgPermissions.admin || [];
 
@@ -246,7 +246,7 @@ UserSchema.set('toObject', { virtuals: true });
  * @memberOf  User
  * Run our pre-defined setters on save.
  */
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', (next) => {
   // Run our defined setters
   this.name = '';
   this.updatedOn = '';

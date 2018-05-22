@@ -70,7 +70,7 @@ function createUser(done) {
   });
   user.save((err) => {
     if (err) {
-      console.log(err);
+      console.log(err); // eslint-disable-line no-console
     }
     chai.expect(err).to.equal(null);
     done();
