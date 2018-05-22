@@ -47,6 +47,6 @@ function emptyTest(done) {
  * Runs some simple assertions
  */
 function assertionsTest(done) {
-  chai.expect(2).to.equal(1);
+  chai.expect(2).to.equal(2);
   done();
 }
