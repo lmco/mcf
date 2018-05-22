@@ -79,6 +79,10 @@ pipeline {
 
     /**
      * This gets run at the end of the pipeline.
+     * The list of defined email-ext env variables can be found at
+     * https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-below
+     * The list of defined gitLab variable can be found at
+     * https://github.com/jenkinsci/gitlab-plugin
      */
     post {
         always {
@@ -89,24 +93,32 @@ pipeline {
         success {
             echo 'success'
             emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
-                <br/><br/>Merge request of branch ${env.GIT_BRANCH} passed automated tests. \
-                No further action is required.",
+                <br/><br/>\
+                Merge Request: ${env.gitlabMergeRequestTitle} \
+                Source Branch: ${env.gitlabSourceBranch} \
+                Target Branch: ${env.gitlabTargetBranch} \
+                <br/><br/>\
+                Merge request passed automated tests. No further action is required.",
                 mimeType: 'text/html',
-                subject: "[jenkins] ${env.JOB_NAME} ${env.GIT_BRANCH} SUCCESS",
+                subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - SUCCESS",
                 to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
                 replyTo: "mbee-service.fc-ssc@lmco.com",
                 from: "mbee-service.fc-ssc@lmco.com"
         }
         failure {
             echo 'failed'
-            emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - FAILED: \
-                <br/><br/>Merge request of ${env.GIT_BRANCH} failed. Check console output at \
+            emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} FAILED: \
+                <br/><br/>\
+                Merge Request: ${env.gitlabMergeRequestTitle} \
+                Source Branch: ${env.gitlabSourceBranch} \
+                Target Branch: ${env.gitlabTargetBranch} \
+                <br/><br/>\
+                Merge request of ${env.gitlabSourceBranch} failed. Check console output at \
                 ${env.BUILD_URL} or see the attached build log to view the results.\
-                <br/><br/>View the Git commit on <a \
-                href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
-                GitLab</a>.",
+                <br/><br/>\
+                View the source branch on <a href=\"${env.gitlabSourceRepoHttpUrl}\">GitLab</a>.",
                 mimeType: 'text/html',
-                subject: "[jenkins] ${env.gitlabMergeRequestTitle} ${env.JOB_NAME} ${env.GIT_BRANCH} FAILURE",
+                subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - FAILURE",
                 to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
                 replyTo: "mbee-service.fc-ssc@lmco.com",
                 from: "mbee-service.fc-ssc@lmco.com",
