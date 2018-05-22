@@ -99,9 +99,9 @@ pipeline {
      */
     post {
         always {
-            emailext body: '$DEFAULT_CONTENT',
+            emailext body: "${env.DEFAULT_CONTENT}",
                 mimeType: 'text/html',
-                subject: "$DEFAULT_SUBJECT",
+                subject: "${env.DEFAULT_SUBJECT}",
                 to: "joshua.d.kaplan@lmco.com",
                 replyTo: "mbee-service.fc-ssc@lmco.com"
         }
