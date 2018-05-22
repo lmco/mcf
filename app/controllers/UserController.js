@@ -294,9 +294,9 @@ class UserController {
 
 
   /**
-     * Takes the request object with user data in the params and body.
-     * Validates and sanitizes that data and returns it as a JSON object.
-     */
+   * Takes the request object with user data in the params and body.
+   * Validates and sanitizes that data and returns it as a JSON object.
+   */
   static getUserData(req) {
     const userData = {};
 

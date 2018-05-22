@@ -140,12 +140,12 @@ class LMICloudStrategy extends BaseStrategy {
 
 
   /**
-     * Searches LDAP for a given user that meets our search criteria.
-     * When the user is found, calls doAuthentication().
-     *
-     * This is called from inside the `authenticate` method and has access to
-     * its variables including req, res, next, and self.
-     */
+   * Searches LDAP for a given user that meets our search criteria.
+   * When the user is found, calls doAuthentication().
+   *
+   * This is called from inside the `authenticate` method and has access to
+   * its variables including req, res, next, and self.
+   */
 
   doSearch(username, password, next) {
     // Generate search filter
@@ -179,13 +179,13 @@ class LMICloudStrategy extends BaseStrategy {
 
 
   /**
-     * Uses a simple bind the user to authenticate the user.
-     * This is called from inside the `authenticate` method and has access to
-     * its variables including req, res, next, and self.
-     *
-     * TODO - Is there a way for no error to occur, but not
-     * successfully bind the user? If so, this could be a problem.
-     */
+   * Uses a simple bind the user to authenticate the user.
+   * This is called from inside the `authenticate` method and has access to
+   * its variables including req, res, next, and self.
+   *
+   * TODO - Is there a way for no error to occur, but not
+   * successfully bind the user? If so, this could be a problem.
+   */
 
   doAuthentication(user, password, next) {
     const self = this;
@@ -206,10 +206,12 @@ class LMICloudStrategy extends BaseStrategy {
   }
 
 
+  /* eslint-disable class-methods-use-this */
+
   /**
-     * This synchronizes just retrieved LDAP user with the local database.
-     * TODO - Pass original query result through to avoid a second query.
-     */
+   * This synchronizes just retrieved LDAP user with the local database.
+   * TODO - Pass original query result through to avoid a second query.
+   */
   syncLDAPUser(ldapUser, next) {
     User.find({
       username: ldapUser[M.config.auth.ldap.username_attribute]
@@ -224,13 +226,13 @@ class LMICloudStrategy extends BaseStrategy {
         isLDAPUser: true
       };
 
-      const user = (users.length == 0) ? new User(initData) : users[0];
+      const user = (users.length === 0) ? new User(initData) : users[0];
       user.fname = ldapUser.givenName;
       user.lname = ldapUser.sn;
       user.email = ldapUser.mail;
-      user.save((err) => {
-        if (err) {
-          next(err);
+      user.save((saveErr) => {
+        if (saveErr) {
+          next(saveErr);
         }
         else {
           next(null, user);
@@ -239,19 +241,22 @@ class LMICloudStrategy extends BaseStrategy {
     });
   }
 
+  /* eslint-disable class-methods-use-this */
+
 
   /**
-     * Handles token authentication. This function gets called both for
-     * the case of a token auth header or a session token. Either way
-     * the token is provided to this function for auth.
-     *
-     * If an error is passed into the callback, authentication fails.
-     * If the callback is called with no parameters, the user is authenticated.
-     */
-  handleTokenAuth(req, res, token, cb) {
+   * Handles token authentication. This function gets called both for
+   * the case of a token auth header or a session token. Either way
+   * the token is provided to this function for auth.
+   *
+   * If an error is passed into the callback, authentication fails.
+   * If the callback is called with no parameters, the user is authenticated.
+   */
+  handleTokenAuth(req, res, _token, cb) {
     // Try to decrypt the token
+    let token = null;
     try {
-      token = M.lib.crypto.inspectToken(token);
+      token = M.lib.crypto.inspectToken(_token);
     }
     // If it cannot be decrypted, it is not valid and the
     // user is not authorized
@@ -294,8 +299,6 @@ class LMICloudStrategy extends BaseStrategy {
      */
 
   doLogin(req, res, next) {
-    console.log(req.params);
-    console.log(req.query);
     M.log.info(`${req.originalUrl} requested by ${req.user.username}`);
 
     // Convenient conversions from ms

@@ -18,19 +18,17 @@
  * This should be the default authentication strategy for MBEE.
  */
 
-const fs = require('fs');
 const path = require('path');
-const util = require('util');
 const crypto = require('crypto');
 
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-const config = require(path.join(__dirname, '..', '..', 'package.json')).config;
 const BaseStrategy = require(path.join(__dirname, 'BaseStrategy'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
-const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
-const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
-const API = require(path.join(__dirname, '..', 'controllers', 'APIController'));
-const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
+
+const libCrypto = M.lib.crypto;
+const sani = M.lib.sani;
+
 
 /**
  * LocalStrategy
@@ -41,8 +39,8 @@ const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
  */
 class LocalStrategy extends BaseStrategy {
   /**
-     * The `LocalStrategy` constructor.
-     */
+   * The `LocalStrategy` constructor.
+   */
 
   constructor() {
     super();
@@ -54,14 +52,19 @@ class LocalStrategy extends BaseStrategy {
   }
 
 
+  // There are reasons to have class methods even when they don't use "this" you know?
+  // For example, when an instance of a class is overwriting and abstract base class
+  // to implement an authentication function. Disabling rule in this case.
+  /* eslint-disable class-methods-use-this */
+
   /**
-     * Handles basic-style authentication. This function gets called both for
-     * the case of a basic auth header or for login form input. Either way
-     * the username and password is provided to this function for auth.
-     *
-     * If an error is passed into the callback, authentication fails.
-     * If the callback is called with no parameters, the user is authenticated.
-     */
+   * Handles basic-style authentication. This function gets called both for
+   * the case of a basic auth header or for login form input. Either way
+   * the username and password is provided to this function for auth.
+   *
+   * If an error is passed into the callback, authentication fails.
+   * If the callback is called with no parameters, the user is authenticated.
+   */
   handleBasicAuth(req, res, username, password, cb) {
     User.findOne({
       username,
@@ -80,7 +83,7 @@ class LocalStrategy extends BaseStrategy {
       hash.update(password);                  // password
       const pwdhash = hash.digest().toString('hex');
       // Authenticate the user
-      if (user.password == pwdhash) {
+      if (user.password === pwdhash) {
         cb(null, user);
       }
       else {
@@ -89,19 +92,26 @@ class LocalStrategy extends BaseStrategy {
     });
   }
 
+  /* eslint-enable class-methods-use-this */
+
+  // Disabling class-methods-use-this because it doesn't need to do that here.
+  // TODO - Should we make these static methods? Is there a reason to do so or not?
+  /* eslint-disable class-methods-use-this */
+
 
   /**
-     * Handles token authentication. This function gets called both for
-     * the case of a token auth header or a session token. Either way
-     * the token is provided to this function for auth.
-     *
-     * If an error is passed into the callback, authentication fails.
-     * If the callback is called with no parameters, the user is authenticated.
-     */
-  handleTokenAuth(req, res, token, cb) {
+   * Handles token authentication. This function gets called both for
+   * the case of a token auth header or a session token. Either way
+   * the token is provided to this function for auth.
+   *
+   * If an error is passed into the callback, authentication fails.
+   * If the callback is called with no parameters, the user is authenticated.
+   */
+  handleTokenAuth(req, res, _token, cb) {
     // Try to decrypt the token
+    let token = null;
     try {
-      token = libCrypto.inspectToken(token);
+      token = libCrypto.inspectToken(_token);
     }
     // If it cannot be decrypted, it is not valid and the
     // user is not authorized
@@ -135,15 +145,20 @@ class LocalStrategy extends BaseStrategy {
       cb('Token is expired or session is invalid');
     }
   }
+  /* eslint-enable class-methods-use-this */
 
+
+  // Disabling class-methods-use-this because it doesn't need to do that here.
+  // TODO - Should we make these static methods? Is there a reason to do so or not?
+  /* eslint-disable class-methods-use-this */
 
   /**
-     * If login was successful, we generate and auth token and return it to the
-     * user.
-     */
+   * If login was successful, we generate and auth token and return it to the
+   * user.
+   */
 
   doLogin(req, res, next) {
-    log.info(`${req.originalUrl} requested by ${req.user.username}`);
+    M.log.info(`${req.originalUrl} requested by ${req.user.username}`);
 
     // Convenient conversions from ms
     const conversions = {
@@ -153,10 +168,10 @@ class LocalStrategy extends BaseStrategy {
       HOURS: 60 * 60 * 1000,
       DAYS: 24 * 60 * 60 * 1000
     };
-    const dT = config.auth.token.expires * conversions[config.auth.token.units];
+    const dT = M.config.auth.token.expires * conversions[M.config.auth.token.units];
 
     // Generate the token and set the session token
-    const token = libCrypto.generateToken({
+    const token = M.lib.crypto.generateToken({
       type: 'user',
       username: req.user.username,
       created: (new Date(Date.now())).toUTCString(),
@@ -164,9 +179,11 @@ class LocalStrategy extends BaseStrategy {
     });
     req.session.user = req.user.username;
     req.session.token = token;
-    log.info(`${req.originalUrl} Logged in ${req.user.username}`);
+    M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
     next();
   }
+
+  /* eslint-enable class-methods-use-this */
 }
 
 module.exports = LocalStrategy;

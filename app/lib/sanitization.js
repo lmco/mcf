@@ -28,7 +28,7 @@ module.exports.sanitize = function(s) {
 };
 
 module.exports.mongo = function(s) {
-  return mongosanitize();
+  return mongosanitize(s);
 };
 
 module.exports.html = function(s) {
