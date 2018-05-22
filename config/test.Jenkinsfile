@@ -96,9 +96,9 @@ pipeline {
             echo 'success'
             emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
                 <br/><br/>\
-                Merge Request: ${env.gitlabMergeRequestTitle} \
-                Source Branch: ${env.gitlabSourceBranch} \
-                Target Branch: ${env.gitlabTargetBranch} \
+                Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
+                Source Branch: ${env.gitlabSourceBranch}<br/> \
+                Target Branch: ${env.gitlabTargetBranch}<br/> \
                 <br/><br/>\
                 Merge request passed automated tests. No further action is required.",
                 mimeType: 'text/html',
