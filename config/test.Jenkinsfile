@@ -32,7 +32,6 @@ pipeline {
                 sh 'rm -rf public'
                 sh 'rm -rf logs/*'
                 sh 'rm -rf *.log'
-                sh 'git branch'
             }
         }
 
