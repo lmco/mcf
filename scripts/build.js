@@ -39,7 +39,7 @@ else {
  */
 
 function build(_args) {
-  console.log('+ Building MBEE ...'); // eslint-disable-line no-console
+  console.log('+ Building MBEE ...');
 
   // Install development dependencies
   install(['--dev']);
