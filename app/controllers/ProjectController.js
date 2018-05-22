@@ -127,7 +127,7 @@ class ProjectController {
      *     orgid
      */
   static postProject(req, res) {
-    const orgId = M.lib.sanitization.html(eq.params.orgid);
+    const orgId = M.lib.sanitization.html(req.params.orgid);
     const projectId = M.lib.sanitization.html(req.params.projectid);
     const project = req.body;
 
