@@ -921,7 +921,8 @@
     // for example someObject.hasOwnProperty('someProperty') is a common statement. The alternative
     // is lengthy and less readable. Leaving as warning for now to draw attention to this item
     // for future style discussion.
-    "no-prototype-builtins": "warn",
+    // LM: Turning rule off for now. Read documentation to consider potential impacts of this.
+    "no-prototype-builtins": "off",
 
     // disallow multiple spaces in a regular expression literal
     "no-regex-spaces": "error",
@@ -987,7 +988,7 @@
     }],
 
     // require return statements to either always or never specify values
-    // LM: Changed to warning in order to avoid no return error for controller 
+    // LM: Changed to warning in order to avoid no return error for controller
     // logic
     "consistent-return": "warn",
 
