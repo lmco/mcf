@@ -20,6 +20,12 @@ const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
 const validators = M.lib.validators;
 const sani = M.lib.sanitization;
 
+// We are disabling the eslint consistent-return rule for this file.
+// The rule doesn't work well for many controller-related functions and
+// throws the warning in cases where it doesn't apply. For this reason, the
+// rule is disabled for this file. Be careful to avoid the issue.
+/* eslint-disable consistent-return */
+
 /**
  * UserController.js
  *
@@ -95,7 +101,7 @@ class UserController {
     }, (err, user) => {
       // Check if error occured
       if (err) {
-        console.log(err);
+        M.log.error(err);
         return res.status(500).send('Internal Server Error');
       }
 
@@ -290,7 +296,7 @@ class UserController {
       });
     }
     else {
-      console.log('Request params does not include a username.');
+      M.log.warn('Request params does not include a username.');
       return res.status(400).send('Bad Request');
     }
   }
@@ -310,13 +316,13 @@ class UserController {
       // Error check - make sure if username in body it matches params
       if (req.body.hasOwnProperty('username')) {
         if (username !== sani.sanitize(req.body.username)) {
-          console.log('Username in body does not match params.');
+          M.log.warn('Username in body does not match params.');
           return null;
         }
       }
       // Error check - make sure username is valid
       if (!RegExp(validators.user.username).test(username)) {
-        console.log('Username in req.params is invalid.');
+        M.log.warn('Username in req.params is invalid.');
         return res.status(400).send('Bad Request');
       }
       userData.username = username;
@@ -331,7 +337,7 @@ class UserController {
       const password = sani.sanitize(req.body.password);
       // Error check - make sure password is valid
       if (!validators.user.password(password)) {
-        console.log('Password is invalid.');
+        M.log.warn('Password is invalid.');
         return res.status(400).send('Bad Request');
       }
       userData.password = password;
@@ -361,7 +367,7 @@ class UserController {
   static whoami(req, res) {
     // Sanity check - make sure we have user with a username
     if (!req.user || req.user.hasOwnProperty('username')) {
-      console.log('Invalid req.user object');
+      M.log.warn('Invalid req.user object');
       return res.status(500).send('Internal Server Error');
     }
     const username = sani.htmlspecialchars(req.user.username);
@@ -372,7 +378,7 @@ class UserController {
     }, (err, user) => {
       // Check if error occured
       if (err) {
-        console.log(err);
+        M.log.error(err);
         return res.status(500).send('Internal Server Error');
       }
 

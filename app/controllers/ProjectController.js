@@ -20,6 +20,11 @@ const API = require(path.join(__dirname, 'APIController'));
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));
 const Project = require(path.join(modelsPath, 'ProjectModel'));
 
+// We are disabling the eslint consistent-return rule for this file.
+// The rule doesn't work well for many controller-related functions and
+// throws the warning in cases where it doesn't apply. For this reason, the
+// rule is disabled for this file. Be careful to avoid the issue.
+/* eslint-disable consistent-return */
 
 /**
  * ProjectController.js
@@ -216,18 +221,18 @@ class ProjectController {
 
 
   /**
-     * Takes an organization ID and project ID in the URI and JSON encoded
-     * project data in the body. Updates the project curresponding to the URI
-     * with the data passed in the body.
-     *
-     * @req.params
-     *     orgid        the ID organizatiion containing the project
-     *     projectid    the ID of the project to update.
-     *
-     * @req.body - A single JSON encoded object containing project data
-     *     id
-     *     name
-     */
+   * Takes an organization ID and project ID in the URI and JSON encoded
+   * project data in the body. Updates the project curresponding to the URI
+   * with the data passed in the body.
+   *
+   * @req.params
+   *     orgid        the ID organizatiion containing the project
+   *     projectid    the ID of the project to update.
+   *
+   * @req.body - A single JSON encoded object containing project data
+   *     id
+   *     name
+   */
 
   static putProject(req, res) {
     const orgId = M.lib.sanitization.html(req.params.orgid);
@@ -332,16 +337,16 @@ class ProjectController {
 
 
   /**
-     * Takes an organization ID and project ID in the URI and deletes the
-     * corresponding project.
-     *
-     * @required.params
-     *     orgid        the ID of the organization containing the project
-     *     projectid    the ID of the project to delete
-     *
-     * @req.body
-     *     N/A
-     */
+   * Takes an organization ID and project ID in the URI and deletes the
+   * corresponding project.
+   *
+   * @required.params
+   *     orgid        the ID of the organization containing the project
+   *     projectid    the ID of the project to delete
+   *
+   * @req.body
+   *     N/A
+   */
 
   static deleteProject(req, res) {
     const orgId = M.lib.sanitization.html(req.params.orgid);

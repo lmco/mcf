@@ -530,7 +530,9 @@
     // is more readable and testable without continue statements, but it seems ridiculous
     // to force no continue statements. We will leave a warning here to draw attention to this
     // for future discussion.
-    "no-continue": "warn",
+    // LM: Turning off. Languages have features for a reason I don't see any good reason to limit
+    // its use. Code reviews can be useful in catching maintainability or ambiguity issues.
+    "no-continue": "off",
 
     // disallow comments inline after code
     "no-inline-comments": "off",
@@ -991,8 +993,10 @@
 
     // require return statements to either always or never specify values
     // LM: Changed to warning in order to avoid no return error for controller
-    // logic
-    "consistent-return": "warn",
+    // logic.
+    // LM: Bring this back up to error status. This may need to be explicitly disabled for
+    // controller files or similar that handle web responses.
+    "consistent-return": "error",
 
     // specify curly brace conventions for all control statements
     // LM: Not sure ESLint does exactly what we need here.

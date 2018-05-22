@@ -25,6 +25,11 @@ const Organization = require(path.join(modelsPath, 'OrganizationModel'));
 // const Project = require(path.join(modelsPath, 'ProjectModel'));
 const User = require(path.join(modelsPath, 'UserModel'));
 
+// We are disabling the eslint consistent-return rule for this file.
+// The rule doesn't work well for many controller-related functions and
+// throws the warning in cases where it doesn't apply. For this reason, the
+// rule is disabled for this file. Be careful to avoid the issue.
+/* eslint-disable consistent-return */
 
 /**
  * OrganizationController
@@ -64,7 +69,7 @@ class RoleController {
       .exec((err, org) => {
         // If error occurs, log it and return 500 status
         if (err) {
-          console.log(err);
+          M.log.error(err);
           return res.status(500).send('Internal Server Error');
         }
 
@@ -132,7 +137,7 @@ class RoleController {
       .exec((findOrgErr, org) => {
         // If error occurs, log it and return 500 status
         if (findOrgErr) {
-          console.log(findOrgErr);
+          M.log.error(findOrgErr);
           return res.status(500).send('Internal Server Error');
         }
 
@@ -154,7 +159,7 @@ class RoleController {
           .exec((findUserErr, user) => {
             // If error occurs, log it and return 500 status
             if (findUserErr) {
-              console.log(findUserErr);
+              M.log.error(findUserErr);
               return res.status(500).send('Internal Server Error');
             }
 
@@ -195,7 +200,7 @@ class RoleController {
                 },
                 (saveErr, userSave) => {
                   if (saveErr) {
-                    console.log(saveErr);
+                    M.log.error(saveErr);
                     return res.status(500).send('Internal Server Error');
                   }
                   // Return response
@@ -251,7 +256,7 @@ class RoleController {
       .exec((findOrgErr, org) => {
         // If error occurs, log it and return 500 status
         if (findOrgErr) {
-          console.log(findOrgErr);
+          M.log.error(findOrgErr);
           return res.status(500).send('Internal Server Error');
         }
 
@@ -273,7 +278,7 @@ class RoleController {
           .exec((findUserErr, user) => {
             // If error occurs, log it and return 500 status
             if (findUserErr) {
-              console.log(findUserErr);
+              M.log.error(findUserErr);
               return res.status(500).send('Internal Server Error');
             }
 
@@ -313,7 +318,7 @@ class RoleController {
                 },
                 (updateErr, userSave) => {
                   if (updateErr) {
-                    console.log(updateErr);
+                    M.log.error(updateErr);
                     return res.status(500).send('Internal Server Error');
                   }
                   // Return response

@@ -105,7 +105,7 @@ function main() {
     tasks[subcommand](opts);
   }
   else {
-    console.log('Unknown command.');
+    console.log('Unknown command.'); // eslint-disable-line no-console
   }
 }
 
