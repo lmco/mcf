@@ -19,7 +19,6 @@
 
 const path = require('path');
 const mbee = require(path.join(__dirname, '..', 'mbee.js'));
-const del = require('del');
 
 if (module.parent == null) {
   clean(process.argv.slice(2));
@@ -41,6 +40,8 @@ else {
  */
 
 function clean(_args) {
+  const del = require('del');  // eslint-disable-line global-require
+
   // Allow the function to be called with no parameters
   // Set the default behavior to build all
   const args = (_args === undefined) ? [] : _args;
