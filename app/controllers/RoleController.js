@@ -17,14 +17,14 @@ const path = require('path');
 const LibSani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
 
 /* Local Modules */
-const config       = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
-const API          = require(path.join(__dirname, 'APIController'));
+const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
+const API = require(path.join(__dirname, 'APIController'));
 
-const modelsPath   = path.join(__dirname, '..', 'models');
+const modelsPath = path.join(__dirname, '..', 'models');
 
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));
-const Project      = require(path.join(modelsPath, 'ProjectModel'));
-const User         = require(path.join(modelsPath, 'UserModel'));
+const Project = require(path.join(modelsPath, 'ProjectModel'));
+const User = require(path.join(modelsPath, 'UserModel'));
 
 
 /**
@@ -37,311 +37,300 @@ const User         = require(path.join(modelsPath, 'UserModel'));
  */
 
 
-class RoleController
-{
-
-     /**
+class RoleController {
+  /**
      * Gets a list of all users of a specific role type for an organization.
      *
      * @req.params
      *     role - the name of the role in the organization (Currenlty 'read' or 'admin')
-     *     
+     *
      * @req.body
      *     N/A
      */
-    static getOrgRoles(req, res)
-    {
-        // Sanitize request params
-        var orgId = LibSani.sanitize(req.params['orgid']);
-        var role  = LibSani.sanitize(req.params['role']);
+  static getOrgRoles(req, res) {
+    // Sanitize request params
+    const orgId = LibSani.sanitize(req.params.orgid);
+    const role = LibSani.sanitize(req.params.role);
 
-        // Build query to populate permissions of the org
-        var orgPopQuery = 'permissions.admin permissions.write'
+    // Build query to populate permissions of the org
+    const orgPopQuery = 'permissions.admin permissions.write';
 
 
-        // Search Mongo for the organizatiom
-        Organization.findOne({id: orgId}).
-        // Select from users that have not been soft deleted
-        populate({
-            path: orgPopQuery
-        }).
-        exec( function(err, org) {
-            // If error occurs, log it and return 500 status
-            if (err) {
-                console.log(err);
-                return res.status(500).send('Internal Server Error');
-            }
-            
-            //If organization is found, return list of users with the specific 'role'
-            // Todo - (Check Error for if statement)
-            if (!org) {
-                return res.status(500).send('Internal Server Error');
-            }
+    // Search Mongo for the organizatiom
+    Organization.findOne({ id: orgId })
+    // Select from users that have not been soft deleted
+      .populate({
+        path: orgPopQuery
+      })
+      .exec((err, org) => {
+        // If error occurs, log it and return 500 status
+        if (err) {
+          console.log(err);
+          return res.status(500).send('Internal Server Error');
+        }
 
-            // Build array of admin usernames from the org for easy search access
-            var adminList = org.permissions.admin.map(a => {return a.username})
-            var user = req.user
+        // If organization is found, return list of users with the specific 'role'
+        // Todo - (Check Error for if statement)
+        if (!org) {
+          return res.status(500).send('Internal Server Error');
+        }
 
-            // Check if user is site admin or if user has admin access to organization
-            if(!user.admin && !adminList.includes(user.username)){
-                return res.status(403).send('Unauthorized')
-            }
+        // Build array of admin usernames from the org for easy search access
+        const adminList = org.permissions.admin.map(a => a.username);
+        const user = req.user;
 
-            // Create Permisssions list containing only username, email, and name
-            if (typeof org.permissions[role] == 'undefined'){
-                return res.status(404).send('Permission type undefined')
-            }
+        // Check if user is site admin or if user has admin access to organization
+        if (!user.admin && !adminList.includes(user.username)) {
+          return res.status(403).send('Unauthorized');
+        }
 
-            var permissionList = org.permissions[role].map(a => {
-                return {
-                    username: a.username, 
-                    email: a.email,
-                    name: a.name
-                }
-            })
+        // Create Permisssions list containing only username, email, and name
+        if (typeof org.permissions[role] === 'undefined') {
+          return res.status(404).send('Permission type undefined');
+        }
 
-            // Return user permission list as an array
-            res.header('Content-Type', 'application/json');
-            return res.status(200).send(API.formatJSON(permissionList));
+        const permissionList = org.permissions[role].map(a => ({
+          username: a.username,
+          email: a.email,
+          name: a.name
+        }));
 
-        })
-    }
+        // Return user permission list as an array
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(API.formatJSON(permissionList));
+      });
+  }
 
-     /**
+  /**
      * Adds a permission to an organization for a specified user.
      *
      * @req.params
      *     orgId - The id of the organization to add user permissions to.
      *     role  - The name of the role in the organization (Currenlty 'read' or 'admin')
-     *     
+     *
      * @req.body
      *     {username: 'username'} - The username of the user who is being granted permissions
      */
-    static postOrgRoles(req, res)
-    {
-        // Sanitize request params and request body
-        var orgId = LibSani.sanitize(req.params['orgid']);
-        var role  = LibSani.sanitize(req.params['role']);
-        var newUsername = LibSani.sanitize(req.body['username'])
+  static postOrgRoles(req, res) {
+    // Sanitize request params and request body
+    const orgId = LibSani.sanitize(req.params.orgid);
+    const role = LibSani.sanitize(req.params.role);
+    const newUsername = LibSani.sanitize(req.body.username);
 
-        // Build query to populate admin and permissions of the org
-        var orgPopQuery = 'permissions.admin'
-        if (role != 'admin'){
-            orgPopQuery = orgPopQuery + ' permissions.' + role
+    // Build query to populate admin and permissions of the org
+    let orgPopQuery = 'permissions.admin';
+    if (role != 'admin') {
+      orgPopQuery = `${orgPopQuery} permissions.${role}`;
+    }
+
+
+    // Search Mongo for the organizatiom
+    Organization.findOne({ id: orgId })
+    // Select from users that have not been soft deleted
+      .populate({
+        path: orgPopQuery
+      })
+      .exec((err, org) => {
+        // If error occurs, log it and return 500 status
+        if (err) {
+          console.log(err);
+          return res.status(500).send('Internal Server Error');
         }
 
+        // If organization is found, return list of users with the specific 'role'
+        // Todo - (Check Error for if statement)
+        if (!org) {
+          return res.status(404).send('Organization not found');
+        }
 
-        // Search Mongo for the organizatiom
-        Organization.findOne({id: orgId}).
-        // Select from users that have not been soft deleted
-        populate({
-            path: orgPopQuery
-        }).
-        exec( function(err, org) {
+        // Build qery to populate member and role permissions stored on the user
+        const userPopQuerry = 'orgPermissions.write orgPermissions.admin';
+
+        // Search Mongo for the user
+        User.findOne({ username: newUsername })
+        // Select the organization members and role
+          .populate({
+            path: userPopQuerry
+          })
+          .exec((err, user) => {
             // If error occurs, log it and return 500 status
             if (err) {
-                console.log(err);
-                return res.status(500).send('Internal Server Error');
-            }
-            
-            // If organization is found, return list of users with the specific 'role'
-            // Todo - (Check Error for if statement)
-            if (!org) {
-                return res.status(404).send('Organization not found');
+              console.log(err);
+              return res.status(500).send('Internal Server Error');
             }
 
-            // Build qery to populate member and role permissions stored on the user
-            var userPopQuerry = 'orgPermissions.write orgPermissions.admin' 
+            // Check if user exists
+            if (!user) {
+              return res.status(404).send('User not found');
+            }
 
-            // Search Mongo for the user
-            User.findOne({username: newUsername}).
-            // Select the organization members and role
-            populate({
-                path: userPopQuerry,
-            }).
-            exec( function(err,user) {
-                // If error occurs, log it and return 500 status
-                if (err) {
+            // Build array of admin usernames from the org for easy search access
+            const adminList = org.permissions.admin.map(a => a.username);
+            const userReq = req.user;
+
+            // Check if user is site admin or if user has admin access to organization
+            if (!userReq.admin && !adminList.includes(userReq.username)) {
+              return res.status(403).send('Unauthorized');
+            }
+
+            if (typeof org.permissions[role] === 'undefined') {
+              return res.status(404).send('Permission type undefined');
+            }
+
+
+            // Build array organizations the user is a member of and has the specified role in
+            const roleList = user.orgPermissions[role].map(a => a.id);
+
+            // If the user is alread a memeber, check if they already have the specified role
+            if (!roleList.includes(org.id)) {
+              // Generate updated keys to push the proper organization permissions
+              const keyRole = `orgPermissions.${role}`;
+              // Generate the updated fields (Required for mongo array push)
+              const pushVals = { [keyRole]: org._id };
+
+              // Find the user and update with the new orgnization permissions
+              User.findOneAndUpdate(
+                { username: newUsername },
+                {
+                  $push: pushVals
+                },
+                (err, userSave) => {
+                  if (err) {
                     console.log(err);
                     return res.status(500).send('Internal Server Error');
+                  }
+                  // Return response
+                  return res.status(200).send(API.formatJSON(userSave.username));
                 }
+              );
+            }
 
-                // Check if user exists
-                if (!user) {
-                    return res.status(404).send('User not found');
-                }
-
-                // Build array of admin usernames from the org for easy search access
-                var adminList = org.permissions.admin.map(a => {return a.username})
-                var userReq = req.user
-
-                // Check if user is site admin or if user has admin access to organization
-                if(!userReq.admin && !adminList.includes(userReq.username)){
-                    return res.status(403).send('Unauthorized')
-                }
-
-                if (typeof org.permissions[role] == 'undefined'){
-                    return res.status(404).send('Permission type undefined')
-                }
+            // Condition executes if the user already has the specified permission
+            else {
+              // Return response
+              return res.status(200).send('User permissions already set');
+            }
+          });
+      });
+  }
 
 
-                // Build array organizations the user is a member of and has the specified role in
-                var roleList = user.orgPermissions[role].map(a => {return a.id})
+  // TODO (JU): Decide if this needs to be implemented or not
+  static putOrgRoles(req, res) {
+    return res.status(200).send('Route not implemented yet');
+  }
 
-                // If the user is alread a memeber, check if they already have the specified role
-                if(!roleList.includes(org.id)) {
-                    // Generate updated keys to push the proper organization permissions
-                    var keyRole    = 'orgPermissions.' + role
-                    // Generate the updated fields (Required for mongo array push)
-                    var pushVals   = {[keyRole]: org._id}
-
-                    // Find the user and update with the new orgnization permissions
-                    User.findOneAndUpdate(
-                        {username: newUsername}, 
-                        {
-                            $push: pushVals
-                        },
-                        function (err, userSave) {
-                        if (err) {
-                            console.log(err);
-                            return res.status(500).send('Internal Server Error');
-                        }
-                        // Return response
-                        return res.status(200).send(API.formatJSON(userSave.username));
-                    })
-                }
-
-                // Condition executes if the user already has the specified permission
-                else {
-                    // Return response
-                    return res.status(200).send('User permissions already set')
-                }
-
-            })
-        })
-    }
-
-
-    // TODO (JU): Decide if this needs to be implemented or not
-    static putOrgRoles(req, res)
-    {
-        return res.status(200).send('Route not implemented yet')
-    }
-
-     /**
+  /**
      * Removes a permission to an organization for a specified user.
      *
      * @req.params
      *     orgId - The id of the organization to remove user permissions from.
      *     role  - The name of the role in the organization (Currenlty 'read' or 'admin')
-     *     
+     *
      * @req.body
      *     {username: 'username'} - The username of the user who is being removed of permissions
      */
-    static deleteOrgRoles(req, res)
-    {
-        // Sanitize request params and request body
-        var orgId = LibSani.sanitize(req.params['orgid']);
-        var role  = LibSani.sanitize(req.params['role']);
-        var newUsername = LibSani.sanitize(req.body['username'])
+  static deleteOrgRoles(req, res) {
+    // Sanitize request params and request body
+    const orgId = LibSani.sanitize(req.params.orgid);
+    const role = LibSani.sanitize(req.params.role);
+    const newUsername = LibSani.sanitize(req.body.username);
 
-        // Build query to populate admin and permissions of the org
-        var orgPopQuery = 'permissions.admin'
-        if (role != 'admin'){
-            orgPopQuery = orgPopQuery + ' permissions.' + role
-        }
-
-
-        // Search Mongo for the organizatiom
-        Organization.findOne({id: orgId}).
-        // Select from users that have not been soft deleted
-        populate({
-            path: orgPopQuery
-        }).
-        exec( function(err, org) {
-            // If error occurs, log it and return 500 status
-            if (err) {
-                console.log(err);
-                return res.status(500).send('Internal Server Error');
-            }
-            
-            // If organization is found, return list of users with the specific 'role'
-            // Todo - (Check Error for if statement)
-            if (!org) {
-                return res.status(404).send('Organization not found');
-            }
-
-            // Build qery to populate member and role permissions stored on the user
-            var userPopQuerry = 'orgPermissions.write orgPermissions.admin' 
-
-            // Search Mongo for the user
-            User.findOne({username: newUsername}).
-            // Select the organization members and role
-            populate({
-                path: userPopQuerry,
-            }).
-            exec( function(err,user) {
-                // If error occurs, log it and return 500 status
-                if (err) {
-                    console.log(err);
-                    return res.status(500).send('Internal Server Error');
-                }
-
-                // Check if user exists
-                if (!user) {
-                    return res.status(404).send('User not found');
-                }
-
-                // Build array of admin usernames from the org for easy search access
-                var adminList = org.permissions.admin.map(a => {return a.username})
-                var userReq = req.user
-
-                // Check if user is site admin or if user has admin access to organization
-                if(!userReq.admin && !adminList.includes(userReq.username)){
-                    return res.status(403).send('Unauthorized')
-                }
-
-                if (typeof org.permissions[role] == 'undefined'){
-                    return res.status(404).send('Permission type undefined')
-                }
-
-                // Build array organizations the user is a member of and has the specified role in
-                var roleList = user.orgPermissions[role].map(a => {return a.id})
-
-                // If the user is alread a memeber, check if they already have the specified role
-                if(roleList.includes(org.id)) {
-                    // Generate updated keys to push the proper organization permissions
-                    var keyRole    = 'orgPermissions.' + role
-                    // Generate the updated fields (Required for mongo array push)
-                    var pullVals   = {[keyRole]: org._id}
-
-                    // Find the user and update with the new orgnization permissions
-                    User.findOneAndUpdate(
-                        {username: newUsername}, 
-                        {
-                            $pull: pullVals
-                        },
-                        function (err, userSave) {
-                        if (err) {
-                            console.log(err);
-                            return res.status(500).send('Internal Server Error');
-                        }
-                        // Return response
-                        return res.status(200).send(API.formatJSON(userSave.username));
-                    })
-                }
-
-                // Condition executes if the user does not have the specified permission
-                else {
-                    // Return response
-                    return res.status(200).send('User permissions do not exist')
-                }
-
-            })
-        })
+    // Build query to populate admin and permissions of the org
+    let orgPopQuery = 'permissions.admin';
+    if (role != 'admin') {
+      orgPopQuery = `${orgPopQuery} permissions.${role}`;
     }
 
 
+    // Search Mongo for the organizatiom
+    Organization.findOne({ id: orgId })
+    // Select from users that have not been soft deleted
+      .populate({
+        path: orgPopQuery
+      })
+      .exec((err, org) => {
+        // If error occurs, log it and return 500 status
+        if (err) {
+          console.log(err);
+          return res.status(500).send('Internal Server Error');
+        }
+
+        // If organization is found, return list of users with the specific 'role'
+        // Todo - (Check Error for if statement)
+        if (!org) {
+          return res.status(404).send('Organization not found');
+        }
+
+        // Build qery to populate member and role permissions stored on the user
+        const userPopQuerry = 'orgPermissions.write orgPermissions.admin';
+
+        // Search Mongo for the user
+        User.findOne({ username: newUsername })
+        // Select the organization members and role
+          .populate({
+            path: userPopQuerry
+          })
+          .exec((err, user) => {
+            // If error occurs, log it and return 500 status
+            if (err) {
+              console.log(err);
+              return res.status(500).send('Internal Server Error');
+            }
+
+            // Check if user exists
+            if (!user) {
+              return res.status(404).send('User not found');
+            }
+
+            // Build array of admin usernames from the org for easy search access
+            const adminList = org.permissions.admin.map(a => a.username);
+            const userReq = req.user;
+
+            // Check if user is site admin or if user has admin access to organization
+            if (!userReq.admin && !adminList.includes(userReq.username)) {
+              return res.status(403).send('Unauthorized');
+            }
+
+            if (typeof org.permissions[role] === 'undefined') {
+              return res.status(404).send('Permission type undefined');
+            }
+
+            // Build array organizations the user is a member of and has the specified role in
+            const roleList = user.orgPermissions[role].map(a => a.id);
+
+            // If the user is alread a memeber, check if they already have the specified role
+            if (roleList.includes(org.id)) {
+              // Generate updated keys to push the proper organization permissions
+              const keyRole = `orgPermissions.${role}`;
+              // Generate the updated fields (Required for mongo array push)
+              const pullVals = { [keyRole]: org._id };
+
+              // Find the user and update with the new orgnization permissions
+              User.findOneAndUpdate(
+                { username: newUsername },
+                {
+                  $pull: pullVals
+                },
+                (err, userSave) => {
+                  if (err) {
+                    console.log(err);
+                    return res.status(500).send('Internal Server Error');
+                  }
+                  // Return response
+                  return res.status(200).send(API.formatJSON(userSave.username));
+                }
+              );
+            }
+
+            // Condition executes if the user does not have the specified permission
+            else {
+              // Return response
+              return res.status(200).send('User permissions do not exist');
+            }
+          });
+      });
+  }
 }
 
 // Expose `RoleController`

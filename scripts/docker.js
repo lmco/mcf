@@ -18,13 +18,15 @@
  * process is parameterized by the configuration.
  */
 
-const { execSync, spawn, spawnSync } = require('child_process');
+/* eslint-disable no-console */
 
-const M = require(__dirname + '/../mbee.js');
-const build = require(`${M.root}/scripts/build`).build;
+const path = require('path');
+const { spawn, spawnSync } = require('child_process');
+
+const M = require(path.join(__dirname, '..', 'mbee.js'));
 
 if (module.parent == null) {
-  docker(process.argv.slice(2))
+  docker(process.argv.slice(2));
 }
 else {
   module.exports = docker;
@@ -43,81 +45,78 @@ else {
  */
 
 function docker(args) {
-    // Removes the previous docker build.
-    if (args.includes('--clean')) {
-      let cmd = null;
+  // Removes the previous docker build.
+  if (args.includes('--clean')) {
+    let cmd = null;
 
-      // Stop the running container
-      cmd = spawnSync('docker', ['stop', M.config.docker.container.name], {stdio: 'inherit'});
-      console.log('stdout:', cmd.stdout);
-      console.log('stderr:', cmd.stderr);
-      console.log('Docker container stopped');
+    // Stop the running container
+    cmd = spawnSync('docker', ['stop', M.config.docker.container.name], { stdio: 'inherit' });
+    console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
+    console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
+    console.log('Docker container stopped'); // eslint-disable-line no-console
 
-      // Remove the container
-      cmd = spawnSync('docker', ['rm', M.config.docker.container.name], {stdio: 'inherit'});
-      console.log('stdout:', cmd.stdout);
-      console.log('stderr:', cmd.stderr);
-      console.log('Docker container removed');
+    // Remove the container
+    cmd = spawnSync('docker', ['rm', M.config.docker.container.name], { stdio: 'inherit' });
+    console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
+    console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
+    console.log('Docker container removed'); // eslint-disable-line no-console
+  }
 
+  // Build the Docker image
+  if (args.includes('--build')) {
+    console.info('Building Docker Image ...');
+
+    // Build docker by running: "docker build -f .../Dockerfile -t mbee ."
+    const buildArgs = [                                               // Create the build args
+      'build',
+      '-f', M.config.docker.Dockerfile,
+      '-t', M.config.docker.image.name, '.'
+    ];
+    const cmd = spawn('docker', buildArgs, { stdio: 'inherit' });     // Run the build process
+    cmd.on('data', (data) => {
+      console.log(data.toString());
+    });
+    cmd.on('exit', (code) => {
+      if (code !== 0) {                                                // Fail if exit code != 0
+        console.log('Docker build failed'); // eslint-disable-line no-console
+        process.exit(code);
+      }
+      else {                                                          // Log successful build
+        console.log('Docker Image Built.');
+      }
+    });
+  }
+
+  // Run the Docker container
+  if (args.includes('--run')) {
+    console.log('Running Docker Container ...');
+
+    // Build the "docker run" command
+    let rargs = [
+      'run',
+      '-d',
+      '-it',
+      '--restart=always'
+    ];
+    if (M.config.server.http.enabled && M.config.docker.http.enabled) {
+      rargs = rargs.concat(['-p', `${M.config.docker.http.port}:${M.config.server.http.port}`]);
     }
-
-    // Build the Docker image
-    if (args.includes('--build')) {
-        console.info('Building Docker Image ...');
-
-        // Build docker by running: "docker build -f .../Dockerfile -t mbee ."
-        let buildArgs = [                           // Create the build args
-            'build',
-            '-f', M.config.docker.Dockerfile,
-            '-t', M.config.docker.image.name, '.'
-        ];
-        let cmd = spawn('docker', buildArgs, {stdio: 'inherit'});       // Run the build process
-        cmd.on('data', function (data) {
-            console.log(data.toString());           // Print stdout
-        });
-        cmd.on('exit', function (code) {
-            if (code != 0) {                        // Fail if exit code != 0
-                console.log('Docker build failed');
-                process.exit(code);
-            }
-            else {                                  // Log successful build
-                console.log('Docker Image Built.');
-            }
-        });
+    if (M.config.server.https.enabled && M.config.docker.https.enabled) {
+      rargs = rargs.concat(['-p', `${M.config.docker.https.port}:${M.config.server.https.port}`]);
     }
+    rargs = rargs.concat(['--name', M.config.docker.container.name]);
+    rargs = rargs.concat([M.config.docker.image.name]);
+    console.log(rargs);
 
     // Run the Docker container
-    if (args.includes('--run')) {
-        console.log('Running Docker Container ...');
-
-        // Build the "docker run" command
-        let server = M.config.server;
-        let docker = M.config.docker;
-        let rargs = [
-            'run',
-            '-d',
-            '-it',
-            '--restart=always'
-        ];
-        if (server.http.enabled && docker.http.enabled) {
-            rargs = rargs.concat(['-p', `${docker.http.port}:${server.http.port}`]);
-        }
-        if (server.https.enabled && docker.https.enabled) {
-            rargs = rargs.concat(['-p', `${docker.https.port}:${server.https.port}`]);
-        }
-        rargs = rargs.concat(['--name', M.config.docker.container.name])
-        rargs = rargs.concat([M.config.docker.image.name])
-        console.log(rargs)
-
-        // Run the Docker container
-        let cmd = spawn('docker', rargs, {stdio: 'inherit'});
-        cmd.on('data', (data) => { console.log(data.toString()); });
-        cmd.on('exit', function (code) {
-            if (code != 0) {
-                console.log('Docker run failed');
-                process.exit(code);
-            }
-        });
-        console.log('Docker Container Running in Background.');
-    }
+    const cmd = spawn('docker', rargs, { stdio: 'inherit' });
+    cmd.on('data', (data) => { console.log(data.toString()); });
+    cmd.on('exit', (code) => {
+      if (code !== 0) {
+        console.log('Docker run failed');
+        process.exit(code);
+      }
+    });
+    console.log('Docker Container Running in Background.');
+  }
 }

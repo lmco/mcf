@@ -17,47 +17,50 @@
  * Defines common validators.
  */
 
+const path = require('path');
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
 module.exports.org = {
-    id:     '^([a-z])([a-z0-9-]){0,}$',
-    name:   '^([a-zA-Z0-9-\\s])+$'
+  id: '^([a-z])([a-z0-9-]){0,}$',
+  name: '^([a-zA-Z0-9-\\s])+$'
 };
 
 module.exports.project = {
-    id:     '^([a-z])([a-z0-9-]){0,}$',
-    name:   '^([a-zA-Z0-9-\\s])+$'
+  id: '^([a-z])([a-z0-9-]){0,}$',
+  name: '^([a-zA-Z0-9-\\s])+$'
 };
 
 module.exports.user = {
-    username: '^([a-z])([a-z0-9_]){0,}$',
-    password: function(p) {
-        // Error check - Make sure password is a string
-        if (typeof(p) !== typeof('')) {
-            return false;
-        }
-
-        try {
-            // At least 8 characters
-            var lengthValidator = (p.length >= 8); 
-            // At least 1 digit
-            var digitsValidator = (p.match(/[0-9]/g).length >= 1);    
-            // At least 1 lowercase letter
-            var lowercaseValidator = (p.match(/[a-z]/g).length >= 1); 
-            // At least 1 uppercase letter  
-            var uppercaseValidator = (p.match(/[A-Z]/g).length >= 1);   
-            // Validate the password
-            return (lengthValidator 
-                &&  digitsValidator 
-                &&  lowercaseValidator 
-                &&  uppercaseValidator) 
-                ? true : false;
-        }
-        catch (error) {
-            log.error(error);
-            return false;
-        }
+  username: '^([a-z])([a-z0-9_]){0,}$',
+  password(p) {
+    // Error check - Make sure password is a string
+    if (typeof (p) !== typeof ('')) {
+      return false;
     }
+
+    try {
+      // At least 8 characters
+      const lengthValidator = (p.length >= 8);
+      // At least 1 digit
+      const digitsValidator = (p.match(/[0-9]/g).length >= 1);
+      // At least 1 lowercase letter
+      const lowercaseValidator = (p.match(/[a-z]/g).length >= 1);
+      // At least 1 uppercase letter
+      const uppercaseValidator = (p.match(/[A-Z]/g).length >= 1);
+      // Validate the password
+      return !!((lengthValidator
+                && digitsValidator
+                && lowercaseValidator
+                && uppercaseValidator));
+    }
+    catch (error) {
+      M.log.error(error);
+      return false;
+    }
+  }
 };
 
 module.exports.url = {
-    next:     '^(\/)(?!\/)' // starts with one and only one /
+  // starts with one and only one
+  next: '^(\/)(?!\/)' // eslint-disable-line no-useless-escape
 };

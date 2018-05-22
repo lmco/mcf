@@ -15,21 +15,25 @@
  * @description  <TEST SUITE DESCRIPTION
  */
 
-const chai  = require('chai');
-const request = require('request');
+const chai = require('chai');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
 
-/*----------( Main )----------*/
+/*------------------------------------
+ *       Main
+ *------------------------------------
+ */
 
-describe(name, function() {
+describe(name, () => {
   it('should run an empty test case', emptyTest);
   it('should run simple assertions', assertionsTest);
 });
 
 
-/*----------( Test Functions )----------*/
+/*------------------------------------
+ *       Test Functions
+ *------------------------------------*/
 
 
 /**
@@ -46,6 +50,3 @@ function assertionsTest(done) {
   chai.expect(2).to.equal(2);
   done();
 }
-
-
-

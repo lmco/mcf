@@ -26,7 +26,7 @@ const AuthStrategy = require(path.join(__dirname, '..', 'auth', M.config.auth.st
 const AuthController = new AuthStrategy();
 
 if (!(AuthController instanceof BaseStrategy)) {
-    throw new Error('Error: Authentication strategy does not extend BaseStrategy class!')
+  throw new Error('Error: Authentication strategy does not extend BaseStrategy class!');
 }
 
 module.exports = AuthController;

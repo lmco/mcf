@@ -17,11 +17,14 @@
  * Runs the ESLint tool against all Javascript code.
  */
 
-const {spawn} = require('child_process');
-const M = require(__dirname + '/../mbee.js');
+/* eslint-disable no-console */
+
+const path = require('path');
+const { spawn } = require('child_process');
+const M = require(path.join(__dirname, '..', 'mbee.js'));
 
 if (module.parent == null) {
-  lint(process.argv.slice(2))
+  lint(process.argv.slice(2));
 }
 else {
   module.exports = lint;
@@ -31,24 +34,22 @@ else {
 /**
  * Runs ESLint against the primary Javascript directories.
  */
-function lint(_args)
-{
-  var args = [
+function lint(_args) {
+  const args = [
     `${M.root}/*.js`,
     `${M.root}/app/**/*.js`,
-    `${M.root}/plugins/**/*.js`,
+    `${M.root}/plugins/*.js`,
     `${M.root}/scripts/**/*.js`,
     `${M.root}/test/**/*.js`
-  ].concat(_args)
+  ].concat(_args);
 
-  spawn(`${M.root}/node_modules/.bin/eslint`, args, {stdio: 'inherit'})
-    .on('data', function(data) {
+  spawn(`${M.root}/node_modules/.bin/eslint`, args, { stdio: 'inherit' })
+    .on('data', (data) => {
       console.log(data.toString());
     })
-    .on('exit', function (code) {
-      if (code != 0) {
-        console.log('Tests failed.');
+    .on('exit', (code) => {
+      if (code !== 0) {
         process.exit(code);
       }
-     });
+    });
 }

@@ -17,27 +17,20 @@
  * Defines common cryptographic functions.
  */
 
-const path = require('path');
-
 const htmlspecialchars = require('htmlspecialchars');
 const mongosanitize = require('mongo-sanitize');
-
-const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
 
 /**
  * Generates a token from user data.
  */
 module.exports.sanitize = function(s) {
-    return mongosanitize(htmlspecialchars(s));
-}
+  return mongosanitize(htmlspecialchars(s));
+};
 
 module.exports.mongo = function(s) {
-    return mongosanitize();
-}
+  return mongosanitize();
+};
 
 module.exports.html = function(s) {
-    return htmlspecialchars(s);
-}
-
-
+  return htmlspecialchars(s);
+};

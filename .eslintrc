@@ -8,6 +8,12 @@
     }
   },
 
+  "env": {
+    "es6": true,
+    "node": true,
+    "mocha": true
+  },
+
   "rules": {
 
     ////////////////////////////////////////////////////////////////////////////
@@ -17,7 +23,10 @@
     // enforces no braces where they can be omitted
     // "https"://eslint.org/docs/rules/arrow-body-style
     // "TODO": enable requireReturnForObjectLiteral?
-    "arrow-body-style": ["error", "as-needed", {
+    // LM: Turning this rule into a warning for now. There may be benefit to allowing flexibility
+    // in style here. Making this a warning rather than "off" to draw attention
+    // to it for future discussion.
+    "arrow-body-style": ["warn", "as-needed", {
       "requireReturnForObjectLiteral": false,
     }],
 
@@ -102,9 +111,12 @@
     }],
 
     // suggest using arrow functions as callbacks
-    "prefer-arrow-callback": ["error", {
+    // LM: setting allowUnboundThis to false because it should be safer. This can be reversed
+    // later is there is a good reason to do so. We will leave a warning in place to encourage
+    // consistency.
+    "prefer-arrow-callback": ["warn", {
       "allowNamedFunctions": false,
-      "allowUnboundThis": true,
+      "allowUnboundThis": false,
     }],
 
     // suggest using of const declaration for variables that are never modified after declared
@@ -114,8 +126,10 @@
     }],
 
     // Prefer destructuring from arrays and objects
-    // "https"://eslint.org/docs/rules/prefer-destructuring
-    "prefer-destructuring": ["error", {
+    // https://eslint.org/docs/rules/prefer-destructuring
+    // LM: Changing this to "warn" instead of "error". Don't see any obvious
+    // reason to force destructuring, but warnings will be used to encourage consistency.
+    "prefer-destructuring": ["warn", {
       "VariableDeclarator": {
         "array": false,
         "object": true,
@@ -247,7 +261,9 @@
     "block-spacing": ["error", "always"],
 
     // enforce one true brace style
-    "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+    // LM: Changing style to "stroustrup", "allman" would be even better, but it doesn't
+    // really work for Javascript.
+    "brace-style": ["error", "stroustrup", { "allowSingleLine": true }],
 
     // require camel case names
     "camelcase": ["error", { "properties": "never" }],
@@ -267,13 +283,16 @@
       },
     }],
 
-    // require trailing commas in multiline object literals
+    // require trailing commas in multiline object literals when set to "always-multiline"
+    // LM: Changing default behavior from "always-multiline" to "never" to disallow
+    // trailing commas. This is the default behavior for ESLint, but the Airbnb style guide
+    // uses "always-multiline" its configuration.
     "comma-dangle": ["error", {
-      "arrays": "always-multiline",
-      "objects": "always-multiline",
-      "imports": "always-multiline",
-      "exports": "always-multiline",
-      "functions": "always-multiline",
+      "arrays": "never",
+      "objects": "never",
+      "imports": "never",
+      "exports": "never",
+      "functions": "never",
     }],
 
     // enforce spacing before and after comma
@@ -317,8 +336,9 @@
     }],
 
     // require function expressions to have a name
-    // "https"://eslint.org/docs/rules/func-names
-    "func-names": "warn",
+    // https://eslint.org/docs/rules/func-names
+    // LM: Turning this off. Don't see any reason to block unnamed function expressions.
+    "func-names": "off",
 
     // enforces use of function declarations or expressions
     // "https"://eslint.org/docs/rules/func-style
@@ -503,8 +523,12 @@
     "no-bitwise": "error",
 
     // disallow use of the continue statement
-    // "https"://eslint.org/docs/rules/no-continue
-    "no-continue": "error",
+    // https://eslint.org/docs/rules/no-continue
+    // LM: Changing from "error" to "warn". There may be an argument for the case that code
+    // is more readable and testable without continue statements, but it seems ridiculous
+    // to force no continue statements. We will leave a warning here to draw attention to this
+    // for future discussion.
+    "no-continue": "warn",
 
     // disallow comments inline after code
     "no-inline-comments": "off",
@@ -557,8 +581,9 @@
     "no-new-object": "error",
 
     // disallow use of unary operators, ++ and --
-    // "https"://eslint.org/docs/rules/no-plusplus
-    "no-plusplus": "error",
+    // https://eslint.org/docs/rules/
+    // LM: Turning this off. It's a ridiculous rule.
+    "no-plusplus": "off",
 
     // disallow certain syntax forms
     // "https"://eslint.org/docs/rules/no-restricted-syntax
@@ -622,8 +647,10 @@
     "object-curly-spacing": ["error", "always"],
 
     // enforce line breaks between braces
-    // "https"://eslint.org/docs/rules/object-curly-newline
-    "object-curly-newline": ["error", {
+    // https://eslint.org/docs/rules/object-curly-newline
+    // LM: Turning this off, don't want to force line breaks unless the line is too long.
+    // That will be enforced by the line length rule.
+    "object-curly-newline": ["off", {
       "ObjectExpression": { "minProperties": 4, "multiline": true, "consistent": true },
       "ObjectPattern": { "minProperties": 4, "multiline": true, "consistent": true },
       "ImportDeclaration": { "minProperties": 4, "multiline": true, "consistent": true },
@@ -689,9 +716,11 @@
     "space-before-blocks": "error",
 
     // require or disallow space before function opening parenthesis
-    // "https"://eslint.org/docs/rules/space-before-function-paren
+    // https://eslint.org/docs/rules/space-before-function-paren
+    // LM: Changing from "always" to "never" because our preferred style is no space.
+    // Leaving asyncArrow as "always" for now.
     "space-before-function-paren": ["error", {
-      "anonymous": "always",
+      "anonymous": "never",
       "named": "never",
       "asyncArrow": "always"
     }],
@@ -719,7 +748,7 @@
         "markers": ["=", "!"], // space here to support sprockets directives
       },
       "block": {
-        "exceptions": ["-", "+"],
+        "exceptions": ["-", "+", "*"],
         "markers": ["=", "!"], // space here to support sprockets directives
         "balanced": true,
       }
@@ -779,10 +808,23 @@
     "no-undefined": "off",
 
     // disallow declaration of variables that are not used in the code
-    "no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": true }],
+    // LM: Changing args from "after-used" to none. We want to disable warnings
+    // on unused function arguments because we think it is better to leave the function
+    // call consistent with the function definition even if there are unused args.
+    "no-unused-vars": ["error", {
+      "vars": "all",
+      "args": "none",
+      "ignoreRestSiblings": true
+    }],
 
-    // disallow use of variables before they are defined
-    "no-use-before-define": ["error", { "functions": true, "classes": true, "variables": true }],
+    // Disallows use of variables before they are defined
+    // LM: We are going to explicitly allow this for functions only. There are some cases (like
+    // in our test suites) where defining functions after their use is cleaner.
+    "no-use-before-define": ["error", {
+      "functions": false,
+      "classes": true,
+      "variables": true
+    }],
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -871,8 +913,12 @@
     "no-obj-calls": "error",
 
     // disallow use of Object.prototypes builtins directly
-    // "https"://eslint.org/docs/rules/no-prototype-builtins
-    "no-prototype-builtins": "error",
+    // https://eslint.org/docs/rules/no-prototype-builtins
+    // LM: Changing from error to warn. This seems like something that we should allow entirely
+    // for example someObject.hasOwnProperty('someProperty') is a common statement. The alternative
+    // is lengthy and less readable. Leaving as warning for now to draw attention to this item
+    // for future style discussion.
+    "no-prototype-builtins": "warn",
 
     // disallow multiple spaces in a regular expression literal
     "no-regex-spaces": "error",
@@ -941,7 +987,11 @@
     "consistent-return": "error",
 
     // specify curly brace conventions for all control statements
-    "curly": ["error", "multi-line"],
+    // LM: Not sure ESLint does exactly what we need here.
+    // I want to allow braceless statements, but not force them.
+    // But, I do want to force consistency for chained if, else-if, else statements.
+    // For now, "multi-line" seems safe enough.
+    "curly": ["error", "multi-line", "consistent"],
 
     // require default case in switch statements
     "default-case": ["error", { "commentPattern": "^no default$" }],
@@ -1061,8 +1111,9 @@
     }],
 
     // disallow use of multiple spaces
+    // LM: setting "ignoreEOLComments" to true to allow aligned EOL comments when appropriate
     "no-multi-spaces": ["error", {
-      "ignoreEOLComments": false,
+      "ignoreEOLComments": true,
     }],
 
     // disallow use of multiline strings

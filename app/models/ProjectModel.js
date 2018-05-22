@@ -9,8 +9,6 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-
-
 /**
  * ProjectsModel.js
  *
@@ -20,16 +18,15 @@
  * Database in order to find, save, update, and delete projects.
  */
 
-
 // Requirements
 const mongoose = require('mongoose');
-
 const path = require('path');
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const modelsPath = path.join(__dirname, '..', 'models');
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));
 
 // Create Project Model Schema:
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
 // TODO (JU) - Discuss use of '_id' vs 'id'
 //
@@ -37,62 +34,66 @@ var Schema = mongoose.Schema;
 // name     = Name of project
 // projects = Organization the project belongs to referenced from the
 //            Organization Model
-var ProjectSchema = new Schema({
-    id: {
-        type: String,
-        require: true,
-        index: true,
-        unique: true,
-        match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
-        maxlength: [36, 'Too many characters in username'],
-    },
+const ProjectSchema = new Schema({
+  id: {
+    type: String,
+    require: true,
+    index: true,
+    unique: true,
+    match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
+    maxlength: [36, 'Too many characters in username']
+  },
 
-    name: {
-    	type: String,
-        requite: true,
-        unique: true,
-        match: RegExp('^([a-zA-Z0-9-\\s])+$')
-	},
+  name: {
+    type: String,
+    requite: true,
+    unique: true,
+    match: RegExp('^([a-zA-Z0-9-\\s])+$')
+  },
 
-    org: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Organization',
-        require: true
-    },
+  org: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Organization',
+    require: true
+  },
 
-    members: {
-    	type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User'
-    },
+  members: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
 
-    permissions: {
-        read: [{
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User'
-        }],
+  permissions: {
+    read: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
 
-        write: [{
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User'
-        }],
+    write: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
 
-        admin: [{
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User'
-        }],
-    }
+    admin: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }]
+  }
 
 
 });
 
-
-
 // Post hook to link refernece to organization upon save
- ProjectSchema.post('save', function() {
-     Organization.findOneAndUpdate({_id: this.org}, {$push : {projects: this._id}}, function(err, org){
-        if (err){console.log(err)}
-    })
-})
+ProjectSchema.post('save', function() {
+  Organization.findOneAndUpdate({
+    _id: this.org
+  }, {                            // eslint is catching the following line by mistake, disabling
+    $push: { projects: this._id } // eslint-disable-line no-underscore-dangle
+  }, (err, org) => {
+    if (err) {
+      M.log.error(err);
+    }
+  });
+});
 
 // Export mongoose model as "Project"
-module.exports = mongoose.model("Project", ProjectSchema)
+module.exports = mongoose.model('Project', ProjectSchema);
