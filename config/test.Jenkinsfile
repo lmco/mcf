@@ -109,9 +109,10 @@ pipeline {
             echo 'failed'
             emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} FAILED: \
                 <br/><br/>\
-                Merge Request: ${env.gitlabMergeRequestTitle} \
-                Source Branch: ${env.gitlabSourceBranch} \
-                Target Branch: ${env.gitlabTargetBranch} \
+                Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
+                Source Branch: ${env.gitlabSourceBranch}<br/> \
+                Target Branch: ${env.gitlabTargetBranch}<br/> \
+                User: ${env.gitlabUserEmail}\
                 <br/><br/>\
                 Merge request of ${env.gitlabSourceBranch} failed. Check console output at \
                 ${env.BUILD_URL} or see the attached build log to view the results.\
