@@ -623,7 +623,10 @@
     }],
 
     // disallow dangling underscores in identifiers
-    "no-underscore-dangle": ["error", {
+    // LM: Turning off, this is useful in a lot of cases. For example, function args that are
+    // defined as _args to avoid conflicting with variables in the function.
+    // Also, mongoose object have an _id field that will be used a lot.
+    "no-underscore-dangle": ["off", {
       "allow": [],
       "allowAfterThis": false,
       "allowAfterSuper": false,

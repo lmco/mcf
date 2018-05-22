@@ -19,7 +19,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const util = require('util');
 const crypto = require('crypto');
 const ldap = require('ldapjs');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
@@ -100,14 +99,15 @@ class LMICloudStrategy extends BaseStrategy {
       }
       // If user found and not LDAP (e.g. a local user),
       // do local authentication
-      if (users.length == 1 && !users[0].isLDAPUser) {
+      if (users.length === 1 && !users[0].isLDAPUser) {
         // Compute the password hash on given password
         const hash = crypto.createHash('sha256');
-        hash.update(users[0]._id.toString());       // salt
+        // salt the hash, the ._id is seen by eslint as a dangling underscore, disabling
+        hash.update(users[0]._id.toString());    // eslint-disable-line no-underscore-dangle
         hash.update(password);                  // password
         const pwdhash = hash.digest().toString('hex');
         // Authenticate the user
-        if (users[0].password == pwdhash) {
+        if (users[0].password === pwdhash) {
           cb(null, users[0]);
         }
         else {
@@ -117,11 +117,11 @@ class LMICloudStrategy extends BaseStrategy {
       // User is not found locally
       // or is found and is an LDAP user,
       // try LDAP authentication
-      else if (users.length == 0 || (users.length == 1 && users[0].isLDAPUser)) {
+      else if (users.length === 0 || (users.length === 1 && users[0].isLDAPUser)) {
         // Bind the resource account we will use to do our lookups
         // The initCallback function kicks off the search/auth process
-        self.client.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (err) => {
-          if (err) {
+        self.client.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (bindErr) => {
+          if (bindErr) {
             cb('An error has occured binding to the LDAP server.');
           }
           else {
@@ -149,8 +149,8 @@ class LMICloudStrategy extends BaseStrategy {
 
   doSearch(username, password, next) {
     // Generate search filter
-    const filter = `${'(&'
-                 + '(objectclass\=person)'
+    const filter = `${'(&'                 // the escape is part of the ldap query
+                 + '(objectclass\=person)' // eslint-disable-line no-useless-escape
                  + '('}${M.config.auth.ldap.username_attribute}=${username})${
       M.config.auth.ldap.filter
     })`;
@@ -171,8 +171,8 @@ class LMICloudStrategy extends BaseStrategy {
         M.log.debug('Search complete. Entry found.');
         self.doAuthentication(entry.object, password, next);
       });
-      result.on('error', (err) => {
-        next(`error: ${err.message}`);
+      result.on('error', (error) => {
+        next(`error: ${error.message}`);
       });
     });
   }

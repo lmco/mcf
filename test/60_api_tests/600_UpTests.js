@@ -45,10 +45,10 @@ function upTest(done) {
   },
   (error, response, body) => {
     if (error) {
-      M.log.error(error);
+      console.error(error);
     }
     chai.expect(response.statusCode).to.equal(200);
-    M.log.info(body);
+    chai.expect(body).to.equal('');
     done();
   });
 }
