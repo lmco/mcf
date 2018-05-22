@@ -89,6 +89,7 @@ pipeline {
         }
 
         success {
+            echo 'success'
             //emailext body: "${env.JOB_NAME} ${env.GIT_BRANCH} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
             //    <br/><br/>Merge request of branch ${env.GIT_BRANCH} passed automated tests. \
             //    No further action is required.",
@@ -99,6 +100,7 @@ pipeline {
             //    from: "mbee-service.fc-ssc@lmco.com"
         }
         failure {
+            echo 'failed'
             //emailext body: "${env.JOB_NAME} ${env.GIT_BRANCH} - Build #${env.BUILD_NUMBER} - FAILED: \
             //    <br/><br/>Check console output at ${env.BUILD_URL} to view the results.\
             //    <br/><br/>View the Git commit on <a \
