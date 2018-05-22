@@ -17,8 +17,8 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const API = require(path.join(__dirname, 'APIController'));
 const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
 
-const validators = require(path.join(__dirname, '..', 'lib', 'validators.js'));
-const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
+const validators = M.lib.validators;
+const sani = M.lib.sanitization;
 
 /**
  * UserController.js
@@ -30,9 +30,9 @@ const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
  */
 class UserController {
   /**
-     * Gets a list of all users and returns their public data in
-     * JSON format.
-     */
+   * Gets a list of all users and returns their public data in
+   * JSON format.
+   */
   static getUsers(req, res) {
     User.find({
       deletedOn: null
@@ -57,35 +57,35 @@ class UserController {
 
 
   /**
-     * Accepts a list of JSON-encoded user objects and creates them.
-     * Currently not implemented.
-     */
+   * Accepts a list of JSON-encoded user objects and creates them.
+   * Currently not implemented.
+   */
   static postUsers(req, res) {
     return res.status(501).send('Not Implemented.');
   }
 
 
   /**
-     * Accepts a list of JSON-encoded user objects and either creates them
-     * or updates them. Currently not implemented.
-     */
+   * Accepts a list of JSON-encoded user objects and either creates them
+   * or updates them. Currently not implemented.
+   */
   static putUsers(req, res) {
     return res.status(501).send('Not Implemented.');
   }
 
 
   /**
-     * Accepts a list of JSON-encoded user objects containing usernames and
-     * deletes them. Currently not implemented.
-     */
+   * Accepts a list of JSON-encoded user objects containing usernames and
+   * deletes them. Currently not implemented.
+   */
   static deleteUsers(req, res) {
     return res.status(501).send('Not Implemented.');
   }
 
 
   /**
-     * Gets a user by username and returns the user's public JSON data.
-     */
+   * Gets a user by username and returns the user's public JSON data.
+   */
   static getUser(req, res) {
     const username = sani.sanitize(req.params.username);
 
@@ -107,10 +107,10 @@ class UserController {
 
 
   /**
-     * Creates a user. Expects the user data to be in the request body.
-     * Note: for some of the controllers we must explicitly disable ESLint's
-     * consistent-return rule.
-     */
+   * Creates a user. Expects the user data to be in the request body.
+   * Note: for some of the controllers we must explicitly disable ESLint's
+   * consistent-return rule.
+   */
   static postUser(req, res) { // eslint-disable-line consistent-return
     // Error check - make sure the user is defined
     if (!req.user) {
@@ -126,7 +126,7 @@ class UserController {
 
     // Get the validated and sanitized user data from the request
     // If data not retrieved, fail.
-    const newUserData = UserController.getUserData(req);
+    const newUserData = UserController.getUserData(req, res);
     if (!newUserData) {
       M.log.warn('User data could not be extracted from the request.');
       return res.status(400).send('Bad Request');
@@ -134,9 +134,9 @@ class UserController {
 
     User.find({
       username: newUserData.username
-    }, (err, users) => { // eslint-disable-line consistent-return
-      if (err) {
-        M.log.error(err);
+    }, (findErr, users) => { // eslint-disable-line consistent-return
+      if (findErr) {
+        M.log.error(findErr);
         return res.status(500).send('Internal Server Error');
       }
 
@@ -148,9 +148,9 @@ class UserController {
 
       // Create the new user
       const user = new User(newUserData);
-      user.save((err) => {
-        if (err) {
-          M.log.error(err);
+      user.save((saveErr) => {
+        if (saveErr) {
+          M.log.error(saveErr);
           return res.status(500).send('Internal Server Error');
         }
         const publicUserData = user.getPublicData();
@@ -162,9 +162,11 @@ class UserController {
 
 
   /**
-     *
-     */
+   *
+   */
   static putUser(req, res) {
+    let user = {};
+
     // Error check - make sure the user is defined
     if (!req.user) {
       M.log.error('Error: req.user is not defined.');
@@ -179,7 +181,7 @@ class UserController {
 
     // Get the validated and sanitized user data from the request
     // If data not retrieved, fail.
-    const userData = UserController.getUserData(req);
+    const userData = UserController.getUserData(req, res);
     if (!userData) {
       M.log.warn('User data could not be extracted from the request.');
       return res.status(400).send('Bad Request');
@@ -188,10 +190,10 @@ class UserController {
     // Check if user exists
     User.find({
       username: userData.username
-    }, (err, users) => {
+    }, (findErr, users) => {
       // Error check
-      if (err) {
-        M.log.error(err);
+      if (findErr) {
+        M.log.error(findErr);
         return res.status(500).send('Internal Server Error');
       }
       // Make sure user doesn't already exist
@@ -201,9 +203,8 @@ class UserController {
       }
 
       // If user exists, update the existing user
-      if (users.length == 1) {
+      if (users.length === 1) {
         M.log.debug('User found.');
-        var user = users[0];
 
         // Sanity check - if user is soft-deleted, we won't update them
         if (user.deleted) {
@@ -221,13 +222,13 @@ class UserController {
       // Otherwise (user does not exist), create the user
       else {
         M.log.info('User does not exist, creating user.');
-        var user = new User(userData);
+        user = new User(userData);
       }
 
       // Save the user
-      user.save((err) => {
-        if (err) {
-          M.log.error(err);
+      user.save((saveErr) => {
+        if (saveErr) {
+          M.log.error(saveErr);
           return res.status(500).send('Internal Server Error');
         }
         const publicUserData = user.getPublicData();
@@ -239,8 +240,8 @@ class UserController {
 
 
   /**
-     * Deletes a user.
-     */
+   * Deletes a user.
+   */
   static deleteUser(req, res) {
     // Error check - make sure the user is defined
     if (!req.user) {
@@ -268,18 +269,20 @@ class UserController {
       User.findOne({
         username,
         deletedOn: null
-      }, (err, user) => {
-        if (err) {
-          M.log.error(err);
+      }, (findErr, user) => {
+        if (findErr) {
+          M.log.error(findErr);
           return res.status(500).send('Internal Server Error');
         }
 
         // Delete the user (soft-delete)
-        user.deletedOn = Date.now();
-        user.deleted = true;
-        user.save((err) => {
-          if (err) {
-            M.log.error(err);
+        // Lines are disabled because we are directly changing a database
+        // document.
+        user.deletedOn = Date.now(); // eslint-disable-line no-param-reassign
+        user.deleted = true; // eslint-disable-line no-param-reassign
+        user.save((saveErr) => {
+          if (saveErr) {
+            M.log.error(saveErr);
             return res.status(500).send('Internal Server Error');
           }
           return res.status(200).send('OK');
@@ -294,10 +297,10 @@ class UserController {
 
 
   /**
-     * Takes the request object with user data in the params and body.
-     * Validates and sanitizes that data and returns it as a JSON object.
-     */
-  static getUserData(req) {
+   * Takes the request object with user data in the params and body.
+   * Validates and sanitizes that data and returns it as a JSON object.
+   */
+  static getUserData(req, res) {
     const userData = {};
 
     // Handle username
@@ -306,7 +309,7 @@ class UserController {
       const username = sani.sanitize(req.params.username);
       // Error check - make sure if username in body it matches params
       if (req.body.hasOwnProperty('username')) {
-        if (username != sani.sanitize(req.body.username)) {
+        if (username !== sani.sanitize(req.body.username)) {
           console.log('Username in body does not match params.');
           return null;
         }
@@ -353,15 +356,15 @@ class UserController {
 
 
   /**
-     * Returns the public information of the currently logged in user.
-     */
+   * Returns the public information of the currently logged in user.
+   */
   static whoami(req, res) {
     // Sanity check - make sure we have user with a username
     if (!req.user || req.user.hasOwnProperty('username')) {
       console.log('Invalid req.user object');
       return res.status(500).send('Internal Server Error');
     }
-    const username = sanitize(htmlspecialchars(req.user.username));
+    const username = sani.htmlspecialchars(req.user.username);
 
     User.findOne({
       username,

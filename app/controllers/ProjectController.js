@@ -13,11 +13,8 @@
 /* Node.js Modules */
 const path = require('path');
 
-/* Third-party modules */
-const htmlspecialchars = require('htmlspecialchars');
-
 /* Local Modules */
-const config = require(path.join(__dirname, '..', '..', 'package.json')).config;
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const modelsPath = path.join(__dirname, '..', 'models');
 const API = require(path.join(__dirname, 'APIController'));
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));
@@ -41,7 +38,7 @@ class ProjectController {
      */
 
   static getProjects(req, res) {
-    const orgid = htmlspecialchars(req.params.orgid);
+    const orgid = M.lib.sanitization.html(req.params.orgid);
     Project.find({ orgid }, (err, projects) => {
       if (err) {
         return res.status(500).send('Internal Server Error');
@@ -95,19 +92,19 @@ class ProjectController {
      */
 
   static getProject(req, res) {
-    const orgid = htmlspecialchars(req.params.orgid);
-    const projectid = htmlspecialchars(req.params.projectid);
+    const orgid = M.lib.sanitization.html(req.params.orgid);
+    const projectid = M.lib.sanitization.html(req.params.projectid);
 
     Project.find({ id: projectid }, (err, projects) => {
       if (err) {
         console.log(err);
         return res.status(500).send('Internal Server Error');
       }
-      if (projects.length != 1) {
+      if (projects.length !== 1) {
         console.log('Error: Unexpected number of projects found.');
         return res.status(500).send('Internal Server Error');
       }
-      if (projects[0].orgid != orgid) {
+      if (projects[0].orgid !== orgid) {
         console.log('Error: Project orgid does not match URL orgid.');
         return res.status(500).send('Internal Server Error');
       }
@@ -130,13 +127,13 @@ class ProjectController {
      *     orgid
      */
   static postProject(req, res) {
-    const orgId = htmlspecialchars(req.params.orgid);
-    const projectId = htmlspecialchars(req.params.projectid);
+    const orgId = M.lib.sanitization.html(eq.params.orgid);
+    const projectId = M.lib.sanitization.html(req.params.projectid);
     const project = req.body;
 
     // Error check - if project ID exists in body, make sure it matches URI
     if (project.hasOwnProperty('id')) {
-      if (htmlspecialchars(project.id) != projectId) {
+      if (M.lib.sanitization.html(project.id) !== projectId) {
         console.log('Project ID in body does not match Project ID in URI.');
         return res.status(400).send('Bad Request');
       }
@@ -154,7 +151,7 @@ class ProjectController {
       return res.status(400).send('Bad Request');
     }
 
-    const projectName = htmlspecialchars(project.name);
+    const projectName = M.lib.sanitization.html(project.name);
 
     // Error check - Make sure project name is valid
     if (!RegExp('^([a-zA-Z0-9-\\s])+$').test(projectName)) {
@@ -164,7 +161,7 @@ class ProjectController {
 
     // Error check - If org ID exists in body, make sure it matches URI
     if (project.hasOwnProperty('orgid')) {
-      if (htmlspecialchars(project.orgid) != orgId) {
+      if (M.lib.sanitization.html(project.orgid) !== orgId) {
         console.log('Organization ID in body does not match Organization ID in URI.');
         return res.status(400).send('Bad Request');
       }
@@ -173,26 +170,26 @@ class ProjectController {
     // Create the callback function to create the project
     const createProject = function(orgs) {
       // Create the new project and save it
-      const new_project = new Project({
+      const newProject = new Project({
         id: projectId,
         name: projectName,
         org: orgs[0]._id
       });
-      new_project.save((err, project) => {
-        if (err) {
-          console.log(err);
+      newProject.save((saveErr, projectUpdated) => {
+        if (saveErr) {
+          console.log(saveErr);
           return res.status(500).send('Internal Server Error');
         }
         // Return success and the JSON object
         res.header('Content-Type', 'application/json');
-        return res.status(201).send(API.formatJSON(new_project));
+        return res.status(201).send(API.formatJSON(projectUpdated));
       });
     };
 
     // Error check - Make sure the org exists
-    Organization.find({ id: orgId }, (err, orgs) => {
-      if (err) {
-        console.log(err);
+    Organization.find({ id: orgId }, (findOrgErr, orgs) => {
+      if (findOrgErr) {
+        console.log(findOrgErr);
         return res.status(500).send('Internal Server Error');
       }
       if (orgs.length < 1) {
@@ -201,9 +198,9 @@ class ProjectController {
       }
 
       // Error check - check if the project already exists
-      Project.find({ id: projectId }, (err, projects) => {
-        if (err) {
-          console.log(err);
+      Project.find({ id: projectId }, (findProjErr, projects) => {
+        if (findProjErr) {
+          console.log(findProjErr);
           return res.status(500).send('Internal Server Error');
         }
         if (projects.length >= 1) {
@@ -233,20 +230,20 @@ class ProjectController {
      */
 
   static putProject(req, res) {
-    const orgId = htmlspecialchars(req.params.orgid);
-    const projectId = htmlspecialchars(req.params.projectid);
+    const orgId = M.lib.sanitization.html(req.params.orgid);
+    const projectId = M.lib.sanitization.html(req.params.projectid);
     const project = req.body;
 
     // Error check - if project ID exists in body, make sure it matches URI
     if (project.hasOwnProperty('id')) {
-      if (htmlspecialchars(project.id) != projectId) {
+      if (M.lib.sanitization.html(project.id) !== projectId) {
         console.log('Project ID in body does not match Project ID in URI.');
         return res.status(400).send('Bad Request');
       }
     }
 
     // Error check - make sure project ID is valid
-    if (!RegExp('^([a-z])([a-z0-9-]){0,}$').test(projectId)) {
+    if (M.lib.validators.id(projectId)) {
       console.log('Project ID is not valid.');
       return res.status(400).send('Bad Request');
     }
@@ -257,17 +254,17 @@ class ProjectController {
       return res.status(400).send('Bad Request');
     }
 
-    const projectName = htmlspecialchars(project.name);
+    const projectName = M.lib.sanitization.html(project.name);
 
     // Error check - Make sure project name is valid
-    if (!RegExp('^([a-zA-Z0-9-\s])+$').test(projectName)) {
+    if (M.lib.validators.name(projectName)) {
       console.log('Project name is not valid.');
       return res.status(400).send('Bad Request');
     }
 
     // Error check - If org ID exists in body, make sure it matches URI
     if (project.hasOwnProperty('orgid')) {
-      if (htmlspecialchars(project.orgid) != orgId) {
+      if (M.lib.sanitization.html(project.orgid) !== orgId) {
         console.log('Organization ID in body does not match Organization ID in URI.');
         return res.status(400).send('Bad Request');
       }
@@ -276,22 +273,23 @@ class ProjectController {
     // Create the callback function to create the project
     const createProject = function(orgs) {
       // Create the new project and save it
-      const new_project = new Project({
+      const newProject = new Project({
         id: projectId,
         name: projectName,
         orgid: orgs[0]._id
       });
-      new_project.save();
+      newProject.save();
 
       // Return success and the JSON object
       res.header('Content-Type', 'application/json');
-      return res.status(201).send(API.formatJSON(new_project));
+      return res.status(201).send(API.formatJSON(newProject));
     };
 
     // The callback function to replace the project
-    const replaceProject = function(project) {
+    // eslint disable because function is specifically changing project
+    const replaceProject = function(project) { // eslint-disable-line no-shadow
       // Currently we only suppoer updating the name
-      project.name = projectName;
+      project.name = projectName; // eslint-disable-line no-param-reassign
       project.save();
 
       // Return success and the JSON object
@@ -300,9 +298,9 @@ class ProjectController {
     };
 
     // Error check - Make sure the org exists
-    Organization.find({ id: orgId }, (err, orgs) => {
-      if (err) {
-        console.log(err);
+    Organization.find({ id: orgId }, (findOrgErr, orgs) => {
+      if (findOrgErr) {
+        console.log(findOrgErr);
         return res.status(500).send('Internal Server Error');
       }
       if (orgs.length < 1) {
@@ -311,9 +309,9 @@ class ProjectController {
       }
 
       // Error check - check if the project already exists
-      Project.find({ id: projectId }, (err, projects) => {
-        if (err) {
-          console.log(err);
+      Project.find({ id: projectId }, (findProjErr, projects) => {
+        if (findProjErr) {
+          console.log(findProjErr);
           return res.status(500).send('Internal Server Error');
         }
         if (projects.length > 1) {
@@ -322,7 +320,7 @@ class ProjectController {
         }
 
         // If project is found, update it
-        if (projects.length == 1) {
+        if (projects.length === 1) {
           replaceProject(projects[0]);
         }
 
@@ -346,36 +344,38 @@ class ProjectController {
      */
 
   static deleteProject(req, res) {
-    const orgId = htmlspecialchars(req.params.orgid);
-    const projectId = htmlspecialchars(req.params.projectid);
+    const orgId = M.lib.sanitization.html(req.params.orgid);
+    const projectId = M.lib.sanitization.html(req.params.projectid);
 
-    Project.find({ id: projectId }).populate('org').exec((err, projects) => {
-      if (err) {
-        console.log(err);
+    Project.find({ id: projectId }).populate('org').exec((findOrgErr, projects) => {
+      if (findOrgErr) {
+        console.log(findOrgErr);
         return res.status(500).send('Internal Server Error');
       }
-      if (projects.length != 1) {
+      if (projects.length !== 1) {
         console.log('Unexpected number of projects found');
         return res.status(500).send('Internal Server Error');
       }
-      if (projects[0].org.id != orgId) {
+      if (projects[0].org.id !== orgId) {
         console.log('Project OrgID does not match OrgID in URI.');
         return res.status(500).send('Internal Server Error');
       }
       // Remove the Project
-      Project.findByIdAndRemove(projects[0]._id, (err) => {
-        if (err) {
-          console.log(err);
+      Project.findByIdAndRemove(projects[0]._id, (findProjErr) => {
+        if (findProjErr) {
+          console.log(findProjErr);
           return res.status(500).send('Internal Server Error');
         }
         // Remove the Organization reference to the project
-        Organization.findOneAndUpdate({ id: orgId }, { $pull: { projects: projects[0]._id } }, (err, deleted) => {
-          if (err) {
-            console.log(err);
-            return res.status(500).send('Internal Server Error');
-          }
-          return res.status(200).send('OK');
-        });
+        Organization.findOneAndUpdate({ id: orgId },
+          { $pull: { projects: projects[0]._id } },
+          (updateErr, deleted) => {
+            if (updateErr) {
+              console.log(updateErr);
+              return res.status(500).send('Internal Server Error');
+            }
+            return res.status(200).send('OK');
+          });
       });
     });
   }

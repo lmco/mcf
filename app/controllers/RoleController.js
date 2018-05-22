@@ -14,16 +14,15 @@
 const path = require('path');
 
 /* Third-party modules */
-const LibSani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 /* Local Modules */
-const config = require(path.join(__dirname, '..', '..', 'package.json'))['mbee-config'];
 const API = require(path.join(__dirname, 'APIController'));
 
 const modelsPath = path.join(__dirname, '..', 'models');
 
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));
-const Project = require(path.join(modelsPath, 'ProjectModel'));
+// const Project = require(path.join(modelsPath, 'ProjectModel'));
 const User = require(path.join(modelsPath, 'UserModel'));
 
 
@@ -39,18 +38,18 @@ const User = require(path.join(modelsPath, 'UserModel'));
 
 class RoleController {
   /**
-     * Gets a list of all users of a specific role type for an organization.
-     *
-     * @req.params
-     *     role - the name of the role in the organization (Currenlty 'read' or 'admin')
-     *
-     * @req.body
-     *     N/A
-     */
+   * Gets a list of all users of a specific role type for an organization.
+   *
+   * @req.params
+   *     role - the name of the role in the organization (Currenlty 'read' or 'admin')
+   *
+   * @req.body
+   *     N/A
+   */
   static getOrgRoles(req, res) {
     // Sanitize request params
-    const orgId = LibSani.sanitize(req.params.orgid);
-    const role = LibSani.sanitize(req.params.role);
+    const orgId = M.lib.sanitize.html(req.params.orgid);
+    const role = M.lib.sanitize.html(req.params.role);
 
     // Build query to populate permissions of the org
     const orgPopQuery = 'permissions.admin permissions.write';
@@ -102,24 +101,24 @@ class RoleController {
   }
 
   /**
-     * Adds a permission to an organization for a specified user.
-     *
-     * @req.params
-     *     orgId - The id of the organization to add user permissions to.
-     *     role  - The name of the role in the organization (Currenlty 'read' or 'admin')
-     *
-     * @req.body
-     *     {username: 'username'} - The username of the user who is being granted permissions
-     */
+   * Adds a permission to an organization for a specified user.
+   *
+   * @req.params
+   *     orgId - The id of the organization to add user permissions to.
+   *     role  - The name of the role in the organization (Currenlty 'read' or 'admin')
+   *
+   * @req.body
+   *     {username: 'username'} - The username of the user who is being granted permissions
+   */
   static postOrgRoles(req, res) {
     // Sanitize request params and request body
-    const orgId = LibSani.sanitize(req.params.orgid);
-    const role = LibSani.sanitize(req.params.role);
-    const newUsername = LibSani.sanitize(req.body.username);
+    const orgId = M.lib.sanitize.html(req.params.orgid);
+    const role = M.lib.sanitize.html(req.params.role);
+    const newUsername = M.lib.sanitize.html(req.body.username);
 
     // Build query to populate admin and permissions of the org
     let orgPopQuery = 'permissions.admin';
-    if (role != 'admin') {
+    if (role !== 'admin') {
       orgPopQuery = `${orgPopQuery} permissions.${role}`;
     }
 
@@ -130,10 +129,10 @@ class RoleController {
       .populate({
         path: orgPopQuery
       })
-      .exec((err, org) => {
+      .exec((findOrgErr, org) => {
         // If error occurs, log it and return 500 status
-        if (err) {
-          console.log(err);
+        if (findOrgErr) {
+          console.log(findOrgErr);
           return res.status(500).send('Internal Server Error');
         }
 
@@ -152,10 +151,10 @@ class RoleController {
           .populate({
             path: userPopQuerry
           })
-          .exec((err, user) => {
+          .exec((findUserErr, user) => {
             // If error occurs, log it and return 500 status
-            if (err) {
-              console.log(err);
+            if (findUserErr) {
+              console.log(findUserErr);
               return res.status(500).send('Internal Server Error');
             }
 
@@ -194,9 +193,9 @@ class RoleController {
                 {
                   $push: pushVals
                 },
-                (err, userSave) => {
-                  if (err) {
-                    console.log(err);
+                (saveErr, userSave) => {
+                  if (saveErr) {
+                    console.log(saveErr);
                     return res.status(500).send('Internal Server Error');
                   }
                   // Return response
@@ -221,24 +220,24 @@ class RoleController {
   }
 
   /**
-     * Removes a permission to an organization for a specified user.
-     *
-     * @req.params
-     *     orgId - The id of the organization to remove user permissions from.
-     *     role  - The name of the role in the organization (Currenlty 'read' or 'admin')
-     *
-     * @req.body
-     *     {username: 'username'} - The username of the user who is being removed of permissions
-     */
+   * Removes a permission to an organization for a specified user.
+   *
+   * @req.params
+   *     orgId - The id of the organization to remove user permissions from.
+   *     role  - The name of the role in the organization (Currenlty 'read' or 'admin')
+   *
+   * @req.body
+   *     {username: 'username'} - The username of the user who is being removed of permissions
+   */
   static deleteOrgRoles(req, res) {
     // Sanitize request params and request body
-    const orgId = LibSani.sanitize(req.params.orgid);
-    const role = LibSani.sanitize(req.params.role);
-    const newUsername = LibSani.sanitize(req.body.username);
+    const orgId = M.lib.sanitize.html(req.params.orgid);
+    const role = M.lib.sanitize.html(req.params.role);
+    const newUsername = M.lib.sanitize.html(req.body.username);
 
     // Build query to populate admin and permissions of the org
     let orgPopQuery = 'permissions.admin';
-    if (role != 'admin') {
+    if (role !== 'admin') {
       orgPopQuery = `${orgPopQuery} permissions.${role}`;
     }
 
@@ -249,10 +248,10 @@ class RoleController {
       .populate({
         path: orgPopQuery
       })
-      .exec((err, org) => {
+      .exec((findOrgErr, org) => {
         // If error occurs, log it and return 500 status
-        if (err) {
-          console.log(err);
+        if (findOrgErr) {
+          console.log(findOrgErr);
           return res.status(500).send('Internal Server Error');
         }
 
@@ -271,10 +270,10 @@ class RoleController {
           .populate({
             path: userPopQuerry
           })
-          .exec((err, user) => {
+          .exec((findUserErr, user) => {
             // If error occurs, log it and return 500 status
-            if (err) {
-              console.log(err);
+            if (findUserErr) {
+              console.log(findUserErr);
               return res.status(500).send('Internal Server Error');
             }
 
@@ -312,9 +311,9 @@ class RoleController {
                 {
                   $pull: pullVals
                 },
-                (err, userSave) => {
-                  if (err) {
-                    console.log(err);
+                (updateErr, userSave) => {
+                  if (updateErr) {
+                    console.log(updateErr);
                     return res.status(500).send('Internal Server Error');
                   }
                   // Return response
