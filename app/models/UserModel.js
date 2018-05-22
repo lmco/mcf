@@ -200,9 +200,9 @@ const UserSchema = new mongoose.Schema({
 
 
   /**
-    * This holds a reference to the organizations that the user has
-    * either write or admin permissions to.
-    */
+   * This holds a reference to the organizations that the user has
+   * either write or admin permissions to.
+   */
   orgPermissions: {
     write: [{
       type: mongoose.Schema.Types.ObjectId,
@@ -218,11 +218,16 @@ const UserSchema = new mongoose.Schema({
 
 });
 
+
+// Changing the callback to arrow notation causes this.orgPermissions to be null when
+// this function os executed. TODO (jk, ju) - understand this.
+/* eslint-disable prefer-arrow-callback */
+
 /**
-* This is a getter which can be used in order to populate a list of
-* all organizations the user has write or admin permissions to.
-*/
-UserSchema.virtual('orgPermissions.member').get(() => {
+ * This is a getter which can be used in order to populate a list of
+ * all organizations the user has write or admin permissions to.
+ */
+UserSchema.virtual('orgPermissions.member').get(function() {
   const member = this.orgPermissions.write || [];
   const admin = this.orgPermissions.admin || [];
 
@@ -236,6 +241,8 @@ UserSchema.virtual('orgPermissions.member').get(() => {
 
   return member;
 });
+
+/* eslint-enable prefer-arrow-callback */
 
 // Necessary for virtual getters to be executed.
 UserSchema.set('toJSON', { virtuals: true });
