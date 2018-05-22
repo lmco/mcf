@@ -33,6 +33,7 @@ pipeline {
                 sh 'rm -rf logs/*'
                 sh 'rm -rf *.log'
                 sh 'git status'
+                //
             }
         }
 
