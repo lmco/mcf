@@ -98,15 +98,31 @@ pipeline {
      * This gets run at the end of the pipeline.
      */
     post {
-        always {
-            emailext body: '''
-                ${env.PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - ${env.BUILD_STATUS}:
-
-                Check console output at ${env.BUILD_URL} to view the results.''',
+        success {
+            emailext
+                body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - SUCCESS: \
+                \
+                Check console output at ${env.BUILD_URL} to view the results.\
+                Git: ${env.GIT_URL} - ${env.GIT_COMMIT}",
                 mimeType: 'text/html',
-                subject: "${env.PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - ${env.BUILD_STATUS}!",
+                subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - SUCCESS!",
                 to: "joshua.d.kaplan@lmco.com",
-                replyTo: "mbee-service.fc-ssc@lmco.com"
+                replyTo: "mbee-service.fc-ssc@lmco.com",
+                from: "mbee-service.fc-ssc@lmco.com".
+                attachLog: true
+        }
+        failure {
+            emailext
+                body: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED: \
+                \
+                Check console output at ${env.BUILD_URL} to view the results.\
+                Git: ${env.GIT_URL} - ${env.GIT_COMMIT}",
+                mimeType: 'text/html',
+                subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILED!",
+                to: "joshua.d.kaplan@lmco.com",
+                replyTo: "mbee-service.fc-ssc@lmco.com",
+                from: "mbee-service.fc-ssc@lmco.com".
+                attachLog: true
         }
     }
 }
