@@ -129,7 +129,9 @@
     // https://eslint.org/docs/rules/prefer-destructuring
     // LM: Changing this to "warn" instead of "error". Don't see any obvious
     // reason to force destructuring, but warnings will be used to encourage consistency.
-    "prefer-destructuring": ["warn", {
+    // LM: Turning this rule off for now. Destructring is more implicit than explicit and
+    // we don't like that.
+    "prefer-destructuring": ["off", {
       "VariableDeclarator": {
         "array": false,
         "object": true,
