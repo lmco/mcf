@@ -14,10 +14,9 @@
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * The OrganizationModel.js file creates a mongoose model to interact with the 
+ * The OrganizationModel.js file creates a mongoose model to interact with the
  * MongoDB Database in order to find, save, update, and delete organizations.
  */
-
 
 const mongoose = require('mongoose');
 
@@ -25,41 +24,41 @@ const mongoose = require('mongoose');
  * Defines the Role Schema
  * @constructor Role
  */
-var OrganizationSchema = new mongoose.Schema({
-    /**
+const OrganizationSchema = new mongoose.Schema({
+  /**
     * The 'id' holds a unique organization id for reference from the database.
     */
-    id: {
-        type: String,
-        require: true,
-        index: true,
-        unique: true,
-        match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
-        maxlength: [36, 'Too many characters in username'],
-    },
+  id: {
+    type: String,
+    require: true,
+    index: true,
+    unique: true,
+    match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
+    maxlength: [36, 'Too many characters in username']
+  },
 
 
-    /**
+  /**
     * The 'name' holds a unique organization name to be displayed for an
     * organization.
     */
-        name: {
-    	type: String,
-        requite: true,
-        unique: true,
-        match: RegExp('^([a-zA-Z0-9-\\s])+$')
-	},
+  name: {
+    type: String,
+    requite: true,
+    unique: true,
+    match: RegExp('^([a-zA-Z0-9-\\s])+$')
+  },
 
 
-    /**
-    * The 'project' holds a list of references to projects which belong to 
+  /**
+    * The 'project' holds a list of references to projects which belong to
     * the organzation
     */
-    projects: [{
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Project'
-    }]
-})
+  projects: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Project'
+  }]
+});
 
 
 /**
@@ -67,11 +66,11 @@ var OrganizationSchema = new mongoose.Schema({
 * permissions to the organization
 */
 OrganizationSchema.virtual('permissions.write', {
-    ref: 'User',
-    localField: '_id',
-    foreignField: 'orgPermissions.write',
-    justOne: false
-})
+  ref: 'User',
+  localField: '_id',
+  foreignField: 'orgPermissions.write',
+  justOne: false
+});
 
 
 /**
@@ -79,37 +78,36 @@ OrganizationSchema.virtual('permissions.write', {
 * permissions to the organization
 */
 OrganizationSchema.virtual('permissions.admin', {
-    ref: 'User',
-    localField: '_id',
-    foreignField: 'orgPermissions.admin',
-    justOne: false
-})
+  ref: 'User',
+  localField: '_id',
+  foreignField: 'orgPermissions.admin',
+  justOne: false
+});
 
 
 /**
 * The 'permissions.member' is a virtual getter to users with admin
 * and/or write permissions to the organization
 */
-OrganizationSchema.virtual('permissions.member').get( function() {
-    var member = this.permissions.write || [];
-    var admin = this.permissions.admin || [];
+OrganizationSchema.virtual('permissions.member').get(() => {
+  const member = this.permissions.write || [];
+  const admin = this.permissions.admin || [];
 
-    memberList = member.map(a => {return a.username})
+  const memberList = member.map(a => a.username);
 
-
-    for (var i = 0; i < admin.length; i++){
-        if(!memberList.includes(admin[i].username)){
-            member.push(admin[i]);
-        }
+  for (let i = 0; i < admin.length; i++) {
+    if (!memberList.includes(admin[i].username)) {
+      member.push(admin[i]);
     }
+  }
 
-    return member;
-})
+  return member;
+});
 
 // Required for virtual getters
-OrganizationSchema.set('toJSON', { virtuals: true })
-OrganizationSchema.set('toObject', { virtuals: true })
+OrganizationSchema.set('toJSON', { virtuals: true });
+OrganizationSchema.set('toObject', { virtuals: true });
 
 
 // Export mongoose model as "Organization"
-module.exports = mongoose.model("Organization", OrganizationSchema);
+module.exports = mongoose.model('Organization', OrganizationSchema);

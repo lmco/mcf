@@ -17,29 +17,31 @@
  * Executes tests of the test framework itself.
  */
 
-var chai  = require('chai');
-var request = require('request');
-
+const path = require('path');
+const chai = require('chai');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
+const { version } = require(path.join(__dirname, '..', '..', 'package.json'));
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-/*----------( Main )----------*/
 
-describe(name, function() {
+/*------------------------------------
+ *       Main
+ *------------------------------------*/
+
+describe(name, () => {
   it('should check the version', versionCheck);
 });
 
 
-/*----------( Test Functions )----------*/
-
+/*------------------------------------
+ *       Test functions
+ *------------------------------------*/
 
 /**
  * Checks the MBEE runtime version against that in the package.json file.
  */
 function versionCheck(done) {
-  const version = require(__dirname + '/../../package.json')['version']
-  const M = require(__dirname + '/../../mbee.js');
   chai.expect(M.version).to.equal(version);
   done();
 }
-

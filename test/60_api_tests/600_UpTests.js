@@ -17,26 +17,23 @@
  * @description  Tests the project model
  */
 
-const fs = require('fs');
 const path = require('path');
-const chai  = require('chai');
+const chai = require('chai');
 const request = require('request');
-
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
-
-const M = require(__dirname + '/../../mbee.js');
-
-
-/*----------( Main )----------*/
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 
-describe(name, function() {
+/* ----------( Main )---------- */
+
+
+describe(name, () => {
   it('should confirm that the API is up', upTest);
 });
 
 
-/*----------( Test Functions )----------*/
+/* ----------( Test Functions )---------- */
 
 
 /**
@@ -46,13 +43,12 @@ function upTest(done) {
   request({
     url: `${M.config.test.url}/api/test`
   },
-  function(error, response, body) {
+  (error, response, body) => {
     if (error) {
-      console.log(error);
+      console.error(error);  // eslint-disable-line no-console
     }
     chai.expect(response.statusCode).to.equal(200);
+    chai.expect(body).to.equal('');
     done();
   });
 }
-
-

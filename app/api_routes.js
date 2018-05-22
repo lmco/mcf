@@ -26,18 +26,18 @@
  * being undefined.
  */
 
-const path              = require('path');
-const express           = require('express');
+const path = require('path');
+const express = require('express');
 const M = require(path.join(__dirname, '..', 'mbee.js'));
-var getController       = (x) => path.join(__dirname, 'controllers', x);
-const APIController     = require(getController('APIController'));
-const OrgController     = require(getController('OrganizationController'));
+const getController = x => path.join(__dirname, 'controllers', x);
+const APIController = require(getController('APIController'));
+const OrgController = require(getController('OrganizationController'));
 const ProjectController = require(getController('ProjectController'));
-const UserController    = require(getController('UserController'));
-const RoleController    = require(getController('RoleController'));
+const UserController = require(getController('UserController'));
+const RoleController = require(getController('RoleController'));
 const AuthController = M.load('lib/auth');
 
-var api = express.Router();
+const api = express.Router();
 
 
 /**
@@ -96,12 +96,12 @@ api.get('/doc/swagger.json', APIController.swaggerJSON);
  *         description: Internal Server Error
  */
 api.route('/login')
-    .get(AuthController.authenticate.bind(AuthController),
-         AuthController.doLogin,
-         APIController.login)
-    .post(AuthController.authenticate.bind(AuthController),
-          AuthController.doLogin,
-          APIController.login);
+  .get(AuthController.authenticate.bind(AuthController),
+    AuthController.doLogin,
+    APIController.login)
+  .post(AuthController.authenticate.bind(AuthController),
+    AuthController.doLogin,
+    APIController.login);
 
 
 /**
@@ -118,9 +118,7 @@ api.route('/login')
  *         description: Internal Server Error
  */
 api.route('/version')
-    .get(AuthController.authenticate.bind(AuthController), APIController.version);
-
-
+  .get(AuthController.authenticate.bind(AuthController), APIController.version);
 
 
 /**
@@ -155,10 +153,10 @@ api.route('/version')
  *         description: Not Implemented
  */
 api.route('/orgs')
-    .get   (AuthController.authenticate.bind(AuthController), OrgController.getOrgs)
-    .post  (AuthController.authenticate.bind(AuthController), OrgController.postOrgs)
-    .put   (AuthController.authenticate.bind(AuthController), OrgController.putOrgs)
-    .delete(AuthController.authenticate.bind(AuthController), OrgController.deleteOrgs);
+  .get(AuthController.authenticate.bind(AuthController), OrgController.getOrgs)
+  .post(AuthController.authenticate.bind(AuthController), OrgController.postOrgs)
+  .put(AuthController.authenticate.bind(AuthController), OrgController.putOrgs)
+  .delete(AuthController.authenticate.bind(AuthController), OrgController.deleteOrgs);
 
 
 /**
@@ -304,10 +302,10 @@ api.route('/orgs')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid')
-    .get   (AuthController.authenticate.bind(AuthController), OrgController.getOrg)
-    .post  (AuthController.authenticate.bind(AuthController), OrgController.postOrg)
-    .put   (AuthController.authenticate.bind(AuthController), OrgController.putOrg)
-    .delete(AuthController.authenticate.bind(AuthController), OrgController.deleteOrg);
+  .get(AuthController.authenticate.bind(AuthController), OrgController.getOrg)
+  .post(AuthController.authenticate.bind(AuthController), OrgController.postOrg)
+  .put(AuthController.authenticate.bind(AuthController), OrgController.putOrg)
+  .delete(AuthController.authenticate.bind(AuthController), OrgController.deleteOrg);
 
 
 /**
@@ -359,10 +357,10 @@ api.route('/orgs/:orgid')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/projects')
-    .get   (AuthController.authenticate.bind(AuthController), ProjectController.getProjects)
-    .post  (AuthController.authenticate.bind(AuthController), ProjectController.postProjects)
-    .put   (AuthController.authenticate.bind(AuthController), ProjectController.putProjects)
-    .delete(AuthController.authenticate.bind(AuthController), ProjectController.deleteProjects);
+  .get(AuthController.authenticate.bind(AuthController), ProjectController.getProjects)
+  .post(AuthController.authenticate.bind(AuthController), ProjectController.postProjects)
+  .put(AuthController.authenticate.bind(AuthController), ProjectController.putProjects)
+  .delete(AuthController.authenticate.bind(AuthController), ProjectController.deleteProjects);
 
 /**
  * @swagger
@@ -453,7 +451,9 @@ api.route('/orgs/:orgid/projects')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   put:
- *     description: Creates or replaces a project. If the project does not yet exist, it will be created (just like a POST). If it does exist, the project will be replaced with data provided.
+ *     description: Creates or replaces a project. If the project does not yet exist, it will be
+ *                  reated (just like a POST). If it does exist, the project will be replaced with
+ *                  data provided.
  *     produces:
  *       - application/json
  *     parameters:
@@ -532,10 +532,10 @@ api.route('/orgs/:orgid/projects')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid')
-    .get   (AuthController.authenticate.bind(AuthController), ProjectController.getProject)
-    .post  (AuthController.authenticate.bind(AuthController), ProjectController.postProject)
-    .put   (AuthController.authenticate.bind(AuthController), ProjectController.putProject)
-    .delete(AuthController.authenticate.bind(AuthController), ProjectController.deleteProject);
+  .get(AuthController.authenticate.bind(AuthController), ProjectController.getProject)
+  .post(AuthController.authenticate.bind(AuthController), ProjectController.postProject)
+  .put(AuthController.authenticate.bind(AuthController), ProjectController.putProject)
+  .delete(AuthController.authenticate.bind(AuthController), ProjectController.deleteProject);
 
 /**
  * @swagger
@@ -562,10 +562,10 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/members/:role')
-    .get   (AuthController.authenticate, RoleController.getOrgRoles)
-    .post  (AuthController.authenticate, RoleController.postOrgRoles)
-    .put   (AuthController.authenticate, RoleController.putOrgRoles)
-    .delete(AuthController.authenticate, RoleController.deleteOrgRoles);
+  .get(AuthController.authenticate, RoleController.getOrgRoles)
+  .post(AuthController.authenticate, RoleController.postOrgRoles)
+  .put(AuthController.authenticate, RoleController.putOrgRoles)
+  .delete(AuthController.authenticate, RoleController.deleteOrgRoles);
 
 
 /**
@@ -593,17 +593,18 @@ api.route('/orgs/:orgid/members/:role')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:role')
-    .get   (AuthController.authenticate, APIController.notImplemented)
-    .post  (AuthController.authenticate, APIController.notImplemented)
-    .put   (AuthController.authenticate, APIController.notImplemented)
-    .delete(AuthController.authenticate, APIController.notImplemented);
+  .get(AuthController.authenticate, APIController.notImplemented)
+  .post(AuthController.authenticate, APIController.notImplemented)
+  .put(AuthController.authenticate, APIController.notImplemented)
+  .delete(AuthController.authenticate, APIController.notImplemented);
 
 
 /**
  * @swagger
  * /users:
  *   get:
- *     description: Gets a list of all users. Returns a list of JSON objects containing public user data.
+ *     description: Gets a list of all users. Returns a list of JSON objects containing public
+ *                  user data.
  *     produces:
  *       - application/json
  *     parameters:
@@ -638,10 +639,10 @@ api.route('/orgs/:orgid/projects/:projectid/members/:role')
  *         description: Not Implemented
  */
 api.route('/users')
-    .get   (AuthController.authenticate.bind(AuthController), UserController.getUsers)
-    .post  (AuthController.authenticate.bind(AuthController), UserController.postUsers)
-    .put   (AuthController.authenticate.bind(AuthController), UserController.putUsers)
-    .delete(AuthController.authenticate.bind(AuthController), UserController.deleteUsers);
+  .get(AuthController.authenticate.bind(AuthController), UserController.getUsers)
+  .post(AuthController.authenticate.bind(AuthController), UserController.postUsers)
+  .put(AuthController.authenticate.bind(AuthController), UserController.putUsers)
+  .delete(AuthController.authenticate.bind(AuthController), UserController.deleteUsers);
 
 /**
  * @swagger
@@ -717,7 +718,9 @@ api.route('/users')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   put:
- *     description: Creates or updates user. If the user already exists it will be updated. In this case, any valid fields that are given in the request body will replace the existing field values.
+ *     description: Creates or updates user. If the user already exists it will be updated. In this
+ *                  case, any valid fields that are given in the request body will replace the
+ *                  existing field values.
  *     produces:
  *       - application/json
  *     parameters:
@@ -786,10 +789,10 @@ api.route('/users')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/users/:username')
-    .get   (AuthController.authenticate.bind(AuthController), UserController.getUser)
-    .post  (AuthController.authenticate.bind(AuthController), UserController.postUser)
-    .put   (AuthController.authenticate.bind(AuthController), UserController.putUser)
-    .delete(AuthController.authenticate.bind(AuthController), UserController.deleteUser);
+  .get(AuthController.authenticate.bind(AuthController), UserController.getUser)
+  .post(AuthController.authenticate.bind(AuthController), UserController.postUser)
+  .put(AuthController.authenticate.bind(AuthController), UserController.putUser)
+  .delete(AuthController.authenticate.bind(AuthController), UserController.deleteUser);
 
 /**
  * @swagger
@@ -816,10 +819,10 @@ api.route('/users/:username')
  *         description: Not Implemented
  */
 api.route('/users/:username/roles')
-    .get   (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .post  (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .put   (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
 
 
 /**
@@ -847,10 +850,10 @@ api.route('/users/:username/roles')
  *         description: Not Implemented
  */
 api.route('/users/:username/groups')
-    .get   (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .post  (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .put   (AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-    .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
 
 
 /**
@@ -869,7 +872,7 @@ api.route('/users/:username/groups')
  *         description: Internal Server Error
  */
 api.route('/users/whoami')
-    .get(AuthController.authenticate.bind(AuthController), UserController.whoami);
+  .get(AuthController.authenticate.bind(AuthController), UserController.whoami);
 
 
 // Export the API router

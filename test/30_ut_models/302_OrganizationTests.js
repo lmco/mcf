@@ -17,30 +17,28 @@
  * @description  Tests the org model
  */
 
-const fs = require('fs');
 const path = require('path');
-const chai  = require('chai');
+const chai = require('chai');
 const mongoose = require('mongoose');
-
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
-
-const M = require(__dirname + '/../../mbee.js');
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.load('models/OrganizationModel');
 
 
-/*----------( Main )----------*/
+/*------------------------------------
+ *       Main
+ *------------------------------------*/
 
-
-describe(name, function() {
+describe(name, () => {
   // runs before all tests in this block
-  before(function() {
+  before(() => {
     const db = M.load('lib/db');
     db.connect();
   });
 
   // runs after all tests in this block
-  after(function() {
+  after(() => {
     mongoose.connection.close();
   });
 
@@ -49,20 +47,21 @@ describe(name, function() {
 });
 
 
-/*----------( Test Functions )----------*/
-
+/*------------------------------------
+ *       Test Functions
+ *------------------------------------*/
 
 /**
  * Creates a user using the User model.
  */
 function createOrg(done) {
-  let org = new Org({
-      id:   'empire',
-      name: 'Galactic Empire'
+  const org = new Org({
+    id: 'empire',
+    name: 'Galactic Empire'
   });
-  org.save(function(err) {
+  org.save((err) => {
     if (err) {
-        console.log(err);
+      M.log.error(err);
     }
     chai.expect(err).to.equal(null);
     done();
@@ -75,11 +74,9 @@ function createOrg(done) {
  */
 function deleteOrg(done) {
   Org.findOneAndRemove({
-    id: 'empire',
-  }, function(err) {
+    id: 'empire'
+  }, (err) => {
     chai.expect(err).to.equal(null);
     done();
   });
 }
-
-

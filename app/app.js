@@ -26,7 +26,7 @@ const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
 const expressLayouts = require('express-ejs-layouts');
 
-const M = require(__dirname + '/../mbee.js');
+const M = require(`${__dirname}/../mbee.js`);
 
 const app = express();       // Initializes our application
 M.lib.db.connect();       // Connect to the database
@@ -38,45 +38,45 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Configures views/templates
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname , 'views'));
+app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 
 // Convenient conversions from ms to other times units
-var units = {
-    'MILLISECONDS': 1,
-    'SECONDS':      1000,
-    'MINUTES':      60*1000,
-    'HOURS':        60*60*1000,
-    'DAYS':         24*60*60*1000
+const units = {
+  MILLISECONDS: 1,
+  SECONDS: 1000,
+  MINUTES: 60 * 1000,
+  HOURS: 60 * 60 * 1000,
+  DAYS: 24 * 60 * 60 * 1000
 }[M.config.auth.session.units];
 
 // Configure sessions
 app.use(session({
-    name: 'SESSION_ID',
-    secret: M.config.server.secret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: M.config.auth.session.expires * units },
-    store: new MongoStore({ mongooseConnection: mongoose.connection })
+  name: 'SESSION_ID',
+  secret: M.config.server.secret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: M.config.auth.session.expires * units },
+  store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
 
 // Load the API Routes
 if (M.config.server.api.enabled) {
-    const APIRoutesPath = path.join(__dirname, 'api_routes.js');
-    const APIRouter = require(APIRoutesPath);
-    app.use('/api', APIRouter);
+  const APIRoutesPath = path.join(__dirname, 'api_routes.js');
+  const APIRouter = require(APIRoutesPath); // eslint-disable-line global-require
+  app.use('/api', APIRouter);
 }
 // Load the plugin routes
 if (M.config.server.plugins.enabled) {
-    const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
-    const PluginRouter = require(PluginRoutesPath);
-    app.use('/plugins', PluginRouter);
+  const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
+  const PluginRouter = require(PluginRoutesPath); // eslint-disable-line global-require
+  app.use('/plugins', PluginRouter);
 }
 // Load the UI/other routes
 if (M.config.server.ui.enabled) {
-    const RoutesPath = path.join(__dirname, 'routes.js');
-    const Router = require(RoutesPath);
-    app.use('/', Router);
+  const RoutesPath = path.join(__dirname, 'routes.js');
+  const Router = require(RoutesPath); // eslint-disable-line global-require
+  app.use('/', Router);
 }
 
 // Export the app

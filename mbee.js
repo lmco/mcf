@@ -25,17 +25,17 @@ const https = require('https');
 const path = require('path');
 
 // Global MBEE helper object
-var M = { env: process.env.NODE_ENV || 'dev' };
-M.version = require(__dirname + '/package.json')['version'];
-M.config  = require(__dirname + `/config/${M.env}.json`);
+const M = { env: process.env.NODE_ENV || 'dev' };
+M.version = require(`${__dirname}/package.json`).version;
+M.config = require(`${__dirname}/config/${M.env}.json`);
 M.root = __dirname;
 M.path = {
-    lib:         (s) => {return path.join(__dirname, 'app', 'lib', s)},
-    controllers: (s) => {return path.join(__dirname, 'app', 'controllers', s)},
-    models:      (s) => {return path.join(__dirname, 'app', 'models', s)}
+  lib: s => path.join(__dirname, 'app', 'lib', s),
+  controllers: s => path.join(__dirname, 'app', 'controllers', s),
+  models: s => path.join(__dirname, 'app', 'models', s)
 };
 
-//M.util = {
+// M.util = {
 //    /**
 //     * Takes a list of items, A, and a list of mutually exclusive items, B.
 //     * Returns false if than one item from B is found in A, true otherwise.
@@ -50,9 +50,14 @@ M.path = {
 //            }
 //        }
 //    }
-//}
+// }
 
-M.load = (m) => {return require(path.join(__dirname, 'app', m)) };
+/**
+ * This function provides a useful utility for requiring other MBEE modules in the app directory.
+ * This should allow the path to the modules to be a bit simpler.
+ * The global-require is explicitely disabled here due to the nature of this function.
+ */
+M.load = m => require(path.join(__dirname, 'app', m)); // eslint-disable-line global-require
 
 // This exports the basic MBEE version and config data so that modules may
 // have access to that data when they are loaded.
@@ -63,15 +68,15 @@ M.load = (m) => {return require(path.join(__dirname, 'app', m)) };
 module.exports = M;
 
 // If dependecies have been installed, initialize the MBEE helper object
-if (fs.existsSync(__dirname + '/node_modules')) {
-    initialize()
+if (fs.existsSync(`${__dirname}/node_modules`)) {
+  initialize();
 }
 
-const build = require(__dirname + '/scripts/build');
-const clean = require(__dirname + '/scripts/clean');
-const docker = require(__dirname + '/scripts/docker');
-const lint = require(__dirname + '/scripts/linter');
-const test = require(__dirname + '/scripts/test');
+const build = require(`${__dirname}/scripts/build`);
+const clean = require(`${__dirname}/scripts/clean`);
+const docker = require(`${__dirname}/scripts/docker`);
+const lint = require(`${__dirname}/scripts/linter`);
+const test = require(`${__dirname}/scripts/test`);
 
 // Call main
 if (module.parent == null) {
@@ -79,32 +84,30 @@ if (module.parent == null) {
 }
 
 
-
 /******************************************************************************
  *  Main Function                                                             *
  ******************************************************************************/
 
-function main()
-{
-    var subcommand = process.argv.slice(2,3)[0];
-    var opts = process.argv.slice(3);
-    var tasks = {
-        'build':     build.build,
-        'clean':     clean,
-        'docker':    docker,
-        'install':   build.install,
-        'lint':      lint,
-        'start':     start,
-        'test':      test
-    };
+function main() {
+  const subcommand = process.argv.slice(2, 3)[0];
+  const opts = process.argv.slice(3);
+  const tasks = {
+    build: build.build,
+    clean,
+    docker,
+    install: build.install,
+    lint,
+    start,
+    test
+  };
 
-    if (tasks.hasOwnProperty(subcommand))
-        tasks[subcommand](opts)
-    else
-        console.log('Unknown command.')
+  if (tasks.hasOwnProperty(subcommand)) {
+    tasks[subcommand](opts);
+  }
+  else {
+    console.log('Unknown command.'); // eslint-disable-line no-console
+  }
 }
-
-
 
 
 /**
@@ -113,47 +116,51 @@ function main()
  */
 
 function start(args) {
-    initialize();
-    M.log.debug(`+ mbee.js executed as ${process.argv.join(' ')} `
-                    + `with env=${M.env} and configuration: `
-                    + JSON.stringify(M.config));
+  initialize();
+  M.log.debug(`${`+ mbee.js executed as ${process.argv.join(' ')} `
+                  + `with env=${M.env} and configuration: `}${JSON.stringify(M.config)}`);
 
-    M.lib.startup();                                // Print startup banner
-    var app = require(__dirname + '/app/app.js');   // Import the app
+  M.lib.startup();                                 // Print startup banner
+
+  // Import the app, disable the global-import rule for this
+  const app = require(`${__dirname}/app/app.js`);   // eslint-disable-line global-require
 
 
-    // Create HTTP Server
-    if (M.config.server.http.enabled) {
-        var httpServer = http.createServer(app);
-    }
+  /* eslint-disable no-var, vars-on-top, block-scoped-var */
 
-    // Create HTTPS Server
-    if (M.config.server.https.enabled) {
-        var keyPath = path.join('certs', `${M.config.server.https.sslCertName}.key`);
-        var crtPath = path.join('certs', `${M.config.server.https.sslCertName}.crt`);
-        var privateKey  = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
-        var certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
-        var credentials = {key: privateKey, cert: certificate};
-        var httpsServer = https.createServer(credentials, app);
-    }
+  // Create HTTP Server
+  if (M.config.server.http.enabled) {
+    var httpServer = http.createServer(app);
+  }
 
-    // Run HTTP Server
-    if (M.config.server.http.enabled) {
-        httpServer.listen(M.config.server.http.port, function() {
-            let port = M.config.server.http.port;
-            M.log.info('MBEE server listening on port ' + port + '!')
-        });
-    }
+  // Create HTTPS Server
+  if (M.config.server.https.enabled) {
+    const keyPath = path.join('certs', `${M.config.server.https.sslCertName}.key`);
+    const crtPath = path.join('certs', `${M.config.server.https.sslCertName}.crt`);
+    const privateKey = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
+    const certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
+    const credentials = { key: privateKey, cert: certificate };
+    var httpsServer = https.createServer(credentials, app);
+  }
 
-    // Run HTTPS Server
-    if (M.config.server.https.enabled) {
-        httpsServer.listen(M.config.server.https.port, function() {
-            let port = M.config.server.https.port;
-            M.log.info('MBEE server listening on port ' + port + '!')
-        });
-    }
+  // Run HTTP Server
+  if (M.config.server.http.enabled) {
+    httpServer.listen(M.config.server.http.port, () => {
+      const port = M.config.server.http.port;
+      M.log.info(`MBEE server listening on port ${port}!`);
+    });
+  }
+
+  // Run HTTPS Server
+  if (M.config.server.https.enabled) {
+    httpsServer.listen(M.config.server.https.port, () => {
+      const port = M.config.server.https.port;
+      M.log.info(`MBEE server listening on port ${port}!`);
+    });
+  }
+
+  /* eslint-enable no-var, vars-on-top */
 }
-
 
 
 /**
@@ -162,16 +169,15 @@ function start(args) {
  * global helper object.
  */
 
-function initialize(args)
-{
-    M.log = M.load('lib/logger');
-    M.lib = {
-        crypto:     M.load('lib/crypto'),
-        db:         M.load('lib/db'),
-        sani:       M.load('lib/sanitization'),
-        startup:    M.load('lib/startup'),
-        validators: M.load('lib/validators')
-    }
-    // Re-export mbee after initialization
-    module.exports = M;
+function initialize(args) {
+  M.log = M.load('lib/logger');
+  M.lib = {
+    crypto: M.load('lib/crypto'),
+    db: M.load('lib/db'),
+    sani: M.load('lib/sanitization'),
+    startup: M.load('lib/startup'),
+    validators: M.load('lib/validators')
+  };
+  // Re-export mbee after initialization
+  module.exports = M;
 }

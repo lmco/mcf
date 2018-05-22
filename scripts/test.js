@@ -17,11 +17,12 @@
  * This file executes the test suite with Mocha.
  */
 
-const {spawn} = require('child_process');
-const M = require(__dirname + '/../mbee.js');
+const path = require('path');
+const { spawn } = require('child_process');
+const M = require(path.join(__dirname, '..', 'mbee.js'));
 
 if (module.parent == null) {
-  test(process.argv.slice(2))
+  test(process.argv.slice(2));
 }
 else {
   module.exports = test;
@@ -37,22 +38,20 @@ else {
  *                slow. Half that number will warn that the test is nearly slow.
  * --grep <REGEX> Only runs the test whose name matches REGEX.
  */
-function test(_args)
-{
-  printHeader()
+function test(_args) {
+  printHeader();
+  const args = [`${M.root}/test/**/*.js`].concat(_args);
 
-  var args = [`${M.root}/test/**/*.js`].concat(_args)
-
-  spawn(`${M.root}/node_modules/.bin/mocha`, args, {stdio: 'inherit'})
-    .on('data', function(data) {
-      console.log(data.toString());
+  spawn(`${M.root}/node_modules/.bin/mocha`, args, { stdio: 'inherit' })
+    .on('data', (data) => {
+      console.log(data.toString()); // eslint-disable-line no-console
     })
-    .on('exit', function (code) {
-      if (code != 0) {
-        console.log('Tests failed.');
+    .on('exit', (code) => {
+      if (code !== 0) {
+        console.log('Tests failed.'); // eslint-disable-line no-console
         process.exit(code);
       }
-     });
+    });
 }
 
 
@@ -60,18 +59,18 @@ function test(_args)
  * Prints the MBEE test framework header.
  */
 function printHeader() {
-  let Y = '\u001b[33m';
-  let W = '\u001b[39m';
-  let G = '\u001b[37m';
-  let date = new Date(Date.now()).toUTCString()
-  let title = '\u001b[1mModel-Based Engineering Environment Test Framework\u001b[0m'
+  const Y = '\u001b[33m';
+  const W = '\u001b[39m';
+  const G = '\u001b[37m';
+  const date = new Date(Date.now()).toUTCString();
+  const title = '\u001b[1mModel-Based Engineering Environment Test Framework\u001b[0m';
 
-  console.log('_'.repeat(65));
-  console.log(` ${G},-.${W} `);
-  console.log(` ${G}\\_/${W} \t ${title}`);
-  console.log(`${Y}{|||)${W}${G}<${W} `);
-  console.log(` ${G}/ \\${W} \t Version: ${M.version}`);
-  console.log(` ${G}\`-'${W} \t Date: ${date}`);
-  console.log('_'.repeat(65));
-  console.log('');
+  console.log('_'.repeat(65)); // eslint-disable-line no-console
+  console.log(` ${G},-.${W} `); // eslint-disable-line no-console
+  console.log(` ${G}\\_/${W} \t ${title}`); // eslint-disable-line no-console
+  console.log(`${Y}{|||)${W}${G}<${W} `); // eslint-disable-line no-console
+  console.log(` ${G}/ \\${W} \t Version: ${M.version}`); // eslint-disable-line no-console
+  console.log(` ${G}\`-'${W} \t Date: ${date}`); // eslint-disable-line no-console
+  console.log('_'.repeat(65)); // eslint-disable-line no-console
+  console.log(''); // eslint-disable-line no-console
 }

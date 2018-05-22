@@ -17,15 +17,16 @@
  * This cleans the existing MBEE build.
  */
 
-const mbee = require(__dirname + '/../mbee.js');
+const path = require('path');
+const mbee = require(path.join(__dirname, '..', 'mbee.js'));
+const del = require('del');
 
 if (module.parent == null) {
-  clean(process.argv.slice(2))
+  clean(process.argv.slice(2));
 }
 else {
   module.exports = clean;
 }
-
 
 
 /**
@@ -39,30 +40,28 @@ else {
  * cross-platform.
  */
 
-function clean(args)
-{
-  console.log(args)
-  let del = require('del');
-
+function clean(_args) {
   // Allow the function to be called with no parameters
   // Set the default behavior to build all
-  if (args == undefined)
-    args = [];
+  const args = (_args === undefined) ? [] : _args;
 
   // Clean logs
-  if (args.length == 0 || args.includes('--all') || args.includes('--logs')) {
+  if (args.length === 0 || args.includes('--all') || args.includes('--logs')) {
     del.sync([`${mbee.root}/*.log`, `${mbee.root}/logs/*.log`]);
   }
 
   // Clean docs
-  if (args.length == 0 || args.includes('--all') || args.includes('--docs'))
+  if (args.length === 0 || args.includes('--all') || args.includes('--docs')) {
     del.sync([`${mbee.root}/docs`]);
+  }
 
   // Clean public
-  if (args.length == 0 || args.includes('--all') || args.includes('--public'))
+  if (args.length === 0 || args.includes('--all') || args.includes('--public')) {
     del.sync([`${mbee.root}/public`]);
+  }
 
   // Clean node_modules
-  if (args.includes('--all') || args.includes('--node-modules'))
+  if (args.includes('--all') || args.includes('--node-modules')) {
     del.sync([`${mbee.root}/node_modules`]);
+  }
 }

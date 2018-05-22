@@ -17,29 +17,30 @@
  * @description This class defines basic tests of the User data model.
  */
 
-const fs = require('fs');
 const path = require('path');
-const chai  = require('chai');
+const chai = require('chai');
 const mongoose = require('mongoose');
 
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
-const M = require(__dirname + '/../../mbee.js');
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.load('models/UserModel');
 
-/*----------( Main )----------*/
 
-describe(name, function() {
+/*------------------------------------
+ *       Main
+ *------------------------------------*/
 
+describe(name, () => {
   // runs before all tests in this block
-  before(function() {
+  before(() => {
     const db = M.load('lib/db');
     db.connect();
   });
 
   // runs after all tests in this block
-  after(function() {
+  after(() => {
     mongoose.connection.close();
   });
 
@@ -52,22 +53,24 @@ describe(name, function() {
 });
 
 
-/*----------( Test Functions )----------*/
+/*------------------------------------
+ *       Test Functions
+ *------------------------------------*/
 
 
 /**
  * Creates a user using the User model.
  */
 function createUser(done) {
-  let user = new User({
-    username:   'ackbar',
-    password:   'itsatrap',
-    fname:      'Admiral',
-    lname:      'Ackbar'
+  const user = new User({
+    username: 'ackbar',
+    password: 'itsatrap',
+    fname: 'Admiral',
+    lname: 'Ackbar'
   });
-  user.save(function(err) {
+  user.save((err) => {
     if (err) {
-        console.log(err);
+      console.log(err); // eslint-disable-line no-console
     }
     chai.expect(err).to.equal(null);
     done();
@@ -81,9 +84,9 @@ function createUser(done) {
  */
 function getUser(done) {
   User.findOne({
-      username:   'ackbar',
-      deletedOn:  null
-  }, function(err, user) {
+    username: 'ackbar',
+    deletedOn: null
+  }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
 
@@ -105,23 +108,24 @@ function getUser(done) {
  */
 function updateUser(done) {
   User.findOneAndUpdate({
-    username:   'ackbar'
+    username: 'ackbar'
   }, {
     fname: 'Mr.'
-  }, function(err, user) {
+  }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
 
     // Re-query the user. The user defined above is not updated
     User.findOne({
-      username:   'ackbar'
-    }, function(err, user) {
+      username: user.username
+    }, (err2, user2) => {
+      chai.expect(err2).to.equal(null);
       // Check basic user data
-      chai.expect(user.username).to.equal('ackbar');
-      chai.expect(user.fname).to.equal('Mr.');
-      chai.expect(user.lname).to.equal('Ackbar');
-      chai.expect(user.getFullName()).to.equal('Mr. Ackbar');
-      chai.expect(user.name).to.equal('Mr. Ackbar');
+      chai.expect(user2.username).to.equal('ackbar');
+      chai.expect(user2.fname).to.equal('Mr.');
+      chai.expect(user2.lname).to.equal('Ackbar');
+      chai.expect(user2.getFullName()).to.equal('Mr. Ackbar');
+      chai.expect(user2.name).to.equal('Mr. Ackbar');
       done();
     });
   });
@@ -133,18 +137,18 @@ function updateUser(done) {
  */
 function softDeleteUser(done) {
   User.findOneAndUpdate({
-      username: 'ackbar',
+    username: 'ackbar'
   }, {
     deletedOn: Date.now()
   },
-  function(err, user) {
+  (err, user) => {
     User.findOne({
-      username:   'ackbar'
-    }, function(err, user) {
+      username: user.username
+    }, (err2, user2) => {
       // Verify soft delete
-      chai.expect(err).to.equal(null);
-      chai.expect(user.deletedOn).to.not.equal(null);
-      chai.expect(user.deleted).to.equal(true);
+      chai.expect(err2).to.equal(null);
+      chai.expect(user2.deletedOn).to.not.equal(null);
+      chai.expect(user2.deleted).to.equal(true);
       done();
     });
   });
@@ -156,12 +160,12 @@ function softDeleteUser(done) {
  */
 function getSoftDeletedUser(done) {
   User.findOne({
-      username:   'ackbar',
-  }, function(err, user) {
-      // Make sure there are no errors
-      chai.expect(err).to.equal(null);
-      chai.expect(user.username).to.equal('ackbar');
-      done();
+    username: 'ackbar'
+  }, (err, user) => {
+    // Make sure there are no errors
+    chai.expect(err).to.equal(null);
+    chai.expect(user.username).to.equal('ackbar');
+    done();
   });
 }
 
@@ -171,8 +175,8 @@ function getSoftDeletedUser(done) {
  */
 function deleteUser(done) {
   User.findOneAndRemove({
-    username: 'ackbar',
-  }, function(err) {
+    username: 'ackbar'
+  }, (err) => {
     chai.expect(err).to.equal(null);
     done();
   });
