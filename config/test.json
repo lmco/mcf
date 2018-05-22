@@ -31,7 +31,7 @@
     }
   },
   "db": {
-    "name": "mbee",
+    "name": "test",
     "url": "dev.mbee.us.lmco.com",
     "port": "27017",
     "username": "mbee",
