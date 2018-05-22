@@ -32,6 +32,7 @@ pipeline {
                 sh 'rm -rf public'
                 sh 'rm -rf logs/*'
                 sh 'rm -rf *.log'
+                sh 'git status'
             }
         }
 
@@ -87,27 +88,27 @@ pipeline {
         }
 
         success {
-            emailext body: "${env.JOB_NAME} ${env.GIT_BRANCH} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
-                <br/><br/>Merge request of branch ${env.GIT_BRANCH} passed automated tests. \
-                No further action is required.",
-                mimeType: 'text/html',
-                subject: "[jenkins] ${env.JOB_NAME} ${env.GIT_BRANCH} SUCCESS",
-                to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
-                replyTo: "mbee-service.fc-ssc@lmco.com",
-                from: "mbee-service.fc-ssc@lmco.com"
+            //emailext body: "${env.JOB_NAME} ${env.GIT_BRANCH} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
+            //    <br/><br/>Merge request of branch ${env.GIT_BRANCH} passed automated tests. \
+            //    No further action is required.",
+            //    mimeType: 'text/html',
+            //    subject: "[jenkins] ${env.JOB_NAME} ${env.GIT_BRANCH} SUCCESS",
+            //    to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+            //    replyTo: "mbee-service.fc-ssc@lmco.com",
+            //    from: "mbee-service.fc-ssc@lmco.com"
         }
         failure {
-            emailext body: "${env.JOB_NAME} ${env.GIT_BRANCH} - Build #${env.BUILD_NUMBER} - FAILED: \
-                <br/><br/>Check console output at ${env.BUILD_URL} to view the results.\
-                <br/><br/>View the Git commit on <a \
-                href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
-                GitLab</a>.",
-                mimeType: 'text/html',
-                subject: "[jenkins] ${env.JOB_NAME} ${env.GIT_BRANCH} FAILURE",
-                to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
-                replyTo: "mbee-service.fc-ssc@lmco.com",
-                from: "mbee-service.fc-ssc@lmco.com",
-                attachLog: true
+            //emailext body: "${env.JOB_NAME} ${env.GIT_BRANCH} - Build #${env.BUILD_NUMBER} - FAILED: \
+            //    <br/><br/>Check console output at ${env.BUILD_URL} to view the results.\
+            //    <br/><br/>View the Git commit on <a \
+            //    href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
+            //    GitLab</a>.",
+            //    mimeType: 'text/html',
+            //    subject: "[jenkins] ${env.JOB_NAME} ${env.GIT_BRANCH} FAILURE",
+            //    to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+            //    replyTo: "mbee-service.fc-ssc@lmco.com",
+            //    from: "mbee-service.fc-ssc@lmco.com",
+            //    attachLog: true
         }
     }
 }
