@@ -17,6 +17,7 @@
  * @description  Tests the project model
  */
 
+const fs = require('fs');
 const path = require('path');
 const chai = require('chai');
 const request = require('request');
@@ -30,6 +31,7 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 describe(name, () => {
   it('should confirm that the API is up', upTest);
+  it('should confirm that swagger.json API documentation is up', swaggerJSONTest);
 });
 
 
@@ -40,8 +42,13 @@ describe(name, () => {
  * Tests that the API is running.
  */
 function upTest(done) {
+  const test = M.config.test;
+  if (test.hasOwnProperty('NODE_TLS_REJECT_UNAUTHORIZED')) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = test.NODE_TLS_REJECT_UNAUTHORIZED;
+  }
   request({
-    url: `${M.config.test.url}/api/test`
+    url: `${test.url}/api/test`,
+    ca: (test.hasOwnProperty('ca')) ? fs.readFileSync(`${M.root}/${test.ca}`) : undefined
   },
   (error, response, body) => {
     if (error) {
@@ -49,6 +56,30 @@ function upTest(done) {
     }
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(body).to.equal('');
+
+    done();
+  });
+}
+
+
+/**
+ * Tests that the API is running.
+ */
+function swaggerJSONTest(done) {
+  const test = M.config.test;
+  if (test.hasOwnProperty('NODE_TLS_REJECT_UNAUTHORIZED')) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = test.NODE_TLS_REJECT_UNAUTHORIZED;
+  }
+  request({
+    url: `${test.url}/api/doc/swagger.json`,
+    ca: (test.hasOwnProperty('ca')) ? fs.readFileSync(`${M.root}/${test.ca}`) : undefined
+  },
+  (error, response, body) => {
+    if (error) {
+      console.error(error);  // eslint-disable-line no-console
+    }
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(JSON.parse(body)).to.be.an('object');
     done();
   });
 }
