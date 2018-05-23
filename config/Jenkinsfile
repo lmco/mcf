@@ -69,9 +69,16 @@ pipeline {
         stage('Test') {
             steps {
                 // Wait to be sure server is up
-                sh 'sleep 30'
-                // Runs the basic test suite against the running stage container
-                sh 'NODE_ENV=stage node mbee test --grep "^[0-6]"'
+                sh 'sleep 15'
+
+                // The tests will retry up to 3 times
+                // The test process will timeout after 10 minutes (total, not per retry)
+                // This timing may need to be updated as the test suite grows
+                timeout(time: 10, unit: 'MINUTES') {
+                    retry(3) {
+                        sh 'NODE_ENV=stage node mbee test --grep "^[0-6]"'
+                    }
+                }
             }
         }
 
