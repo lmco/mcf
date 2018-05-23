@@ -28,6 +28,7 @@ const path = require('path');
 const M = { env: process.env.NODE_ENV || 'dev' };
 M.version = require(`${__dirname}/package.json`).version;
 M.build = require(`${__dirname}/package.json`).buildNumber;
+M.version4 = (M.build !== 'NO_BUILD_NUMBER') ? `${M.version}.${M.build}` : `${M.version}.0`;
 M.config = require(`${__dirname}/config/${M.env}.json`);
 M.root = __dirname;
 M.path = {

@@ -37,7 +37,11 @@ class APIController {
      */
   static version(req, res) {
     mbee.log.info(`GET "/api/version" requested by ${req.user.username}`);
-    const obj = { version: mbee.version, build: `${mbee.build}` };
+    const obj = {
+      version: mbee.version,
+      version4: mbee.version4,
+      build: `${mbee.build}`
+    };
     res.header('Content-Type', 'application/json');
     return res.send(APIController.formatJSON(obj));
   }

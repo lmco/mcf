@@ -106,8 +106,7 @@ class UIController {
           ui: M.config.server.ui,
           user: req.user,
           info: {
-            version: M.version,
-            build: M.build
+            version: M.version4
           },
           title: 'About | Model-Based Engineering Environment'
         });
