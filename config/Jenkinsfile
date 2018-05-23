@@ -69,7 +69,7 @@ pipeline {
         stage('Test') {
             steps {
                 // Wait to be sure server is up
-                sh 'sleep 10'
+                sh 'sleep 30'
                 // Runs the basic test suite against the running stage container
                 sh 'NODE_ENV=stage node mbee test --grep "^[0-6]"'
             }
@@ -98,6 +98,10 @@ pipeline {
      * This gets run at the end of the pipeline.
      */
     post {
+        always {
+            // Always ensure staged container is removed
+            sh 'NODE_ENV=stage node mbee docker --clean'
+        }
         success {
             emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
                 <br/><br/>No further action is required.",
