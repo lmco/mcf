@@ -90,7 +90,7 @@ function build(_args) {
     gulp.src('./node_modules/jquery/dist/jquery.min.js')
       .pipe(gulp.dest('public/js'));
     // Copy Popper JS
-    gulp.src('./node_modules/popper.js/dist/popper.min.js')
+    gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
       .pipe(gulp.dest('public/js'));
   }
 

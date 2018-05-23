@@ -40,7 +40,8 @@ class UIController {
     M.log.info(`GET ${req.originalUrl} requested by ${req.user.username}`);
     return res.render('home', {
       ui: M.config.server.ui,
-      user: req.user.getPublicData()
+      user: req.user.getPublicData(),
+      title: 'MBEE | Model-Based Engineering Environment'
     });
   }
 
@@ -58,7 +59,8 @@ class UIController {
       renderer: 'mbee-renderer',
       user: req.user.getPublicData(),
       org: M.lib.sani.sanitize(req.params.org),
-      project: M.lib.sani.sanitize(req.params.project)
+      project: M.lib.sani.sanitize(req.params.project),
+      title: 'MBEE | Model-Based Engineering Environment'
     });
   }
 
@@ -73,7 +75,8 @@ class UIController {
     return res.render('home', {
       ui: M.config.server.ui,
       renderer: 'admin-renderer',
-      user: req.user.getPublicData()
+      user: req.user.getPublicData(),
+      title: 'Admin | Model-Based Engineering Environment'
     });
   }
 
@@ -103,31 +106,12 @@ class UIController {
           ui: M.config.server.ui,
           user: req.user,
           info: {
-            version: M.version
-          }
+            version: M.version,
+            build: M.build
+          },
+          title: 'About | Model-Based Engineering Environment'
         });
       });
-  }
-
-
-  /**
-   * Renders the developers' documentation page.
-   * This is expected to move to a plugin eventually.
-   */
-
-  static showDevelopersPage(req, res) {
-    // log the request
-    const user = (req.user) ? req.user.username.toString() : 'anonymous';
-    M.log.info(`GET "/developers" requested by  ${user}`);
-
-    // render the developers page
-    return res.render('developers', {
-      ui: M.config.server.ui,
-      user: req.user,
-      info: {
-        version: M.version
-      }
-    });
   }
 
 
@@ -152,6 +136,7 @@ class UIController {
     return res.render('login', {
       ui: M.config.server.ui,
       user: '',
+      title: 'Login | Model-Based Engineering Environment',
       next
     });
   }

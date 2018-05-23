@@ -27,6 +27,7 @@ const path = require('path');
 // Global MBEE helper object
 const M = { env: process.env.NODE_ENV || 'dev' };
 M.version = require(`${__dirname}/package.json`).version;
+M.build = require(`${__dirname}/package.json`).buildNumber;
 M.config = require(`${__dirname}/config/${M.env}.json`);
 M.root = __dirname;
 M.path = {
