@@ -17,6 +17,7 @@
 
 const path = require('path');
 const express = require('express');
+const M = require(path.join(__dirname, '..', 'mbee.js'));
 const getController = x => path.join(__dirname, 'controllers', x);
 const UIController = require(getController('UIController'));
 const AuthController = require(path.join(__dirname, 'lib', 'auth'));
@@ -50,14 +51,9 @@ router.post('/login',
 router.get('/', AuthController.authenticate.bind(AuthController), UIController.home);
 
 /* This renders the home page for logged in users */
-router.get('/:org/:project',
+router.get(`/:org(${M.lib.validators.org.id})/:project`,
   AuthController.authenticate.bind(AuthController),
   UIController.mbee);
-
-/* Renders the developers documentation page */
-router.get('/developers',
-  AuthController.authenticate.bind(AuthController),
-  UIController.showDevelopersPage);
 
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.

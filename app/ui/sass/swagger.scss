@@ -2,6 +2,23 @@
 @import 'variables';
 @charset "UTF-8";
 
+html{
+    box-sizing: border-box;
+    overflow: -moz-scrollbars-vertical;
+    overflow-y: scroll;
+    padding-top: 0;
+    background: 20px;
+}
+
+body {
+  margin: 0;
+  margin-top: 0;
+  position: relative;
+  top: 0;
+  background: #fafafa;
+}
+
+
 .swagger-ui html {
   box-sizing: border-box
 }
@@ -473,7 +490,8 @@
   margin: 0 0 20px;
   padding: 30px 0;
   background: #fff;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .15)
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .15);
+  display: none;
 }
 
 .swagger-ui .scheme-container .schemes {
@@ -1260,7 +1278,8 @@
 
 .swagger-ui .topbar {
   padding: 8px 30px;
-  background-color: #89bf04
+  background-color: #89bf04;
+  display: none; /* hides the top bar */
 }
 
 .swagger-ui .topbar .topbar-wrapper {

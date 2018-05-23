@@ -44,6 +44,8 @@ const api = express.Router();
  * @swagger
  * /doc:
  *   get:
+ *     tags:
+ *       - general
  *     description: This API endpoint should be used to test is the API is functional.
  *     produces:
  *       - application/json
@@ -58,6 +60,8 @@ api.get('/test', APIController.test);
  * @swagger
  * /doc:
  *   get:
+ *     tags:
+ *       - general
  *     description: Renders the Swagger API documentation.
  *     produces:
  *       - application/json
@@ -71,6 +75,8 @@ api.get('/doc', APIController.swaggerDoc);
  * @swagger
  * /doc/swagger.json:
  *   get:
+ *     tags:
+ *       - general
  *     description: Returns the swagger JSON file.
  *     produces:
  *       - application/json
@@ -84,6 +90,8 @@ api.get('/doc/swagger.json', APIController.swaggerJSON);
  * @swagger
  * /login:
  *   post:
+ *     tags:
+ *       - general
  *     description: Logs the user into the application.
  *     produces:
  *       - application/json
@@ -108,6 +116,8 @@ api.route('/login')
  * @swagger
  * /version:
  *   get:
+ *     tags:
+ *       - general
  *     description: Returns the application version as JSON.
  *     produces:
  *       - application/json
@@ -125,6 +135,8 @@ api.route('/version')
  * @swagger
  * /orgs:
  *   get:
+ *     tags:
+ *       - organizations
  *     description: Logs the user into the application.
  *     produces:
  *       - application/json
@@ -136,16 +148,22 @@ api.route('/version')
  *       500:
  *         description: Internal Server Error
  *   post:
+ *     tags:
+ *       - organizations
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   put:
+ *     tags:
+ *       - organizations
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   delete:
+ *     tags:
+ *       - organizations
  *     description: Not implemented, reserved for future use.
  *                  When implemented this will delete all organizations.
  *     responses:
@@ -163,6 +181,8 @@ api.route('/orgs')
  * @swagger
  * /orgs/:orgid:
  *   get:
+ *     tags:
+ *       - organizations
  *     description: Retrieves and returns an organization by ID.
  *     produces:
  *       - application/json
@@ -187,6 +207,8 @@ api.route('/orgs')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   post:
+ *     tags:
+ *       - organizations
  *     description: Creates an organization.
  *     produces:
  *       - application/json
@@ -229,6 +251,8 @@ api.route('/orgs')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   put:
+ *     tags:
+ *       - organizations
  *     description: Creates or updates an organization. If the organization does
  *                  not yet exist it will be created (this is the same as a POST
  *                  request). If the organization already exists, this will
@@ -275,6 +299,8 @@ api.route('/orgs')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   delete:
+ *     tags:
+ *       - organizations
  *     description: Deletes the organization.
  *     produces:
  *       - application/json
@@ -312,6 +338,8 @@ api.route('/orgs/:orgid')
  * @swagger
  * /orgs/:orgid/projects:
  *   get:
+ *     tags:
+ *       - projects
  *     description: Gets a list of all projects the user has access to within an organization.
  *     produces:
  *       - application/json
@@ -340,16 +368,22 @@ api.route('/orgs/:orgid')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   post:
+ *     tags:
+ *       - projects
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   put:
+ *     tags:
+ *       - projects
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   delete:
+ *     tags:
+ *       - projects
  *     description: Not implemented, reserved for future use. If implemented,
  *                  this would delete all projects in the organization.
  *     responses:
@@ -366,6 +400,8 @@ api.route('/orgs/:orgid/projects')
  * @swagger
  * /orgs/:orgid/projects/:projectid:
  *   get:
+ *     tags:
+ *       - projects
  *     description: Gets a project by ID
  *     produces:
  *       - application/json
@@ -396,6 +432,8 @@ api.route('/orgs/:orgid/projects')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   post:
+ *     tags:
+ *       - projects
  *     description: Creates a new project.
  *     produces:
  *       - application/json
@@ -451,6 +489,8 @@ api.route('/orgs/:orgid/projects')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   put:
+ *     tags:
+ *       - projects
  *     description: Creates or replaces a project. If the project does not yet exist, it will be
  *                  reated (just like a POST). If it does exist, the project will be replaced with
  *                  data provided.
@@ -501,6 +541,8 @@ api.route('/orgs/:orgid/projects')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   delete:
+ *     tags:
+ *       - projects
  *     description: Deletes a project
  *     produces:
  *       - application/json
@@ -541,21 +583,29 @@ api.route('/orgs/:orgid/projects/:projectid')
  * @swagger
  * /orgs/:orgid/members:
  *   get:
+ *     tags:
+ *       - organizations
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   post:
+ *     tags:
+ *       - organizations
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   put:
+ *     tags:
+ *       - organizations
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   delete:
+ *     tags:
+ *       - organizations
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
@@ -572,21 +622,29 @@ api.route('/orgs/:orgid/members/:role')
  * @swagger
  * /orgs/:orgid/projects/:projectid/members:
  *   get:
+ *     tags:
+ *       - projects
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   post:
+ *     tags:
+ *       - projects
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   put:
+ *     tags:
+ *       - projects
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   delete:
+ *     tags:
+ *       - projects
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
@@ -603,6 +661,8 @@ api.route('/orgs/:orgid/projects/:projectid/members/:role')
  * @swagger
  * /users:
  *   get:
+ *     tags:
+ *       - users
  *     description: Gets a list of all users. Returns a list of JSON objects containing public
  *                  user data.
  *     produces:
@@ -623,16 +683,22 @@ api.route('/orgs/:orgid/projects/:projectid/members/:role')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   post:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   put:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   delete:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
@@ -648,6 +714,8 @@ api.route('/users')
  * @swagger
  * /users/:username:
  *   get:
+ *     tags:
+ *       - users
  *     description: Gets a user by username.
  *     produces:
  *       - application/json
@@ -673,6 +741,8 @@ api.route('/users')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   post:
+ *     tags:
+ *       - users
  *     description: Creates a user.
  *     produces:
  *       - application/json
@@ -718,6 +788,8 @@ api.route('/users')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   put:
+ *     tags:
+ *       - users
  *     description: Creates or updates user. If the user already exists it will be updated. In this
  *                  case, any valid fields that are given in the request body will replace the
  *                  existing field values.
@@ -765,6 +837,8 @@ api.route('/users')
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   delete:
+ *     tags:
+ *       - users
  *     description: Deletes the user.
  *     produces:
  *       - application/json
@@ -798,21 +872,29 @@ api.route('/users/:username')
  * @swagger
  * /users/:id/roles:
  *   get:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   post:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   put:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   delete:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
@@ -829,21 +911,29 @@ api.route('/users/:username/roles')
  * @swagger
  * /users/:id/groups:
  *   get:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   post:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   put:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   delete:
+ *     tags:
+ *       - users
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
@@ -860,6 +950,8 @@ api.route('/users/:username/groups')
  * @swagger
  * /users/whoami:
  *   get:
+ *     tags:
+ *       - users
  *     description: Returns the currently logged in user information
  *     responses:
  *       200:
