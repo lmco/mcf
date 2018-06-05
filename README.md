@@ -64,6 +64,7 @@ For more information on configuration, see the
 [configuration section](#configuration) below.
 
 ### Building MBEE
+
 The easiest way to build MBEE is to run `node mbee build`. This will install
 dependencies and build MBEE.
 
@@ -75,6 +76,7 @@ dependencies and build MBEE.
 > Javascript and similar tasks required for MBEE to run.
 
 #### NPM, Yarn, and mbee.js
+
 NPM is the default package manager that comes with with Node.js. MBEE is
 designed to that NPM could be used to build and run MBEE without issue. Yarn
 is used instead because it handles dependency management a bit more effectively
