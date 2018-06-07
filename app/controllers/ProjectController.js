@@ -36,6 +36,7 @@ const Project = require(path.join(modelsPath, 'ProjectModel'));
  */
 
 class ProjectController {
+
   /**
    * Takes an orgid in the request params and returns a list of the project
    * objects for that organization. Returns an error message if organization
@@ -384,6 +385,7 @@ class ProjectController {
       });
     });
   }
+
 }
 
 // Expose `ProjectController`

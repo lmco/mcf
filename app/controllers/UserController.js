@@ -35,6 +35,7 @@ const sani = M.lib.sanitization;
  * controller defines the implementation of /users/* API endpoints.
  */
 class UserController {
+
   /**
    * Gets a list of all users and returns their public data in
    * JSON format.
@@ -387,6 +388,7 @@ class UserController {
       return res.status(200).send(API.formatJSON(user.getPublicData()));
     });
   }
+
 }
 
 module.exports = UserController;

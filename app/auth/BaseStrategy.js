@@ -30,13 +30,13 @@ const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const sani = M.lib.sani;
 
-
 class BaseStrategy {
+
   /**
-     * @constructor BaseStrategy
-     *
-     * @description  The `BaseStrategy` constructor.
-     */
+   * @constructor BaseStrategy
+   *
+   * @description  The `BaseStrategy` constructor.
+   */
   constructor() {
     this.name = 'base-strategy';
     this.authenticate.bind(this);
@@ -46,6 +46,7 @@ class BaseStrategy {
   /**
    * This function will be called for API routes requiring authentication.
    */
+
   authenticate(req, res, next) {
     const authorization = req.headers.authorization;
     let username = null;
@@ -101,6 +102,7 @@ class BaseStrategy {
           next();
         });
       }
+
       /**********************************************************************
        * Handle Token Authentication
        **********************************************************************
@@ -154,6 +156,7 @@ class BaseStrategy {
         next();
       });
     }
+
     /**********************************************************************
      * Handle Form Input Authentication
      **********************************************************************
@@ -243,6 +246,7 @@ class BaseStrategy {
   }
 
   /* eslint-enable class-methods-use-this */
+
 }
 
 module.exports = BaseStrategy;

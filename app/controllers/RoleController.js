@@ -42,6 +42,7 @@ const User = require(path.join(modelsPath, 'UserModel'));
 
 
 class RoleController {
+
   /**
    * Gets a list of all users of a specific role type for an organization.
    *
@@ -335,6 +336,7 @@ class RoleController {
           });
       });
   }
+
 }
 
 // Expose `RoleController`

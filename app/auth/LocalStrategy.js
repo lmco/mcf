@@ -38,6 +38,7 @@ const sani = M.lib.sani;
  * @classdesc This
  */
 class LocalStrategy extends BaseStrategy {
+
   /**
    * The `LocalStrategy` constructor.
    */
@@ -184,6 +185,7 @@ class LocalStrategy extends BaseStrategy {
   }
 
   /* eslint-enable class-methods-use-this */
+
 }
 
 module.exports = LocalStrategy;

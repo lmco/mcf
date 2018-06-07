@@ -30,8 +30,8 @@ const User = require(path.join(__dirname, '..', 'models', 'UserModel.js'));
  * It handles the server-side logic for most UI routes and renders the
  * appropriate views.
  */
-
 class UIController {
+
   /**
    * Renders the home page.
    */
@@ -184,6 +184,7 @@ class UIController {
     // redirect to the login screen
     res.redirect('/login');
   }
+
 }
 
 module.exports = UIController;
