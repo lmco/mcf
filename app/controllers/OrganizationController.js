@@ -64,7 +64,7 @@ class OrganizationController {
     return new Promise(function(resolve, reject) {
       const orgId = M.lib.sani.sanitize(orgid);
       Organization.findOne({ id: orgId }, (err, org) => {
-        // If error occurs, log it and return 500 status
+        // If error occurs, return it
         if (err) {
           M.log.error(err);
           reject(err);
@@ -96,7 +96,7 @@ class OrganizationController {
    * @example
    * OrganizationController.createOrg('josh', {mbee-sw})
    * .then(function(org) {
-   *   // do something with the newly createdorg
+   *   // do something with the newly created org
    * })
    * .catch(function(error) {
    *   M.log.error(error);
@@ -134,8 +134,9 @@ class OrganizationController {
         return reject(new Error('Organization name is not valid.'));
       }
 
+      // Check if org already exists
       Organization.find({ id: orgId }, (err, orgs) => {
-        // If error, log it and return error
+        // If error occurs, return it
         if (err) {
           return reject(err);
         }
@@ -157,6 +158,128 @@ class OrganizationController {
     })
   }
 
+  /**
+   * This function takes a user and org object and updates an existing organization.
+   *
+   * @example
+   * OrganizationController.createOrg('josh', {mbee-sw})
+   * .then(function(org) {
+   *   // do something with the newly updated org
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the  requesting user.
+   * @param  {id: (string), name: (string)} The JSON of the updated org elements.
+   */
+  static updateOrg(user, orgUpdate) {
+    return new Promise(function (resolve, reject) {
+
+      // TODO (JU & JK): Implement in APIController 
+      /*
+      // If a given property is not an allowed property to be updated,
+      // return an error immediately.
+      const allowedProperties = ['name'];
+      const givenProperties = Object.keys(req.body);
+      for (let i = 0; i < givenProperties.length; i++) {
+        if (!allowedProperties.includes(givenProperties[i])) {
+          return res.status(400).send('Bad Request');
+        }
+      }
+      // If nothing is being changed, return.
+      if (givenProperties.length < 1) {
+        return res.status(400).send('Bad Request');
+      }
+      */
+
+      // Error check - Make sure user is admin
+      if (!user.admin){
+        return reject(new Error('User cannot create orgs.'))
+      }
+
+      // Error check - Make sure organization body has an organization id and name
+      if (!orgUpdate.hasOwnProperty('id')) {
+        return reject(new Error('Organization ID not included.'));
+      }
+      if (!orgUpdate.hasOwnProperty('name')) {
+        return reject(new Error('Organization does not have a name.'));
+      }
+
+      // Sanitize fields
+      const newOrgId = M.lib.sani.html(orgUpdate.id);
+      const newOrgName = M.lib.sani.html(orgUpdate.name);
+
+      Organization.find({ id: orgId }, (err, orgs) => {
+        // If error occurs, return it
+        if (err) {
+          return reject(err);
+        }
+        // Error check - validate only 1 org was found
+        if (orgs.length > 1) {
+          return reject( new Error('Too many orgs found with same ID'));
+        }
+        if (orgs.length < 1) {
+          return reject( new Error('Organization not found.'));
+        }
+
+        // allocation for convenience
+        const org = orgs[0];
+
+        // Update the name
+        org.name = newOrgName;
+        org.save((saveErr) => {
+          if (saveErr) {
+            // If error occurs, return it
+            return reject(saveErr);
+          }
+          // Return updated org
+          return resolve(org);
+        });
+      });
+    })
+  }
+
+  /**
+   * This function takes a user and org object and updates an existing organization.
+   *
+   * @example
+   * OrganizationController.createOrg('josh', {mbee-sw})
+   * .then(function(org) {
+   *   // do something with the newly updated org
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the  requesting user.
+   * @param  {string} The ID of the org being deleted.
+   */
+  static removeOrg(user, org) {
+    return new Promise(resolve, reject) {
+      // Error check - Make sure user is admin
+      if (!user.admin){
+        return reject(new Error('User cannot create orgs.'))
+      }
+
+      const orgid = M.lib.sani.html(req.params.orgid);
+
+      M.log.verbose('Attempting delete of', orgid, '...');
+
+      // Do the deletion
+      Organization.findOneAndRemove({
+        id: orgid
+      },
+      (err) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(org);
+      });
+    }
+  }
 
 
 }
