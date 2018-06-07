@@ -90,19 +90,32 @@ OrganizationSchema.virtual('permissions.admin', {
 * and/or write permissions to the organization
 */
 OrganizationSchema.virtual('permissions.member').get(() => {
-  const member = this.permissions.write || [];
+  const write = this.permissions.write || [];
   const admin = this.permissions.admin || [];
 
-  const memberList = member.map(a => a.username);
+  const memberList = write.map(a => a.username);
 
   for (let i = 0; i < admin.length; i++) {
     if (!memberList.includes(admin[i].username)) {
-      member.push(admin[i]);
+      memberList.push(admin[i].username);
     }
   }
 
-  return member;
+  return memberList;
 });
+
+
+/**
+ * Returns the orgs's public data.
+ * TODO (ju) - Add permissions to public data?
+ */
+OrganizationSchema.methods.getPublicData = function() {
+  return {
+    id: this.username,
+    name: this.name,
+    projects: this.projects
+  };
+};
 
 // Required for virtual getters
 OrganizationSchema.set('toJSON', { virtuals: true });

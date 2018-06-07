@@ -12,8 +12,10 @@
 
 const path = require('path');
 const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
 
+const OrgController = mbee.load('controllers/OrganizationController');
 
 /**
  * APIController.js
@@ -114,6 +116,32 @@ class APIController {
      */
   static notImplemented(req, res) {
     return res.status(501).send('Not Implemented.');
+  }
+
+
+  /*******************************************************
+   *
+   *******************************************************/
+
+  /**
+   * GET /api/org/:orgid
+   * Gets the organization whose ID is 'orgid' and returns the organization's
+   * public data as JSON.
+   */
+  static getOrg(req, res) {
+    const username = req.user.username;
+    const orgid = M.lib.sani.sanitize(req.params.orgid);
+
+    OrgController.getOrg(username, orgid)
+    .then(function(org) {
+      res.header('Content-Type', 'application/json');
+      return res.send(APIController.formatJSON(org.getPublicData()));
+    })
+    .catch(function(error) {
+      M.log.error(error);
+      return res.status(500).send('Internal Server Error');
+    })
+
   }
 }
 

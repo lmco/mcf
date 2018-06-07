@@ -128,6 +128,49 @@ class OrganizationController {
   }
 
 
+  /**
+   * This function takes a user and orgid and resolves the organization.
+   *
+   * @example
+   * OrganizationController.getOrg('josh', 'mbee-sw')
+   * .then(function(org) {
+   *   // do something with the org
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {String} The string containing the username of the requesting user.
+   * @param  {String} The string of the org ID.
+   */
+  static getOrg(username, orgid) {
+    return new Promise(function(resolve, reject) {
+      const orgId = M.lib.sani.sanitize(orgid);
+      Organization.findOne({ id: orgId }, (err, org) => {
+        // If error occurs, log it and return 500 status
+        if (err) {
+          M.log.error(err);
+          reject(err);
+        }
+
+        // If no org is found, reject
+        if (!org) {
+          reject(new Error('Org not found'));
+        }
+
+        // If user is not a member
+        if (!org.permissions.member.includes(username)) {
+          reject(new Error('Org not found'));
+        }
+
+        // If we find one org (which we should if it exists)
+        resolve(org)
+      });
+
+    })
+  }
+
   /* eslint-disable consistent-return */
 
   /**
