@@ -17,9 +17,12 @@ const path = require('path');
 /* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-const API = require(path.join(__dirname, 'APIController'));
+const API = require(path.join(__dirname, 'APIController.js'));
 const modelsPath = path.join(__dirname, '..', 'models');
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));
+
+console.log(API);
+console.log(API.formatJSON);
 
 
 /**
@@ -99,34 +102,6 @@ class OrganizationController {
   }
 
 
-  /**
-   * Takes an orgid parameter in the request URI and returns the organization
-   * with that ID.
-   *
-   * @req.params
-   *     orgid    the ID of the organization to get.
-   *
-   * @req.body
-   *     N/A
-   */
-
-  static getOrg(req, res) {
-    const orgId = M.lib.sani.html(req.params.orgid);
-    Organization.find({ id: orgId }, (err, orgs) => {
-      // If error occurs, log it and return 500 status
-      if (err) {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-      // If we find one org (which we should if it exists)
-      if (orgs.length === 1) {
-        res.header('Content-Type', 'application/json');
-        return res.send(API.formatJSON(orgs[0]));
-      }
-      return res.status(500).send('Internal Server Error');
-    });
-  }
-
 
   /**
    * This function takes a user and orgid and resolves the organization.
@@ -154,18 +129,21 @@ class OrganizationController {
           reject(err);
         }
 
+        console.log(orgId)
+        console.log(org)
+
         // If no org is found, reject
         if (!org) {
-          reject(new Error('Org not found'));
+          return reject(new Error('Org not found'));
         }
 
         // If user is not a member
         if (!org.permissions.member.includes(username)) {
-          reject(new Error('Org not found'));
+          return reject(new Error('Org not found'));
         }
 
         // If we find one org (which we should if it exists)
-        resolve(org)
+        return resolve(org)
       });
 
     })
