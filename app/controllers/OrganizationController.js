@@ -27,9 +27,6 @@ console.log(API.formatJSON);
 console.log(APIPath);
 
 
-
-
-
 /**
  * OrganizationController
  *
@@ -40,9 +37,6 @@ console.log(APIPath);
  */
 
 class OrganizationController {
-
-
-
 
   /**
    * This function takes a user and orgid and resolves the organization.
@@ -90,6 +84,7 @@ class OrganizationController {
     })
   }
 
+
   /**
    * This function takes a user and org id and creates a new organization.
    *
@@ -108,7 +103,6 @@ class OrganizationController {
    */
   static createOrg(user, org) {
     return new Promise(function(resolve, reject) {
-
       // Error check - Make sure user is admin
       if (!user.admin){
         return reject(new Error('User cannot create orgs.'))
@@ -158,6 +152,7 @@ class OrganizationController {
     })
   }
 
+
   /**
    * This function takes a user and org object and updates an existing organization.
    *
@@ -176,7 +171,6 @@ class OrganizationController {
    */
   static updateOrg(user, orgUpdate) {
     return new Promise(function (resolve, reject) {
-
       // TODO (JU & JK): Implement in APIController 
       /*
       // If a given property is not an allowed property to be updated,
@@ -241,6 +235,7 @@ class OrganizationController {
     })
   }
 
+
   /**
    * This function takes a user and org object and updates an existing organization.
    *
@@ -280,7 +275,6 @@ class OrganizationController {
       });
     }
   }
-
 
 }
 
