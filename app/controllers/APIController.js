@@ -137,6 +137,8 @@ class APIController {
    ****************************************************************************/
 
   /**
+   * GET /api/orgs
+   *
    * Gets a list of all organizations that a user has access to.
    * Returns a Promise resolved with an array of organizations.
    * If the user had no access to organizations, the promise resolves
@@ -159,54 +161,53 @@ class APIController {
 
 
   /**
-   * Accepts a list of JSON objects containing valid organizations.
+   * POST /api/orgs
+   *
+   * Accepts a list of JSON objects containing organization data.
    * Attempts to create each of the organizations. If any of the organizations
-   * fail, the entire request fails and none of the orgs are created.
+   * fail, the entire request fails and none of the organizations are created.
    *
    * This method is not yet implemented.
    */
   static postOrgs(req, res) {
     // TODO - Discuss the possibility of batch creation of orgs.
-    // We may need to look into using transactions with Mongo to make this work.
+    // We may need to look into using transactions with mongo to make this work.
     res.status(501).send('Not Implemented.');
   }
 
 
   /**
-   * TODO (jk) - Discuss the possibility of batch updates to orgs by passing
-   * a list of existing orgs. Must define behavior for this.
+   * PUT /api/orgs
    *
-   * @req.params
-   *     N/A
+   * Accepts a list of JSON objects containing organization data. This function expects each of the
+   * organizations to already exist (this should be updating them). If any of the organization
+   * updates fail, the entire request fails.
    *
-   * @req.body
-   *     N/A
+   * This method is not yet implemented.
    */
-
   static putOrgs(req, res) {
+    // TODO - Discuss the possibility of batch updates to orgs by passing
+    // a list of existing orgs. Must define behavior for this.
     res.status(501).send('Not Implemented.');
   }
 
 
   /**
-   * This function will delete all orgs.
+   * DELETE /api/orgs
    *
-   * TODO (jk) - Discuss and define behavior for this will work or if it is
-   * necessary.
+   * This function will soft-delete all orgs.
    *
-   * @req.params
-   *     N/A
-   *
-   * @req.body
-   *     N/A
+   * This method is not yet implemented.
    */
   static deleteOrgs(req, res) {
+    // TODO - Discuss and define behavior for this will work or if it is necessary.
     res.status(501).send('Not Implemented.');
   }
 
 
   /**
-   * GET /api/org/:orgid
+   * GET /api/orgs/:orgid
+   *
    * Gets the organization whose ID is 'orgid' and returns the organization's
    * public data as JSON.
    */
@@ -227,22 +228,14 @@ class APIController {
 
 
   /* eslint-disable consistent-return */
-
   /**
+   * POST /api/orgs/:orgid
+   *
    * Takes an organization in the request body formatted as JSON and an
    * organization ID in the URI and creates the corresponding organization.
    * A valid orgid consists of only lowercase letters, numbers, and dashes
    * and must begin with a letter.
-   *
-   * @req.params
-   *     orgid            The ID of the organization to create.
-   *
-   * @req.body
-   *     id (optional)    The organization id. This must match the orgid
-   *                      in the request params.
-   *     name             The name of the organization to create.
    */
-
   static postOrg(req, res) {
     const orgId = M.lib.sani.html(req.params.orgid);
 
@@ -304,19 +297,15 @@ class APIController {
   }
   /* eslint-enable consistent-return */
 
+
   /* eslint-disable consistent-return */
   /**
+   * PUT /api/orgs/:orgid
+   *
    * Takes an orgid in the URI and JSON encoded data in the body. Updates the
    * org specified by the URI with the data provided in the body.
-   *
    * The organization ID cannot be updated and should not be provided in the
    * body.
-   *
-   * @req.params
-   *     orgid            The ID of the organization to create.
-   *
-   * @req.body
-   *     name             The name of the organization to create.
    */
   static putOrg(req, res) {
     const orgId = M.lib.sani.html(req.params.orgid);
@@ -381,17 +370,12 @@ class APIController {
 
 
   /**
-   * Takes an orgid in the URI and deletes the corresponding
+   * DELETE /api/orgs/:orgid
+   *
+   * Takes an orgid in the URI and soft-deletes the corresponding
    * organization. Returns a success message if successful, otherwise an error
    * message is returned.
-   *
-   * @req.params
-   *     orgid    The ID of the organization to delete.
-   *
-   * @req.body
-   *     N/A
    */
-
   static deleteOrg(req, res) {
     const orgid = M.lib.sani.html(req.params.orgid);
     M.log.verbose('Attempting delete of', orgid, '...');
@@ -414,12 +398,341 @@ class APIController {
    * Project API Endpoints
    ****************************************************************************/
 
-  /**
-   * GET /api/org/:orgid/project/:projectid
-   *
-   */
-  static getProject(req, res) {
 
+  /**
+   * GET /api/org/:orgid/projects
+   *
+   * Takes an orgid in the request params and returns a list of the project
+   * objects for that organization. Returns an error message if organization
+   * not found or other error occurs.
+   */
+  static getProjects(req, res) {
+    const orgid = M.lib.sanitization.html(req.params.orgid);
+    Project.find({ orgid }, (err, projects) => {
+      if (err) {
+        return res.status(500).send('Internal Server Error');
+      }
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(API.formatJSON(projects));
+    });
+  }
+
+
+  /**
+   * POST /api/org/:orgid/projects
+   *
+   * It is defined here so that
+   * calls to the corresponding route can be caught and error messages returned
+   * rather than throwing a 500 server error.
+   */
+  static postProjects(req, res) {
+    return res.status(501).send('Not Implemented.');
+  }
+
+
+  /**
+   * PUT /api/org/:orgid/projects
+   *
+   * This function is not intented to be implemented. It is defined here so that
+   * calls to the corresponding route can be caught and error messages returned
+   * rather than throwing a 500 server error.
+   *
+   * TODO (jk) - Figure out how we want to handle a change to an orgid.
+   * For now, this assumes orgid won't change and stuff will break if it does
+   */
+  static putProjects(req, res) {
+    return res.status(501).send('Not Implemented.');
+  }
+
+
+  /**
+   * DELETE /api/org/:orgid/projects
+   *
+   * This function is not intended to be implemented. It is defined here so that
+   * calls to the corresponding route can be caught and error messages returned
+   * rather than throwing a 500 server error.
+   *
+   * TODO (jk) - This may be one of the ugliest functions I've ever written. Fix it.
+   */
+  static deleteProjects(req, res) {
+    return res.status(501).send('Not Implemented.');
+  }
+
+
+  /**
+   * GET /api/org/:orgid/projects/:projectid
+   *
+   * Gets and returns a list of all projects.
+   */
+
+  static getProject(req, res) {
+    const orgid = M.lib.sanitization.html(req.params.orgid);
+    const projectid = M.lib.sanitization.html(req.params.projectid);
+
+    Project.find({ id: projectid }, (err, projects) => {
+      if (err) {
+        M.log.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+      if (projects.length !== 1) {
+        M.log.error('Error: Unexpected number of projects found.');
+        return res.status(500).send('Internal Server Error');
+      }
+      if (projects[0].orgid !== orgid) {
+        M.log.error('Error: Project orgid does not match URL orgid.');
+        return res.status(500).send('Internal Server Error');
+      }
+      res.header('Content-Type', 'application/json');
+      return res.send(API.formatJSON(projects[0]));
+    });
+  }
+
+
+  /**
+   * POST /api/org/:orgid/projects/:projectid
+   *
+   * Takes a project object in the request body and creates the project.
+   */
+  static postProject(req, res) {
+    const orgId = M.lib.sanitization.html(req.params.orgid);
+    const projectId = M.lib.sanitization.html(req.params.projectid);
+    const project = req.body;
+
+    // Error check - if project ID exists in body, make sure it matches URI
+    if (project.hasOwnProperty('id')) {
+      if (M.lib.sanitization.html(project.id) !== projectId) {
+        M.log.warn('Project ID in body does not match Project ID in URI.');
+        return res.status(400).send('Bad Request');
+      }
+    }
+
+    // Error check - make sure project ID is valid
+    if (!RegExp('^([a-z])([a-z0-9-]){0,}$').test(projectId)) {
+      M.log.warn('Project ID is not valid.');
+      return res.status(400).send('Bad Request');
+    }
+
+    // Error check - Make sure project body has a project name
+    if (!project.hasOwnProperty('name')) {
+      M.log.warn('Project does not have a name.');
+      return res.status(400).send('Bad Request');
+    }
+
+    const projectName = M.lib.sanitization.html(project.name);
+
+    // Error check - Make sure project name is valid
+    if (!RegExp('^([a-zA-Z0-9-\\s])+$').test(projectName)) {
+      M.log.warn('Project name is not valid.');
+      return res.status(400).send('Bad Request');
+    }
+
+    // Error check - If org ID exists in body, make sure it matches URI
+    if (project.hasOwnProperty('orgid')) {
+      if (M.lib.sanitization.html(project.orgid) !== orgId) {
+        M.log.warn('Organization ID in body does not match Organization ID in URI.');
+        return res.status(400).send('Bad Request');
+      }
+    }
+
+    // Create the callback function to create the project
+    const createProject = function(orgs) {
+      // Create the new project and save it
+      const newProject = new Project({
+        id: projectId,
+        name: projectName,
+        org: orgs[0]._id
+      });
+      newProject.save((saveErr, projectUpdated) => {
+        if (saveErr) {
+          M.log.error(saveErr);
+          return res.status(500).send('Internal Server Error');
+        }
+        // Return success and the JSON object
+        res.header('Content-Type', 'application/json');
+        return res.status(201).send(API.formatJSON(projectUpdated));
+      });
+    };
+
+    // Error check - Make sure the org exists
+    Organization.find({ id: orgId }, (findOrgErr, orgs) => {
+      if (findOrgErr) {
+        M.log.error(findOrgErr);
+        return res.status(500).send('Internal Server Error');
+      }
+      if (orgs.length < 1) {
+        M.log.warn('Org not found.');
+        return res.status(500).send('Internal Server Error');
+      }
+
+      // Error check - check if the project already exists
+      Project.find({ id: projectId }, (findProjErr, projects) => {
+        if (findProjErr) {
+          M.log.error(findProjErr);
+          return res.status(500).send('Internal Server Error');
+        }
+        if (projects.length >= 1) {
+          M.log.error('Project already exists.');
+          return res.status(500).send('Internal Server Error');
+        }
+
+        // If the project does not exist, create it.
+        createProject(orgs);
+      });
+    });
+  }
+
+
+  /**
+   * PUT /api/org/:orgid/projects/:projectid
+   *
+   * Takes an organization ID and project ID in the URI and JSON encoded
+   * project data in the body. Updates the project curresponding to the URI
+   * with the data passed in the body.
+   */
+  static putProject(req, res) {
+    const orgId = M.lib.sanitization.html(req.params.orgid);
+    const projectId = M.lib.sanitization.html(req.params.projectid);
+    const project = req.body;
+
+    // Error check - if project ID exists in body, make sure it matches URI
+    if (project.hasOwnProperty('id')) {
+      if (M.lib.sanitization.html(project.id) !== projectId) {
+        M.log.error('Project ID in body does not match Project ID in URI.');
+        return res.status(400).send('Bad Request');
+      }
+    }
+
+    // Error check - make sure project ID is valid
+    if (M.lib.validators.id(projectId)) {
+      M.log.warn('Project ID is not valid.');
+      return res.status(400).send('Bad Request');
+    }
+
+    // Error check - Make sure project body has a project name
+    if (!project.hasOwnProperty('name')) {
+      M.log.warn('Project does not have a name.');
+      return res.status(400).send('Bad Request');
+    }
+
+    const projectName = M.lib.sanitization.html(project.name);
+
+    // Error check - Make sure project name is valid
+    if (M.lib.validators.name(projectName)) {
+      M.log.warn('Project name is not valid.');
+      return res.status(400).send('Bad Request');
+    }
+
+    // Error check - If org ID exists in body, make sure it matches URI
+    if (project.hasOwnProperty('orgid')) {
+      if (M.lib.sanitization.html(project.orgid) !== orgId) {
+        M.log.warn('Organization ID in body does not match Organization ID in URI.');
+        return res.status(400).send('Bad Request');
+      }
+    }
+
+    // Create the callback function to create the project
+    const createProject = function(orgs) {
+      // Create the new project and save it
+      const newProject = new Project({
+        id: projectId,
+        name: projectName,
+        orgid: orgs[0]._id
+      });
+      newProject.save();
+
+      // Return success and the JSON object
+      res.header('Content-Type', 'application/json');
+      return res.status(201).send(API.formatJSON(newProject));
+    };
+
+    // The callback function to replace the project
+    // eslint disable because function is specifically changing project
+    const replaceProject = function(project) { // eslint-disable-line no-shadow
+      // Currently we only suppoer updating the name
+      project.name = projectName; // eslint-disable-line no-param-reassign
+      project.save();
+
+      // Return success and the JSON object
+      res.header('Content-Type', 'application/json');
+      return res.status(201).send(API.formatJSON(project));
+    };
+
+    // Error check - Make sure the org exists
+    Organization.find({ id: orgId }, (findOrgErr, orgs) => {
+      if (findOrgErr) {
+        M.log.error(findOrgErr);
+        return res.status(500).send('Internal Server Error');
+      }
+      if (orgs.length < 1) {
+        M.log.warn('Org not found.');
+        return res.status(500).send('Internal Server Error');
+      }
+
+      // Error check - check if the project already exists
+      Project.find({ id: projectId }, (findProjErr, projects) => {
+        if (findProjErr) {
+          M.log.error(findProjErr);
+          return res.status(500).send('Internal Server Error');
+        }
+        if (projects.length > 1) {
+          M.log.warn('Too many projects found.');
+          return res.status(500).send('Internal Server Error');
+        }
+
+        // If project is found, update it
+        if (projects.length === 1) {
+          replaceProject(projects[0]);
+        }
+
+        // If the project does not exist, create it.
+        createProject(orgs);
+      });
+    });
+  }
+
+
+  /**
+   * DELETE /api/org/:orgid/projects:projectid
+   *
+   * Takes an organization ID and project ID in the URI and deletes the
+   * corresponding project.
+   */
+
+  static deleteProject(req, res) {
+    const orgId = M.lib.sanitization.html(req.params.orgid);
+    const projectId = M.lib.sanitization.html(req.params.projectid);
+
+    Project.find({ id: projectId }).populate('org').exec((findOrgErr, projects) => {
+      if (findOrgErr) {
+        M.log.error(findOrgErr);
+        return res.status(500).send('Internal Server Error');
+      }
+      if (projects.length !== 1) {
+        M.log.warn('Unexpected number of projects found');
+        return res.status(500).send('Internal Server Error');
+      }
+      if (projects[0].org.id !== orgId) {
+        M.log.warn('Project OrgID does not match OrgID in URI.');
+        return res.status(500).send('Internal Server Error');
+      }
+      // Remove the Project
+      Project.findByIdAndRemove(projects[0]._id, (findProjErr) => {
+        if (findProjErr) {
+          M.log.warn(findProjErr);
+          return res.status(500).send('Internal Server Error');
+        }
+        // Remove the Organization reference to the project
+        Organization.findOneAndUpdate({ id: orgId },
+          { $pull: { projects: projects[0]._id } },
+          (updateErr, deleted) => {
+            if (updateErr) {
+              M.log.error(updateErr);
+              return res.status(500).send('Internal Server Error');
+            }
+            return res.status(200).send('OK');
+          });
+      });
+    });
   }
 
 
