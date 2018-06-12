@@ -47,18 +47,20 @@ const OrganizationSchema = new mongoose.Schema({
     requite: true,
     unique: true,
     match: RegExp('^([a-zA-Z0-9-\\s])+$')
-  },
+  }
+}
 
 
-  /**
-    * The 'project' holds a list of references to projects which belong to
-    * the organzation
-    */
-  projects: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project'
-  }]
-});
+/**
+  * The 'project' holds a list of references to projects which belong to
+  * the organzation
+  */
+OrganizationSchema.virtual('projects', {
+  ref: 'Project',
+  localField: '_id',
+  foreignField: 'org',
+  justOne: false
+}):
 
 
 /**

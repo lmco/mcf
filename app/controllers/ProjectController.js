@@ -37,7 +37,229 @@ const Project = require(path.join(modelsPath, 'ProjectModel'));
 
 class ProjectController {
 
+  static findProject(user, orgid, projid) {
+    return new Promise((resolve, reject) => {
+      // Sanitize inputs
+      const orgid = M.lib.sanitization.html(orgid);
+      const projid = M.lib.sanitization.html(projid);
 
+      // Search for project
+      Project.find({ id: projid }, (err, projects) => {
+        // Error Check - Database/Server Error
+        if (err) {
+          return res.status(500).send('Internal Server Error');
+        }
+
+        // Error Check - Ensure only 1 project is found
+        if (projects.length !== 1) {
+          return reject(new Error('Error: Unexpected number of projects found.'));
+        }
+
+        // Error Check -  Insure that orgid matches project orgid
+        if (projects[0].orgid !== orgid) {
+          return reject(new Error('Error: Project orgid does not match URL orgid.'));
+        }
+
+        // Return resulting project
+        return resolve(projects[0])
+      });
+    }
+  }
+  
+  static createProject(user, project) {
+    return new Promise((resolve, reject) => {
+
+      // Error check - if project ID exists in body, make sure it matches URI
+      if (!project.hasOwnProperty('id')) {
+        return reject( new Error('Project does not have attribute (id)'));
+      }
+
+      // Error check - Make sure project body has a project name
+      if (!project.hasOwnProperty('name')) {
+        return reject( new Error('Project does not have attribute (name)'));
+      }
+
+      // Error check - If org ID exists in body, make sure it matches URI
+      if (!project.hasOwnProperty('orgid')) {
+        return reject( new Error('Project does not have attribute (orgid)'));
+      }
+
+      // Sanitize project properties
+      const projId   = M.lib.sanitization.html(project.id);
+      const projName = M.lib.sanitization.html(project.name);
+      const orgId    = M.lib.sanitization.html(project.orgid);
+
+
+      // Error check - make sure project ID is valid
+      if (!RegExp('^([a-z])([a-z0-9-]){0,}$').test(projId)) {
+        return reject( new Error('Project ID is not valid.'));
+      }
+
+      // Error check - Make sure project name is valid
+      if (!RegExp('^([a-zA-Z0-9-\\s])+$').test(projName)) {
+        return reject( new Error('Project Name is not valid.'));
+      }
+
+      // Error check - Make sure the org exists
+      Organization.find({ id: orgId }, (findOrgErr, orgs) => {
+        if (findOrgErr) {
+          return reject( new Error(findOrgErr));
+        }
+        if (orgs.length < 1) {
+          return reject(new Error('Org not found.'))
+        }
+
+        // Error check - check if the project already exists
+        Project.find({ id: projectId }, (findProjErr, projects) => {
+          if (findProjErr) {
+            return reject( new Error(findProjErr));
+          }
+          if (projects.length >= 1) {
+            return reject(new Error('Project already exists.'))
+          }
+
+          // Create the new project and save it
+          const newProject = new Project({
+            id: projectId,
+            name: projectName,
+            org: orgs[0]._id
+          });
+
+          newProject.save((saveErr, projectUpdated) => {
+            if (saveErr) {
+              return reject(saveErr)
+            }
+            // Return success and the JSON object
+            return resolve(projectUpdated);
+          });
+        }
+      }
+    }
+  }
+  
+  static updateProject(user, project) {
+    return new Promise((resolve, reject) => {
+
+      // Error check - if project ID exists in body, make sure it matches URI
+      if (!project.hasOwnProperty('id')) {
+        return reject( new Error('Project does not have attribute (id)'));
+      }
+
+      // Error check - Make sure project body has a project name
+      if (!project.hasOwnProperty('name')) {
+        return reject( new Error('Project does not have attribute (name)'));
+      }
+
+      // Error check - If org ID exists in body, make sure it matches URI
+      if (!project.hasOwnProperty('orgid')) {
+        return reject( new Error('Project does not have attribute (orgid)'));
+      }
+
+      // Sanitize project properties
+      const projId   = M.lib.sanitization.html(project.id);
+      const projName = M.lib.sanitization.html(project.name);
+      const orgId    = M.lib.sanitization.html(project.orgid);
+
+
+      // Error check - make sure project ID is valid
+      if (!RegExp('^([a-z])([a-z0-9-]){0,}$').test(projId)) {
+        return reject( new Error('Project ID is not valid.'));
+      }
+
+      // Error check - Make sure project name is valid
+      if (!RegExp('^([a-zA-Z0-9-\\s])+$').test(projName)) {
+        return reject( new Error('Project Name is not valid.'));
+      }
+
+      // Error Check - check if the organization for the project exists
+      Organization.find({ id: orgId }, (findOrgErr, orgs) => {
+        if (findOrgErr) {
+          return reject(findOrgErr)
+        }
+        if (orgs.length < 1) {
+          return reject(new Error('Org not found.'));
+        }
+
+       // Error check - check if the project already exists
+       Project.find({ id: projectId }, (findProjErr, projects) => {
+          if (findProjErr) {
+            return reject(findProjErr);
+          }
+          // Error Check - make sure more than 1 project does not exist.
+          if (projects.length > 1) {
+            return reject(new Error('Too many projects found.'));
+          }
+          // Error Check - make sure project exists
+          if (projects.length !== 1) {
+            return reject(new Error('Project not found.'))
+          }
+
+          // Allocate project for convenience
+          project = projects[0];
+
+          // Currently we only suppoer updating the name
+          project.name = projectName; // eslint-disable-line no-param-reassign
+          project.save();
+
+          // Return the updated project object
+          return resolve(project)
+        });
+      });
+    }
+  }
+  
+  static removeProject(user, project) {
+    return new Promise((resolve, reject) => {
+      // Error check - if project ID exists in body, make sure it matches URI
+      if (!project.hasOwnProperty('id')) {
+        return reject( new Error('Project does not have attribute (id)'));
+      }
+
+      // Error check - Make sure project body has a project name
+      if (!project.hasOwnProperty('name')) {
+        return reject( new Error('Project does not have attribute (name)'));
+      }
+
+      // Error check - If org ID exists in body, make sure it matches URI
+      if (!project.hasOwnProperty('orgid')) {
+        return reject( new Error('Project does not have attribute (orgid)'));
+      }
+
+      // Sanitize project properties
+      const projId   = M.lib.sanitization.html(project.id);
+      const projName = M.lib.sanitization.html(project.name);
+      const orgId    = M.lib.sanitization.html(project.orgid);
+
+      // Check if project exists
+      Project.find({ id: projectId }).populate('org').exec((findOrgErr, projects) => {
+        // Error Check - Return error if database query does not work
+        if (findOrgErr) {
+          return reject(findOrgErr);
+        }
+        // Error Check - Check number of projects
+        if (projects.length >1 ) {
+          return reject(new Error('More than one project found.'));
+        }
+
+        // Error Check - Check if project was found
+        if (projects.length !== 1 ) {
+          return reject(new Error('Project not found.'));
+        }
+
+        // Error Check - Check if org matches
+        if (projects[0].org.id !== orgId) {
+          return reject(new Error('Project OrgID does not match OrgID in object.'));
+        }
+
+        // Remove the Project
+        Project.findByIdAndRemove(projects[0]._id, (findProjErr) => {
+          if (findProjErr) {
+            return reject(findProjErr);
+          }
+        });
+      });
+    });
+  }
 
 }
 

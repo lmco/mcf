@@ -253,7 +253,7 @@ class OrganizationController {
    * @param  {string} The ID of the org being deleted.
    */
   static removeOrg(user, org) {
-    return new Promise(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       // Error check - Make sure user is admin
       if (!user.admin){
         return reject(new Error('User cannot create orgs.'))
@@ -273,7 +273,7 @@ class OrganizationController {
         }
         return resolve(org);
       });
-    }
+    });
   }
 
 }
