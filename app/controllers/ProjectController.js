@@ -34,17 +34,42 @@ const Project = require(path.join(modelsPath, 'ProjectModel'));
  * The ProjectController class defines static methods for
  * project-related API routes.
  */
-
 class ProjectController {
 
-  static findProject(user, orgid, projid) {
+  /** 
+   * The function finds a project. 
+   *
+   * @example
+   * ProjectController.findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
+   * .then(function(org) {
+   *   // do something with the returned project
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {Project} The object of the project being created.
+   */
+  static findProject(user, project) {
     return new Promise((resolve, reject) => {
-      // Sanitize inputs
-      const orgid = M.lib.sanitization.html(orgid);
-      const projid = M.lib.sanitization.html(projid);
+      // Error check - if project ID exists in body, make sure it matches URI
+      if (!project.hasOwnProperty('id')) {
+        return reject( new Error('Project does not have attribute (id)'));
+      }
+
+      // Error check - If org ID exists in body, make sure it matches URI
+      if (!project.hasOwnProperty('orgid')) {
+        return reject( new Error('Project does not have attribute (orgid)'));
+      }
+
+      // Sanitize project properties
+      const projId   = M.lib.sanitization.html(project.id);
+      const orgId    = M.lib.sanitization.html(project.orgid);
 
       // Search for project
-      Project.find({ id: projid }, (err, projects) => {
+      Project.find({ id: projId }, (err, projects) => {
         // Error Check - Database/Server Error
         if (err) {
           return res.status(500).send('Internal Server Error');
@@ -56,8 +81,8 @@ class ProjectController {
         }
 
         // Error Check -  Insure that orgid matches project orgid
-        if (projects[0].orgid !== orgid) {
-          return reject(new Error('Error: Project orgid does not match URL orgid.'));
+        if (projects[0].orgid !== orgId) {
+          return reject(new Error('Error: Project orgid does not passed orgid.'));
         }
 
         // Return resulting project
@@ -65,7 +90,24 @@ class ProjectController {
       });
     }
   }
-  
+
+
+  /** 
+   * The function creates a project.
+   *
+   * @example
+   * ProjectController.createProject({Tony Stark}, {Arc Reactor 1})
+   * .then(function(org) {
+   *   // do something with the newly created project.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {Project} The object of the project being created.
+   */
   static createProject(user, project) {
     return new Promise((resolve, reject) => {
 
@@ -137,6 +179,23 @@ class ProjectController {
     }
   }
   
+
+  /** 
+   * The function updates a project.
+   *
+   * @example
+   * ProjectController.updateProject({Tony Stark}, {Arc Reactor 1})
+   * .then(function(org) {
+   *   // do something with the updated project.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {Project} The object of the project being updated.
+   */
   static updateProject(user, project) {
     return new Promise((resolve, reject) => {
 
@@ -208,6 +267,23 @@ class ProjectController {
     }
   }
   
+
+  /** 
+   * The function deletes a project.
+   *
+   * @example
+   * ProjectController.createProject({Tony Stark}, {Arc Reactor 1})
+   * .then(function(org) {
+   *   // do something with the newly created project.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {Project} The object of the project being created.
+   */
   static removeProject(user, project) {
     return new Promise((resolve, reject) => {
       // Error check - if project ID exists in body, make sure it matches URI
