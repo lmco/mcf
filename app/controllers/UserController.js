@@ -93,23 +93,24 @@ class UserController {
   /**
    * Gets a user by username and returns the user's public JSON data.
    */
-  static getUser(req, res) {
-    const username = sani.sanitize(req.params.username);
+  static findUser(user) {
+    return new Promise((resolve, reject) => {
+      const username = sani.sanitize(req.params.username);
 
-    User.findOne({
-      username,
-      deletedOn: null
-    }, (err, user) => {
-      // Check if error occured
-      if (err) {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
+      User.findOne({
+        username,
+        deletedOn: null
+      }, (err, user) => {
+        // Check if error occured
+        if (err) {
+          return reject(err)
+        }
 
-      // Otherwise return 200 and the user's public JSON
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(API.formatJSON(user.getPublicData()));
-    });
+        // Otherwise return 200 and the user's public JSON
+        return resolve(user)
+      });
+    })
+
   }
 
 

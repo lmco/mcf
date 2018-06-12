@@ -38,6 +38,11 @@ console.log(APIPath);
 
 class OrganizationController {
 
+  static findOrgs() {
+    //TODO: Josh
+  }
+
+
   /**
    * This function takes a user and orgid and resolves the organization.
    *
@@ -56,16 +61,14 @@ class OrganizationController {
    */
   static findOrg(username, orgid) {
     return new Promise(function(resolve, reject) {
+
+      // TODO (JU): Verify passed in object is not a string
       const orgId = M.lib.sani.sanitize(orgid);
       Organization.findOne({ id: orgId }, (err, org) => {
         // If error occurs, return it
         if (err) {
-          M.log.error(err);
-          reject(err);
+          return reject(err);
         }
-
-        console.log(orgId)
-        console.log(org)
 
         // If no org is found, reject
         if (!org) {
@@ -120,6 +123,8 @@ class OrganizationController {
       const orgId = M.lib.sani.html(org.id);
       const orgName = M.lib.sani.html(org.name);
 
+      // TODO (JU): Check to make sure the following are valid strings and update to pull from the 
+      // Lib validator.
       // Error check - Make sure a valid orgid and name is given
       if (!RegExp('^([a-z])([a-z0-9-]){0,}$').test(orgId)) {
         return reject(new Error('Organization ID is not valid.'));
@@ -169,7 +174,7 @@ class OrganizationController {
    * @param  {User} The object containing the  requesting user.
    * @param  {id: (string), name: (string)} The JSON of the updated org elements.
    */
-  static updateOrg(user, orgUpdate) {
+  static updateOrg(user, orgUpdate, allowedPropertiesOnly) {
     return new Promise(function (resolve, reject) {
       // TODO (JU & JK): Implement in APIController 
       /*
@@ -256,10 +261,10 @@ class OrganizationController {
     return new Promise(function (resolve, reject) {
       // Error check - Make sure user is admin
       if (!user.admin){
-        return reject(new Error('User cannot create orgs.'))
+        return reject(new Error('User cannot delete orgs.'))
       }
 
-      const orgid = M.lib.sani.html(req.params.orgid);
+      const orgid = M.lib.sani.html(org.id);
 
       M.log.verbose('Attempting delete of', orgid, '...');
 

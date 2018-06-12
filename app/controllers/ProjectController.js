@@ -66,7 +66,7 @@ class ProjectController {
 
       // Sanitize project properties
       const projId   = M.lib.sanitization.html(project.id);
-      const orgId    = M.lib.sanitization.html(project.orgid);
+      const orgId    = M.lib.sanitization.html(project.org.id);
 
       // Search for project
       Project.find({ id: projId }, (err, projects) => {
