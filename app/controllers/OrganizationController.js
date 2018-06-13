@@ -183,7 +183,7 @@ class OrganizationController {
           return reject(new Error('Organization already exists.'));
         }
 
-        // Create the new org and save it
+        // Create the new org
         const newOrg = new Organization({
           id: orgId,
           name: orgName,
@@ -191,32 +191,11 @@ class OrganizationController {
             admin: [user._id]
           }
         });
+
+        // Save and resolve the new error
         newOrg.save(function(err) {
-          console.log(user.username)
-
-
-          user.save(function(err) {
-            User.findOne({'username': user.username})
-            .populate('orgs.admin orgs.write')
-            .exec(function(err, user) {
-              if (err) {
-                M.log.error(err);
-              }
-              if (!user) {
-                M.log.error('User not found');
-              }
-
-              console.log(user);
-              // Return the response message
-              return resolve(newOrg);
-            })
-          })
-
-
-
+          return resolve(newOrg);
         });
-
-
       });
     })
   }
