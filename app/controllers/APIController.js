@@ -640,6 +640,33 @@ class APIController {
 
   }
 
+  /**
+   * Returns the public information of the currently logged in user.
+   */
+  static whoami(req, res) {
+    // Sanity check - make sure we have user with a username
+    if (!req.user || req.user.hasOwnProperty('username')) {
+      M.log.warn('Invalid req.user object');
+      return res.status(500).send('Internal Server Error');
+    }
+    const username = sani.htmlspecialchars(req.user.username);
+
+    User.findOne({
+      username,
+      deletedOn: null
+    }, (err, user) => {
+      // Check if error occured
+      if (err) {
+        M.log.error(err);
+        return res.status(500).send('Internal Server Error');
+      }
+
+      // Otherwise return 200 and the user's public JSON
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(API.formatJSON(user.getPublicData()));
+    });
+  }
+
 }
 
 // Expose the API controller

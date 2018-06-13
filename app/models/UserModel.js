@@ -47,7 +47,7 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    match: RegExp('^([a-z])([a-z0-9_]){0,}$')
+    match: RegExp(M.lib.validators.user.username)
   },
 
   /**
@@ -79,7 +79,7 @@ const UserSchema = new mongoose.Schema({
      */
   email: {
     type: String,
-    match: RegExp('^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$')
+    match: RegExp(M.lib.validators.user.email)
   },
 
   /**
@@ -341,6 +341,24 @@ UserSchema.pre('save', (next) => {
   this.deleted = '';
   next();
 });
+
+
+UserSchema.methods.isUpdateAllowed = function(field) {
+  const allowedMap =  {
+    username: false,
+    fname: true,
+    lname: true,
+    email: true,
+    name: false,
+    createOn: false,
+    deletedOn: true,
+    deleted: false,
+    updatedOn: false,
+    isLDAPUser: false,
+    admin: false
+  }
+  return allowedMap[field];
+}
 
 
 /**
