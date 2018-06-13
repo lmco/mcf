@@ -70,8 +70,9 @@ class OrganizationController {
   }
 
 
+
   /**
-   * This function takes a user and orgid and resolves the organization.
+   * This function takes a user and orgID and resolves the organization.
    *
    * @example
    * OrganizationController.getOrg('josh', 'mbee-sw')
@@ -86,17 +87,17 @@ class OrganizationController {
    * @param  {String} The string containing the username of the requesting user.
    * @param  {String} The string of the org ID.
    */
-  static findOrg(username, orgid) {
+  static findOrg(username, organizationID) {
     return new Promise(function(resolve, reject) {
 
-      // Error check - Make sure orgid is a string. Otherwise, reject.
-      if (typeof orgid !== 'string') {
-        M.log.verbose('orgid is not a string');
-        return reject(new Error('orgid is not a string'));
+      // Error check - Make sure orgID is a string. Otherwise, reject.
+      if (typeof organizationID !== 'string') {
+        M.log.verbose('orgID is not a string');
+        return reject(new Error('orgID is not a string'));
       }
 
-      const orgId = M.lib.sani.sanitize(orgid);
-      Organization.findOne({ id: orgId }, (err, org) => {
+      const orgID = M.lib.sani.sanitize(organizationID);
+      Organization.findOne({ id: orgID }, (err, org) => {
         // If error occurs, return it
         if (err) {
           return reject(err);
@@ -153,19 +154,19 @@ class OrganizationController {
       }
 
       // Sanitize fields
-      const orgId = M.lib.sani.html(org.id);
+      const orgID = M.lib.sani.html(org.id);
       const orgName = M.lib.sani.html(org.name);
 
-      // Error check - Make sure a valid orgid and name is given
-      if (!RegExp(orgId).test(orgId)) {
+      // Error check - Make sure a valid orgID and name is given
+      if (!RegExp(orgID).test(orgID)) {
         return reject(new Error('Organization ID is not valid.'));
       }
       if (!RegExp(M.lib.validators.org.name).test(orgName)) {
         return reject(new Error('Organization name is not valid.'));
       }
 
-      // Error check - Make sure a valid orgid and name is given
-      if (!RegExp(M.lib.validators.org.id).test(orgId)) {
+      // Error check - Make sure a valid orgID and name is given
+      if (!RegExp(M.lib.validators.org.id).test(orgID)) {
         return reject(new Error('Organization ID is not valid.'));
       }
       if (!RegExp(M.lib.validators.org.name).test(orgName)) {
@@ -173,7 +174,7 @@ class OrganizationController {
       }
 
       // Check if org already exists
-      Organization.find({ id: orgId }, (err, orgs) => {
+      Organization.find({ id: orgID }, (err, orgs) => {
         // If error occurs, return it
         if (err) {
           return reject(err);
@@ -185,7 +186,7 @@ class OrganizationController {
 
         // Create the new org
         const newOrg = new Organization({
-          id: orgId,
+          id: orgID,
           name: orgName,
           permissions: {
             admin: [user._id]
@@ -217,7 +218,7 @@ class OrganizationController {
    * @param  {User} The object containing the  requesting user.
    * @param  {id: (string), name: (string)} The JSON of the updated org elements.
    */
-  static updateOrg(user, orgUpdate, allowedPropertiesOnly) {
+  static updateOrg(user, organizationID, orgUpdate) {
     return new Promise(function (resolve, reject) {
       // TODO (JU & JK): Implement in APIController
       /*
@@ -241,19 +242,15 @@ class OrganizationController {
         return reject(new Error('User cannot create orgs.'))
       }
 
-      // Error check - Make sure organization body has an organization id and name
-      if (!orgUpdate.hasOwnProperty('id')) {
-        return reject(new Error('Organization ID not included.'));
-      }
       if (!orgUpdate.hasOwnProperty('name')) {
         return reject(new Error('Organization does not have a name.'));
       }
 
       // Sanitize fields
-      const newOrgId = M.lib.sani.html(orgUpdate.id);
+      const orgID = M.lib.sani.html(organizationID);
       const newOrgName = M.lib.sani.html(orgUpdate.name);
 
-      Organization.find({ id: orgId }, (err, orgs) => {
+      Organization.find({ id: orgID }, (err, orgs) => {
         // If error occurs, return it
         if (err) {
           return reject(err);
@@ -300,20 +297,26 @@ class OrganizationController {
    * @param  {User} The object containing the  requesting user.
    * @param  {string} The ID of the org being deleted.
    */
-  static removeOrg(user, org) {
+  static removeOrg(user, organizationID) {
     return new Promise(function (resolve, reject) {
       // Error check - Make sure user is admin
       if (!user.admin){
         return reject(new Error('User cannot delete orgs.'))
       }
 
-      const orgid = M.lib.sani.html(org.id);
+      // Error check - Make sure orgID is a string. Otherwise, reject.
+      if (typeof organizationID !== 'string') {
+        M.log.verbose('Organization ID is not a string');
+        return reject(new Error('Organization ID is not a string'));
+      }
 
-      M.log.verbose('Attempting delete of', orgid, '...');
+      const orgID = M.lib.sani.html(organizationID);
+
+      M.log.verbose('Attempting delete of', orgID, '...');
 
       // Do the deletion
       Organization.findOneAndRemove({
-        id: orgid
+        id: orgID
       },
       (err) => {
         if (err) {

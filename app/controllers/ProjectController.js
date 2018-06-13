@@ -66,7 +66,7 @@ class ProjectController {
       // Sanitize project properties
       const orgId   = M.lib.sanitization.html(organizationId);
       const projId  = M.lib.sanitization.html(projectId);
-      const projUID = '${projId}:${orgId}';
+      const projUID = `${projId}:${orgId}`;
 
       // Search for project
       Project.find({ uid: projUID }).populate.exec((err, projects) => {
@@ -143,7 +143,7 @@ class ProjectController {
       const projId   = M.lib.sanitization.html(project.id);
       const projName = M.lib.sanitization.html(project.name);
       const orgId    = M.lib.sanitization.html(project.org.id);
-      const projUID  = '${projId}:${orgID}';
+      const projUID  = `${projId}:${orgID}`;
 
 
       // Error check - make sure project ID and project name are valid
@@ -216,43 +216,30 @@ class ProjectController {
    * @param  {Project} The object of the existing project.
    * @param  {Project} The object of the updated project.
    */
-  static updateProject(user, project, projectUpdated) {
+  static updateProject(user, organizationId, projectId, projectUpdated) {
     return new Promise((resolve, reject) => {
 
-      // Error check - id, name, and org.id are in project variable.
-      if (!project.hasOwnProperty('id')) {
-        return reject( new Error('Project does not have attribute (id)'));
-      }
-      if (!project.hasOwnProperty('name')) {
-        return reject( new Error('Project does not have attribute (name)'));
-      }
       if (!projectUpdated.hasOwnProperty('name')) {
         return reject( new Error('Project does not have attribute (name)'));
       }
-      if (!project.hasOwnProperty('org.id')) {
-        return reject( new Error('Project does not have attribute (orgid)'));
-      }
 
       // Error check - Verify id, name, and org.id are of type string for sanitization.
-      if (typeof project.id !== 'string') {
-        return reject( new Error('Project ID is not of type String.'));
+      if (typeof organizationId !== 'string') {
+        return reject( new Error('Organization ID is not of type String.'));
       }
-      if (typeof project.name !== 'string') {
-        return reject( new Error('Project name is not of type String.'));
+      if (typeof projectId !== 'string') {
+        return reject( new Error('Project ID is not of type String.'));
       }
       if (typeof projectUpdated.name !== 'string') {
         return reject( new Error('New project name is not of type String.'));
       }
-      if (typeof project.org.id !== 'string') {
-        return reject( new Error('Organization ID is not of type String.'));
-      }
+
 
       // Sanitize project properties
-      const projId          = M.lib.sanitization.html(project.id);
-      const projName        = M.lib.sanitization.html(project.name);
+      const orgId = M.lib.sanitization.html(organizationId);
+      const projId = M.lib.sanitization.html(projectId);
       const projNameUpdated = M.lib.sanitization.html(projectUpdated.name);
-      const orgId           = M.lib.sanitization.html(project.org.id);
-      const projUID         = '${projId}:${orgId}';
+      const projUID = `${projId}:${orgId}`;
 
 
       // Error check - make sure project ID and project name are valid
@@ -332,7 +319,7 @@ class ProjectController {
       // Sanitize project properties
       const orgId   = M.lib.sanitization.html(organizationId);
       const projId  = M.lib.sanitization.html(projectId);
-      const projUID = '${projId}:${orgId}';
+      const projUID = `${projId}:${orgId}`;
 
       // Check if project exists
       Project.find({ id: projUID }).populate('org').exec((findOrgErr, projects) => {

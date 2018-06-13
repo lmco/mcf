@@ -16,6 +16,7 @@ const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
 
 const OrgController = mbee.load('controllers/OrganizationController');
+const ProjController = mbee.load('controllers/ProjectController');
 
 /**
  * APIController.js
@@ -297,62 +298,42 @@ class APIController {
    * body.
    */
   static putOrg(req, res) {
-    const orgId = M.lib.sani.html(req.params.orgid);
 
-    // If a given property is not an allowed property to be updated,
-    // return an error immediately.
-    const allowedProperties = ['name'];
-    const givenProperties = Object.keys(req.body);
-    for (let i = 0; i < givenProperties.length; i++) {
-      if (!allowedProperties.includes(givenProperties[i])) {
-        return res.status(400).send('Bad Request');
-      }
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.error('Request does not have a user.')
+      return res.status(500).send('Internal Server Error');
     }
-    // If nothing is being changed, return.
-    if (givenProperties.length < 1) {
+
+    // If any ID was provided in the body as well as the params,
+    // and the IDs do not match, fail.
+    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
+      M.log.error('Organization ID in body does not match ID in params.')
       return res.status(400).send('Bad Request');
     }
 
-    // If name in body, validate the name
-    if (req.body.hasOwnProperty('name')) {
-      const orgName = M.lib.sani.html(req.body.name);
-      // Error check - Make sure org name is valid
-      if (!RegExp('^([a-zA-Z0-9-\\s])+$').test(orgName)) {
-        M.log.warn('Organization name is not valid.');
-        return res.status(400).send('Bad Request');
-      }
+    // Verify that orgID and name are strings
+    if (typeof req.params.orgid !== 'string' || typeof req.body.name !== 'string') {
+      M.log.error('Given data is not of expected type, string.')
+      return res.status(400).send('Bad Request');
     }
 
-    Organization.find({ id: orgId }, (err, orgs) => {
-      // If error occurs, log it and return 500
-      if (err) {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-      // If ore than 1 org found
-      if (orgs.length > 1) {
-        M.log.warn('Too many orgs found with same ID');
-        return res.status(500).send('Internal Server Error');
-      }
-      if (orgs.length < 1) {
-        M.log.warn('Org', orgId, 'does not exist.');
-        return res.status(400).send('Internal Server Error');
-      }
+    // Sanitize the input
+    const organizationID = M.lib.sani.sanitize(req.params.orgid);
+    const organizationName = M.lib.sani.sanitize(req.body.name);
 
-      const org = orgs[0];
-      // Update the name
-      if (req.body.hasOwnProperty('name')) {
-        org.name = M.lib.sani.html(req.body.name);
-      }
-      org.save((saveErr) => {
-        if (saveErr) {
-          M.log.error(saveErr);
-          res.status(500).send('Internal Server Error');
-        }
-        // Return OK status and the updated org
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(API.formatJSON(org));
-      });
+    OrgController.updateOrg(req.user, organizationID, {
+      id: organizationID,
+      name: organizationName
+    })
+    .then(function(org) {
+      // Return OK status and the created org
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(org));
+    })
+    .catch(function(error) {
+      M.log.error(error);
+      return res.status(500).send('Internal Server Error');
     });
   }
   /* eslint-enable consistent-return */
@@ -366,20 +347,17 @@ class APIController {
    * message is returned.
    */
   static deleteOrg(req, res) {
-    const orgid = M.lib.sani.html(req.params.orgid);
-    M.log.verbose('Attempting delete of', orgid, '...');
+    const orgid = M.lib.sani.sanitize(req.params.orgid);
 
-    // Do the deletion
-    Organization.findOneAndRemove({
-      id: orgid
-    },
-    (err) => {
-      if (err) {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-      return res.status(200).send('OK');
-    });
+    OrgController.removeOrg(username, orgid)
+    .then(function(org) {
+      res.header('Content-Type', 'application/json');
+      return res.send(APIController.formatJSON(org.getPublicData()));
+    })
+    .catch(function(error) {
+      M.log.warn(error);
+      return res.status(500).send('Internal Server Error');
+    })
   }
 
 
@@ -455,24 +433,24 @@ class APIController {
    */
 
   static getProject(req, res) {
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.error('Request does not have a user.')
+      return res.status(500).send('Internal Server Error');
+    }
+
     const orgid = M.lib.sanitization.html(req.params.orgid);
     const projectid = M.lib.sanitization.html(req.params.projectid);
 
-    Project.find({ id: projectid }, (err, projects) => {
-      if (err) {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-      if (projects.length !== 1) {
-        M.log.error('Error: Unexpected number of projects found.');
-        return res.status(500).send('Internal Server Error');
-      }
-      if (projects[0].orgid !== orgid) {
-        M.log.error('Error: Project orgid does not match URL orgid.');
-        return res.status(500).send('Internal Server Error');
-      }
+    ProjController.findProject(req.user, orgid, projectid)
+    .then(function(project){
       res.header('Content-Type', 'application/json');
-      return res.send(API.formatJSON(projects[0]));
+      return res.status(200).send(API.formatJSON(project));
+    })
+    .catch(function(err){
+      M.log.error(err);
+      res.header('Content-Type', 'application/json');
+      return res.status(500).send('Internal Server Error');
     });
   }
 
@@ -483,91 +461,67 @@ class APIController {
    * Takes a project object in the request body and creates the project.
    */
   static postProject(req, res) {
-    const orgId = M.lib.sanitization.html(req.params.orgid);
-    const projectId = M.lib.sanitization.html(req.params.projectid);
-    const project = req.body;
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.error('Request does not have a user.')
+      return res.status(500).send('Internal Server Error');
+    }
 
-    // Error check - if project ID exists in body, make sure it matches URI
-    if (project.hasOwnProperty('id')) {
-      if (M.lib.sanitization.html(project.id) !== projectId) {
-        M.log.warn('Project ID in body does not match Project ID in URI.');
+    // If any ID was provided in the body as well as the params,
+    // and the IDs do not match, fail.
+    if (req.body.hasOwnProperty('org')) {
+      if(req.body.org.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
+        M.log.error('Organization ID in body does not match ID in params.')
         return res.status(400).send('Bad Request');
       }
     }
 
-    // Error check - make sure project ID is valid
-    if (!RegExp('^([a-z])([a-z0-9-]){0,}$').test(projectId)) {
-      M.log.warn('Project ID is not valid.');
+    // If any ID was provided in the body as well as the params,
+    // and the IDs do not match, fail.
+    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.projid) {
+      M.log.error('Project ID in body does not match ID in params.')
       return res.status(400).send('Bad Request');
     }
 
-    // Error check - Make sure project body has a project name
-    if (!project.hasOwnProperty('name')) {
-      M.log.warn('Project does not have a name.');
+    // If any ID was provided in the body as well as the params,
+    // and the IDs do not match, fail.
+    if (!req.body.hasOwnProperty('name')) {
+      M.log.error('Project name not found in request body.')
       return res.status(400).send('Bad Request');
     }
 
-    const projectName = M.lib.sanitization.html(project.name);
-
-    // Error check - Make sure project name is valid
-    if (!RegExp('^([a-zA-Z0-9-\\s])+$').test(projectName)) {
-      M.log.warn('Project name is not valid.');
+    // Verify that orgID is a string
+    if (typeof req.params.orgid !== 'string') {
+      M.log.error('Given data is not of expected type, string.')
       return res.status(400).send('Bad Request');
     }
 
-    // Error check - If org ID exists in body, make sure it matches URI
-    if (project.hasOwnProperty('orgid')) {
-      if (M.lib.sanitization.html(project.orgid) !== orgId) {
-        M.log.warn('Organization ID in body does not match Organization ID in URI.');
-        return res.status(400).send('Bad Request');
-      }
+    // Verify that projID and name are strings
+    if (typeof req.params.projid !== 'string' || typeof req.body.name !== 'string') {
+      M.log.error('Given data is not of expected type, string.')
+      return res.status(400).send('Bad Request');
     }
 
-    // Create the callback function to create the project
-    const createProject = function(orgs) {
-      // Create the new project and save it
-      const newProject = new Project({
-        id: projectId,
-        name: projectName,
-        org: orgs[0]._id
-      });
-      newProject.save((saveErr, projectUpdated) => {
-        if (saveErr) {
-          M.log.error(saveErr);
-          return res.status(500).send('Internal Server Error');
-        }
-        // Return success and the JSON object
-        res.header('Content-Type', 'application/json');
-        return res.status(201).send(API.formatJSON(projectUpdated));
-      });
-    };
+    const projectId = M.lib.sani.sanitize(req.params.projid)
+    const projectName = M.lib.sani.sanitize(req.body.name)
+    const orgId = M.lib.sani.sanitize(req.params.orgid)
 
-    // Error check - Make sure the org exists
-    Organization.find({ id: orgId }, (findOrgErr, orgs) => {
-      if (findOrgErr) {
-        M.log.error(findOrgErr);
-        return res.status(500).send('Internal Server Error');
+    ProjController.createProject(req.user, {
+      id: projectId,
+      name: projectName,
+      org: {
+        id: orgId
       }
-      if (orgs.length < 1) {
-        M.log.warn('Org not found.');
-        return res.status(500).send('Internal Server Error');
-      }
-
-      // Error check - check if the project already exists
-      Project.find({ id: projectId }, (findProjErr, projects) => {
-        if (findProjErr) {
-          M.log.error(findProjErr);
-          return res.status(500).send('Internal Server Error');
-        }
-        if (projects.length >= 1) {
-          M.log.error('Project already exists.');
-          return res.status(500).send('Internal Server Error');
-        }
-
-        // If the project does not exist, create it.
-        createProject(orgs);
-      });
+    })
+    .then(function(project){
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(API.formatJSON(project));
+    })
+    .catch(function(err){
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
     });
+
   }
 
 
@@ -579,104 +533,67 @@ class APIController {
    * with the data passed in the body.
    */
   static putProject(req, res) {
-    const orgId = M.lib.sanitization.html(req.params.orgid);
-    const projectId = M.lib.sanitization.html(req.params.projectid);
-    const project = req.body;
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.error('Request does not have a user.')
+      return res.status(500).send('Internal Server Error');
+    }
 
-    // Error check - if project ID exists in body, make sure it matches URI
-    if (project.hasOwnProperty('id')) {
-      if (M.lib.sanitization.html(project.id) !== projectId) {
-        M.log.error('Project ID in body does not match Project ID in URI.');
+    // If any ID was provided in the body as well as the params,
+    // and the IDs do not match, fail.
+    if (req.body.hasOwnProperty('org')) {
+      if(req.body.org.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
+        M.log.error('Organization ID in body does not match ID in params.')
         return res.status(400).send('Bad Request');
       }
     }
 
-    // Error check - make sure project ID is valid
-    if (M.lib.validators.id(projectId)) {
-      M.log.warn('Project ID is not valid.');
+    // If any ID was provided in the body as well as the params,
+    // and the IDs do not match, fail.
+    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.projid) {
+      M.log.error('Project ID in body does not match ID in params.')
       return res.status(400).send('Bad Request');
     }
 
-    // Error check - Make sure project body has a project name
-    if (!project.hasOwnProperty('name')) {
-      M.log.warn('Project does not have a name.');
+    // If any ID was provided in the body as well as the params,
+    // and the IDs do not match, fail.
+    if (!req.body.hasOwnProperty('name')) {
+      M.log.error('Project name not found in request body.')
       return res.status(400).send('Bad Request');
     }
 
-    const projectName = M.lib.sanitization.html(project.name);
-
-    // Error check - Make sure project name is valid
-    if (M.lib.validators.name(projectName)) {
-      M.log.warn('Project name is not valid.');
+    // Verify that orgID is a string
+    if (typeof req.params.orgid !== 'string') {
+      M.log.error('Given data is not of expected type, string.')
       return res.status(400).send('Bad Request');
     }
 
-    // Error check - If org ID exists in body, make sure it matches URI
-    if (project.hasOwnProperty('orgid')) {
-      if (M.lib.sanitization.html(project.orgid) !== orgId) {
-        M.log.warn('Organization ID in body does not match Organization ID in URI.');
-        return res.status(400).send('Bad Request');
+    // Verify that projID and name are strings
+    if (typeof req.params.projid !== 'string' || typeof req.body.name !== 'string') {
+      M.log.error('Given data is not of expected type, string.')
+      return res.status(400).send('Bad Request');
+    }
+
+    const projectId = M.lib.sani.sanitize(req.params.projid)
+    const projectName = M.lib.sani.sanitize(req.body.name)
+    const orgId = M.lib.sani.sanitize(req.params.orgid)
+
+    ProjController.createProject(req.user, orgId, projectId {
+      id: projectId,
+      name: projectName,
+      org: {
+        id: orgId
       }
-    }
-
-    // Create the callback function to create the project
-    const createProject = function(orgs) {
-      // Create the new project and save it
-      const newProject = new Project({
-        id: projectId,
-        name: projectName,
-        orgid: orgs[0]._id
-      });
-      newProject.save();
-
-      // Return success and the JSON object
+    })
+    .then(function(project){
       res.header('Content-Type', 'application/json');
-      return res.status(201).send(API.formatJSON(newProject));
-    };
-
-    // The callback function to replace the project
-    // eslint disable because function is specifically changing project
-    const replaceProject = function(project) { // eslint-disable-line no-shadow
-      // Currently we only suppoer updating the name
-      project.name = projectName; // eslint-disable-line no-param-reassign
-      project.save();
-
-      // Return success and the JSON object
-      res.header('Content-Type', 'application/json');
-      return res.status(201).send(API.formatJSON(project));
-    };
-
-    // Error check - Make sure the org exists
-    Organization.find({ id: orgId }, (findOrgErr, orgs) => {
-      if (findOrgErr) {
-        M.log.error(findOrgErr);
-        return res.status(500).send('Internal Server Error');
-      }
-      if (orgs.length < 1) {
-        M.log.warn('Org not found.');
-        return res.status(500).send('Internal Server Error');
-      }
-
-      // Error check - check if the project already exists
-      Project.find({ id: projectId }, (findProjErr, projects) => {
-        if (findProjErr) {
-          M.log.error(findProjErr);
-          return res.status(500).send('Internal Server Error');
-        }
-        if (projects.length > 1) {
-          M.log.warn('Too many projects found.');
-          return res.status(500).send('Internal Server Error');
-        }
-
-        // If project is found, update it
-        if (projects.length === 1) {
-          replaceProject(projects[0]);
-        }
-
-        // If the project does not exist, create it.
-        createProject(orgs);
-      });
+      return res.status(200).send(API.formatJSON(project));
+    })
+    .catch(function(err){
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
     });
+
   }
 
 
@@ -686,42 +603,25 @@ class APIController {
    * Takes an organization ID and project ID in the URI and deletes the
    * corresponding project.
    */
-
   static deleteProject(req, res) {
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.error('Request does not have a user.')
+      return res.status(500).send('Internal Server Error');
+    }
     const orgId = M.lib.sanitization.html(req.params.orgid);
     const projectId = M.lib.sanitization.html(req.params.projectid);
 
-    Project.find({ id: projectId }).populate('org').exec((findOrgErr, projects) => {
-      if (findOrgErr) {
-        M.log.error(findOrgErr);
-        return res.status(500).send('Internal Server Error');
-      }
-      if (projects.length !== 1) {
-        M.log.warn('Unexpected number of projects found');
-        return res.status(500).send('Internal Server Error');
-      }
-      if (projects[0].org.id !== orgId) {
-        M.log.warn('Project OrgID does not match OrgID in URI.');
-        return res.status(500).send('Internal Server Error');
-      }
-      // Remove the Project
-      Project.findByIdAndRemove(projects[0]._id, (findProjErr) => {
-        if (findProjErr) {
-          M.log.warn(findProjErr);
-          return res.status(500).send('Internal Server Error');
-        }
-        // Remove the Organization reference to the project
-        Organization.findOneAndUpdate({ id: orgId },
-          { $pull: { projects: projects[0]._id } },
-          (updateErr, deleted) => {
-            if (updateErr) {
-              M.log.error(updateErr);
-              return res.status(500).send('Internal Server Error');
-            }
-            return res.status(200).send('OK');
-          });
-      });
+    ProjectController.removeProject(req.user, orgId, projectId)
+    .then(function(project){
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(API.formatJSON(project));
+    })
+    .catch(function(err){
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
     });
+
   }
 
 
