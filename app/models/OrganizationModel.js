@@ -54,7 +54,6 @@ const OrganizationSchema = new mongoose.Schema({
    * or "roles" within an organization.
    */
   permissions: {
-
     /**
      * Contains the list of users with write access to the organization.
      * @type {Array}
@@ -89,36 +88,12 @@ OrganizationSchema.virtual('projects', {
 
 
 /**
-* The 'permissions.write' is a virtual reference to users with write
-* permissions to the organization
-*/
-//OrganizationSchema.virtual('permissions.write', {
-//  ref: 'User',
-//  localField: '_id',
-//  foreignField: 'orgPermissions.write',
-//  justOne: false
-//});
-
-
-/**
-* The 'permissions.admin' is a virtual reference to users with admin
-* permissions to the organization
-*/
-//OrganizationSchema.virtual('permissions.admin', {
-//  ref: 'User',
-//  localField: '_id',
-//  foreignField: 'orgPermissions.admin',
-//  justOne: false
-//});
-
-
-/**
-* The 'permissions.member' is a virtual getter to users with admin
-* and/or write permissions to the organization.
-*
-* TODO - Check out a post org and figure out why this gets called three times.
-*/
-OrganizationSchema.virtual('permissions.member').get(function() {
+ * The 'permissions.member' is a virtual getter to users with admin
+ * and/or write permissions to the organization.
+ *
+ * TODO - Check out a post org and figure out why this gets called three times.
+ */
+OrganizationSchema.virtual('permissions.members').get(function() {
   // Grab the write and admin permissions lists
   const write = this.permissions.write;
   const admin = this.permissions.admin;

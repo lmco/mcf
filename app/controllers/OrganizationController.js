@@ -18,6 +18,8 @@ const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 
+const User = M.load('models/UserModel');
+
 const modelsPath = path.join(__dirname, '..', 'models');
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));
 
@@ -189,10 +191,32 @@ class OrganizationController {
             admin: [user._id]
           }
         });
-        newOrg.save();
+        newOrg.save(function(err) {
+          console.log(user.username)
 
-        // Return the response message
-        return resolve(newOrg);
+
+          user.save(function(err) {
+            User.findOne({'username': user.username})
+            .populate('orgs.admin orgs.write')
+            .exec(function(err, user) {
+              if (err) {
+                M.log.error(err);
+              }
+              if (!user) {
+                M.log.error('User not found');
+              }
+
+              console.log(user);
+              // Return the response message
+              return resolve(newOrg);
+            })
+          })
+
+
+
+        });
+
+
       });
     })
   }

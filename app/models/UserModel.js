@@ -203,19 +203,20 @@ const UserSchema = new mongoose.Schema({
    * This holds a reference to the organizations that the user has
    * either write or admin permissions to.
    */
-  orgPermissions: {
-    write: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization'
-    }],
+  //orgPermissions: {
+  //  write: [{
+  //    type: mongoose.Schema.Types.ObjectId,
+  //    ref: 'Organization'
+  //  }],
 
-    admin: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization'
-    }]
+  //  admin: [{
+  //    type: mongoose.Schema.Types.ObjectId,
+  //    ref: 'Organization'
+  //  }]
 
-  }
+  //}
 
+  //orgs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Organization' }]
 });
 
 
@@ -227,18 +228,51 @@ const UserSchema = new mongoose.Schema({
  * This is a getter which can be used in order to populate a list of
  * all organizations the user has write or admin permissions to.
  */
-UserSchema.virtual('orgPermissions.member').get(function() {
-  const member = this.orgPermissions.write || [];
-  const admin = this.orgPermissions.admin || [];
+//UserSchema.virtual('orgPermissions.member').get(function() {
+//  const member = this.orgPermissions.write || [];
+//  const admin = this.orgPermissions.admin || [];
+//
+//  const memberList = member.map(a => a.id);
+//
+//  for (let i = 0; i < admin.length; i++) {
+//    if (!memberList.includes(admin[i].id)) {
+//      member.push(admin[i]);
+//    }
+//  }
+//
+//  return member;
+//});
 
-  const memberList = member.map(a => a.id);
 
+UserSchema.virtual('orgs.write', {
+  ref: 'Organization',
+  localField: '_id',
+  foreignField: 'permissions.write',
+  justOne: false
+});
+
+UserSchema.virtual('orgs.admin', {
+  ref: 'Organization',
+  localField: '_id',
+  foreignField: 'permissions.admin',
+  justOne: false
+});
+
+UserSchema.virtual('orgs.members').get(function() {
+  // Grab the write and admin permissions lists
+  const write = this.orgs.write;
+  const admin = this.orgs.admin;
+
+  // set member to a copy of write
+  const member = write.slice();
+
+  // Add admins that aren't already in the member list,
+  // creating a unique list of members
   for (let i = 0; i < admin.length; i++) {
-    if (!memberList.includes(admin[i].id)) {
+    if (!member.includes(admin[i])) {
       member.push(admin[i]);
     }
   }
-
   return member;
 });
 
