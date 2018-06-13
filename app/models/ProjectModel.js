@@ -71,11 +71,6 @@ const ProjectSchema = new Schema({
     require: true
   },
 
-  members: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-
   permissions: {
     read: [{
       type: mongoose.Schema.Types.ObjectId,
@@ -96,6 +91,32 @@ const ProjectSchema = new Schema({
 
 });
 
+ProjectSchema.virtual('members').get(function() {
+  // Grab the write and admin permissions lists
+  const read  = this.permissions.read;
+  const write = this.permissions.write;
+  const admin = this.permissions.admin;
+
+  // set member to a copy of write
+  const member = read.slice();
+
+  // Add admins that aren't already in the member list,
+  // creating a unique list of members
+  for (let i = 0; i < write.length; i++) {
+    if (!member.includes(write[i])) {
+      member.push(write[i]);
+    }
+  }
+
+  for (let i = 0; i < admin.length; i++) {
+    if (!member.includes(admin[i])) {
+      member.push(admin[i]);
+    }
+  }
+
+  return member;
+});
+
 // Post hook to link refernece to organization upon save
 ProjectSchema.post('save', () => {
   Organization.findOneAndUpdate({
@@ -108,6 +129,10 @@ ProjectSchema.post('save', () => {
     }
   });
 });
+
+// Required for virtual getters
+ProjectSchema.set('toJSON', { virtuals: true });
+ProjectSchema.set('toObject', { virtuals: true });
 
 // Export mongoose model as "Project"
 module.exports = mongoose.model('Project', ProjectSchema);

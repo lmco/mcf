@@ -50,7 +50,8 @@ class ProjectController {
    *
    *
    * @param  {User} The object containing the requesting user.
-   * @param  {Project} The object of the project being created.
+   * @param  {String} The organization ID for the Organization the project belongs to.
+   * @param  {String} The project ID of the Project which is being searched for.
    */
   static findProject(user, organizationId, projectId) {
     return new Promise((resolve, reject) => {
@@ -182,6 +183,7 @@ class ProjectController {
             id: projectId,
             name: projectName,
             org: orgs[0]._id
+            permissions.admin: [user._id]
           });
 
           newProject.save((saveErr, projectUpdated) => {

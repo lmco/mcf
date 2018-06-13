@@ -276,6 +276,54 @@ UserSchema.virtual('orgs.members').get(function() {
   return member;
 });
 
+UserSchema.virtual('proj.read', {
+  ref: 'Project',
+  localField: '_id',
+  foreignField: 'permissions.read',
+  justOne: false
+});
+
+UserSchema.virtual('proj.write', {
+  ref: 'Project',
+  ref: 'Organization',
+  localField: '_id',
+  foreignField: 'permissions.write',
+  justOne: false
+});
+
+UserSchema.virtual('proj.admin', {
+  ref: 'Project',
+  ref: 'Organization',
+  localField: '_id',
+  foreignField: 'permissions.admin',
+  justOne: false
+});
+
+UserSchema.virtual('proj.members').get(function() {
+  // Grab the write and admin permissions lists
+  const read  = this.proj.read;
+  const write = this.proj.write;
+  const admin = this.proj.admin;
+
+  // set member to a copy of write
+  const member = write.slice();
+
+  // Add admins that aren't already in the member list,
+  // creating a unique list of members
+  for (let i = 0; i < write.length; i++) {
+    if (!member.includes(write[i])) {
+      member.push(write[i]);
+    }
+  }
+
+  for (let i = 0; i < admin.length; i++) {
+    if (!member.includes(admin[i])) {
+      member.push(admin[i]);
+    }
+  }
+  return member;
+});
+
 /* eslint-enable prefer-arrow-callback */
 
 // Necessary for virtual getters to be executed.
