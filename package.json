@@ -22,8 +22,7 @@
     "mongodb": "^3.1.0-beta4",
     "mongoose": "^5.1.1",
     "swagger-jsdoc": "^1.9.7",
-    "winston": "^3.0.0-rc5",
-    "errortest": "^1.0.0"
+    "winston": "^3.0.0-rc5"
   },
   "devDependencies": {
     "bootstrap": "^4.0.0",
