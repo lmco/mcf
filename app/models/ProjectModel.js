@@ -39,10 +39,24 @@ const ProjectSchema = new Schema({
     type: String,
     require: true,
     index: true,
-    unique: true,
     match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
     maxlength: [36, 'Too many characters in username']
   },
+
+  uid: {
+    type: String,
+    unique: true,
+    default() {
+      return (`${this.org.id}:${this.id}`);
+    },
+    set() {
+      return (`${this.org.id}:${this.id}`);
+    },
+    get() {
+      return (`${this.org.id}:${this.id}`);
+    }
+
+  }
 
   name: {
     type: String,
