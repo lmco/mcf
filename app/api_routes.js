@@ -616,10 +616,10 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/members/:role')
-  .get(AuthController.authenticate, APIController.getOrgRoles)
-  .post(AuthController.authenticate, APIController.postOrgRoles)
-  .put(AuthController.authenticate, APIController.putOrgRoles)
-  .delete(AuthController.authenticate, APIController.deleteOrgRoles);
+  .get(AuthController.authenticate, APIController.notImplemented)
+  .post(AuthController.authenticate, APIController.notImplemented)
+  .put(AuthController.authenticate, APIController.notImplemented)
+  .delete(AuthController.authenticate, APIController.notImplemented);
 
 
 /**
@@ -709,10 +709,10 @@ api.route('/orgs/:orgid/projects/:projectid/members/:role')
  *         description: Not Implemented
  */
 api.route('/users')
-  .get(AuthController.authenticate.bind(AuthController), APIController.getUsers)
-  .post(AuthController.authenticate.bind(AuthController), APIController.postUsers)
-  .put(AuthController.authenticate.bind(AuthController), APIController.putUsers)
-  .delete(AuthController.authenticate.bind(AuthController), APIController.deleteUsers);
+  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
 
 /**
  * @swagger
@@ -867,10 +867,10 @@ api.route('/users')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/users/:username')
-  .get(AuthController.authenticate.bind(AuthController), APIController.getUser)
-  .post(AuthController.authenticate.bind(AuthController), APIController.postUser)
-  .put(AuthController.authenticate.bind(AuthController), APIController.putUser)
-  .delete(AuthController.authenticate.bind(AuthController), APIController.deleteUser);
+  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
 
 /**
  * @swagger
@@ -968,7 +968,7 @@ api.route('/users/:username/groups')
  *         description: Internal Server Error
  */
 api.route('/users/whoami')
-  .get(AuthController.authenticate.bind(AuthController), APIController.whoami);
+  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
 
 
 // Export the API router

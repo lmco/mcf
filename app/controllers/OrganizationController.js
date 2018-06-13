@@ -17,14 +17,9 @@ const path = require('path');
 /* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-const APIPath = path.join(__dirname, 'APIController');
-const API = require(APIPath);
+
 const modelsPath = path.join(__dirname, '..', 'models');
 const Organization = require(path.join(modelsPath, 'OrganizationModel'));
-
-console.log(API);
-console.log(API.formatJSON);
-console.log(APIPath);
 
 
 /**
@@ -38,8 +33,38 @@ console.log(APIPath);
 
 class OrganizationController {
 
-  static findOrgs() {
-    //TODO: Josh
+  /**
+   * This function takes a user objects and returns a list of orgs that the user has at least
+   * read access too.
+   *
+   * @example
+   * OrganizationController.findOrgs(user)
+   *   .then(orgs => {
+   *     console.log(orgs);
+   *   })
+   *   .catch(err => {
+   *     console.log(err);
+   *   })
+   *
+   * @param  {User} The user whose organizations to find
+   */
+  static findOrgs(user) {
+    return new Promise(function(resolve, reject) {
+      const sanitizedUser = M.lib.sani.sanitize(user)
+      Organization.find({
+        permissions: {
+          read: { $contains : sanitizedUser }
+        }
+      }, (err, orgs) => {
+        // If error occurs, return it
+        if (err) {
+          return reject(err);
+        }
+
+        // Resolve the list of orgs
+        return resolve(orgs)
+      });
+    });
   }
 
 
@@ -62,7 +87,12 @@ class OrganizationController {
   static findOrg(username, orgid) {
     return new Promise(function(resolve, reject) {
 
-      // TODO (JU): Verify passed in object is not a string
+      // Error check - Make sure orgid is a string. Otherwise, reject.
+      if (typeof orgid !== 'string') {
+        M.log.verbose('orgid is not a string');
+        return reject(new Error('orgid is not a string'));
+      }
+
       const orgId = M.lib.sani.sanitize(orgid);
       Organization.findOne({ id: orgId }, (err, org) => {
         // If error occurs, return it
@@ -76,6 +106,7 @@ class OrganizationController {
         }
 
         // If user is not a member
+        // TODO - Is there a way we can include this as part of the query?
         if (!org.permissions.member.includes(username)) {
           return reject(new Error('Org not found'));
         }
@@ -123,13 +154,19 @@ class OrganizationController {
       const orgId = M.lib.sani.html(org.id);
       const orgName = M.lib.sani.html(org.name);
 
-      // TODO (JU): Check to make sure the following are valid strings and update to pull from the 
-      // Lib validator.
       // Error check - Make sure a valid orgid and name is given
-      if (!RegExp('^([a-z])([a-z0-9-]){0,}$').test(orgId)) {
+      if (!RegExp(orgId).test(orgId)) {
         return reject(new Error('Organization ID is not valid.'));
       }
-      if (!RegExp('^([a-zA-Z0-9-\\s])+$').test(orgName)) {
+      if (!RegExp(M.lib.validators.org.name).test(orgName)) {
+        return reject(new Error('Organization name is not valid.'));
+      }
+
+      // Error check - Make sure a valid orgid and name is given
+      if (!RegExp(M.lib.validators.org.id).test(orgId)) {
+        return reject(new Error('Organization ID is not valid.'));
+      }
+      if (!RegExp(M.lib.validators.org.name).test(orgName)) {
         return reject(new Error('Organization name is not valid.'));
       }
 
@@ -143,11 +180,14 @@ class OrganizationController {
         if (orgs.length >= 1) {
           return reject(new Error('Organization already exists.'));
         }
-        
+
         // Create the new org and save it
         const newOrg = new Organization({
           id: orgId,
-          name: orgName
+          name: orgName,
+          permissions: {
+            admin: [user._id]
+          }
         });
         newOrg.save();
 
@@ -176,7 +216,7 @@ class OrganizationController {
    */
   static updateOrg(user, orgUpdate, allowedPropertiesOnly) {
     return new Promise(function (resolve, reject) {
-      // TODO (JU & JK): Implement in APIController 
+      // TODO (JU & JK): Implement in APIController
       /*
       // If a given property is not an allowed property to be updated,
       // return an error immediately.

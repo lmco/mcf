@@ -47,8 +47,33 @@ const OrganizationSchema = new mongoose.Schema({
     requite: true,
     unique: true,
     match: RegExp('^([a-zA-Z0-9-\\s])+$')
+  },
+
+  /**
+   * Permissions includes lists of users with certain permission levels
+   * or "roles" within an organization.
+   */
+  permissions: {
+
+    /**
+     * Contains the list of users with write access to the organization.
+     * @type {Array}
+     */
+    write: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+
+    /**
+     * Contains the list of users with admin rights to the organization.
+     * @type {Array}
+     */
+    admin: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }]
   }
-}
+})
 
 
 /**
@@ -60,50 +85,55 @@ OrganizationSchema.virtual('projects', {
   localField: '_id',
   foreignField: 'org',
   justOne: false
-}):
+});
 
 
 /**
 * The 'permissions.write' is a virtual reference to users with write
 * permissions to the organization
 */
-OrganizationSchema.virtual('permissions.write', {
-  ref: 'User',
-  localField: '_id',
-  foreignField: 'orgPermissions.write',
-  justOne: false
-});
+//OrganizationSchema.virtual('permissions.write', {
+//  ref: 'User',
+//  localField: '_id',
+//  foreignField: 'orgPermissions.write',
+//  justOne: false
+//});
 
 
 /**
 * The 'permissions.admin' is a virtual reference to users with admin
 * permissions to the organization
 */
-OrganizationSchema.virtual('permissions.admin', {
-  ref: 'User',
-  localField: '_id',
-  foreignField: 'orgPermissions.admin',
-  justOne: false
-});
+//OrganizationSchema.virtual('permissions.admin', {
+//  ref: 'User',
+//  localField: '_id',
+//  foreignField: 'orgPermissions.admin',
+//  justOne: false
+//});
 
 
 /**
 * The 'permissions.member' is a virtual getter to users with admin
-* and/or write permissions to the organization
+* and/or write permissions to the organization.
+*
+* TODO - Check out a post org and figure out why this gets called three times.
 */
-OrganizationSchema.virtual('permissions.member').get(() => {
-  const write = this.permissions.write || [];
-  const admin = this.permissions.admin || [];
+OrganizationSchema.virtual('permissions.member').get(function() {
+  // Grab the write and admin permissions lists
+  const write = this.permissions.write;
+  const admin = this.permissions.admin;
 
-  const memberList = write.map(a => a.username);
+  // set member to a copy of write
+  const member = write.slice();
 
+  // Add admins that aren't already in the member list,
+  // creating a unique list of members
   for (let i = 0; i < admin.length; i++) {
-    if (!memberList.includes(admin[i].username)) {
-      memberList.push(admin[i].username);
+    if (!member.includes(admin[i])) {
+      member.push(admin[i]);
     }
   }
-
-  return memberList;
+  return member;
 });
 
 

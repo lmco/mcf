@@ -15,7 +15,7 @@ const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
 
-//const OrgController = mbee.load('controllers/OrganizationController');
+const OrgController = mbee.load('controllers/OrganizationController');
 
 /**
  * APIController.js
@@ -144,18 +144,27 @@ class APIController {
    * If the user had no access to organizations, the promise resolves
    * an empty array.
    */
-  static getOrgs(username) {
+  static getOrgs(req, res) {
+
+
     // Query all organizations from the database
-    Organization.find((err, orgs) => {
-      // If error occurs, log error and return 500 status.
-      if (err) {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
+    OrgController.findOrgs(req.user)
+    .then(orgs => {
+      // If successful, return 200 status with list of orgs
+      // Make sure we only return the orgs public data
+      const orgsPublicData = [];
+      for (let i = 0; i < orgs.length; i++) {
+        orgsPublicData.push(orgs[i].getPublicData());
       }
 
-      // Otherwise return 200 and the orgs
+      // Return 200 and the orgs
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(API.formatJSON(orgs));
+      return res.status(200).send(APIController.formatJSON(orgsPublicData));
+    })
+    .catch(error => {
+      // If error occurs, log error and return 500 status.
+      M.log.error(error);
+      return res.status(500).send('Internal Server Error');
     });
   }
 
@@ -237,62 +246,42 @@ class APIController {
    * and must begin with a letter.
    */
   static postOrg(req, res) {
-    const orgId = M.lib.sani.html(req.params.orgid);
 
-    // Error check - If body has an org ID, make sure it matches the URI
-    if (req.body.hasOwnProperty('id')) {
-      const bodyOrgId = M.lib.sani.html(req.body.id);
-      if (bodyOrgId !== orgId) {
-        M.log.warn('Org ID in body does not match Org ID in URI.');
-        return res.status(400).send('Bad Request');
-      }
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.error('Request does not have a user.')
+      return res.status(500).send('Internal Server Error');
     }
 
-    // Error check - Make sure a valid orgid is given
-    if (!RegExp('^([a-z])([a-z0-9-]){0,}$').test(orgId)) {
-      M.log.warn('Organization ID is not valid.');
+    // If any ID was provided in the body as well as the params,
+    // and the IDs do not match, fail.
+    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
+      M.log.error('Organization ID in body does not match ID in params.')
       return res.status(400).send('Bad Request');
     }
 
-    // Error check - Make sure organization body has a project name
-    if (!req.body.hasOwnProperty('name')) {
-      M.log.warn('Organization does not have a name.');
+    // Verify that orgID and name are strings
+    if (typeof req.params.orgid !== 'string' || typeof req.body.name !== 'string') {
+      M.log.error('Given data is not of expected type, string.')
       return res.status(400).send('Bad Request');
     }
 
-    const orgName = M.lib.sani.html(req.body.name);
+    // Sanitize the input
+    const organizationID = M.lib.sani.sanitize(req.params.orgid);
+    const organizationName = M.lib.sani.sanitize(req.body.name);
 
-    // Error check - Make sure org name is valid
-    if (!RegExp('^([a-zA-Z0-9-\\s])+$').test(orgName)) {
-      M.log.warn('Organization name is not valid.');
-      return res.status(400).send('Bad Request');
-    }
-
-    const createOrganization = function() {
-      // Create the new org and save it
-      const newOrg = new Organization({
-        id: M.lib.sani.html(orgId),
-        name: M.lib.sani.html(orgName)
-      });
-      newOrg.save();
-
-      // Return the response message
+    OrgController.createOrg(req.user, {
+      id: organizationID,
+      name: organizationName
+    })
+    .then(function(org) {
+      // Return OK status and the created org
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(API.formatJSON(newOrg));
-    };
-
-    Organization.find({ id: orgId }, (err, orgs) => {
-      // If error, log it and return 500
-      if (err) {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-      // If org already exists, throw an error
-      if (orgs.length >= 1) {
-        M.log.warn('Organization already exists.');
-        return res.status(500).send('Internal Server Error');
-      }
-      createOrganization();
+      return res.status(200).send(APIController.formatJSON(org));
+    })
+    .catch(function(error) {
+      M.log.error(error);
+      return res.status(500).send('Internal Server Error');
     });
   }
   /* eslint-enable consistent-return */
@@ -749,7 +738,5 @@ class APIController {
 
 }
 
-console.log('IN API CONTROLLER')
-console.log(APIController.formatJSON)
-
+// Expose the API controller
 module.exports = APIController;
