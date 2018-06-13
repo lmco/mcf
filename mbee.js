@@ -100,10 +100,12 @@ function main() {
     install: build.install,
     lint,
     start,
-    test
+    test: test
   };
 
   if (tasks.hasOwnProperty(subcommand)) {
+    console.log(subcommand);
+    console.log(opts);
     tasks[subcommand](opts);
   }
   else {

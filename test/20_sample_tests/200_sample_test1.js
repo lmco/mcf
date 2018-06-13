@@ -18,35 +18,41 @@
 const chai = require('chai');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
-console.log(name);
 
-/*------------------------------------
- *       Main
- *------------------------------------
- */
-
-describe(name, () => {
-  it('should run an empty test case', emptyTest);
-  it('should run simple assertions', assertionsTest);
-});
-
-
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
-
-
-/**
- * Runs an empty test case.
- */
-function emptyTest(done) {
-  done();
+var val1 = 6;
+var val2 = 4;
+var val3 = 10;
+var arr1 = [1, 2, 3, 4, 5];
+function func1(){
+    return("func1 returning correctly");
 }
 
-/**
- * Runs some simple assertions
- */
-function assertionsTest(done) {
-  chai.expect(2).to.equal(2);
-  done();
+
+describe(name, () => {
+    it('val1 and val2 should be numbers', numTest)
+    it('val1 + val2 should equal val3', equalityTest);
+    it('arr1 should not be empty or include the number 6', arrTest)
+    it('func1 should return the correct value', funcTest)
+});
+
+function numTest(done){
+    chai.expect(val1).to.be.a('number');
+    chai.expect(val2).to.be.a('number');
+    done();
+}
+
+function equalityTest(done){
+    chai.expect(val1 + val2).to.equal(val3);
+    done();
+}
+
+function arrTest(done){
+    chai.expect(arr1).to.not.be.empty;
+    chai.expect(arr1).to.not.include.members([6])
+    done();
+}
+
+function funcTest(done){
+    chai.expect(func1()).to.equal("func1 returning correctly");
+    done();
 }
