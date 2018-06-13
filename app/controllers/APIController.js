@@ -16,7 +16,7 @@ const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
 
 const OrgController = mbee.load('controllers/OrganizationController');
-const ProjController = mbee.load('controllers/ProjectController');
+const ProjectController = mbee.load('controllers/ProjectController');
 
 /**
  * APIController.js
@@ -222,10 +222,9 @@ class APIController {
    * public data as JSON.
    */
   static getOrg(req, res) {
-    const username = req.user.username;
     const orgid = M.lib.sani.sanitize(req.params.orgid);
 
-    OrgController.getOrg(username, orgid)
+    OrgController.findOrg(req.user, orgid)
     .then(function(org) {
       res.header('Content-Type', 'application/json');
       return res.send(APIController.formatJSON(org.getPublicData()));
@@ -347,9 +346,15 @@ class APIController {
    * message is returned.
    */
   static deleteOrg(req, res) {
+        // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.error('Request does not have a user.')
+      return res.status(500).send('Internal Server Error');
+    }
+
     const orgid = M.lib.sani.sanitize(req.params.orgid);
 
-    OrgController.removeOrg(username, orgid)
+    OrgController.removeOrg(req.user, orgid)
     .then(function(org) {
       res.header('Content-Type', 'application/json');
       return res.send(APIController.formatJSON(org.getPublicData()));
@@ -439,17 +444,16 @@ class APIController {
       return res.status(500).send('Internal Server Error');
     }
 
-    const orgid = M.lib.sanitization.html(req.params.orgid);
-    const projectid = M.lib.sanitization.html(req.params.projectid);
+    const orgid = M.lib.sani.html(req.params.orgid);
+    const projectid = M.lib.sani.html(req.params.projectid);
 
-    ProjController.findProject(req.user, orgid, projectid)
+    ProjectController.findProject(req.user, orgid, projectid)
     .then(function(project){
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(API.formatJSON(project));
+      return res.status(200).send(APIController.formatJSON(project));
     })
     .catch(function(err){
       M.log.error(err);
-      res.header('Content-Type', 'application/json');
       return res.status(500).send('Internal Server Error');
     });
   }
@@ -470,7 +474,7 @@ class APIController {
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('org')) {
-      if(req.body.org.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
+      if(req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
         M.log.error('Organization ID in body does not match ID in params.')
         return res.status(400).send('Bad Request');
       }
@@ -478,7 +482,7 @@ class APIController {
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
-    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.projid) {
+    if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.projectid)) {
       M.log.error('Project ID in body does not match ID in params.')
       return res.status(400).send('Bad Request');
     }
@@ -497,16 +501,16 @@ class APIController {
     }
 
     // Verify that projID and name are strings
-    if (typeof req.params.projid !== 'string' || typeof req.body.name !== 'string') {
+    if (typeof req.params.projectid !== 'string' || typeof req.body.name !== 'string') {
       M.log.error('Given data is not of expected type, string.')
       return res.status(400).send('Bad Request');
     }
 
-    const projectId = M.lib.sani.sanitize(req.params.projid)
-    const projectName = M.lib.sani.sanitize(req.body.name)
-    const orgId = M.lib.sani.sanitize(req.params.orgid)
+    const projectId = M.lib.sani.html(req.params.projectid)
+    const projectName = M.lib.sani.html(req.body.name)
+    const orgId = M.lib.sani.html(req.params.orgid)
 
-    ProjController.createProject(req.user, {
+    ProjectController.createProject(req.user, {
       id: projectId,
       name: projectName,
       org: {
@@ -515,7 +519,7 @@ class APIController {
     })
     .then(function(project){
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(API.formatJSON(project));
+      return res.status(200).send(APIController.formatJSON(project));
     })
     .catch(function(err){
       M.log.error(err);
@@ -542,7 +546,7 @@ class APIController {
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('org')) {
-      if(req.body.org.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
+      if(req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
         M.log.error('Organization ID in body does not match ID in params.')
         return res.status(400).send('Bad Request');
       }
@@ -550,7 +554,7 @@ class APIController {
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
-    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.projid) {
+    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.projectid) {
       M.log.error('Project ID in body does not match ID in params.')
       return res.status(400).send('Bad Request');
     }
@@ -569,16 +573,16 @@ class APIController {
     }
 
     // Verify that projID and name are strings
-    if (typeof req.params.projid !== 'string' || typeof req.body.name !== 'string') {
+    if (typeof req.params.projectid !== 'string' || typeof req.body.name !== 'string') {
       M.log.error('Given data is not of expected type, string.')
       return res.status(400).send('Bad Request');
     }
 
-    const projectId = M.lib.sani.sanitize(req.params.projid)
-    const projectName = M.lib.sani.sanitize(req.body.name)
-    const orgId = M.lib.sani.sanitize(req.params.orgid)
+    const projectId = M.lib.sani.html(req.params.projectid)
+    const projectName = M.lib.sani.html(req.body.name)
+    const orgId = M.lib.sani.html(req.params.orgid)
 
-    ProjController.createProject(req.user, orgId, projectId {
+    ProjectController.updateProject(req.user, orgId, projectId, {
       id: projectId,
       name: projectName,
       org: {
@@ -587,7 +591,7 @@ class APIController {
     })
     .then(function(project){
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(API.formatJSON(project));
+      return res.status(200).send(APIController.formatJSON(project));
     })
     .catch(function(err){
       M.log.error(err);
@@ -609,13 +613,13 @@ class APIController {
       M.log.error('Request does not have a user.')
       return res.status(500).send('Internal Server Error');
     }
-    const orgId = M.lib.sanitization.html(req.params.orgid);
-    const projectId = M.lib.sanitization.html(req.params.projectid);
+    const orgId = M.lib.sani.html(req.params.orgid);
+    const projectId = M.lib.sani.html(req.params.projectid);
 
     ProjectController.removeProject(req.user, orgId, projectId)
     .then(function(project){
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(API.formatJSON(project));
+      return res.status(200).send(APIController.formatJSON(project));
     })
     .catch(function(err){
       M.log.error(err);

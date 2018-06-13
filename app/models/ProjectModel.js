@@ -43,32 +43,22 @@ const ProjectSchema = new Schema({
     maxlength: [36, 'Too many characters in username']
   },
 
+  org: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Organization',
+    require: true
+  },
+
   uid: {
     type: String,
     unique: true,
-    default() {
-      return (`${this.org.id}:${this.id}`);
-    },
-    set() {
-      return (`${this.org.id}:${this.id}`);
-    },
-    get() {
-      return (`${this.org.id}:${this.id}`);
-    }
-
-  }
+  },
 
   name: {
     type: String,
     requite: true,
     unique: true,
     match: RegExp('^([a-zA-Z0-9-\\s])+$')
-  },
-
-  org: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Organization',
-    require: true
   },
 
   permissions: {
@@ -117,6 +107,7 @@ ProjectSchema.virtual('members').get(function() {
   return member;
 });
 
+
 // Post hook to link refernece to organization upon save
 ProjectSchema.post('save', () => {
   Organization.findOneAndUpdate({
@@ -128,6 +119,14 @@ ProjectSchema.post('save', () => {
       M.log.error(err);
     }
   });
+});
+
+ProjectSchema.pre('find', function() {
+  this.populate('org');
+});
+
+ProjectSchema.pre('save', function() {
+  this.populate('org');
 });
 
 // Required for virtual getters

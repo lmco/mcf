@@ -87,7 +87,7 @@ class OrganizationController {
    * @param  {String} The string containing the username of the requesting user.
    * @param  {String} The string of the org ID.
    */
-  static findOrg(username, organizationID) {
+  static findOrg(user, organizationID) {
     return new Promise(function(resolve, reject) {
 
       // Error check - Make sure orgID is a string. Otherwise, reject.
@@ -105,13 +105,16 @@ class OrganizationController {
 
         // If no org is found, reject
         if (!org) {
-          return reject(new Error('Org not found'));
+          return reject(new Error('Org not found.'));
         }
 
         // If user is not a member
         // TODO - Is there a way we can include this as part of the query?
-        if (!org.permissions.member.includes(username)) {
-          return reject(new Error('Org not found'));
+
+        const members = org.members.map(u => u._id.toString())
+
+        if (!members.includes(user._id.toString())) {
+          return reject(new Error('User does not have permissions.'));
         }
 
         // If we find one org (which we should if it exists)
@@ -318,7 +321,7 @@ class OrganizationController {
       Organization.findOneAndRemove({
         id: orgID
       },
-      (err) => {
+      (err, org) => {
         if (err) {
           return reject(err);
         }

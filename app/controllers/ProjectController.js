@@ -64,37 +64,45 @@ class ProjectController {
       }
 
       // Sanitize project properties
-      const orgId   = M.lib.sanitization.html(organizationId);
-      const projId  = M.lib.sanitization.html(projectId);
+      const orgId   = M.lib.sani.html(organizationId);
+      const projId  = M.lib.sani.html(projectId);
       const projUID = `${projId}:${orgId}`;
 
       // Search for project
-      Project.find({ uid: projUID }).populate.exec((err, projects) => {
+      Project.find({ uid: projUID })
+      .populate('org')
+      .exec( (err, projects) => {
         // Error Check - Database/Server Error
         if (err) {
           return reject(err)
         }
 
         // Check User Permissions
-        project = projects[0];
-        if (!project.permissions.member.includes(user.username) && !user.admin) {
-          return reject(new Error('User does not have permission.'))
-        }
+        //if (!project.permissions.member.includes(user.username) && !user.admin) {
+        //  return reject(new Error('User does not have permission.'))
+        //}
 
         // Error Check - Ensure only 1 project is found
         if (projects.length < 1) {
           return reject(new Error('Project not found'));
         }
+          
+        // Check Permissions
+        const project = projects[0]
+        const members = project.members.map(u => u._id.toString())
+        if(!members.includes(user._id.toString()) && !user.admin){
+          return reject(new Error('User does not have permission.'))
+        }
 
         // Error Check -  Insure that orgid matches project orgid
-        if (projects[0].orgid !== orgId) {
+        if (projects[0].org.id !== orgId) {
           return reject(new Error('Error: Project org id does not equal passed org id.'));
         }
 
         // Return resulting project
         return resolve(project)
       });
-    }
+    });
   }
 
 
@@ -124,8 +132,10 @@ class ProjectController {
       if (!project.hasOwnProperty('name')) {
         return reject( new Error('Project does not have attribute (name)'));
       }
-      if (!project.hasOwnProperty('org.id')) {
-        return reject( new Error('Project does not have attribute (orgid)'));
+      if (!project.hasOwnProperty('org')) {
+        if(!project.org.hasOwnProperty('id')){
+          return reject( new Error('Project does not have attribute (org.id)'));
+        }
       }
 
       // Error check - Verify id, name, and org.id are of type string for sanitization.
@@ -140,10 +150,10 @@ class ProjectController {
       }
 
       // Sanitize project properties
-      const projId   = M.lib.sanitization.html(project.id);
-      const projName = M.lib.sanitization.html(project.name);
-      const orgId    = M.lib.sanitization.html(project.org.id);
-      const projUID  = `${projId}:${orgID}`;
+      const projId   = M.lib.sani.html(project.id);
+      const projName = M.lib.sani.html(project.name);
+      const orgId    = M.lib.sani.html(project.org.id);
+      const projUID  = `${projId}:${orgId}`;
 
 
       // Error check - make sure project ID and project name are valid
@@ -155,7 +165,9 @@ class ProjectController {
       }
 
       // Error check - Make sure the org exists
-      Organization.find({ id: orgId }, (findOrgErr, orgs) => {
+      Organization.find({ id: orgId })
+      .populate('permissions.admin')
+      .exec( (findOrgErr, orgs) => {
         if (findOrgErr) {
           return reject( new Error(findOrgErr));
         }
@@ -164,8 +176,10 @@ class ProjectController {
         }
 
         // Check Permissions
-        org = orgs[0];
-        if(!org.permission.admin.includes(user.username) && !user.admin){
+        const org = orgs[0];
+        const members = org.members.map(u => u._id.toString())
+
+        if(!members.includes(user._id.toString()) && !user.admin){
           return reject(new Error('User does not have permission.'))
         }
 
@@ -180,10 +194,11 @@ class ProjectController {
 
           // Create the new project and save it
           const newProject = new Project({
-            id: projectId,
-            name: projectName,
-            org: orgs[0]._id
-            permissions.admin: [user._id]
+            id: projId,
+            name: projName,
+            org: orgs[0]._id,
+            permissions: {admin: [user._id]},
+            uid: `${projId}:${orgs[0].id}`
           });
 
           newProject.save((saveErr, projectUpdated) => {
@@ -193,9 +208,9 @@ class ProjectController {
             // Return success and the JSON object
             return resolve(projectUpdated);
           });
-        }
-      }
-    }
+        });
+      });
+    });
   }
   
 
@@ -234,19 +249,17 @@ class ProjectController {
         return reject( new Error('New project name is not of type String.'));
       }
 
-
       // Sanitize project properties
-      const orgId = M.lib.sanitization.html(organizationId);
-      const projId = M.lib.sanitization.html(projectId);
-      const projNameUpdated = M.lib.sanitization.html(projectUpdated.name);
+      const orgId = M.lib.sani.html(organizationId);
+      const projId = M.lib.sani.html(projectId);
+      const projNameUpdated = M.lib.sani.html(projectUpdated.name);
       const projUID = `${projId}:${orgId}`;
-
 
       // Error check - make sure project ID and project name are valid
       if (!RegExp(M.lib.validators.project.id).test(projId)) {
         return reject( new Error('Project ID is not valid.'));
       }
-      if (!RegExp(M.lib.validators.project.name).test(projName)) {
+      if (!RegExp(M.lib.validators.project.name).test(projNameUpdated)) {
         return reject( new Error('Project Name is not valid.'));
       }
 
@@ -269,23 +282,22 @@ class ProjectController {
             return reject(new Error('Project not found.'));
           }
 
-          // Allocate project for convenience
-          project = projects[0];
-
           // Check Permissions
-          if (project.permissions.admin.includes(user.username)) {
+          const project = projects[0]
+          const members = project.members.map(u => u._id.toString())
+          if(!members.includes(user._id.toString()) && !user.admin){
             return reject(new Error('User does not have permission.'))
           }
 
           // Currently we only support updating the name
           project.name = projNameUpdated; // eslint-disable-line no-param-reassign
-          projectUpdate.save();
+          project.save();
 
           // Return the updated project object
           return resolve(project)
         });
       });
-    }
+    });
   }
   
 
@@ -306,7 +318,7 @@ class ProjectController {
    * @param  {String} The organization ID for the Organization the project belongs to.
    * @param  {String} The project ID of the Project which is being deleted.
    */
-  static removeProject(user, orgId, projId) {
+  static removeProject(user, organizationId, projectId) {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
@@ -317,12 +329,12 @@ class ProjectController {
       }
 
       // Sanitize project properties
-      const orgId   = M.lib.sanitization.html(organizationId);
-      const projId  = M.lib.sanitization.html(projectId);
+      const orgId   = M.lib.sani.html(organizationId);
+      const projId  = M.lib.sani.html(projectId);
       const projUID = `${projId}:${orgId}`;
 
       // Check if project exists
-      Project.find({ id: projUID }).populate('org').exec((findOrgErr, projects) => {
+      Project.find({ uid: projUID }).populate('org').exec((findProjErr, projects) => {
         // Error Check - Return error if database query does not work
         if (findProjErr) {
           return reject(findProjErr);
@@ -332,11 +344,19 @@ class ProjectController {
           return reject(new Error('Project not found.'));
         }
 
+        // Check Permissions
+        const project = projects[0]
+        const members = project.members.map(u => u._id.toString())
+        if(!members.includes(user._id.toString()) && !user.admin){
+          return reject(new Error('User does not have permission.'))
+        }
+
         // Remove the Project
-        Project.findByIdAndRemove(projects[0]._id, (findProjErr) => {
-          if (findProjErr) {
-            return reject(findProjErr);
+        Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
+          if (removeProjErr) {
+            return reject(removeProjErr);
           }
+          return resolve(projectRemoved);
         });
       });
     });
