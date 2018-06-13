@@ -228,22 +228,13 @@ const UserSchema = new mongoose.Schema({
  * This is a getter which can be used in order to populate a list of
  * all organizations the user has write or admin permissions to.
  */
-//UserSchema.virtual('orgPermissions.member').get(function() {
-//  const member = this.orgPermissions.write || [];
-//  const admin = this.orgPermissions.admin || [];
-//
-//  const memberList = member.map(a => a.id);
-//
-//  for (let i = 0; i < admin.length; i++) {
-//    if (!memberList.includes(admin[i].id)) {
-//      member.push(admin[i]);
-//    }
-//  }
-//
-//  return member;
-//});
 
 
+
+/**
+ * This is the list of orgs the user has write access to.
+ * @type {String}
+ */
 UserSchema.virtual('orgs.write', {
   ref: 'Organization',
   localField: '_id',
@@ -251,6 +242,10 @@ UserSchema.virtual('orgs.write', {
   justOne: false
 });
 
+/**
+ * This is the list of orgs the user has admin access to.
+ * @type {String}
+ */
 UserSchema.virtual('orgs.admin', {
   ref: 'Organization',
   localField: '_id',
@@ -258,6 +253,10 @@ UserSchema.virtual('orgs.admin', {
   justOne: false
 });
 
+
+/**
+ * This populates an array containing the organizations the user is a member of.
+ */
 UserSchema.virtual('orgs.members').get(function() {
   // Grab the write and admin permissions lists
   const write = this.orgs.write;

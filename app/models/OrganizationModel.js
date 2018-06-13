@@ -93,7 +93,7 @@ OrganizationSchema.virtual('projects', {
  *
  * TODO - Check out a post org and figure out why this gets called three times.
  */
-OrganizationSchema.virtual('permissions.members').get(function() {
+OrganizationSchema.virtual('members').get(function() {
   // Grab the write and admin permissions lists
   const write = this.permissions.write;
   const admin = this.permissions.admin;
