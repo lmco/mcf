@@ -370,6 +370,44 @@ class APIController {
       });
   }
 
+  /**
+   * POST /api/orgs/:orgid/members/:role
+   *
+   * @description  Takes an orgid and role in the URI and updates a given 
+   * members role within the organization.
+   */
+  static postUserRole(req, res) {
+    // If no user in the request
+    if (!req.user) {
+      M.log.error('Request does not have a user.');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // If no user in the request body
+    if (!req.body.hasOwnProperty('username')) {
+      M.log.error('Request body does not contain a username field.');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    const orgID = M.lib.sani.sanitize(req.params.orgid)
+    UserController.findUser(req.body.username)
+    .then((user) => {
+      OrgController.setUserPermissions(req.user, user, orgID, req.params.role)
+      .then((org) => {
+        res.header('Content-Type', 'application/json');
+        return res.send(APIController.formatJSON(org.getPublicData()));
+      })
+      .catch((error) => {
+        M.log.warn(error);
+        return res.status(500).send('Internal Server Error');
+      });
+    })
+    .catch((err) => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    })
+  }
+
 
   /****************************************************************************
    * Project API Endpoints

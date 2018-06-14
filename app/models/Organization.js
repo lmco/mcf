@@ -55,6 +55,15 @@ const OrganizationSchema = new mongoose.Schema({
    */
   permissions: {
     /**
+     * Contains the list of users with read access to the organization.
+     * @type {Array}
+     */
+    read: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+
+    /**
      * Contains the list of users with write access to the organization.
      * @type {Array}
      */
@@ -94,7 +103,8 @@ OrganizationSchema.virtual('projects', {
  * TODO - Check out a post org and figure out why this gets called three times.
  */
 OrganizationSchema.virtual('members').get(function() {
-  // Grab the write and admin permissions lists
+  // Grab the read, write and admin permissions lists
+  const read = this.permissions.read;
   const write = this.permissions.write;
   const admin = this.permissions.admin;
 
@@ -111,6 +121,12 @@ OrganizationSchema.virtual('members').get(function() {
   return member;
 });
 
+OrganizationSchema.pre('find', function() {
+  this.populate('projects');
+  this.populate('permissions.read');
+  this.populate('permissions.write');
+  this.populate('permissions.admin');
+});
 
 /**
  * Returns the orgs's public data.
