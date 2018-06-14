@@ -449,6 +449,8 @@ class APIController {
    * @description  Gets and returns a list of all projects.
    */
   static getProject(req, res) {
+    
+    console.log('logging')
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.error('Request does not have a user.');

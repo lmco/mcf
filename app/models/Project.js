@@ -73,9 +73,10 @@ const ProjectSchema = new Schema({
     admin: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
-    }]
-  }
+    }],
 
+
+  }
 
 });
 
@@ -108,7 +109,15 @@ ProjectSchema.virtual('members').get(function() {
 
 ProjectSchema.pre('find', function() {
   this.populate('org');
+  this.populate('permissions')
+  for (key in this.populate) {
+    this.populate(`permissions.${this.permissions[key]}`);
+  }
 });
+
+ProjectSchema.method.permissionsLevel = function() {
+  return ['read', 'write', 'admin']
+}
 
 ProjectSchema.pre('save', function() {
   this.populate('org');

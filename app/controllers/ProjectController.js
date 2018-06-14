@@ -130,11 +130,6 @@ class ProjectController {
             return reject(err);
           }
 
-          // Check User Permissions
-          // if (!project.permissions.member.includes(user.username) && !user.admin) {
-          //  return reject(new Error('User does not have permission.'))
-          // }
-
           // Error Check - Ensure only 1 project is found
           if (projects.length < 1) {
             return reject(new Error('Project not found'));
@@ -148,9 +143,11 @@ class ProjectController {
           }
 
           // Error Check -  Insure that orgid matches project orgid
-          if (projects[0].org.id !== orgId) {
+          if (project.org.id !== orgId) {
             return reject(new Error('Error: Project org id does not equal passed org id.'));
           }
+
+          console.log(project.permissionsLevel())
 
           // Return resulting project
           return resolve(project);
@@ -413,6 +410,43 @@ class ProjectController {
           });
         });
     });
+  }
+
+  static setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
+    return new Promise((resolve, reject) => {
+      // Error check - Verify id, name, and org.id are of type string for sanitization.
+      if (typeof organizationID !== 'string') {
+        return reject(new Error('Organization ID is not of type String.'));
+      }
+      if (typeof projectID !== 'string') {
+        return reject(new Error('Project ID is not of type String.'));
+      }
+      if (typeof permissionType !== 'string') {
+        return reject(new Error('Permission type is not of type String.'));
+      }
+
+      const orgID = M.lib.sani.html(organizationID);
+      const projID = M.lib.sani.html(projectID);
+      const projUID = `${orgID}:${projID}`;
+      const permType = M.lib.sani.html(permissionType);
+
+      Project.find({uid: projUID}, (err, projects) => {
+        if (err) {
+          return reject(err);
+        }
+
+        if (projects.length < 1){
+          return reject(new Error('Project not found.'));
+        }
+
+        const project = projects[0];
+
+
+      })
+
+
+
+    })
   }
 
 }
