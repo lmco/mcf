@@ -23,7 +23,7 @@ const mongoose = require('mongoose');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const Org = M.load('models/OrganizationModel');
+const Org = M.load('models/Organization');
 
 
 /*------------------------------------

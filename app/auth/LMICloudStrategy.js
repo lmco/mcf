@@ -22,9 +22,8 @@ const path = require('path');
 const crypto = require('crypto');
 const ldap = require('ldapjs');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
-const BaseStrategy = require(path.join(__dirname, 'BaseStrategy'));
-const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
+const BaseStrategy = M.load('auth/BaseStrategy');
+const User = M.load('models/User');
 
 /**
  * LMICloudStrategy
@@ -34,10 +33,10 @@ const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
  * @classdesc This class defines authentication in the LMI cloud environemnt.
  */
 class LMICloudStrategy extends BaseStrategy {
-  /**
-     * The `LMICloudStrategy` constructor.
-     */
 
+  /**
+   * The `LMICloudStrategy` constructor.
+   */
   constructor() {
     super();
     this.name = 'lmi-cloud-strategy';
@@ -71,13 +70,13 @@ class LMICloudStrategy extends BaseStrategy {
 
 
   /**
-     * Handles basic-style authentication. This function gets called both for
-     * the case of a basic auth header or for login form input. Either way
-     * the username and password is provided to this function for auth.
-     *
-     * If an error is passed into the callback, authentication fails.
-     * If the callback is called with no parameters, the user is authenticated.
-     */
+   * Handles basic-style authentication. This function gets called both for
+   * the case of a basic auth header or for login form input. Either way
+   * the username and password is provided to this function for auth.
+   *
+   * If an error is passed into the callback, authentication fails.
+   * If the callback is called with no parameters, the user is authenticated.
+   */
 
   handleBasicAuth(req, res, username, password, cb) {
     // Okay, this is silly...I'm not sure I like Javascript OOP.
@@ -90,7 +89,7 @@ class LMICloudStrategy extends BaseStrategy {
 
     // Search locally for the user
     User.find({
-      username,
+      username: username,
       deletedOn: null
     }, (err, users) => {
       // Check for errors
@@ -160,7 +159,7 @@ class LMICloudStrategy extends BaseStrategy {
     const self = this;
 
     const opts = {
-      filter,
+      filter: filter,
       scope: 'sub',
       attributes: M.config.auth.ldap.attributes
     };
@@ -293,10 +292,10 @@ class LMICloudStrategy extends BaseStrategy {
 
 
   /**
-     * This function gets called when the user is logged in.
-     * It creates a session token for the user and sets the req.session.token
-     * object to the newly created token.
-     */
+   * This function gets called when the user is logged in.
+   * It creates a session token for the user and sets the req.session.token
+   * object to the newly created token.
+   */
 
   doLogin(req, res, next) {
     M.log.info(`${req.originalUrl} requested by ${req.user.username}`);
@@ -323,6 +322,7 @@ class LMICloudStrategy extends BaseStrategy {
     M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
     next();
   }
+
 }
 
 module.exports = LMICloudStrategy;
