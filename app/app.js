@@ -42,11 +42,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 
 // Logging Middleware
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   const username = (req.user) ? req.user.username : 'anonymous';
   M.log.info(`"${req.originalUrl}" requested by ${username}`);
   next();
-})
+});
 
 // Convenient conversions from ms to other times units
 const units = {

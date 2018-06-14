@@ -130,7 +130,7 @@ class UIController {
       ui: M.config.server.ui,
       user: '',
       title: 'Login | Model-Based Engineering Environment',
-      next
+      next: next
     });
   }
 

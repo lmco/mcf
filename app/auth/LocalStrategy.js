@@ -65,7 +65,7 @@ class LocalStrategy extends BaseStrategy {
    */
   handleBasicAuth(req, res, username, password, cb) {
     User.findOne({
-      username,
+      username: username,
       deletedOn: null
     }, (err, user) => {
       // Check for errors

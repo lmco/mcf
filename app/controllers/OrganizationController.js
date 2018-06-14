@@ -42,11 +42,11 @@ class OrganizationController {
    * @param  {User} The user whose organizations to find
    */
   static findOrgs(user) {
-    return new Promise(function(resolve, reject) {
-      const sanitizedUser = M.lib.sani.sanitize(user)
+    return new Promise(((resolve, reject) => {
+      const sanitizedUser = M.lib.sani.sanitize(user);
       Organization.find({
         permissions: {
-          read: { $contains : sanitizedUser }
+          read: { $contains: sanitizedUser }
         }
       }, (err, orgs) => {
         // If error occurs, return it
@@ -55,11 +55,10 @@ class OrganizationController {
         }
 
         // Resolve the list of orgs
-        return resolve(orgs)
+        return resolve(orgs);
       });
-    });
+    }));
   }
-
 
 
   /**
@@ -80,7 +79,7 @@ class OrganizationController {
    * @param  {String} The string of the org ID.
    */
   static findOrg(user, organizationID) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(((resolve, reject) => {
       // Error check - Make sure orgID is a string. Otherwise, reject.
       if (typeof organizationID !== 'string') {
         M.log.verbose('orgID is not a string');
@@ -101,17 +100,16 @@ class OrganizationController {
 
         // If user is not a member
         // TODO - Is there a way we can include this as part of the query?
-        const members = org.members.map(u => u._id.toString())
+        const members = org.members.map(u => u._id.toString());
 
         if (!members.includes(user._id.toString())) {
           return reject(new Error('User does not have permissions.'));
         }
 
         // If we find one org (which we should if it exists)
-        return resolve(org)
+        return resolve(org);
       });
-
-    })
+    }));
   }
 
 
@@ -133,10 +131,10 @@ class OrganizationController {
    * @param  {id: (string), name: (string)} The JSON of the new org.
    */
   static createOrg(user, org) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       // Error check - Make sure user is admin
-      if (!user.admin){
-        return reject(new Error('User cannot create orgs.'))
+      if (!user.admin) {
+        return reject(new Error('User cannot create orgs.'));
       }
 
       // Error check - Make sure organization body has an organization id and name
@@ -168,10 +166,10 @@ class OrganizationController {
       }
 
       // Check if org already exists
-      Organization.find({ id: orgID }, (err, orgs) => {
+      Organization.find({ id: orgID }, (findOrgErr, orgs) => {
         // If error occurs, return it
-        if (err) {
-          return reject(err);
+        if (findOrgErr) {
+          return reject(findOrgErr);
         }
         // If org already exists, throw an error
         if (orgs.length >= 1) {
@@ -188,8 +186,11 @@ class OrganizationController {
         });
 
         // Save and resolve the new error
-        newOrg.save(function(err) {
-          return resolve(newOrg);
+        newOrg.save((saveOrgErr) => {
+          if (saveOrgErr) {
+            return reject(saveOrgErr);
+          }
+          resolve(newOrg);
         });
       });
     });
@@ -214,7 +215,7 @@ class OrganizationController {
    * @param  {id: (string), name: (string)} The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(((resolve, reject) => {
       // TODO (JU & JK): Implement in APIController
       /*
       // If a given property is not an allowed property to be updated,
@@ -241,41 +242,41 @@ class OrganizationController {
       const newOrgName = M.lib.sani.html(orgUpdate.name);
 
       Organization.find({ id: orgID })
-      .populate('permissions.admin')
-      .exec((err, orgs) => {
+        .populate('permissions.admin')
+        .exec((err, orgs) => {
         // If error occurs, return it
-        if (err) {
-          return reject(err);
-        }
-        // Error check - validate only 1 org was found
-        if (orgs.length > 1) {
-          return reject( new Error('Too many orgs found with same ID'));
-        }
-        if (orgs.length < 1) {
-          return reject( new Error('Organization not found.'));
-        }
-
-        // allocation for convenience
-        const org = orgs[0];
-
-        // Error check - Make sure user is admin
-        const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-        if (!user.admin || orgAdmins.includes(user._id.toString())){
-          return reject(new Error('User cannot create orgs.'))
-        }
-
-        // Update the name
-        org.name = newOrgName;
-        org.save((saveErr) => {
-          if (saveErr) {
-            // If error occurs, return it
-            return reject(saveErr);
+          if (err) {
+            return reject(err);
           }
-          // Return updated org
-          return resolve(org);
+          // Error check - validate only 1 org was found
+          if (orgs.length > 1) {
+            return reject(new Error('Too many orgs found with same ID'));
+          }
+          if (orgs.length < 1) {
+            return reject(new Error('Organization not found.'));
+          }
+
+          // allocation for convenience
+          const org = orgs[0];
+
+          // Error check - Make sure user is admin
+          const orgAdmins = org.permissions.admin.map(u => u._id.toString());
+          if (!user.admin || orgAdmins.includes(user._id.toString())) {
+            return reject(new Error('User cannot create orgs.'));
+          }
+
+          // Update the name
+          org.name = newOrgName;
+          org.save((saveErr) => {
+            if (saveErr) {
+            // If error occurs, return it
+              return reject(saveErr);
+            }
+            // Return updated org
+            return resolve(org);
+          });
         });
-      });
-    })
+    }));
   }
 
 
@@ -296,10 +297,10 @@ class OrganizationController {
    * @param  {string} The ID of the org being deleted.
    */
   static removeOrg(user, organizationID) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(((resolve, reject) => {
       // Error check - Make sure user is admin
-      if (!user.admin){
-        return reject(new Error('User cannot delete orgs.'))
+      if (!user.admin) {
+        return reject(new Error('User cannot delete orgs.'));
       }
 
       // Error check - Make sure orgID is a string. Otherwise, reject.
@@ -322,7 +323,7 @@ class OrganizationController {
         }
         return resolve(org);
       });
-    });
+    }));
   }
 
 }

@@ -72,7 +72,7 @@ const OrganizationSchema = new mongoose.Schema({
       ref: 'User'
     }]
   }
-})
+});
 
 
 /**

@@ -37,7 +37,7 @@ const ProjectSchema = new Schema({
     type: String,
     require: true,
     index: true,
-    match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
+    match: RegExp(M.lib.validators.project.id),
     maxlength: [36, 'Too many characters in username']
   },
 
@@ -49,14 +49,14 @@ const ProjectSchema = new Schema({
 
   uid: {
     type: String,
-    unique: true,
+    unique: true
   },
 
   name: {
     type: String,
     requite: true,
     unique: true,
-    match: RegExp('^([a-zA-Z0-9-\\s])+$')
+    match: RegExp(M.lib.validators.project.name)
   },
 
   permissions: {
@@ -81,7 +81,7 @@ const ProjectSchema = new Schema({
 
 ProjectSchema.virtual('members').get(function() {
   // Grab the write and admin permissions lists
-  const read  = this.permissions.read;
+  const read = this.permissions.read;
   const write = this.permissions.write;
   const admin = this.permissions.admin;
 
@@ -105,19 +105,6 @@ ProjectSchema.virtual('members').get(function() {
   return member;
 });
 
-
-// Post hook to link refernece to organization upon save
-ProjectSchema.post('save', () => {
-  Organization.findOneAndUpdate({
-    _id: this.org
-  }, {                            // eslint is catching the following line by mistake, disabling
-    $push: { projects: this._id } // eslint-disable-line no-underscore-dangle
-  }, (err, org) => {
-    if (err) {
-      M.log.error(err);
-    }
-  });
-});
 
 ProjectSchema.pre('find', function() {
   this.populate('org');

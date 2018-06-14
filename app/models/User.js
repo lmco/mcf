@@ -62,7 +62,7 @@ const UserSchema = new mongoose.Schema({
     required: true,
     maxlength: [64, 'Password hash too long'],
     minlength: [64, 'Password hash too short'],
-    set(pwd) {
+    set: function(pwd) {
       const hash = crypto.createHash('sha256');
       // eslint is catching the below line by mistake
       // disabling underscore rule for that line only
@@ -112,13 +112,13 @@ const UserSchema = new mongoose.Schema({
     type: String,
     maxlength: [72, 'Name too long'],
     trim: true,
-    default() {
+    default: function() {
       return (`${this.fname} ${this.lname}`).trim();
     },
-    set() {
+    set: function() {
       return (`${this.fname} ${this.lname}`).trim();
     },
-    get() {
+    get: function() {
       return (`${this.fname} ${this.lname}`).trim();
     }
   },
@@ -153,7 +153,7 @@ const UserSchema = new mongoose.Schema({
   createdOn: {
     type: Date,
     default: Date.now,
-    set: (v) => { // eslint-disable-line no-unused-vars, arrow-body-style
+    set: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
       return this.createdOn;
     }
   },
@@ -190,20 +190,20 @@ const UserSchema = new mongoose.Schema({
   deleted: {
     type: Boolean,
     default: false,
-    set: (v) => {  // eslint-disable-line no-unused-vars, arrow-body-style
+    set: function(v) {  // eslint-disable-line no-unused-vars, arrow-body-style
       return (this.deletedOn !== null);
     },
-    get: (v) => { // eslint-disable-line no-unused-vars, arrow-body-style
+    get: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
       return (this.deletedOn !== null);
     }
-  },
+  }
 
 
   /**
    * This holds a reference to the organizations that the user has
    * either write or admin permissions to.
    */
-  //orgPermissions: {
+  // orgPermissions: {
   //  write: [{
   //    type: mongoose.Schema.Types.ObjectId,
   //    ref: 'Organization'
@@ -214,9 +214,9 @@ const UserSchema = new mongoose.Schema({
   //    ref: 'Organization'
   //  }]
 
-  //}
+  // }
 
-  //orgs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Organization' }]
+  // orgs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Organization' }]
 });
 
 
@@ -228,7 +228,6 @@ const UserSchema = new mongoose.Schema({
  * This is a getter which can be used in order to populate a list of
  * all organizations the user has write or admin permissions to.
  */
-
 
 
 /**
@@ -284,7 +283,6 @@ UserSchema.virtual('proj.read', {
 
 UserSchema.virtual('proj.write', {
   ref: 'Project',
-  ref: 'Organization',
   localField: '_id',
   foreignField: 'permissions.write',
   justOne: false
@@ -292,7 +290,6 @@ UserSchema.virtual('proj.write', {
 
 UserSchema.virtual('proj.admin', {
   ref: 'Project',
-  ref: 'Organization',
   localField: '_id',
   foreignField: 'permissions.admin',
   justOne: false
@@ -300,12 +297,12 @@ UserSchema.virtual('proj.admin', {
 
 UserSchema.virtual('proj.members').get(function() {
   // Grab the write and admin permissions lists
-  const read  = this.proj.read;
+  const read = this.proj.read;
   const write = this.proj.write;
   const admin = this.proj.admin;
 
   // set member to a copy of write
-  const member = write.slice();
+  const member = read.slice();
 
   // Add admins that aren't already in the member list,
   // creating a unique list of members
@@ -334,7 +331,7 @@ UserSchema.set('toObject', { virtuals: true });
  * @memberOf  User
  * Run our pre-defined setters on save.
  */
-UserSchema.pre('save', (next) => {
+UserSchema.pre('save', function(next) {
   // Run our defined setters
   this.name = '';
   this.updatedOn = '';
@@ -344,7 +341,7 @@ UserSchema.pre('save', (next) => {
 
 
 UserSchema.methods.isUpdateAllowed = function(field) {
-  const allowedMap =  {
+  const allowedMap = {
     username: false,
     fname: true,
     lname: true,
@@ -358,7 +355,7 @@ UserSchema.methods.isUpdateAllowed = function(field) {
     admin: false
   };
   return allowedMap[field];
-}
+};
 
 
 /**

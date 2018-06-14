@@ -31,10 +31,6 @@ const express = require('express');
 const M = require(path.join(__dirname, '..', 'mbee.js'));
 
 const APIController = M.load('controllers/APIController');
-//const OrgController = M.load('controllers/OrganizationController');
-//const ProjectController = require(getController('ProjectController'));
-//const UserController = require(getController('UserController'));
-//const RoleController = require(getController('RoleController'));
 const AuthController = M.load('lib/auth');
 
 const api = express.Router();

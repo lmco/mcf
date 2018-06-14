@@ -89,7 +89,7 @@ class LMICloudStrategy extends BaseStrategy {
 
     // Search locally for the user
     User.find({
-      username,
+      username: username,
       deletedOn: null
     }, (err, users) => {
       // Check for errors
@@ -159,7 +159,7 @@ class LMICloudStrategy extends BaseStrategy {
     const self = this;
 
     const opts = {
-      filter,
+      filter: filter,
       scope: 'sub',
       attributes: M.config.auth.ldap.attributes
     };

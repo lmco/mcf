@@ -95,12 +95,12 @@ function main() {
   const opts = process.argv.slice(3);
   const tasks = {
     build: build.build,
-    clean,
-    docker,
+    clean: clean,
+    docker: docker,
     install: build.install,
-    lint,
-    start,
-    test
+    lint: lint,
+    start: start,
+    test: test
   };
 
   if (tasks.hasOwnProperty(subcommand)) {

@@ -17,6 +17,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 
 const OrgController = mbee.load('controllers/OrganizationController');
 const ProjectController = mbee.load('controllers/ProjectController');
+const UserController = mbee.load('controllers/UserController');
 
 /**
  * APIController.js
@@ -158,23 +159,23 @@ class APIController {
   static getOrgs(req, res) {
     // Query all organizations from the database
     OrgController.findOrgs(req.user)
-    .then(orgs => {
+      .then((orgs) => {
       // If successful, return 200 status with list of orgs
       // Make sure we only return the orgs public data
-      const orgsPublicData = [];
-      for (let i = 0; i < orgs.length; i++) {
-        orgsPublicData.push(orgs[i].getPublicData());
-      }
+        const orgsPublicData = [];
+        for (let i = 0; i < orgs.length; i++) {
+          orgsPublicData.push(orgs[i].getPublicData());
+        }
 
-      // Return 200 and the orgs
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(orgsPublicData));
-    })
-    .catch(error => {
+        // Return 200 and the orgs
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(orgsPublicData));
+      })
+      .catch((error) => {
       // If error occurs, log error and return 500 status.
-      M.log.error(error);
-      return res.status(500).send('Internal Server Error');
-    });
+        M.log.error(error);
+        return res.status(500).send('Internal Server Error');
+      });
   }
 
 
@@ -235,16 +236,15 @@ class APIController {
     const orgid = M.lib.sani.sanitize(req.params.orgid);
 
     OrgController.findOrg(req.user, orgid)
-    .then(function(org) {
-      res.header('Content-Type', 'application/json');
-      return res.send(APIController.formatJSON(org.getPublicData()));
-    })
-    .catch(function(error) {
-      M.log.warn(error);
-      return res.status(500).send('Internal Server Error');
-    })
+      .then((org) => {
+        res.header('Content-Type', 'application/json');
+        return res.send(APIController.formatJSON(org.getPublicData()));
+      })
+      .catch((error) => {
+        M.log.warn(error);
+        return res.status(500).send('Internal Server Error');
+      });
   }
-
 
 
   /**
@@ -258,20 +258,20 @@ class APIController {
   static postOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.')
+      M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
-      M.log.error('Organization ID in body does not match ID in params.')
+      M.log.error('Organization ID in body does not match ID in params.');
       return res.status(400).send('Bad Request');
     }
 
     // Verify that orgID and name are strings
     if (typeof req.params.orgid !== 'string' || typeof req.body.name !== 'string') {
-      M.log.error('Given data is not of expected type, string.')
+      M.log.error('Given data is not of expected type, string.');
       return res.status(400).send('Bad Request');
     }
 
@@ -283,15 +283,15 @@ class APIController {
       id: organizationID,
       name: organizationName
     })
-    .then(function(org) {
+      .then((org) => {
       // Return OK status and the created org
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(org));
-    })
-    .catch(function(error) {
-      M.log.error(error);
-      return res.status(500).send('Internal Server Error');
-    });
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(org));
+      })
+      .catch((error) => {
+        M.log.error(error);
+        return res.status(500).send('Internal Server Error');
+      });
   }
 
 
@@ -306,20 +306,20 @@ class APIController {
   static putOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.')
+      M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
-      M.log.error('Organization ID in body does not match ID in params.')
+      M.log.error('Organization ID in body does not match ID in params.');
       return res.status(400).send('Bad Request');
     }
 
     // Verify that orgID and name are strings
     if (typeof req.params.orgid !== 'string' || typeof req.body.name !== 'string') {
-      M.log.error('Given data is not of expected type, string.')
+      M.log.error('Given data is not of expected type, string.');
       return res.status(400).send('Bad Request');
     }
 
@@ -331,15 +331,15 @@ class APIController {
       id: organizationID,
       name: organizationName
     })
-    .then(function(org) {
+      .then((org) => {
       // Return OK status and the created org
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(org));
-    })
-    .catch(function(error) {
-      M.log.error(error);
-      return res.status(500).send('Internal Server Error');
-    });
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(org));
+      })
+      .catch((error) => {
+        M.log.error(error);
+        return res.status(500).send('Internal Server Error');
+      });
   }
 
 
@@ -351,23 +351,23 @@ class APIController {
    * message is returned.
    */
   static deleteOrg(req, res) {
-        // If for some reason we don't have a user, fail.
+    // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.')
+      M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
 
     const orgid = M.lib.sani.sanitize(req.params.orgid);
 
     OrgController.removeOrg(req.user, orgid)
-    .then(function(org) {
-      res.header('Content-Type', 'application/json');
-      return res.send(APIController.formatJSON(org.getPublicData()));
-    })
-    .catch(function(error) {
-      M.log.warn(error);
-      return res.status(500).send('Internal Server Error');
-    })
+      .then((org) => {
+        res.header('Content-Type', 'application/json');
+        return res.send(APIController.formatJSON(org.getPublicData()));
+      })
+      .catch((error) => {
+        M.log.warn(error);
+        return res.status(500).send('Internal Server Error');
+      });
   }
 
 
@@ -384,14 +384,21 @@ class APIController {
    * organization not found or other error occurs.
    */
   static getProjects(req, res) {
+    // Sanitize input
     const orgid = M.lib.sanitization.html(req.params.orgid);
-    Project.find({ orgid }, (err, projects) => {
-      if (err) {
+
+    // Call project find with user and organization ID
+    ProjectController.findProjects(req.user, orgid)
+      .then((projects) => {
+      // Return project
+        res.header('Content-Type', 'application/json');
+        return res.send(APIController.formatJSON(projects));
+      })
+      .catch((err) => {
+      // Log error and send error response
+        M.log.error(err);
         return res.status(500).send('Internal Server Error');
-      }
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(API.formatJSON(projects));
-    });
+      });
   }
 
 
@@ -444,7 +451,7 @@ class APIController {
   static getProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.')
+      M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
 
@@ -452,14 +459,14 @@ class APIController {
     const projectid = M.lib.sani.html(req.params.projectid);
 
     ProjectController.findProject(req.user, orgid, projectid)
-    .then(function(project){
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
-    })
-    .catch(function(err){
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
-    });
+      .then((project) => {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(project));
+      })
+      .catch((err) => {
+        M.log.error(err);
+        return res.status(500).send('Internal Server Error');
+      });
   }
 
 
@@ -472,15 +479,15 @@ class APIController {
   static postProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.')
+      M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('org')) {
-      if(req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
-        M.log.error('Organization ID in body does not match ID in params.')
+      if (req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
+        M.log.error('Organization ID in body does not match ID in params.');
         return res.status(400).send('Bad Request');
       }
     }
@@ -488,32 +495,32 @@ class APIController {
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.projectid)) {
-      M.log.error('Project ID in body does not match ID in params.')
+      M.log.error('Project ID in body does not match ID in params.');
       return res.status(400).send('Bad Request');
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (!req.body.hasOwnProperty('name')) {
-      M.log.error('Project name not found in request body.')
+      M.log.error('Project name not found in request body.');
       return res.status(400).send('Bad Request');
     }
 
     // Verify that orgID is a string
     if (typeof req.params.orgid !== 'string') {
-      M.log.error('Given data is not of expected type, string.')
+      M.log.error('Given data is not of expected type, string.');
       return res.status(400).send('Bad Request');
     }
 
     // Verify that projID and name are strings
     if (typeof req.params.projectid !== 'string' || typeof req.body.name !== 'string') {
-      M.log.error('Given data is not of expected type, string.')
+      M.log.error('Given data is not of expected type, string.');
       return res.status(400).send('Bad Request');
     }
 
-    const projectId = M.lib.sani.html(req.params.projectid)
-    const projectName = M.lib.sani.html(req.body.name)
-    const orgId = M.lib.sani.html(req.params.orgid)
+    const projectId = M.lib.sani.html(req.params.projectid);
+    const projectName = M.lib.sani.html(req.body.name);
+    const orgId = M.lib.sani.html(req.params.orgid);
 
     ProjectController.createProject(req.user, {
       id: projectId,
@@ -522,14 +529,14 @@ class APIController {
         id: orgId
       }
     })
-    .then(function(project){
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
-    })
-    .catch(function(err){
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
-    });
+      .then((project) => {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(project));
+      })
+      .catch((err) => {
+        M.log.error(err);
+        return res.status(500).send('Internal Server Error');
+      });
   }
 
 
@@ -543,15 +550,15 @@ class APIController {
   static putProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.')
+      M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('org')) {
-      if(req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
-        M.log.error('Organization ID in body does not match ID in params.')
+      if (req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
+        M.log.error('Organization ID in body does not match ID in params.');
         return res.status(400).send('Bad Request');
       }
     }
@@ -559,32 +566,32 @@ class APIController {
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && req.body.id !== req.params.projectid) {
-      M.log.error('Project ID in body does not match ID in params.')
+      M.log.error('Project ID in body does not match ID in params.');
       return res.status(400).send('Bad Request');
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (!req.body.hasOwnProperty('name')) {
-      M.log.error('Project name not found in request body.')
+      M.log.error('Project name not found in request body.');
       return res.status(400).send('Bad Request');
     }
 
     // Verify that orgID is a string
     if (typeof req.params.orgid !== 'string') {
-      M.log.error('Given data is not of expected type, string.')
+      M.log.error('Given data is not of expected type, string.');
       return res.status(400).send('Bad Request');
     }
 
     // Verify that projID and name are strings
     if (typeof req.params.projectid !== 'string' || typeof req.body.name !== 'string') {
-      M.log.error('Given data is not of expected type, string.')
+      M.log.error('Given data is not of expected type, string.');
       return res.status(400).send('Bad Request');
     }
 
-    const projectId = M.lib.sani.html(req.params.projectid)
-    const projectName = M.lib.sani.html(req.body.name)
-    const orgId = M.lib.sani.html(req.params.orgid)
+    const projectId = M.lib.sani.html(req.params.projectid);
+    const projectName = M.lib.sani.html(req.body.name);
+    const orgId = M.lib.sani.html(req.params.orgid);
 
     ProjectController.updateProject(req.user, orgId, projectId, {
       id: projectId,
@@ -593,15 +600,14 @@ class APIController {
         id: orgId
       }
     })
-    .then(function(project){
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
-    })
-    .catch(function(err){
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
-    });
-
+      .then((project) => {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(project));
+      })
+      .catch((err) => {
+        M.log.error(err);
+        return res.status(500).send('Internal Server Error');
+      });
   }
 
 
@@ -614,22 +620,21 @@ class APIController {
   static deleteProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.')
+      M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
     const orgId = M.lib.sani.html(req.params.orgid);
     const projectId = M.lib.sani.html(req.params.projectid);
 
     ProjectController.removeProject(req.user, orgId, projectId)
-    .then(function(project){
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
-    })
-    .catch(function(err){
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
-    });
-
+      .then((project) => {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(project));
+      })
+      .catch((err) => {
+        M.log.error(err);
+        return res.status(500).send('Internal Server Error');
+      });
   }
 
 
@@ -644,18 +649,18 @@ class APIController {
   static getUser(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.')
+      M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
-    .then(user => {
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
-    })
-    .catch(err => {
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
-    })
+      .then((user) => {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+      })
+      .catch((err) => {
+        M.log.error(err);
+        return res.status(500).send('Internal Server Error');
+      });
   }
 
   /**
@@ -672,7 +677,7 @@ class APIController {
 
     // Otherwise return 200 and the user's public JSON
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(API.formatJSON(user.getPublicData()));
+    return res.status(200).send(APIController.formatJSON(req.user.getPublicData()));
   }
 
 }

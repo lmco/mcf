@@ -36,7 +36,7 @@ class UserController {
    * JSON format.
    */
   static findUsers() {
-    return new Promise(function (resolve, reject) {
+    return new Promise(((resolve, reject) => {
       User.find({
         deletedOn: null
       }, (err, users) => {
@@ -49,32 +49,30 @@ class UserController {
         // Otherwise return 200 and the users' public JSON
         return resolve(publicUsers);
       });
-    });
+    }));
   }
-
 
 
   /**
    * Gets a user by username and returns the user's public JSON data.
    */
   static findUser(searchedUsername) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(((resolve, reject) => {
       const username = M.lib.sani.sanitize(searchedUsername);
 
       User.findOne({
-        username,
+        username: username,
         deletedOn: null
       }, (err, user) => {
         // Check if error occured
         if (err) {
-          return reject(err)
+          return reject(err);
         }
 
         // Otherwise return 200 and the user's public JSON
-        return resolve(user)
+        return resolve(user);
       });
-    })
-
+    }));
   }
 
 
@@ -84,7 +82,7 @@ class UserController {
    * consistent-return rule.
    */
   static createUser(requestingUser, newUser) { // eslint-disable-line consistent-return
-    return new Promise(function (resolve, reject) {
+    return new Promise(((resolve, reject) => {
       // Error check - make sure the user is defined
       if (!requestingUser) {
         return reject(new Error('Requesting user is not defined.'));
@@ -118,12 +116,12 @@ class UserController {
         const user = new User(M.lib.sani.sanitize(newUser));
         user.save((saveErr) => {
           if (saveErr) {
-            return reject(saveErr)
+            return reject(saveErr);
           }
           return resolve(user.getPublicData());
         });
       });
-    });
+    }));
   }
 
 
@@ -131,7 +129,7 @@ class UserController {
    * Updates a user.
    */
   static updateUser(requestingUser, usernameToUpdate, newUserData) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(((resolve, reject) => {
       // Error check - make sure the user is defined
       if (!requestingUser) {
         return reject(new Error('Requesting user is not defined'));
@@ -160,7 +158,7 @@ class UserController {
           return reject(new Error('User does not exist'));
         }
 
-        let user = user[0];
+        const user = users[0];
 
         // If user exists, update the existing user
         M.log.debug('User found. Updating existing user ...');
@@ -169,7 +167,7 @@ class UserController {
         const props = Object.keys(newUserData);
         for (let i = 0; i < props.length; i++) {
           if (user.isUpdateAllowed(props[i])) {
-            user[props[i]] = M.lib.sani.sanitize(userData[props[i]]);
+            user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
           }
         }
 
@@ -181,7 +179,7 @@ class UserController {
           return resolve(updatedUser.getPublicData());
         });
       });
-    });
+    }));
   }
 
 
@@ -189,7 +187,7 @@ class UserController {
    * Deletes a user.
    */
   static deleteUser(requestingUser, usernameToDelete) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(((resolve, reject) => {
       // Error check - make sure the user is defined
       if (!requestingUser) {
         return reject(new Error('Requesting user is not defined.'));
@@ -202,7 +200,7 @@ class UserController {
 
       // Error check - prevent user from being stupid
       if (requestingUser.username === usernameToDelete) {
-        M.log.warn(`${requestingUser.username} tried to delete themselves.`)
+        M.log.warn(`${requestingUser.username} tried to delete themselves.`);
         return reject(new Error('User cannot delete self.'));
       }
 
@@ -216,7 +214,7 @@ class UserController {
         }
         return resolve(usernameToDelete);
       });
-    });
+    }));
   }
 
 }

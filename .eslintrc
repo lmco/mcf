@@ -105,16 +105,14 @@
 
     // require method and property shorthand syntax for object literals
     // "https"://eslint.org/docs/rules/object-shorthand
-    "object-shorthand": ["error", "always", {
-      "ignoreConstructors": false,
-      "avoidQuotes": true,
-    }],
+    // LM: Turning off to allow long form way because it is more explicit and easier to read.
+    "object-shorthand": ["error", "never"],
 
     // suggest using arrow functions as callbacks
-    // LM: setting allowUnboundThis to false because it should be safer. This can be reversed
-    // later is there is a good reason to do so. We will leave a warning in place to encourage
-    // consistency.
-    "prefer-arrow-callback": ["warn", {
+    // LM: Turning off because the arrow function does not work with some models using the "this" 
+    // variable reference. The function call is also valid and we do not want to limit the teams
+    // use to only use arrow callbacks.
+    "prefer-arrow-callback": ["off", {
       "allowNamedFunctions": false,
       "allowUnboundThis": false,
     }],
@@ -1013,9 +1011,8 @@
     // require return statements to either always or never specify values
     // LM: Changed to warning in order to avoid no return error for controller
     // logic.
-    // LM: Bring this back up to error status. This may need to be explicitly disabled for
-    // controller files or similar that handle web responses.
-    "consistent-return": "error",
+    // LM: Changed back to warning due to the fact that some API returns cannot be consistent
+    "consistent-return": "warn",
 
     // specify curly brace conventions for all control statements
     // LM: Not sure ESLint does exactly what we need here.
