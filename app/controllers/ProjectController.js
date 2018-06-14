@@ -51,6 +51,61 @@ class ProjectController {
    * @param  {String} The organization ID for the Organization the project belongs to.
    * @param  {String} The project ID of the Project which is being searched for.
    */
+  static findProjects(user, organizationId) {
+    return new Promise((resolve, reject) => {
+      // Error check - Verify id, name, and org.id are of type string for sanitization.
+      if (typeof organizationId !== 'string') {
+        return reject( new Error('Organization ID is not of type String.'));
+      }
+
+      // Sanitize project properties
+      const orgId   = M.lib.sani.html(organizationId);
+
+      // Search for project
+      Project.find({ org: orgId })
+      .populate('org')
+      .exec( (err, projects) => {
+        // Error Check - Database/Server Error
+        if (err) {
+          return reject(err)
+        }
+
+        // Error Check - Ensure only 1 project is found
+        if (projects.length < 1) {
+          return reject(new Error('Project not found'));
+        }
+
+        projectList = [];
+        for (let i = 0; i < projects.length; i++) {
+          const members = projects[i].members.map(u => u._id.toString());
+          if(members.includes(user._id.toString()) && !user.admin){
+            projectList.push(projects[i].getPublicData())
+          }
+        }
+
+        // Return resulting project
+        return resolve(projectList)
+      });
+    });
+  }
+
+  /**
+   * @description  The function finds a project.
+   *
+   * @example
+   * ProjectController.findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
+   * .then(function(org) {
+   *   // do something with the returned project
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {String} The organization ID for the Organization the project belongs to.
+   * @param  {String} The project ID of the Project which is being searched for.
+   */
   static findProject(user, organizationId, projectId) {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
