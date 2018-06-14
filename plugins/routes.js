@@ -26,7 +26,7 @@ const M = require(path.join(__dirname, '..', 'mbee.js'));
 const express = require('express');
 const pluginRouter = express.Router();
 
-/*
+/* Uncomment when merging or making permenant changes
 // Clone plugins
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   const metadata = M.config.server.plugins.plugins[i];
