@@ -31,7 +31,7 @@ class OrganizationController {
    * orgs that the user has at least read access too.
    *
    * @example
-   * OrganizationController.findOrgs(user)
+   * OrganizationController.findOrgs(username)
    *   .then(orgs => {
    *     console.log(orgs);
    *   })
@@ -41,12 +41,12 @@ class OrganizationController {
    *
    * @param  {User} The user whose organizations to find
    */
-  static findOrgs(user) {
+  static findOrgs(username) {
     return new Promise(((resolve, reject) => {
-      const sanitizedUser = M.lib.sani.sanitize(user);
+      const user = M.lib.sani.sanitize(username);
       Organization.find({
         permissions: {
-          read: { $contains: sanitizedUser }
+          read: { $contains: user }
         }
       }, (err, orgs) => {
         // If error occurs, return it
@@ -326,7 +326,25 @@ class OrganizationController {
     }));
   }
 
-
+  /**
+   * This function takes a user, second user, orgID and role and updates a
+   * users permissions within an organization
+   *
+   * @example
+   * OrganizationController.createOrg('josh', 'austin, {mbee-sw}, 'write')
+   * .then(function(org) {
+   *   // Change the users role
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {User} The object containing the user whose roles are to be changed.
+   * @param  {string} The ID of the org being deleted.
+   * @param  {string} The new role for the user. 
+   */
   static setUserPermissions(user, username, organizationID, role) {
     return new Promise((resolve, reject) => {
 
