@@ -10,18 +10,9 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 
-/* Node.js Modules */
 const path = require('path');
-
-
-/* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
-
-const User = M.load('models/UserModel');
-
-const modelsPath = path.join(__dirname, '..', 'models');
-const Organization = require(path.join(modelsPath, 'OrganizationModel'));
+const Organization = M.load('models/Organization');
 
 
 /**
@@ -36,8 +27,8 @@ const Organization = require(path.join(modelsPath, 'OrganizationModel'));
 class OrganizationController {
 
   /**
-   * This function takes a user objects and returns a list of orgs that the user has at least
-   * read access too.
+   * @description  This function takes a user objects and returns a list of
+   * orgs that the user has at least read access too.
    *
    * @example
    * OrganizationController.findOrgs(user)
@@ -72,7 +63,8 @@ class OrganizationController {
 
 
   /**
-   * This function takes a user and orgID and resolves the organization.
+   * @description  This function takes a user and orgID and resolves the
+   * organization.
    *
    * @example
    * OrganizationController.getOrg('josh', 'mbee-sw')
@@ -89,7 +81,6 @@ class OrganizationController {
    */
   static findOrg(user, organizationID) {
     return new Promise(function(resolve, reject) {
-
       // Error check - Make sure orgID is a string. Otherwise, reject.
       if (typeof organizationID !== 'string') {
         M.log.verbose('orgID is not a string');
@@ -110,7 +101,6 @@ class OrganizationController {
 
         // If user is not a member
         // TODO - Is there a way we can include this as part of the query?
-
         const members = org.members.map(u => u._id.toString())
 
         if (!members.includes(user._id.toString())) {
@@ -126,7 +116,8 @@ class OrganizationController {
 
 
   /**
-   * This function takes a user and org id and creates a new organization.
+   * @description  This function takes a user and org id and creates a new
+   * organization.
    *
    * @example
    * OrganizationController.createOrg('josh', {mbee-sw})
@@ -201,12 +192,13 @@ class OrganizationController {
           return resolve(newOrg);
         });
       });
-    })
+    });
   }
 
 
   /**
-   * This function takes a user and org object and updates an existing organization.
+   * @description  This function takes a user and org object and updates an
+   * existing organization.
    *
    * @example
    * OrganizationController.createOrg('josh', {mbee-sw})
@@ -240,11 +232,6 @@ class OrganizationController {
       }
       */
 
-      // Error check - Make sure user is admin
-      if (!user.admin){
-        return reject(new Error('User cannot create orgs.'))
-      }
-
       if (!orgUpdate.hasOwnProperty('name')) {
         return reject(new Error('Organization does not have a name.'));
       }
@@ -253,7 +240,9 @@ class OrganizationController {
       const orgID = M.lib.sani.html(organizationID);
       const newOrgName = M.lib.sani.html(orgUpdate.name);
 
-      Organization.find({ id: orgID }, (err, orgs) => {
+      Organization.find({ id: orgID })
+      .populate('permissions.admin')
+      .exec((err, orgs) => {
         // If error occurs, return it
         if (err) {
           return reject(err);
@@ -268,6 +257,12 @@ class OrganizationController {
 
         // allocation for convenience
         const org = orgs[0];
+
+        // Error check - Make sure user is admin
+        const orgAdmins = org.permissions.admin.map(u => u._id.toString());
+        if (!user.admin || orgAdmins.includes(user._id.toString())){
+          return reject(new Error('User cannot create orgs.'))
+        }
 
         // Update the name
         org.name = newOrgName;

@@ -11,14 +11,8 @@
  *****************************************************************************/
 
 const path = require('path');
-
-// const version = require(path.join(__dirname, '..', '..', 'package.json'))['version'];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-// const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
-// const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
-// const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
-// const validators = require(path.join(__dirname, '..', 'lib', 'validators.js'));
-const User = require(path.join(__dirname, '..', 'models', 'UserModel.js'));
+const User = M.load('models/User');
 
 
 /**

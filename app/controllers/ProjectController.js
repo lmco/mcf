@@ -15,10 +15,8 @@ const path = require('path');
 
 /* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const modelsPath = path.join(__dirname, '..', 'models');
-const API = require(path.join(__dirname, 'APIController'));
-const Organization = require(path.join(modelsPath, 'OrganizationModel'));
-const Project = require(path.join(modelsPath, 'ProjectModel'));
+const Organization = M.load('models/Organization');
+const Project = M.load('models/Project');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -36,8 +34,8 @@ const Project = require(path.join(modelsPath, 'ProjectModel'));
  */
 class ProjectController {
 
-  /** 
-   * The function finds a project. 
+  /**
+   * @description  The function finds a project.
    *
    * @example
    * ProjectController.findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
@@ -86,10 +84,10 @@ class ProjectController {
         if (projects.length < 1) {
           return reject(new Error('Project not found'));
         }
-          
+
         // Check Permissions
-        const project = projects[0]
-        const members = project.members.map(u => u._id.toString())
+        const project = projects[0];
+        const members = project.members.map(u => u._id.toString());
         if(!members.includes(user._id.toString()) && !user.admin){
           return reject(new Error('User does not have permission.'))
         }
@@ -106,8 +104,8 @@ class ProjectController {
   }
 
 
-  /** 
-   * The function creates a project.
+  /**
+   * @description  The function creates a project.
    *
    * @example
    * ProjectController.createProject({Tony Stark}, {Arc Reactor 1})
@@ -124,7 +122,6 @@ class ProjectController {
    */
   static createProject(user, project) {
     return new Promise((resolve, reject) => {
-
       // Error check - id, name, and org.id are in project variable.
       if (!project.hasOwnProperty('id')) {
         return reject( new Error('Project does not have attribute (id)'));
@@ -155,7 +152,6 @@ class ProjectController {
       const orgId    = M.lib.sani.html(project.org.id);
       const projUID  = `${projId}:${orgId}`;
 
-
       // Error check - make sure project ID and project name are valid
       if (!RegExp(M.lib.validators.project.id).test(projId)) {
         return reject( new Error('Project ID is not valid.'));
@@ -166,8 +162,8 @@ class ProjectController {
 
       // Error check - Make sure the org exists
       Organization.find({ id: orgId })
-      .populate('permissions.admin')
-      .exec( (findOrgErr, orgs) => {
+      .populate('permissions.write')
+      .exec((findOrgErr, orgs) => {
         if (findOrgErr) {
           return reject( new Error(findOrgErr));
         }
@@ -177,9 +173,9 @@ class ProjectController {
 
         // Check Permissions
         const org = orgs[0];
-        const members = org.members.map(u => u._id.toString())
+        const writers = org.write.map(u => u._id.toString())
 
-        if(!members.includes(user._id.toString()) && !user.admin){
+        if(!writers.includes(user._id.toString()) && !user.admin){
           return reject(new Error('User does not have permission.'))
         }
 
@@ -212,10 +208,10 @@ class ProjectController {
       });
     });
   }
-  
 
-  /** 
-   * The function updates a project.
+
+  /**
+   * @description  The function updates a project.
    *
    * @example
    * ProjectController.updateProject({Tony Stark}, {Arc Reactor 1})
@@ -233,11 +229,9 @@ class ProjectController {
    */
   static updateProject(user, organizationId, projectId, projectUpdated) {
     return new Promise((resolve, reject) => {
-
       if (!projectUpdated.hasOwnProperty('name')) {
         return reject( new Error('Project does not have attribute (name)'));
       }
-
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
         return reject( new Error('Organization ID is not of type String.'));
@@ -273,7 +267,9 @@ class ProjectController {
         }
 
        // Error check - check if the project already exists
-       Project.find({ uid: projUID }, (findProjErr, projects) => {
+       Project.find({ uid: projUID })
+       .populate('permissions.admin')
+       .exec((findProjErr, projects) => {
           if (findProjErr) {
             return reject(findProjErr);
           }
@@ -284,8 +280,8 @@ class ProjectController {
 
           // Check Permissions
           const project = projects[0]
-          const members = project.members.map(u => u._id.toString())
-          if(!members.includes(user._id.toString()) && !user.admin){
+          const admins = project.permissions.admin.map(u => u._id.toString())
+          if(!admins.includes(user._id.toString()) && !user.admin){
             return reject(new Error('User does not have permission.'))
           }
 
@@ -299,9 +295,9 @@ class ProjectController {
       });
     });
   }
-  
 
-  /** 
+
+  /**
    * The function deletes a project.
    *
    * @example
@@ -334,7 +330,9 @@ class ProjectController {
       const projUID = `${projId}:${orgId}`;
 
       // Check if project exists
-      Project.find({ uid: projUID }).populate('org').exec((findProjErr, projects) => {
+      Project.find({ uid: projUID })
+      .populate('permissions.admin')
+      .exec((findProjErr, projects) => {
         // Error Check - Return error if database query does not work
         if (findProjErr) {
           return reject(findProjErr);
@@ -346,8 +344,8 @@ class ProjectController {
 
         // Check Permissions
         const project = projects[0]
-        const members = project.members.map(u => u._id.toString())
-        if(!members.includes(user._id.toString()) && !user.admin){
+        const admins = project.permissions.admin.map(u => u._id.toString())
+        if(!admins.includes(user._id.toString()) && !user.admin){
           return reject(new Error('User does not have permission.'))
         }
 

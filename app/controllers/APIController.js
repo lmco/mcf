@@ -28,8 +28,11 @@ const ProjectController = mbee.load('controllers/ProjectController');
 class APIController {
 
   /**
-   * Formats an object as JSON. This method should be used for all API JSON
-   * formatting to provide common formatting across the API.
+   * @description This is a utility function that formats an object as JSON.
+   * This method should be used for all API JSON formatting to provide common
+   * formatting across the API.
+   *
+   * @param {object} obj An object to convert to a JSON-formatted string.
    */
   static formatJSON(obj) {
     return JSON.stringify(obj, null, mbee.config.server.api.json.indent);
@@ -37,8 +40,12 @@ class APIController {
 
 
   /**
-   * This is a helper method for defining a route that is not yet implemented.
-   * Mapping routes to this method will return a response of 501 Not Implemented.
+   * @description  This is a helper method for defining a route that is not yet
+   * implemented. Mapping routes to this method will return a response of
+   * 501 Not Implemented.
+   *
+   * @param {object} req The request object.
+   * @param {object} res The response object.
    */
   static notImplemented(req, res) {
     return res.status(501).send('Not Implemented.');
@@ -46,18 +53,19 @@ class APIController {
 
 
   /**
-   *
+   * @description Generates the Swagger specification based on the Swagger JSDoc
+   * in the API routes file.
    */
   static swaggerSpec() {
     return swaggerJSDoc({
       swaggerDefinition: {
         info: {
-          title: 'MBEE API Documentation',    // Title (required)
-          version: mbee.version    // Version (required)
+          title: 'MBEE API Documentation',          // Title (required)
+          version: mbee.version                     // Version (required)
         }
       },
       apis: [
-        path.join(__dirname, '..', 'api_routes.js')  // Path to the API docs
+        path.join(__dirname, '..', 'api_routes.js') // Path to the API docs
       ]
     });
   }
@@ -70,12 +78,12 @@ class APIController {
   /**
    * GET /api/doc
    *
-   * Renders the swagger doc.
+   * @description Renders the swagger doc.
    */
   static swaggerDoc(req, res) {
     return res.render('swagger', {
       swagger: APIController.swaggerSpec(),
-      ui: mbee.config.server.ui,
+      ui: M.config.server.ui,
       user: null,
       title: 'MBEE API Documentation'
     });
@@ -84,7 +92,8 @@ class APIController {
 
   /**
    * GET /api/doc/swagger.json
-   * Returns the swagger JSON spec.
+   *
+   * @description  Returns the swagger JSON specification.
    */
   static swaggerJSON(req, res) {
     const swaggerSpec = APIController.swaggerSpec();
@@ -95,10 +104,10 @@ class APIController {
 
   /**
    * POST /api/login
-   * Returns the login token after AuthController.doLogin.
+   *
+   * @description Returns the login token after AuthController.doLogin.
    */
   static login(req, res) {
-    mbee.log.debug('In APIController.login ...');
     res.header('Content-Type', 'application/json');
     return res.status(200).send(APIController.formatJSON({
       token: req.session.token
@@ -109,7 +118,7 @@ class APIController {
   /**
    * GET /api/test
    *
-   * Returns 200 to confirm the API is functional
+   * @description Returns 200 to confirm the API is functional
    */
   static test(req, res) {
     res.header('Content-Type', 'application/json');
@@ -119,7 +128,8 @@ class APIController {
 
   /**
    * GET /api/version
-   * Returns the version number as JSON.
+   *
+   * @description Returns the version number as JSON.
    */
   static version(req, res) {
     mbee.log.info(`GET "/api/version" requested by ${req.user.username}`);
@@ -140,14 +150,12 @@ class APIController {
   /**
    * GET /api/orgs
    *
-   * Gets a list of all organizations that a user has access to.
+   * @description Gets a list of all organizations that a user has access to.
    * Returns a Promise resolved with an array of organizations.
    * If the user had no access to organizations, the promise resolves
    * an empty array.
    */
   static getOrgs(req, res) {
-
-
     // Query all organizations from the database
     OrgController.findOrgs(req.user)
     .then(orgs => {
@@ -173,7 +181,7 @@ class APIController {
   /**
    * POST /api/orgs
    *
-   * Accepts a list of JSON objects containing organization data.
+   * @description  Accepts a list of JSON objects containing organization data.
    * Attempts to create each of the organizations. If any of the organizations
    * fail, the entire request fails and none of the organizations are created.
    *
@@ -189,9 +197,10 @@ class APIController {
   /**
    * PUT /api/orgs
    *
-   * Accepts a list of JSON objects containing organization data. This function expects each of the
-   * organizations to already exist (this should be updating them). If any of the organization
-   * updates fail, the entire request fails.
+   * @description Accepts a list of JSON objects containing organization data.
+   * This function expects each of the organizations to already exist (this
+   * should be updating them). If any of the organization updates fail, the
+   * entire request fails.
    *
    * This method is not yet implemented.
    */
@@ -205,12 +214,13 @@ class APIController {
   /**
    * DELETE /api/orgs
    *
-   * This function will soft-delete all orgs.
+   * @description  This function will soft-delete all orgs.
    *
    * This method is not yet implemented.
    */
   static deleteOrgs(req, res) {
-    // TODO - Discuss and define behavior for this will work or if it is necessary.
+    // TODO - Discuss and define behavior for this will work
+    // or if it is necessary.
     res.status(501).send('Not Implemented.');
   }
 
@@ -218,8 +228,8 @@ class APIController {
   /**
    * GET /api/orgs/:orgid
    *
-   * Gets the organization whose ID is 'orgid' and returns the organization's
-   * public data as JSON.
+   * @description Gets the organization whose ID is 'orgid' and returns the
+   * organization's public data as JSON.
    */
   static getOrg(req, res) {
     const orgid = M.lib.sani.sanitize(req.params.orgid);
@@ -236,7 +246,7 @@ class APIController {
   }
 
 
-  /* eslint-disable consistent-return */
+
   /**
    * POST /api/orgs/:orgid
    *
@@ -246,7 +256,6 @@ class APIController {
    * and must begin with a letter.
    */
   static postOrg(req, res) {
-
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.error('Request does not have a user.')
@@ -284,20 +293,17 @@ class APIController {
       return res.status(500).send('Internal Server Error');
     });
   }
-  /* eslint-enable consistent-return */
 
 
-  /* eslint-disable consistent-return */
   /**
    * PUT /api/orgs/:orgid
    *
-   * Takes an orgid in the URI and JSON encoded data in the body. Updates the
-   * org specified by the URI with the data provided in the body.
+   * @description  Takes an orgid in the URI and JSON encoded data in the body.
+   * Updates the org specified by the URI with the data provided in the body.
    * The organization ID cannot be updated and should not be provided in the
    * body.
    */
   static putOrg(req, res) {
-
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.error('Request does not have a user.')
@@ -335,13 +341,12 @@ class APIController {
       return res.status(500).send('Internal Server Error');
     });
   }
-  /* eslint-enable consistent-return */
 
 
   /**
    * DELETE /api/orgs/:orgid
    *
-   * Takes an orgid in the URI and soft-deletes the corresponding
+   * @description  Takes an orgid in the URI and soft-deletes the corresponding
    * organization. Returns a success message if successful, otherwise an error
    * message is returned.
    */
@@ -374,9 +379,9 @@ class APIController {
   /**
    * GET /api/org/:orgid/projects
    *
-   * Takes an orgid in the request params and returns a list of the project
-   * objects for that organization. Returns an error message if organization
-   * not found or other error occurs.
+   * @description  Takes an orgid in the request params and returns a list of
+   * the project objects for that organization. Returns an error message if
+   * organization not found or other error occurs.
    */
   static getProjects(req, res) {
     const orgid = M.lib.sanitization.html(req.params.orgid);
@@ -393,9 +398,9 @@ class APIController {
   /**
    * POST /api/org/:orgid/projects
    *
-   * It is defined here so that
-   * calls to the corresponding route can be caught and error messages returned
-   * rather than throwing a 500 server error.
+   * @description  It is defined here so that calls to the corresponding route
+   * can be caught and error messages returned rather than throwing a 500
+   * server error.
    */
   static postProjects(req, res) {
     return res.status(501).send('Not Implemented.');
@@ -405,9 +410,9 @@ class APIController {
   /**
    * PUT /api/org/:orgid/projects
    *
-   * This function is not intented to be implemented. It is defined here so that
-   * calls to the corresponding route can be caught and error messages returned
-   * rather than throwing a 500 server error.
+   * @description  This function is not intented to be implemented. It is
+   * defined here so that calls to the corresponding route can be caught and
+   * error messages returned rather than throwing a 500 server error.
    *
    * TODO (jk) - Figure out how we want to handle a change to an orgid.
    * For now, this assumes orgid won't change and stuff will break if it does
@@ -420,9 +425,9 @@ class APIController {
   /**
    * DELETE /api/org/:orgid/projects
    *
-   * This function is not intended to be implemented. It is defined here so that
-   * calls to the corresponding route can be caught and error messages returned
-   * rather than throwing a 500 server error.
+   * @description  This function is not intended to be implemented. It is
+   * defined here so that calls to the corresponding route can be caught and
+   * error messages returned rather than throwing a 500 server error.
    *
    * TODO (jk) - This may be one of the ugliest functions I've ever written. Fix it.
    */
@@ -434,9 +439,8 @@ class APIController {
   /**
    * GET /api/org/:orgid/projects/:projectid
    *
-   * Gets and returns a list of all projects.
+   * @description  Gets and returns a list of all projects.
    */
-
   static getProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
@@ -462,7 +466,8 @@ class APIController {
   /**
    * POST /api/org/:orgid/projects/:projectid
    *
-   * Takes a project object in the request body and creates the project.
+   * @description Takes a project object in the request body and creates the
+   * project.
    */
   static postProject(req, res) {
     // If for some reason we don't have a user, fail.
@@ -525,16 +530,15 @@ class APIController {
       M.log.error(err);
       return res.status(500).send('Internal Server Error');
     });
-
   }
 
 
   /**
    * PUT /api/org/:orgid/projects/:projectid
    *
-   * Takes an organization ID and project ID in the URI and JSON encoded
-   * project data in the body. Updates the project curresponding to the URI
-   * with the data passed in the body.
+   * @description  Takes an organization ID and project ID in the URI and JSON
+   * encoded project data in the body. Updates the project corresponding to the
+   * URI with the data passed in the body.
    */
   static putProject(req, res) {
     // If for some reason we don't have a user, fail.
@@ -635,36 +639,40 @@ class APIController {
   /**
    * GET /api/user/:username
    *
+   * @description Gets and returns the user.
    */
   static getUser(req, res) {
-
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.error('Request does not have a user.')
+      return res.status(500).send('Internal Server Error');
+    }
+    UserController.findUser(M.lib.sani.sanitize(req.params.username))
+    .then(user => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+    })
+    .catch(err => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    })
   }
 
   /**
-   * Returns the public information of the currently logged in user.
+   * GET /users/whoami
+   *
+   * @description Returns the public information of the currently logged in user.
    */
   static whoami(req, res) {
     // Sanity check - make sure we have user with a username
-    if (!req.user || req.user.hasOwnProperty('username')) {
+    if (!req.user) {
       M.log.warn('Invalid req.user object');
       return res.status(500).send('Internal Server Error');
     }
-    const username = sani.htmlspecialchars(req.user.username);
 
-    User.findOne({
-      username,
-      deletedOn: null
-    }, (err, user) => {
-      // Check if error occured
-      if (err) {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-
-      // Otherwise return 200 and the user's public JSON
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(API.formatJSON(user.getPublicData()));
-    });
+    // Otherwise return 200 and the user's public JSON
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(API.formatJSON(user.getPublicData()));
   }
 
 }

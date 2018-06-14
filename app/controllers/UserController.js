@@ -11,14 +11,9 @@
  *****************************************************************************/
 
 const path = require('path');
-
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const User = M.load('models/User');
 
-const API = require(path.join(__dirname, 'APIController'));
-const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
-
-const validators = M.lib.validators;
-const sani = M.lib.sani;
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -37,7 +32,7 @@ const sani = M.lib.sani;
 class UserController {
 
   /**
-   * Gets a list of all users and returns their public data in
+   * @description  Gets a list of all users and returns their public data in
    * JSON format.
    */
   static findUsers() {
@@ -49,10 +44,8 @@ class UserController {
         if (err) {
           return reject(err);
         }
-
         // Convert to public user data
         const publicUsers = users.map(u => u.getPublicData());
-
         // Otherwise return 200 and the users' public JSON
         return resolve(publicUsers);
       });
@@ -66,7 +59,7 @@ class UserController {
    */
   static findUser(searchedUsername) {
     return new Promise(function (resolve, reject) {
-      const username = sani.sanitize(searchedUsername);
+      const username = M.lib.sani.sanitize(searchedUsername);
 
       User.findOne({
         username,
@@ -102,6 +95,11 @@ class UserController {
         return reject(new Error('User is not an admin.'));
       }
 
+      // New users require a username
+      if (!newUser.hasOwnProperty('username')) {
+        return reject(new Error('Username not provided.'));
+      }
+
       User.find({
         username: M.lib.sani.sanitize(newUser.username)
       }, (findErr, users) => { // eslint-disable-line consistent-return
@@ -130,7 +128,7 @@ class UserController {
 
 
   /**
-   *
+   * Updates a user.
    */
   static updateUser(requestingUser, usernameToUpdate, newUserData) {
     return new Promise(function (resolve, reject) {

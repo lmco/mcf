@@ -20,12 +20,9 @@
 
 const path = require('path');
 const crypto = require('crypto');
-
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
-const BaseStrategy = require(path.join(__dirname, 'BaseStrategy'));
-const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
-
+const BaseStrategy = M.load('auth/BaseStrategy');
+const User = M.load('models/User');
 const libCrypto = M.lib.crypto;
 const sani = M.lib.sani;
 

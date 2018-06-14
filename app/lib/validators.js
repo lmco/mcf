@@ -57,7 +57,7 @@ module.exports.user = {
       M.log.error(error);
       return false;
     }
-  }
+  },
   email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$'
 };
 
