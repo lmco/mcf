@@ -184,7 +184,7 @@ class OrganizationController {
         name: M.lib.sani.html(orgName)
       });
       newOrg.save();
-
+console.log(newOrg);
       // Return the response message
       res.header('Content-Type', 'application/json');
       return res.status(200).send(API.formatJSON(newOrg));

@@ -12,6 +12,7 @@
 /**
  * @module  Lib Tests
  *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * 
 @description  This is currently a test of loading the Crypto Library and seeing if encrypt and
 decrypt are defined in the code.

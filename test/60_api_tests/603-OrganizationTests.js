@@ -17,32 +17,32 @@
  * Tests Basic API functionality.
  */
 
-// const path = require('path');
-// const util = require('util');
-// const chai  = require('chai');
-// const request = require('request');
+ const path = require('path');
+ const util = require('util');
+ const chai  = require('chai');
+ const request = require('request');
+ const fname = module.filename;
+ const name = fname.split('/')[fname.split('/').length - 1];
+ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 
-// const package_json = require(path.join(__dirname, '..', 'package.json'));
-// const config = package_json['config'];
-//
-// /**
-//  * APIOrgTest
-//  *
-//  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
-//  *
-//  * @classdesc This class defines ...
-//  */
-// class APIOrgTest
-// {
-//     /**
-//      * This function runs our unit tests.
-//      */
-//     static run()
-//     {
-//         describe('API Tests - Organizations', function() {
-//             it('should GET empty orgs', APIOrgTest.getOrgs01);
-//             it('should POST an organization', APIOrgTest.postOrg01);
+ const package_json = require(path.join(__dirname,'..', '..', 'package.json'));
+ const config = package_json['config'];
+
+ /**
+  * APIOrgTest
+  *
+  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+  *
+  * @classdesc This class defines ...
+  */
+ 
+  /**
+   * This function runs our unit tests.
+   */
+  describe(name, () => {
+      //             it('should GET empty orgs', APIOrgTest.getOrgs01);
+      it('should POST an organization', postOrg01);
 //             it('should reject a POST with ID mismatch', APIOrgTest.postOrg02);
 //             it('should reject a POST with invalid org id', APIOrgTest.postOrg03);
 //             it('should reject a POST with missing org name', APIOrgTest.postOrg04);
@@ -50,20 +50,19 @@
 //             it('should POST second organization', APIOrgTest.postOrg06);
 //             it('should reject a POST of a repeat org', APIOrgTest.postOrg07);
 //             it('should GET 2 organizations', APIOrgTest.getOrgs02);
-//             it('should DELETE org1', APIOrgTest.deleteOrg01);
+      it('should DELETE org1', deleteOrg01);
 //             it('should DELETE org2', APIOrgTest.deleteOrg02);
 //             it('should GET 0 organizations', APIOrgTest.getOrgs03);
-//         });
-//     }
-//
-//
-//
-//     /**
-//      * Makes a GET request to /api/orgs. This should happen before any orgs
-//      * are added to the database. So the response should be an empty array.
-//      *
-//      * TODO (jk) - What happens if we don't want to start with an empty db?
-//      */
+});
+
+
+
+     /**
+      * Makes a GET request to /api/orgs. This should happen before any orgs
+      * are added to the database. So the response should be an empty array.
+      *
+      * TODO (jk) - What happens if we don't want to start with an empty db?
+      */
 //     static getOrgs01(done)
 //     {
 //         request({
@@ -75,12 +74,13 @@
 //             chai.expect(body).to.equal('[]');
 //             done();
 //         });
+
 //     }
-//
-//     /**
-//      * Makes a GET request to /api/orgs. At this point we should have 2 orgs
-//      * in the database.
-//      */
+
+     /**
+      * Makes a GET request to /api/orgs. At this point we should have 2 orgs
+      * in the database.
+      */
 //     static getOrgs02(done)
 //     {
 //         request({
@@ -95,10 +95,10 @@
 //         });
 //     }
 //
-//     /**
-//      * Makes a GET request to /api/orgs. At this point our created orgs
-//      * should be deleted.
-//      */
+     /**
+      * Makes a GET request to /api/orgs. At this point our created orgs
+      * should be deleted.
+      */
 //     static getOrgs03(done)
 //     {
 //         request({
@@ -113,30 +113,33 @@
 //         });
 //     }
 //
-//
-//     /**
-//      * Makes a POST request to /api/orgs/:orgid to create an org.
-//      * This is our valid, expected use case.
-//      */
-//     static postOrg01(done)
-//     {
-//         request({
-//             url:        config.test.url + '/api/orgs/org1',
-//             headers:    APIOrgTest.getHeaders(),
-//             method:     'POST',
-//             body:       JSON.stringify({
-//                 'id':   'org1',
-//                 'name': 'Organization 1'
-//             })
-//         },
-//         function(error, response, body) {
-//             var json = JSON.parse(body);
-//             chai.expect(response.statusCode).to.equal(200);
-//             chai.expect(json['id']).to.equal('org1');
-//             chai.expect(json['name']).to.equal('Organization 1');
-//             done();
-//         });
-//     }
+
+     /**
+      * Makes a POST request to /api/orgs/:orgid to create an org.
+      * This is our valid, expected use case.
+      */
+     function postOrg01(done)
+     {
+         const test = M.config.test;
+
+         request({
+             url:        `${test.url}/api/orgs/org1`,
+             headers:    getHeaders(),
+             method:     'POST',
+             body:       JSON.stringify({
+                 "id" :   'org1',
+                 "name" : 'Organization 1'
+             })
+         },
+         (error, response, body) => {
+             console.log(body);
+             var json = JSON.parse(body);
+             chai.expect(response.statusCode).to.equal(200);
+             chai.expect(json['id']).to.equal('org1');
+             chai.expect(json['name']).to.equal('Organization 1');
+             done();
+         });
+     }
 //
 //
 //     /**
@@ -274,25 +277,26 @@
 //             done();
 //         });
 //     }
-//
-//     /**
-//      * Makes a DELETE request to /api/orgs/:orgid to remove an org.
-//      * This should succeed.
-//      */
-//     static deleteOrg01(done)
-//     {
-//         request({
-//             url:        config.test.url + '/api/orgs/org1',
-//             headers:    APIOrgTest.getHeaders(),
-//             method:     'DELETE'
-//         },
-//         function(error, response, body) {
-//             chai.expect(response.statusCode).to.equal(200);
-//             done();
-//         });
-//     }
-//
-//
+
+     /**
+      * Makes a DELETE request to /api/orgs/:orgid to remove an org.
+      * This should succeed.
+      */
+     function deleteOrg01(done)
+     {
+         const test = M.config.test;
+         request({
+             url:        `${test.url}/api/orgs/org1`,
+             headers:    getHeaders(),
+             method:     'DELETE'
+         },
+         (error, response, body) => {
+             chai.expect(response.statusCode).to.equal(200);
+             done();
+         });
+     }
+
+
 //     /**
 //      * Makes a DELETE request to /api/orgs/:orgid to remove an org.
 //      * This should succeed.
@@ -311,23 +315,15 @@
 //     }
 //
 //
-//     /*----------( Helper Functions )----------*/
-//
-//
-//     /**
-//      * Produces and returns an object containing common request headers.
-//      */
-//     static getHeaders()
-//     {
-//         return {
-//             'Content-Type': 'application/json',
-//             'authorization': 'Bearer SiSyFQ06xzC6tTcgMjCsz/q3p0qwWtseGeL+9FNiYl8nn/X3WLHn3' +
-//                              'AjK0caYt1am9KYSBS1sAqauWeP1LPZbyqoha5BwAx10x8vUv0mKWk2QtS/Q8q' +
-//                              '4y0TumhHsGrJZ8uw6/so9xeY5FUv1xzexFoudYtcYU7K5XHTl/yd5pXCY='
-//         }
-//     }
-//
-//
-// }
-//
-// module.exports = APIOrgTest;
+    /*----------( Helper Functions )----------*/
+
+     /**
+      * Produces and returns an object containing common request headers.
+      */
+     function getHeaders()
+     {
+         return {
+             'Content-Type': 'application/json'
+         }
+     }
+

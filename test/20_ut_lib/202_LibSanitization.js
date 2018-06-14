@@ -12,6 +12,7 @@
 /**
  * @module  Lib Tests
  *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * 
 @description  This is currently a test to see if encrypt returns a hex.
  */

@@ -10,14 +10,15 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Lib Tests
+ * @module  Controller Tests
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * 
-@description  This is currently a copy of test 100.
+@description  This is currently a test to see if the controllers for a user 
+are working.
  */
 
 const chai = require('chai');
+const sinon = require('sinon');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
@@ -29,32 +30,18 @@ const M = require('../../mbee.js');
  */
 
 describe(name, () => {
-  it('should load libraries', loadLib);
-});
+    it('calls the original function', fakeTest);
+  });
 
-
-/*------------------------------------
+ /*------------------------------------
  *       Test Functions
  *------------------------------------*/
+function fakeTest() {
+    var userController = M.load('controllers/UserController');
+    callback = sinon.fake();
+    proxy = userController.getUsers(callback);
 
+    proxy();
 
-/**
- * Loads a library
- */
-function loadLib(done) {
-  var crypto = M.load('lib/crypto');
-  //var auth = M.load('lib/auth');
-  //var db = M.load('lib/db');
-  var logger = M.load('lib/logger');
-  var sanitization = M.load('lib/sanitization');
-  var startup = M.load('lib/startup');
-  var validators = M.load('lib/validators');
-  chai.expect(crypto).to.not.equal(undefined);
-  //chai.expect(auth).to.not.equal(undefined);
-  //chai.expect(db).to.not.equal(undefined);
-  chai.expect(logger).to.not.equal(undefined);
-  chai.expect(sanitization).to.not.equal(undefined);
-  chai.expect(startup).to.not.equal(undefined);
-  chai.expect(validators).to.not.equal(undefined);
-  done();
+    chai.assert(callback.called);
 }
