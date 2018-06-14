@@ -77,7 +77,8 @@ files.forEach((f) => {
   try { // Handle error in plugin
     pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
   } catch(err) {
-    M.log.info(`Could not install plugin ${namespace}.`);
+    M.log.info(`Could not install plugin ${namespace}, error thrown:`);
+    M.log.info(err);
     return;
   }
   M.log.info(`Plugin ${namespace} installed.`);
