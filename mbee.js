@@ -104,8 +104,6 @@ function main() {
   };
 
   if (tasks.hasOwnProperty(subcommand)) {
-    console.log(subcommand);
-    console.log(opts);
     tasks[subcommand](opts);
   }
   else {
