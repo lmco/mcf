@@ -25,7 +25,7 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.load('models/UserModel');
+const User = M.load('models/User');
 
 
 /*------------------------------------

@@ -22,8 +22,6 @@
 const mongoose = require('mongoose');
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const modelsPath = path.join(__dirname, '..', 'models');
-const Organization = require(path.join(modelsPath, 'OrganizationModel'));
 
 // Create Project Model Schema:
 const Schema = mongoose.Schema;
@@ -39,16 +37,8 @@ const ProjectSchema = new Schema({
     type: String,
     require: true,
     index: true,
-    unique: true,
-    match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
+    match: RegExp(M.lib.validators.project.id),
     maxlength: [36, 'Too many characters in username']
-  },
-
-  name: {
-    type: String,
-    requite: true,
-    unique: true,
-    match: RegExp('^([a-zA-Z0-9-\\s])+$')
   },
 
   org: {
@@ -57,9 +47,16 @@ const ProjectSchema = new Schema({
     require: true
   },
 
-  members: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+  uid: {
+    type: String,
+    unique: true
+  },
+
+  name: {
+    type: String,
+    requite: true,
+    unique: true,
+    match: RegExp(M.lib.validators.project.name)
   },
 
   permissions: {
@@ -82,18 +79,44 @@ const ProjectSchema = new Schema({
 
 });
 
-// Post hook to link refernece to organization upon save
-ProjectSchema.post('save', () => {
-  Organization.findOneAndUpdate({
-    _id: this.org
-  }, {                            // eslint is catching the following line by mistake, disabling
-    $push: { projects: this._id } // eslint-disable-line no-underscore-dangle
-  }, (err, org) => {
-    if (err) {
-      M.log.error(err);
+ProjectSchema.virtual('members').get(function() {
+  // Grab the write and admin permissions lists
+  const read = this.permissions.read;
+  const write = this.permissions.write;
+  const admin = this.permissions.admin;
+
+  // set member to a copy of write
+  const member = read.slice();
+
+  // Add admins that aren't already in the member list,
+  // creating a unique list of members
+  for (let i = 0; i < write.length; i++) {
+    if (!member.includes(write[i])) {
+      member.push(write[i]);
     }
-  });
+  }
+
+  for (let i = 0; i < admin.length; i++) {
+    if (!member.includes(admin[i])) {
+      member.push(admin[i]);
+    }
+  }
+
+  return member;
 });
+
+
+ProjectSchema.pre('find', function() {
+  this.populate('org');
+});
+
+ProjectSchema.pre('save', function() {
+  this.populate('org');
+});
+
+// Required for virtual getters
+ProjectSchema.set('toJSON', { virtuals: true });
+ProjectSchema.set('toObject', { virtuals: true });
 
 // Export mongoose model as "Project"
 module.exports = mongoose.model('Project', ProjectSchema);

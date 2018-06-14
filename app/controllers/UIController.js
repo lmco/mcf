@@ -11,14 +11,8 @@
  *****************************************************************************/
 
 const path = require('path');
-
-// const version = require(path.join(__dirname, '..', '..', 'package.json'))['version'];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-// const log = require(path.join(__dirname, '..', 'lib', 'logger.js'));
-// const sani = require(path.join(__dirname, '..', 'lib', 'sanitization.js'));
-// const libCrypto = require(path.join(__dirname, '..', 'lib', 'crypto.js'));
-// const validators = require(path.join(__dirname, '..', 'lib', 'validators.js'));
-const User = require(path.join(__dirname, '..', 'models', 'UserModel.js'));
+const User = M.load('models/User');
 
 
 /**
@@ -30,8 +24,8 @@ const User = require(path.join(__dirname, '..', 'models', 'UserModel.js'));
  * It handles the server-side logic for most UI routes and renders the
  * appropriate views.
  */
-
 class UIController {
+
   /**
    * Renders the home page.
    */
@@ -136,7 +130,7 @@ class UIController {
       ui: M.config.server.ui,
       user: '',
       title: 'Login | Model-Based Engineering Environment',
-      next
+      next: next
     });
   }
 
@@ -184,6 +178,7 @@ class UIController {
     // redirect to the login screen
     res.redirect('/login');
   }
+
 }
 
 module.exports = UIController;

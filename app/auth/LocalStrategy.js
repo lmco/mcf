@@ -20,12 +20,9 @@
 
 const path = require('path');
 const crypto = require('crypto');
-
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
-const BaseStrategy = require(path.join(__dirname, 'BaseStrategy'));
-const User = require(path.join(__dirname, '..', 'models', 'UserModel'));
-
+const BaseStrategy = M.load('auth/BaseStrategy');
+const User = M.load('models/User');
 const libCrypto = M.lib.crypto;
 const sani = M.lib.sani;
 
@@ -38,6 +35,7 @@ const sani = M.lib.sani;
  * @classdesc This
  */
 class LocalStrategy extends BaseStrategy {
+
   /**
    * The `LocalStrategy` constructor.
    */
@@ -67,7 +65,7 @@ class LocalStrategy extends BaseStrategy {
    */
   handleBasicAuth(req, res, username, password, cb) {
     User.findOne({
-      username,
+      username: username,
       deletedOn: null
     }, (err, user) => {
       // Check for errors
@@ -184,6 +182,7 @@ class LocalStrategy extends BaseStrategy {
   }
 
   /* eslint-enable class-methods-use-this */
+
 }
 
 module.exports = LocalStrategy;

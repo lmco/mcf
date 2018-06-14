@@ -42,6 +42,10 @@ module.exports.encrypt = encrypt;
  * base64 encoded string format returned by the encrypt function.
  */
 function decrypt(data) {
+  if (data === undefined || data.toString() === '') {
+    mbee.log.warn(`Can't decrypt ${data}. Returning ...`);
+    return '{}';
+  }
   try {
     const secret = mbee.config.server.secret;
     const decipher = crypto.createDecipher('aes-256-cbc', secret);
