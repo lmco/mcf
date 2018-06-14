@@ -128,7 +128,7 @@ class OrganizationController {
    *
    *
    * @param  {User} The object containing the user of the requesting user.
-   * @param  {id: (string), name: (string)} The JSON of the new org.
+   * @param  {Org} The JSON of the new org.
    */
   static createOrg(user, org) {
     return new Promise((resolve, reject) => {
@@ -212,7 +212,7 @@ class OrganizationController {
    *
    *
    * @param  {User} The object containing the  requesting user.
-   * @param  {id: (string), name: (string)} The JSON of the updated org elements.
+   * @param  {String} The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
     return new Promise(((resolve, reject) => {
