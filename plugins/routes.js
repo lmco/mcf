@@ -26,7 +26,6 @@ const M = require(path.join(__dirname, '..', 'mbee.js'));
 const express = require('express');
 const pluginRouter = express.Router();
 
-/* Uncomment when merging or making permenant changes
 // Clone plugins
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   const metadata = M.config.server.plugins.plugins[i];
@@ -47,7 +46,7 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   M.log.verbose(stdout.toString());
   M.log.info('Clone complete.');
 }
-*/
+
 
 // Load plugin routes
 const files = fs.readdirSync(__dirname);
@@ -76,8 +75,8 @@ files.forEach((f) => {
   // Install the plugin
   try { // Handle error in plugin
     pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
-  } 
-  catch(err) {
+  }
+  catch (err) {
     M.log.error(`Could not install plugin ${namespace}, error thrown:`);
     M.log.error(err);
     return;

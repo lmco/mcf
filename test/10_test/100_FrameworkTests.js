@@ -18,7 +18,6 @@
 const chai = require('chai');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
-console.log(name);
 
 /*------------------------------------
  *       Main

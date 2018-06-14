@@ -41,7 +41,7 @@ else {
 function test(_args) {
   printHeader();
   const args = [`${M.root}/test/**/*.js`].concat(_args);
-  
+
   spawn(`${M.root}/node_modules/.bin/mocha`, args, { stdio: 'inherit' })
     .on('data', (data) => {
       console.log(data.toString()); // eslint-disable-line no-console
