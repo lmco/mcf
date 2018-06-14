@@ -73,6 +73,11 @@ files.forEach((f) => {
   const stdout = execSync(commands.join('; '));
   M.log.verbose(stdout.toString());
 
+  process.on('uncaughtException', function (err) {
+    console.log(err);
+    return;
+  });
+
   // Install the plugin
   pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
   M.log.info(`Plugin ${namespace} installed.`);
