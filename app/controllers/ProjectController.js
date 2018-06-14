@@ -491,8 +491,9 @@ class ProjectController {
           // loop through project permissions list to add and remove the correct permissions.
           for (let i = 1; i < permissionLevels.length; i++){
 
+            // Map permission list for easy access
             permissionList = project.permissions[permissionLevels[i]].map(u => u._id.toString());
-
+            // Check for push vals
             if (i <= permissionLevel) {
               if(!permissionList.includes(setUser._id.toString())){
                 if(!pushPullRoles.hasOwnProperty('$push')){
@@ -501,6 +502,8 @@ class ProjectController {
                 pushPullRoles['$push'][`permissions.${permissionLevels[i]}`] = setUser._id.toString()
               }
             }
+
+            // Check for pull vals
             else {
               if(permissionList.includes(setUser._id.toString())){
                 if(!pushPullRoles.hasOwnProperty('$pull')){
@@ -511,7 +514,7 @@ class ProjectController {
             }
           }
 
-
+          // Update project
           Project.findOneAndUpdate(
             {uid: projUID},
             pushPullRoles,
