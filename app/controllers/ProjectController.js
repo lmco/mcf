@@ -146,8 +146,6 @@ class ProjectController {
           return reject(new Error('Error: Project org id does not equal passed org id.'));
         }
 
-        console.log(project.permissions.admin)
-
         // Return resulting project
         return resolve(project);
       });
@@ -446,7 +444,7 @@ class ProjectController {
 
       const orgID = M.lib.sani.html(organizationID);
       const projID = M.lib.sani.html(projectID);
-      const projUID = `${orgID}:${projID}`;
+      const projUID = `${projID}:${orgID}`;
       const permType = M.lib.sani.html(permissionType);
 
       // Check if Organization exists
@@ -471,7 +469,7 @@ class ProjectController {
 
           // Check Permissions
           const project = projects[0];
-          admins = project.permissions.admin.map(u => u._id.toString())
+          const admins = project.permissions.admin.map(u => u._id.toString())
           if(!admins.includes(reqUser._id.toString()) && !reqUser.admin){
             return reject(new Error('User does not have permissions'));
           }
@@ -480,28 +478,44 @@ class ProjectController {
           const permissionLevels = project.getPermissionLevels();
 
           // Errock Check - Make sure that a valid permissions type was passed
-          if (permissionLevels.includes(permType)) {
+          if (!permissionLevels.includes(permType)) {
             return reject(new Error('Permissions type not found.'));
           }
 
           // Grab the index of the permission type
           const permissionLevel = permissionLevels.indexOf(permType);
 
+          let permissionList = []
+          let pushPullRoles = {}
+
           // loop through project permissions list to add and remove the correct permissions.
           for (let i = 1; i < permissionLevels.length; i++){
+
+            permissionList = project.permissions[permissionLevels[i]].map(u => u._id.toString());
+
             if (i <= permissionLevel) {
-              if(!project.permissions[permissionLevels[i]].includes(setUser._id.toString())){
-                project.permissions[permissionLevels[i]].push(setUser._id)
+              if(!permissionList.includes(setUser._id.toString())){
+                if(!pushPullRoles.hasOwnProperty('$push')){
+                  pushPullRoles['$push'] = {}
+                }
+                pushPullRoles['$push'][`permissions.${permissionLevels[i]}`] = setUser._id.toString()
               }
             }
             else {
-              if(project.permissions[permissionLevels[i]].includes(setUser._id.toString())){
-                project.permissions[permissionLevels[i]].pull(setUser._id)
+              if(permissionList.includes(setUser._id.toString())){
+                if(!pushPullRoles.hasOwnProperty('$pull')){
+                  pushPullRoles['$pull'] = {}
+                }
+                pushPullRoles['$pull'][`permissions.${permissionLevels[i]}`] = setUser._id.toString()
               }
             }
           }
 
-          project.save((saveProjErr, projectSaved) => {
+
+          Project.findOneAndUpdate(
+            {uid: projUID},
+            pushPullRoles,
+            (saveProjErr, projectSaved) => {
             if (saveProjErr) {
               return reject(saveProjErr);
             }

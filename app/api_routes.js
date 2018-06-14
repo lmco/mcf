@@ -651,10 +651,10 @@ api.route('/orgs/:orgid/members/:role')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:role')
-  .get(AuthController.authenticate, APIController.notImplemented)
-  .post(AuthController.authenticate, APIController.postProjectRoles)
-  .put(AuthController.authenticate, APIController.notImplemented)
-  .delete(AuthController.authenticate, APIController.notImplemented);
+  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .post(AuthController.authenticate.bind(AuthController), APIController.postProjectRoles)
+  .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
 
 
 /**

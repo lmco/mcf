@@ -119,12 +119,6 @@ ProjectSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin']
 }
 
-ProjectSchema.pre('save', function() {
-  this.populate('org');
-  this.populate('permissions.read');
-  this.populate('permissions.write');
-  this.populate('permissions.admin');
-});
 
 // Required for virtual getters
 ProjectSchema.set('toJSON', { virtuals: true });

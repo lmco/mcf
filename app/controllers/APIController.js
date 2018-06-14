@@ -389,6 +389,7 @@ class APIController {
       return res.status(500).send('Internal Server Error');
     }
 
+
     const orgID = M.lib.sani.sanitize(req.params.orgid)
     UserController.findUser(req.body.username)
     .then((user) => {
@@ -707,7 +708,7 @@ class APIController {
       .catch((findUserErr) => {
         M.log.error(findUserErr);
         return res.status(500).send('Internal Server Error');
-      })
+    })
   }
 
 

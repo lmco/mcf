@@ -122,10 +122,10 @@ OrganizationSchema.virtual('members').get(function() {
 });
 
 OrganizationSchema.pre('find', function() {
-  this.populate('projects');
-  this.populate('permissions.read');
-  this.populate('permissions.write');
-  this.populate('permissions.admin');
+  //this.populate('projects');
+  //this.populate('permissions.read');
+  //this.populate('permissions.write');
+  //this.populate('permissions.admin');
 });
 
 /**
