@@ -74,7 +74,7 @@ files.forEach((f) => {
   M.log.verbose(stdout.toString());
 
   // Install the plugin
-  try{
+  try{ // Handle error in plugin
     pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
   } catch(err) {
     console.log("Could not install plugin");
