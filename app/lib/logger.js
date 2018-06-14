@@ -134,7 +134,7 @@ const formatter = printf((msg) => {
  */
 const logger = winston.createLogger({
   level: mbee.config.log.level,
-  levels,
+  levels: levels,
   format: combine(
     label({ label: 'MBEE' }),
     winston.format.colorize(),

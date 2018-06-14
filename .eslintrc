@@ -105,16 +105,14 @@
 
     // require method and property shorthand syntax for object literals
     // "https"://eslint.org/docs/rules/object-shorthand
-    "object-shorthand": ["error", "always", {
-      "ignoreConstructors": false,
-      "avoidQuotes": true,
-    }],
+    // LM: Turning off to allow long form way because it is more explicit and easier to read.
+    "object-shorthand": ["error", "never"],
 
     // suggest using arrow functions as callbacks
-    // LM: setting allowUnboundThis to false because it should be safer. This can be reversed
-    // later is there is a good reason to do so. We will leave a warning in place to encourage
-    // consistency.
-    "prefer-arrow-callback": ["warn", {
+    // LM: Turning off because the arrow function does not work with some models using the "this" 
+    // variable reference. The function call is also valid and we do not want to limit the teams
+    // use to only use arrow callbacks.
+    "prefer-arrow-callback": ["off", {
       "allowNamedFunctions": false,
       "allowUnboundThis": false,
     }],
@@ -442,7 +440,21 @@
     "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": false }],
 
     // enforces empty lines around comments
-    "lines-around-comment": "off",
+    "lines-around-comment": ["error", {
+      "beforeBlockComment": false, // requires an empty line before block comments
+      "afterBlockComment": false,  // requires an empty line after block comments
+      "beforeLineComment": false,  // requires an empty line before line comments
+      "afterLineComment": false,   // requires an empty line after line comments
+      "allowBlockStart": true,     // allows comments to appear at the start of block statements
+      "allowBlockEnd": true,       // allows comments to appear at the end of block statements
+      "allowObjectStart": true,    // allows comments to appear at the start of object literals
+      "allowObjectEnd": true,      // allows comments to appear at the end of object literals
+      "allowArrayStart": true,     // allows comments to appear at the start of array literals
+      "allowArrayEnd": true,       // allows comments to appear at the end of array literals
+      "allowClassStart": true,     // allows comments to appear at the start of classes
+      "allowClassEnd": true        // allows comments to appear at the end of classes
+
+    }],
 
     // require or disallow newlines around directives
     // "https"://eslint.org/docs/rules/lines-around-directive
@@ -686,7 +698,12 @@
     "operator-linebreak": ["error", "before", { "overrides": { "=": "none" } }],
 
     // disallow padding within blocks
-    "padded-blocks": ["error", { "blocks": "never", "classes": "never", "switches": "never" }],
+    // LM: Turning this off, there are cases where flexibility is nice here.
+    "padded-blocks": ["error", {
+      "blocks": "never",
+      "classes": "always",
+      "switches": "never"
+    }],
 
     // Require or disallow padding lines between statements
     // "https"://eslint.org/docs/rules/padding-line-between-statements
@@ -994,9 +1011,8 @@
     // require return statements to either always or never specify values
     // LM: Changed to warning in order to avoid no return error for controller
     // logic.
-    // LM: Bring this back up to error status. This may need to be explicitly disabled for
-    // controller files or similar that handle web responses.
-    "consistent-return": "error",
+    // LM: Changed back to warning due to the fact that some API returns cannot be consistent
+    "consistent-return": "warn",
 
     // specify curly brace conventions for all control statements
     // LM: Not sure ESLint does exactly what we need here.

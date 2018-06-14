@@ -32,7 +32,7 @@ module.exports.project = {
 
 module.exports.user = {
   username: '^([a-z])([a-z0-9_]){0,}$',
-  password(p) {
+  password: function(p) {
     // Error check - Make sure password is a string
     if (typeof (p) !== typeof ('')) {
       return false;
@@ -57,7 +57,8 @@ module.exports.user = {
       M.log.error(error);
       return false;
     }
-  }
+  },
+  email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$'
 };
 
 module.exports.url = {

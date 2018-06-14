@@ -95,11 +95,11 @@ function main() {
   const opts = process.argv.slice(3);
   const tasks = {
     build: build.build,
-    clean,
-    docker,
+    clean: clean,
+    docker: docker,
     install: build.install,
-    lint,
-    start,
+    lint: lint,
+    start: start,
     test: test
   };
 

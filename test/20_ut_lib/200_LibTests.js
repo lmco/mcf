@@ -10,40 +10,24 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Org Model Tests
+ * @module  Lib Tests
  *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
- *
- * @description  Tests the org model
+ * @description  This is currently a copy of test 100.
  */
 
-const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const Org = M.load('models/Organization');
 
 
 /*------------------------------------
  *       Main
- *------------------------------------*/
+ *------------------------------------
+ */
 
 describe(name, () => {
-  // runs before all tests in this block
-  before(() => {
-    const db = M.load('lib/db');
-    db.connect();
-  });
-
-  // runs after all tests in this block
-  after(() => {
-    mongoose.connection.close();
-  });
-
-  it('should create an organization', createOrg).timeout(2500);
-  it('should delete an organization', deleteOrg).timeout(2500);
+  it('should run an empty test case', emptyTest);
+  it('should run simple assertions', assertionsTest);
 });
 
 
@@ -51,32 +35,18 @@ describe(name, () => {
  *       Test Functions
  *------------------------------------*/
 
+
 /**
- * Creates a user using the User model.
+ * Runs an empty test case.
  */
-function createOrg(done) {
-  const org = new Org({
-    id: 'empire',
-    name: 'Galactic Empire'
-  });
-  org.save((err) => {
-    if (err) {
-      M.log.error(err);
-    }
-    chai.expect(err).to.equal(null);
-    done();
-  });
+function emptyTest(done) {
+  done();
 }
 
-
 /**
- * Deletes the organization.
+ * Runs some simple assertions
  */
-function deleteOrg(done) {
-  Org.findOneAndRemove({
-    id: 'empire'
-  }, (err) => {
-    chai.expect(err).to.equal(null);
-    done();
-  });
+function assertionsTest(done) {
+  chai.expect(2).to.equal(2);
+  done();
 }

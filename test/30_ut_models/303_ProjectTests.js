@@ -23,8 +23,8 @@ const mongoose = require('mongoose');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const Org = M.load('models/OrganizationModel');
-const Project = M.load('models/ProjectModel');
+const Org = M.load('models/Organization');
+const Project = M.load('models/Project');
 
 // This is so the same parent org can be references across test functions
 let org = null;

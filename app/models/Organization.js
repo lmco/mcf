@@ -49,61 +49,81 @@ const OrganizationSchema = new mongoose.Schema({
     match: RegExp('^([a-zA-Z0-9-\\s])+$')
   },
 
-
   /**
-    * The 'project' holds a list of references to projects which belong to
-    * the organzation
-    */
-  projects: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project'
-  }]
+   * Permissions includes lists of users with certain permission levels
+   * or "roles" within an organization.
+   */
+  permissions: {
+    /**
+     * Contains the list of users with write access to the organization.
+     * @type {Array}
+     */
+    write: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+
+    /**
+     * Contains the list of users with admin rights to the organization.
+     * @type {Array}
+     */
+    admin: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }]
+  }
 });
 
 
 /**
-* The 'permissions.write' is a virtual reference to users with write
-* permissions to the organization
-*/
-OrganizationSchema.virtual('permissions.write', {
-  ref: 'User',
+  * The 'project' holds a list of references to projects which belong to
+  * the organzation
+  */
+OrganizationSchema.virtual('projects', {
+  ref: 'Project',
   localField: '_id',
-  foreignField: 'orgPermissions.write',
+  foreignField: 'org',
   justOne: false
 });
 
 
 /**
-* The 'permissions.admin' is a virtual reference to users with admin
-* permissions to the organization
-*/
-OrganizationSchema.virtual('permissions.admin', {
-  ref: 'User',
-  localField: '_id',
-  foreignField: 'orgPermissions.admin',
-  justOne: false
-});
+ * The 'permissions.member' is a virtual getter to users with admin
+ * and/or write permissions to the organization.
+ *
+ * TODO - Check out a post org and figure out why this gets called three times.
+ */
+OrganizationSchema.virtual('members').get(function() {
+  // Grab the write and admin permissions lists
+  const write = this.permissions.write;
+  const admin = this.permissions.admin;
 
+  // set member to a copy of write
+  const member = write.slice();
 
-/**
-* The 'permissions.member' is a virtual getter to users with admin
-* and/or write permissions to the organization
-
-OrganizationSchema.virtual('permissions.member').get(() => {
-  const member = this.permissions.write || [];
-  const admin = this.permissions.admin || [];
-
-  const memberList = member.map(a => a.username);
-
+  // Add admins that aren't already in the member list,
+  // creating a unique list of members
   for (let i = 0; i < admin.length; i++) {
-    if (!memberList.includes(admin[i].username)) {
+    if (!member.includes(admin[i])) {
       member.push(admin[i]);
     }
   }
-
   return member;
 });
 */
+
+
+/**
+ * Returns the orgs's public data.
+ * TODO (ju) - Add permissions to public data?
+ */
+OrganizationSchema.methods.getPublicData = function() {
+  return {
+    id: this.username,
+    name: this.name,
+    projects: this.projects
+  };
+};
 
 // Required for virtual getters
 OrganizationSchema.set('toJSON', { virtuals: true });
