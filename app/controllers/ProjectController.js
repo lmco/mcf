@@ -15,6 +15,7 @@ const path = require('path');
 
 /* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const OrgController = M.load('models/Organization');
 const Organization = M.load('models/Organization');
 const Project = M.load('models/Project');
 
@@ -122,36 +123,34 @@ class ProjectController {
       const projUID = `${projId}:${orgId}`;
 
       // Search for project
-      Project.find({ uid: projUID })
-        .populate('org')
-        .exec((err, projects) => {
+      Project.find({ uid: projUID }, (err, projects) => {
         // Error Check - Database/Server Error
-          if (err) {
-            return reject(err);
-          }
+        if (err) {
+          return reject(err);
+        }
 
-          // Error Check - Ensure only 1 project is found
-          if (projects.length < 1) {
-            return reject(new Error('Project not found'));
-          }
+        // Error Check - Ensure only 1 project is found
+        if (projects.length < 1) {
+          return reject(new Error('Project not found'));
+        }
 
-          // Check Permissions
-          const project = projects[0];
-          const members = project.members.map(u => u._id.toString());
-          if (!members.includes(user._id.toString()) && !user.admin) {
-            return reject(new Error('User does not have permission.'));
-          }
+        // Check Permissions
+        const project = projects[0];
+        const members = project.members.map(u => u._id.toString());
+        if (!members.includes(user._id.toString()) && !user.admin) {
+          return reject(new Error('User does not have permission.'));
+        }
 
-          // Error Check -  Insure that orgid matches project orgid
-          if (project.org.id !== orgId) {
-            return reject(new Error('Error: Project org id does not equal passed org id.'));
-          }
+        // Error Check -  Insure that orgid matches project orgid
+        if (project.org.id !== orgId) {
+          return reject(new Error('Error: Project org id does not equal passed org id.'));
+        }
 
-          console.log(project.permissionsLevel())
+        console.log(project.permissions.admin)
 
-          // Return resulting project
-          return resolve(project);
-        });
+        // Return resulting project
+        return resolve(project);
+      });
     });
   }
 
@@ -430,18 +429,66 @@ class ProjectController {
       const projUID = `${orgID}:${projID}`;
       const permType = M.lib.sani.html(permissionType);
 
-      Project.find({uid: projUID}, (err, projects) => {
-        if (err) {
-          return reject(err);
+      // Check if Organization exists
+      Organization.find({id: orgID}, (findOrgErr, orgs) => {
+        if (findOrgErr) {
+          return reject(findOrgErr)
         }
-
-        if (projects.length < 1){
-          return reject(new Error('Project not found.'));
+        // Error Check - See if organization exists
+        if (orgs.length < 1) {
+          return reject(new Error('Organization not found.'))
         }
+        // Allocate org variable for convenience.
+        const org = orgs[0];
 
-        const project = projects[0];
+        Project.find({uid: projUID}, (findProjErr, projects) => {
+          if (findProjErr) {
+            return reject(findProjErr);
+          }
+          if (projects.length < 1){
+            return reject(new Error('Project not found.'));
+          }
 
+          // Check Permissions
+          const project = projects[0];
+          admins = project.permissions.admin.map(u => u._id.toString())
+          if(!admins.includes(reqUser._id.toString()) && !reqUser.admin){
+            return reject(new Error('User does not have permissions'));
+          }
 
+          // Grab permissions levels from Project schema method
+          const permissionLevels = project.getPermissionLevels();
+
+          // Errock Check - Make sure that a valid permissions type was passed
+          if (permissionLevels.includes(permType)) {
+            return reject(new Error('Permissions type not found.'));
+          }
+
+          // Grab the index of the permission type
+          const permissionLevel = permissionLevels.indexOf(permType);
+
+          for (let i = 1; i < permissionLevels.length; i++){
+            if (i <= permissionLevel) {
+              if(!project.permissions[permissionLevels[i]].includes(setUser._id.toString())){
+                project.permissions[permissionLevels[i]].push(setUser._id)
+              }
+            }
+            else {
+              if(project.permissions[permissionLevels[i]].includes(setUser._id.toString())){
+                project.permissions[permissionLevels[i]].pull(setUser._id)
+              }
+            }
+          }
+
+          project.save((saveProjErr, projectSaved) => {
+            if (saveProjErr) {
+              return reject(saveProjErr);
+            }
+
+            return resolve(projectSaved);
+          });
+
+        })
       })
 
 

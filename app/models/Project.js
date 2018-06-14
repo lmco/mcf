@@ -109,18 +109,21 @@ ProjectSchema.virtual('members').get(function() {
 
 ProjectSchema.pre('find', function() {
   this.populate('org');
-  this.populate('permissions')
-  for (key in this.populate) {
-    this.populate(`permissions.${this.permissions[key]}`);
-  }
+  this.populate('permissions');
+  this.populate('permissions.read');
+  this.populate('permissions.write');
+  this.populate('permissions.admin');
 });
 
-ProjectSchema.method.permissionsLevel = function() {
-  return ['read', 'write', 'admin']
+ProjectSchema.methods.getPermissionLevels = function() {
+  return ['REMOVE_ALL', 'read', 'write', 'admin']
 }
 
 ProjectSchema.pre('save', function() {
   this.populate('org');
+  this.populate('permissions.read');
+  this.populate('permissions.write');
+  this.populate('permissions.admin');
 });
 
 // Required for virtual getters

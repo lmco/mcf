@@ -449,8 +449,6 @@ class APIController {
    * @description  Gets and returns a list of all projects.
    */
   static getProject(req, res) {
-    
-    console.log('logging')
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.error('Request does not have a user.');
@@ -637,6 +635,37 @@ class APIController {
         M.log.error(err);
         return res.status(500).send('Internal Server Error');
       });
+  }
+
+  static postProjectPermissions(req, res){
+    if (!req.user) {
+      M.log.error('Request does not have a user.');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    const orgID = M.lib.sani.html(req.params.orgid);
+    const projectID = M.lib.sani.html(req.params.projectid);
+    const username = M.lib.sani.html(req.body.username);
+    const permType = M.lib.sani.html(req.params.role);
+
+    UserController.findUser(username)
+      .then((user) => {
+        ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
+        .then((project) => {
+          res.header('Content-Type', 'application/json');
+          return res.status(200).send(APIController.formatJSON(project));
+
+        })
+        .catch((setPermErr) => {
+          M.log.error(setPermErr);
+          return res.status(500).send('Internal Server Error');
+        })
+
+      })
+      .catch((findUserErr) => {
+        M.log.error(findUserErr);
+        return res.status(500).send('Internal Server Error');
+      })
   }
 
 
