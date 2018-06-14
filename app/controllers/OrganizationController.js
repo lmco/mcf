@@ -326,6 +326,90 @@ class OrganizationController {
     }));
   }
 
+
+  static setUserPermissions(user, username, organizationID, role) {
+    return new Promise((resolve, reject) => {
+
+      // Ensure organizationID is a string
+      if (typeof organizationID !== 'string') {
+        M.log.verbose('Organization ID is not a string');
+        return reject(new Error('Organization ID is not a string'));
+      }
+
+      // Ensure role is a string
+      if (typeof role !== 'string') {
+        M.log.verbose('Role is not a string');
+        return reject(new Error('Role is not a string'));
+      }
+
+      // Ensure the role is a valid role
+      if ((role !== 'admin') && (role !== 'write') && (role !== 'read') && (role !== 'REMOVE_ALL')) {
+        return reject(new Error('The permission enetered is not a valid permission.'));
+      }
+
+      const orgID = M.lib.sani.sanitize(organizationID);
+
+      Organization.findOne({
+        id: orgID
+      },
+      (err, org) => {
+        if (err) {
+          return reject(err);
+        }
+
+        // Ensure user is an admin within the organization
+        const orgAdmins = org.permissions.admin.map(u => u._id.toString());
+        if (!user.admin || !orgAdmins.includes(user._id.toString())) {
+          return reject(new Error('User cannot change permissions.'));
+        }
+
+        const perm = org.permissions;
+
+        // Remove all current roles for the selected user
+        Object.keys(perm).forEach((roles) => {
+          // For some reason, list of keys includes $init, so ignore this key
+          if (roles !== '$init') {
+            const permVals = perm[roles].map(u => u._id.toString());
+            if (permVals.includes(username._id.toString())) {
+              perm[roles].splice(perm[roles].indexOf(username._id), 1);
+            }
+          }
+        });
+
+        // Add user to admin array
+        if (role === 'admin') {
+          if (!perm.admin.includes(username._id)) {
+            perm.admin.push(username._id);
+          }
+        }
+
+        // Add user to write array if admin or write 
+        if (role === 'admin' || role === 'write') {
+          if (!perm.write.includes(username._id)) {
+            perm.write.push(username._id);
+          }
+        }
+
+        // Add user to read array if admin, write or read
+        if (role === 'admin' || role === 'write' || role === 'read') {
+          if (!perm.read.includes(username._id)) {
+            perm.read.push(username._id);
+          } 
+        }
+
+        // Save the modified organization
+        org.save((saveErr) => {
+          if (saveErr) {
+          // If error occurs, return it
+            return reject(saveErr);
+          }
+          // Return updated org
+          return resolve(org);
+        });
+      });
+    });
+  }
+
 }
 
 // Expose `OrganizationController`

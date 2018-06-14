@@ -612,10 +612,10 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/members/:role')
-  .get(AuthController.authenticate, APIController.notImplemented)
-  .post(AuthController.authenticate, APIController.notImplemented)
-  .put(AuthController.authenticate, APIController.notImplemented)
-  .delete(AuthController.authenticate, APIController.notImplemented);
+  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .post(AuthController.authenticate.bind(AuthController), APIController.postUserRole)
+  .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
 
 
 /**

@@ -229,6 +229,16 @@ const UserSchema = new mongoose.Schema({
  * all organizations the user has write or admin permissions to.
  */
 
+/**
+ * This is the list of orgs the user has read access to.
+ * @type {String}
+ */
+UserSchema.virtual('orgs.read', {
+  ref: 'Organization',
+  localField: '_id',
+  foreignField: 'permissions.read',
+  justOne: false
+});
 
 /**
  * This is the list of orgs the user has write access to.
@@ -258,6 +268,7 @@ UserSchema.virtual('orgs.admin', {
  */
 UserSchema.virtual('orgs.members').get(function() {
   // Grab the write and admin permissions lists
+  const read = this.orgs.read;
   const write = this.orgs.write;
   const admin = this.orgs.admin;
 
