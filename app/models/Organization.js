@@ -110,8 +110,6 @@ OrganizationSchema.virtual('members').get(function() {
   }
   return member;
 });
-*/
-
 
 /**
  * Returns the orgs's public data.
