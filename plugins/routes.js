@@ -76,4 +76,4 @@ files.forEach((f) => {
   M.log.info(`Plugin ${namespace} installed.`);
 });
 
-module.exports = pluginRouter;
+module.exports = pluginRoute;
