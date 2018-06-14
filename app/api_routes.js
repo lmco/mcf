@@ -652,7 +652,7 @@ api.route('/orgs/:orgid/members/:role')
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:role')
   .get(AuthController.authenticate, APIController.notImplemented)
-  .post(AuthController.authenticate, APIController.notImplemented)
+  .post(AuthController.authenticate, APIController.postProjectRoles)
   .put(AuthController.authenticate, APIController.notImplemented)
   .delete(AuthController.authenticate, APIController.notImplemented);
 

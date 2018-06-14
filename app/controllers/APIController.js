@@ -675,31 +675,35 @@ class APIController {
       });
   }
 
-  static postProjectPermissions(req, res){
+  static postProjectRoles(req, res){
     if (!req.user) {
       M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
 
+    // Sanitize Inputs
     const orgID = M.lib.sani.html(req.params.orgid);
     const projectID = M.lib.sani.html(req.params.projectid);
     const username = M.lib.sani.html(req.body.username);
     const permType = M.lib.sani.html(req.params.role);
 
+    // Find User to be set
     UserController.findUser(username)
       .then((user) => {
+        // Set project permissions
         ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
         .then((project) => {
           res.header('Content-Type', 'application/json');
           return res.status(200).send(APIController.formatJSON(project));
 
         })
+        // Return and log error if caught
         .catch((setPermErr) => {
           M.log.error(setPermErr);
           return res.status(500).send('Internal Server Error');
         })
-
       })
+      // Return and log error if caught
       .catch((findUserErr) => {
         M.log.error(findUserErr);
         return res.status(500).send('Internal Server Error');

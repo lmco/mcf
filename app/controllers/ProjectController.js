@@ -411,6 +411,26 @@ class ProjectController {
     });
   }
 
+
+  /**
+   * The function sets a user's permissions for a project.
+   *
+   * @example
+   * ProjectController.removeProject({Tony Stark}, {Arc Reactor 1})
+   * .then(function(org) {
+   *   // do something with the newly created project.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {String} The organization ID for the Organization the project belongs to.
+   * @param  {String} The project ID of the Project which is being deleted.
+   * @param  {User} The object containing the user which permissions are being set for.
+   * @param  {String} The permission level or type being set for the user.
+   */
   static setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
@@ -467,6 +487,7 @@ class ProjectController {
           // Grab the index of the permission type
           const permissionLevel = permissionLevels.indexOf(permType);
 
+          // loop through project permissions list to add and remove the correct permissions.
           for (let i = 1; i < permissionLevels.length; i++){
             if (i <= permissionLevel) {
               if(!project.permissions[permissionLevels[i]].includes(setUser._id.toString())){
