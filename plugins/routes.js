@@ -74,10 +74,12 @@ files.forEach((f) => {
   M.log.verbose(stdout.toString());
 
   // Install the plugin
-  pluginRouter.use(`/${namespace}`, require(entrypoint)).catch(function(){
-    console.log("Could not load plugin");
+  try{
+    pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
+  } catch(err) {
+    console.log("Could not install plugin");
     return;
-  }); // eslint-disable-line global-require
+  }
   M.log.info(`Plugin ${namespace} installed.`);
 });
 
