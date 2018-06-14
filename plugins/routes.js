@@ -73,10 +73,11 @@ files.forEach((f) => {
   const stdout = execSync(commands.join('; '));
   M.log.verbose(stdout.toString());
 
-  console.log("Could not load plugin");
-
   // Install the plugin
-  pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
+  pluginRouter.use(`/${namespace}`, require(entrypoint)).catch(function(){
+    console.log("Could not load plugin");
+    return;
+  }); // eslint-disable-line global-require
   M.log.info(`Plugin ${namespace} installed.`);
 });
 
