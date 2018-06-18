@@ -159,23 +159,24 @@ class APIController {
   static getOrgs(req, res) {
     // Query all organizations from the database
     OrgController.findOrgs(req.user)
-      .then((orgs) => {
+    .then((orgs) => {
       // If successful, return 200 status with list of orgs
       // Make sure we only return the orgs public data
-        const orgsPublicData = [];
-        for (let i = 0; i < orgs.length; i++) {
-          orgsPublicData.push(orgs[i].getPublicData());
-        }
+      const orgsPublicData = [];
+      for (let i = 0; i < orgs.length; i++) {
+        orgsPublicData.push(orgs[i].getPublicData());
+      }
 
-        // Return 200 and the orgs
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(orgsPublicData));
-      })
-      .catch((error) => {
+      // Return 200 and the orgs
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(orgsPublicData));
+    })
+    .catch((error) => {
       // If error occurs, log error and return 500 status.
-        M.log.error(error);
-        return res.status(500).send('Internal Server Error');
-      });
+      M.log.error(error);
+      M.log.error(error.stack);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -236,14 +237,14 @@ class APIController {
     const orgid = M.lib.sani.sanitize(req.params.orgid);
 
     OrgController.findOrg(req.user, orgid)
-      .then((org) => {
-        res.header('Content-Type', 'application/json');
-        return res.send(APIController.formatJSON(org.getPublicData()));
-      })
-      .catch((error) => {
-        M.log.warn(error);
-        return res.status(500).send('Internal Server Error');
-      });
+    .then((org) => {
+      res.header('Content-Type', 'application/json');
+      return res.send(APIController.formatJSON(org.getPublicData()));
+    })
+    .catch((error) => {
+      M.log.warn(error);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -283,15 +284,15 @@ class APIController {
       id: organizationID,
       name: organizationName
     })
-      .then((org) => {
+    .then((org) => {
       // Return OK status and the created org
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(org));
-      })
-      .catch((error) => {
-        M.log.error(error);
-        return res.status(500).send('Internal Server Error');
-      });
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(org));
+    })
+    .catch((error) => {
+      M.log.error(error);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -331,15 +332,15 @@ class APIController {
       id: organizationID,
       name: organizationName
     })
-      .then((org) => {
+    .then((org) => {
       // Return OK status and the created org
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(org));
-      })
-      .catch((error) => {
-        M.log.error(error);
-        return res.status(500).send('Internal Server Error');
-      });
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(org));
+    })
+    .catch((error) => {
+      M.log.error(error);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -360,14 +361,14 @@ class APIController {
     const orgid = M.lib.sani.sanitize(req.params.orgid);
 
     OrgController.removeOrg(req.user, orgid)
-      .then((org) => {
-        res.header('Content-Type', 'application/json');
-        return res.send(APIController.formatJSON(org.getPublicData()));
-      })
-      .catch((error) => {
-        M.log.warn(error);
-        return res.status(500).send('Internal Server Error');
-      });
+    .then((org) => {
+      res.header('Content-Type', 'application/json');
+      return res.send(APIController.formatJSON(org.getPublicData()));
+    })
+    .catch((error) => {
+      M.log.warn(error);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -389,16 +390,16 @@ class APIController {
 
     // Call project find with user and organization ID
     ProjectController.findProjects(req.user, orgid)
-      .then((projects) => {
+    .then((projects) => {
       // Return project
-        res.header('Content-Type', 'application/json');
-        return res.send(APIController.formatJSON(projects));
-      })
-      .catch((err) => {
+      res.header('Content-Type', 'application/json');
+      return res.send(APIController.formatJSON(projects));
+    })
+    .catch((err) => {
       // Log error and send error response
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      });
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -459,14 +460,14 @@ class APIController {
     const projectid = M.lib.sani.html(req.params.projectid);
 
     ProjectController.findProject(req.user, orgid, projectid)
-      .then((project) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(project));
-      })
-      .catch((err) => {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      });
+    .then((project) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(project));
+    })
+    .catch((err) => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -529,14 +530,14 @@ class APIController {
         id: orgId
       }
     })
-      .then((project) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(project));
-      })
-      .catch((err) => {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      });
+    .then((project) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(project));
+    })
+    .catch((err) => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -600,14 +601,14 @@ class APIController {
         id: orgId
       }
     })
-      .then((project) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(project));
-      })
-      .catch((err) => {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      });
+    .then((project) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(project));
+    })
+    .catch((err) => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -627,14 +628,14 @@ class APIController {
     const projectId = M.lib.sani.html(req.params.projectid);
 
     ProjectController.removeProject(req.user, orgId, projectId)
-      .then((project) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(project));
-      })
-      .catch((err) => {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      });
+    .then((project) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(project));
+    })
+    .catch((err) => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
 
@@ -653,14 +654,14 @@ class APIController {
       return res.status(500).send('Internal Server Error');
     }
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
-      .then((user) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(user.getPublicData()));
-      })
-      .catch((err) => {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      });
+    .then((user) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+    })
+    .catch((err) => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
   /**
