@@ -10,7 +10,6 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 
-
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Organization = M.load('models/Organization');
@@ -26,6 +25,7 @@ const Organization = M.load('models/Organization');
  */
 
 class OrganizationController {
+
   /**
    * @description  This function takes a user objects and returns a list of
    * orgs that the user has at least read access too.
@@ -43,11 +43,11 @@ class OrganizationController {
    */
   static findOrgs(user) {
     return new Promise(((resolve, reject) => {
-      const sanitizedUser = M.lib.sani.sanitize(user);
+      const sanitizedUser = M.lib.sani.sanitize(user._id);
       Organization.find({
-        permissions: {
-          read: { $contains: sanitizedUser }
-        }
+        //permissions: {
+        //  read: { $contains: sanitizedUser }
+        //}
       }, (err, orgs) => {
         // If error occurs, return it
         if (err) {
@@ -126,6 +126,7 @@ class OrganizationController {
    *   M.log.error(error);
    * });
    *
+   *
    * @param  {User} The object containing the user of the requesting user.
    * @param  {Org} The JSON of the new org.
    */
@@ -174,7 +175,6 @@ class OrganizationController {
         if (orgs.length >= 1) {
           return reject(new Error('Organization already exists.'));
         }
-
         // Create the new org
         const newOrg = new Organization({
           id: orgID,
@@ -183,7 +183,6 @@ class OrganizationController {
             admin: [user._id]
           }
         });
-
         // Save and resolve the new error
         newOrg.save((saveOrgErr) => {
           if (saveOrgErr) {
@@ -291,6 +290,7 @@ class OrganizationController {
    *   M.log.error(error);
    * });
    *
+   *
    * @param  {User} The object containing the  requesting user.
    * @param  {string} The ID of the org being deleted.
    */
@@ -300,18 +300,12 @@ class OrganizationController {
       if (!user.admin) {
         return reject(new Error('User cannot delete orgs.'));
       }
-    }
-    // If nothing is being changed, return.
-    if (givenProperties.length < 1) {
-      return res.status(400).send('Bad Request');
-    }
 
       // Error check - Make sure orgID is a string. Otherwise, reject.
       if (typeof organizationID !== 'string') {
         M.log.verbose('Organization ID is not a string');
         return reject(new Error('Organization ID is not a string'));
       }
-    }
 
       const orgID = M.lib.sani.html(organizationID);
 
@@ -330,37 +324,6 @@ class OrganizationController {
     }));
   }
 
-  /* eslint-enable consistent-return */
-
-
-  /**
-   * Takes an orgid in the URI and deletes the corresponding
-   * organization. Returns a success message if successful, otherwise an error
-   * message is returned.
-   *
-   * @req.params
-   *     orgid    The ID of the organization to delete.
-   *
-   * @req.body
-   *     N/A
-   */
-
-  static deleteOrg(req, res) {
-    const orgid = M.lib.sani.html(req.params.orgid);
-    M.log.verbose('Attempting delete of', orgid, '...');
-
-    // Do the deletion
-    Organization.findOneAndRemove({
-      id: orgid
-    },
-    (err) => {
-      if (err) {
-        M.log.error(err);
-        return res.status(500).send('Internal Server Error');
-      }
-      return res.status(200).send('OK');
-    });
-  }
 }
 
 // Expose `OrganizationController`

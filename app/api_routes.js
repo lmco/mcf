@@ -328,10 +328,10 @@ api.route('/orgs')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid')
-  .get(APIController.getOrg)
-  .post(APIController.postOrg)
-  .put(APIController.putOrg)
-  .delete(APIController.deleteOrg);
+  .get(AuthController.authenticate.bind(AuthController), APIController.getOrg)
+  .post(AuthController.authenticate.bind(AuthController), APIController.postOrg)
+  .put(AuthController.authenticate.bind(AuthController), APIController.putOrg)
+  .delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrg);
 
 
 /**
