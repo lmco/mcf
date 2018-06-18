@@ -27,6 +27,7 @@ const express = require('express');
 const pluginRouter = express.Router();
 
 // Clone plugins
+/*
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   const metadata = M.config.server.plugins.plugins[i];
 
@@ -45,7 +46,7 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   stdout = execSync(cmd);
   M.log.verbose(stdout.toString());
   M.log.info('Clone complete.');
-}
+} */
 
 // Load plugin routes
 const files = fs.readdirSync(__dirname);

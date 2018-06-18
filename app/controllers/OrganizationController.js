@@ -45,9 +45,9 @@ class OrganizationController {
     return new Promise(((resolve, reject) => {
       const sanitizedUser = M.lib.sani.sanitize(user);
       Organization.find({
-        permissions: {
-          read: { $contains: sanitizedUser }
-        }
+        // permissions: {
+        //   read: { $contains: sanitizedUser }
+        // }
       }, (err, orgs) => {
         // If error occurs, return it
         if (err) {
