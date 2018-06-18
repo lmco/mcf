@@ -526,7 +526,6 @@ class ProjectController {
             }
             return resolve(projectSaved);
           });
-
         });
       });
     });

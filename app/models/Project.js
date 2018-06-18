@@ -61,26 +61,18 @@ const ProjectSchema = new Schema({
   permissions: {
     read: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      unique: true,
-      partialFilterExpression: {$exists: false}
+      ref: 'User'
     }],
 
     write: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      unique: true,
-      partialFilterExpression: {$exists: false}
+      ref: 'User'
     }],
 
     admin: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      unique: true,
-      partialFilterExpression: {$exists: false}
+      ref: 'User'
     }],
-
-
   }
 
 });
