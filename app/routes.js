@@ -59,7 +59,7 @@ router.get(`/:org(${M.lib.validators.org.id})/:project`,
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */
 router.route('/logout')
-  .get(AuthController.authenticate.bind(AuthController), UIController.logout);
+.get(AuthController.authenticate.bind(AuthController), UIController.logout);
 
 /* Renders the admin console */
 router.get('/admin/console', AuthController.authenticate.bind(AuthController), UIController.admin);

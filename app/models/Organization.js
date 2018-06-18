@@ -111,7 +111,6 @@ OrganizationSchema.virtual('members').get(function() {
   return member;
 });
 
-
 /**
  * Returns the orgs's public data.
  * TODO (ju) - Add permissions to public data?
