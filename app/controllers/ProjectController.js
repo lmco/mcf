@@ -63,29 +63,29 @@ class ProjectController {
 
       // Search for project
       Project.find({ org: orgId })
-        .populate('org')
-        .exec((err, projects) => {
+      .populate('org')
+      .exec((err, projects) => {
         // Error Check - Database/Server Error
-          if (err) {
-            return reject(err);
-          }
+        if (err) {
+          return reject(err);
+        }
 
-          // Error Check - Ensure only 1 project is found
-          if (projects.length < 1) {
-            return reject(new Error('Project not found'));
-          }
+        // Error Check - Ensure only 1 project is found
+        if (projects.length < 1) {
+          return reject(new Error('Project not found'));
+        }
 
-          const projectList = [];
-          for (let i = 0; i < projects.length; i++) {
-            const members = projects[i].members.map(u => u._id.toString());
-            if (members.includes(user._id.toString()) && !user.admin) {
-              projectList.push(projects[i].getPublicData());
-            }
+        const projectList = [];
+        for (let i = 0; i < projects.length; i++) {
+          const members = projects[i].members.map(u => u._id.toString());
+          if (members.includes(user._id.toString()) && !user.admin) {
+            projectList.push(projects[i].getPublicData());
           }
+        }
 
-          // Return resulting project
-          return resolve(projectList);
-        });
+        // Return resulting project
+        return resolve(projectList);
+      });
     });
   }
 
@@ -123,38 +123,38 @@ class ProjectController {
 
       // Search for project
       Project.find({ uid: projUID })
-        .populate('org')
-        .exec((err, projects) => {
+      .populate('org')
+      .exec((err, projects) => {
         // Error Check - Database/Server Error
-          if (err) {
-            return reject(err);
-          }
+        if (err) {
+          return reject(err);
+        }
 
-          // Check User Permissions
-          // if (!project.permissions.member.includes(user.username) && !user.admin) {
-          //  return reject(new Error('User does not have permission.'))
-          // }
+        // Check User Permissions
+        // if (!project.permissions.member.includes(user.username) && !user.admin) {
+        //  return reject(new Error('User does not have permission.'))
+        // }
 
-          // Error Check - Ensure only 1 project is found
-          if (projects.length < 1) {
-            return reject(new Error('Project not found'));
-          }
+        // Error Check - Ensure only 1 project is found
+        if (projects.length < 1) {
+          return reject(new Error('Project not found'));
+        }
 
-          // Check Permissions
-          const project = projects[0];
-          const members = project.members.map(u => u._id.toString());
-          if (!members.includes(user._id.toString()) && !user.admin) {
-            return reject(new Error('User does not have permission.'));
-          }
+        // Check Permissions
+        const project = projects[0];
+        const members = project.members.map(u => u._id.toString());
+        if (!members.includes(user._id.toString()) && !user.admin) {
+          return reject(new Error('User does not have permission.'));
+        }
 
-          // Error Check -  Insure that orgid matches project orgid
-          if (projects[0].org.id !== orgId) {
-            return reject(new Error('Error: Project org id does not equal passed org id.'));
-          }
+        // Error Check -  Insure that orgid matches project orgid
+        if (projects[0].org.id !== orgId) {
+          return reject(new Error('Error: Project org id does not equal passed org id.'));
+        }
 
-          // Return resulting project
-          return resolve(project);
-        });
+        // Return resulting project
+        return resolve(project);
+      });
     });
   }
 
@@ -217,50 +217,50 @@ class ProjectController {
 
       // Error check - Make sure the org exists
       Organization.find({ id: orgId })
-        .populate('permissions.write')
-        .exec((findOrgErr, orgs) => {
-          if (findOrgErr) {
-            return reject(new Error(findOrgErr));
+      .populate('permissions.write')
+      .exec((findOrgErr, orgs) => {
+        if (findOrgErr) {
+          return reject(new Error(findOrgErr));
+        }
+        if (orgs.length < 1) {
+          return reject(new Error('Org not found.'));
+        }
+
+        // Check Permissions
+        const org = orgs[0];
+        const writers = org.write.map(u => u._id.toString());
+
+        if (!writers.includes(user._id.toString()) && !user.admin) {
+          return reject(new Error('User does not have permission.'));
+        }
+
+        // Error check - check if the project already exists
+        Project.find({ uid: projUID }, (findProjErr, projects) => {
+          if (findProjErr) {
+            return reject(new Error(findProjErr));
           }
-          if (orgs.length < 1) {
-            return reject(new Error('Org not found.'));
+          if (projects.length >= 1) {
+            return reject(new Error('Project already exists.'));
           }
 
-          // Check Permissions
-          const org = orgs[0];
-          const writers = org.write.map(u => u._id.toString());
+          // Create the new project and save it
+          const newProject = new Project({
+            id: projId,
+            name: projName,
+            org: orgs[0]._id,
+            permissions: { admin: [user._id] },
+            uid: `${projId}:${orgs[0].id}`
+          });
 
-          if (!writers.includes(user._id.toString()) && !user.admin) {
-            return reject(new Error('User does not have permission.'));
-          }
-
-          // Error check - check if the project already exists
-          Project.find({ uid: projUID }, (findProjErr, projects) => {
-            if (findProjErr) {
-              return reject(new Error(findProjErr));
+          newProject.save((saveErr, projectUpdated) => {
+            if (saveErr) {
+              return reject(saveErr);
             }
-            if (projects.length >= 1) {
-              return reject(new Error('Project already exists.'));
-            }
-
-            // Create the new project and save it
-            const newProject = new Project({
-              id: projId,
-              name: projName,
-              org: orgs[0]._id,
-              permissions: { admin: [user._id] },
-              uid: `${projId}:${orgs[0].id}`
-            });
-
-            newProject.save((saveErr, projectUpdated) => {
-              if (saveErr) {
-                return reject(saveErr);
-              }
-              // Return success and the JSON object
-              return resolve(projectUpdated);
-            });
+            // Return success and the JSON object
+            return resolve(projectUpdated);
           });
         });
+      });
     });
   }
 
@@ -323,30 +323,30 @@ class ProjectController {
 
         // Error check - check if the project already exists
         Project.find({ uid: projUID })
-          .populate('permissions.admin')
-          .exec((findProjErr, projects) => {
-            if (findProjErr) {
-              return reject(findProjErr);
-            }
-            // Error Check - make sure project exists
-            if (projects.length < 1) {
-              return reject(new Error('Project not found.'));
-            }
+        .populate('permissions.admin')
+        .exec((findProjErr, projects) => {
+          if (findProjErr) {
+            return reject(findProjErr);
+          }
+          // Error Check - make sure project exists
+          if (projects.length < 1) {
+            return reject(new Error('Project not found.'));
+          }
 
-            // Check Permissions
-            const project = projects[0];
-            const admins = project.permissions.admin.map(u => u._id.toString());
-            if (!admins.includes(user._id.toString()) && !user.admin) {
-              return reject(new Error('User does not have permission.'));
-            }
+          // Check Permissions
+          const project = projects[0];
+          const admins = project.permissions.admin.map(u => u._id.toString());
+          if (!admins.includes(user._id.toString()) && !user.admin) {
+            return reject(new Error('User does not have permission.'));
+          }
 
-            // Currently we only support updating the name
-            project.name = projNameUpdated; // eslint-disable-line no-param-reassign
-            project.save();
+          // Currently we only support updating the name
+          project.name = projNameUpdated; // eslint-disable-line no-param-reassign
+          project.save();
 
-            // Return the updated project object
-            return resolve(project);
-          });
+          // Return the updated project object
+          return resolve(project);
+        });
       });
     });
   }
@@ -386,32 +386,32 @@ class ProjectController {
 
       // Check if project exists
       Project.find({ uid: projUID })
-        .populate('permissions.admin')
-        .exec((findProjErr, projects) => {
+      .populate('permissions.admin')
+      .exec((findProjErr, projects) => {
         // Error Check - Return error if database query does not work
-          if (findProjErr) {
-            return reject(findProjErr);
-          }
-          // Error Check - Check number of projects
-          if (projects.length < 1) {
-            return reject(new Error('Project not found.'));
-          }
+        if (findProjErr) {
+          return reject(findProjErr);
+        }
+        // Error Check - Check number of projects
+        if (projects.length < 1) {
+          return reject(new Error('Project not found.'));
+        }
 
-          // Check Permissions
-          const project = projects[0];
-          const admins = project.permissions.admin.map(u => u._id.toString());
-          if (!admins.includes(user._id.toString()) && !user.admin) {
-            return reject(new Error('User does not have permission.'));
-          }
+        // Check Permissions
+        const project = projects[0];
+        const admins = project.permissions.admin.map(u => u._id.toString());
+        if (!admins.includes(user._id.toString()) && !user.admin) {
+          return reject(new Error('User does not have permission.'));
+        }
 
-          // Remove the Project
-          Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
-            if (removeProjErr) {
-              return reject(removeProjErr);
-            }
-            return resolve(projectRemoved);
-          });
+        // Remove the Project
+        Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
+          if (removeProjErr) {
+            return reject(removeProjErr);
+          }
+          return resolve(projectRemoved);
         });
+      });
     });
   }
 

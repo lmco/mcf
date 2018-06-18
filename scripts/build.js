@@ -63,44 +63,44 @@ function build(_args) {
 
     // Copy images
     gulp.src('./app/ui/img/**/*')
-      .pipe(gulp.dest('public/img'));
+    .pipe(gulp.dest('public/img'));
     // Copy React
     gulp.src('./node_modules/react/umd/react.production.min.js')
-      .pipe(react())
-      .pipe(concat('react.min.js'))
-      .pipe(gulp.dest('public/js'));
+    .pipe(react())
+    .pipe(concat('react.min.js'))
+    .pipe(gulp.dest('public/js'));
     // Copy ReactDOM
     gulp.src('./node_modules/react-dom/umd/react-dom.production.min.js')
-      .pipe(react())
-      .pipe(concat('react-dom.min.js'))
-      .pipe(gulp.dest('public/js'));
+    .pipe(react())
+    .pipe(concat('react-dom.min.js'))
+    .pipe(gulp.dest('public/js'));
     // Copy Swagger CSS
     gulp.src('./node_modules/swagger-ui-express/static/*.css')
-      .pipe(gulp.dest('public/css'));
+    .pipe(gulp.dest('public/css'));
     // Copy Swagger JS
     gulp.src('./node_modules/swagger-ui-express/static/*.js')
-      .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('public/js'));
     // Copy Bootstrap CSS
     gulp.src('./node_modules/bootstrap/dist/css/bootstrap.min.css')
-      .pipe(gulp.dest('public/css'));
+    .pipe(gulp.dest('public/css'));
     // Copy Bootstrap JS
     gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
-      .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('public/js'));
     // Copy Jquery JS
     gulp.src('./node_modules/jquery/dist/jquery.min.js')
-      .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('public/js'));
     // Copy Popper JS
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
-      .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('public/js'));
   }
 
   // Build Sass into CSS
   if (args.includes('--all') || args.includes('--sass')) {
     console.log('Building sass ...');
     gulp.src('./app/ui/sass/**/*.scss')
-      .pipe(sass({ outputStyle: 'compressed' })
-        .on('error', sass.logError))
-      .pipe(gulp.dest('./public/css'));
+    .pipe(sass({ outputStyle: 'compressed' })
+    .on('error', sass.logError))
+    .pipe(gulp.dest('./public/css'));
   }
 
   // Builds the React libraries into client-side JS
@@ -108,13 +108,13 @@ function build(_args) {
     console.log('Building react ...'); // eslint-disable-line no-console
     // Build React
     gulp.src('./app/ui/react-components/**/*.jsx')
-      .pipe(react())
-      .pipe(concat('mbee.js'))
-      .pipe(gulp.dest('public/js'));
+    .pipe(react())
+    .pipe(concat('mbee.js'))
+    .pipe(gulp.dest('public/js'));
     // Build ReactDOM
     gulp.src('./app/ui/react-renderers/**/*.jsx')
-      .pipe(react())
-      .pipe(gulp.dest('public/js'));
+    .pipe(react())
+    .pipe(gulp.dest('public/js'));
   }
 
   // Build JSDoc

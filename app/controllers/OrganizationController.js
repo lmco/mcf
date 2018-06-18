@@ -43,11 +43,12 @@ class OrganizationController {
    */
   static findOrgs(user) {
     return new Promise(((resolve, reject) => {
-      const sanitizedUser = M.lib.sani.sanitize(user);
+      // const sanitizedUser = M.lib.sani.sanitize(user);
       Organization.find({
-        permissions: {
-          read: { $contains: sanitizedUser }
-        }
+        // TODO - Uncomment as part of Austin's merge
+        // permissions: {
+        //   read: { $contains: sanitizedUser }
+        // }
       }, (err, orgs) => {
         // If error occurs, return it
         if (err) {
@@ -242,40 +243,40 @@ class OrganizationController {
       const newOrgName = M.lib.sani.html(orgUpdate.name);
 
       Organization.find({ id: orgID })
-        .populate('permissions.admin')
-        .exec((err, orgs) => {
+      .populate('permissions.admin')
+      .exec((err, orgs) => {
         // If error occurs, return it
-          if (err) {
-            return reject(err);
-          }
-          // Error check - validate only 1 org was found
-          if (orgs.length > 1) {
-            return reject(new Error('Too many orgs found with same ID'));
-          }
-          if (orgs.length < 1) {
-            return reject(new Error('Organization not found.'));
-          }
+        if (err) {
+          return reject(err);
+        }
+        // Error check - validate only 1 org was found
+        if (orgs.length > 1) {
+          return reject(new Error('Too many orgs found with same ID'));
+        }
+        if (orgs.length < 1) {
+          return reject(new Error('Organization not found.'));
+        }
 
-          // allocation for convenience
-          const org = orgs[0];
+        // allocation for convenience
+        const org = orgs[0];
 
-          // Error check - Make sure user is admin
-          const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-          if (!user.admin || orgAdmins.includes(user._id.toString())) {
-            return reject(new Error('User cannot create orgs.'));
-          }
+        // Error check - Make sure user is admin
+        const orgAdmins = org.permissions.admin.map(u => u._id.toString());
+        if (!user.admin || orgAdmins.includes(user._id.toString())) {
+          return reject(new Error('User cannot create orgs.'));
+        }
 
-          // Update the name
-          org.name = newOrgName;
-          org.save((saveErr) => {
-            if (saveErr) {
+        // Update the name
+        org.name = newOrgName;
+        org.save((saveErr) => {
+          if (saveErr) {
             // If error occurs, return it
-              return reject(saveErr);
-            }
-            // Return updated org
-            return resolve(org);
-          });
+            return reject(saveErr);
+          }
+          // Return updated org
+          return resolve(org);
         });
+      });
     }));
   }
 
