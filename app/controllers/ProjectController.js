@@ -222,7 +222,7 @@ class ProjectController {
 
           // Check Permissions
           const org = orgs[0];
-          const writers = org.write.map(u => u._id.toString());
+          const writers = org.permissions.write.map(u => u._id.toString());
 
           if (!writers.includes(user._id.toString()) && !user.admin) {
             return reject(new Error('User does not have permission.'));
@@ -414,7 +414,7 @@ class ProjectController {
    * The function sets a user's permissions for a project.
    *
    * @example
-   * ProjectController.removeProject({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.setPermissions({Tony}, 'stark_industries', 'arc_reactor', {Jarvis}, 'write')
    * .then(function(org) {
    *   // do something with the newly created project.
    * })
@@ -442,6 +442,7 @@ class ProjectController {
         return reject(new Error('Permission type is not of type String.'));
       }
 
+      // Sanitize input
       const orgID = M.lib.sani.html(organizationID);
       const projID = M.lib.sani.html(projectID);
       const projUID = `${projID}:${orgID}`;
@@ -459,10 +460,12 @@ class ProjectController {
         // Allocate org variable for convenience.
         const org = orgs[0];
 
+        // Check if project exists
         Project.find({uid: projUID}, (findProjErr, projects) => {
           if (findProjErr) {
             return reject(findProjErr);
           }
+          // Error Check - See if project exists
           if (projects.length < 1){
             return reject(new Error('Project not found.'));
           }
@@ -477,14 +480,19 @@ class ProjectController {
           // Grab permissions levels from Project schema method
           const permissionLevels = project.getPermissionLevels();
 
-          // Errock Check - Make sure that a valid permissions type was passed
+          // Error Check - Make sure that a valid permissions type was passed
           if (!permissionLevels.includes(permType)) {
             return reject(new Error('Permissions type not found.'));
+          }
+
+          if (reqUser.username === setUser.username && permType !== permissionLevels[-1]) {
+            return reject(new Error('User cannot remove their own admin privlages.'));
           }
 
           // Grab the index of the permission type
           const permissionLevel = permissionLevels.indexOf(permType);
 
+          // Allocate variables to be used in for loop
           let permissionList = []
           let pushPullRoles = {}
 
@@ -496,42 +504,32 @@ class ProjectController {
             // Check for push vals
             if (i <= permissionLevel) {
               if(!permissionList.includes(setUser._id.toString())){
-                if(!pushPullRoles.hasOwnProperty('$push')){
-                  pushPullRoles['$push'] = {}
-                }
+                // required because mongoose does not allow a 'push' with empty parameters
+                pushPullRoles['$push'] = pushPullRoles['$push'] || {}
                 pushPullRoles['$push'][`permissions.${permissionLevels[i]}`] = setUser._id.toString()
               }
             }
-
             // Check for pull vals
             else {
               if(permissionList.includes(setUser._id.toString())){
-                if(!pushPullRoles.hasOwnProperty('$pull')){
-                  pushPullRoles['$pull'] = {}
-                }
+                // required because mongoose does not allow a 'pull' with empty parameters
+                pushPullRoles['$pull'] = pushPullRoles['$pull'] || {}
                 pushPullRoles['$pull'][`permissions.${permissionLevels[i]}`] = setUser._id.toString()
               }
             }
           }
 
           // Update project
-          Project.findOneAndUpdate(
-            {uid: projUID},
-            pushPullRoles,
-            (saveProjErr, projectSaved) => {
+          Project.findOneAndUpdate({uid: projUID}, pushPullRoles, (saveProjErr, projectSaved) => {
             if (saveProjErr) {
               return reject(saveProjErr);
             }
-
             return resolve(projectSaved);
           });
 
-        })
-      })
-
-
-
-    })
+        });
+      });
+    });
   }
 
 }

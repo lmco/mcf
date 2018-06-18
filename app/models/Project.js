@@ -55,24 +55,29 @@ const ProjectSchema = new Schema({
   name: {
     type: String,
     requite: true,
-    unique: true,
     match: RegExp(M.lib.validators.project.name)
   },
 
   permissions: {
     read: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      unique: true,
+      partialFilterExpression: {$exists: false}
     }],
 
     write: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      unique: true,
+      partialFilterExpression: {$exists: false}
     }],
 
     admin: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      unique: true,
+      partialFilterExpression: {$exists: false}
     }],
 
 
@@ -88,17 +93,18 @@ ProjectSchema.virtual('members').get(function() {
 
   // set member to a copy of write
   const member = read.slice();
+  const memberMap = member.map(u => u.username);
 
   // Add admins that aren't already in the member list,
   // creating a unique list of members
   for (let i = 0; i < write.length; i++) {
-    if (!member.includes(write[i])) {
+    if (!memberMap.includes(write[i].username)) {
       member.push(write[i]);
     }
   }
 
   for (let i = 0; i < admin.length; i++) {
-    if (!member.includes(admin[i])) {
+    if (!memberMap.includes(admin[i].username)) {
       member.push(admin[i]);
     }
   }

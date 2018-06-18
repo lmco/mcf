@@ -60,7 +60,9 @@ const OrganizationSchema = new mongoose.Schema({
      */
     read: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      unique: true,
+      partialFilterExpression: {$exists: false}
     }],
 
     /**
@@ -69,7 +71,10 @@ const OrganizationSchema = new mongoose.Schema({
      */
     write: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      unique: true,
+      partialFilterExpression: {$exists: false}
+
     }],
 
     /**
@@ -78,7 +83,9 @@ const OrganizationSchema = new mongoose.Schema({
      */
     admin: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      unique: true,
+      partialFilterExpression: {$exists: false}
     }]
   }
 });
@@ -110,11 +117,12 @@ OrganizationSchema.virtual('members').get(function() {
 
   // set member to a copy of write
   const member = write.slice();
+  const memberMap = member.map(u => u.username);
 
   // Add admins that aren't already in the member list,
   // creating a unique list of members
   for (let i = 0; i < admin.length; i++) {
-    if (!member.includes(admin[i])) {
+    if (!memberMap.includes(admin[i].username)) {
       member.push(admin[i]);
     }
   }

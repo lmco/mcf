@@ -613,7 +613,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  */
 api.route('/orgs/:orgid/members/:role')
   .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-  .post(AuthController.authenticate.bind(AuthController), APIController.postUserRole)
+  .post(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
   .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
   .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
 
@@ -652,7 +652,7 @@ api.route('/orgs/:orgid/members/:role')
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:role')
   .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-  .post(AuthController.authenticate.bind(AuthController), APIController.postProjectRoles)
+  .post(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
   .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
   .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
 

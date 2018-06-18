@@ -376,7 +376,7 @@ class APIController {
    * @description  Takes an orgid and role in the URI and updates a given 
    * members role within the organization.
    */
-  static postUserRole(req, res) {
+  static postOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
       M.log.error('Request does not have a user.');
@@ -676,7 +676,7 @@ class APIController {
       });
   }
 
-  static postProjectRoles(req, res){
+  static postProjectRole(req, res){
     if (!req.user) {
       M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
