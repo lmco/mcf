@@ -260,11 +260,11 @@ class OrganizationController {
         // allocation for convenience
         const org = orgs[0];
 
-          // Error check - Make sure user is admin
-          const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-          if (!user.admin && !orgAdmins.includes(user._id.toString())) {
-            return reject(new Error('User cannot create orgs.'));
-          }
+        // Error check - Make sure user is admin
+        const orgAdmins = org.permissions.admin.map(u => u._id.toString());
+        if (!user.admin && !orgAdmins.includes(user._id.toString())) {
+          return reject(new Error('User cannot create orgs.'));
+        }
 
         // Update the name
         org.name = newOrgName;
