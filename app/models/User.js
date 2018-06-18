@@ -326,6 +326,9 @@ UserSchema.virtual('proj.members').get(function() {
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });
 
+UserSchema.pre('find', function() {
+  this.populate('orgs.write orgs.admin proj.read proj.write proj.admin');
+});
 
 /**
  * @memberOf  User

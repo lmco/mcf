@@ -44,12 +44,12 @@ function lint(_args) {
   ].concat(_args);
 
   spawn(`${M.root}/node_modules/.bin/eslint`, args, { stdio: 'inherit' })
-    .on('data', (data) => {
-      console.log(data.toString());
-    })
-    .on('exit', (code) => {
-      if (code !== 0) {
-        process.exit(code);
-      }
-    });
+  .on('data', (data) => {
+    console.log(data.toString());
+  })
+  .on('exit', (code) => {
+    if (code !== 0) {
+      process.exit(code);
+    }
+  });
 }
