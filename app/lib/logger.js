@@ -93,12 +93,12 @@ const formatter = printf((msg) => {
   // because the string includes the color formatter and toUpperCase will
   // break the color formatting.
   let level = msg.level
-    .replace('critical', 'CRITICAL')
-    .replace('error', 'ERROR')
-    .replace('warn', 'WARN')
-    .replace('info', 'INFO')
-    .replace('verbose', 'VERBOSE')
-    .replace('debug', 'DEBUG');
+  .replace('critical', 'CRITICAL')
+  .replace('error', 'ERROR')
+  .replace('warn', 'WARN')
+  .replace('info', 'INFO')
+  .replace('verbose', 'VERBOSE')
+  .replace('debug', 'DEBUG');
 
   // If we want colored logs, this is our return string
   if (mbee.config.log.colorize) {
@@ -109,16 +109,16 @@ const formatter = printf((msg) => {
   // If colorize is false, we remove colors from the log level.
 
   level = level
-    .replace('\u001b[30m', '')
-    .replace('\u001b[31m', '')
-    .replace('\u001b[32m', '')
-    .replace('\u001b[33m', '')
-    .replace('\u001b[34m', '')
-    .replace('\u001b[35m', '')
-    .replace('\u001b[36m', '')
-    .replace('\u001b[37m', '')
-    .replace('\u001b[38m', '')
-    .replace('\u001b[39m', '');
+  .replace('\u001b[30m', '')
+  .replace('\u001b[31m', '')
+  .replace('\u001b[32m', '')
+  .replace('\u001b[33m', '')
+  .replace('\u001b[34m', '')
+  .replace('\u001b[35m', '')
+  .replace('\u001b[36m', '')
+  .replace('\u001b[37m', '')
+  .replace('\u001b[38m', '')
+  .replace('\u001b[39m', '');
   const ts = `${msg.timestamp}`; // timestamp
   const f = `${file}`;           // file
   return `${ts} [${level}] ${f}:${line} -> ${msg.message}`;

@@ -86,25 +86,25 @@ class UIController {
     User.findOne({
       username: M.lib.sani.sanitize(token.username)
     })
-      .exec((err, user) => {
-        if (err) {
-          M.log.error(err);
-        }
-        else {
-          req.user = user;
-        }
-        // Disables because database document is being directly used
-        user = (req.user) ? req.user.username.toString() : 'anonymous'; // eslint-disable-line no-param-reassign
-        M.log.info(`GET "/about" requested by  ${user}`);
-        return res.render('about', {
-          ui: M.config.server.ui,
-          user: req.user,
-          info: {
-            version: M.version4
-          },
-          title: 'About | Model-Based Engineering Environment'
-        });
+    .exec((err, user) => {
+      if (err) {
+        M.log.error(err);
+      }
+      else {
+        req.user = user;
+      }
+      // Disables because database document is being directly used
+      user = (req.user) ? req.user.username.toString() : 'anonymous'; // eslint-disable-line no-param-reassign
+      M.log.info(`GET "/about" requested by  ${user}`);
+      return res.render('about', {
+        ui: M.config.server.ui,
+        user: req.user,
+        info: {
+          version: M.version4
+        },
+        title: 'About | Model-Based Engineering Environment'
       });
+    });
   }
 
 
