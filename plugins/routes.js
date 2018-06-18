@@ -48,6 +48,7 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   M.log.info('Clone complete.');
 } */
 
+
 // Load plugin routes
 const files = fs.readdirSync(__dirname);
 files.forEach((f) => {
@@ -73,7 +74,14 @@ files.forEach((f) => {
   M.log.verbose(stdout.toString());
 
   // Install the plugin
-  pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
+  try { // Handle error in plugin
+    pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
+  }
+  catch (err) {
+    M.log.error(`Could not install plugin ${namespace}, error thrown:`);
+    M.log.error(err);
+    return;
+  }
   M.log.info(`Plugin ${namespace} installed.`);
 });
 
