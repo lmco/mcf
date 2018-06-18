@@ -46,8 +46,9 @@
       it('should GET an empty organization', getOrgs);
       it('should POST an organization', postOrg01);
       it('should GET posted organization', getOrg01);
-      it('should PUT an update to posted organization', updateOrg01);
+      it('should PUT an update to posted organization', putOrg01);
       it('should POST second organization', postOrg02);
+      it('should reject a PUT update with ID mismatch', putOrg02Err)
       it('should GET 2 organizations', getTwoOrgs);
       it('should reject a POST with ID mismatch', postOrg02Err);
       it('should reject a POST with invalid org id', postInvalidOrg);
@@ -124,20 +125,20 @@
 
      }
 
-     /** !!!!!!!!!!!!NEED TO FIGURE THIS OUT!!!!!!!!!!!
-      * Makes an UPDATE request to api/org1. This should update the orgninal
+     /**
+      * Makes an UPDATE request to api/orgs/org1. This should update the orgninal
       * org1 name: "Organization 1" that was added to the database to name" "
       * Updated Organization 1". This should succeed.
       */
-     function updateOrg01(done)
+     function putOrg01(done)
      {
          request({
              url:        `${test.url}/api/orgs/org1`,
              headers:    getHeaders(),
              method:     'PUT',
              body:       JSON.stringify({
-                 "id" :   'org1',
-                 "name" : 'Updated Organization 1'
+                 "id": "org1",
+                 "name": 'Updated Organization 1'
              })
          },
          (error, response, body) => {
@@ -169,6 +170,31 @@
              chai.expect(response.statusCode).to.equal(200);
              chai.expect(json['id']).to.equal('org2');
              chai.expect(json['name']).to.equal('Organization 2');
+             done();
+         });
+     }
+
+     /**
+      * Makes an UPDATE request to api/orgs/org2. This should attempt to update the organization
+      * org2, but will fail because the org id is the wrong. This should respond with 400 status
+      * and "Bad Request".
+      */
+     function putOrg02Err(done)
+     {
+         request({
+             url:        `${test.url}/api/orgs/org1`,
+             headers:    getHeaders(),
+             method:     'PUT',
+             body:       JSON.stringify({
+                 "id": "org1",
+                 "name": 'Updated Organization 1'
+             })
+         },
+         (error, response, body) => {
+             var json = JSON.parse(body);
+             chai.expect(response.statusCode).to.equal(200);
+             chai.expect(json['id']).to.equal('org1');
+             chai.expect(json['name']).to.equal('Updated Organization 1');
              done();
          });
      }

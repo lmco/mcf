@@ -239,7 +239,6 @@ class OrganizationController {
       // Sanitize fields
       const orgID = M.lib.sani.html(organizationID);
       const newOrgName = M.lib.sani.html(orgUpdate.name);
-
       Organization.find({ id: orgID })
       .populate('permissions.admin')
       .exec((err, orgs) => {
@@ -257,10 +256,9 @@ class OrganizationController {
 
         // allocation for convenience
         const org = orgs[0];
-
         // Error check - Make sure user is admin
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-        if (!user.admin || orgAdmins.includes(user._id.toString())) {
+        if (!user.admin && !orgAdmins.includes(user._id.toString())) {
           return reject(new Error('User cannot create orgs.'));
         }
 
