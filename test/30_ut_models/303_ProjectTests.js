@@ -38,17 +38,23 @@ describe(name, () => {
   before(() => {
     const db = M.load('lib/db');
     db.connect();
-
-    // Create a parent organization before creating any projects
-    org = new Org({
-      id: 'empire',
-      name: 'Galactic Empire'
-    });
-    org.save((err) => {
-      if (err) {
-        M.log.error(err);
-      }
-      chai.expect(err).to.equal(null);
+    User.findOne({username : 'mbee'}, function(err, users){
+      // Create a parent organization before creating any projects
+      org = new Org({
+        id: 'empire',
+        name: 'Galactic Empire',
+        permissions: {
+          admin: [user._id],
+          write: [user._id],
+          read: [user._id]
+        }
+      });
+      org.save((err) => {
+        if (err) {
+          M.log.error(err);
+        }
+        chai.expect(err).to.equal(null);
+      });
     });
   });
 
@@ -77,10 +83,30 @@ describe(name, () => {
  * Creates a user using the User model.
  */
 function createProject(done) {
+  User.findOne({username : 'mbee'}, function(err, users){
+    // Create a project
+    const newProject = new Project({
+      id: 'dthstr',
+      name: 'Death Star',
+      org: org._id,
+      permissions: { 
+        admin: [user._id] ,
+        write: [user._id], 
+        read: [user._id] 
+      },
+      uid: `${projId}:${org.id}`
+    });
+    org.save((err) => {
+      if (err) {
+        M.log.error(err);
+      }
+      chai.expect(err).to.equal(null);
+    });
+  });
   const project = new Project({
     id: 'dthstr',
     name: 'Death Star',
-    orgId: org.id
+    org: org._id
   });
   project.save((err) => {
     if (err) {
