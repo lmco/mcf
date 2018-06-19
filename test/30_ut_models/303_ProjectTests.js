@@ -25,6 +25,7 @@ const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.load('models/Organization');
 const Project = M.load('models/Project');
+const User = M.load('models/User');
 
 // This is so the same parent org can be references across test functions
 let org = null;
@@ -38,9 +39,14 @@ describe(name, () => {
   before(() => {
     const db = M.load('lib/db');
     db.connect();
-    User.findOne({username : 'mbee'}, function(err, users){
+    User.findOne({username : 'mbee'}, function(err, user){
+      // Check if error occured
+      if (err) {
+        M.log.error(err);
+      }
+      // Otherwise,
       // Create a parent organization before creating any projects
-      org = new Org({
+      newOrg = new Org({
         id: 'empire',
         name: 'Galactic Empire',
         permissions: {
@@ -49,7 +55,7 @@ describe(name, () => {
           read: [user._id]
         }
       });
-      org.save((err) => {
+      newOrg.save((err) => {
         if (err) {
           M.log.error(err);
         }
@@ -60,7 +66,7 @@ describe(name, () => {
 
   // runs after all tests in this block
   after(() => {
-    Org.findOneAndRemove({ id: org.id }, (err) => {
+    Org.findOneAndRemove({ id: newOrg.id }, (err) => {
       if (err) {
         M.log.error(err);
       }
@@ -83,37 +89,31 @@ describe(name, () => {
  * Creates a user using the User model.
  */
 function createProject(done) {
-  User.findOne({username : 'mbee'}, function(err, users){
+  User.findOne({username : 'mbee'}, function(err, user){
+    // Check if error occured
+    if (err) {
+      M.log.error(err);
+    }
+    // Otherwise,
     // Create a project
-    const newProject = new Project({
+    newProject = new Project({
       id: 'dthstr',
       name: 'Death Star',
-      org: org._id,
+      org: newOrg.id,
       permissions: { 
-        admin: [user._id] ,
+        admin: [user._id],
         write: [user._id], 
         read: [user._id] 
       },
-      uid: `${projId}:${org.id}`
+      uid: `${newProject.id}:${newOrg.id}`      
     });
     org.save((err) => {
       if (err) {
         M.log.error(err);
       }
       chai.expect(err).to.equal(null);
+      done();
     });
-  });
-  const project = new Project({
-    id: 'dthstr',
-    name: 'Death Star',
-    org: org._id
-  });
-  project.save((err) => {
-    if (err) {
-      M.log.error(err);
-    }
-    chai.expect(err).to.equal(null);
-    done();
   });
 }
 
