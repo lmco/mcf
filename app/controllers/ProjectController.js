@@ -228,7 +228,7 @@ class ProjectController {
 
         // Check Permissions
         const org = orgs[0];
-        const writers = org.write.map(u => u._id.toString());
+        const writers = org.permissions.write.map(u => u._id.toString());
 
         if (!writers.includes(user._id.toString()) && !user.admin) {
           return reject(new Error('User does not have permission.'));

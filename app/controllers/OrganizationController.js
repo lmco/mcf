@@ -262,7 +262,7 @@ class OrganizationController {
 
         // Error check - Make sure user is admin
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-        if (!user.admin || orgAdmins.includes(user._id.toString())) {
+        if (!user.admin && !orgAdmins.includes(user._id.toString())) {
           return reject(new Error('User cannot create orgs.'));
         }
 
