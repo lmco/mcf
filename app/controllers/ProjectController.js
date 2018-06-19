@@ -71,9 +71,9 @@ class ProjectController {
         }
 
         // Error Check - Ensure only 1 project is found
-        if (projects.length < 1) {
-          return reject(new Error('Project not found'));
-        }
+        // if (projects.length < 1) {
+        //   return reject(new Error('Project not found'));
+        // }
 
         const projectList = [];
         for (let i = 0; i < projects.length; i++) {
