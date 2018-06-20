@@ -14,7 +14,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
-@description  This is currently a copy of test 100.
+@description  This is currently a test to see if encrypt returns a hex.
  */
 
 const chai = require('chai');
@@ -29,32 +29,50 @@ const M = require('../../mbee.js');
  */
 
 describe(name, () => {
-  it('should load libraries', loadLib);
+  it('should output empty object', sanTest);
+  it('should not sanitize strings', htmlMongoTest);
+  it('should delete the key by user input', keyDelete);
+  it('should sanitize html inputs by user', htmlTest);
 });
-
 
 /*------------------------------------
  *       Test Functions
  *------------------------------------*/
 
-
 /**
  * Loads a library
  */
-function loadLib(done) {
-  const crypto = M.load('lib/crypto');
-  // var auth = M.load('lib/auth');
-  // var db = M.load('lib/db');
-  const logger = M.load('lib/logger');
+
+
+function sanTest(done) {
   const sanitization = M.load('lib/sanitization');
-  const startup = M.load('lib/startup');
-  const validators = M.load('lib/validators');
-  chai.expect(crypto).to.not.equal(undefined);
-  // chai.expect(auth).to.not.equal(undefined);
-  // chai.expect(db).to.not.equal(undefined);
-  chai.expect(logger).to.not.equal(undefined);
-  chai.expect(sanitization).to.not.equal(undefined);
-  chai.expect(startup).to.not.equal(undefined);
-  chai.expect(validators).to.not.equal(undefined);
+  const mongoSan = sanitization.mongo({ $lt: 10 });
+  chai.expect(typeof mongoSan).to.equal(typeof {});
+  done();
+}
+
+/* This html test if failing due to mongo sanitize not being able to
+take in strings because mongo sanitize only takes in objects */
+function htmlMongoTest(done) {
+  const sanitization = M.load('lib/sanitization');
+  const mongohtmlSan = sanitization.mongo({ '$<script>': null });
+  chai.expect(mongohtmlSan).to.not.equal({});
+  done();
+}
+
+/* This key delete is failing not being able to compare to the key */
+function keyDelete(done) {
+  const v = { $lt: null };
+  const sanitization = M.load('lib/sanitization');
+  const mongoSanitize = sanitization.mongo(v);
+  const key = Object.keys(mongoSanitize);
+  chai.expect(key.length).to.equal(0);
+  done();
+}
+
+function htmlTest(done) {
+  const sanitization = M.load('lib/sanitization');
+  const htmlSan = sanitization.html('<script>');
+  chai.expect(htmlSan).to.equal('&lt;script&gt;');
   done();
 }
