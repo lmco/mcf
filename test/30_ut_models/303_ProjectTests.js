@@ -91,7 +91,7 @@ describe(name, function() {
 /**
  * Creates a user using the User model.
  */
-function createProject() {
+function createProject(done) {
   User.findOne({ username: 'mbee' }, function(errUser, user) {
     // Check if error occured
     if (errUser) {
@@ -115,7 +115,8 @@ function createProject() {
       if (err) {
         M.log.error(err);
       }
-      chai.assert(err === null);
+      chai.expect(err).to.equal(null);
+      done();
     });
   });
 }
@@ -124,8 +125,9 @@ function createProject() {
 /**
  * Deletes the organization.
  */
-function deleteProject() {
+function deleteProject(done) {
   Project.findOneAndRemove({ id: 'empire' }, function(err) {
-    chai.assert(err === null);
+    chai.expect(err).to.equal(null);
+    done();
   });
 }
