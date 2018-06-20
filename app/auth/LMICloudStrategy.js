@@ -216,11 +216,11 @@ class LMICloudStrategy extends BaseStrategy {
   syncLDAPUser(ldapUser, next) {
     User.find({
       username: ldapUser[M.config.auth.ldap.username_attribute]
-    }, (err, users) => {
+    })
+    .exec((err, users) => {
       if (err) {
         next(err);
       }
-
       const initData = {
         username: ldapUser[M.config.auth.ldap.username_attribute],
         password: 'NO_PASSWORD',

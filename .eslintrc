@@ -109,7 +109,7 @@
     "object-shorthand": ["error", "never"],
 
     // suggest using arrow functions as callbacks
-    // LM: Turning off because the arrow function does not work with some models using the "this" 
+    // LM: Turning off because the arrow function does not work with some models using the "this"
     // variable reference. The function call is also valid and we do not want to limit the teams
     // use to only use arrow callbacks.
     "prefer-arrow-callback": ["off", {
@@ -365,12 +365,12 @@
     "implicit-arrow-linebreak": ["error", "beside"],
 
     // this option sets a specific tab width for your code
-    // "https"://eslint.org/docs/rules/indent
+    // https://eslint.org/docs/rules/indent
     "indent": ["error", 2, {
       "SwitchCase": 1,
       "VariableDeclarator": 1,
       "outerIIFEBody": 1,
-      // "MemberExpression": null,
+      "MemberExpression": 0,
       "FunctionDeclaration": {
         "parameters": 1,
         "body": 1
