@@ -38,7 +38,7 @@ class UserController {
   static findUsers() {
     return new Promise(((resolve, reject) => {
       User.find({deletedOn: null})
-      .populate('orgs.read orgs.write orgs.admin')
+      .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
       .exec((err, users) => {
         // Check if error occured
         if (err) {
@@ -61,7 +61,7 @@ class UserController {
       const username = M.lib.sani.sanitize(searchedUsername);
 
       User.findOne({username: username, deletedOn: null})
-      .populate('orgs.read orgs.write orgs.admin')
+      .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
       .exec((err, user) => {
         // Check if error occured
         if (err) {

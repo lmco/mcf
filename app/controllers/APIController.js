@@ -581,7 +581,7 @@ class APIController {
     const orgid = M.lib.sani.html(req.params.orgid);
     const projectid = M.lib.sani.html(req.params.projectid);
 
-    ProjectController.findProject(req.user, orgid, projectid)
+    ProjectController.findProject(req.user, orgid, projectid, true)
     .then((project) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
@@ -807,7 +807,9 @@ class APIController {
       const roles = {};
 
       for (let i = 0; i < roleKeys.length; i++){
-        roles[roleKeys[i]] = user.proj[roleKeys[i]]
+        if (!RegExp('^[$]').test(roleKeys[i])){
+          roles[roleKeys[i]] = user.proj[roleKeys[i]]
+        }
       }
 
       res.header('Content-Type', 'application/json');

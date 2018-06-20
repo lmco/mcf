@@ -45,7 +45,7 @@ class OrganizationController {
     return new Promise((resolve, reject) => {
       const userID = M.lib.sani.sanitize(user._id);
       Organization.find({ 'permissions.read': userID })
-        .populate('projects')
+        .populate('projects read permissions.write permissions.admin')
         .exec((err, orgs) => {
         // If error occurs, return it
           if (err) {
@@ -85,7 +85,7 @@ class OrganizationController {
 
       const orgID = M.lib.sani.sanitize(organizationID);
       Organization.findOne({ id: orgID })
-      .populate('projects') 
+      .populate('projects permissions.read permissions.write permissions.admin') 
       .exec((err, org) => {
         // If error occurs, return it
         if (err) {

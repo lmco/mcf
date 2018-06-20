@@ -71,10 +71,12 @@ class ProjectController {
           return reject(new Error('User does not have permissions'));
         }
 
+        popQuery = 'org'
+
         // Search for project
-        Projects.find({ 'org': org._id, 'permissions.read': reqUser._id})
-        .populate('org permissions.read permissions.write permissions.admin')
-        .exec((err, project) => {
+        Project.find({ 'org': org._id, 'permissions.read': reqUser._id})
+        .populate(popQuery)
+        .exec((err, projects) => {
           // Error Check - Database/Server Error
           if (err) {
             return reject(err);
@@ -84,6 +86,7 @@ class ProjectController {
           if (projects.length < 1) {
             return reject(new Error('Projects not found'));
           }
+
 
           // Return resulting project
           return resolve(projects);
