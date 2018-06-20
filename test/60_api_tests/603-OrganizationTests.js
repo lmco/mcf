@@ -49,7 +49,7 @@ describe(name, function() {
   it('should reject a POST with invalid org id', postInvalidOrg).timeout(3000);
   it('should reject a POST with missing org name', postOrg03).timeout(3000);
   it('should reject a POST with an empty name', postEmptyOrg).timeout(3000);
-  it('should reject a POST of a repeat org', postOrg04.timeout(3000);
+  it('should reject a POST of a repeat org', postOrg04).timeout(3000);
   it('should DELETE organization', deleteOrg01).timeout(3000);
   it('should DELETE second organization', deleteOrg02).timeout(3000);
   it('should GET 0 organizations', getOrgs03).timeout(3000);
