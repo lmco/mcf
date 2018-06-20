@@ -17,26 +17,26 @@
 are working.
  */
 
-//const chai = require('chai');
-//const sinon = require('sinon');
-//const fname = module.filename;
-//const name = fname.split('/')[fname.split('/').length - 1];
+// const chai = require('chai');
+// const sinon = require('sinon');
+// const fname = module.filename;
+// const name = fname.split('/')[fname.split('/').length - 1];
 
-//const M = require('../../mbee.js');
+// const M = require('../../mbee.js');
 
 /*------------------------------------
  *       Main
  *------------------------------------
  */
 
-//describe(name, () => {
+// describe(name, () => {
 //  it('calls the original function', fakeTest);
-//});
+// });
 
 /*------------------------------------
  *       Test Functions
  *------------------------------------*/
-//function fakeTest() {
+// function fakeTest() {
 //  const userController = M.load('controllers/UserController');
 //  callback = sinon.fake();
 //  proxy = userController.getUsers(callback);
@@ -44,4 +44,4 @@ are working.
 //  proxy();
 
 //  chai.assert(callback.called);
-//}
+// }
