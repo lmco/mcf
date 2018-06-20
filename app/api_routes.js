@@ -611,7 +611,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *       501:
  *         description: Not Implemented
  */
-api.route('/orgs/:orgid/members/:role')
+api.route('/orgs/:orgid/members/')
+  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+
+
+api.route('/orgs/:orgid/members/:username/')
   .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
   .post(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
   .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
