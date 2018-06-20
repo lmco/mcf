@@ -41,23 +41,22 @@ class OrganizationController {
    *
    * @param  {User} The user whose organizations to find
    */
-  static findOrgs(username) {
-    return new Promise(((resolve, reject) => {
-      const user = M.lib.sani.sanitize(username);
-      Organization.find({
-        permissions: {
-          read: { $contains: user }
-        }
-      }, (err, orgs) => {
+  static findOrgs(user) {
+    return new Promise((resolve, reject) => {
+      const userID = M.lib.sani.sanitize(user._id);
+      Organization.find({ 'permissions.read': userID })
+        .populate({
+          path: 'projects'
+        })
+        .exec((err, orgs) => {
         // If error occurs, return it
-        if (err) {
-          return reject(err);
-        }
-
-        // Resolve the list of orgs
-        return resolve(orgs);
-      });
-    }));
+          if (err) {
+            return reject(err);
+          }
+          // Resolve the list of orgs
+          return resolve(orgs);
+        });
+    });
   }
 
 
@@ -133,6 +132,8 @@ class OrganizationController {
   static createOrg(user, org) {
     return new Promise((resolve, reject) => {
       // Error check - Make sure user is admin
+      console.log(user.admin);
+      console.log(user._id.toString());
       if (!user.admin) {
         return reject(new Error('User cannot create orgs.'));
       }
@@ -181,7 +182,9 @@ class OrganizationController {
           id: orgID,
           name: orgName,
           permissions: {
-            admin: [user._id]
+            admin: [user._id],
+            write: [user._id],
+            read: [user._id]
           }
         });
 
@@ -343,10 +346,14 @@ class OrganizationController {
    * @param  {User} The object containing the requesting user.
    * @param  {User} The object containing the user whose roles are to be changed.
    * @param  {string} The ID of the org being deleted.
-   * @param  {string} The new role for the user. 
+   * @param  {string} The new role for the user.
    */
   static setUserPermissions(user, username, organizationID, role) {
     return new Promise((resolve, reject) => {
+      // Stop a user from changing their own permissions
+      if (user._id.toString() === username._id.toString()) {
+        return reject(new Error('User cannot change their own permissions.'));
+      }
 
       // Ensure organizationID is a string
       if (typeof organizationID !== 'string') {
@@ -354,14 +361,8 @@ class OrganizationController {
         return reject(new Error('Organization ID is not a string'));
       }
 
-      // Ensure role is a string
-      if (typeof role !== 'string') {
-        M.log.verbose('Role is not a string');
-        return reject(new Error('Role is not a string'));
-      }
-
       // Ensure the role is a valid role
-      if ((role !== 'admin') && (role !== 'write') && (role !== 'read') && (role !== 'REMOVE_ALL')) {
+      if (!['admin', 'write', 'read', 'REMOVE_ALL'].includes(role)) {
         return reject(new Error('The permission enetered is not a valid permission.'));
       }
 
@@ -401,7 +402,7 @@ class OrganizationController {
           }
         }
 
-        // Add user to write array if admin or write 
+        // Add user to write array if admin or write
         if (role === 'admin' || role === 'write') {
           if (!perm.write.includes(username._id)) {
             perm.write.push(username._id);
@@ -412,7 +413,7 @@ class OrganizationController {
         if (role === 'admin' || role === 'write' || role === 'read') {
           if (!perm.read.includes(username._id)) {
             perm.read.push(username._id);
-          } 
+          }
         }
 
         // Save the modified organization

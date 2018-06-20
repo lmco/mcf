@@ -373,7 +373,7 @@ class APIController {
   /**
    * POST /api/orgs/:orgid/members/:role
    *
-   * @description  Takes an orgid and role in the URI and updates a given 
+   * @description  Takes an orgid and role in the URI and updates a given
    * members role within the organization.
    */
   static postOrgRole(req, res) {
@@ -390,23 +390,23 @@ class APIController {
     }
 
 
-    const orgID = M.lib.sani.sanitize(req.params.orgid)
+    const orgID = M.lib.sani.sanitize(req.params.orgid);
     UserController.findUser(req.body.username)
-    .then((user) => {
-      OrgController.setUserPermissions(req.user, user, orgID, req.params.role)
-      .then((org) => {
-        res.header('Content-Type', 'application/json');
-        return res.send(APIController.formatJSON(org.getPublicData()));
+      .then((user) => {
+        OrgController.setUserPermissions(req.user, user, orgID, req.params.role)
+          .then((org) => {
+            res.header('Content-Type', 'application/json');
+            return res.send(APIController.formatJSON(org.getPublicData()));
+          })
+          .catch((error) => {
+            M.log.warn(error);
+            return res.status(500).send('Internal Server Error');
+          });
       })
-      .catch((error) => {
-        M.log.warn(error);
+      .catch((err) => {
+        M.log.error(err);
         return res.status(500).send('Internal Server Error');
       });
-    })
-    .catch((err) => {
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
-    })
   }
 
 
@@ -676,7 +676,7 @@ class APIController {
       });
   }
 
-  static postProjectRole(req, res){
+  static postProjectRole(req, res) {
     if (!req.user) {
       M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
@@ -693,22 +693,21 @@ class APIController {
       .then((user) => {
         // Set project permissions
         ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
-        .then((project) => {
-          res.header('Content-Type', 'application/json');
-          return res.status(200).send(APIController.formatJSON(project));
-
-        })
+          .then((project) => {
+            res.header('Content-Type', 'application/json');
+            return res.status(200).send(APIController.formatJSON(project));
+          })
         // Return and log error if caught
-        .catch((setPermErr) => {
-          M.log.error(setPermErr);
-          return res.status(500).send('Internal Server Error');
-        })
+          .catch((setPermErr) => {
+            M.log.error(setPermErr);
+            return res.status(500).send('Internal Server Error');
+          });
       })
       // Return and log error if caught
       .catch((findUserErr) => {
         M.log.error(findUserErr);
         return res.status(500).send('Internal Server Error');
-    })
+      });
   }
 
 

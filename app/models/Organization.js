@@ -104,7 +104,6 @@ OrganizationSchema.virtual('projects', {
  */
 OrganizationSchema.virtual('members').get(function() {
   // Grab the read, write and admin permissions lists
-  const read = this.permissions.read;
   const write = this.permissions.write;
   const admin = this.permissions.admin;
 
@@ -123,10 +122,10 @@ OrganizationSchema.virtual('members').get(function() {
 });
 
 OrganizationSchema.pre('find', function() {
-  //this.populate('projects');
-  //this.populate('permissions.read');
-  //this.populate('permissions.write');
-  //this.populate('permissions.admin');
+  // this.populate('projects');
+  // this.populate('permissions.read');
+  // this.populate('permissions.write');
+  // this.populate('permissions.admin');
 });
 
 /**

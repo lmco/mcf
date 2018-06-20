@@ -449,31 +449,31 @@ class ProjectController {
       const permType = M.lib.sani.html(permissionType);
 
       // Check if Organization exists
-      Organization.find({id: orgID}, (findOrgErr, orgs) => {
+      Organization.find({ id: orgID }, (findOrgErr, orgs) => {
         if (findOrgErr) {
-          return reject(findOrgErr)
+          return reject(findOrgErr);
         }
         // Error Check - See if organization exists
         if (orgs.length < 1) {
-          return reject(new Error('Organization not found.'))
+          return reject(new Error('Organization not found.'));
         }
         // Allocate org variable for convenience.
         const org = orgs[0];
 
         // Check if project exists
-        Project.find({uid: projUID}, (findProjErr, projects) => {
+        Project.find({ uid: projUID }, (findProjErr, projects) => {
           if (findProjErr) {
             return reject(findProjErr);
           }
           // Error Check - See if project exists
-          if (projects.length < 1){
+          if (projects.length < 1) {
             return reject(new Error('Project not found.'));
           }
 
           // Check Permissions
           const project = projects[0];
-          const admins = project.permissions.admin.map(u => u._id.toString())
-          if(!admins.includes(reqUser._id.toString()) && !reqUser.admin){
+          const admins = project.permissions.admin.map(u => u._id.toString());
+          if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
             return reject(new Error('User does not have permissions'));
           }
 
@@ -493,34 +493,31 @@ class ProjectController {
           const permissionLevel = permissionLevels.indexOf(permType);
 
           // Allocate variables to be used in for loop
-          let permissionList = []
-          let pushPullRoles = {}
+          let permissionList = [];
+          const pushPullRoles = {};
 
           // loop through project permissions list to add and remove the correct permissions.
-          for (let i = 1; i < permissionLevels.length; i++){
-
+          for (let i = 1; i < permissionLevels.length; i++) {
             // Map permission list for easy access
             permissionList = project.permissions[permissionLevels[i]].map(u => u._id.toString());
             // Check for push vals
             if (i <= permissionLevel) {
-              if(!permissionList.includes(setUser._id.toString())){
+              if (!permissionList.includes(setUser._id.toString())) {
                 // required because mongoose does not allow a 'push' with empty parameters
-                pushPullRoles['$push'] = pushPullRoles['$push'] || {}
-                pushPullRoles['$push'][`permissions.${permissionLevels[i]}`] = setUser._id.toString()
+                pushPullRoles.$push = pushPullRoles.$push || {};
+                pushPullRoles.$push[`permissions.${permissionLevels[i]}`] = setUser._id.toString();
               }
             }
             // Check for pull vals
-            else {
-              if(permissionList.includes(setUser._id.toString())){
-                // required because mongoose does not allow a 'pull' with empty parameters
-                pushPullRoles['$pull'] = pushPullRoles['$pull'] || {}
-                pushPullRoles['$pull'][`permissions.${permissionLevels[i]}`] = setUser._id.toString()
-              }
+            else if (permissionList.includes(setUser._id.toString())) {
+              // required because mongoose does not allow a 'pull' with empty parameters
+              pushPullRoles.$pull = pushPullRoles.$pull || {};
+              pushPullRoles.$pull[`permissions.${permissionLevels[i]}`] = setUser._id.toString();
             }
           }
 
           // Update project
-          Project.findOneAndUpdate({uid: projUID}, pushPullRoles, (saveProjErr, projectSaved) => {
+          Project.findOneAndUpdate({ uid: projUID }, pushPullRoles, (saveProjErr, projectSaved) => {
             if (saveProjErr) {
               return reject(saveProjErr);
             }
