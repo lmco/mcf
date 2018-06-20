@@ -30,17 +30,8 @@ const M = require('../../mbee.js');
 
 describe(name, () => {
   it('should output empty object', sanTest);
-});
-
-describe(name, () => {
   it('should not sanitize strings', htmlMongoTest);
-});
-
-describe(name, () => {
   it('should delete the key by user input', keyDelete);
-});
-
-describe(name, () => {
   it('should sanitize html inputs by user', htmlTest);
 });
 

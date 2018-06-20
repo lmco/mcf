@@ -102,7 +102,7 @@
     "secret": "RANDOM"
   },
   "test": {
-    "url": "http://localhost:9080",
+    "url": "https://dev.mbee.us.lmco.com:443",
     "ca": "./certs/LockheedMartinRootCertificationAuthority.pem",
     "NODE_TLS_REJECT_UNAUTHORIZED": "0",
     "username": "mbee",
