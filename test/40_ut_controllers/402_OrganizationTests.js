@@ -155,8 +155,9 @@ function addUserRole(done) {
 function getUserRoles(done) {
   OrgController.getUserPermissions(user, newUser, org.id.toString())
     .then((roles) => {
-      chai.expect(roles.permissions).to.include('read');
-      chai.expect(roles.permissions).to.include('write');
+      chai.expect(roles["read"]).to.equal(true);
+      chai.expect(roles["write"]).to.equal(true);
+      chai.expect(roles["admin"]).to.equal(false);
       done();
     })
     .catch((error) => {
@@ -168,14 +169,14 @@ function getUserRoles(done) {
  * Tests retrieving all members roles for a specified project
  */
 function getMembers(done) {
-  OrgController.getUsersWithPermissions(user, org.id.toString())
+  OrgController.getAllUsersPermissions(user, org.id.toString())
     .then((members) => {
-      chai.expect(members.read).to.include(newUser._id.toString());
-      chai.expect(members.read).to.include(user._id.toString());
-      chai.expect(members.write).to.include(newUser._id.toString());
-      chai.expect(members.write).to.include(user._id.toString());
-      chai.expect(members.admin).to.not.include(newUser._id.toString());
-      chai.expect(members.admin).to.include(user._id.toString());
+      chai.expect(members["msmith"]["read"]).to.equal(true);
+      chai.expect(members["msmith"]["write"]).to.equal(true);
+      chai.expect(members["msmith"]["admin"]).to.equal(false);
+      chai.expect(members["rsanchez"]["read"]).to.equal(true);
+      chai.expect(members["rsanchez"]["write"]).to.equal(true);
+      chai.expect(members["rsanchez"]["admin"]).to.equal(true);
       done()
     })
     .catch((error) => {

@@ -591,7 +591,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/members/')
-  .get(AuthController.authenticate.bind(AuthController), APIController.getOrgMembers)
+  .get(AuthController.authenticate.bind(AuthController), APIController.getAllOrgRoles)
 
 /**
  * @swagger

@@ -348,40 +348,13 @@ class OrganizationController {
    */
   static getUserPermissions(user, username, organizationID) {
     return new Promise((resolve, reject) => {
-      // Ensure organizationID is a string
-      if (typeof organizationID !== 'string') {
-        return reject(new Error('Organization ID is not a string'));
-      }
-
-      // Ensure the requesting user is an admin
-      if (!user.admin) {
-        return reject(new Error('User does not have permissions to retreive others permissions.'));
-      }
-
-      const orgID = M.lib.sani.sanitize(organizationID);
-      Organization.findOne({id: orgID})
-      .populate()
-      .exec((err, org) => {
-        if (err) {
-          return reject(err);
-        }
-
-        const perm = org.permissions;
-        let permissionsArray = []
-
-        // Remove all current roles for the selected user
-        Object.keys(perm).forEach((roles) => {
-          // For some reason, list of keys includes $init, so ignore this key
-          if (roles !== '$init') {
-            const permVals = perm[roles].map(u => u._id.toString());
-            if (permVals.includes(username._id.toString())) {
-              permissionsArray.push(roles);
-            }
-          }
-        });
-
-        return resolve({"permissions": permissionsArray});
-      });
+      OrganizationController.getAllUsersPermissions(user, organizationID)
+      .then((users) => {
+        return resolve(users[username.username]);
+      })
+      .catch((error) => {
+        return reject(error);
+      })
     });
   }
 
@@ -500,7 +473,7 @@ class OrganizationController {
    * @param  {User} The object containing the requesting user.
    * @param  {string} The ID of the org being deleted.
    */
-  static getUsersWithPermissions(user, organizationID) {
+  static getAllUsersPermissions(user, organizationID) {
     return new Promise((resolve, reject) => {
     // Ensure organizationID is a string
       if (typeof organizationID !== 'string') {
@@ -513,14 +486,30 @@ class OrganizationController {
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
-      Organization.findOne({id: orgID})
-      .populate()
-      .exec((err, org) => {
-        if (err) {
-          return reject(err);
-        }
+      const returnDict = {}
 
-        return resolve(org.permissions);
+      // Find the org
+      OrganizationController.findOrg(user, orgID)
+      .then((org) => {
+        const users = org.members;
+
+        // Loop through each user in the org
+        users.forEach((u) => {
+          returnDict[u.username] = {}
+
+          // Loop through each type of permission for each user
+          org.getPermissionLevels().forEach((role) => {
+            if (role !== 'REMOVE_ALL') {
+              const permVals = org.permissions[role].map(v => v._id.toString());
+              returnDict[u.username][role] = permVals.includes(u._id.toString())
+            }
+          });
+        });
+        return resolve(returnDict);
+      })
+      .catch((error) => {
+        console.log(error)
+        return reject(error);
       });
     });
   }
