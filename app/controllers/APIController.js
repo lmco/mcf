@@ -372,10 +372,43 @@ class APIController {
   }
 
   /**
-   * POST /api/orgs/:orgid/members/:role
+   * GET /api/orgs/:orgid/members/:username
+   * 
+   * @description  Takes an orgid and username in the URI and returns
+   * a list of roles which the user has within the organization
+   */
+  static getOrgRole(req, res) {
+    // If no user in the request
+    if (!req.user) {
+      M.log.error('Request does not have a user.');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    const orgID = M.lib.sani.sanitize(req.params.orgid);
+    UserController.findUser(M.lib.sani.sanitize(req.params.username))
+      .then((user) => {
+        OrgController.getUserPermissions(req.user, user, orgID)
+          .then((roles) => {
+            res.header('Content-Type', 'application/json');
+            return res.send(APIController.formatJSON(roles));
+          })
+          .catch((error) => {
+            M.log.warn(error);
+            return res.status(500).send('Internal Server Error');
+          });
+      })
+      .catch((err) => {
+        M.log.error(err);
+        return res.status(500).send('Internal Server Error');
+      });
+  }
+
+  /**
+   * POST /api/orgs/:orgid/members/:username
+   * PUT /api/orgs/:orgid/members/:username
    *
-   * @description  Takes an orgid and role in the URI and updates a given
-   * members role within the organization.
+   * @description  Takes an orgid and username in the URI and updates a given
+   * members role within the organization. Requires a role in the body
    */
   static postOrgRole(req, res) {
     // If no user in the request
@@ -384,17 +417,16 @@ class APIController {
       return res.status(500).send('Internal Server Error');
     }
 
-    // If no user in the request body
-    if (!req.body.hasOwnProperty('username')) {
-      M.log.error('Request body does not contain a username field.');
+    // If no role in the request body
+    if (!req.body.hasOwnProperty('role')) {
+      M.log.error('Request body does not contain a role field.');
       return res.status(500).send('Internal Server Error');
     }
 
-
     const orgID = M.lib.sani.sanitize(req.params.orgid);
-    UserController.findUser(req.body.username)
+    UserController.findUser(M.lib.sani.sanitize(req.params.username))
       .then((user) => {
-        OrgController.setUserPermissions(req.user, user, orgID, req.params.role)
+        OrgController.setUserPermissions(req.user, user, orgID, req.body.role)
           .then((org) => {
             res.header('Content-Type', 'application/json');
             return res.send(APIController.formatJSON(org.getPublicData()));
@@ -409,6 +441,57 @@ class APIController {
         return res.status(500).send('Internal Server Error');
       });
   }
+
+  /**
+   * DELETE /api/orgs/:orgid/members/:username
+   *
+   * @description  Takes an orgid and username in the URI and removes the 
+   * given user from all permissions within the organization.
+   */
+  static deleteOrgRole(req, res) {
+    // If no user in the request
+    if (!req.user) {
+      M.log.error('Request does not have a user.');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    const orgID = M.lib.sani.sanitize(req.params.orgid);
+    UserController.findUser(M.lib.sani.sanitize(req.params.username))
+    .then((user) => {
+      OrgController.setUserPermissions(req.user, user, orgID, 'REMOVE_ALL')
+        .then((org) => {
+          res.header('Content-Type', 'application/json');
+          return res.send(APIController.formatJSON(org.getPublicData()));
+        })
+        .catch((error) => {
+          M.log.warn(error);
+          return res.status(500).send('Internal Server Error');
+        });
+    })
+    .catch((err) => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    });
+  }
+
+   static getOrgMembers(req, res) {
+    // If no user in the request
+    if (!req.user) {
+      M.log.error('Request does not have a user.');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    const orgID = M.lib.sani.sanitize(req.params.orgid);
+    OrgController.getUsersWithPermissions(req.user, orgID)
+    .then((members) => {
+      res.header('Content-Type', 'application/json');
+      return res.send(APIController.formatJSON(members));
+    })
+    .catch((error) => {
+      M.log.warn(error);
+      return res.status(500).send('Internal Server Error');
+    });
+   }
 
 
   /****************************************************************************

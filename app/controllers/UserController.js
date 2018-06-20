@@ -37,9 +37,9 @@ class UserController {
    */
   static findUsers() {
     return new Promise(((resolve, reject) => {
-      User.find({
-        deletedOn: null
-      }, (err, users) => {
+      User.find({deletedOn: null})
+      .populate('orgs.read orgs.write orgs.admin')
+      .exec((err, users) => {
         // Check if error occured
         if (err) {
           return reject(err);
@@ -60,10 +60,9 @@ class UserController {
     return new Promise(((resolve, reject) => {
       const username = M.lib.sani.sanitize(searchedUsername);
 
-      User.findOne({
-        username: username,
-        deletedOn: null
-      }, (err, user) => {
+      User.findOne({username: username, deletedOn: null})
+      .populate('orgs.read orgs.write orgs.admin')
+      .exec((err, user) => {
         // Check if error occured
         if (err) {
           return reject(err);
@@ -98,9 +97,9 @@ class UserController {
         return reject(new Error('Username not provided.'));
       }
 
-      User.find({
-        username: M.lib.sani.sanitize(newUser.username)
-      }, (findErr, users) => { // eslint-disable-line consistent-return
+      User.find({username: M.lib.sani.sanitize(newUser.username)})
+      .populate() 
+      .exec((findErr, users) => { // eslint-disable-line consistent-return
         if (findErr) {
           return reject(findErr);
         }
@@ -141,10 +140,9 @@ class UserController {
       }
 
       // Check if user exists
-      User.find({
-        username: M.lib.sani.sanitize(usernameToUpdate),
-        deletedOn: null
-      }, (findErr, users) => {
+      User.find({username: M.lib.sani.sanitize(usernameToUpdate), deletedOn: null})
+      .populate()
+      .exec((findErr, users) => {
         // Error check
         if (findErr) {
           return reject(findErr);
@@ -205,10 +203,9 @@ class UserController {
       }
 
       // Do the deletion
-      User.findOneAndRemove({
-        username: M.lib.sani.sanitize(usernameToDelete)
-      },
-      (err) => {
+      User.findOneAndRemove({username: M.lib.sani.sanitize(usernameToDelete)})
+      .populate()
+      .exec((err) => {
         if (err) {
           return reject(err);
         }

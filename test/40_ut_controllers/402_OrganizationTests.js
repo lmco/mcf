@@ -119,6 +119,8 @@ describe(name, () => {
   });
 
   it('should add a user to an org', addUserRole).timeout(2500);
+  it('should get a users roles within an org', getUserRoles).timeout(2500);
+  it('should get all members with permissions in an org and their permissions', getMembers).timeout(2500);
   it('should remove a users role within an org', removeUserRole).timeout(2500);
   it('should throw an error', changeOwnRole).timeout(2500);
   it('should throw an error', nonAdminChangeRole).timeout(2500);
@@ -139,7 +141,7 @@ function addUserRole(done) {
     .then((retOrg) => {
       chai.expect(retOrg.permissions.write).to.include(newUser._id.toString());
       chai.expect(retOrg.permissions.read).to.include(newUser._id.toString());
-      chai.expect(retOrg.permissions.admin).to.not.include(newUser._id.toString());
+      chai.expect(org.permissions.admin).to.not.include(newUser._id.toString());
       done();
     })
     .catch((error) => {
@@ -148,14 +150,48 @@ function addUserRole(done) {
 }
 
 /**
+ * Tests retrieving the roles a specific user has
+ */
+function getUserRoles(done) {
+  OrgController.getUserPermissions(user, newUser, org.id.toString())
+    .then((roles) => {
+      chai.expect(roles.permissions).to.include('read');
+      chai.expect(roles.permissions).to.include('write');
+      done();
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+/**
+ * Tests retrieving all members roles for a specified project
+ */
+function getMembers(done) {
+  OrgController.getUsersWithPermissions(user, org.id.toString())
+    .then((members) => {
+      chai.expect(members.read).to.include(newUser._id.toString());
+      chai.expect(members.read).to.include(user._id.toString());
+      chai.expect(members.write).to.include(newUser._id.toString());
+      chai.expect(members.write).to.include(user._id.toString());
+      chai.expect(members.admin).to.not.include(newUser._id.toString());
+      chai.expect(members.admin).to.include(user._id.toString());
+      done()
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+} 
+
+/**
  * Tests removing a users role within an org
  */
 function removeUserRole(done) {
   OrgController.setUserPermissions(user, newUser, org.id.toString(), 'REMOVE_ALL')
     .then((retOrg) => {
-      chai.expect(retOrg.permissions.write).to.not.include(newUser._id.toString());
-      chai.expect(retOrg.permissions.read).to.not.include(newUser._id.toString());
-      chai.expect(retOrg.permissions.admin).to.not.include(newUser._id.toString());
+      chai.expect(org.permissions.write).to.not.include(newUser._id.toString());
+      chai.expect(org.permissions.read).to.not.include(newUser._id.toString());
+      chai.expect(org.permissions.admin).to.not.include(newUser._id.toString());
       done();
     })
     .catch((error) => {

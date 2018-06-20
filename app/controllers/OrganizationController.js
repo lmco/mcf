@@ -45,9 +45,7 @@ class OrganizationController {
     return new Promise((resolve, reject) => {
       const userID = M.lib.sani.sanitize(user._id);
       Organization.find({ 'permissions.read': userID })
-        .populate({
-          path: 'projects'
-        })
+        .populate('projects')
         .exec((err, orgs) => {
         // If error occurs, return it
           if (err) {
@@ -86,7 +84,9 @@ class OrganizationController {
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
-      Organization.findOne({ id: orgID }, (err, org) => {
+      Organization.findOne({ id: orgID })
+      .populate('projects') 
+      .exec((err, org) => {
         // If error occurs, return it
         if (err) {
           return reject(err);
@@ -132,8 +132,6 @@ class OrganizationController {
   static createOrg(user, org) {
     return new Promise((resolve, reject) => {
       // Error check - Make sure user is admin
-      console.log(user.admin);
-      console.log(user._id.toString());
       if (!user.admin) {
         return reject(new Error('User cannot create orgs.'));
       }
@@ -167,7 +165,9 @@ class OrganizationController {
       }
 
       // Check if org already exists
-      Organization.find({ id: orgID }, (findOrgErr, orgs) => {
+      Organization.find({ id: orgID })
+      .populate()
+      .exec((findOrgErr, orgs) => {
         // If error occurs, return it
         if (findOrgErr) {
           return reject(findOrgErr);
@@ -317,10 +317,9 @@ class OrganizationController {
       M.log.verbose('Attempting delete of', orgID, '...');
 
       // Do the deletion
-      Organization.findOneAndRemove({
-        id: orgID
-      },
-      (err, org) => {
+      Organization.findOneAndRemove({id: orgID})
+      .populate()
+      .exec((err, org) => {
         if (err) {
           return reject(err);
         }
@@ -330,11 +329,68 @@ class OrganizationController {
   }
 
   /**
+   * This function takes a user, second user and orgID and returns the 
+   * permissions the second user has within the org
+   *
+   * @example
+   * OrganizationController.getUserPermissions(Josh, Austin, 'mbee')
+   * .then(function(org) {
+   *  // Get the users roles
+   * })
+   * .catch(function(error) {
+   *  M.log.error(error);
+   * });
+   *
+   *
+   * @param {User} The object containing the requesting user.
+   * @param {User} The object containing the user whose info is being returned
+   * @param {string} The ID of the organization
+   */
+  static getUserPermissions(user, username, organizationID) {
+    return new Promise((resolve, reject) => {
+      // Ensure organizationID is a string
+      if (typeof organizationID !== 'string') {
+        return reject(new Error('Organization ID is not a string'));
+      }
+
+      // Ensure the requesting user is an admin
+      if (!user.admin) {
+        return reject(new Error('User does not have permissions to retreive others permissions.'));
+      }
+
+      const orgID = M.lib.sani.sanitize(organizationID);
+      Organization.findOne({id: orgID})
+      .populate()
+      .exec((err, org) => {
+        if (err) {
+          return reject(err);
+        }
+
+        const perm = org.permissions;
+        let permissionsArray = []
+
+        // Remove all current roles for the selected user
+        Object.keys(perm).forEach((roles) => {
+          // For some reason, list of keys includes $init, so ignore this key
+          if (roles !== '$init') {
+            const permVals = perm[roles].map(u => u._id.toString());
+            if (permVals.includes(username._id.toString())) {
+              permissionsArray.push(roles);
+            }
+          }
+        });
+
+        return resolve({"permissions": permissionsArray});
+      });
+    });
+  }
+
+  /**
    * This function takes a user, second user, orgID and role and updates a
    * users permissions within an organization
    *
    * @example
-   * OrganizationController.createOrg('josh', 'austin, {mbee-sw}, 'write')
+   * OrganizationController.setUserPermissions(Josh, Austin, 'mbee', 'write')
    * .then(function(org) {
    *   // Change the users role
    * })
@@ -367,18 +423,16 @@ class OrganizationController {
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
-
-      Organization.findOne({
-        id: orgID
-      },
-      (err, org) => {
+      Organization.findOne({id: orgID})
+      .populate()
+      .exec((err, org) => {
         if (err) {
           return reject(err);
         }
-
         // Ensure user is an admin within the organization
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!user.admin || !orgAdmins.includes(user._id.toString())) {
+          M.log.verbose('User cannot chnage permissions');
           return reject(new Error('User cannot change permissions.'));
         }
 
@@ -425,6 +479,48 @@ class OrganizationController {
           // Return updated org
           return resolve(org);
         });
+      });
+    });
+  }
+
+  /**
+   * This function takes a user and ordID and returns the permissions
+   * object, displaying the users who have those permissions 
+   *
+   * @example
+   * OrganizationController.getUsersWithPermissions(Austin, 'mbee')
+   * .then(function(org) {
+   *   // Retrieve the members
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {string} The ID of the org being deleted.
+   */
+  static getUsersWithPermissions(user, organizationID) {
+    return new Promise((resolve, reject) => {
+    // Ensure organizationID is a string
+      if (typeof organizationID !== 'string') {
+        return reject(new Error('Organization ID is not a string'));
+      }
+
+      // Ensure the requesting user is an admin
+      if (!user.admin) {
+        return reject(new Error('User does not have permissions to retreive others permissions.'));
+      }
+
+      const orgID = M.lib.sani.sanitize(organizationID);
+      Organization.findOne({id: orgID})
+      .populate()
+      .exec((err, org) => {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(org.permissions);
       });
     });
   }

@@ -589,38 +589,50 @@ api.route('/orgs/:orgid/projects/:projectid')
  *     responses:
  *       501:
  *         description: Not Implemented
+ */
+api.route('/orgs/:orgid/members/')
+  .get(AuthController.authenticate.bind(AuthController), APIController.getOrgMembers)
+
+/**
+ * @swagger
+ * /orgs/:orgid/members/:username:
+ *   get:
+ *     tags:
+ *       - projects
+ *     description: Not implemented, reserved for future use.
+ *     responses:
+ *       501:
+ *         description: Not Implemented
  *   post:
  *     tags:
- *       - organizations
+ *       - projects
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   put:
  *     tags:
- *       - organizations
+ *       - projects
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  *   delete:
  *     tags:
- *       - organizations
+ *       - projects
  *     description: Not implemented, reserved for future use.
  *     responses:
  *       501:
  *         description: Not Implemented
  */
-api.route('/orgs/:orgid/members/')
-  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
 
-
+ // 6/20/18 
+ // NOTE: POST and PUT have the same functionality, thus they map to the same route.
 api.route('/orgs/:orgid/members/:username/')
-  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+  .get(AuthController.authenticate.bind(AuthController), APIController.getOrgRole)
   .post(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
-  .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-  .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
-
+  .put(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
+  .delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrgRole);
 
 /**
  * @swagger
@@ -659,8 +671,6 @@ api.route('/orgs/:orgid/projects/:projectid/members/:role')
   .post(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
   .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
   .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
-
-
 
 /**
  * @swagger
