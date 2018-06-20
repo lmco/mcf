@@ -304,7 +304,7 @@
                  'name':   'Organization 2'
              })
          },
-         function(error, response, body) {
+         function(response, body) {
              chai.expect(response.statusCode).to.equal(500);
              chai.expect(body).to.equal('Internal Server Error');
              done();

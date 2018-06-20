@@ -35,7 +35,8 @@ let org = null;
  *------------------------------------*/
 
 // runs before all tests in this block
-describe('hooks', ()=> {
+
+describe(name, () => {
   before(() => {
     db = M.load('lib/db');
     db.connect()
@@ -76,9 +77,7 @@ describe('hooks', ()=> {
       mongoose.connection.close();
     });
   });
-})
 
-describe(name, () => {
   it('should create an project', createProject).timeout(3000);
   it('should delete an project', deleteProject).timeout(3000);
 })

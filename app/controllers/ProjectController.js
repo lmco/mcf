@@ -228,6 +228,7 @@ class ProjectController {
 
         // Check Permissions
         const org = orgs[0];
+        console.log(org);
         const writers = org.write.map(u => u._id.toString());
 
         if (!writers.includes(user._id.toString()) && !user.admin) {

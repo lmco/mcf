@@ -18,7 +18,6 @@
  */
 
 const path = require('path');
-const util = require('util');
 const chai  = require('chai');
 const request = require('request');
 
@@ -31,6 +30,7 @@ const Org = M.load('models/Organization');
 const package_json = require(path.join(__dirname,'..', '..', 'package.json'));
 const config = package_json['config'];
 const test = M.config.test;
+const User = M.load('models/User');
 
 /**
  * APIProjectTest
@@ -42,51 +42,55 @@ const test = M.config.test;
 /*------------------------------------
  *       Main
  *------------------------------------*/
-
+let org = null; 
+let user = null;
   // runs before all tests in this block
-describe('hooks', ()=> {
-  before(() => {
-    db = M.load('lib/db');
-    db.connect()
-    return new Promise((resolve) => {
-        User.findOne({username : 'mbee'}, function(err, user){
-          // Check if error occured
-          if (err) {
-            M.log.error(err);
-          }
-          // Otherwise,
-          // Create a parent organization before creating any projects
-          org = new Org({
-            id: 'empire',
-            name: 'Galactic Empire',
-            permissions: {
-              admin: [user._id],
-              write: [user._id],
-              read: [user._id]
-            }
-          });
-          org.save((err) => {
+
+describe(name, () => {
+    before(() => {
+        db = M.load('lib/db');
+        db.connect()
+        console.log('before promise');
+        return new Promise((resolve) => {
+            User.findOne({username : 'mbee'}, function(err, foundUser){
+              user = foundUser;
+              // Check if error occured
+              if (err) {
+                M.log.error(err);
+              }
+              // Otherwise,
+              // Create a parent organization before creating any projects
+              org = new Org({
+                id: 'hogwarts',
+                name: 'Gryffindor',
+                permissions: {
+                  admin: [user._id],
+                  write: [user._id],
+                  read: [user._id]
+                }
+              });
+              console.log('before save');
+              org.save((err) => {
+                if (err) {
+                  M.log.error(err);
+                }
+                console.log(org);
+                resolve();
+              });
+            });
+        });
+      });
+      //runs after all the tests are done
+      after(() => {
+          Org.findOneAndRemove({ id: 'hogwarts' }, (err) => {
             if (err) {
               M.log.error(err);
             }
-            resolve();
+            chai.assert(err === null);
+            mongoose.connection.close();
           });
-        });
-    });
-  });
-  //runs after all the tests are done
-  after(() => {
-      Org.findOneAndRemove({ id: org.id }, (err) => {
-        if (err) {
-          M.log.error(err);
-        }
-        chai.assert(err === null);
-        mongoose.connection.close();
       });
-  });
-})
 
-describe(name, () => {
     it('should POST a project to the organization', postProject01);
     it('should DELETE a project to the organziation', deleteProject01);
 });
@@ -101,16 +105,25 @@ describe(name, () => {
       */
      function postProject01(done)
      {
+         var id = 'harrypotter';
          request({
              url:        `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
              headers:    getHeaders(),
              method:     'POST',
              body:       JSON.stringify({
-                 "id": 'harrypotter',
-                 "name":   'Youre a wizard Harry'
+                 "id": id,
+                 "name":   'Youre a wizard Harry',
+                 "org" : org._id,
+                 "permissions": { 
+                   "admin": [user._id],
+                   "write": [user._id], 
+                   "read": [user._id] 
+                },
+                 uid: `${id}:${org.id}`  
              })
          },
          function(error, response, body) {
+             console.log(body);
              var json = JSON.parse(body);
              chai.expect(response.statusCode).to.equal(200);
              chai.expect(json['id']).to.equal('harrypotter');
