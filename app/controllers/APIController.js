@@ -323,7 +323,7 @@ class APIController {
       M.log.error('Given data is not of expected type, string.');
       return res.status(400).send('Bad Request');
     }
-    
+
     // Sanitize the input
     const organizationID = M.lib.sani.sanitize(req.params.orgid);
     const organizationName = M.lib.sani.sanitize(req.body.name);

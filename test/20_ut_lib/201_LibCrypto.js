@@ -13,7 +13,7 @@
  * @module  Lib Tests
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * 
+ *
 @description  This is currently a test of loading the Crypto Library and seeing if encrypt and
 decrypt are defined in the code.
  */
@@ -47,16 +47,16 @@ describe(name, () => {
  * Loads a library
  */
 function defCrypts(done) {
-  var crypto = M.load('lib/crypto');
+  const crypto = M.load('lib/crypto');
   chai.expect(crypto.encrypt).to.not.equal(undefined);
   chai.expect(crypto.decrypt).to.not.equal(undefined);
   done();
 }
 
 function encryptTest(done) {
-  var crypto = M.load('lib/crypto');
-  var message = crypto.encrypt('Leah');
-  var decrypMess = crypto.decrypt(message);
+  const crypto = M.load('lib/crypto');
+  const message = crypto.encrypt('Leah');
+  const decrypMess = crypto.decrypt(message);
   chai.expect(decrypMess).to.equal('Leah');
   done();
 }
