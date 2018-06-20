@@ -58,14 +58,6 @@ class LMICloudStrategy extends BaseStrategy {
       const file = fs.readFileSync(path.join(projectRoot, fname));
       this.cacerts.push(file);
     }
-
-    // Initialize the LDAP TLS client
-    this.client = ldap.createClient({
-      url: M.config.auth.ldap.server,
-      tlsOptions: {
-        ca: this.cacerts
-      }
-    });
   }
 
 
@@ -86,6 +78,14 @@ class LMICloudStrategy extends BaseStrategy {
     // variable scope, we can call class methods using `self`.
     // This is ugly. I don't like it.
     const self = this;
+
+    // Initialize the LDAP TLS client
+    this.client = ldap.createClient({
+      url: M.config.auth.ldap.server,
+      tlsOptions: {
+        ca: this.cacerts
+      }
+    });
 
     // Search locally for the user
     User.find({

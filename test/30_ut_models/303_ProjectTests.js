@@ -126,7 +126,7 @@ function createProject(done) {
  * Deletes the organization.
  */
 function deleteProject(done) {
-  Project.findOneAndRemove({ id: 'empire' }, function(err) {
+  Project.findOneAndRemove({ id: 'dthstr' }, function(err) {
     chai.expect(err).to.equal(null);
     done();
   });
