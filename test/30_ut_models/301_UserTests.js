@@ -186,11 +186,9 @@ function loginLDAPUser(done) {
   const AuthController = M.load('lib/auth');
   const u = M.config.test.username;
   const p = M.config.test.password;
-  console.log(u);
-  console.log(p);
   AuthController.handleBasicAuth(null, null, u, p, (err, user) => {
     chai.expect(err).to.equal(null);
     chai.expect(user.username).to.equal('mbee');
     done();
-  })
+  });
 }
