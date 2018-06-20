@@ -33,7 +33,7 @@ describe(name, () => {
 });
 
 describe(name, () => {
-  it('should sanitize user input of html', htmlMongoTest);
+  it('should not sanitize strings', htmlMongoTest);
 });
 
 describe(name, () => {
@@ -65,7 +65,7 @@ take in strings because mongo sanitize only takes in objects */
 function htmlMongoTest(done) {
   const sanitization = M.load('lib/sanitization');
   const mongohtmlSan = sanitization.mongo({ '$<script>': null });
-  chai.expect(mongohtmlSan).to.equal({});
+  chai.expect(mongohtmlSan).to.not.equal({});
   done();
 }
 

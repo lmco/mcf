@@ -39,20 +39,20 @@ const test = M.config.test;
  *------------------------------------*/
 
 describe(name, function() {
-  it('should GET an empty organization', getOrgs);
-  it('should POST an organization', postOrg01);
-  it('should GET posted organization', getOrg01);
-  it('should PUT an update to posted organization', putOrg01);
-  it('should POST second organization', postOrg02);
-  it('should GET 2 organizations', getTwoOrgs);
-  it('should reject a POST with ID mismatch', postOrg02Err);
-  it('should reject a POST with invalid org id', postInvalidOrg);
-  it('should reject a POST with missing org name', postOrg03);
-  it('should reject a POST with an empty name', postEmptyOrg);
-  it('should reject a POST of a repeat org', postOrg04);
-  it('should DELETE organization', deleteOrg01);
-  it('should DELETE second organization', deleteOrg02);
-  it('should GET 0 organizations', getOrgs03);
+  it('should GET an empty organization', getOrgs).timeout(3000);
+  it('should POST an organization', postOrg01).timeout(3000);
+  it('should GET posted organization', getOrg01).timeout(3000);
+  it('should PUT an update to posted organization', putOrg01).timeout(3000);
+  it('should POST second organization', postOrg02).timeout(3000);
+  it('should GET 2 organizations', getTwoOrgs).timeout(3000);
+  it('should reject a POST with ID mismatch', postOrg02Err).timeout(3000);
+  it('should reject a POST with invalid org id', postInvalidOrg).timeout(3000);
+  it('should reject a POST with missing org name', postOrg03).timeout(3000);
+  it('should reject a POST with an empty name', postEmptyOrg).timeout(3000);
+  it('should reject a POST of a repeat org', postOrg04.timeout(3000);
+  it('should DELETE organization', deleteOrg01).timeout(3000);
+  it('should DELETE second organization', deleteOrg02).timeout(3000);
+  it('should GET 0 organizations', getOrgs03).timeout(3000);
 });
 
 /**---------------------------------------------------

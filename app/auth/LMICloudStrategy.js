@@ -217,6 +217,7 @@ class LMICloudStrategy extends BaseStrategy {
     })
     .exec((err, users) => {
       if (err) {
+        this.client.destroy();
         next(err);
       }
       const initData = {
@@ -231,9 +232,11 @@ class LMICloudStrategy extends BaseStrategy {
       user.email = ldapUser.mail;
       user.save((saveErr) => {
         if (saveErr) {
+          this.client.destroy();
           next(saveErr);
         }
         else {
+          this.client.destroy();
           next(null, user);
         }
       });
