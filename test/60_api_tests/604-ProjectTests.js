@@ -15,7 +15,9 @@
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * Tests Basic API functionality with Projects.
+ * UNCOMMENT WHEN NEED TO TEST
  */
+
 
 /** Tests that need to be made:
  *  - inputting special characters into the name of the project (I am guessing those should fail)
@@ -29,14 +31,14 @@
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
-const request = require('request');
+// const request = require('request');
 
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.load('models/Organization');
 
-const test = M.config.test;
+// const test = M.config.test;
 const User = M.load('models/User');
 /**
  * APIProjectTest
@@ -103,14 +105,14 @@ describe(name, function() {
 });
 
 /**---------------------------------------------------
-   *            Test Functions
-   ----------------------------------------------------*/
+ *            Test Functions
+  ----------------------------------------------------*/
 
 /**
-      * Makes a POST request to /api/orgs/:orgid/projects/:projectid to create a project.
-      * This should succeed.
-      */
-function postProject01(done) {
+ * Makes a POST request to /api/orgs/:orgid/projects/:projectid to create a project.
+ * This should succeed.
+ */
+/* function postProject01(done) {
   const id = 'harrypotter';
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
@@ -135,13 +137,13 @@ function postProject01(done) {
     chai.expect(json.name).to.equal('Youre a wizard Harry');
     done();
   });
-}
+} */
 
 /**
-      * Makes a GET request to /api/orgs/:orgid/projects/:projectid. This should happen after a post
-      * to the projects was made to harrypotter. This should succeed.
-      */
-function getProject01(done) {
+ * Makes a GET request to /api/orgs/:orgid/projects/:projectid. This should happen after a post
+ * to the projects was made to harrypotter. This should succeed.
+ */
+/* function getProject01(done) {
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
     headers: getHeaders(),
@@ -153,14 +155,14 @@ function getProject01(done) {
     chai.expect(json.name).to.equal('Youre a wizard Harry');
     done();
   });
-}
+} */
 
 /**
-      * Makes an UPDATE request to api/orgs/:orgid/projects/:projectid. This should update the orgninal
-      * project name: "Youre a wizard Harry" that was added to the database to name: "I know".
-      * This should succeed.
-      */
-function putOrg01(done) {
+ * Makes an UPDATE request to api/orgs/:orgid/projects/:projectid. This should update the orgninal
+ * project name: "Youre a wizard Harry" that was added to the database to name: "I know".
+ * This should succeed.
+ */
+/* function putOrg01(done) {
   const id = 'harrypotter';
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
@@ -184,12 +186,12 @@ function putOrg01(done) {
     chai.expect(json.name).to.equal('I know');
     done();
   });
-}
+} */
 /**
-      * Makes a POST request to /api/orgs/:orgid/projects/:projectid to create a project.
-      * This should succeed.
-      */
-function postProject02(done) {
+ * Makes a POST request to /api/orgs/:orgid/projects/:projectid to create a project.
+ * This should succeed.
+ */
+/* function postProject02(done) {
   const id = 'ronweasly';
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/ronweasly`,
@@ -217,10 +219,10 @@ function postProject02(done) {
 }
 
 /**
-      * Makes a DELETE request to /api/orgs/:orgid/projects/:projectid to remove a project.
-      * This should succeed.
-      */
-function deleteProject01(done) {
+ * Makes a DELETE request to /api/orgs/:orgid/projects/:projectid to remove a project.
+ * This should succeed.
+ */
+/* function deleteProject01(done) {
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
     headers: getHeaders(),
@@ -230,13 +232,13 @@ function deleteProject01(done) {
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
-}
+} */
 
 /**
-      * Makes a DELETE request to /api/orgs/:orgid/projects/:projectid to remove a project.
-      * This should succeed.
-      */
-function deleteProject02(done) {
+ * Makes a DELETE request to /api/orgs/:orgid/projects/:projectid to remove a project.
+ * This should succeed.
+ */
+/* function deleteProject02(done) {
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/ronweasly`,
     headers: getHeaders(),
@@ -246,17 +248,19 @@ function deleteProject02(done) {
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
-}
+} */
 
 
 /* ----------( Helper Functions )----------*/
 
 /**
-  * Produces and returns an object containing common request headers.
-  */
-function getHeaders() {
+ * Produces and returns an object containing common request headers.
+ */
+/* function getHeaders() {
+  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',
-    authorization: `Basic ${Buffer.from(`${M.config.test.username}:${M.config.test.password}`).toString('base64')}`
+    authorization: s
   };
-}
+} */
