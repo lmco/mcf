@@ -43,39 +43,53 @@ const test = M.config.test;
  *       Main
  *------------------------------------*/
 
-describe(name, () => {
-    // runs before all tests in this block
-    before(() => {
-      const db = M.load('lib/db');
-      db.connect();
-  
-      // Create a parent organization before creating any projects
-      org = new Org({
-        id: 'hogwarts',
-        name: 'Gryffindor'
-      });
-      org.save((err) => {
-        if (err) {
-          M.log.error(err);
-        }
-       chai.expect(err).to.equal(null);
-      });
+  // runs before all tests in this block
+describe('hooks', ()=> {
+  before(() => {
+    db = M.load('lib/db');
+    db.connect()
+    return new Promise((resolve) => {
+        User.findOne({username : 'mbee'}, function(err, user){
+          // Check if error occured
+          if (err) {
+            M.log.error(err);
+          }
+          // Otherwise,
+          // Create a parent organization before creating any projects
+          org = new Org({
+            id: 'empire',
+            name: 'Galactic Empire',
+            permissions: {
+              admin: [user._id],
+              write: [user._id],
+              read: [user._id]
+            }
+          });
+          org.save((err) => {
+            if (err) {
+              M.log.error(err);
+            }
+            resolve();
+          });
+        });
     });
-  
-    // runs after all tests in this block
-    after(() => {
+  });
+  //runs after all the tests are done
+  after(() => {
       Org.findOneAndRemove({ id: org.id }, (err) => {
         if (err) {
           M.log.error(err);
         }
-        chai.expect(err).to.equal(null);
+        chai.assert(err === null);
         mongoose.connection.close();
       });
-    });
-  
+  });
+})
+
+describe(name, () => {
     it('should POST a project to the organization', postProject01);
     it('should DELETE a project to the organziation', deleteProject01);
-  });
+});
 
   /**---------------------------------------------------
    *            Test Functions

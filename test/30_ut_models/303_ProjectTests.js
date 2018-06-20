@@ -34,50 +34,54 @@ let org = null;
  *       Main
  *------------------------------------*/
 
-describe(name, () => {
-  // runs before all tests in this block
+// runs before all tests in this block
+describe('hooks', ()=> {
   before(() => {
-    const db = M.load('lib/db');
-    db.connect();
-    User.findOne({username : 'mbee'}, function(err, user){
-      // Check if error occured
-      if (err) {
-        M.log.error(err);
-      }
-      // Otherwise,
-      // Create a parent organization before creating any projects
-      newOrg = new Org({
-        id: 'empire',
-        name: 'Galactic Empire',
-        permissions: {
-          admin: [user._id],
-          write: [user._id],
-          read: [user._id]
-        }
-      });
-      newOrg.save((err) => {
-        if (err) {
-          M.log.error(err);
-        }
-        chai.expect(err).to.equal(null);
-      });
+    db = M.load('lib/db');
+    db.connect()
+    return new Promise((resolve) => {
+        User.findOne({username : 'mbee'}, function(err, user){
+          // Check if error occured
+          if (err) {
+            M.log.error(err);
+          }
+          // Otherwise,
+          // Create a parent organization before creating any projects
+          org = new Org({
+            id: 'empire',
+            name: 'Galactic Empire',
+            permissions: {
+              admin: [user._id],
+              write: [user._id],
+              read: [user._id]
+            }
+          });
+          org.save((err) => {
+            if (err) {
+              M.log.error(err);
+            }
+            resolve();
+          });
+        });
     });
   });
 
-  // runs after all tests in this block
+//runs after all the tests are done
   after(() => {
-    Org.findOneAndRemove({ id: newOrg.id }, (err) => {
+    Org.findOneAndRemove({ id: org.id }, (err) => {
       if (err) {
         M.log.error(err);
       }
-      chai.expect(err).to.equal(null);
+      chai.assert(err === null);
       mongoose.connection.close();
     });
   });
+})
 
-  it('should create an project', createProject);
-  it('should delete an project', deleteProject);
-});
+describe(name, () => {
+  it('should create an project', createProject).timeout(3000);
+  it('should delete an project', deleteProject).timeout(3000);
+})
 
 
 /*------------------------------------
@@ -88,7 +92,7 @@ describe(name, () => {
 /**
  * Creates a user using the User model.
  */
-function createProject(done) {
+function createProject() {
   User.findOne({username : 'mbee'}, function(err, user){
     // Check if error occured
     if (err) {
@@ -96,23 +100,23 @@ function createProject(done) {
     }
     // Otherwise,
     // Create a project
-    newProject = new Project({
-      id: 'dthstr',
+    const id = 'dthstr';
+    var newProject = new Project({
+      id: id,
       name: 'Death Star',
-      org: newOrg.id,
+      org: org._id,
       permissions: { 
         admin: [user._id],
         write: [user._id], 
         read: [user._id] 
       },
-      uid: `${newProject.id}:${newOrg.id}`      
+      uid: `${id}:${org.id}`      
     });
-    org.save((err) => {
+    newProject.save((err) => {
       if (err) {
         M.log.error(err);
       }
-      chai.expect(err).to.equal(null);
-      done();
+      chai.assert(err === null);
     });
   });
 }
@@ -121,9 +125,8 @@ function createProject(done) {
 /**
  * Deletes the organization.
  */
-function deleteProject(done) {
-  Project.findOneAndRemove({ id: 'dthstr' }, (err) => {
-    chai.expect(err).to.equal(null);
-    done();
+function deleteProject() {
+  Project.findOneAndRemove({ id : 'empire' }, (err) => {
+    chai.assert(err === null);
   });
 }
