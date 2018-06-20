@@ -28,6 +28,7 @@
 
 const path = require('path');
 const chai = require('chai');
+const mongoose = require('mongoose');
 const request = require('request');
 
 const fname = module.filename;
