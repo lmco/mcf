@@ -654,11 +654,14 @@ api.route('/orgs/:orgid/members/:username/')
  *       501:
  *         description: Not Implemented
  */
-api.route('/orgs/:orgid/projects/:projectid/members/:role')
-  .get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
+api.route('/orgs/:orgid/projects/:projectid/members/')
+  .get(AuthController.authenticate.bind(AuthController), APIController.getProjectRoles)
+
+api.route('/orgs/:orgid/projects/:projectid/members/:username/')
+  .get(AuthController.authenticate.bind(AuthController), APIController.getProjectRole)
   .post(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
-  .put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-  .delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+  .put(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
+  .delete(AuthController.authenticate.bind(AuthController), APIController.deleteProjectRole);
 
 
 

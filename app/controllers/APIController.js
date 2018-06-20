@@ -425,7 +425,7 @@ class APIController {
    */
   static getProjects(req, res) {
     // Sanitize input
-    const orgid = M.lib.sanitization.html(req.params.orgid);
+    const orgid = M.lib.sani.html(req.params.orgid);
 
     // Call project find with user and organization ID
     ProjectController.findProjects(req.user, orgid)
@@ -436,7 +436,7 @@ class APIController {
     })
     .catch((err) => {
       // Log error and send error response
-      M.log.error(err);
+      M.log.error(err.stack);
       return res.status(500).send('Internal Server Error');
     });
   }
@@ -672,7 +672,68 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(project));
     })
     .catch((err) => {
-      M.log.error(err);
+      M.log.error(err.stack);
+      return res.status(500).send('Internal Server Error');
+    });
+  }
+
+  static getProjectRoles(req, res) {
+    if (!req.user) {
+      M.log.error('Request does not have a user.');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Sanitize Inputs
+    const orgID = M.lib.sani.html(req.params.orgid);
+    const projectID = M.lib.sani.html(req.params.projectid);
+
+    // Find Project
+    ProjectController.findProject(req.user, orgID, projectID)
+    .then((project) => {
+      const roleKeys = Object.keys(project.permissions);
+      const roles = {};
+
+      for (let i = 0; i < roleKeys.length; i++){
+        roles[roleKeys[i]] = project.permissions[roleKeys[i]]
+      }
+
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(roles));
+    })
+    .catch((findProjErr) => {
+        M.log.error(findProjErr.stack);
+        return res.status(500).send('Internal Server Error');
+    })
+  }
+
+  static getProjectRole(req, res) {
+    if (!req.user) {
+      M.log.error('Request does not have a user.');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Sanitize Inputs
+    const orgID = M.lib.sani.html(req.params.orgid);
+    const projectID = M.lib.sani.html(req.params.projectid);
+    const username = M.lib.sani.html(req.params.username);
+
+    // Find User to be set
+    UserController.findUser(username)
+    .then((user) => {
+      const roleKeys = Object.keys(user.proj);
+      const roles = {};
+
+      for (let i = 0; i < roleKeys.length; i++){
+        roles[roleKeys[i]] = user.proj[roleKeys[i]]
+      }
+
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(roles));
+    })
+
+    // Return and log error if caught
+    .catch((findUserErr) => {
+      M.log.error(findUserErr.stack);
       return res.status(500).send('Internal Server Error');
     });
   }
@@ -686,8 +747,8 @@ class APIController {
     // Sanitize Inputs
     const orgID = M.lib.sani.html(req.params.orgid);
     const projectID = M.lib.sani.html(req.params.projectid);
-    const username = M.lib.sani.html(req.body.username);
-    const permType = M.lib.sani.html(req.params.role);
+    const username = M.lib.sani.html(req.params.username);
+    const permType = M.lib.sani.html(req.body.role);
 
     // Find User to be set
     UserController.findUser(username)
@@ -706,11 +767,44 @@ class APIController {
       })
       // Return and log error if caught
       .catch((findUserErr) => {
-        M.log.error(findUserErr);
+        M.log.error(findUserErr.stack);
         return res.status(500).send('Internal Server Error');
       });
   }
 
+  static deleteProjectRole(req, res) {
+    if (!req.user) {
+      M.log.error('Request does not have a user.');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Sanitize Inputs
+    const orgID = M.lib.sani.html(req.params.orgid);
+    const projectID = M.lib.sani.html(req.params.projectid);
+    const username = M.lib.sani.html(req.params.username);
+    const permType = 'REMOVE_ALL';
+
+    // Find User to be set
+    UserController.findUser(username)
+      .then((user) => {
+        // Set project permissions
+        ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
+          .then((project) => {
+            res.header('Content-Type', 'application/json');
+            return res.status(200).send(APIController.formatJSON(project));
+          })
+        // Return and log error if caught
+          .catch((setPermErr) => {
+            M.log.error(setPermErr.stack);
+            return res.status(500).send('Internal Server Error');
+          });
+      })
+      // Return and log error if caught
+      .catch((findUserErr) => {
+        M.log.error(findUserErr.stack);
+        return res.status(500).send('Internal Server Error');
+      });
+  }
 
   /****************************************************************************
    * User API Endpoints

@@ -198,25 +198,6 @@ const UserSchema = new mongoose.Schema({
     }
   }
 
-
-  /**
-   * This holds a reference to the organizations that the user has
-   * either write or admin permissions to.
-   */
-  // orgPermissions: {
-  //  write: [{
-  //    type: mongoose.Schema.Types.ObjectId,
-  //    ref: 'Organization'
-  //  }],
-
-  //  admin: [{
-  //    type: mongoose.Schema.Types.ObjectId,
-  //    ref: 'Organization'
-  //  }]
-
-  // }
-
-  // orgs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Organization' }]
 });
 
 
@@ -231,7 +212,7 @@ const UserSchema = new mongoose.Schema({
 
 /**
  * This is the list of orgs the user has read access to.
- * @type {String}
+ * @type {Organization}
  */
 UserSchema.virtual('orgs.read', {
   ref: 'Organization',
@@ -242,7 +223,7 @@ UserSchema.virtual('orgs.read', {
 
 /**
  * This is the list of orgs the user has write access to.
- * @type {String}
+ * @type {Organization}
  */
 UserSchema.virtual('orgs.write', {
   ref: 'Organization',
@@ -253,7 +234,7 @@ UserSchema.virtual('orgs.write', {
 
 /**
  * This is the list of orgs the user has admin access to.
- * @type {String}
+ * @type {Organization}
  */
 UserSchema.virtual('orgs.admin', {
   ref: 'Organization',
@@ -263,77 +244,28 @@ UserSchema.virtual('orgs.admin', {
 });
 
 
-/**
- * This populates an array containing the organizations the user is a member of.
- * NOTE: Commented out on 6/19 due to decision that members was no longer needed
- */
-// UserSchema.virtual('orgs.members').get(function() {
-//   // Grab the write and admin permissions lists
-//   const read = this.orgs.read;
-//   const write = this.orgs.write;
-//   const admin = this.orgs.admin;
 
-//   // set member to a copy of write
-//   const member = write.slice();
+UserSchema.virtual('proj.read', {
+  ref: 'Project',
+  localField: '_id',
+  foreignField: 'permissions.read',
+  justOne: false
+});
 
-//   // Add admins that aren't already in the member list,
-//   // creating a unique list of members
-//   for (let i = 0; i < admin.length; i++) {
-//     if (!member.includes(admin[i])) {
-//       member.push(admin[i]);
-//     }
-//   }
-//   return member;
-// });
+UserSchema.virtual('proj.write', {
+  ref: 'Project',
+  localField: '_id',
+  foreignField: 'permissions.write',
+  justOne: false
+});
 
-// UserSchema.virtual('proj.read', {
-//   ref: 'Project',
-//   localField: '_id',
-//   foreignField: 'permissions.read',
-//   justOne: false
-// });
+UserSchema.virtual('proj.admin', {
+  ref: 'Project',
+  localField: '_id',
+  foreignField: 'permissions.admin',
+  justOne: false
+});
 
-// UserSchema.virtual('proj.write', {
-//   ref: 'Project',
-//   localField: '_id',
-//   foreignField: 'permissions.write',
-//   justOne: false
-// });
-
-// UserSchema.virtual('proj.admin', {
-//   ref: 'Project',
-//   localField: '_id',
-//   foreignField: 'permissions.admin',
-//   justOne: false
-// });
-
-
-// NOTE: Commented out on 6/19 due to decision that members was no longer needed
-
-// UserSchema.virtual('proj.members').get(function() {
-//   // Grab the write and admin permissions lists
-//   const read = this.proj.read;
-//   const write = this.proj.write;
-//   const admin = this.proj.admin;
-
-//   // set member to a copy of write
-//   const member = read.slice();
-
-//   // Add admins that aren't already in the member list,
-//   // creating a unique list of members
-//   for (let i = 0; i < write.length; i++) {
-//     if (!member.includes(write[i])) {
-//       member.push(write[i]);
-//     }
-//   }
-
-//   for (let i = 0; i < admin.length; i++) {
-//     if (!member.includes(admin[i])) {
-//       member.push(admin[i]);
-//     }
-//   }
-//   return member;
-// });
 
 /* eslint-enable prefer-arrow-callback */
 
