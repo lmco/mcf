@@ -44,7 +44,7 @@ app.use(expressLayouts);
 // Logging Middleware
 app.use((req, res, next) => {
   const username = (req.user) ? req.user.username : 'anonymous';
-  M.log.info(`"${req.originalUrl}" requested by ${username}`);
+  M.log.info(`${req.method} "${req.originalUrl}" requested by ${username}`);
   next();
 });
 

@@ -25,6 +25,7 @@ const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.load('models/Organization');
 const Project = M.load('models/Project');
+const User = M.load('models/User');
 
 // This is so the same parent org can be references across test functions
 let org = null;
@@ -33,38 +34,52 @@ let org = null;
  *       Main
  *------------------------------------*/
 
-describe(name, () => {
-  // runs before all tests in this block
-  before(() => {
+// runs before all tests in this block
+
+describe(name, function() {
+  before(function() {
     const db = M.load('lib/db');
     db.connect();
-
-    // Create a parent organization before creating any projects
-    org = new Org({
-      id: 'empire',
-      name: 'Galactic Empire'
-    });
-    org.save((err) => {
-      if (err) {
-        M.log.error(err);
-      }
-      chai.expect(err).to.equal(null);
+    return new Promise(function(resolve) {
+      User.findOne({ username: 'mbee' }, function(errUser, user) {
+        // Check if error occured
+        if (errUser) {
+          M.log.error(errUser);
+        }
+        // Otherwise,
+        // Create a parent organization before creating any projects
+        org = new Org({
+          id: 'empire',
+          name: 'Galactic Empire',
+          permissions: {
+            admin: [user._id],
+            write: [user._id],
+            read: [user._id]
+          }
+        });
+        org.save(function(err) {
+          if (err) {
+            M.log.error(err);
+          }
+          resolve();
+        });
+      });
     });
   });
 
-  // runs after all tests in this block
-  after(() => {
-    Org.findOneAndRemove({ id: org.id }, (err) => {
+  // runs after all the tests are done
+  after(function() {
+    Org.findOneAndRemove({ id: org.id }, function(err) {
       if (err) {
         M.log.error(err);
       }
-      chai.expect(err).to.equal(null);
+      chai.assert(err === null);
       mongoose.connection.close();
     });
   });
 
-  it('should create an project', createProject);
-  it('should delete an project', deleteProject);
+  it('should create an project', createProject).timeout(3000);
+  it('should delete an project', deleteProject).timeout(3000);
 });
 
 
@@ -77,17 +92,32 @@ describe(name, () => {
  * Creates a user using the User model.
  */
 function createProject(done) {
-  const project = new Project({
-    id: 'dthstr',
-    name: 'Death Star',
-    orgId: org.id
-  });
-  project.save((err) => {
-    if (err) {
-      M.log.error(err);
+  User.findOne({ username: 'mbee' }, function(errUser, user) {
+    // Check if error occured
+    if (errUser) {
+      M.log.error(errUser);
     }
-    chai.expect(err).to.equal(null);
-    done();
+    // Otherwise,
+    // Create a project
+    const id = 'dthstr';
+    const newProject = new Project({
+      id: id,
+      name: 'Death Star',
+      org: org._id,
+      permissions: {
+        admin: [user._id],
+        write: [user._id],
+        read: [user._id]
+      },
+      uid: `${id}:${org.id}`
+    });
+    newProject.save(function(err) {
+      if (err) {
+        M.log.error(err);
+      }
+      chai.expect(err).to.equal(null);
+      done();
+    });
   });
 }
 
@@ -96,7 +126,7 @@ function createProject(done) {
  * Deletes the organization.
  */
 function deleteProject(done) {
-  Project.findOneAndRemove({ id: 'dthstr' }, (err) => {
+  Project.findOneAndRemove({ id: 'dthstr' }, function(err) {
     chai.expect(err).to.equal(null);
     done();
   });
