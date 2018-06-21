@@ -61,20 +61,21 @@ describe(name, function() {
           if (err) {
             M.log.error(err);
           }
-          resolve();
+          return resolve();
         });
       });
     });
   });
 
   // runs after all the tests are done
-  after(function() {
+  after(function(done) {
     Org.findOneAndRemove({ id: org.id }, function(err) {
       if (err) {
         M.log.error(err);
       }
       chai.assert(err === null);
       mongoose.connection.close();
+      done()
     });
   });
 

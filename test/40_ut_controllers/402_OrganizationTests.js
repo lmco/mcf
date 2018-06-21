@@ -40,7 +40,7 @@ describe(name, () => {
   // NOTE: Changed from arrow function to allow for use of
   // this so that a larger timeout could be set
   before(function(done) {
-    this.timeout(10000);
+    this.timeout(5000);
     const db = M.load('lib/db');
     db.connect();
 
@@ -54,7 +54,7 @@ describe(name, () => {
     });
     user.save((err) => {
       chai.expect(err).to.equal(null);
-      console.log('first save');
+
       // A second non-admin user
       newUser = new User({
         username: 'msmith',
@@ -65,7 +65,7 @@ describe(name, () => {
       });
       newUser.save((error) => {
         chai.expect(error).to.equal(null);
-        console.log('second save');
+
         // Create the organization
         org = new Org({
           id: 'council',
@@ -77,11 +77,8 @@ describe(name, () => {
           }
         });
 
-        console.log('org object created')
         org.save((orgErr) => {
-          console.log('chai expect save org')
           chai.expect(orgErr).to.equal(null);
-          console.log('third save');
           done();
         });
       });
@@ -114,19 +111,19 @@ describe(name, () => {
     });
   });
 
-  it('should create a new org', addNewOrg).timeout(10000);
-  it('should find an existing org', findExistingOrg).timeout(10000);
-  it('should find all orgs a user has access to', findAllExistingOrgs).timeout(10000);
-  it('should delete an existing org', deleteExistingOrg).timeout(10000);
-  it('should add a user to an org', addUserRole).timeout(10000);
-  it('should get a users roles within an org', getUserRoles).timeout(10000);
-  it('should get all members with permissions in an org and their permissions', getMembers).timeout(10000);
-  it('should remove a users role within an org', removeUserRole).timeout(10000);
-  it('should throw an error', getOldUserRoles).timeout(10000);
-  it('should throw an error', changeOwnRole).timeout(10000);
-  it('should throw an error', nonAdminChangeRole).timeout(10000);
-  it('should throw an error', invalidPermission).timeout(10000);
-  it('should throw an error', nonAdminGetPermissions).timeout(10000);
+  it('should create a new org', addNewOrg).timeout(1000);
+  it('should find an existing org', findExistingOrg).timeout(1000);
+  it('should find all orgs a user has access to', findAllExistingOrgs).timeout(1000);
+  it('should delete an existing org', deleteExistingOrg).timeout(1000);
+  it('should add a user to an org', addUserRole).timeout(1000);
+  it('should get a users roles within an org', getUserRoles).timeout(1000);
+  it('should get all members with permissions in an org and their permissions', getMembers).timeout(1000);
+  it('should remove a users role within an org', removeUserRole).timeout(1000);
+  it('should throw an error', getOldUserRoles).timeout(1000);
+  it('should throw an error', changeOwnRole).timeout(1000);
+  it('should throw an error', nonAdminChangeRole).timeout(1000);
+  it('should throw an error', invalidPermission).timeout(1000);
+  it('should throw an error', nonAdminGetPermissions).timeout(1000);
 });
 
 
