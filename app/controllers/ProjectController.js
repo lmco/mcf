@@ -71,7 +71,7 @@ class ProjectController {
           return reject(new Error('User does not have permissions'));
         }
 
-        popQuery = 'org'
+        const popQuery = 'org'
 
         // Search for project
         Project.find({ 'org': org._id, 'permissions.read': reqUser._id})
@@ -419,6 +419,60 @@ class ProjectController {
           }
           return resolve(projectRemoved);
         });
+      });
+    });
+  }
+
+  static findAllPermissions(reqUser, organizationID, ProjectID) {
+    return new Promise((resolve, reject) => {
+      const orgID = M.lib.sani.html(organizationID);
+      const projectID = M.lib.sani.html(ProjectID);
+
+      // Find Project
+      ProjectController.findProject(reqUser, orgID, projectID)
+      .then((project) => {
+        const permissionLevels = project.getPermissionLevels();
+        const memberList = project.permissions[permissionLevels[1]].map(u => u.username);
+        let permissionsList = [];
+
+        let roleList = {};
+
+        for (let i = 0; i < memberList.length; i++){
+          roleList[memberList[i]] = {};
+          for (let j = 1; j < permissionLevels.length; j++){
+            permissionsList = project.permissions[permissionLevels[j]].map(u => u.username);
+            if(permissionsList.includes(memberList[i])){
+              roleList[memberList[i]][permissionLevels[j]] = true;
+            }
+            else {
+              roleList[memberList[i]][permissionLevels[j]] = false;
+            }
+          }
+        }
+        return resolve(roleList)
+      })
+      .catch((findProjectErr) => {
+        return reject(findProjectErr)
+      });
+    });
+  }
+
+  static findPermissions(reqUser, organizationID, ProjectID, user) {
+    return new Promise((resolve, reject) => {
+      const orgID = M.lib.sani.html(organizationID);
+      const projectID = M.lib.sani.html(ProjectID);
+
+      // Find Project
+      ProjectController.findAllPermissions(reqUser, orgID, projectID)
+      .then((permissionList) => {
+        if (!permissionList.hasOwnProperty(user.username)) {
+          return reject(new Error('User not found.'))
+        }
+
+        return resolve(permissionList[user.username]);
+      })
+      .catch((findPermissionsErr) => {
+        return reject(findPermissionsErr)
       });
     });
   }

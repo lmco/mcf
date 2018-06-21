@@ -771,17 +771,10 @@ class APIController {
     const projectID = M.lib.sani.html(req.params.projectid);
 
     // Find Project
-    ProjectController.findProject(req.user, orgID, projectID)
-    .then((project) => {
-      const roleKeys = Object.keys(project.permissions);
-      const roles = {};
-
-      for (let i = 0; i < roleKeys.length; i++){
-        roles[roleKeys[i]] = project.permissions[roleKeys[i]]
-      }
-
+    ProjectController.findAllPermissions(req.user, orgID, projectID)
+    .then((permissions) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(roles));
+      return res.status(200).send(APIController.formatJSON(permissions));
     })
     .catch((findProjErr) => {
         M.log.error(findProjErr.stack);
@@ -800,27 +793,25 @@ class APIController {
     const projectID = M.lib.sani.html(req.params.projectid);
     const username = M.lib.sani.html(req.params.username);
 
-    // Find User to be set
+    // Find User
     UserController.findUser(username)
     .then((user) => {
-      const roleKeys = Object.keys(user.proj);
-      const roles = {};
-
-      for (let i = 0; i < roleKeys.length; i++){
-        if (!RegExp('^[$]').test(roleKeys[i])){
-          roles[roleKeys[i]] = user.proj[roleKeys[i]]
-        }
-      }
-
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(roles));
+      // Find Project
+      ProjectController.findPermissions(req.user, orgID, projectID, user)
+      .then((permissions) => {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(permissions));
+      })
+      .catch((findProjErr) => {
+          M.log.error(findProjErr.stack);
+          return res.status(500).send('Internal Server Error');
+      })
+    })
+    .catch((findUserErr) => {
+        M.log.error(findUserErr.stack);
+        return res.status(500).send('Internal Server Error');
     })
 
-    // Return and log error if caught
-    .catch((findUserErr) => {
-      M.log.error(findUserErr.stack);
-      return res.status(500).send('Internal Server Error');
-    });
   }
 
   static postProjectRole(req, res) {
