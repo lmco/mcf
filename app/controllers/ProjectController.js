@@ -629,19 +629,19 @@ class ProjectController {
             })
             .catch((setOrgPermErr) => {
               return reject(setOrgPermErr)
-            });
+            }); // Closing Set Permissions
           })
           .catch((findOrgPermErr) => {
             return reject(findOrgPermErr)
-          });
-        });
+          }); // Closing find org permissions
+        }); // Closing Project Update
       })
       .catch((findProjErr) => {
         return reject(findProjErr)
-      });
-    });
-  });
-}
+      }); // Closing projectFind
+    }); // Closing promise
+  } // Closing function
+} // Closing class
 
 // Expose `ProjectController`
 module.exports = ProjectController;
