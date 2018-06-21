@@ -581,7 +581,7 @@ class ProjectController {
             return reject(saveProjErr);
           }
           // Check if user has org read permissions
-          OrgController.findPermissions(reqUser, orgID, setUser)
+          OrgController.findPermissions(reqUser, setUser, orgID)
           .then((userOrgPermissions) => {
             if (userOrgPermissions.read) {
               return resolve(projectSaved);
@@ -600,18 +600,12 @@ class ProjectController {
           .catch((findOrgPermErr) => {
             return reject(findOrgPermErr)
           });
-
-
         });
-
       })
 
       .catch((findProjErr) = => {
         return reject(findProjErr)
       })
-
-
-
 
     });
   }
