@@ -56,6 +56,7 @@ let user = null;
 
 describe(name, function() {
   before(function(done) {
+    this.timeout(4000);
     const db = M.load('lib/db');
     db.connect();
 
@@ -86,6 +87,7 @@ describe(name, function() {
   });
   // runs after all the tests are done
   after(function(done) {
+    this.timeout(4000);
     Org.findOneAndRemove({ id: 'hogwarts' }, (err) => {
       if (err) {
         M.log.error(err);
