@@ -602,7 +602,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *		   description: Internal Server Error - Something went wront on the 
  *		                server side. Details may exist in the application logs. 
  */
-api.route('/orgs/:orgid/members/')
+api.route('/orgs/:orgid/members')
 .get(AuthController.authenticate.bind(AuthController), APIController.getAllOrgRoles);
 
 /**
@@ -718,7 +718,7 @@ api.route('/orgs/:orgid/members/')
 
 // 6/20/18
 // NOTE: POST and PUT have the same functionality, thus they map to the same route.
-api.route('/orgs/:orgid/members/:username/')
+api.route('/orgs/:orgid/members/:username')
 .get(AuthController.authenticate.bind(AuthController), APIController.getOrgRole)
 .post(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
 .put(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
