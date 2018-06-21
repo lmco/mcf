@@ -842,7 +842,7 @@ class APIController {
       })
       // Return and log error if caught
       .catch((setPermErr) => {
-        M.log.error(setPermErr);
+        M.log.error(setPermErr.stack);
         return res.status(500).send('Internal Server Error');
       });
     })

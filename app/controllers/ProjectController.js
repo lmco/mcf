@@ -541,9 +541,9 @@ class ProjectController {
         }
 
         // Error Check - Do not allow admin user to downgrade their permissions
-        //if (reqUser.username === setUser.username && permType !== permissionLevels[-1]) {
-        //  return reject(new Error('User cannot remove their own admin privlages.'));
-        //}
+        if (reqUser.username === setUser.username && permType !== permissionLevels[-1]) {
+          return reject(new Error('User cannot remove their own admin privlages.'));
+        }
 
         // Grab the index of the permission type
         const permissionLevel = permissionLevels.indexOf(permType);
@@ -574,7 +574,7 @@ class ProjectController {
 
         // Update project
         Project.findOneAndUpdate(
-        { uid: projUID }, 
+        { uid: `${orgID}:${projID}` }, 
         pushPullRoles, 
         (saveProjErr, projectSaved) => {
           if (saveProjErr) {
@@ -603,7 +603,7 @@ class ProjectController {
         });
       })
 
-      .catch((findProjErr) = => {
+      .catch((findProjErr) => {
         return reject(findProjErr)
       })
 
