@@ -345,7 +345,12 @@ class OrganizationController {
   static findPermissions(user, username, organizationID) {
     return new Promise((resolve, reject) => {
       OrganizationController.findAllPermissions(user, organizationID)
-      .then(users => resolve(users[username.username]))
+      .then(users => {
+        if (users[username.username] === undefined) {
+          return reject(new Error("User is not a member of the organization."));
+        }
+        return resolve(users[username.username]);
+      })
       .catch(error => reject(error));
     });
   }
@@ -375,7 +380,7 @@ class OrganizationController {
       if (reqUser._id.toString() === setUser._id.toString()) {
         return reject(new Error('User cannot change their own permissions.'));
       }
-      
+
       // Ensure organizationID is a string
       if (typeof organizationID !== 'string') {
         M.log.verbose('Organization ID is not a string');
