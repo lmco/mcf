@@ -347,7 +347,7 @@ class OrganizationController {
       OrganizationController.findAllPermissions(user, organizationID)
       .then(users => {
         if (users[username.username] === undefined) {
-          return reject(new Error("User is not a member of the organization."));
+          return reject(new Error('User is not a member of the organization.'));
         }
         return resolve(users[username.username]);
       })
@@ -402,7 +402,7 @@ class OrganizationController {
         // Ensure user is an admin within the organization
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!reqUser.admin || !orgAdmins.includes(reqUser._id.toString())) {
-          M.log.verbose('User cannot chnage permissions');
+          M.log.verbose('User cannot change permissions');
           return reject(new Error('User cannot change permissions.'));
         }
 

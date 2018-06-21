@@ -119,9 +119,11 @@ describe(name, () => {
   it('should get a users roles within an org', getUserRoles).timeout(2500);
   it('should get all members with permissions in an org and their permissions', getMembers).timeout(2500);
   it('should remove a users role within an org', removeUserRole).timeout(2500);
+  it('should throw an error', getOldUserRoles).timeout(2500);
   it('should throw an error', changeOwnRole).timeout(2500);
   it('should throw an error', nonAdminChangeRole).timeout(2500);
   it('should throw an error', invalidPermission).timeout(2500);
+  it('should throw an error', nonAdminGetPermissions).timeout(2500);
 });
 
 
@@ -272,6 +274,21 @@ function removeUserRole(done) {
 }
 
 /**
+ * Tests retrieving the roles a specific user has
+ */
+function getOldUserRoles(done) {
+  OrgController.findPermissions(user, newUser, org.id.toString())
+  .then((roles) => {
+    chai.fail('The user doesnt exist in the org, this should have given an error.');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.message).to.equal('User is not a member of the organization.');
+    done();
+  });
+}
+
+/**
  * Try to change the same users role
  */
 function changeOwnRole(done) {
@@ -312,6 +329,21 @@ function invalidPermission(done) {
   })
   .catch((error) => {
     chai.expect(error.message).to.equal('The permission enetered is not a valid permission.');
+    done();
+  });
+}
+
+/*
+ * Non-admin attempt to retrieve permissions
+ */
+function nonAdminGetPermissions(done) {
+  OrgController.findAllPermissions(newUser, 'council')
+  .then((members) => {
+    chai.fail('User doesnt have the right permissions, they shouldnt be able to retrieve any.');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.message).to.equal('User does not have permissions to retreive others permissions.');
     done();
   });
 }
