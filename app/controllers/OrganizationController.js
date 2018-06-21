@@ -45,15 +45,15 @@ class OrganizationController {
     return new Promise((resolve, reject) => {
       const userID = M.lib.sani.sanitize(user._id);
       Organization.find({ 'permissions.read': userID })
-        .populate('projects read permissions.write permissions.admin')
-        .exec((err, orgs) => {
+      .populate('projects read permissions.write permissions.admin')
+      .exec((err, orgs) => {
         // If error occurs, return it
-          if (err) {
-            return reject(err);
-          }
-          // Resolve the list of orgs
-          return resolve(orgs);
-        });
+        if (err) {
+          return reject(err);
+        }
+        // Resolve the list of orgs
+        return resolve(orgs);
+      });
     });
   }
 
@@ -85,7 +85,7 @@ class OrganizationController {
 
       const orgID = M.lib.sani.sanitize(organizationID);
       Organization.findOne({ id: orgID })
-      .populate('projects permissions.read permissions.write permissions.admin') 
+      .populate('projects permissions.read permissions.write permissions.admin')
       .exec((err, org) => {
         // If error occurs, return it
         if (err) {
@@ -113,7 +113,7 @@ class OrganizationController {
 
 
   /**
-   * @description  This function takes a user and dictionary containing 
+   * @description  This function takes a user and dictionary containing
    * the org id and name and creates a new organization.
    *
    * @example
@@ -313,7 +313,7 @@ class OrganizationController {
       M.log.verbose('Attempting delete of', orgID, '...');
 
       // Do the deletion
-      Organization.findOneAndRemove({id: orgID})
+      Organization.findOneAndRemove({ id: orgID })
       .populate()
       .exec((err, org) => {
         if (err) {
@@ -325,7 +325,7 @@ class OrganizationController {
   }
 
   /**
-   * This function takes a user, second user and orgID and returns the 
+   * This function takes a user, second user and orgID and returns the
    * permissions the second user has within the org
    *
    * @example
@@ -345,12 +345,8 @@ class OrganizationController {
   static getUserPermissions(user, username, organizationID) {
     return new Promise((resolve, reject) => {
       OrganizationController.getAllUsersPermissions(user, organizationID)
-      .then((users) => {
-        return resolve(users[username.username]);
-      })
-      .catch((error) => {
-        return reject(error);
-      })
+      .then(users => resolve(users[username.username]))
+      .catch(error => reject(error));
     });
   }
 
@@ -392,7 +388,7 @@ class OrganizationController {
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
-      Organization.findOne({id: orgID})
+      Organization.findOne({ id: orgID })
       .populate()
       .exec((err, org) => {
         if (err) {
@@ -454,7 +450,7 @@ class OrganizationController {
 
   /**
    * This function takes a user and ordID and returns the permissions
-   * object, displaying the users who have those permissions 
+   * object, displaying the users who have those permissions
    *
    * @example
    * OrganizationController.getUsersWithPermissions(Austin, 'mbee')
@@ -482,7 +478,7 @@ class OrganizationController {
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
-      const returnDict = {}
+      const returnDict = {};
 
       // Find the org
       OrganizationController.findOrg(user, orgID)
@@ -491,24 +487,20 @@ class OrganizationController {
 
         // Loop through each user in the org
         users.forEach((u) => {
-          returnDict[u.username] = {}
+          returnDict[u.username] = {};
 
           // Loop through each type of permission for each user
           org.getPermissionLevels().forEach((role) => {
             if (role !== 'REMOVE_ALL') {
-
               // Store whether each permission is given to the user or not in a dictionary
               const permVals = org.permissions[role].map(v => v._id.toString());
-              returnDict[u.username][role] = permVals.includes(u._id.toString())
+              returnDict[u.username][role] = permVals.includes(u._id.toString());
             }
           });
         });
         return resolve(returnDict);
       })
-      .catch((error) => {
-        console.log(error)
-        return reject(error);
-      });
+      .catch(error => reject(error));
     });
   }
 

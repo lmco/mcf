@@ -373,7 +373,7 @@ class APIController {
 
   /**
    * GET /api/orgs/:orgid/members/:username
-   * 
+   *
    * @description  Takes an orgid and username in the URI and returns
    * a list of roles which the user has within the organization
    */
@@ -386,21 +386,21 @@ class APIController {
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
-      .then((user) => {
-        OrgController.getUserPermissions(req.user, user, orgID)
-          .then((roles) => {
-            res.header('Content-Type', 'application/json');
-            return res.send(APIController.formatJSON(roles));
-          })
-          .catch((error) => {
-            M.log.warn(error);
-            return res.status(500).send('Internal Server Error');
-          });
+    .then((user) => {
+      OrgController.getUserPermissions(req.user, user, orgID)
+      .then((roles) => {
+        res.header('Content-Type', 'application/json');
+        return res.send(APIController.formatJSON(roles));
       })
-      .catch((err) => {
-        M.log.error(err);
+      .catch((error) => {
+        M.log.warn(error);
         return res.status(500).send('Internal Server Error');
       });
+    })
+    .catch((err) => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
   /**
@@ -425,27 +425,27 @@ class APIController {
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
-      .then((user) => {
-        OrgController.setUserPermissions(req.user, user, orgID, req.body.role)
-          .then((org) => {
-            res.header('Content-Type', 'application/json');
-            return res.send(APIController.formatJSON(org.getPublicData()));
-          })
-          .catch((error) => {
-            M.log.warn(error);
-            return res.status(500).send('Internal Server Error');
-          });
+    .then((user) => {
+      OrgController.setUserPermissions(req.user, user, orgID, req.body.role)
+      .then((org) => {
+        res.header('Content-Type', 'application/json');
+        return res.send(APIController.formatJSON(org.getPublicData()));
       })
-      .catch((err) => {
-        M.log.error(err);
+      .catch((error) => {
+        M.log.warn(error);
         return res.status(500).send('Internal Server Error');
       });
+    })
+    .catch((err) => {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
   /**
    * DELETE /api/orgs/:orgid/members/:username
    *
-   * @description  Takes an orgid and username in the URI and removes the 
+   * @description  Takes an orgid and username in the URI and removes the
    * given user from all permissions within the organization.
    */
   static deleteOrgRole(req, res) {
@@ -459,14 +459,14 @@ class APIController {
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
     .then((user) => {
       OrgController.setUserPermissions(req.user, user, orgID, 'REMOVE_ALL')
-        .then((org) => {
-          res.header('Content-Type', 'application/json');
-          return res.send(APIController.formatJSON(org.getPublicData()));
-        })
-        .catch((error) => {
-          M.log.warn(error);
-          return res.status(500).send('Internal Server Error');
-        });
+      .then((org) => {
+        res.header('Content-Type', 'application/json');
+        return res.send(APIController.formatJSON(org.getPublicData()));
+      })
+      .catch((error) => {
+        M.log.warn(error);
+        return res.status(500).send('Internal Server Error');
+      });
     })
     .catch((err) => {
       M.log.error(err);
@@ -474,7 +474,7 @@ class APIController {
     });
   }
 
-   static getAllOrgRoles(req, res) {
+  static getAllOrgRoles(req, res) {
     // If no user in the request
     if (!req.user) {
       M.log.error('Request does not have a user.');
@@ -491,7 +491,7 @@ class APIController {
       M.log.warn(error);
       return res.status(500).send('Internal Server Error');
     });
-   }
+  }
 
 
   /****************************************************************************
@@ -777,9 +777,9 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(permissions));
     })
     .catch((findProjErr) => {
-        M.log.error(findProjErr.stack);
-        return res.status(500).send('Internal Server Error');
-    })
+      M.log.error(findProjErr.stack);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
   static getProjectRole(req, res) {
@@ -803,15 +803,14 @@ class APIController {
         return res.status(200).send(APIController.formatJSON(permissions));
       })
       .catch((findProjErr) => {
-          M.log.error(findProjErr.stack);
-          return res.status(500).send('Internal Server Error');
-      })
+        M.log.error(findProjErr.stack);
+        return res.status(500).send('Internal Server Error');
+      });
     })
     .catch((findUserErr) => {
-        M.log.error(findUserErr.stack);
-        return res.status(500).send('Internal Server Error');
-    })
-
+      M.log.error(findUserErr.stack);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
   static postProjectRole(req, res) {
@@ -828,24 +827,24 @@ class APIController {
 
     // Find User to be set
     UserController.findUser(username)
-      .then((user) => {
-        // Set project permissions
-        ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
-          .then((project) => {
-            res.header('Content-Type', 'application/json');
-            return res.status(200).send(APIController.formatJSON(project));
-          })
-        // Return and log error if caught
-          .catch((setPermErr) => {
-            M.log.error(setPermErr);
-            return res.status(500).send('Internal Server Error');
-          });
+    .then((user) => {
+      // Set project permissions
+      ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
+      .then((project) => {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(project));
       })
       // Return and log error if caught
-      .catch((findUserErr) => {
-        M.log.error(findUserErr.stack);
+      .catch((setPermErr) => {
+        M.log.error(setPermErr);
         return res.status(500).send('Internal Server Error');
       });
+    })
+    // Return and log error if caught
+    .catch((findUserErr) => {
+      M.log.error(findUserErr.stack);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
   static deleteProjectRole(req, res) {
@@ -862,24 +861,24 @@ class APIController {
 
     // Find User to be set
     UserController.findUser(username)
-      .then((user) => {
-        // Set project permissions
-        ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
-          .then((project) => {
-            res.header('Content-Type', 'application/json');
-            return res.status(200).send(APIController.formatJSON(project));
-          })
-        // Return and log error if caught
-          .catch((setPermErr) => {
-            M.log.error(setPermErr.stack);
-            return res.status(500).send('Internal Server Error');
-          });
+    .then((user) => {
+      // Set project permissions
+      ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
+      .then((project) => {
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(APIController.formatJSON(project));
       })
       // Return and log error if caught
-      .catch((findUserErr) => {
-        M.log.error(findUserErr.stack);
+      .catch((setPermErr) => {
+        M.log.error(setPermErr.stack);
         return res.status(500).send('Internal Server Error');
       });
+    })
+    // Return and log error if caught
+    .catch((findUserErr) => {
+      M.log.error(findUserErr.stack);
+      return res.status(500).send('Internal Server Error');
+    });
   }
 
   /****************************************************************************

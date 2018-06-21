@@ -53,9 +53,6 @@ describe(name, () => {
       admin: true
     });
     user.save((err) => {
-      if (err) {
-        console.log(err);
-      }
       chai.expect(err).to.equal(null);
 
       // A second non-admin user
@@ -67,9 +64,6 @@ describe(name, () => {
         admin: false
       });
       newUser.save((error) => {
-        if (error) {
-          console.log(error);
-        }
         chai.expect(error).to.equal(null);
 
         // Create the organization
@@ -83,9 +77,6 @@ describe(name, () => {
           }
         });
         org.save((orgErr) => {
-          if (orgErr) {
-            console.log(orgErr);
-          }
           chai.expect(orgErr).to.equal(null);
 
           done();
@@ -142,17 +133,17 @@ describe(name, () => {
  */
 function addNewOrg(done) {
   const orgData = {
-    'id': 'tv',
-    'name': 'Intergalactic Cable'
+    id: 'tv',
+    name: 'Intergalactic Cable'
   };
   OrgController.createOrg(user, orgData)
-  .then((org) => {
-    chai.expect(org.id).to.equal('tv');
-    chai.expect(org.name).to.equal('Intergalactic Cable');
-    chai.expect(org.permissions.read).to.include(user._id.toString());
-    chai.expect(org.permissions.write).to.include(user._id.toString());
-    chai.expect(org.permissions.admin).to.include(user._id.toString());
-    done()
+  .then((retOrg) => {
+    chai.expect(retOrg.id).to.equal('tv');
+    chai.expect(retOrg.name).to.equal('Intergalactic Cable');
+    chai.expect(retOrg.permissions.read).to.include(user._id.toString());
+    chai.expect(retOrg.permissions.write).to.include(user._id.toString());
+    chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
+    done();
   })
   .catch((error) => {
     chai.expect(error).to.equal(null);
@@ -164,8 +155,8 @@ function addNewOrg(done) {
  */
 function findExistingOrg(done) {
   OrgController.findOrg(user, 'tv')
-  .then((org) => {
-    chai.expect(org.name).to.equal('Intergalactic Cable');
+  .then((retOrg) => {
+    chai.expect(retOrg.name).to.equal('Intergalactic Cable');
     done();
   })
   .catch((error) => {
@@ -179,14 +170,14 @@ function findExistingOrg(done) {
  */
 function deleteExistingOrg(done) {
   OrgController.removeOrg(user, 'tv')
-  .then((org) => {
+  .then((retOrg) => {
     OrgController.findOrg(user, 'tv')
     .then((orgTwo) => {
       chai.expect(orgTwo).to.equal(null);
       done();
     })
     .catch((error) => {
-      chai.expect(error.message).to.equal("Org not found.");
+      chai.expect(error.message).to.equal('Org not found.');
       done();
     });
   })
@@ -202,15 +193,15 @@ function deleteExistingOrg(done) {
 function addUserRole(done) {
   // Increase a users role
   OrgController.setUserPermissions(user, newUser, org.id.toString(), 'write')
-    .then((retOrg) => {
-      chai.expect(retOrg.permissions.write).to.include(newUser._id.toString());
-      chai.expect(retOrg.permissions.read).to.include(newUser._id.toString());
-      chai.expect(org.permissions.admin).to.not.include(newUser._id.toString());
-      done();
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  .then((retOrg) => {
+    chai.expect(retOrg.permissions.write).to.include(newUser._id.toString());
+    chai.expect(retOrg.permissions.read).to.include(newUser._id.toString());
+    chai.expect(org.permissions.admin).to.not.include(newUser._id.toString());
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+  });
 }
 
 /**
@@ -218,15 +209,15 @@ function addUserRole(done) {
  */
 function getUserRoles(done) {
   OrgController.getUserPermissions(user, newUser, org.id.toString())
-    .then((roles) => {
-      chai.expect(roles["read"]).to.equal(true);
-      chai.expect(roles["write"]).to.equal(true);
-      chai.expect(roles["admin"]).to.equal(false);
-      done();
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  .then((roles) => {
+    chai.expect(roles.read).to.equal(true);
+    chai.expect(roles.write).to.equal(true);
+    chai.expect(roles.admin).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+  });
 }
 
 /**
@@ -234,34 +225,34 @@ function getUserRoles(done) {
  */
 function getMembers(done) {
   OrgController.getAllUsersPermissions(user, org.id.toString())
-    .then((members) => {
-      chai.expect(members["msmith"]["read"]).to.equal(true);
-      chai.expect(members["msmith"]["write"]).to.equal(true);
-      chai.expect(members["msmith"]["admin"]).to.equal(false);
-      chai.expect(members["rsanchez"]["read"]).to.equal(true);
-      chai.expect(members["rsanchez"]["write"]).to.equal(true);
-      chai.expect(members["rsanchez"]["admin"]).to.equal(true);
-      done()
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-} 
+  .then((members) => {
+    chai.expect(members.msmith.read).to.equal(true);
+    chai.expect(members.msmith.write).to.equal(true);
+    chai.expect(members.msmith.admin).to.equal(false);
+    chai.expect(members.rsanchez.read).to.equal(true);
+    chai.expect(members.rsanchez.write).to.equal(true);
+    chai.expect(members.rsanchez.admin).to.equal(true);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+  });
+}
 
 /**
  * Tests removing a users role within an org
  */
 function removeUserRole(done) {
   OrgController.setUserPermissions(user, newUser, org.id.toString(), 'REMOVE_ALL')
-    .then((retOrg) => {
-      chai.expect(org.permissions.write).to.not.include(newUser._id.toString());
-      chai.expect(org.permissions.read).to.not.include(newUser._id.toString());
-      chai.expect(org.permissions.admin).to.not.include(newUser._id.toString());
-      done();
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  .then((retOrg) => {
+    chai.expect(org.permissions.write).to.not.include(newUser._id.toString());
+    chai.expect(org.permissions.read).to.not.include(newUser._id.toString());
+    chai.expect(org.permissions.admin).to.not.include(newUser._id.toString());
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+  });
 }
 
 /**
@@ -269,14 +260,14 @@ function removeUserRole(done) {
  */
 function changeOwnRole(done) {
   OrgController.setUserPermissions(user, user, org.id.toString(), 'REMOVE_ALL')
-    .then((retOrg) => {
-      chai.fail('The same user should NOT have been able to change their own permissions.');
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.message).to.equal('User cannot change their own permissions.');
-      done();
-    });
+  .then((retOrg) => {
+    chai.fail('The same user should NOT have been able to change their own permissions.');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.message).to.equal('User cannot change their own permissions.');
+    done();
+  });
 }
 
 /*
@@ -284,13 +275,14 @@ function changeOwnRole(done) {
  */
 function nonAdminChangeRole(done) {
   OrgController.setUserPermissions(newUser, user, org.id.toString(), 'REMOVE_ALL')
-    .then((retOrg) => {
-      console.log('A non-admin should not be able to change permissions');
-    })
-    .catch((error) => {
-      chai.expect(error.message).to.equal('User cannot change permissions.');
-      done();
-    });
+  .then((retOrg) => {
+    chai.fail('A non-admin should not be able to change permissions');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.message).to.equal('User cannot change permissions.');
+    done();
+  });
 }
 
 /*
@@ -298,12 +290,12 @@ function nonAdminChangeRole(done) {
  */
 function invalidPermission(done) {
   OrgController.setUserPermissions(user, newUser, 'council', 'overlord')
-    .then((retOrg) => {
-      console.log('This type of role should not be allowed...');
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.message).to.equal('The permission enetered is not a valid permission.');
-      done();
-    });
+  .then((retOrg) => {
+    chai.fail('This type of role should not be allowed...');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.message).to.equal('The permission enetered is not a valid permission.');
+    done();
+  });
 }
