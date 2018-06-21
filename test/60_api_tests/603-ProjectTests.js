@@ -31,14 +31,14 @@
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
-// const request = require('request');
+const request = require('request');
 
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.load('models/Organization');
 
-// const test = M.config.test;
+const test = M.config.test;
 const User = M.load('models/User');
 /**
  * APIProjectTest
@@ -130,7 +130,7 @@ function postProject01(done) {
       uid: `${id}:${org.id}`
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('harrypotter');
@@ -147,9 +147,9 @@ function getProject01(done) {
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
     headers: getHeaders(),
-    method: 'POST'
+    method: 'GET'
   },
-  function(response, body) {
+  function(err, response, body) {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
     chai.expect(json.name).to.equal('Youre a wizard Harry');
@@ -179,7 +179,7 @@ function putOrg01(done) {
       }
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal(id);
@@ -209,7 +209,7 @@ function postProject02(done) {
       uid: `${id}:${org.id}`
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('ronweasly');
@@ -228,7 +228,7 @@ function deleteProject01(done) {
     headers: getHeaders(),
     method: 'DELETE'
   },
-  function(response) {
+  function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
@@ -244,7 +244,7 @@ function deleteProject02(done) {
     headers: getHeaders(),
     method: 'DELETE'
   },
-  function(response) {
+  function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
     done();
   });

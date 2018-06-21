@@ -73,10 +73,10 @@ function getOrgs(done) {
     url: `${test.url}/api/orgs`,
     headers: getHeaders()
   },
-  function(response, body) {
+  function(err, response, body) {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(0);
     done();
   });
 }
@@ -94,7 +94,7 @@ function postOrg01(done) {
       name: 'Organization 1'
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.name).to.equal('Organization 1');
@@ -113,7 +113,7 @@ function getOrg01(done) {
     url: `${test.url}/api/orgs/org1`,
     headers: getHeaders()
   },
-  function(response, body) {
+  function(err, response, body) {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
     chai.expect(json.name).to.equal('Organization 1');
@@ -136,7 +136,7 @@ function putOrg01(done) {
       name: 'Updated Organization 1'
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('org1');
@@ -158,7 +158,7 @@ function postOrg02(done) {
       name: 'Organization 2'
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('org2');
@@ -176,10 +176,10 @@ function getTwoOrgs(done) {
     url: `${test.url}/api/orgs`,
     headers: getHeaders()
   },
-  function(response, body) {
+  function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.length).to.equal(4);
+    chai.expect(json.length).to.equal(2);
     done();
   });
 }
@@ -200,7 +200,7 @@ function postOrg02Err(done) {
       name: 'Organization 2'
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     chai.expect(response.statusCode).to.equal(400);
     chai.expect(body).to.equal('Bad Request');
     done();
@@ -221,7 +221,7 @@ function postInvalidOrg(done) {
       name: 'Invalid Organization'
     })
   },
-  function(response) {
+  function(err, response) {
     chai.expect(response.statusCode).to.not.equal(200);
     // chai.expect(body).to.equal('Internal Server Error');
     done();
@@ -242,7 +242,7 @@ function postOrg03(done) {
       id: 'org3'
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     chai.expect(response.statusCode).to.equal(400);
     chai.expect(body).to.equal('Bad Request');
     done();
@@ -263,7 +263,7 @@ function postEmptyOrg(done) {
       id: ''
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     chai.expect(response.statusCode).to.equal(400);
     chai.expect(body).to.equal('Bad Request');
     done();
@@ -285,7 +285,7 @@ function postOrg04(done) {
       name: 'Organization 2'
     })
   },
-  function(response, body) {
+  function(err, response, body) {
     chai.expect(response.statusCode).to.equal(500);
     chai.expect(body).to.equal('Internal Server Error');
     done();
@@ -302,7 +302,7 @@ function deleteOrg01(done) {
     headers: getHeaders(),
     method: 'DELETE'
   },
-  function(response) {
+  function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
@@ -319,7 +319,7 @@ function deleteOrg02(done) {
     headers: getHeaders(),
     method: 'DELETE'
   },
-  function(response) {
+  function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
@@ -334,10 +334,10 @@ function getOrgs03(done) {
     url: `${test.url}/api/orgs`,
     headers: getHeaders()
   },
-  function(response, body) {
+  function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(0);
     done();
   });
 }

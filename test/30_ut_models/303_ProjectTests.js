@@ -75,7 +75,7 @@ describe(name, function() {
       }
       chai.assert(err === null);
       mongoose.connection.close();
-      done()
+      done();
     });
   });
 
