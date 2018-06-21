@@ -37,7 +37,7 @@ class UserController {
    */
   static findUsers() {
     return new Promise(((resolve, reject) => {
-      User.find({deletedOn: null})
+      User.find({ deletedOn: null })
       .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
       .exec((err, users) => {
         // Check if error occured
@@ -60,7 +60,7 @@ class UserController {
     return new Promise(((resolve, reject) => {
       const username = M.lib.sani.sanitize(searchedUsername);
 
-      User.findOne({username: username, deletedOn: null})
+      User.findOne({ username: username, deletedOn: null })
       .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
       .exec((err, user) => {
         // Check if error occured
@@ -97,8 +97,8 @@ class UserController {
         return reject(new Error('Username not provided.'));
       }
 
-      User.find({username: M.lib.sani.sanitize(newUser.username)})
-      .populate() 
+      User.find({ username: M.lib.sani.sanitize(newUser.username) })
+      .populate()
       .exec((findErr, users) => { // eslint-disable-line consistent-return
         if (findErr) {
           return reject(findErr);
@@ -140,7 +140,7 @@ class UserController {
       }
 
       // Check if user exists
-      User.find({username: M.lib.sani.sanitize(usernameToUpdate), deletedOn: null})
+      User.find({ username: M.lib.sani.sanitize(usernameToUpdate), deletedOn: null })
       .populate()
       .exec((findErr, users) => {
         // Error check
@@ -203,7 +203,7 @@ class UserController {
       }
 
       // Do the deletion
-      User.findOneAndRemove({username: M.lib.sani.sanitize(usernameToDelete)})
+      User.findOneAndRemove({ username: M.lib.sani.sanitize(usernameToDelete) })
       .populate()
       .exec((err) => {
         if (err) {

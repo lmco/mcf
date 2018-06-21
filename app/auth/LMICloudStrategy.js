@@ -92,51 +92,51 @@ class LMICloudStrategy extends BaseStrategy {
       username: username,
       deletedOn: null
     })
-      .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
-      .exec((err, users) => {
+    .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
+    .exec((err, users) => {
       // Check for errors
-        if (err) {
-          cb(err);
-        }
-        // If user found and not LDAP (e.g. a local user),
-        // do local authentication
-        if (users.length === 1 && !users[0].isLDAPUser) {
+      if (err) {
+        cb(err);
+      }
+      // If user found and not LDAP (e.g. a local user),
+      // do local authentication
+      if (users.length === 1 && !users[0].isLDAPUser) {
         // Compute the password hash on given password
-          const hash = crypto.createHash('sha256');
-          // salt the hash, the ._id is seen by eslint as a dangling underscore, disabling
-          hash.update(users[0]._id.toString());    // eslint-disable-line no-underscore-dangle
-          hash.update(password);                  // password
-          const pwdhash = hash.digest().toString('hex');
-          // Authenticate the user
-          if (users[0].password === pwdhash) {
-            cb(null, users[0]);
-          }
-          else {
-            cb('Invalid password');
-          }
+        const hash = crypto.createHash('sha256');
+        // salt the hash, the ._id is seen by eslint as a dangling underscore, disabling
+        hash.update(users[0]._id.toString());    // eslint-disable-line no-underscore-dangle
+        hash.update(password);                  // password
+        const pwdhash = hash.digest().toString('hex');
+        // Authenticate the user
+        if (users[0].password === pwdhash) {
+          cb(null, users[0]);
         }
-        // User is not found locally
-        // or is found and is an LDAP user,
-        // try LDAP authentication
-        else if (users.length === 0 || (users.length === 1 && users[0].isLDAPUser)) {
+        else {
+          cb('Invalid password');
+        }
+      }
+      // User is not found locally
+      // or is found and is an LDAP user,
+      // try LDAP authentication
+      else if (users.length === 0 || (users.length === 1 && users[0].isLDAPUser)) {
         // Bind the resource account we will use to do our lookups
         // The initCallback function kicks off the search/auth process
-          self.client.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (bindErr) => {
-            if (bindErr) {
-              cb('An error has occured binding to the LDAP server.');
-            }
-            else {
-              self.doSearch(username, password, cb);
-            }
-          });
-        }
-        // This should never actually be hit
-        else {
-          M.log.debug('Found Users: ');
-          M.log.debug(users);
-          cb('Too many users found.');
-        }
-      });
+        self.client.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (bindErr) => {
+          if (bindErr) {
+            cb('An error has occured binding to the LDAP server.');
+          }
+          else {
+            self.doSearch(username, password, cb);
+          }
+        });
+      }
+      // This should never actually be hit
+      else {
+        M.log.debug('Found Users: ');
+        M.log.debug(users);
+        cb('Too many users found.');
+      }
+    });
   }
 
 

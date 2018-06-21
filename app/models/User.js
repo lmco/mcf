@@ -243,8 +243,6 @@ UserSchema.virtual('orgs.admin', {
   justOne: false
 });
 
-
-
 UserSchema.virtual('proj.read', {
   ref: 'Project',
   localField: '_id',

@@ -591,7 +591,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/members/')
-  .get(AuthController.authenticate.bind(AuthController), APIController.getAllOrgRoles)
+.get(AuthController.authenticate.bind(AuthController), APIController.getAllOrgRoles);
 
 /**
  * @swagger
@@ -626,13 +626,13 @@ api.route('/orgs/:orgid/members/')
  *         description: Not Implemented
  */
 
- // 6/20/18 
- // NOTE: POST and PUT have the same functionality, thus they map to the same route.
+// 6/20/18
+// NOTE: POST and PUT have the same functionality, thus they map to the same route.
 api.route('/orgs/:orgid/members/:username/')
-  .get(AuthController.authenticate.bind(AuthController), APIController.getOrgRole)
-  .post(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
-  .put(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
-  .delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrgRole);
+.get(AuthController.authenticate.bind(AuthController), APIController.getOrgRole)
+.post(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
+.put(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
+.delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrgRole);
 
 /**
  * @swagger
@@ -667,13 +667,13 @@ api.route('/orgs/:orgid/members/:username/')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/projects/:projectid/members/')
-  .get(AuthController.authenticate.bind(AuthController), APIController.getProjectRoles)
+.get(AuthController.authenticate.bind(AuthController), APIController.getProjectRoles);
 
 api.route('/orgs/:orgid/projects/:projectid/members/:username/')
-  .get(AuthController.authenticate.bind(AuthController), APIController.getProjectRole)
-  .post(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
-  .put(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
-  .delete(AuthController.authenticate.bind(AuthController), APIController.deleteProjectRole);
+.get(AuthController.authenticate.bind(AuthController), APIController.getProjectRole)
+.post(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
+.put(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
+.delete(AuthController.authenticate.bind(AuthController), APIController.deleteProjectRole);
 
 /**
  * @swagger
