@@ -541,7 +541,7 @@ class ProjectController {
    */
   static setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
     return new Promise((resolve, reject) => {
-            // Error check - Verify perm type of type string for sanitization.
+      // Error check - Verify perm type of type string for sanitization.
       if (typeof organizationID !== 'string') {
         return reject(new Error('Organization ID is not of type String.'));
       }
@@ -629,20 +629,18 @@ class ProjectController {
             })
             .catch((setOrgPermErr) => {
               return reject(setOrgPermErr)
-            })
+            });
           })
           .catch((findOrgPermErr) => {
             return reject(findOrgPermErr)
           });
         });
       })
-
       .catch((findProjErr) => {
         return reject(findProjErr)
       });
     });
   });
-
 }
 
 // Expose `ProjectController`
