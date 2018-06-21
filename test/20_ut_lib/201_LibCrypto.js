@@ -14,7 +14,8 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
-@description  This is currently a copy of test 100.
+@description  This is currently a test of loading the Crypto Library and seeing if encrypt and
+decrypt are defined in the code.
  */
 
 const chai = require('chai');
@@ -29,7 +30,11 @@ const M = require('../../mbee.js');
  */
 
 describe(name, () => {
-  it('should load libraries', loadLib);
+  it('should have encrypt and decypt functions', defCrypts);
+});
+
+describe(name, () => {
+  it('should encrypt and decrypt a message', encryptTest);
 });
 
 
@@ -41,20 +46,17 @@ describe(name, () => {
 /**
  * Loads a library
  */
-function loadLib(done) {
+function defCrypts(done) {
   const crypto = M.load('lib/crypto');
-  // var auth = M.load('lib/auth');
-  // var db = M.load('lib/db');
-  const logger = M.load('lib/logger');
-  const sanitization = M.load('lib/sanitization');
-  const startup = M.load('lib/startup');
-  const validators = M.load('lib/validators');
-  chai.expect(crypto).to.not.equal(undefined);
-  // chai.expect(auth).to.not.equal(undefined);
-  // chai.expect(db).to.not.equal(undefined);
-  chai.expect(logger).to.not.equal(undefined);
-  chai.expect(sanitization).to.not.equal(undefined);
-  chai.expect(startup).to.not.equal(undefined);
-  chai.expect(validators).to.not.equal(undefined);
+  chai.expect(crypto.encrypt).to.not.equal(undefined);
+  chai.expect(crypto.decrypt).to.not.equal(undefined);
+  done();
+}
+
+function encryptTest(done) {
+  const crypto = M.load('lib/crypto');
+  const message = crypto.encrypt('Leah');
+  const decrypMess = crypto.decrypt(message);
+  chai.expect(decrypMess).to.equal('Leah');
   done();
 }

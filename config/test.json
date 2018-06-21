@@ -102,7 +102,9 @@
     "secret": "RANDOM"
   },
   "test": {
-    "url": "http://dev.mbee.us.lmco.com:6080"
+    "url": "http://dev.mbee.us.lmco.com:6080",
+    "username": "mbee",
+    "password": "t1QAx&hICyQSg)|"
   },
   "yarn": {
     "http-proxy":  "http://proxy-lmi.global.lmco.com",
