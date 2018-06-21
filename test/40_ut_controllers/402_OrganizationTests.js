@@ -119,11 +119,11 @@ describe(name, () => {
   it('should get a users roles within an org', getUserRoles).timeout(1000);
   it('should get all members with permissions in an org and their permissions', getMembers).timeout(1000);
   it('should remove a users role within an org', removeUserRole).timeout(1000);
-  it('should throw an error', getOldUserRoles).timeout(1000);
-  it('should throw an error', changeOwnRole).timeout(1000);
-  it('should throw an error', nonAdminChangeRole).timeout(1000);
-  it('should throw an error', invalidPermission).timeout(1000);
-  it('should throw an error', nonAdminGetPermissions).timeout(1000);
+  it('should throw an error saying the user is not in the org', getOldUserRoles).timeout(1000);
+  it('should throw an error saying the user cannot change their own role', changeOwnRole).timeout(1000);
+  it('should throw an error saying the user is not an admin', nonAdminChangeRole).timeout(1000);
+  it('should throw an error the permission is not valid', invalidPermission).timeout(1000);
+  it('should throw an error saying the user is not an admin', nonAdminGetPermissions).timeout(1000);
 });
 
 
