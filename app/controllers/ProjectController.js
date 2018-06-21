@@ -67,14 +67,14 @@ class ProjectController {
         const orgReaders = org.permissions.read.map(u => u.username);
 
         // Error Check - See if user has read permissions on org
-        if(!orgReaders.includes(reqUser.username)){
+        if (!orgReaders.includes(reqUser.username)) {
           return reject(new Error('User does not have permissions'));
         }
 
-        const popQuery = 'org'
+        const popQuery = 'org';
 
         // Search for project
-        Project.find({ org: org._id, 'permissions.read': reqUser._id})
+        Project.find({ org: org._id, 'permissions.read': reqUser._id })
         .populate(popQuery)
         .exec((err, projects) => {
           // Error Check - Database/Server Error
@@ -93,11 +93,7 @@ class ProjectController {
         });
       })
 
-      .catch((orgFindErr) => {
-        return reject(orgFindErr)
-      })
-
-
+      .catch((orgFindErr) => reject(orgFindErr));
     });
   }
 
@@ -136,7 +132,7 @@ class ProjectController {
       // Search for project
       Project.find({ uid: projUID })
       .populate('org permissions.read permissions.write permissions.admin')
-      .exec( (err, projects) => {
+      .exec((err, projects) => {
         // Error Check - Database/Server Error
         if (err) {
           return reject(err);
@@ -250,7 +246,7 @@ class ProjectController {
             id: projID,
             name: projName,
             org: orgs[0]._id,
-            permissions: { 
+            permissions: {
               read: [reqUser._id],
               write: [reqUser._id],
               admin: [reqUser._id]
@@ -260,8 +256,6 @@ class ProjectController {
 
           newProject.save((saveErr, projectUpdated) => {
             if (saveErr) {
-
-
               return reject(saveErr);
             }
             // Return success and the JSON object
@@ -448,23 +442,22 @@ class ProjectController {
       // Find Project
       ProjectController.findProject(reqUser, orgID, projectID)
       .then((project) => {
-
         const permissionLevels = project.getPermissionLevels();
         const memberList = project.permissions[permissionLevels[1]].map(u => u.username);
         let permissionsList = [];
 
         // Check permissions
-        if (!memberList.includes(reqUser.username)){
-          return reject(new Error('User does not have permissions'))
+        if (!memberList.includes(reqUser.username)) {
+          return reject(new Error('User does not have permissions'));
         }
 
-        let roleList = {};
+        const roleList = {};
 
-        for (let i = 0; i < memberList.length; i++){
+        for (let i = 0; i < memberList.length; i++) {
           roleList[memberList[i]] = {};
-          for (let j = 1; j < permissionLevels.length; j++){
+          for (let j = 1; j < permissionLevels.length; j++) {
             permissionsList = project.permissions[permissionLevels[j]].map(u => u.username);
-            if(permissionsList.includes(memberList[i])){
+            if (permissionsList.includes(memberList[i])) {
               roleList[memberList[i]][permissionLevels[j]] = true;
             }
             else {
@@ -472,11 +465,9 @@ class ProjectController {
             }
           }
         }
-        return resolve(roleList)
+        return resolve(roleList);
       })
-      .catch((findProjectErr) => {
-        return reject(findProjectErr)
-      });
+      .catch((findProjectErr) => reject(findProjectErr));
     });
   }
 
@@ -508,14 +499,12 @@ class ProjectController {
       ProjectController.findAllPermissions(reqUser, orgID, projectID)
       .then((permissionList) => {
         if (!permissionList.hasOwnProperty(user.username)) {
-          return reject(new Error('User not found.'))
+          return reject(new Error('User not found.'));
         }
 
         return resolve(permissionList[user.username]);
       })
-      .catch((findPermissionsErr) => {
-        return reject(findPermissionsErr)
-      });
+      .catch((findPermissionsErr) => reject(findPermissionsErr));
     });
   }
 
@@ -545,7 +534,7 @@ class ProjectController {
       if (typeof organizationID !== 'string') {
         return reject(new Error('Organization ID is not of type String.'));
       }
-            // Error check - Verify perm type of type string for sanitization.
+      // Error check - Verify perm type of type string for sanitization.
       if (typeof projectID !== 'string') {
         return reject(new Error('Project ID type is not of type String.'));
       }
@@ -559,7 +548,7 @@ class ProjectController {
       const projID = M.lib.sani.html(projectID);
       const permType = M.lib.sani.html(permissionType);
 
-        // Check if project exists
+      // Check if project exists
       ProjectController.findProject(reqUser, organizationID, projectID)
       .then((project) => {
         // Check permissions
@@ -610,37 +599,31 @@ class ProjectController {
 
         // Update project
         Project.findOneAndUpdate(
-        { uid: `${orgID}:${projID}` }, 
-        pushPullRoles, 
-        (saveProjErr, projectSaved) => {
-          if (saveProjErr) {
-            return reject(saveProjErr);
-          }
-          // Check if user has org read permissions
-          OrgController.findPermissions(reqUser, setUser, orgID)
-          .then((userOrgPermissions) => {
-            if (userOrgPermissions.read) {
-              return resolve(projectSaved);
+          { uid: `${orgID}:${projID}` },
+          pushPullRoles,
+          (saveProjErr, projectSaved) => {
+            if (saveProjErr) {
+              return reject(saveProjErr);
             }
-            // Update org read permissions if needed
-            OrgController.setPermissions(reqUser, orgID, setUser, 'read')
-            .then((userSetPermissions) => {
-              return resolve(projectSaved);
+            // Check if user has org read permissions
+            OrgController.findPermissions(reqUser, setUser, orgID)
+            .then((userOrgPermissions) => {
+              if (userOrgPermissions.read) {
+                return resolve(projectSaved);
+              }
+              // Update org read permissions if needed
+              OrgController.setPermissions(reqUser, orgID, setUser, 'read')
+              .then((userSetPermissions) => resolve(projectSaved))
+              .catch((setOrgPermErr) => reject(setOrgPermErr)); // Closing Set Permissions
             })
-            .catch((setOrgPermErr) => {
-              return reject(setOrgPermErr)
-            }); // Closing Set Permissions
-          })
-          .catch((findOrgPermErr) => {
-            return reject(findOrgPermErr)
-          }); // Closing find org permissions
-        }); // Closing Project Update
+            .catch((findOrgPermErr) => reject(findOrgPermErr)); // Closing find org permissions
+          }
+        ); // Closing Project Update
       })
-      .catch((findProjErr) => {
-        return reject(findProjErr)
-      }); // Closing projectFind
+      .catch((findProjErr) => reject(findProjErr)); // Closing projectFind
     }); // Closing promise
   } // Closing function
+
 } // Closing class
 
 // Expose `ProjectController`
