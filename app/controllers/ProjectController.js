@@ -65,7 +65,6 @@ class ProjectController {
       OrgController.findOrg(reqUser, orgID)
       .then((org) => {
         const orgReaders = org.permissions.read.map(u => u.username);
-
         // Error Check - See if user has read permissions on org
         if (!orgReaders.includes(reqUser.username)) {
           return reject(new Error('User does not have permissions'));
