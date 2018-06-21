@@ -843,6 +843,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: role
  *         description: The role the user will have in the org.
  *         in: URI
  *         required: true
