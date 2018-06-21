@@ -265,7 +265,7 @@ class APIController {
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
-    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
+    if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
       M.log.error('Organization ID in body does not match ID in params.');
       return res.status(400).send('Bad Request');
     }
@@ -663,7 +663,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(project));
     })
     .catch((err) => {
-      M.log.error(err);
+      M.log.error(err.stack);
       return res.status(500).send('Internal Server Error');
     });
   }

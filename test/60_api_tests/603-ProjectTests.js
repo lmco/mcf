@@ -55,44 +55,44 @@ let user = null;
 // runs before all tests in this block
 
 describe(name, function() {
-  before(function() {
+  before(function(done) {
     const db = M.load('lib/db');
     db.connect();
-    return new Promise(function(resolve) {
-      User.findOne({ username: 'mbee' }, function(errUser, foundUser) {
-        user = foundUser;
-        // Check if error occured
-        if (errUser) {
-          M.log.error(errUser);
+
+    User.findOne({ username: 'mbee' }, function(errUser, foundUser) {
+      user = foundUser;
+      // Check if error occured
+      if (errUser) {
+        M.log.error(errUser);
+      }
+      // Otherwise,
+      // Create a parent organization before creating any projects
+      org = new Org({
+        id: 'hogwarts',
+        name: 'Gryffindor',
+        permissions: {
+          admin: [user._id],
+          write: [user._id],
+          read: [user._id]
         }
-        // Otherwise,
-        // Create a parent organization before creating any projects
-        org = new Org({
-          id: 'hogwarts',
-          name: 'Gryffindor',
-          permissions: {
-            admin: [user._id],
-            write: [user._id],
-            read: [user._id]
-          }
-        });
-        org.save(function(err) {
-          if (err) {
-            M.log.error(err);
-          }
-          resolve();
-        });
+      });
+      org.save(function(err) {
+        if (err) {
+          M.log.error(err);
+        }
+        done();
       });
     });
   });
   // runs after all the tests are done
-  after(function() {
+  after(function(done) {
     Org.findOneAndRemove({ id: 'hogwarts' }, (err) => {
       if (err) {
         M.log.error(err);
       }
       chai.assert(err === null);
       mongoose.connection.close();
+      done();
     });
   });
 
@@ -121,7 +121,9 @@ function postProject01(done) {
     body: JSON.stringify({
       id: id,
       name: 'Youre a wizard Harry',
-      org: org._id,
+      org: {
+        id: 'hogwarts'
+      },
       permissions: {
         admin: [user._id],
         write: [user._id],
@@ -171,7 +173,9 @@ function putOrg01(done) {
     body: JSON.stringify({
       id: id,
       name: 'I know',
-      org: org._id,
+      org: {
+        id: 'hogwarts'
+      },
       permissions: {
         admin: [user._id],
         write: [user._id],
@@ -200,7 +204,9 @@ function postProject02(done) {
     body: JSON.stringify({
       id: id,
       name: 'Red Head',
-      org: org._id,
+      org: {
+        id: 'hogwarts'
+      },
       permissions: {
         admin: [user._id],
         write: [user._id],

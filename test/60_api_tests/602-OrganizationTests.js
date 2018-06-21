@@ -260,7 +260,7 @@ function postEmptyOrg(done) {
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
-      id: ''
+
     })
   },
   function(err, response, body) {
