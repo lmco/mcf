@@ -180,8 +180,8 @@ function findAllExistingOrgs(done) {
   .catch((error) => {
     chai.expect(error).to.equal(null);
     done();
-  })
-} 
+  });
+}
 
 /**
  * Tests deleting an existing org

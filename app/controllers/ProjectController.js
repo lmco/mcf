@@ -62,7 +62,7 @@ class ProjectController {
       // Sanitize project properties
       const orgID = M.lib.sani.html(organizationId);
 
-      OrgController.findOrg(reqUser, organizationId)
+      OrgController.findOrg(reqUser, orgID)
       .then((org) => {
         const orgReaders = org.permissions.read.map(u => u.username);
 
@@ -74,7 +74,7 @@ class ProjectController {
         const popQuery = 'org'
 
         // Search for project
-        Project.find({ 'org': org._id, 'permissions.read': reqUser._id})
+        Project.find({ org: org._id, 'permissions.read': reqUser._id})
         .populate(popQuery)
         .exec((err, projects) => {
           // Error Check - Database/Server Error
@@ -622,16 +622,14 @@ class ProjectController {
             if (userOrgPermissions.read) {
               return resolve(projectSaved);
             }
-            else {
-              // Update org read permissions if needed
-              OrgController.setPermissions(reqUser, orgID, setUser, 'read')
-              .then((userSetPermissions) => {
-                return resolve(projectSaved);
-              })
-              .catch((setOrgPermErr) => {
-                return reject(setOrgPermErr)
-              })
-            }
+            // Update org read permissions if needed
+            OrgController.setPermissions(reqUser, orgID, setUser, 'read')
+            .then((userSetPermissions) => {
+              return resolve(projectSaved);
+            })
+            .catch((setOrgPermErr) => {
+              return reject(setOrgPermErr)
+            })
           })
           .catch((findOrgPermErr) => {
             return reject(findOrgPermErr)
@@ -641,10 +639,9 @@ class ProjectController {
 
       .catch((findProjErr) => {
         return reject(findProjErr)
-      })
-
+      });
     });
-  }
+  });
 
 }
 
