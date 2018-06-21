@@ -474,7 +474,7 @@ class APIController {
     });
   }
 
-   static getOrgMembers(req, res) {
+   static getAllOrgRoles(req, res) {
     // If no user in the request
     if (!req.user) {
       M.log.error('Request does not have a user.');
@@ -482,7 +482,7 @@ class APIController {
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
-    OrgController.getUsersWithPermissions(req.user, orgID)
+    OrgController.getAllUsersPermissions(req.user, orgID)
     .then((members) => {
       res.header('Content-Type', 'application/json');
       return res.send(APIController.formatJSON(members));

@@ -37,8 +37,10 @@ let org = null;
  *------------------------------------*/
 
 describe(name, () => {
-  // runs before all tests in this block
-  before((done) => {
+  // NOTE: Changed from arrow function to allow for use of
+  // this so that a larger timeout could be set
+  before(function(done) {
+    this.timeout(10000);
     const db = M.load('lib/db');
     db.connect();
 
@@ -118,6 +120,9 @@ describe(name, () => {
     });
   });
 
+  it('should create a new org', addNewOrg).timeout(5000);
+  it('should find an existing org', findExistingOrg).timeout(2500);
+  it('should delete an existing org', deleteExistingOrg).timeout(2500);
   it('should add a user to an org', addUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
   it('should get all members with permissions in an org and their permissions', getMembers).timeout(2500);
@@ -131,6 +136,65 @@ describe(name, () => {
 /*------------------------------------
  *       Test Functions
  *------------------------------------*/
+
+/**
+ * Tests creating an org
+ */
+function addNewOrg(done) {
+  const orgData = {
+    'id': 'tv',
+    'name': 'Intergalactic Cable'
+  };
+  OrgController.createOrg(user, orgData)
+  .then((org) => {
+    chai.expect(org.id).to.equal('tv');
+    chai.expect(org.name).to.equal('Intergalactic Cable');
+    chai.expect(org.permissions.read).to.include(user._id.toString());
+    chai.expect(org.permissions.write).to.include(user._id.toString());
+    chai.expect(org.permissions.admin).to.include(user._id.toString());
+    done()
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+  });
+}
+
+/**
+ * Tests finding a single org which should exist
+ */
+function findExistingOrg(done) {
+  OrgController.findOrg(user, 'tv')
+  .then((org) => {
+    chai.expect(org.name).to.equal('Intergalactic Cable');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests deleting an existing org
+ */
+function deleteExistingOrg(done) {
+  OrgController.removeOrg(user, 'tv')
+  .then((org) => {
+    OrgController.findOrg(user, 'tv')
+    .then((orgTwo) => {
+      chai.expect(orgTwo).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error.message).to.equal("Org not found.");
+      done();
+    });
+  })
+  .catch((err) => {
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
 
 /**
  * Tests adding a user to an org
@@ -155,8 +219,9 @@ function addUserRole(done) {
 function getUserRoles(done) {
   OrgController.getUserPermissions(user, newUser, org.id.toString())
     .then((roles) => {
-      chai.expect(roles.permissions).to.include('read');
-      chai.expect(roles.permissions).to.include('write');
+      chai.expect(roles["read"]).to.equal(true);
+      chai.expect(roles["write"]).to.equal(true);
+      chai.expect(roles["admin"]).to.equal(false);
       done();
     })
     .catch((error) => {
@@ -168,14 +233,14 @@ function getUserRoles(done) {
  * Tests retrieving all members roles for a specified project
  */
 function getMembers(done) {
-  OrgController.getUsersWithPermissions(user, org.id.toString())
+  OrgController.getAllUsersPermissions(user, org.id.toString())
     .then((members) => {
-      chai.expect(members.read).to.include(newUser._id.toString());
-      chai.expect(members.read).to.include(user._id.toString());
-      chai.expect(members.write).to.include(newUser._id.toString());
-      chai.expect(members.write).to.include(user._id.toString());
-      chai.expect(members.admin).to.not.include(newUser._id.toString());
-      chai.expect(members.admin).to.include(user._id.toString());
+      chai.expect(members["msmith"]["read"]).to.equal(true);
+      chai.expect(members["msmith"]["write"]).to.equal(true);
+      chai.expect(members["msmith"]["admin"]).to.equal(false);
+      chai.expect(members["rsanchez"]["read"]).to.equal(true);
+      chai.expect(members["rsanchez"]["write"]).to.equal(true);
+      chai.expect(members["rsanchez"]["admin"]).to.equal(true);
       done()
     })
     .catch((error) => {

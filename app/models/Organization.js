@@ -140,6 +140,10 @@ OrganizationSchema.methods.getPublicData = function() {
   };
 };
 
+OrganizationSchema.methods.getPermissionLevels = function() {
+  return ['REMOVE_ALL', 'read', 'write', 'admin'];
+};
+
 // Required for virtual getters
 OrganizationSchema.set('toJSON', { virtuals: true });
 OrganizationSchema.set('toObject', { virtuals: true });
