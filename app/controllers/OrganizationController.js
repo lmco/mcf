@@ -76,7 +76,7 @@ class OrganizationController {
    * @param  {String} The string of the org ID.
    */
   static findOrg(user, organizationID) {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // Error check - Make sure orgID is a string. Otherwise, reject.
       if (typeof organizationID !== 'string') {
         M.log.verbose('orgID is not a string');
@@ -108,13 +108,13 @@ class OrganizationController {
         // If we find one org (which we should if it exists)
         return resolve(org);
       });
-    }));
+    });
   }
 
 
   /**
-   * @description  This function takes a user and org id and creates a new
-   * organization.
+   * @description  This function takes a user and dictionary containing 
+   * the org id and name and creates a new organization.
    *
    * @example
    * OrganizationController.createOrg('josh', {mbee-sw})
@@ -129,7 +129,7 @@ class OrganizationController {
    * @param  {User} The object containing the user of the requesting user.
    * @param  {Org} The JSON of the new org.
    */
-  static createOrg(user, org) {
+  static createOrg(user, orgInfo) {
     return new Promise((resolve, reject) => {
       // Error check - Make sure user is admin
       if (!user.admin) {
@@ -137,16 +137,16 @@ class OrganizationController {
       }
 
       // Error check - Make sure organization body has an organization id and name
-      if (!org.hasOwnProperty('id')) {
+      if (!orgInfo.hasOwnProperty('id')) {
         return reject(new Error('Organization ID not included.'));
       }
-      if (!org.hasOwnProperty('name')) {
+      if (!orgInfo.hasOwnProperty('name')) {
         return reject(new Error('Organization does not have a name.'));
       }
 
       // Sanitize fields
-      const orgID = M.lib.sani.html(org.id);
-      const orgName = M.lib.sani.html(org.name);
+      const orgID = M.lib.sani.html(orgInfo.id);
+      const orgName = M.lib.sani.html(orgInfo.name);
 
       // Error check - Make sure a valid orgID and name is given
       if (!RegExp(orgID).test(orgID)) {
@@ -500,6 +500,8 @@ class OrganizationController {
           // Loop through each type of permission for each user
           org.getPermissionLevels().forEach((role) => {
             if (role !== 'REMOVE_ALL') {
+
+              // Store whether each permission is given to the user or not in a dictionary
               const permVals = org.permissions[role].map(v => v._id.toString());
               returnDict[u.username][role] = permVals.includes(u._id.toString())
             }
