@@ -423,6 +423,23 @@ class ProjectController {
     });
   }
 
+  /**
+   * The function finds a projects permissions.
+   *
+   * @example
+   * ProjectController.findAllPermissions({Tony Stark}, {Arc Reactor 1})
+   * .then(function(org) {
+   *   // do something with the newly created project.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {String} The organization ID for the Organization the project belongs to.
+   * @param  {String} The project ID of the Project which is being deleted.
+   */
   static findAllPermissions(reqUser, organizationID, ProjectID) {
     return new Promise((resolve, reject) => {
       const orgID = M.lib.sani.html(organizationID);
@@ -463,6 +480,25 @@ class ProjectController {
     });
   }
 
+
+  /**
+   * The function finds a projects permissions.
+   *
+   * @example
+   * ProjectController.findAllPermissions({Tony Stark}, {Arc Reactor 1})
+   * .then(function(org) {
+   *   // do something with the newly created project.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {String} The organization ID for the Organization the project belongs to.
+   * @param  {String} The project ID of the Project which is being deleted.
+   * @param  {User} The object containing the user to be searched for.
+   */
   static findPermissions(reqUser, organizationID, ProjectID, user) {
     return new Promise((resolve, reject) => {
       const orgID = M.lib.sani.html(organizationID);
