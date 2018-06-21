@@ -387,7 +387,7 @@ class APIController {
     const orgID = M.lib.sani.sanitize(req.params.orgid);
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
     .then((user) => {
-      OrgController.getUserPermissions(req.user, user, orgID)
+      OrgController.findPermissions(req.user, user, orgID)
       .then((roles) => {
         res.header('Content-Type', 'application/json');
         return res.send(APIController.formatJSON(roles));
@@ -426,7 +426,7 @@ class APIController {
     const orgID = M.lib.sani.sanitize(req.params.orgid);
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
     .then((user) => {
-      OrgController.setUserPermissions(req.user, user, orgID, req.body.role)
+      OrgController.setPermissions(req.user, orgID, user, req.body.role)
       .then((org) => {
         res.header('Content-Type', 'application/json');
         return res.send(APIController.formatJSON(org.getPublicData()));
@@ -458,7 +458,7 @@ class APIController {
     const orgID = M.lib.sani.sanitize(req.params.orgid);
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
     .then((user) => {
-      OrgController.setUserPermissions(req.user, user, orgID, 'REMOVE_ALL')
+      OrgController.setPermissions(req.user, orgID, user, 'REMOVE_ALL')
       .then((org) => {
         res.header('Content-Type', 'application/json');
         return res.send(APIController.formatJSON(org.getPublicData()));
@@ -474,6 +474,12 @@ class APIController {
     });
   }
 
+  /**
+   * GET /orgs/:orgid/members/
+   *
+   * @description  Takes an orgid and return a list of members
+   * and the permissions they have
+   */
   static getAllOrgRoles(req, res) {
     // If no user in the request
     if (!req.user) {
@@ -482,7 +488,7 @@ class APIController {
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
-    OrgController.getAllUsersPermissions(req.user, orgID)
+    OrgController.findAllPermissions(req.user, orgID)
     .then((members) => {
       res.header('Content-Type', 'application/json');
       return res.send(APIController.formatJSON(members));

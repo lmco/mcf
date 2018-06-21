@@ -342,9 +342,9 @@ class OrganizationController {
    * @param {User} The object containing the user whose info is being returned
    * @param {string} The ID of the organization
    */
-  static getUserPermissions(user, username, organizationID) {
+  static findPermissions(user, username, organizationID) {
     return new Promise((resolve, reject) => {
-      OrganizationController.getAllUsersPermissions(user, organizationID)
+      OrganizationController.findAllPermissions(user, organizationID)
       .then(users => resolve(users[username.username]))
       .catch(error => reject(error));
     });
@@ -369,13 +369,13 @@ class OrganizationController {
    * @param  {string} The ID of the org being deleted.
    * @param  {string} The new role for the user.
    */
-  static setUserPermissions(user, username, organizationID, role) {
+  static setPermissions(reqUser, organizationID, setUser, role) {
     return new Promise((resolve, reject) => {
       // Stop a user from changing their own permissions
-      if (user._id.toString() === username._id.toString()) {
+      if (reqUser._id.toString() === setUser._id.toString()) {
         return reject(new Error('User cannot change their own permissions.'));
       }
-
+      
       // Ensure organizationID is a string
       if (typeof organizationID !== 'string') {
         M.log.verbose('Organization ID is not a string');
@@ -396,7 +396,7 @@ class OrganizationController {
         }
         // Ensure user is an admin within the organization
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-        if (!user.admin || !orgAdmins.includes(user._id.toString())) {
+        if (!reqUser.admin || !orgAdmins.includes(reqUser._id.toString())) {
           M.log.verbose('User cannot chnage permissions');
           return reject(new Error('User cannot change permissions.'));
         }
@@ -408,30 +408,30 @@ class OrganizationController {
           // For some reason, list of keys includes $init, so ignore this key
           if (roles !== '$init') {
             const permVals = perm[roles].map(u => u._id.toString());
-            if (permVals.includes(username._id.toString())) {
-              perm[roles].splice(perm[roles].indexOf(username._id), 1);
+            if (permVals.includes(setUser._id.toString())) {
+              perm[roles].splice(perm[roles].indexOf(setUser._id), 1);
             }
           }
         });
 
         // Add user to admin array
         if (role === 'admin') {
-          if (!perm.admin.includes(username._id)) {
-            perm.admin.push(username._id);
+          if (!perm.admin.includes(setUser._id)) {
+            perm.admin.push(setUser._id);
           }
         }
 
         // Add user to write array if admin or write
         if (role === 'admin' || role === 'write') {
-          if (!perm.write.includes(username._id)) {
-            perm.write.push(username._id);
+          if (!perm.write.includes(setUser._id)) {
+            perm.write.push(setUser._id);
           }
         }
 
         // Add user to read array if admin, write or read
         if (role === 'admin' || role === 'write' || role === 'read') {
-          if (!perm.read.includes(username._id)) {
-            perm.read.push(username._id);
+          if (!perm.read.includes(setUser._id)) {
+            perm.read.push(setUser._id);
           }
         }
 
@@ -453,7 +453,7 @@ class OrganizationController {
    * object, displaying the users who have those permissions
    *
    * @example
-   * OrganizationController.getUsersWithPermissions(Austin, 'mbee')
+   * OrganizationController.findAllPermissions(Austin, 'mbee')
    * .then(function(org) {
    *   // Retrieve the members
    * })
@@ -465,7 +465,7 @@ class OrganizationController {
    * @param  {User} The object containing the requesting user.
    * @param  {string} The ID of the org being deleted.
    */
-  static getAllUsersPermissions(user, organizationID) {
+  static findAllPermissions(user, organizationID) {
     return new Promise((resolve, reject) => {
     // Ensure organizationID is a string
       if (typeof organizationID !== 'string') {

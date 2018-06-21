@@ -113,6 +113,7 @@ describe(name, () => {
 
   it('should create a new org', addNewOrg).timeout(5000);
   it('should find an existing org', findExistingOrg).timeout(2500);
+  it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
   it('should delete an existing org', deleteExistingOrg).timeout(2500);
   it('should add a user to an org', addUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
@@ -166,6 +167,21 @@ function findExistingOrg(done) {
 }
 
 /**
+ * Find all existing orgs a user has access to
+ */
+function findAllExistingOrgs(done) {
+  OrgController.findOrgs(user)
+  .then((orgs) => {
+    chai.expect(orgs.length).to.equal(2);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+    done();
+  })
+} 
+
+/**
  * Tests deleting an existing org
  */
 function deleteExistingOrg(done) {
@@ -192,7 +208,7 @@ function deleteExistingOrg(done) {
  */
 function addUserRole(done) {
   // Increase a users role
-  OrgController.setUserPermissions(user, newUser, org.id.toString(), 'write')
+  OrgController.setPermissions(user, org.id.toString(), newUser, 'write')
   .then((retOrg) => {
     chai.expect(retOrg.permissions.write).to.include(newUser._id.toString());
     chai.expect(retOrg.permissions.read).to.include(newUser._id.toString());
@@ -208,7 +224,7 @@ function addUserRole(done) {
  * Tests retrieving the roles a specific user has
  */
 function getUserRoles(done) {
-  OrgController.getUserPermissions(user, newUser, org.id.toString())
+  OrgController.findPermissions(user, newUser, org.id.toString())
   .then((roles) => {
     chai.expect(roles.read).to.equal(true);
     chai.expect(roles.write).to.equal(true);
@@ -224,7 +240,7 @@ function getUserRoles(done) {
  * Tests retrieving all members roles for a specified project
  */
 function getMembers(done) {
-  OrgController.getAllUsersPermissions(user, org.id.toString())
+  OrgController.findAllPermissions(user, org.id.toString())
   .then((members) => {
     chai.expect(members.msmith.read).to.equal(true);
     chai.expect(members.msmith.write).to.equal(true);
@@ -243,7 +259,7 @@ function getMembers(done) {
  * Tests removing a users role within an org
  */
 function removeUserRole(done) {
-  OrgController.setUserPermissions(user, newUser, org.id.toString(), 'REMOVE_ALL')
+  OrgController.setPermissions(user, org.id.toString(), newUser, 'REMOVE_ALL')
   .then((retOrg) => {
     chai.expect(org.permissions.write).to.not.include(newUser._id.toString());
     chai.expect(org.permissions.read).to.not.include(newUser._id.toString());
@@ -259,7 +275,7 @@ function removeUserRole(done) {
  * Try to change the same users role
  */
 function changeOwnRole(done) {
-  OrgController.setUserPermissions(user, user, org.id.toString(), 'REMOVE_ALL')
+  OrgController.setPermissions(user, org.id.toString(), user, 'REMOVE_ALL')
   .then((retOrg) => {
     chai.fail('The same user should NOT have been able to change their own permissions.');
     done();
@@ -274,7 +290,7 @@ function changeOwnRole(done) {
  * Non-admin try to change a users role
  */
 function nonAdminChangeRole(done) {
-  OrgController.setUserPermissions(newUser, user, org.id.toString(), 'REMOVE_ALL')
+  OrgController.setPermissions(newUser, org.id.toString(), user, 'REMOVE_ALL')
   .then((retOrg) => {
     chai.fail('A non-admin should not be able to change permissions');
     done();
@@ -289,7 +305,7 @@ function nonAdminChangeRole(done) {
  * Try to change to an unsupported role
  */
 function invalidPermission(done) {
-  OrgController.setUserPermissions(user, newUser, 'council', 'overlord')
+  OrgController.setPermissions(user, 'council', newUser, 'overlord')
   .then((retOrg) => {
     chai.fail('This type of role should not be allowed...');
     done();
