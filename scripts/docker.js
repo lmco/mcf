@@ -125,7 +125,7 @@ function docker(args) {
     console.log('Getting docker logs ...');
 
     // Build the "docker run" command
-    let rargs = [
+    const rargs = [
       'logs',
       M.config.docker.container.name
     ];

@@ -586,7 +586,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *     tags:
  *       - organizations
  *     description: Gets the users on an organization and their permissions.
- *	   produces: 
+ *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
@@ -595,12 +595,12 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The members of an org and thier permissions
- *						were succesfully retrieved and returned as JSON.
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *                      were succesfully retrieved and returned as JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/members')
 .get(AuthController.authenticate.bind(AuthController), APIController.getAllOrgRoles);
@@ -626,12 +626,12 @@ api.route('/orgs/:orgid/members')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The member of the org and thier permissions
- *						were succesfully retrieved and returned as JSON.
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *            were succesfully retrieved and returned as JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   post:
  *     tags:
  *       - organizations
@@ -655,12 +655,12 @@ api.route('/orgs/:orgid/members')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The members permissions were set or updated,
- *						and the organization is returned in JSON. 
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *            and the organization is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   put:
  *     tags:
  *       - organizations
@@ -684,16 +684,16 @@ api.route('/orgs/:orgid/members')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The members permissions were set or updated,
- *						and the organization is returned in JSON. 
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *            and the organization is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   delete:
  *     tags:
  *       - organizations
- *     description: Deletes a users permissions within an org. 
+ *     description: Deletes a users permissions within an org.
  *     produces:
  *       - application/json
  *     parameters:
@@ -708,12 +708,12 @@ api.route('/orgs/:orgid/members')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The members permissions were deleted,
- *					    and the organization is returned in JSON. 
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *              and the organization is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  */
 
 // 6/20/18
@@ -745,12 +745,12 @@ api.route('/orgs/:orgid/members/:username')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The members of a project and thier permissions
- *						were succesfully retrieved and returned as JSON.
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *            were succesfully retrieved and returned as JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members')
 .get(AuthController.authenticate.bind(AuthController), APIController.getProjectRoles);
@@ -781,12 +781,12 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The member of the project and thier permissions
- *						were succesfully retrieved and returned as JSON.
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *            were succesfully retrieved and returned as JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   post:
  *     tags:
  *       - organizations
@@ -815,12 +815,12 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The members permissions were set or updated,
- *						and the project is returned in JSON. 
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *            and the project is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   put:
  *     tags:
  *       - organizations
@@ -848,16 +848,16 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The members permissions were set or updated,
- *						and the project is returned in JSON. 
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *            and the project is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   delete:
  *     tags:
  *       - organizations
- *     description: Deletes a users permissions within an org. 
+ *     description: Deletes a users permissions within an org.
  *     produces:
  *       - application/json
  *     parameters:
@@ -877,12 +877,12 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         required: true
  *         type: string
  *     responses:
- *       200: 
+ *       200:
  *         description: Success - The members permissions were deleted,
- *					    and the project is returned in JSON. 
- *		 500:
- *		   description: Internal Server Error - Something went wront on the 
- *		                server side. Details may exist in the application logs. 
+ *              and the project is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:username')
 .get(AuthController.authenticate.bind(AuthController), APIController.getProjectRole)
