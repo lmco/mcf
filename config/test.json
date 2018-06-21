@@ -80,7 +80,7 @@
       }
     },
     "plugins": {
-      "enabled": true,
+      "enabled": false,
       "plugins": [{
         "name": "developers",
         "repository": "git@gitlab.lmms.lmco.com:mbee/mbee-integrations/plugin-developers.git",
@@ -102,7 +102,7 @@
     "secret": "RANDOM"
   },
   "test": {
-    "url": "http://dev.mbee.us.lmco.com:6080",
+    "url": "http://localhost:9080",
     "username": "mbee",
     "password": "t1QAx&hICyQSg)|"
   },
