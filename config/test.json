@@ -80,7 +80,7 @@
       }
     },
     "plugins": {
-      "enabled": false,
+      "enabled": true,
       "plugins": [{
         "name": "developers",
         "repository": "git@gitlab.lmms.lmco.com:mbee/mbee-integrations/plugin-developers.git",
