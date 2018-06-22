@@ -69,14 +69,14 @@ describe(name, function() {
       }
       // Otherwise,
       // Create a parent organization before creating any projects
-      OrgController.createOrg(user, {id: 'hogwarts', name: 'Gryffindor'})
+      OrgController.createOrg(user, { id: 'hogwarts', name: 'Gryffindor' })
       .then((newOrg) => {
-        org = newOrg
+        org = newOrg;
         done();
       })
       .catch((err) => {
         M.log.error(err);
-        done()
+        done();
       });
       // org = new Org({
       //   id: 'hogwarts',
