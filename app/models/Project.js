@@ -55,7 +55,6 @@ const ProjectSchema = new Schema({
   name: {
     type: String,
     requite: true,
-    unique: true,
     match: RegExp(M.lib.validators.project.name)
   },
 
@@ -74,45 +73,65 @@ const ProjectSchema = new Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }]
-  }
+  },
 
+  /**
+    * The date the project was soft-deleted on.
+    */
+  deletedOn: {
+    type: Date,
+    default: null
+  },
 
-});
-
-ProjectSchema.virtual('members').get(function() {
-  // Grab the write and admin permissions lists
-  const read = this.permissions.read;
-  const write = this.permissions.write;
-  const admin = this.permissions.admin;
-
-  // set member to a copy of write
-  const member = read.slice();
-
-  // Add admins that aren't already in the member list,
-  // creating a unique list of members
-  for (let i = 0; i < write.length; i++) {
-    if (!member.includes(write[i])) {
-      member.push(write[i]);
+  /**
+    * A boolean value displaying whether or not the project
+    * has been soft deleted.
+    */
+  deleted: {
+    type: Boolean,
+    default: false,
+    set: function(v) {
+      return (this.deletedOn !== null);
+    },
+    get: function(v) {
+      return (this.deletedOn !== null);
     }
   }
-
-  for (let i = 0; i < admin.length; i++) {
-    if (!member.includes(admin[i])) {
-      member.push(admin[i]);
-    }
-  }
-
-  return member;
 });
 
+// NOTE: Commented out on 6/19 due to decision that members was no longer needed
 
-ProjectSchema.pre('find', function() {
-  this.populate('org');
-});
+// ProjectSchema.virtual('members').get(function() {
+//   // Grab the write and admin permissions lists
+//   const read = this.permissions.read;
+//   const write = this.permissions.write;
+//   const admin = this.permissions.admin;
 
-ProjectSchema.pre('save', function() {
-  this.populate('org');
-});
+//   // set member to a copy of write
+//   const member = read.slice();
+//   const memberMap = member.map(u => u.username);
+
+//   // Add admins that aren't already in the member list,
+//   // creating a unique list of members
+//   for (let i = 0; i < write.length; i++) {
+//     if (!memberMap.includes(write[i].username)) {
+//       member.push(write[i]);
+//     }
+//   }
+
+//   for (let i = 0; i < admin.length; i++) {
+//     if (!memberMap.includes(admin[i].username)) {
+//       member.push(admin[i]);
+//     }
+//   }
+
+//   return member;
+// });
+
+ProjectSchema.methods.getPermissionLevels = function() {
+  return ['REMOVE_ALL', 'read', 'write', 'admin'];
+};
+
 
 // Required for virtual getters
 ProjectSchema.set('toJSON', { virtuals: true });

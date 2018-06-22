@@ -559,7 +559,7 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The project was successfully created.
+ *         description: Success - The project was successfully deleted.
  *                      The new project is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -585,38 +585,144 @@ api.route('/orgs/:orgid/projects/:projectid')
  *   get:
  *     tags:
  *       - organizations
- *     description: Not implemented, reserved for future use.
+ *     description: Gets the users on an organization and their permissions.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The members of an org and thier permissions
+ *                      were succesfully retrieved and returned as JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
+ */
+api.route('/orgs/:orgid/members')
+.get(AuthController.authenticate.bind(AuthController), APIController.getAllOrgRoles);
+
+/**
+ * @swagger
+ * /orgs/:orgid/members/:username:
+ *   get:
+ *     tags:
+ *       - organizations
+ *     description: Retrieves the permissions a user has within an org.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: username
+ *         description: The username of the searched user.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The member of the org and thier permissions
+ *            were succesfully retrieved and returned as JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   post:
  *     tags:
  *       - organizations
- *     description: Not implemented, reserved for future use.
+ *     description: Sets an/or updates a users permissions within an org.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: username
+ *         description: The username of the searched user.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: role
+ *         description: The role the user will have in the org.
+ *         in: URI
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The members permissions were set or updated,
+ *            and the organization is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   put:
  *     tags:
  *       - organizations
- *     description: Not implemented, reserved for future use.
+ *     description: Sets an/or updates a users permissions within an org.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: username
+ *         description: The username of the searched user.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: role
+ *         description: The role the user will have in the org.
+ *         in: URI
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The members permissions were set or updated,
+ *            and the organization is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   delete:
  *     tags:
  *       - organizations
- *     description: Not implemented, reserved for future use.
+ *     description: Deletes a users permissions within an org.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: username
+ *         description: The username of the searched user.
+ *         in: URI
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The members permissions were deleted,
+ *              and the organization is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  */
-api.route('/orgs/:orgid/members/:role')
-.get(AuthController.authenticate, APIController.notImplemented)
-.post(AuthController.authenticate, APIController.notImplemented)
-.put(AuthController.authenticate, APIController.notImplemented)
-.delete(AuthController.authenticate, APIController.notImplemented);
 
+// 6/20/18
+// NOTE: POST and PUT have the same functionality, thus they map to the same route.
+api.route('/orgs/:orgid/members/:username')
+.get(AuthController.authenticate.bind(AuthController), APIController.getOrgRole)
+.post(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
+.put(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
+.delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrgRole);
 
 /**
  * @swagger
@@ -624,38 +730,166 @@ api.route('/orgs/:orgid/members/:role')
  *   get:
  *     tags:
  *       - projects
- *     description: Not implemented, reserved for future use.
+ *     description: Retrieves the list of members and thier pemissions for a project.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project.
+ *         in: URI
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The members of a project and thier permissions
+ *            were succesfully retrieved and returned as JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
+ */
+api.route('/orgs/:orgid/projects/:projectid/members')
+.get(AuthController.authenticate.bind(AuthController), APIController.getProjectRoles);
+
+/**
+ * @swagger
+ * /orgs/:orgid/projects/:projectid/members/:username:
+ *   get:
+ *     tags:
+ *       - organizations
+ *     description: Retrieves the permissions a user has within an project.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: username
+ *         description: The username of the searched user.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The member of the project and thier permissions
+ *            were succesfully retrieved and returned as JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   post:
  *     tags:
- *       - projects
- *     description: Not implemented, reserved for future use.
+ *       - organizations
+ *     description: Sets an/or updates a users permissions within an org.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: username
+ *         description: The username of the searched user.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: role
+ *         description: The role the user will have in the org.
+ *         in: URI
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The members permissions were set or updated,
+ *            and the project is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   put:
  *     tags:
- *       - projects
- *     description: Not implemented, reserved for future use.
+ *       - organizations
+ *     description: Sets an/or updates a users permissions within an org.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: username
+ *         description: The username of the searched user.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: role
+ *         description: The role the user will have in the org.
+ *         in: URI
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The members permissions were set or updated,
+ *            and the project is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  *   delete:
  *     tags:
- *       - projects
- *     description: Not implemented, reserved for future use.
+ *       - organizations
+ *     description: Deletes a users permissions within an org.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: username
+ *         description: The username of the searched user.
+ *         in: URI
+ *         required: true
+ *         type: string
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: Success - The members permissions were deleted,
+ *              and the project is returned in JSON.
+ *     500:
+ *       description: Internal Server Error - Something went wront on the
+ *                    server side. Details may exist in the application logs.
  */
-api.route('/orgs/:orgid/projects/:projectid/members/:role')
-.get(AuthController.authenticate, APIController.notImplemented)
-.post(AuthController.authenticate, APIController.notImplemented)
-.put(AuthController.authenticate, APIController.notImplemented)
-.delete(AuthController.authenticate, APIController.notImplemented);
-
+api.route('/orgs/:orgid/projects/:projectid/members/:username')
+.get(AuthController.authenticate.bind(AuthController), APIController.getProjectRole)
+.post(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
+.put(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
+.delete(AuthController.authenticate.bind(AuthController), APIController.deleteProjectRole);
 
 /**
  * @swagger
