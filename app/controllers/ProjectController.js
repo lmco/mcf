@@ -214,7 +214,7 @@ class ProjectController {
 
       // Error check - Make sure the org exists
       Organization.find({ id: orgID })
-      .populate()
+      .populate('permissions.write')
       .exec((findOrgErr, orgs) => {
         if (findOrgErr) {
           return reject(new Error(findOrgErr));

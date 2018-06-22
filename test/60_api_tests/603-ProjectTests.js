@@ -37,6 +37,7 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.load('models/Organization');
+const OrgController = M.load('controllers/OrganizationController');
 
 const test = M.config.test;
 const User = M.load('models/User');
@@ -68,21 +69,30 @@ describe(name, function() {
       }
       // Otherwise,
       // Create a parent organization before creating any projects
-      org = new Org({
-        id: 'hogwarts',
-        name: 'Gryffindor',
-        permissions: {
-          admin: [user._id],
-          write: [user._id],
-          read: [user._id]
-        }
-      });
-      org.save(function(err) {
-        if (err) {
-          M.log.error(err);
-        }
+      OrgController.createOrg(user, {id: 'hogwarts', name: 'Gryffindor'})
+      .then((newOrg) => {
+        org = newOrg
         done();
+      })
+      .catch((err) => {
+        M.log.error(err);
+        done()
       });
+      // org = new Org({
+      //   id: 'hogwarts',
+      //   name: 'Gryffindor',
+      //   permissions: {
+      //     admin: [user._id],
+      //     write: [user._id],
+      //     read: [user._id]
+      //   }
+      // });
+      // org.save(function(err) {
+      //   if (err) {
+      //     M.log.error(err);
+      //   }
+      //   done();
+      // });
     });
   });
   // runs after all the tests are done
