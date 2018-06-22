@@ -26,7 +26,6 @@ const path = require('path');
 
 // Global MBEE helper object
 const M = { env: process.env.NODE_ENV || 'dev' };
-console.log(M);
 M.version = require(`${__dirname}/package.json`).version;
 M.build = require(`${__dirname}/package.json`).buildNumber;
 M.version4 = (M.build !== 'NO_BUILD_NUMBER') ? `${M.version}.${M.build}` : `${M.version}.0`;
