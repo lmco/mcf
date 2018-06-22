@@ -13,6 +13,7 @@
  * @module  Project Model Tests
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description  Tests the project model
  */
@@ -79,8 +80,9 @@ describe(name, function() {
     });
   });
 
-  it('should create an project', createProject).timeout(3000);
-  it('should delete an project', deleteProject).timeout(3000);
+  it('should create a project', createProject).timeout(3000);
+  it('should soft delete a project', softDeleteProject).timeout(3000);
+  it('should delete a project', deleteProject).timeout(3000);
 });
 
 
@@ -117,6 +119,27 @@ function createProject(done) {
         M.log.error(err);
       }
       chai.expect(err).to.equal(null);
+      done();
+    });
+  });
+}
+
+/**
+ * Soft deletes a project.
+ */
+function softDeleteProject(done) {
+  Project.findOneAndUpdate({
+    id: 'dthstr'
+  }, {
+    deletedOn: Date.now(),
+    deleted: true
+  }, (err, proj) => {
+    Project.findOne({
+      id: proj.id
+    }, (err2, proj2) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(proj2.deleted).to.equal(true);
+      chai.expect(proj2.deletedOn).to.not.equal(null);
       done();
     });
   });

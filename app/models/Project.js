@@ -73,8 +73,30 @@ const ProjectSchema = new Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }]
-  }
+  },
 
+  /**
+    * The date the project was soft-deleted on.
+    */
+  deletedOn: {
+    type: Date,
+    default: null
+  },
+
+  /**
+    * A boolean value displaying whether or not the project
+    * has been soft deleted.
+    */
+  deleted: {
+    type: Boolean,
+    default: false,
+    set: function(v) {
+      return (this.deletedOn !== null);
+    },
+    get: function(v) {
+      return (this.deletedOn !== null);
+    }
+  }
 });
 
 // NOTE: Commented out on 6/19 due to decision that members was no longer needed
