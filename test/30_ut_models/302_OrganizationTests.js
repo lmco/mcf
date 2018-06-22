@@ -13,6 +13,7 @@
  * @module  Org Model Tests
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description  Tests the org model
  */
@@ -43,6 +44,7 @@ describe(name, () => {
   });
 
   it('should create an organization', createOrg).timeout(2500);
+  it('should soft delete an organization', softDeleteOrg).timeout(2500);
   it('should delete an organization', deleteOrg).timeout(2500);
 });
 
@@ -68,6 +70,28 @@ function createOrg(done) {
   });
 }
 
+/**
+ * Soft-deletes the org.
+ */
+function softDeleteOrg(done) {
+  Org.findOneAndUpdate({
+    id: 'empire'
+  }, {
+    deletedOn: Date.now(),
+    deleted: true
+  },
+  (err, org) => {
+    Org.findOne({
+      id: org.id
+    }, (err2, org2) => {
+      // Verify soft delete
+      chai.expect(err2).to.equal(null);
+      chai.expect(org2.deletedOn).to.not.equal(null);
+      chai.expect(org2.deleted).to.equal(true);
+      done();
+    });
+  });
+}
 
 /**
  * Deletes the organization.

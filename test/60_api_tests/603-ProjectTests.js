@@ -37,7 +37,6 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.load('models/Organization');
-const OrgController = M.load('controllers/OrganizationController');
 
 const test = M.config.test;
 const User = M.load('models/User');
@@ -56,48 +55,38 @@ let user = null;
 // runs before all tests in this block
 
 describe(name, function() {
-  before(function(done) {
-    this.timeout(10000);
+  before(function() {
     const db = M.load('lib/db');
     db.connect();
-
-    User.findOne({ username: 'mbee' }, function(errUser, foundUser) {
-      user = foundUser;
-      // Check if error occured
-      if (errUser) {
-        M.log.error(errUser);
-      }
-      // Otherwise,
-      // Create a parent organization before creating any projects
-      OrgController.createOrg(user, { id: 'hogwarts', name: 'Gryffindor' })
-      .then((newOrg) => {
-        org = newOrg;
-        done();
-      })
-      .catch((err) => {
-        M.log.error(err);
-        done();
+    return new Promise(function(resolve) {
+      User.findOne({ username: 'mbee' }, function(errUser, foundUser) {
+        user = foundUser;
+        // Check if error occured
+        if (errUser) {
+          M.log.error(errUser);
+        }
+        // Otherwise,
+        // Create a parent organization before creating any projects
+        org = new Org({
+          id: 'hogwarts',
+          name: 'Gryffindor',
+          permissions: {
+            admin: [user._id],
+            write: [user._id],
+            read: [user._id]
+          }
+        });
+        org.save(function(err) {
+          if (err) {
+            M.log.error(err);
+          }
+          return resolve();
+        });
       });
-      // org = new Org({
-      //   id: 'hogwarts',
-      //   name: 'Gryffindor',
-      //   permissions: {
-      //     admin: [user._id],
-      //     write: [user._id],
-      //     read: [user._id]
-      //   }
-      // });
-      // org.save(function(err) {
-      //   if (err) {
-      //     M.log.error(err);
-      //   }
-      //   done();
-      // });
     });
   });
   // runs after all the tests are done
   after(function(done) {
-    this.timeout(10000);
     Org.findOneAndRemove({ id: 'hogwarts' }, (err) => {
       if (err) {
         M.log.error(err);
@@ -133,9 +122,7 @@ function postProject01(done) {
     body: JSON.stringify({
       id: id,
       name: 'Youre a wizard Harry',
-      org: {
-        id: 'hogwarts'
-      },
+      org: org._id,
       permissions: {
         admin: [user._id],
         write: [user._id],
@@ -185,9 +172,7 @@ function putOrg01(done) {
     body: JSON.stringify({
       id: id,
       name: 'I know',
-      org: {
-        id: 'hogwarts'
-      },
+      org: org._id,
       permissions: {
         admin: [user._id],
         write: [user._id],
@@ -216,9 +201,7 @@ function postProject02(done) {
     body: JSON.stringify({
       id: id,
       name: 'Red Head',
-      org: {
-        id: 'hogwarts'
-      },
+      org: org._id,
       permissions: {
         admin: [user._id],
         write: [user._id],
