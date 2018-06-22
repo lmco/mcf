@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Org Model Tests
+ * @module  Org Controller Tests
  *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  Tests the org model
+ * @description  Tests the org controller
  */
 
 const path = require('path');
