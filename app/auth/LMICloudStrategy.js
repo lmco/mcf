@@ -91,7 +91,9 @@ class LMICloudStrategy extends BaseStrategy {
     User.find({
       username: username,
       deletedOn: null
-    }, (err, users) => {
+    })
+    .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
+    .exec((err, users) => {
       // Check for errors
       if (err) {
         cb(err);
@@ -215,6 +217,7 @@ class LMICloudStrategy extends BaseStrategy {
     User.find({
       username: ldapUser[M.config.auth.ldap.username_attribute]
     })
+    .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
     .exec((err, users) => {
       if (err) {
         this.client.destroy();
@@ -272,7 +275,9 @@ class LMICloudStrategy extends BaseStrategy {
       User.findOne({
         username: M.lib.sani.sanitize(req.session.user),
         deletedOn: null
-      }, (err, user) => {
+      })
+      .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
+      .exec((err, user) => {
         cb((err) || null, user);
       });
     }
@@ -283,7 +288,9 @@ class LMICloudStrategy extends BaseStrategy {
       User.findOne({
         username: M.lib.sani.sanitize(token.username),
         deletedOn: null
-      }, (err, user) => {
+      })
+      .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
+      .exec((err, user) => {
         cb((err) || null, user);
       });
     }

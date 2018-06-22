@@ -189,6 +189,10 @@ function loginLDAPUser(done) {
   AuthController.handleBasicAuth(null, null, u, p, (err, user) => {
     chai.expect(err).to.equal(null);
     chai.expect(user.username).to.equal('mbee');
+
+    User.findOneAndUpdate({ username: 'mbee' }, { admin: true }, (updateErr, userUpdate) => {
+      chai.expect(updateErr).to.equal(null);
+    });
     done();
   });
 }

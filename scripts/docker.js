@@ -96,7 +96,8 @@ function docker(args) {
       'run',
       '-d',
       '-it',
-      '--restart=always'
+      '--restart=always',
+      '-e', `NODE_ENV=${M.env}`
     ];
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
       rargs = rargs.concat(['-p', `${M.config.docker.http.port}:${M.config.server.http.port}`]);
@@ -118,5 +119,27 @@ function docker(args) {
       }
     });
     console.log('Docker Container Running in Background.');
+  }
+
+  // Get the Docker logs
+  if (args.includes('--get-logs')) {
+    console.log('Getting docker logs ...');
+
+    // Build the "docker run" command
+    const rargs = [
+      'logs',
+      M.config.docker.container.name
+    ];
+
+    // Call the Docker logs command
+    const cmd = spawn('docker', rargs, { stdio: 'inherit' });
+    cmd.on('data', (data) => { console.log(data.toString()); });
+    cmd.on('exit', (code) => {
+      if (code !== 0) {
+        console.log('Docker logs failed');
+        process.exit(code);
+      }
+    });
+    console.log('End of Docker logs.');
   }
 }

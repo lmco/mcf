@@ -88,6 +88,8 @@ pipeline {
      */
     post {
         always {
+            // Gets the logs and prints them to the console
+            sh 'NODE_ENV=test node mbee docker --get-logs'
             // Removes any test containers
             sh 'NODE_ENV=test node mbee docker --clean'
         }

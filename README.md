@@ -24,7 +24,7 @@ up, see our section on [setting up MongoDB](#setting-up-mongodb). Once MongoDB
 is set up, you just need to configure MBEE to point to it.
 
 Finally, you need to clone the MBEE code by running:
-`git clone https://git.lmms.lmco.com/mbee/mbee.git `. And enter the directory
+`git clone https://gitlab.lmms.lmco.com/mbee/mbee.git `. And enter the directory
 with `cd mbee`.
 
 #### Lockheed Martin Specific Setup

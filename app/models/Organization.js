@@ -55,6 +55,15 @@ const OrganizationSchema = new mongoose.Schema({
    */
   permissions: {
     /**
+     * Contains the list of users with read access to the organization.
+     * @type {Array}
+     */
+    read: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+
+    /**
      * Contains the list of users with write access to the organization.
      * @type {Array}
      */
@@ -94,21 +103,29 @@ OrganizationSchema.virtual('projects', {
  * TODO - Check out a post org and figure out why this gets called three times.
  */
 OrganizationSchema.virtual('members').get(function() {
-  // Grab the write and admin permissions lists
+  // Grab the read, write and admin permissions lists
   const write = this.permissions.write;
   const admin = this.permissions.admin;
 
   // set member to a copy of write
   const member = write.slice();
+  const memberMap = member.map(u => u.username);
 
   // Add admins that aren't already in the member list,
   // creating a unique list of members
   for (let i = 0; i < admin.length; i++) {
-    if (!member.includes(admin[i])) {
+    if (!memberMap.includes(admin[i].username)) {
       member.push(admin[i]);
     }
   }
   return member;
+});
+
+OrganizationSchema.pre('find', function() {
+  // this.populate('projects');
+  // this.populate('permissions.read');
+  // this.populate('permissions.write');
+  // this.populate('permissions.admin');
 });
 
 /**
@@ -121,6 +138,10 @@ OrganizationSchema.methods.getPublicData = function() {
     name: this.name,
     projects: this.projects
   };
+};
+
+OrganizationSchema.methods.getPermissionLevels = function() {
+  return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
 
 // Required for virtual getters
