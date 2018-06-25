@@ -45,7 +45,7 @@ module.exports.mongo = function(s) {
 module.exports.html = function(s) {
   if (typeof s === 'string') {
     return String(s)
-    .replace(/&/g, '&amp;')
+    .replace(/&(?![(amp;)(lt;)(gt;)(quot;)(#039;)])/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')

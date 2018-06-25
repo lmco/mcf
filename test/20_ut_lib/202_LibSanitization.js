@@ -35,6 +35,7 @@ describe(name, () => {
   it('should delete the key by user input', keyDelete);
   it('should sanitize html inputs by user', htmlTest);
   it('should sanitize a JSON object', sanitizeHtmlObject);
+  it('should not sanitize the allowed exceptions', sanitizeAllowedCharacters);
 });
 
 /*------------------------------------
@@ -75,6 +76,9 @@ function htmlTest(done) {
   done();
 }
 
+/**
+ * Test sanitization of a JSON Object.
+ */
 function sanitizeHtmlObject(done) {
   const data = {
     name: 'rick sanchez',
@@ -89,5 +93,16 @@ function sanitizeHtmlObject(done) {
   chai.expect(htmlSan.lname).to.equal('&lt;/script&gt;');
   chai.expect(htmlSan.admin).to.equal(true);
   chai.expect(htmlSan.email).to.equal('');
+  done();
+}
+
+/**
+ * Should attempt to sanatize &amp; and other allowed exceptions.
+ */
+function sanitizeAllowedCharacters(done) {
+  const s = 'this string has &amp; and &lt; but also &sample';
+  const expected = 'this string has &amp; and &lt; but also &amp;sample';
+  const htmlSan = sanitization.html(s);
+  chai.expect(htmlSan).to.equal(expected);
   done();
 }
