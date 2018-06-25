@@ -369,9 +369,9 @@ class ProjectController {
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
    * @param  {String} The project ID of the Project which is being deleted.
-   * @param {boolean} The optional flag indicating whether or not to soft delete the project.
+   * @param  {JSON Object} Contains the list of delete options.
    */
-  static removeProject(reqUser, organizationId, projectId, softDelete = true) {
+  static removeProject(reqUser, organizationId, projectId, options) {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
@@ -379,6 +379,19 @@ class ProjectController {
       }
       if (typeof projectId !== 'string') {
         return reject(new Error('Project ID is not of type String.'));
+      }
+
+      let softDelete = true;
+      if (options.hasOwnProperty('soft')) {
+        if (options.soft === false && reqUser.admin) {
+          softDelete = false;
+        }
+        else if (options.soft === false && !reqUser.admin) {
+          return reject(new Error('User does not have permissions to hard-delete an organization.'));
+        }
+        else if (options.soft !== false && options.soft !== true) {
+          return reject(new Error('Invalid argument for the \'soft\' field.'));
+        }
       }
 
       // Sanitize project properties

@@ -125,7 +125,7 @@ function createProject(done) {
  * Tests soft-deleting a project
  */
 function softDeleteProject(done) {
-  ProjController.removeProject(user, org.id, 'prtlgn', true)
+  ProjController.removeProject(user, org.id, 'prtlgn', {soft: true})
   .then((proj) => {
     ProjController.findProject(user, org.id, 'prtlgn')
     .then((proj2) => {
@@ -147,7 +147,7 @@ function softDeleteProject(done) {
  * Tests deleting a project
  */
 function deleteProject(done) {
-  ProjController.removeProject(user, org.id, 'prtlgn', false)
+  ProjController.removeProject(user, org.id, 'prtlgn', {soft: false})
   .then((proj) => {
     ProjController.findProject(user, org.id, 'prtlgn')
     .then((proj2) => {

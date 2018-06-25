@@ -358,23 +358,9 @@ class APIController {
       return res.status(500).send('Internal Server Error');
     }
 
-    // Check if the user wants to hard delete.
-    // Will soft delete by default.
-    let soft = true;
-
-    if (req.body.hasOwnProperty('soft')) {
-      if (req.body.soft === false) {
-        soft = false;
-      }
-      else if (req.body.soft !== true) {
-        M.log.error('Invalid option for soft delete, must be a boolean.');
-        return res.status(500).send('Internal Server Error');
-      }
-    }
-
     const orgid = M.lib.sani.sanitize(req.params.orgid);
 
-    OrgController.removeOrg(req.user, orgid, soft)
+    OrgController.removeOrg(req.user, orgid, req.body)
     .then((org) => {
       res.header('Content-Type', 'application/json');
       return res.send(APIController.formatJSON(org.getPublicData()));
@@ -767,24 +753,10 @@ class APIController {
       return res.status(500).send('Internal Server Error');
     }
 
-    // Check if the user wants to hard delete.
-    // Will soft delete by default.
-    let soft = true;
-
-    if (req.body.hasOwnProperty('soft')) {
-      if (req.body.soft === false) {
-        soft = false;
-      }
-      else if (req.body.soft !== true) {
-        M.log.error('Invalid option for soft delete, must be a boolean.');
-        return res.status(500).send('Internal Server Error');
-      }
-    }
-
     const orgId = M.lib.sani.html(req.params.orgid);
     const projectId = M.lib.sani.html(req.params.projectid);
 
-    ProjectController.removeProject(req.user, orgId, projectId, soft)
+    ProjectController.removeProject(req.user, orgId, projectId, req.body)
     .then((project) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));

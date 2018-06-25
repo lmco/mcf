@@ -295,9 +295,9 @@ class OrganizationController {
    *
    * @param  {User} The object containing the  requesting user.
    * @param  {string} The ID of the org being deleted.
-   * @param {boolean} The flag indicating whether or not to soft delete the org.
+   * @param  {JSON Object} Contains the list of delete options.
    */
-  static removeOrg(user, organizationID, softDelete = true) {
+  static removeOrg(user, organizationID, options) {
     return new Promise(((resolve, reject) => {
       // Error check - Make sure user is admin
       if (!user.admin) {
@@ -308,6 +308,19 @@ class OrganizationController {
       if (typeof organizationID !== 'string') {
         M.log.verbose('Organization ID is not a string');
         return reject(new Error('Organization ID is not a string'));
+      }
+
+      let softDelete = true;
+      if (options.hasOwnProperty('soft')) {
+        if (options.soft === false && user.admin) {
+          softDelete = false;
+        }
+        else if (options.soft === false && !user.admin) {
+          return reject(new Error('User does not have permissions to hard-delete an organization.'));
+        }
+        else if (options.soft !== false && options.soft !== true) {
+          return reject(new Error('Invalid argument for the \'soft\' field.'));
+        }
       }
 
       const orgID = M.lib.sani.html(organizationID);
