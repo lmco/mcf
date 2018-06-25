@@ -73,7 +73,7 @@ class ProjectController {
         const popQuery = 'org';
 
         // Search for project
-        Project.find({ org: org._id, 'permissions.read': reqUser._id })
+        Project.find({ org: org._id, 'permissions.read': reqUser._id, deleted: false })
         .populate(popQuery)
         .exec((err, projects) => {
           // Error Check - Database/Server Error
@@ -129,7 +129,7 @@ class ProjectController {
       const projUID = `${orgID}:${projID}`;
 
       // Search for project
-      Project.find({ uid: projUID })
+      Project.find({ uid: projUID, deleted: false })
       .populate('org permissions.read permissions.write permissions.admin')
       .exec((err, projects) => {
         // Error Check - Database/Server Error
@@ -369,8 +369,9 @@ class ProjectController {
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
    * @param  {String} The project ID of the Project which is being deleted.
+   * @param {boolean} The optional flag indicating whether or not to soft delete the project.
    */
-  static removeProject(reqUser, organizationId, projectId) {
+  static removeProject(reqUser, organizationId, projectId, softDelete = true) {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
@@ -405,13 +406,28 @@ class ProjectController {
           return reject(new Error('User does not have permission.'));
         }
 
-        // Remove the Project
-        Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
-          if (removeProjErr) {
-            return reject(removeProjErr);
-          }
-          return resolve(projectRemoved);
-        });
+        if (softDelete) {
+          project.deletedOn = Date.now();
+          project.deleted = true;
+          project.save((saveErr) => {
+            if (saveErr) {
+              // If error occurs, return it
+              return reject(saveErr);
+            }
+
+            // Return updated project
+            return resolve(project);
+          });
+        }
+        else {
+          // Remove the Project
+          Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
+            if (removeProjErr) {
+              return reject(removeProjErr);
+            }
+            return resolve(projectRemoved);
+          });
+        }
       });
     });
   }

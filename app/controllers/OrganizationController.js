@@ -44,7 +44,7 @@ class OrganizationController {
   static findOrgs(user) {
     return new Promise((resolve, reject) => {
       const userID = M.lib.sani.sanitize(user._id);
-      Organization.find({ 'permissions.read': userID })
+      Organization.find({ 'permissions.read': userID, deleted: false })
       .populate('projects read permissions.write permissions.admin')
       .exec((err, orgs) => {
         // If error occurs, return it
@@ -84,7 +84,7 @@ class OrganizationController {
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
-      Organization.findOne({ id: orgID })
+      Organization.findOne({ id: orgID, deleted: false })
       .populate('projects permissions.read permissions.write permissions.admin')
       .exec((err, org) => {
         // If error occurs, return it
@@ -280,10 +280,11 @@ class OrganizationController {
 
 
   /**
-   * This function takes a user and org object and updates an existing organization.
+   * This function takes a user object, org object, and boolean flag
+   * and (soft)deletes an existing organization.
    *
    * @example
-   * OrganizationController.createOrg('josh', {mbee-sw})
+   * OrganizationController.createOrg('josh', {mbee-sw}, fasle)
    * .then(function(org) {
    *   // do something with the newly updated org
    * })
@@ -294,8 +295,9 @@ class OrganizationController {
    *
    * @param  {User} The object containing the  requesting user.
    * @param  {string} The ID of the org being deleted.
+   * @param {boolean} The flag indicating whether or not to soft delete the org.
    */
-  static removeOrg(user, organizationID) {
+  static removeOrg(user, organizationID, softDelete = true) {
     return new Promise(((resolve, reject) => {
       // Error check - Make sure user is admin
       if (!user.admin) {
@@ -310,17 +312,37 @@ class OrganizationController {
 
       const orgID = M.lib.sani.html(organizationID);
 
-      M.log.verbose('Attempting delete of', orgID, '...');
+      // M.log.verbose('Attempting delete of', orgID, '...');
 
       // Do the deletion
-      Organization.findOneAndRemove({ id: orgID })
-      .populate()
-      .exec((err, org) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(org);
-      });
+
+      if (softDelete) {
+        OrganizationController.findOrg(user, orgID)
+        .then((org) => {
+          org.deletedOn = Date.now();
+          org.deleted = true;
+          org.save((saveErr) => {
+            if (saveErr) {
+              // If error occurs, return it
+              return reject(saveErr);
+            }
+
+            // Return updated org
+            return resolve(org);
+          });
+        })
+        .catch(error => reject(error));
+      }
+      else {
+        Organization.findOneAndRemove({ id: orgID })
+        .populate()
+        .exec((err, org) => {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(org);
+        });
+      }
     }));
   }
 

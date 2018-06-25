@@ -89,13 +89,7 @@ const ProjectSchema = new Schema({
     */
   deleted: {
     type: Boolean,
-    default: false,
-    set: function(v) {
-      return (this.deletedOn !== null);
-    },
-    get: function(v) {
-      return (this.deletedOn !== null);
-    }
+    default: false
   }
 });
 
