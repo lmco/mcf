@@ -79,8 +79,15 @@ function sanitizeHtmlObject(done) {
   const data = {
     name: 'rick sanchez',
     fname: '<script>',
-    lname: '</script>'
-  }
+    lname: '</script>',
+    admin: true,
+    email: null
+  };
   const htmlSan = sanitization.html(data);
+  chai.expect(htmlSan.name).to.equal('rick sanchez');
+  chai.expect(htmlSan.fname).to.equal('&lt;script&gt;');
+  chai.expect(htmlSan.lname).to.equal('&lt;/script&gt;');
+  chai.expect(htmlSan.admin).to.equal(true);
+  chai.expect(htmlSan.email).to.equal('');
   done();
 }

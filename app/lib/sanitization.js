@@ -17,31 +17,50 @@
  * Defines common cryptographic functions.
  */
 
-const htmlspecialchars = require('htmlspecialchars');
-const mongosanitize = require('mongo-sanitize');
 
 /**
  * Generates a token from user data.
  */
 module.exports.sanitize = function(s) {
-  return mongosanitize(htmlspecialchars(s));
+  return module.exports.mongo(module.exports.html(s));
 };
 
+/**
+ * Sanitizes for databse queries
+ */
 module.exports.mongo = function(s) {
-  return mongosanitize(s);
+  if (s instanceof Object) {
+    Object.keys(s).forEach((k) => {
+      if (/^\$/.test(k)) {
+        delete s[k];
+      }
+    });
+  }
+  return s;
 };
 
+/**
+ * Sanitizes for any scripting in html.
+ */
 module.exports.html = function(s) {
-  if (typeof s === 'string' ) {
-    console.log('sanitize a string');
+  if (typeof s === 'string') {
+    return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
   }
-  else if (typeof s === 'object') {
+  if (s === null) {
+    return '';
+  }
+  if (s instanceof Object) {
     Object.keys(s).forEach((k) => {
-      module.exports.html(k);
-    })
+      const newVal = module.exports.html(s[k]);
+      s[k] = newVal;
+    });
+    return s;
   }
-  else {
-    console.log(typeof s);
-  }
-  // return htmlspecialchars(s);
+
+  return s;
 };
