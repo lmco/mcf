@@ -96,13 +96,7 @@ const OrganizationSchema = new mongoose.Schema({
     */
   deleted: {
     type: Boolean,
-    default: false,
-    set: function(v) {
-      return (this.deletedOn !== null);
-    },
-    get: function(v) {
-      return (this.deletedOn !== null);
-    }
+    default: false
   }
 });
 
@@ -170,7 +164,6 @@ OrganizationSchema.methods.getPermissionLevels = function() {
 // Required for virtual getters
 OrganizationSchema.set('toJSON', { virtuals: true });
 OrganizationSchema.set('toObject', { virtuals: true });
-
 
 // Export mongoose model as "Organization"
 module.exports = mongoose.model('Organization', OrganizationSchema);
