@@ -227,7 +227,10 @@ function deleteProject01(done) {
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
     headers: getHeaders(),
-    method: 'DELETE'
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
   },
   function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
@@ -243,7 +246,10 @@ function deleteProject02(done) {
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/ronweasly`,
     headers: getHeaders(),
-    method: 'DELETE'
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
   },
   function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
