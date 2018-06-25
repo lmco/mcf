@@ -189,7 +189,7 @@ function findAllExistingOrgs(done) {
  * Soft-delete an existing org
  */
 function softDeleteExistingOrg(done) {
-  OrgController.removeOrg(user, 'tv', {soft: true})
+  OrgController.removeOrg(user, 'tv', { soft: true })
   .then((retOrg) => {
     OrgController.findOrg(user, 'tv')
     .then((orgTwo) => {
@@ -211,7 +211,7 @@ function softDeleteExistingOrg(done) {
  * Tests deleting an existing org
  */
 function deleteExistingOrg(done) {
-  OrgController.removeOrg(user, 'tv', {soft: false})
+  OrgController.removeOrg(user, 'tv', { soft: false })
   .then((retOrg) => {
     OrgController.findOrg(user, 'tv')
     .then((orgTwo) => {
