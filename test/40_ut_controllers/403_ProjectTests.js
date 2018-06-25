@@ -8,11 +8,13 @@
  *                                                                           *
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
+ * WAITING FOR IMPLEMENTATION OF ERROR STRINGS                               *
  *****************************************************************************/
 /**
  * @module  Project Controller Tests
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description  Tests the project controller
  */
@@ -28,6 +30,7 @@ const Org = M.load('models/Organization');
 const User = M.load('models/User');
 
 let user = null;
+let nonAuser = null;
 let org = null;
 
 
@@ -50,21 +53,30 @@ describe(name, () => {
     });
     user.save((err) => {
       chai.expect(err).to.equal(null);
-
-      // Create the organization
-      org = new Org({
-        id: 'council',
-        name: 'Council of Ricks',
-        permissions: {
-          admin: [user._id],
-          write: [user._id],
-          read: [user._id]
-        }
+      nonAuser = new User({
+        username: 'msmith',
+        password: 'doihavetorick',
+        fname: 'Morty',
+        lname: 'Smith',
+        admin: false
       });
+      nonAuser.save((err) => {
+          chai.expect(err).to.equal(null);
 
-      org.save((orgErr) => {
-        chai.expect(orgErr).to.equal(null);
-        done();
+        // Create the organization
+        org = new Org({
+          id: 'council',
+          name: 'Council of Ricks',
+          permissions: {
+            admin: [user._id],
+            write: [user._id],
+            read: [user._id]
+          }
+        });
+        org.save((orgErr) => {
+          chai.expect(orgErr).to.equal(null);
+          done();
+        });
       });
     });
   });
@@ -82,13 +94,24 @@ describe(name, () => {
         username: 'rsanchez'
       }, (userErrorOne) => {
         chai.expect(userErrorOne).to.equal(null);
-        mongoose.connection.close();
-        done();
+        User.findOneAndRemove({
+          username: 'msmith'
+        }, (userErrorTwo) => {
+          chai.expect(userErrorTwo).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       });
     });
   });
 
   it('should create a new project', createProject).timeout(2500);
+ // it('should reject creation of project with invalid ID', noId).timeout(2500);
+ // it('should reject creation of project with invalid Name', noName).timeout(2500);
+ // it('should reject creation of project with invalid Org', noOrg).timeout(2500);
+  it('should find a project', findProj).timeout(2500);
+ // it('should not find a project', noProj).timeout(2500);
+ // it('should reject non-A user from finding a project', nonAUser).timeout(2500);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
   it('should delete a project', deleteProject).timeout(2500);
 });
@@ -120,6 +143,142 @@ function createProject(done) {
     done();
   });
 }
+
+/**
+ * Tests creating a project that has not id input.
+ * This should be rejected and give an error.
+ */
+function noId(done) {
+  const projData = {
+    id: '',
+    name: 'denyme',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(user, projData)
+  .then((error) => {
+    chai.expect(error).to.equal('Project ID is not valid.');
+    done();
+  })
+  .catch((err) => {
+    chai.expect(err).to.equal('Project ID is not valid.');
+    done();
+  });
+}
+
+/**
+ * Tests creating a project that has not id input.
+ * This should be rejected and give an error.
+ */
+function noName(done) {
+  const projData = {
+    id: 'imfake',
+    name: '',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(user, projData)
+  .then((error) => {
+    chai.expect(error).to.equal('Project Name is not valid.');
+    done();
+  })
+  .catch((err) => {
+    chai.expect(err).to.equal('Project Name is not valid.');
+    done();
+  });
+}
+
+/**
+ * Tests creating a project that has not id input.
+ * This should be rejected and give an error.
+ */
+function noOrg(done) {
+  const projData = {
+    id: 'imfake',
+    name: 'denyme',
+    org: {
+      id: ''
+    }
+  };
+  ProjController.createProject(user, projData)
+  .then((error) => {
+    chai.expect(error).to.equal('Org not found.');
+    done();
+  })
+  .catch((err) => {
+    chai.expect(err).to.equal('Org not found.');
+    done();
+  });
+}
+
+/**
+ * Tests for finding the project that was 
+ * just created above. Should succeed
+ */
+
+function findProj(done){
+  const orgId = 'council';
+  const projId = 'prtlgn'
+  ProjController.findProject(user, orgId, projId)
+  .then(function(proj) {
+    chai.expect(proj.id).to.equal('prtlgn');
+    chai.expect(proj.name).to.equal('portal gun');
+    done();
+  })
+  .catch(function(err){
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests for find a project that does not exist.
+ * Should output error.
+ * NOTE: Technically this test does pass 
+ * except that the output is not of a string
+ * therefore it is failing.
+ */
+
+function noProj(done){
+  const orgId = 'council';
+  const projId = 'fakeProj'
+  ProjController.findProject(user, orgId, projId)
+  .then(function(error) {
+    //chai.expect(error).to.not.equal(null);
+    chai.expect(error).to.equal('Error: Project not found');
+    done();
+  })
+  .catch(function(err){
+    //chai.expect(error).to.not.equal(null);
+    chai.expect(err).to.equal('Error: Project not found');
+    done();
+  });
+}
+
+/**
+ * Tests for find a project using a non admin user.
+ * Should output error.
+ * NOTE: Technically this test does pass 
+ * except that the output is not of a string
+ * therefore it is failing.
+ */
+
+function nonAUser(done){
+  const orgId = 'council';
+  const projId = 'fakeProj'
+  ProjController.findProject(user, orgId, projId)
+  .then(function(error) {
+    chai.expect(error).to.equal('Error: User does not have permission.');
+    done();
+  })
+  .catch(function(err){
+    chai.expect(err).to.equal('Error: User does not have permission.');
+    done();
+  });
+}
+
 
 /**
  * Tests soft-deleting a project
