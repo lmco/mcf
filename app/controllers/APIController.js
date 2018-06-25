@@ -347,9 +347,9 @@ class APIController {
   /**
    * DELETE /api/orgs/:orgid
    *
-   * @description  Takes an orgid in the URI and soft-deletes the corresponding
-   * organization. Returns a success message if successful, otherwise an error
-   * message is returned.
+   * @description  Takes an orgid in the URI and options in the body and
+   * deletes the corresponding organization. Returns a success message if
+   * successful, otherwise an error message is returned.
    */
   static deleteOrg(req, res) {
     // If for some reason we don't have a user, fail.
