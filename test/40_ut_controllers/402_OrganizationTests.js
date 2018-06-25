@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Org Controller Tests
+ * @module  Organization Controller Tests
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -86,7 +86,7 @@ describe(name, () => {
   });
 
   // runs after all tests in this block
-  after(() => {
+  after((done) => {
     // Delete the org
     Org.findOneAndRemove({
       id: org.id
@@ -106,6 +106,7 @@ describe(name, () => {
         }, (userErrorTwo) => {
           chai.expect(userErrorTwo).to.equal(null);
           mongoose.connection.close();
+          done();
         });
       });
     });
@@ -114,6 +115,7 @@ describe(name, () => {
   it('should create a new org', addNewOrg).timeout(2500);
   it('should find an existing org', findExistingOrg).timeout(2500);
   it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
+  it('should soft delete an existing org', softDeleteExistingOrg).timeout(2500);
   it('should delete an existing org', deleteExistingOrg).timeout(2500);
   it('should add a user to an org', addUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
@@ -184,10 +186,32 @@ function findAllExistingOrgs(done) {
 }
 
 /**
+ * Soft-delete an existing org
+ */
+function softDeleteExistingOrg(done) {
+  OrgController.removeOrg(user, 'tv', { soft: true })
+  .then((retOrg) => {
+    OrgController.findOrg(user, 'tv')
+    .then((orgTwo) => {
+      chai.expect(orgTwo).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error.message).to.equal('Org not found.');
+      done();
+    });
+  })
+  .catch((err) => {
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
  * Tests deleting an existing org
  */
 function deleteExistingOrg(done) {
-  OrgController.removeOrg(user, 'tv')
+  OrgController.removeOrg(user, 'tv', { soft: false })
   .then((retOrg) => {
     OrgController.findOrg(user, 'tv')
     .then((orgTwo) => {
