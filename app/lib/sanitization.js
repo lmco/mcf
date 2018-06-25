@@ -32,5 +32,16 @@ module.exports.mongo = function(s) {
 };
 
 module.exports.html = function(s) {
-  return htmlspecialchars(s);
+  if (typeof s === 'string' ) {
+    console.log('sanitize a string');
+  }
+  else if (typeof s === 'object') {
+    Object.keys(s).forEach((k) => {
+      module.exports.html(k);
+    })
+  }
+  else {
+    console.log(typeof s);
+  }
+  // return htmlspecialchars(s);
 };
