@@ -30,6 +30,11 @@ module.exports.project = {
   name: '^([a-zA-Z0-9-\\s])+$'
 };
 
+module.exports.element = {
+  id: '^([a-zA-Z0-9])([a-zA-Z0-9-\:]){0,}$',
+  name: '^([a-zA-Z0-9-\\s])+$'
+}
+
 module.exports.user = {
   username: '^([a-z])([a-z0-9_]){0,}$',
   password: function(p) {
