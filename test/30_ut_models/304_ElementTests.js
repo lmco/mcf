@@ -242,7 +242,7 @@ function createBlock01(done) {
   Element.Package.findOne({
     id: 'empire:deathstar:0001'
   })
-  .exec((findRootErr, package) => {
+  .exec((findRootErr, pkg) => {
     // Make sure no errors occur in lookup
     if (findRootErr) {
       M.log.error(findRootErr);
@@ -254,7 +254,7 @@ function createBlock01(done) {
       id: 'empire:deathstar:0002',
       name: 'Core Reactor',
       project: project._id,
-      parent: package._id
+      parent: pkg._id
     });
 
     // Save and verify it was created
@@ -268,11 +268,11 @@ function createBlock01(done) {
       chai.expect(createdBlock.id).to.equal('empire:deathstar:0002');
       chai.expect(createdBlock.name).to.equal('Core Reactor');
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
-      chai.expect(createdBlock.parent.toString()).to.equal(package._id.toString());
+      chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
 
       // Add the block to the package.contains field
-      package.contains.push(createdBlock);
-      package.save((packageSaveErr) => {
+      pkg.contains.push(createdBlock);
+      pkg.save((packageSaveErr) => {
         chai.expect(packageSaveErr).to.equal(null);
         done();
       });
@@ -288,7 +288,7 @@ function createBlock02(done) {
   Element.Package.findOne({
     id: 'empire:deathstar:0001'
   })
-  .exec((findRootErr, package) => {
+  .exec((findRootErr, pkg) => {
     // Make sure no errors occur in lookup
     if (findRootErr) {
       M.log.error(findRootErr);
@@ -300,7 +300,7 @@ function createBlock02(done) {
       id: 'empire:deathstar:0003',
       name: 'Thermal Exhaust Port',
       project: project._id,
-      parent: package._id
+      parent: pkg._id
     });
 
     // Save and verify it was created
@@ -314,11 +314,11 @@ function createBlock02(done) {
       chai.expect(createdBlock.id).to.equal('empire:deathstar:0003');
       chai.expect(createdBlock.name).to.equal('Thermal Exhaust Port');
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
-      chai.expect(createdBlock.parent.toString()).to.equal(package._id.toString());
+      chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
 
       // Add the block to the package.contains field
-      package.contains.push(createdBlock);
-      package.save((packageSaveErr) => {
+      pkg.contains.push(createdBlock);
+      pkg.save((packageSaveErr) => {
         chai.expect(packageSaveErr).to.equal(null);
         done();
       });
@@ -334,23 +334,23 @@ function createRelationship(done) {
   Element.Package.findOne({
     id: 'empire:deathstar:0001'
   })
-  .exec((findRootErr, package) => {
+  .exec((findRootErr, pkg) => {
     // Make sure no errors occur in lookup
     if (findRootErr) {
       M.log.error(findRootErr);
       chai.expect(findRootErr).to.equal(null);
     }
 
-    chai.expect(package.contains.length).to.equal(2);
-    const source = package.contains[0];
-    const target = package.contains[1];
+    chai.expect(pkg.contains.length).to.equal(2);
+    const source = pkg.contains[0];
+    const target = pkg.contains[1];
 
     // Create the new block
     const newRelationship = new Element.Relationship({
       id: 'empire:deathstar:0004',
       name: 'Dependency Link',
       project: project._id,
-      parent: package._id,
+      parent: pkg._id,
       source: source,
       target: target
     });
@@ -366,13 +366,13 @@ function createRelationship(done) {
       chai.expect(createdRelationship.id).to.equal('empire:deathstar:0004');
       chai.expect(createdRelationship.name).to.equal('Dependency Link');
       chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
-      chai.expect(createdRelationship.parent.toString()).to.equal(package._id.toString());
+      chai.expect(createdRelationship.parent.toString()).to.equal(pkg._id.toString());
       chai.expect(createdRelationship.source.toString()).to.equal(source.toString());
       chai.expect(createdRelationship.target.toString()).to.equal(target.toString());
 
       // Add the block to the package.contains field
-      package.contains.push(createdRelationship);
-      package.save((packageSaveErr) => {
+      pkg.contains.push(createdRelationship);
+      pkg.save((packageSaveErr) => {
         chai.expect(packageSaveErr).to.equal(null);
         done();
       });
@@ -397,7 +397,6 @@ function deleteBlocksAndRelationships(done) {
       id: 'empire:deathstar:0003'
     })
     .exec((block02DeleteError) => {
-
       chai.expect(block02DeleteError).to.equal(null);
 
       // Delete the first block
