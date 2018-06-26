@@ -603,8 +603,9 @@
 
     // disallow certain syntax forms
     // "https"://eslint.org/docs/rules/no-restricted-syntax
+    // LM: 6/26/18 Changing to warn to allow use of for..in loops
     "no-restricted-syntax": [
-      "error",
+      "warn",
       {
         "selector": "ForInStatement",
         "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array.",

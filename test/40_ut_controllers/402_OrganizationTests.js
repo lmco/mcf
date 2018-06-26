@@ -24,6 +24,7 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const OrgController = M.load('controllers/OrganizationController');
+const ProjController = M.load('controllers/ProjectController');
 const Org = M.load('models/Organization');
 const User = M.load('models/User');
 
@@ -117,6 +118,8 @@ describe(name, () => {
   it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
   it('should soft delete an existing org', softDeleteExistingOrg).timeout(2500);
   it('should delete an existing org', deleteExistingOrg).timeout(2500);
+  it('should soft-delete an existing org and its project', softDeleteProjectAndOrg).timeout(5000);
+  it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(2500);
   it('should add a user to an org', addUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
   it('should get all members with permissions in an org and their permissions', getMembers).timeout(2500);
@@ -225,6 +228,80 @@ function deleteExistingOrg(done) {
   })
   .catch((err) => {
     chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests that projects are soft deleted with orgs
+ */
+function softDeleteProjectAndOrg(done) {
+  OrgController.createOrg(user, { id: 'tv', name: 'Intergalactic Cable' })
+  .then((retOrg) => {
+    ProjController.createProject(user, { id: 'prtlgn', name: 'portal gun', org: { id: 'tv' } })
+    .then((retProj) => {
+      OrgController.removeOrg(user, 'tv', { soft: true })
+      .then((retOrg2) => {
+        OrgController.findOrg(user, 'tv')
+        .then((retOrg3) => {
+          chai.expect(retOrg3).to.equal(null);
+          done();
+        })
+        .catch((error) => {
+          chai.expect(error.message).to.equal('Org not found.');
+        });
+        ProjController.findProject(user, 'tv', 'prtlgn')
+        .then((retProj2) => {
+          chai.expect(retProj2).to.equal(null);
+          done();
+        })
+        .catch((error) => {
+          chai.expect(error.message).to.equal('Project not found');
+          done();
+        });
+      })
+      .catch((error2) => {
+        chai.expect(error2).to.equal(null);
+        done();
+      });
+    })
+    .catch((error3) => {
+      chai.expect(error3).to.equal(null);
+      done();
+    });
+  })
+  .catch((error4) => {
+    chai.expect(error4).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests that projects are hard deleted with orgs
+ */
+function hardDeleteProjectAndOrg(done) {
+  OrgController.removeOrg(user, 'tv', { soft: false })
+  .then((retOrg2) => {
+    OrgController.findOrg(user, 'tv')
+    .then((retOrg3) => {
+      chai.expect(retOrg3).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error.message).to.equal('Org not found.');
+    });
+    ProjController.findProject(user, 'tv', 'prtlgn')
+    .then((retProj2) => {
+      chai.expect(retProj2).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error.message).to.equal('Project not found');
+      done();
+    });
+  })
+  .catch((error2) => {
+    chai.expect(error2).to.equal(null);
     done();
   });
 }
