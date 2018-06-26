@@ -36,12 +36,12 @@ const Project = M.load('models/Project');
 class ProjectController {
 
   /**
-   * @description  The function finds a project.
+   * @description  The function finds all projects for a given orgID.
    *
    * @example
-   * ProjectController.findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
+   * ProjectController.findProjects({Tony Stark}, 'StarkIndustries')
    * .then(function(org) {
-   *   // do something with the returned project
+   *   // do something with the returned projects
    * })
    * .catch(function(error) {
    *   M.log.error(error);
@@ -50,7 +50,6 @@ class ProjectController {
    *
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {String} The project ID of the Project which is being searched for.
    */
   static findProjects(reqUser, organizationId) {
     return new Promise((resolve, reject) => {
@@ -95,6 +94,87 @@ class ProjectController {
       .catch((orgFindErr) => reject(orgFindErr));
     });
   }
+
+  /**
+   * @description  The function deletes all projects for an org.
+   *
+   * @example
+   * ProjectController.removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
+   * .then(function(org) {
+   *   // Delete projects
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {String} The organization ID for the Organization the project belongs to.
+   * @param  {JSON Object} Contains a list of delete options.
+   */
+  static removeProjects(reqUser, organizationId, options) {
+    return new Promise((resolve, reject) => {
+      // Error check - Verify id is of type string for sanitization.
+      if (typeof organizationId !== 'string') {
+        return reject(new Error('Organization ID is not of type String.'));
+      }
+
+      // Determine whether to soft delete or not
+      let softDelete = true;
+      if (options.hasOwnProperty('soft')) {
+        // User must be a system admin to hard delete
+        if (options.soft === false && reqUser.admin) {
+          softDelete = false;
+        }
+        else if (options.soft === false && !reqUser.admin) {
+          return reject(new Error('User does not have permissions to hard-delete an organization.'));
+        }
+        else if (options.soft !== false && options.soft !== true) {
+          return reject(new Error('Invalid argument for the \'soft\' field.'));
+        }
+      }
+
+      // Sanitize the orgid
+      const orgID = M.lib.sani.html(organizationId);
+
+
+      // Delete the projects
+      if (softDelete) {
+        // Find the projects
+        ProjectController.findProjects(reqUser, orgID)
+        .then((projects) => {
+          // Mark each of them as deleted
+          for (let proj = 0; proj < projects.length; proj++) {
+            projects[proj].deletedOn = Date.now();
+            projects[proj].deleted = true;
+            projects[proj].save((saveErr) => {
+              if (saveErr) {
+                return reject(saveErr);
+              }
+            });
+          }
+          return resolve(projects);
+        })
+        .catch((deleteError) => reject(deleteError));
+      }
+      else {
+        // Find the org
+        OrgController.findOrg(reqUser, orgID, true)
+        .then((org) => {
+          // Hard-delete any projects with the matching orgID
+          Project.deleteMany({ org: org._id }, (deleteError, projectsDeleted) => {
+            if (deleteError) {
+              return reject(deleteError);
+            }
+
+            return resolve(projectsDeleted);
+          });
+        })
+        .catch((findOrgErr) => reject(findOrgErr));
+      }
+    });
+  }
+
 
   /**
    * @description  The function finds a project.
@@ -357,7 +437,7 @@ class ProjectController {
    * The function deletes a project.
    *
    * @example
-   * ProjectController.removeProject({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
    * .then(function(org) {
    *   // do something with the newly created project.
    * })
@@ -449,7 +529,7 @@ class ProjectController {
    * The function finds a projects permissions.
    *
    * @example
-   * ProjectController.findAllPermissions({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.findAllPermissions({Tony Stark}, 'stark', 'arc')
    * .then(function(org) {
    *   // do something with the newly created project.
    * })
@@ -504,7 +584,7 @@ class ProjectController {
    * The function finds a projects permissions.
    *
    * @example
-   * ProjectController.findAllPermissions({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
    * .then(function(org) {
    *   // do something with the newly created project.
    * })

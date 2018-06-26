@@ -63,7 +63,7 @@ class OrganizationController {
    * organization.
    *
    * @example
-   * OrganizationController.getOrg('josh', 'mbee-sw')
+   * OrganizationController.findOrg('josh', 'mbee-sw')
    * .then(function(org) {
    *   // do something with the org
    * })
@@ -74,8 +74,10 @@ class OrganizationController {
    *
    * @param  {String} The string containing the username of the requesting user.
    * @param  {String} The string of the org ID.
+   * @param  {Boolean} An optinal flag that allows users to search for
+   *                   soft deleted projects as well.
    */
-  static findOrg(user, organizationID) {
+  static findOrg(user, organizationID, softDeleted = false) {
     return new Promise((resolve, reject) => {
       // Error check - Make sure orgID is a string. Otherwise, reject.
       if (typeof organizationID !== 'string') {
@@ -84,7 +86,13 @@ class OrganizationController {
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
-      Organization.findOne({ id: orgID, deleted: false })
+      let searchParams = { id: orgID, deleted: false };
+
+      if (softDeleted && user.admin) {
+        searchParams = { id: orgID };
+      }
+
+      Organization.findOne(searchParams)
       .populate('projects permissions.read permissions.write permissions.admin')
       .exec((err, org) => {
         // If error occurs, return it
@@ -203,7 +211,7 @@ class OrganizationController {
    * existing organization.
    *
    * @example
-   * OrganizationController.createOrg('josh', {mbee-sw})
+   * OrganizationController.updateOrg('josh', {mbee-sw})
    * .then(function(org) {
    *   // do something with the newly updated org
    * })
@@ -284,7 +292,7 @@ class OrganizationController {
    * and (soft)deletes an existing organization.
    *
    * @example
-   * OrganizationController.createOrg('josh', {mbee-sw}, fasle)
+   * OrganizationController.removerg('josh', {mbee-sw}, {soft: false})
    * .then(function(org) {
    *   // do something with the newly updated org
    * })
@@ -298,7 +306,11 @@ class OrganizationController {
    * @param  {JSON Object} Contains the list of delete options.
    */
   static removeOrg(user, organizationID, options) {
-    return new Promise(((resolve, reject) => {
+    // Loading controller function wide since the project controller loads
+    // the org controller globally. Both files cannot load each other globally.
+    const ProjController = M.load('controllers/ProjectController');
+
+    return new Promise((resolve, reject) => {
       // Error check - Make sure user is admin
       if (!user.admin) {
         return reject(new Error('User cannot delete orgs.'));
@@ -310,8 +322,10 @@ class OrganizationController {
         return reject(new Error('Organization ID is not a string'));
       }
 
+      // Decide whether or not to soft delete the org
       let softDelete = true;
       if (options.hasOwnProperty('soft')) {
+        // User must be a system admin to hard delete
         if (options.soft === false && user.admin) {
           softDelete = false;
         }
@@ -325,10 +339,48 @@ class OrganizationController {
 
       const orgID = M.lib.sani.html(organizationID);
 
-      // M.log.verbose('Attempting delete of', orgID, '...');
+      // Delete the projects first while the org still exists
+      ProjController.removeProjects(user, orgID, options)
+      .then((projects) => {
+        OrganizationController.removeOrgHelper(user, orgID, softDelete)
+        .then((retOrg) => resolve(retOrg))
+        .catch((err) => reject(err));
+      })
+      .catch((deleteErr) => {
+        // There are simply no projects associated with this org to delete
+        if (deleteErr.message === 'Projects not found') {
+          OrganizationController.removeOrgHelper(user, orgID, softDelete)
+          .then((retOrg) => resolve(retOrg))
+          .catch((err) => reject(err));
+        }
+        else {
+          // If there is some other issue in deleting the projects.
+          return reject(deleteErr);
+        }
+      });
+    });
+  }
 
-      // Do the deletion
-
+  /**
+   * This function does the actual deletion or updating on an org.
+   * It was written to help clean up some code in the removeOrg function.
+   *
+   * @example
+   * OrganizationController.removeOrgHelper(Josh, 'mbee', true)
+   * .then(function(org) {
+   *  // Get the users roles
+   * })
+   * .catch(function(error) {
+   *  M.log.error(error);
+   * });
+   *
+   *
+   * @param {User} The object containing the requesting user.
+   * @param {string} The organization ID.
+   * @param {boolean} THe flag indicating whether or not to soft delete.
+   */
+  static removeOrgHelper(user, orgID, softDelete) {
+    return new Promise((resolve, reject) => {
       if (softDelete) {
         OrganizationController.findOrg(user, orgID)
         .then((org) => {
@@ -339,8 +391,6 @@ class OrganizationController {
               // If error occurs, return it
               return reject(saveErr);
             }
-
-            // Return updated org
             return resolve(org);
           });
         })
@@ -356,7 +406,7 @@ class OrganizationController {
           return resolve(org);
         });
       }
-    }));
+    });
   }
 
   /**
@@ -364,7 +414,7 @@ class OrganizationController {
    * permissions the second user has within the org
    *
    * @example
-   * OrganizationController.getUserPermissions(Josh, Austin, 'mbee')
+   * OrganizationController.findPermissions(Josh, Austin, 'mbee')
    * .then(function(org) {
    *  // Get the users roles
    * })
@@ -395,7 +445,7 @@ class OrganizationController {
    * users permissions within an organization
    *
    * @example
-   * OrganizationController.setUserPermissions(Josh, Austin, 'mbee', 'write')
+   * OrganizationController.setPermissions(Josh, Austin, 'mbee', 'write')
    * .then(function(org) {
    *   // Change the users role
    * })
