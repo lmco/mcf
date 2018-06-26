@@ -43,7 +43,7 @@ describe(name, function() {
    */
   before(function() {
     this.timeout(5000);
-    return new Promise(function(resolve) {
+    return new Promise(function(resolve, reject) {
       const db = M.load('lib/db');
       db.connect();
 
@@ -55,7 +55,7 @@ describe(name, function() {
         // Check if error occurred
         if (errUser) {
           M.log.error(errUser);
-          return reject(errUser);
+          chai.expect(errUser).to.equal(null);
         }
 
         // Create the org to be used for testing
@@ -120,10 +120,10 @@ describe(name, function() {
     .exec((projectRemoveErr) => {
       // Error check - make sure project was successfully removed
       if (projectRemoveErr) {
-        M.log.error(err);
+        M.log.error(projectRemoveErr);
       }
       // Expect error to be null
-      chai.expect(projectRemoveErr).to.equal(null)
+      chai.expect(projectRemoveErr).to.equal(null);
 
       // Remove the org
       Org.findOneAndRemove({
@@ -135,14 +135,13 @@ describe(name, function() {
           M.log.error(orgRemoveErr);
         }
         // Expect error to be null
-        chai.expect(orgRemoveErr).to.equal(null)
+        chai.expect(orgRemoveErr).to.equal(null);
 
         // Once db items are removed, close the db connection and finish
         mongoose.connection.close();
         done();
       });
     });
-
   });
 
   it('should create a generic element', createElement);
@@ -196,10 +195,9 @@ function deleteElement(done) {
  * Creates a project's root Package element
  */
 function createRootPackage(done) {
-
   // Create the new package
   const newPackage = new Element.Package({
-    id: 'empire:deathstar:0001' ,
+    id: 'empire:deathstar:0001',
     name: 'Death Star Model Root Package',
     project: project._id,
     parent: null
@@ -213,11 +211,13 @@ function createRootPackage(done) {
     chai.expect(err).to.equal(null);
 
     // Lookup the element and make sure it's there
-    Element.Package.find({id: 'empire:deathstar:0001'})
+    Element.Package.find({
+      id: 'empire:deathstar:0001'
+    })
     .exec((findErr, packages) => {
       // Error check make sure the find didn't fail
       if (findErr) {
-        console.log(findErr)
+        M.log.error(findErr);
       }
 
       // Make sure everything is as we expect it
@@ -226,7 +226,7 @@ function createRootPackage(done) {
       chai.expect(packages[0].id).to.equal('empire:deathstar:0001');
       chai.expect(packages[0].type).to.equal('Package');
       done();
-    })
+    });
   });
 }
 

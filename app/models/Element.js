@@ -23,7 +23,7 @@ const mongoose = require('mongoose');
 const M = require(path.join('..', '..', 'mbee.js'));
 
 // Mongoose options - for discriminators
-const options = {discriminatorKey: 'type'};
+const options = { discriminatorKey: 'type' };
 
 
 /******************************************************************************
@@ -177,7 +177,7 @@ const ElementSchema = new mongoose.Schema({
 }, options); // end of ElementSchema
 
 // Add text indexing some of the element fields
-ElementSchema.index({name: 'text', documentation: 'text'});
+ElementSchema.index({ name: 'text', documentation: 'text' });
 
 /**
  * Run our pre-defined setters on save.
@@ -314,4 +314,3 @@ module.exports.Element = Element;
 module.exports.Block = Block;
 module.exports.Relationship = Relationship;
 module.exports.Package = Package;
-
