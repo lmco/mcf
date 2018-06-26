@@ -104,8 +104,9 @@ const formatter = printf((msg) => {
   if (mbee.config.log.colorize) {
     const ts = `${fmt.color.grey}${msg.timestamp}${fmt.color.esc}`; // timestamp
     const f = `${fmt.color.cyan}${file}${fmt.color.esc}`;           // file
+    // Print stack for error and critical logs
     let msgPrint = msg.message;
-    if(~msg.level.indexOf('error') || ~msg.level.indexOf('critical')) {
+    if ((msg.level.indexOf('error') >= 0) || (msg.level.indexOf('critical') >= 0)) {
       msgPrint = msg.stack;
     }
     return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msgPrint}`;
