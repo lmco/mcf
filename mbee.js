@@ -60,6 +60,7 @@ M.path = {
  * The global-require is explicitely disabled here due to the nature of this function.
  */
 M.load = m => require(path.join(__dirname, 'app', m)); // eslint-disable-line global-require
+M.require = M.load; // an alias for M.load
 
 // This exports the basic MBEE version and config data so that modules may
 // have access to that data when they are loaded.
