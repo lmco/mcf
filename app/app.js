@@ -61,23 +61,6 @@ app.use(session({
   store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
 
-
-// Authenticaiton Middleware
-const unAuthRoutes = ['/login', '/api/doc', '/api/test'];
-
-const AuthController = M.load('lib/auth');
-const unAuthRegExp = new RegExp(`^(?!(${unAuthRoutes.join('|')}))`.split('/').join('\\/'));
-app.use(unAuthRegExp, AuthController.authenticate.bind(AuthController));
-
-
-// Logging Middleware
-app.use((req, res, next) => {
-  const username = (req.user) ? req.user.username : 'anonymous';
-  M.log.info(`${req.method} "${req.originalUrl}" requested by ${username}`);
-  next();
-});
-
-
 // Load the API Routes
 if (M.config.server.api.enabled) {
   const APIRouter = M.load('api_routes');
@@ -94,6 +77,12 @@ if (M.config.server.ui.enabled) {
   app.use('/', Router);
 }
 
+// Logging Middleware
+app.use((req, res, next) => {
+  const username = (req.user) ? req.user.username : 'anonymous';
+  M.log.info(`${req.method} "${req.originalUrl}" requested by ${username}`);
+  next();
+});
 
 // Export the app
 module.exports = app;
