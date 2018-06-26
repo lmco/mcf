@@ -37,14 +37,9 @@ let org = null;
  * Other tests to test:
  *  -long names for id
  *  -long names for name
- *  -html input for name
- *  -html input for id
  *  -string for id
  *  -string for name
  *  -string for org
- *  -try to create the same project
- *  -Find all permissions on project
- *  -Find permissions for user on project
  *  -Set permissions for a user on project
  * 
  */
@@ -55,6 +50,8 @@ let org = null;
 
 describe(name, () => {
   before(function(done) {
+  // NOTE: Changed from arrow function to allow for use of
+  // this so that a larger timeout could be set
     this.timeout(5000);
     const db = M.load('lib/db');
     db.connect();
@@ -122,18 +119,23 @@ describe(name, () => {
   });
 
   it('should create a new project', createProject).timeout(2500);
+  it('should create a second project', createProject02).timeout(2500);
+  it('should attempt to create a project with a long ID', createLongId).timeout(2500);
+  it('should reject creation of a project already made',recreateProject).timeout(2500);
   it('should reject creation of project with invalid ID', noId).timeout(2500);
   it('should reject creation of project with invalid Name', noName).timeout(2500);
   it('should reject creation of project with invalid Org', noOrg).timeout(2500);
   it('should reject creation of project with non-A user',nonACreator).timeout(2500);
-  //it('should update the original project', updateProj).timeout(2500);
-  //it('should reject updating due to non-A user', updateNonA).timeout(2500);
   it('should find a project', findProj).timeout(2500);
   it('should not find a project', noProj).timeout(2500);
+  it('should update the original project', updateProj).timeout(2500);
   it('should reject non-A user from finding a project', nonAUser).timeout(2500);
+  it('should reject updating due to non-A user', updateNonA).timeout(2500);
+  it('should find the permissions on the project', findPerm).timeout(2500);
+  //it('should set the permissions on the project', setPerm).timeout(2500);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
-  //it('should find all the permissions on the project', findPerm).timeout(2500);
   it('should delete a project', deleteProject).timeout(2500);
+  it('should delete secolnd project', deleteProject02).timeout(2500);
 });
 
 
@@ -160,6 +162,76 @@ function createProject(done) {
   })
   .catch((err) => {
     chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests creating a second project
+ */
+function createProject02(done) {
+  const projData = {
+    id: 'dimc137rick',
+    name: 'Mad Scientist',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(user, projData)
+  .then((proj) => {
+    chai.expect(proj.id).to.equal('dimc137rick');
+    chai.expect(proj.name).to.equal('Mad Scientist');
+    done();
+  })
+  .catch((err) => {
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests to see what valid name of the id 
+ * can be. how long till it breaks...
+ */
+function createLongId(done) {
+  const projData = {
+    id: 'thisisaverylongidnamepleaseacceptmeorbreak',
+    name: 'Long Id',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(user, projData)
+  .then(() => {
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    chai.assert(error.message.startsWith('Project validation failed:'));
+    done();
+  });
+}
+
+/**
+ * Tests attempting to create a project already existing
+ */
+function recreateProject(done) {
+  const projData = {
+    id: 'dimc137rick',
+    name: 'Newbie',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(user, projData)
+  .then(() => {
+    //error should occur therefore not hit then
+    //failure if does
+    chai.assert(true === false);
+    done();
+  })
+  .catch((err) => {
+    chai.expect(err.message).to.equal('Project already exists.');
     done();
   });
 }
@@ -326,8 +398,10 @@ function nonAUser(done){
 function updateProj(done){
   const orgId = 'council';
   const projId = 'prtlgn';
-  const newName = 'freeze ray';
-  ProjController.updateProject(user, orgId, projId, newName)
+  const updateData = { 
+    name: 'freeze ray'
+  };
+  ProjController.updateProject(user, orgId, projId, updateData)
   .then((proj) => {
     chai.expect(proj.id).to.equal('prtlgn');
     chai.expect(proj.name).to.equal('freeze ray');
@@ -346,16 +420,56 @@ function updateProj(done){
 
 function updateNonA(done){
   const orgId = 'council';
-  const projId = 'prtlgn';
-  const newName = 'better not update';
-  ProjController.updateProject(nonAuser, orgId, projId, newName)
-  .then((error) => {
-    chai.expect(error).to.equal('User does not have permission.');
+  const projId = 'dimc137rick';
+  const updateData = { 
+    name: 'Still Mad'
+  };
+  ProjController.updateProject(nonAuser, orgId, projId, updateData)
+  .then(() => {
+    //should never come in then
+    //should throw error incase
+    chai.assert(true === false);
     done();
   })
   .catch((err) => {
     chai.expect(err.message).to.equal('User does not have permission.');
     done();
+  });
+}
+
+/**
+ * Tests finding all permisions on the project.
+ */
+function findPerm(done) {
+  ProjController.findPermissions(user, org.id, 'prtlgn', user)
+  .then((perm) => {
+    chai.expect(perm.read).to.equal(true);
+    chai.expect(perm.write).to.equal(true);
+    chai.expect(perm.admin).to.equal(true);
+    done();
+  })
+  .catch((err2) => {
+      chai.expect(err2.message).to.equal(null);
+      done();
+  });
+}
+
+/**
+ * Tests setting permissions on the project.
+ */
+function setPerm(done) {
+  permType = 'write';
+  ProjController.setPermissions(user, org.id,'dimc137rick', nonAuser, permType)
+  .then((perm) => {
+    chai.expect(perm.read).to.equal(true);
+    chai.expect(perm.write).to.equal(true);
+    chai.expect(perm.admin).to.equal(false);
+    done();
+  })
+  .catch((err2) => {
+      console.log(err2.message);
+      chai.expect(err2.message).to.equal(null);
+      done();
   });
 }
 
@@ -382,29 +496,34 @@ function softDeleteProject(done) {
 }
 
 /**
- * Tests finding all permisions on the project.
- * NOTE: Figure out how to define the project permissions
- * and check with chai if they are what they should
- * be.
- */
-function findPerm(done) {
-  ProjController.findAllPremissions(user, org.id, 'prtlgn')
-  .then((proj) => {
-    chai.expect(proj)
-  })
-  .catch((err2) => {
-      chai.expect(err2.message).to.equal('Project not found');
-      done();
-  });
-}
-
-/**
  * Tests deleting a project
  */
 function deleteProject(done) {
   ProjController.removeProject(user, org.id, 'prtlgn', { soft: false })
   .then((proj) => {
     ProjController.findProject(user, org.id, 'prtlgn')
+    .then((proj2) => {
+      chai.expect(proj2).to.equal(null);
+      done();
+    })
+    .catch((err2) => {
+      chai.expect(err2.message).to.equal('Project not found');
+      done();
+    });
+  })
+  .catch((err) => {
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests deleting second project
+ */
+function deleteProject02(done) {
+  ProjController.removeProject(user, org.id, 'dimc137rick', { soft: false })
+  .then((proj) => {
+    ProjController.findProject(user, org.id, 'dimc137rick')
     .then((proj2) => {
       chai.expect(proj2).to.equal(null);
       done();
