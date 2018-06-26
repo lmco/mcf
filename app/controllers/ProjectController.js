@@ -144,7 +144,7 @@ class ProjectController {
         ProjectController.findProjects(reqUser, orgID)
         .then((projects) => {
           // Mark each of them as deleted
-          Object.keys(projects).forEach((proj) => {
+          for (let proj = 0; proj < projects.length; proj++) {
             projects[proj].deletedOn = Date.now();
             projects[proj].deleted = true;
             projects[proj].save((saveErr) => {
@@ -152,7 +152,7 @@ class ProjectController {
                 return reject(saveErr);
               }
             });
-          });
+          }
           return resolve(projects);
         })
         .catch((deleteError) => reject(deleteError));
