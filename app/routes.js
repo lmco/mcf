@@ -39,7 +39,7 @@ router.route('/about')
   UIController.showAboutPage
 );
 
-router.route('login')
+router.route('/login')
 /* GET /login shows the login page. */
 .get(
   Middleware.logRoute,
