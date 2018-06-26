@@ -37,6 +37,23 @@ const ElementSchema = new mongoose.Schema({
 
   /**
    * @memberOf  Element
+   * @property  {String} uid
+   *
+   * @description  The unique ID of the element.
+   */
+  uid: {
+    type: String,
+    required: true,
+    index: true,
+    unique: true,
+    match: RegExp(M.lib.validators.element.uid),
+    maxlength: [128, 'Element UID is too long'],
+    minlength: [2, 'Element UID is too short']
+  },
+
+
+  /**
+   * @memberOf  Element
    * @property  {String} id
    *
    * @description  The ID of the element.
@@ -44,11 +61,19 @@ const ElementSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    index: true,
-    unique: true,
     match: RegExp(M.lib.validators.element.id),
     maxlength: [36, 'Element ID is too long'],
-    minlength: [2, 'Element ID is too short']
+    minlength: [2, 'Element ID is too short'],
+    default: function() {
+      const parts = this.uid.split(':');  // split on the ':'' separator
+      const id = parts[parts.length - 1]; // the last part
+      return id;
+    },
+    set: function() {
+      const parts = this.uid.split(':');  // split on the ':'' separator
+      const id = parts[parts.length - 1]; // the last part
+      return id;
+    }
   },
 
   /**

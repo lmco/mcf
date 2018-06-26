@@ -31,7 +31,8 @@ module.exports.project = {
 };
 
 module.exports.element = {
-  id: '^([a-zA-Z0-9])([a-zA-Z0-9-:]){0,}$',
+  uid: '^([a-zA-Z0-9])([a-zA-Z0-9-:]){0,}$',
+  id: '^([a-zA-Z0-9])([a-zA-Z0-9-]){0,}$',
   name: '^([a-zA-Z0-9-\\s])+$'
 };
 

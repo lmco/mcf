@@ -166,7 +166,7 @@ describe(name, function() {
  */
 function createElement(done) {
   const newElement = new Element.Element({
-    id: 'empire:deathstar:0000',
+    uid: 'empire:deathstar:0000',
     name: 'Death Star Model Arbitrary Element',
     project: project._id,
     parent: null
@@ -176,7 +176,8 @@ function createElement(done) {
       M.log.error(err);
     }
     chai.expect(err).to.equal(null);
-    chai.expect(createdElement.id).to.equal('empire:deathstar:0000');
+    chai.expect(createdElement.uid).to.equal('empire:deathstar:0000');
+    chai.expect(createdElement.id).to.equal('0000');
     done();
   });
 }
@@ -186,7 +187,7 @@ function createElement(done) {
  */
 function deleteElement(done) {
   Element.Element.findOneAndRemove({
-    id: 'empire:deathstar:0000'
+    uid: 'empire:deathstar:0000'
   })
   .exec((err) => {
     chai.expect(err).to.equal(null);
@@ -201,7 +202,7 @@ function deleteElement(done) {
 function createRootPackage(done) {
   // Create the new package
   const newPackage = new Element.Package({
-    id: 'empire:deathstar:0001',
+    uid: 'empire:deathstar:0001',
     name: 'Death Star Model Root Package',
     project: project._id,
     parent: null
@@ -216,7 +217,7 @@ function createRootPackage(done) {
 
     // Lookup the element and make sure it's there
     Element.Package.find({
-      id: 'empire:deathstar:0001'
+      uid: 'empire:deathstar:0001'
     })
     .exec((findErr, packages) => {
       // Error check make sure the find didn't fail
@@ -227,7 +228,7 @@ function createRootPackage(done) {
       // Make sure everything is as we expect it
       chai.expect(findErr).to.equal(null);
       chai.expect(packages.length).to.equal(1);
-      chai.expect(packages[0].id).to.equal('empire:deathstar:0001');
+      chai.expect(packages[0].uid).to.equal('empire:deathstar:0001');
       chai.expect(packages[0].type).to.equal('Package');
       done();
     });
@@ -240,7 +241,7 @@ function createRootPackage(done) {
 function createBlock01(done) {
   // Start by grabbing the root package
   Element.Package.findOne({
-    id: 'empire:deathstar:0001'
+    uid: 'empire:deathstar:0001'
   })
   .exec((findRootErr, pkg) => {
     // Make sure no errors occur in lookup
@@ -251,7 +252,7 @@ function createBlock01(done) {
 
     // Create the new block
     const newBlock = new Element.Block({
-      id: 'empire:deathstar:0002',
+      uid: 'empire:deathstar:0002',
       name: 'Core Reactor',
       project: project._id,
       parent: pkg._id
@@ -265,7 +266,7 @@ function createBlock01(done) {
       }
 
       // Make sure it created what we expect and finish
-      chai.expect(createdBlock.id).to.equal('empire:deathstar:0002');
+      chai.expect(createdBlock.uid).to.equal('empire:deathstar:0002');
       chai.expect(createdBlock.name).to.equal('Core Reactor');
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
       chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
@@ -286,7 +287,7 @@ function createBlock01(done) {
 function createBlock02(done) {
   // Start by grabbing the root package
   Element.Package.findOne({
-    id: 'empire:deathstar:0001'
+    uid: 'empire:deathstar:0001'
   })
   .exec((findRootErr, pkg) => {
     // Make sure no errors occur in lookup
@@ -297,7 +298,7 @@ function createBlock02(done) {
 
     // Create the new block
     const newBlock = new Element.Block({
-      id: 'empire:deathstar:0003',
+      uid: 'empire:deathstar:0003',
       name: 'Thermal Exhaust Port',
       project: project._id,
       parent: pkg._id
@@ -311,7 +312,7 @@ function createBlock02(done) {
       }
 
       // Make sure it created what we expect and finish
-      chai.expect(createdBlock.id).to.equal('empire:deathstar:0003');
+      chai.expect(createdBlock.uid).to.equal('empire:deathstar:0003');
       chai.expect(createdBlock.name).to.equal('Thermal Exhaust Port');
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
       chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
@@ -332,7 +333,7 @@ function createBlock02(done) {
 function createRelationship(done) {
   // Start by grabbing the root package
   Element.Package.findOne({
-    id: 'empire:deathstar:0001'
+    uid: 'empire:deathstar:0001'
   })
   .exec((findRootErr, pkg) => {
     // Make sure no errors occur in lookup
@@ -347,7 +348,7 @@ function createRelationship(done) {
 
     // Create the new block
     const newRelationship = new Element.Relationship({
-      id: 'empire:deathstar:0004',
+      uid: 'empire:deathstar:0004',
       name: 'Dependency Link',
       project: project._id,
       parent: pkg._id,
@@ -363,7 +364,7 @@ function createRelationship(done) {
       }
 
       // Make sure it created what we expect and finish
-      chai.expect(createdRelationship.id).to.equal('empire:deathstar:0004');
+      chai.expect(createdRelationship.uid).to.equal('empire:deathstar:0004');
       chai.expect(createdRelationship.name).to.equal('Dependency Link');
       chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
       chai.expect(createdRelationship.parent.toString()).to.equal(pkg._id.toString());
@@ -387,21 +388,21 @@ function createRelationship(done) {
 function deleteBlocksAndRelationships(done) {
   // Delete the relationship
   Element.Relationship.findOneAndRemove({
-    id: 'empire:deathstar:0004'
+    uid: 'empire:deathstar:0004'
   })
   .exec((relDeleteError) => {
     chai.expect(relDeleteError).to.equal(null);
 
     // Delete the second block
     Element.Block.findOneAndRemove({
-      id: 'empire:deathstar:0003'
+      uid: 'empire:deathstar:0003'
     })
     .exec((block02DeleteError) => {
       chai.expect(block02DeleteError).to.equal(null);
 
       // Delete the first block
       Element.Block.findOneAndRemove({
-        id: 'empire:deathstar:0002'
+        uid: 'empire:deathstar:0002'
       })
       .exec((block01DeleteError) => {
         chai.expect(block01DeleteError).to.equal(null);
@@ -416,7 +417,7 @@ function deleteBlocksAndRelationships(done) {
  */
 function softDeleteRootPackage(done) {
   Element.Package.findOneAndUpdate({
-    id: 'empire:deathstar:0001'
+    uid: 'empire:deathstar:0001'
   }, {
     deletedOn: Date.now(),
     deleted: true
@@ -425,7 +426,7 @@ function softDeleteRootPackage(done) {
     chai.expect(err).to.equal(null);
 
     Element.Package.findOne({
-      id: 'empire:deathstar:0001'
+      uid: 'empire:deathstar:0001'
     })
     .exec((findErr, foundElem) => {
       chai.expect(findErr).to.equal(null);
@@ -442,7 +443,7 @@ function softDeleteRootPackage(done) {
  */
 function deleteRootPackage(done) {
   Element.Package.findOneAndRemove({
-    id: 'empire:deathstar:0001'
+    uid: 'empire:deathstar:0001'
   })
   .exec((err) => {
     chai.expect(err).to.equal(null);
