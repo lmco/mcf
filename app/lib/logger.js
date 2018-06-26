@@ -106,7 +106,7 @@ const formatter = printf((msg) => {
     const f = `${fmt.color.cyan}${file}${fmt.color.esc}`;           // file
     // Print stack for error and critical logs
     let msgPrint = msg.message;
-    if ((msg.level.indexOf('error') >= 0) || (msg.level.indexOf('critical') >= 0)) {
+    if (msg.level.includes('error') || msg.level.includes('critical')) {
       msgPrint = msg.stack;
     }
     return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msgPrint}`;
