@@ -73,7 +73,8 @@ if (M.config.server.plugins.enabled) {
 }
 // Load the UI/other routes
 if (M.config.server.ui.enabled) {
-  const Router = M.load('routes');
+  const RoutesPath = path.join(__dirname, 'routes.js');
+  const Router = require(RoutesPath); // eslint-disable-line global-require
   app.use('/', Router);
 }
 
