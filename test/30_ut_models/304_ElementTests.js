@@ -147,6 +147,10 @@ describe(name, function() {
   it('should create a generic element', createElement);
   it('should delete the generic element', deleteElement);
   it('should create a root package', createRootPackage);
+  it('should create a block (1)', createBlock01);
+  it('should create a block (2)', createBlock02);
+  it('should create a relationship between blocks', createRelationship);
+  it('should delete blocks and relationships', deleteBlocksAndRelationships);
   it('should soft-delete the root package', softDeleteRootPackage);
   it('should delete the root package', deleteRootPackage);
 });
@@ -226,6 +230,184 @@ function createRootPackage(done) {
       chai.expect(packages[0].id).to.equal('empire:deathstar:0001');
       chai.expect(packages[0].type).to.equal('Package');
       done();
+    });
+  });
+}
+
+/**
+ * Creates a block in the project's root Package element
+ */
+function createBlock01(done) {
+  // Start by grabbing the root package
+  Element.Package.findOne({
+    id: 'empire:deathstar:0001'
+  })
+  .exec((findRootErr, package) => {
+    // Make sure no errors occur in lookup
+    if (findRootErr) {
+      M.log.error(findRootErr);
+      chai.expect(findRootErr).to.equal(null);
+    }
+
+    // Create the new block
+    const newBlock = new Element.Block({
+      id: 'empire:deathstar:0002',
+      name: 'Core Reactor',
+      project: project._id,
+      parent: package._id
+    });
+
+    // Save and verify it was created
+    newBlock.save((saveErr, createdBlock) => {
+      if (saveErr) {
+        M.log.error(saveErr);
+        chai.expect(saveErr).to.equal(null);
+      }
+
+      // Make sure it created what we expect and finish
+      chai.expect(createdBlock.id).to.equal('empire:deathstar:0002');
+      chai.expect(createdBlock.name).to.equal('Core Reactor');
+      chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
+      chai.expect(createdBlock.parent.toString()).to.equal(package._id.toString());
+
+      // Add the block to the package.contains field
+      package.contains.push(createdBlock);
+      package.save((packageSaveErr) => {
+        chai.expect(packageSaveErr).to.equal(null);
+        done();
+      });
+    });
+  });
+}
+
+/**
+ * Creates a a block in the project's root Package element
+ */
+function createBlock02(done) {
+  // Start by grabbing the root package
+  Element.Package.findOne({
+    id: 'empire:deathstar:0001'
+  })
+  .exec((findRootErr, package) => {
+    // Make sure no errors occur in lookup
+    if (findRootErr) {
+      M.log.error(findRootErr);
+      chai.expect(findRootErr).to.equal(null);
+    }
+
+    // Create the new block
+    const newBlock = new Element.Block({
+      id: 'empire:deathstar:0003',
+      name: 'Thermal Exhaust Port',
+      project: project._id,
+      parent: package._id
+    });
+
+    // Save and verify it was created
+    newBlock.save((saveErr, createdBlock) => {
+      if (saveErr) {
+        M.log.error(saveErr);
+        chai.expect(saveErr).to.equal(null);
+      }
+
+      // Make sure it created what we expect and finish
+      chai.expect(createdBlock.id).to.equal('empire:deathstar:0003');
+      chai.expect(createdBlock.name).to.equal('Thermal Exhaust Port');
+      chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
+      chai.expect(createdBlock.parent.toString()).to.equal(package._id.toString());
+
+      // Add the block to the package.contains field
+      package.contains.push(createdBlock);
+      package.save((packageSaveErr) => {
+        chai.expect(packageSaveErr).to.equal(null);
+        done();
+      });
+    });
+  });
+}
+
+/**
+ * Creates a relationship between the blocks in the project's root Package
+ */
+function createRelationship(done) {
+  // Start by grabbing the root package
+  Element.Package.findOne({
+    id: 'empire:deathstar:0001'
+  })
+  .exec((findRootErr, package) => {
+    // Make sure no errors occur in lookup
+    if (findRootErr) {
+      M.log.error(findRootErr);
+      chai.expect(findRootErr).to.equal(null);
+    }
+
+    chai.expect(package.contains.length).to.equal(2);
+    const source = package.contains[0];
+    const target = package.contains[1];
+
+    // Create the new block
+    const newRelationship = new Element.Relationship({
+      id: 'empire:deathstar:0004',
+      name: 'Dependency Link',
+      project: project._id,
+      parent: package._id,
+      source: source,
+      target: target
+    });
+
+    // Save and verify it was created
+    newRelationship.save((saveErr, createdRelationship) => {
+      if (saveErr) {
+        M.log.error(saveErr);
+        chai.expect(saveErr).to.equal(null);
+      }
+
+      // Make sure it created what we expect and finish
+      chai.expect(createdRelationship.id).to.equal('empire:deathstar:0004');
+      chai.expect(createdRelationship.name).to.equal('Dependency Link');
+      chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
+      chai.expect(createdRelationship.parent.toString()).to.equal(package._id.toString());
+      chai.expect(createdRelationship.source.toString()).to.equal(source.toString());
+      chai.expect(createdRelationship.target.toString()).to.equal(target.toString());
+
+      // Add the block to the package.contains field
+      package.contains.push(createdRelationship);
+      package.save((packageSaveErr) => {
+        chai.expect(packageSaveErr).to.equal(null);
+        done();
+      });
+    });
+  });
+}
+
+
+/**
+ * Deletes the previosly created blocks and relationships
+ */
+function deleteBlocksAndRelationships(done) {
+  // Delete the relationship
+  Element.Relationship.findOneAndRemove({
+    id: 'empire:deathstar:0004'
+  })
+  .exec((relDeleteError) => {
+    chai.expect(relDeleteError).to.equal(null);
+
+    // Delete the second block
+    Element.Block.findOneAndRemove({
+      id: 'empire:deathstar:0003'
+    })
+    .exec((block02DeleteError) => {
+
+      chai.expect(block02DeleteError).to.equal(null);
+
+      // Delete the first block
+      Element.Block.findOneAndRemove({
+        id: 'empire:deathstar:0002'
+      })
+      .exec((block01DeleteError) => {
+        chai.expect(block01DeleteError).to.equal(null);
+        done();
+      });
     });
   });
 }
