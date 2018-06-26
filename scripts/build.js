@@ -43,21 +43,15 @@ function build(_args) {
 
   // Install development dependencies
   install(['--dev']);
-  console.log('TEST !')
 
   // This will throw an error with our current ESLint configuration.
   // However, if these are global, then installs will fail. We can either accept this
   // error as is, alter the ESLint configuration, or move install to a separate script.
   // The comments to the right explicitly disable the rule here.
   const gulp = require('gulp');           // eslint-disable-line global-require
-  console.log('TEST 1')
   const concat = require('gulp-concat');  // eslint-disable-line global-require
-  console.log('TEST 2')
   const sass = require('gulp-sass');      // eslint-disable-line global-require
-  console.log('TEST 3')
   const react = require('gulp-react');    // eslint-disable-line global-require
-
-  console.log('TEST ---')
 
   // Allow the function to be called with no parameters
   // Set the default behavior to build all
