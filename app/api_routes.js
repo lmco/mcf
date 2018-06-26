@@ -101,12 +101,10 @@ api.get('/doc/swagger.json', APIController.swaggerJSON);
  */
 api.route('/login')
 .get(
-  AuthController.authenticate.bind(AuthController),
   AuthController.doLogin,
   APIController.login
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
   AuthController.doLogin,
   APIController.login
 );
@@ -128,7 +126,7 @@ api.route('/login')
  *         description: Internal Server Error
  */
 api.route('/version')
-.get(AuthController.authenticate.bind(AuthController), APIController.version);
+.get(APIController.version);
 
 
 /**
@@ -171,10 +169,10 @@ api.route('/version')
  *         description: Not Implemented
  */
 api.route('/orgs')
-.get(AuthController.authenticate.bind(AuthController), APIController.getOrgs)
-.post(AuthController.authenticate.bind(AuthController), APIController.postOrgs)
-.put(AuthController.authenticate.bind(AuthController), APIController.putOrgs)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrgs);
+.get(APIController.getOrgs)
+.post(APIController.postOrgs)
+.put(APIController.putOrgs)
+.delete(APIController.deleteOrgs);
 
 
 /**
@@ -328,10 +326,10 @@ api.route('/orgs')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid')
-.get(AuthController.authenticate.bind(AuthController), APIController.getOrg)
-.post(AuthController.authenticate.bind(AuthController), APIController.postOrg)
-.put(AuthController.authenticate.bind(AuthController), APIController.putOrg)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrg);
+.get(APIController.getOrg)
+.post(APIController.postOrg)
+.put(APIController.putOrg)
+.delete(APIController.deleteOrg);
 
 
 /**
@@ -391,10 +389,10 @@ api.route('/orgs/:orgid')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/projects')
-.get(AuthController.authenticate.bind(AuthController), APIController.getProjects)
-.post(AuthController.authenticate.bind(AuthController), APIController.postProjects)
-.put(AuthController.authenticate.bind(AuthController), APIController.putProjects)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteProjects);
+.get(APIController.getProjects)
+.post(APIController.postProjects)
+.put(APIController.putProjects)
+.delete(APIController.deleteProjects);
 
 /**
  * @swagger
@@ -574,10 +572,10 @@ api.route('/orgs/:orgid/projects')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid')
-.get(AuthController.authenticate.bind(AuthController), APIController.getProject)
-.post(AuthController.authenticate.bind(AuthController), APIController.postProject)
-.put(AuthController.authenticate.bind(AuthController), APIController.putProject)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteProject);
+.get(APIController.getProject)
+.post(APIController.postProject)
+.put(APIController.putProject)
+.delete(APIController.deleteProject);
 
 /**
  * @swagger
@@ -603,7 +601,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                    server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/members')
-.get(AuthController.authenticate.bind(AuthController), APIController.getAllOrgRoles);
+.get(APIController.getAllOrgRoles);
 
 /**
  * @swagger
@@ -719,10 +717,10 @@ api.route('/orgs/:orgid/members')
 // 6/20/18
 // NOTE: POST and PUT have the same functionality, thus they map to the same route.
 api.route('/orgs/:orgid/members/:username')
-.get(AuthController.authenticate.bind(AuthController), APIController.getOrgRole)
-.post(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
-.put(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrgRole);
+.get(APIController.getOrgRole)
+.post(APIController.postOrgRole)
+.put(APIController.postOrgRole)
+.delete(APIController.deleteOrgRole);
 
 /**
  * @swagger
@@ -753,7 +751,7 @@ api.route('/orgs/:orgid/members/:username')
  *                    server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members')
-.get(AuthController.authenticate.bind(AuthController), APIController.getProjectRoles);
+.get(APIController.getProjectRoles);
 
 /**
  * @swagger
@@ -886,10 +884,10 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *                    server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:username')
-.get(AuthController.authenticate.bind(AuthController), APIController.getProjectRole)
-.post(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
-.put(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteProjectRole);
+.get(APIController.getProjectRole)
+.post(APIController.postProjectRole)
+.put(APIController.postProjectRole)
+.delete(APIController.deleteProjectRole);
 
 /**
  * @swagger
@@ -939,10 +937,10 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         description: Not Implemented
  */
 api.route('/users')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented)
+.post(APIController.notImplemented)
+.put(APIController.notImplemented)
+.delete(APIController.notImplemented);
 
 /**
  * @swagger
@@ -1097,10 +1095,10 @@ api.route('/users')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/users/:username')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented)
+.post(APIController.notImplemented)
+.put(APIController.notImplemented)
+.delete(APIController.notImplemented);
 
 /**
  * @swagger
@@ -1135,10 +1133,10 @@ api.route('/users/:username')
  *         description: Not Implemented
  */
 api.route('/users/:username/roles')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented)
+.post(APIController.notImplemented)
+.put(APIController.notImplemented)
+.delete(APIController.notImplemented);
 
 
 /**
@@ -1174,10 +1172,10 @@ api.route('/users/:username/roles')
  *         description: Not Implemented
  */
 api.route('/users/:username/groups')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented)
+.post(APIController.notImplemented)
+.put(APIController.notImplemented)
+.delete(APIController.notImplemented);
 
 
 /**
@@ -1198,7 +1196,7 @@ api.route('/users/:username/groups')
  *         description: Internal Server Error
  */
 api.route('/users/whoami')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented);
 
 
 // Export the API router

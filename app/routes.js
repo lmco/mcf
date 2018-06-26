@@ -48,20 +48,18 @@ router.post('/login',
  **********************************************/
 
 /* This renders the home page for logged in users */
-router.get('/', AuthController.authenticate.bind(AuthController), UIController.home);
+router.get('/', UIController.home);
 
 /* This renders the home page for logged in users */
-router.get(`/:org(${M.lib.validators.org.id})/:project`,
-  AuthController.authenticate.bind(AuthController),
-  UIController.mbee);
+router.get(`/:org(${M.lib.validators.org.id})/:project`, UIController.mbee);
 
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */
 router.route('/logout')
-.get(AuthController.authenticate.bind(AuthController), UIController.logout);
+.get(UIController.logout);
 
 /* Renders the admin console */
-router.get('/admin/console', AuthController.authenticate.bind(AuthController), UIController.admin);
+router.get('/admin/console', UIController.admin);
 
 module.exports = router;
