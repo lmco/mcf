@@ -68,13 +68,13 @@ if (M.config.server.api.enabled) {
 }
 // Load the plugin routes
 if (M.config.server.plugins.enabled) {
-  const PluginRouter = M.load('plugins/routes');
+  const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
+  const PluginRouter = require(PluginRoutesPath); // eslint-disable-line global-require
   app.use('/plugins', PluginRouter);
 }
 // Load the UI/other routes
 if (M.config.server.ui.enabled) {
-  const RoutesPath = path.join(__dirname, 'routes.js');
-  const Router = require(RoutesPath); // eslint-disable-line global-require
+  const Router = M.load('routes');
   app.use('/', Router);
 }
 
