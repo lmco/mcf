@@ -33,13 +33,29 @@ let user = null;
 let nonAuser = null;
 let org = null;
 
+/**
+ * Other tests to test:
+ *  -long names for id
+ *  -long names for name
+ *  -html input for name
+ *  -html input for id
+ *  -string for id
+ *  -string for name
+ *  -string for org
+ *  -try to create the same project
+ *  -Find all permissions on project
+ *  -Find permissions for user on project
+ *  -Set permissions for a user on project
+ * 
+ */
 
 /*------------------------------------
  *       Main
  *------------------------------------*/
 
 describe(name, () => {
-  before((done) => {
+  before(function(done) {
+    this.timeout(5000);
     const db = M.load('lib/db');
     db.connect();
 
@@ -106,13 +122,17 @@ describe(name, () => {
   });
 
   it('should create a new project', createProject).timeout(2500);
- // it('should reject creation of project with invalid ID', noId).timeout(2500);
- // it('should reject creation of project with invalid Name', noName).timeout(2500);
- // it('should reject creation of project with invalid Org', noOrg).timeout(2500);
+  it('should reject creation of project with invalid ID', noId).timeout(2500);
+  it('should reject creation of project with invalid Name', noName).timeout(2500);
+  it('should reject creation of project with invalid Org', noOrg).timeout(2500);
+  it('should reject creation of project with non-A user',nonACreator).timeout(2500);
+  //it('should update the original project', updateProj).timeout(2500);
+  //it('should reject updating due to non-A user', updateNonA).timeout(2500);
   it('should find a project', findProj).timeout(2500);
- // it('should not find a project', noProj).timeout(2500);
- // it('should reject non-A user from finding a project', nonAUser).timeout(2500);
+  it('should not find a project', noProj).timeout(2500);
+  it('should reject non-A user from finding a project', nonAUser).timeout(2500);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
+  //it('should find all the permissions on the project', findPerm).timeout(2500);
   it('should delete a project', deleteProject).timeout(2500);
 });
 
@@ -162,7 +182,7 @@ function noId(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal('Project ID is not valid.');
+    chai.expect(err.message).to.equal('Project ID is not valid.');
     done();
   });
 }
@@ -185,7 +205,7 @@ function noName(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal('Project Name is not valid.');
+    chai.expect(err.message).to.equal('Project Name is not valid.');
     done();
   });
 }
@@ -208,10 +228,35 @@ function noOrg(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal('Org not found.');
+    chai.expect(err.message).to.equal('Org not found.');
     done();
   });
 }
+
+/**
+ * Tests for creating a project using a non admin user.
+ * Should output error.
+ */
+
+function nonACreator(done){
+  const projData = {
+    id: 'iamnoadmin',
+    name: 'dontmakeme',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(nonAuser, projData)
+  .then(function(error) {
+    chai.expect(error).to.equal('User does not have permission.');
+    done();
+  })
+  .catch(function(err){
+    chai.expect(err.message).to.equal('User does not have permission.');
+    done();
+  });
+}
+
 
 /**
  * Tests for finding the project that was 
@@ -220,7 +265,7 @@ function noOrg(done) {
 
 function findProj(done){
   const orgId = 'council';
-  const projId = 'prtlgn'
+  const projId = 'prtlgn';
   ProjController.findProject(user, orgId, projId)
   .then(function(proj) {
     chai.expect(proj.id).to.equal('prtlgn');
@@ -236,23 +281,20 @@ function findProj(done){
 /**
  * Tests for find a project that does not exist.
  * Should output error.
- * NOTE: Technically this test does pass 
- * except that the output is not of a string
- * therefore it is failing.
  */
 
 function noProj(done){
   const orgId = 'council';
-  const projId = 'fakeProj'
+  const projId = 'fakeProj';
   ProjController.findProject(user, orgId, projId)
   .then(function(error) {
     //chai.expect(error).to.not.equal(null);
-    chai.expect(error).to.equal('Error: Project not found');
+    chai.expect(error).to.equal('Project not found');
     done();
   })
   .catch(function(err){
     //chai.expect(error).to.not.equal(null);
-    chai.expect(err).to.equal('Error: Project not found');
+    chai.expect(err.message).to.equal('Project not found');
     done();
   });
 }
@@ -260,25 +302,62 @@ function noProj(done){
 /**
  * Tests for find a project using a non admin user.
  * Should output error.
- * NOTE: Technically this test does pass 
- * except that the output is not of a string
- * therefore it is failing.
  */
 
 function nonAUser(done){
   const orgId = 'council';
-  const projId = 'fakeProj'
-  ProjController.findProject(user, orgId, projId)
+  const projId = 'prtlgn';
+  ProjController.findProject(nonAuser, orgId, projId)
   .then(function(error) {
-    chai.expect(error).to.equal('Error: User does not have permission.');
+    chai.expect(error).to.equal('User does not have permission.');
     done();
   })
   .catch(function(err){
-    chai.expect(err).to.equal('Error: User does not have permission.');
+    chai.expect(err.message).to.equal('User does not have permission.');
     done();
   });
 }
 
+/**
+ * Tests for updating a project.
+ * Should pass.
+ */
+
+function updateProj(done){
+  const orgId = 'council';
+  const projId = 'prtlgn';
+  const newName = 'freeze ray';
+  ProjController.updateProject(user, orgId, projId, newName)
+  .then((proj) => {
+    chai.expect(proj.id).to.equal('prtlgn');
+    chai.expect(proj.name).to.equal('freeze ray');
+    done();
+  })
+  .catch((err) => {
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests for updating a project with a non admin user.
+ * Should throw an error.
+ */
+
+function updateNonA(done){
+  const orgId = 'council';
+  const projId = 'prtlgn';
+  const newName = 'better not update';
+  ProjController.updateProject(nonAuser, orgId, projId, newName)
+  .then((error) => {
+    chai.expect(error).to.equal('User does not have permission.');
+    done();
+  })
+  .catch((err) => {
+    chai.expect(err.message).to.equal('User does not have permission.');
+    done();
+  });
+}
 
 /**
  * Tests soft-deleting a project
@@ -299,6 +378,23 @@ function softDeleteProject(done) {
   .catch((err) => {
     chai.expect(err).to.equal(null);
     done();
+  });
+}
+
+/**
+ * Tests finding all permisions on the project.
+ * NOTE: Figure out how to define the project permissions
+ * and check with chai if they are what they should
+ * be.
+ */
+function findPerm(done) {
+  ProjController.findAllPremissions(user, org.id, 'prtlgn')
+  .then((proj) => {
+    chai.expect(proj)
+  })
+  .catch((err2) => {
+      chai.expect(err2.message).to.equal('Project not found');
+      done();
   });
 }
 
