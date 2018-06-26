@@ -600,7 +600,7 @@ class APIController {
 
 
   /**
-   * POST /api/org/:orgid/projects/:projectid
+   * POST /api/orgs/:orgid/projects/:projectid
    *
    * @description Takes a project object in the request body and creates the
    * project.
@@ -670,7 +670,7 @@ class APIController {
 
 
   /**
-   * PUT /api/org/:orgid/projects/:projectid
+   * PUT /api/orgs/:orgid/projects/:projectid
    *
    * @description  Takes an organization ID and project ID in the URI and JSON
    * encoded project data in the body. Updates the project corresponding to the
@@ -741,7 +741,7 @@ class APIController {
 
 
   /**
-   * DELETE /api/org/:orgid/projects:projectid
+   * DELETE /api/orgs/:orgid/projects:projectid
    *
    * Takes an organization ID and project ID in the URI and deletes the
    * corresponding project.

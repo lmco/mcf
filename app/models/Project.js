@@ -126,6 +126,10 @@ ProjectSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
 
+ProjectSchema.methods.getEditableFields = function() {
+  return ['name', 'delete', 'deletedOn'];
+};
+
 
 // Required for virtual getters
 ProjectSchema.set('toJSON', { virtuals: true });
