@@ -104,7 +104,11 @@ const formatter = printf((msg) => {
   if (mbee.config.log.colorize) {
     const ts = `${fmt.color.grey}${msg.timestamp}${fmt.color.esc}`; // timestamp
     const f = `${fmt.color.cyan}${file}${fmt.color.esc}`;           // file
-    return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msg.message}`;
+    let msgPrint = msg.message;
+    if(~msg.level.indexOf('error') || ~msg.level.indexOf('critical')) {
+      msgPrint = msg.stack;
+    }
+    return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msgPrint}`;
   }
   // If colorize is false, we remove colors from the log level.
 
