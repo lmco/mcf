@@ -117,6 +117,7 @@ class UserController {
           if (saveErr) {
             return reject(saveErr);
           }
+          //console.log(user);
           return resolve(user.getPublicData());
         });
       });

@@ -35,7 +35,6 @@ let org = null;
 
 /**
  * Other tests to test:
- *  -long names for id
  *  -long names for name
  *  -string for id
  *  -string for name
@@ -120,7 +119,10 @@ describe(name, () => {
 
   it('should create a new project', createProject).timeout(2500);
   it('should create a second project', createProject02).timeout(2500);
-  it('should attempt to create a project with a long ID', createLongId).timeout(2500);
+  it('should fail to attempt to create a project with a long ID', createLongId).timeout(2500);
+  it('should attempt to create a project with a long name', createLongName).timeout(2500);
+  it('should reject attempt to create a project with a REALLY long name', createLongName02).timeout(2500);
+  it('should reject attempt to create a project with a period in name', createPeriodName).timeout(2500);
   it('should reject creation of a project already made',recreateProject).timeout(2500);
   it('should reject creation of project with invalid ID', noId).timeout(2500);
   it('should reject creation of project with invalid Name', noName).timeout(2500);
@@ -135,7 +137,8 @@ describe(name, () => {
   //it('should set the permissions on the project', setPerm).timeout(2500);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
   it('should delete a project', deleteProject).timeout(2500);
-  it('should delete secolnd project', deleteProject02).timeout(2500);
+  it('should delete second project', deleteProject02).timeout(2500);
+  it('should delete projects that were created with long names', deleteOthers).timeout(2500);
 });
 
 
@@ -191,7 +194,7 @@ function createProject02(done) {
 
 /**
  * Tests to see what valid name of the id 
- * can be. how long till it breaks...
+ * can be of a project. how long till it breaks...
  */
 function createLongId(done) {
   const projData = {
@@ -208,6 +211,78 @@ function createLongId(done) {
   })
   .catch((error) => {
     chai.assert(error.message.startsWith('Project validation failed:'));
+    done();
+  });
+}
+
+/**
+ * Tests to see what valid name of the project
+ * can be. how long till it breaks...
+ * This succeeds...
+ */
+function createLongName(done) {
+  const projData = {
+    id: 'vlongname',
+    name: 'This is Leah I am writing to see if this is valid are you from here on i am adding more because it worked with what i had at you',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(user, projData)
+  .then((proj) => {
+    chai.expect(proj.id).to.equal('vlongname');
+    done();
+  })
+  .catch((err) => {
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests to see what valid length of the name
+ * of project can be. how long till it breaks...
+ * Just kidding this works...... 
+ */
+function createLongName02(done) {
+  const projData = {
+    id: 'vlongnametwo',
+    name: 'This is Leah I am writing to see if this is valid are you from here on i am adding more because it worked with what i had at you i want to see you break because this is gettting really long and I want you to break please break I want to see you break',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(user, projData)
+  .then((proj) => {
+    chai.expect(proj.id).to.equal('vlongnametwo');
+    done();
+  })
+  .catch((err) => {
+    console.log(err);
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests to see what valid name of the project 
+ * can be.
+ */
+function createPeriodName(done) {
+  const projData = {
+    id: 'period',
+    name: 'This is just to see if a period works....',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(user, projData)
+  .then(() => {
+    chai.assert(true === false);
+    done();
+  })
+  .catch((err) => {
+    chai.expect(err.message).to.equal('Project Name is not valid.');
     done();
   });
 }
@@ -536,5 +611,31 @@ function deleteProject02(done) {
   .catch((err) => {
     chai.expect(err).to.equal(null);
     done();
+  });
+}
+
+/**
+ * Tests deleting all the other projects created
+ */
+function deleteOthers(done) {
+  ProjController.removeProject(user, org.id, 'vlongname', { soft: false })
+  .then(() => {
+    ProjController.findProject(user, org.id, 'vlongname')
+    ProjController.removeProject(user, org.id, 'vlongnametwo', { soft: false })
+    .then(() => {
+      ProjController.findProject(user, org.id, 'vlongnametwo')
+      .then((proj2) => {
+        chai.expect(proj2).to.equal(null);
+        done();
+      })
+      .catch((err2) => {
+        chai.expect(err2.message).to.equal('Project not found');
+        done();
+      });
+    })
+    .catch((err) => {
+      chai.expect(err).to.equal(null);
+      done();
+    });
   });
 }

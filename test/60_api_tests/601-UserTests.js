@@ -33,6 +33,36 @@ const test = M.config.test;
  *------------------------------------*/
 
 describe(name, function() {
+  before(function(done) {
+    this.timeout(6000);
+    const db = M.load('lib/db');
+    db.connect();
+    const userData = {
+      username: 'hgranger',
+      password: 'swishandflick',
+      fname: 'Hermione',
+      lname: 'Granger'
+    };
+    UserController.createUser(reqUser, userData)
+    .then(function(newUser) {
+      chai.expect(newUser.username).to.equal('swishandflick');
+      chai.expect(newUser.fname).to.equal('Hermione');
+      chai.expect(newUser.lname).to.equal('Granger');
+      done();
+    })
+    .catch(function(err){
+      chai.expect(err).to.equal(null);
+    });
+  });  
+  after(function(done) {
+    User.findOneAndRemove({
+      username: 'darthsidious'
+    },function(userError){
+      chai.expect(userError).to.equal(null);
+      mongoose.connection.close();
+      done();
+    });
+  });
     it('should get a username', getUser).timeout(3000);
 });
 

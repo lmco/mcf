@@ -71,8 +71,9 @@ describe(name, function() {
       done();
     });
   });
-
+//ASK ABOUT USER ADMIN AND FIND USERS
   it('should create a user', createNewUser).timeout(3000);
+  //it('should create an admin user', createAUser).timeout(3000);
   it('should create a second user', createUser02).timeout(3000);
   it('should reject a user with no input to username', badUser).timeout(3000);
   it('should reject username with invalid input', invalidUser).timeout(3000);
@@ -115,6 +116,34 @@ describe(name, function() {
       chai.expect(err).to.equal(null);
     });
   }
+
+  /**
+ * Creates a user using the User Controller.
+ * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
+ * NOTE: As of right now the password key becomes a hash
+ * need to eventually made password tests.
+ */
+ function createAUser(done) {
+  const userData = {
+    username: 'darthvader',
+    password: 'iamthechoosenone',
+    fname: 'Aniken',
+    lname: 'Skywalker',
+    admin: true
+  };
+  UserController.createUser(reqUser, userData)
+  .then(function(newUser) {
+    chai.expect(newUser.username).to.equal('darthvader');
+    chai.expect(newUser.fname).to.equal('Aniken');
+    chai.expect(newUser.lname).to.equal('Skywalker');
+    chai.expect(newUser.admin).to.equal(true);
+    done();
+  })
+  .catch(function(err){
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
 
 /**
  * Creates a second user using the User Controller
