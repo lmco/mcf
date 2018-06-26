@@ -22,6 +22,7 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
 const M = require('../../mbee.js');
+const sanitization = M.load('lib/sanitization');
 
 /*------------------------------------
  *       Main
@@ -33,6 +34,8 @@ describe(name, () => {
   it('should not sanitize strings', htmlMongoTest);
   it('should delete the key by user input', keyDelete);
   it('should sanitize html inputs by user', htmlTest);
+  it('should sanitize a JSON object', sanitizeHtmlObject);
+  it('should not sanitize the allowed exceptions', sanitizeAllowedCharacters);
 });
 
 /*------------------------------------
@@ -45,7 +48,6 @@ describe(name, () => {
 
 
 function sanTest(done) {
-  const sanitization = M.load('lib/sanitization');
   const mongoSan = sanitization.mongo({ $lt: 10 });
   chai.expect(typeof mongoSan).to.equal(typeof {});
   done();
@@ -54,7 +56,6 @@ function sanTest(done) {
 /* This html test if failing due to mongo sanitize not being able to
 take in strings because mongo sanitize only takes in objects */
 function htmlMongoTest(done) {
-  const sanitization = M.load('lib/sanitization');
   const mongohtmlSan = sanitization.mongo({ '$<script>': null });
   chai.expect(mongohtmlSan).to.not.equal({});
   done();
@@ -63,7 +64,6 @@ function htmlMongoTest(done) {
 /* This key delete is failing not being able to compare to the key */
 function keyDelete(done) {
   const v = { $lt: null };
-  const sanitization = M.load('lib/sanitization');
   const mongoSanitize = sanitization.mongo(v);
   const key = Object.keys(mongoSanitize);
   chai.expect(key.length).to.equal(0);
@@ -71,8 +71,38 @@ function keyDelete(done) {
 }
 
 function htmlTest(done) {
-  const sanitization = M.load('lib/sanitization');
   const htmlSan = sanitization.html('<script>');
   chai.expect(htmlSan).to.equal('&lt;script&gt;');
+  done();
+}
+
+/**
+ * Test sanitization of a JSON Object.
+ */
+function sanitizeHtmlObject(done) {
+  const data = {
+    name: 'rick sanchez',
+    fname: '<script>',
+    lname: '</script>',
+    admin: true,
+    email: null
+  };
+  const htmlSan = sanitization.html(data);
+  chai.expect(htmlSan.name).to.equal('rick sanchez');
+  chai.expect(htmlSan.fname).to.equal('&lt;script&gt;');
+  chai.expect(htmlSan.lname).to.equal('&lt;/script&gt;');
+  chai.expect(htmlSan.admin).to.equal(true);
+  chai.expect(htmlSan.email).to.equal('');
+  done();
+}
+
+/**
+ * Should attempt to sanatize &amp; and other allowed exceptions.
+ */
+function sanitizeAllowedCharacters(done) {
+  const s = 'this string has &amp; and &lt; but also &sample';
+  const expected = 'this string has &amp; and &lt; but also &amp;sample';
+  const htmlSan = sanitization.html(s);
+  chai.expect(htmlSan).to.equal(expected);
   done();
 }

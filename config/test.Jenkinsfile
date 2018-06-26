@@ -73,7 +73,11 @@ pipeline {
                 // Runs the basic test suite against the running stage container
                 sh 'NODE_ENV=test node mbee lint'
                 // Runs the basic test suite against the running stage container
-                sh 'NODE_ENV=test node mbee test --grep "^[0-6]"'
+                timeout(time: 10, unit: 'MINUTES') {
+                    retry(10) {
+                        sh 'NODE_ENV=test node mbee test --grep "^[0-6]"'
+                    }
+                }
             }
         }
 

@@ -347,9 +347,9 @@ class APIController {
   /**
    * DELETE /api/orgs/:orgid
    *
-   * @description  Takes an orgid in the URI and soft-deletes the corresponding
-   * organization. Returns a success message if successful, otherwise an error
-   * message is returned.
+   * @description  Takes an orgid in the URI and options in the body and
+   * deletes the corresponding organization. Returns a success message if
+   * successful, otherwise an error message is returned.
    */
   static deleteOrg(req, res) {
     // If for some reason we don't have a user, fail.
@@ -360,7 +360,7 @@ class APIController {
 
     const orgid = M.lib.sani.sanitize(req.params.orgid);
 
-    OrgController.removeOrg(req.user, orgid)
+    OrgController.removeOrg(req.user, orgid, req.body)
     .then((org) => {
       res.header('Content-Type', 'application/json');
       return res.send(APIController.formatJSON(org.getPublicData()));
@@ -752,10 +752,11 @@ class APIController {
       M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
+
     const orgId = M.lib.sani.html(req.params.orgid);
     const projectId = M.lib.sani.html(req.params.projectid);
 
-    ProjectController.removeProject(req.user, orgId, projectId)
+    ProjectController.removeProject(req.user, orgId, projectId, req.body)
     .then((project) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));

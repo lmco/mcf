@@ -300,7 +300,10 @@ function deleteOrg01(done) {
   request({
     url: `${test.url}/api/orgs/org1`,
     headers: getHeaders(),
-    method: 'DELETE'
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
   },
   function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
@@ -317,7 +320,10 @@ function deleteOrg02(done) {
   request({
     url: `${test.url}/api/orgs/org2`,
     headers: getHeaders(),
-    method: 'DELETE'
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
   },
   function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
