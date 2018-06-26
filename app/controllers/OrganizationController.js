@@ -63,7 +63,7 @@ class OrganizationController {
    * organization.
    *
    * @example
-   * OrganizationController.getOrg('josh', 'mbee-sw')
+   * OrganizationController.findOrg('josh', 'mbee-sw')
    * .then(function(org) {
    *   // do something with the org
    * })
@@ -211,7 +211,7 @@ class OrganizationController {
    * existing organization.
    *
    * @example
-   * OrganizationController.createOrg('josh', {mbee-sw})
+   * OrganizationController.updateOrg('josh', {mbee-sw})
    * .then(function(org) {
    *   // do something with the newly updated org
    * })
@@ -292,7 +292,7 @@ class OrganizationController {
    * and (soft)deletes an existing organization.
    *
    * @example
-   * OrganizationController.createOrg('josh', {mbee-sw}, fasle)
+   * OrganizationController.removerg('josh', {mbee-sw}, {soft: false})
    * .then(function(org) {
    *   // do something with the newly updated org
    * })
@@ -366,7 +366,7 @@ class OrganizationController {
    * It was written to help clean up some code in the removeOrg function.
    *
    * @example
-   * OrganizationController.getUserPermissions(Josh, 'mbee', true)
+   * OrganizationController.removeOrgHelper(Josh, 'mbee', true)
    * .then(function(org) {
    *  // Get the users roles
    * })
@@ -414,7 +414,7 @@ class OrganizationController {
    * permissions the second user has within the org
    *
    * @example
-   * OrganizationController.getUserPermissions(Josh, Austin, 'mbee')
+   * OrganizationController.findPermissions(Josh, Austin, 'mbee')
    * .then(function(org) {
    *  // Get the users roles
    * })
@@ -445,7 +445,7 @@ class OrganizationController {
    * users permissions within an organization
    *
    * @example
-   * OrganizationController.setUserPermissions(Josh, Austin, 'mbee', 'write')
+   * OrganizationController.setPermissions(Josh, Austin, 'mbee', 'write')
    * .then(function(org) {
    *   // Change the users role
    * })

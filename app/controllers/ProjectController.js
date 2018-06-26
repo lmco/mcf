@@ -39,7 +39,7 @@ class ProjectController {
    * @description  The function finds all projects for a given orgID.
    *
    * @example
-   * ProjectController.findProject({Tony Stark}, 'StarkIndustries')
+   * ProjectController.findProjects({Tony Stark}, 'StarkIndustries')
    * .then(function(org) {
    *   // do something with the returned projects
    * })
@@ -99,7 +99,7 @@ class ProjectController {
    * @description  The function deletes all projects for an org.
    *
    * @example
-   * ProjectController.findProject({Tony Stark}, 'StarkIndustries')
+   * ProjectController.removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
    * .then(function(org) {
    *   // Delete projects
    * })
@@ -437,7 +437,7 @@ class ProjectController {
    * The function deletes a project.
    *
    * @example
-   * ProjectController.removeProject({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
    * .then(function(org) {
    *   // do something with the newly created project.
    * })
@@ -529,7 +529,7 @@ class ProjectController {
    * The function finds a projects permissions.
    *
    * @example
-   * ProjectController.findAllPermissions({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.findAllPermissions({Tony Stark}, 'stark', 'arc')
    * .then(function(org) {
    *   // do something with the newly created project.
    * })
@@ -584,7 +584,7 @@ class ProjectController {
    * The function finds a projects permissions.
    *
    * @example
-   * ProjectController.findAllPermissions({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
    * .then(function(org) {
    *   // do something with the newly created project.
    * })
