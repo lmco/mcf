@@ -226,7 +226,7 @@ class OrganizationController {
    * @param  {String} The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // TODO (JU & JK): Implement in APIController
       /*
       // If a given property is not an allowed property to be updated,
@@ -251,23 +251,8 @@ class OrganizationController {
       // Sanitize fields
       const orgID = M.lib.sani.html(organizationID);
       const newOrgName = M.lib.sani.html(orgUpdate.name);
-      Organization.find({ id: orgID })
-      .populate('permissions.admin')
-      .exec((err, orgs) => {
-        // If error occurs, return it
-        if (err) {
-          return reject(err);
-        }
-        // Error check - validate only 1 org was found
-        if (orgs.length > 1) {
-          return reject(new Error('Too many orgs found with same ID'));
-        }
-        if (orgs.length < 1) {
-          return reject(new Error('Organization not found.'));
-        }
-
-        // allocation for convenience
-        const org = orgs[0];
+      OrganizationController.findOrg(user, orgID)
+      .then((org) => {
         // Error check - Make sure user is admin
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!user.admin && !orgAdmins.includes(user._id.toString())) {
@@ -284,8 +269,11 @@ class OrganizationController {
           // Return updated org
           return resolve(org);
         });
+      })
+      .catch((error) => {
+        return reject(error);
       });
-    }));
+    });
   }
 
 
