@@ -398,28 +398,12 @@ class ProjectController {
       }
 
       // Error Check - check if the organization for the project exists
-      Organization.find({ id: orgID }, (findOrgErr, orgs) => {
-        if (findOrgErr) {
-          return reject(findOrgErr);
-        }
-        if (orgs.length < 1) {
-          return reject(new Error('Org not found.'));
-        }
-
+      OrgController.findOrg(reqUser, orgID)
+      .then((org) => {
         // Error check - check if the project already exists
-        Project.find({ uid: projUID })
-        .populate('permissions.admin')
-        .exec((findProjErr, projects) => {
-          if (findProjErr) {
-            return reject(findProjErr);
-          }
-          // Error Check - make sure project exists
-          if (projects.length < 1) {
-            return reject(new Error('Project not found.'));
-          }
-
+        ProjectController.findProject(reqUser, orgID, projID)
+        .then((project) => {
           // Check Permissions
-          const project = projects[0];
           const admins = project.permissions.admin.map(u => u._id.toString());
           if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
             return reject(new Error('User does not have permission.'));
@@ -431,7 +415,15 @@ class ProjectController {
 
           // Return the updated project object
           return resolve(project);
+        })
+        .catch((error) => {
+          // Error trying to find the project
+          return reject(error);
         });
+      })
+      .catch((error2) => {
+        // Error trying to find the org.
+        return reject(error2);
       });
     });
   }
