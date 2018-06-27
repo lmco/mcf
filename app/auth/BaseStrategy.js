@@ -79,7 +79,7 @@ class BaseStrategy {
         // Get credentials from the auth header
         const credentials = Buffer.from(parts[1], 'base64').toString().split(':');
         if (credentials.length < 2) {
-          M.log.verbose('Credentials length < 2');
+          M.log.debug('Credentials length < 2');
           return (req.originalUrl.startsWith('/api')) ? res.status(400).send('Bad Request') : res.redirect('/login');
         }
         username = sani.sanitize(credentials[0]);
