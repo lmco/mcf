@@ -33,6 +33,12 @@ class Middleware {
     next();
   }
 
+  static logIP(req, res, next) {
+    const ip = req.ip;
+    M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${ip}`);
+    next();
+  }
+
 }
 
 module.exports = Middleware;
