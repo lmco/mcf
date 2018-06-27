@@ -34,8 +34,7 @@ class Middleware {
   }
 
   static logIP(req, res, next) {
-    const ip = req.ip;
-    M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${ip}`);
+    M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${req.ip}`);
     next();
   }
 
