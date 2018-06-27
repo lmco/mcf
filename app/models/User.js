@@ -10,11 +10,12 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @file  models/UserModel
+ * @module  models/User
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * This file creates a mongoose model to interact with the
+ * @fileOverview This file creates a mongoose model to interact with the
  * MongoDB Database in order to find, save, update, and delete organizations.
  */
 
@@ -25,9 +26,6 @@ const M = require(path.join('..', '..', 'mbee.js'));
 
 /**
  * @class  User
- *
- * @author  Josh Kaplan
- * @author  Jake Ursetta
  *
  * @classdesc Defines the User Schema
  */

@@ -14,8 +14,8 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines the MBEE logger. The logger should be used everywhere instead of
- * using `console.log`.
+ * @description Defines the MBEE logger. The logger should be used everywhere
+ * instead of using `console.log`.
  *
  * To use the logger simple require this file (e.g.
  * `const log = require('logger.js')`. You can the use the logger:

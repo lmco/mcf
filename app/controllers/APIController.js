@@ -9,6 +9,13 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
+/**
+ * @module  controllers/api-controller
+ *
+ * @description  This implement all of the API functionality. All API routes
+ * map to function in this controller which in turn uses other controllers that
+ * define behaviors for specific objects.
+ */
 
 const path = require('path');
 const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
@@ -20,11 +27,11 @@ const ProjectController = mbee.load('controllers/ProjectController');
 const UserController = mbee.load('controllers/UserController');
 
 /**
- * APIController.js
+ * @class  APIController
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines API-related control functionality.
+ * @description  Defines API-related control functionality.
  */
 class APIController {
 

@@ -9,12 +9,13 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/*
- * @module auth/LMICloudStrategy
+/**
+ * @module auth/lmi-cloud-strategy
  *
  * @authorized Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * TODO - This file is old and needs to be updated before use.
+ * @description This file implements our authentication strategy for cloud-based
+ * deployments on the LMI.
  */
 
 const fs = require('fs');
