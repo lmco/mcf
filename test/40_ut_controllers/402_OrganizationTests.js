@@ -115,6 +115,7 @@ describe(name, () => {
 
   it('should create a new org', addNewOrg).timeout(2500);
   it('should find an existing org', findExistingOrg).timeout(2500);
+  it('should update an orgs name', updateOrg).timeout(2500);
   it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
   it('should soft delete an existing org', softDeleteExistingOrg).timeout(2500);
   it('should delete an existing org', deleteExistingOrg).timeout(2500);
@@ -171,6 +172,21 @@ function findExistingOrg(done) {
     chai.expect(error).to.equal(null);
     done();
   });
+}
+
+/**
+ * Tests updating an org
+ */
+function updateOrg(done) {
+  OrgController.updateOrg(user, 'tv', {name: 'Interdimensional Cable'})
+  .then((retOrg) => {
+    chai.expect(retOrg.name).to.equal('Interdimensional Cable');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.message).to.equal(null);
+    done();
+  })
 }
 
 /**
