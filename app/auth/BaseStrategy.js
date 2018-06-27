@@ -52,8 +52,6 @@ class BaseStrategy {
     let username = null;
     let password = null;
 
-    M.log.verbose(`Authentication requested from ${req.ip}`);
-
     if (authorization) {
       M.log.debug('Authorization header found');
       // Check it is a valid auth header
