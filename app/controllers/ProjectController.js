@@ -299,18 +299,9 @@ class ProjectController {
       }
 
       // Error check - Make sure the org exists
-      Organization.find({ id: orgID })
-      .populate('permissions.write')
-      .exec((findOrgErr, orgs) => {
-        if (findOrgErr) {
-          return reject(new Error(findOrgErr));
-        }
-        if (orgs.length < 1) {
-          return reject(new Error('Org not found.'));
-        }
-
+      OrgController.findOrg(reqUser, orgID)
+      .then((org) => {
         // Check Permissions
-        const org = orgs[0];
         const writers = org.permissions.write.map(u => u._id.toString());
 
         if (!writers.includes(reqUser._id.toString()) && !reqUser.admin) {
@@ -318,35 +309,42 @@ class ProjectController {
         }
 
         // Error check - check if the project already exists
-        Project.find({ uid: projUID }, (findProjErr, projects) => {
-          if (findProjErr) {
-            return reject(new Error(findProjErr));
-          }
-          if (projects.length >= 1) {
-            return reject(new Error('Project already exists.'));
-          }
+        ProjectController.findProject(reqUser, org.id, projID)
+        .then((proj) => {
+          return reject(new Error("Project already exists."));
+        })
+        .catch((error) => {
+          // This is ok, we dont want the project to already exist.
+          if (error.message === 'Project not found') {
+            // Create the new project and save it
+            const newProject = new Project({
+              id: projID,
+              name: projName,
+              org: org._id,
+              permissions: {
+                read: [reqUser._id],
+                write: [reqUser._id],
+                admin: [reqUser._id]
+              },
+              uid: `${orgID}:${projID}`
+            });
 
-          // Create the new project and save it
-          const newProject = new Project({
-            id: projID,
-            name: projName,
-            org: orgs[0]._id,
-            permissions: {
-              read: [reqUser._id],
-              write: [reqUser._id],
-              admin: [reqUser._id]
-            },
-            uid: `${orgID}:${projID}`
-          });
-
-          newProject.save((saveErr, projectUpdated) => {
-            if (saveErr) {
-              return reject(saveErr);
-            }
-            // Return success and the JSON object
-            return resolve(projectUpdated);
-          });
+            newProject.save((saveErr, projectUpdated) => {
+              if (saveErr) {
+                return reject(saveErr);
+              }
+              // Return success and the JSON object
+              return resolve(projectUpdated);
+            });
+          }
+          else {
+            // Some other error occured, return it.
+            return reject(error);
+          }
         });
+      })
+      .catch((error2) => {
+        return reject(error2);
       });
     });
   }
