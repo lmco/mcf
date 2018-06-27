@@ -9,6 +9,12 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
+/**
+ * @module  controllers/project-controller
+ *
+ * @description  This implements the behavior and logic for a project and
+ * provides functions for interacting with projects.
+ */
 
 /* Node.js Modules */
 const path = require('path');
@@ -110,7 +116,7 @@ class ProjectController {
    *
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {JSON Object} Contains a list of delete options.
+   * @param  {Object} Contains a list of delete options.
    */
   static removeProjects(reqUser, organizationId, options) {
     return new Promise((resolve, reject) => {
@@ -449,7 +455,7 @@ class ProjectController {
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
    * @param  {String} The project ID of the Project which is being deleted.
-   * @param  {JSON Object} Contains the list of delete options.
+   * @param  {Object} Contains the list of delete options.
    */
   static removeProject(reqUser, organizationId, projectId, options) {
     return new Promise((resolve, reject) => {

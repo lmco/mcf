@@ -313,7 +313,7 @@ const Relationship = Element.discriminator('Relationship', RelationshipSchema);
 const PackageSchema = new mongoose.Schema({
   /**
    * @memberOf Package
-   * @property {Array[Schema.Types.ObjectId]} contains
+   * @property {Schema.Types.ObjectId[]} contains
    *
    * @description An array of ObjectId's referencing other
    */

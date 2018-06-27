@@ -1002,6 +1002,224 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
   APIController.deleteProjectRole
 );
 
+
+/**
+ * @swagger
+ * /orgs/:orgid/projects/:projectid/elements/:elementid:
+ *   get:
+ *     tags:
+ *       - model management
+ *     summary: Gets an element by ID
+ *     description: >
+ *       Retrieves a single element. An element is uniquely identified by its
+ *       organization, project, and element IDs.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization the project is in.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The element was successfully retrieved.
+ *                      The element is returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
+ *                      authorization to view this organization or project.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
+ *   post:
+ *     tags:
+ *       - model management
+ *     description: Creates a new element.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project. A valid project ID must consist
+ *                      of only lowercase letters, numbers, and dashes (e.g.
+ *                      "-") and must begin with a letter.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: id
+ *         description: The ID of the element. If this is provided, it must
+ *                      match the element ID provided in the URI.
+ *         in: body
+ *         required: false
+ *         type: string
+ *       - name: name
+ *         description: The name for the element.
+ *         in: body
+ *         required: false
+ *         type: string
+ *       - name: documentation
+ *         description: The documentation for the element.
+ *         in: body
+ *         required: false
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The element was successfully created.
+ *                      The new/updated element is returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
+ *                      authorization to view this org/project.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
+ *   put:
+ *     tags:
+ *       - model management
+ *     description: Creates or replaces an element. If the element does not yet
+ *                  exist, it will be created (just like a POST). If it does
+ *                  exist, the element will be replaced with
+ *                  data provided.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project to create/replace. A valid project
+ *                      ID must consist of only lowercase letters, numbers, and
+ *                      dashes (e.g. "-") and must begin with a letter.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: id
+ *         description: The ID of the element. If this is provided, it must
+ *                      match the element ID provided in the URI.
+ *         in: body
+ *         required: false
+ *         type: string
+ *       - name: name
+ *         description: The name for the element.
+ *         in: body
+ *         required: false
+ *         type: string
+ *       - name: documentation
+ *         description: The documentation for the element.
+ *         in: body
+ *         required: false
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The element was successfully created.
+ *                      The new/updated element is returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
+ *                      authorization to view this organization or project.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
+ *   delete:
+ *     tags:
+ *       -  model management
+ *     description: Deletes an element
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element to delete.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The element was successfully deleted.
+ *                      The element ID is returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
+ *                      authorization to view this organization or project.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
+ */
+api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+);
+
+
 /**
  * @swagger
  * /users:

@@ -9,6 +9,12 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
+/**
+ * @module  controllers/organization-controller
+ *
+ * @description  This implements the behavior and logic for an organization and
+ * provides functions for interacting with organizations.
+ */
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
@@ -290,7 +296,7 @@ class OrganizationController {
    *
    * @param  {User} The object containing the  requesting user.
    * @param  {string} The ID of the org being deleted.
-   * @param  {JSON Object} Contains the list of delete options.
+   * @param  {Object} Contains the list of delete options.
    */
   static removeOrg(user, organizationID, options) {
     // Loading controller function wide since the project controller loads
