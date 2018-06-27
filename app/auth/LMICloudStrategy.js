@@ -101,6 +101,7 @@ class LMICloudStrategy extends BaseStrategy {
       // If user found and not LDAP (e.g. a local user),
       // do local authentication
       if (users.length === 1 && !users[0].isLDAPUser) {
+        M.log.debug('Attempting to authenticate as local user.');
         // Compute the password hash on given password
         const hash = crypto.createHash('sha256');
         // salt the hash, the ._id is seen by eslint as a dangling underscore, disabling
@@ -126,6 +127,7 @@ class LMICloudStrategy extends BaseStrategy {
             cb('An error has occured binding to the LDAP server.');
           }
           else {
+            M.log.debug('Attempting to authentcate as LDAP user.');
             self.doSearch(username, password, cb);
           }
         });
@@ -214,6 +216,7 @@ class LMICloudStrategy extends BaseStrategy {
    * TODO - Pass original query result through to avoid a second query.
    */
   syncLDAPUser(ldapUser, next) {
+    M.log.debug('Synchronizing LDAP user with local database.');
     User.find({
       username: ldapUser[M.config.auth.ldap.username_attribute]
     })

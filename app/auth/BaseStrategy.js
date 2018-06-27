@@ -52,7 +52,10 @@ class BaseStrategy {
     let username = null;
     let password = null;
 
+    M.log.verbose('Authentication Requested...');
+
     if (authorization) {
+      M.log.debug('Authorization header found');
       // Check it is a valid auth header
       const parts = authorization.split(' ');
       if (parts.length < 2) {
@@ -83,7 +86,7 @@ class BaseStrategy {
         password = credentials[1];
         // Error check - make sure username/password are not empty
         if (!username || !password || username === '' || password === '') {
-          M.log.verbose('Username or password not provided.');
+          M.log.debug('Username or password not provided.');
           return (req.originalUrl.startsWith('/api'))
             ? res.status(401).send('Unauthorized')
             : res.redirect(`/login?next=${req.originalUrl}`);
@@ -97,7 +100,7 @@ class BaseStrategy {
               : res.redirect(`/login?next=${req.originalUrl}`);
           }
 
-          M.log.verbose(`Authenticated [${user.username}] via Basic Auth`);
+          M.log.info(`Authenticated [${user.username}] via Basic Auth`);
           req.user = user;
           next();
         });
@@ -111,7 +114,7 @@ class BaseStrategy {
        * or some other external method such as a microservice.
        */
       else if (RegExp('Bearer').test(scheme)) {
-        M.log.debug('Authenticating user via Token Auth ...');
+        M.log.verbose('Authenticating user via Token Auth ...');
         const token = Buffer.from(parts[1], 'utf8').toString();
         this.handleTokenAuth(req, res, token, (err, user) => {
           if (err) {
@@ -121,7 +124,7 @@ class BaseStrategy {
               : res.redirect(`/login?next=${req.originalUrl}`);
           }
 
-          M.log.verbose(`Authenticated [${user.username}] via Token Auth`);
+          M.log.info(`Authenticated [${user.username}] via Token Auth`);
           req.user = user;
           next();
         });
@@ -151,7 +154,7 @@ class BaseStrategy {
             ? res.status(401).send('Unauthorized')
             : res.redirect(`/login?next=${req.originalUrl}`);
         }
-        M.log.verbose(`Authenticated [${user.username}] via Session Token Auth`);
+        M.log.info(`Authenticated [${user.username}] via Session Token Auth`);
         req.user = user;
         next();
       });
@@ -171,7 +174,7 @@ class BaseStrategy {
       password = req.body.password;
       // Error check - make sure username/password are not empty
       if (!username || !password || username === '' || password === '') {
-        M.log.verbose('Username or password not provided.');
+        M.log.debug('Username or password not provided.');
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
           : res.redirect(`/login?next=${req.originalUrl}`);
@@ -184,13 +187,13 @@ class BaseStrategy {
             : res.redirect(`/login?next=${req.originalUrl}`);
         }
 
-        M.log.verbose(`Authenticated [${user.username}] via Form Input Auth`);
+        M.log.info(`Authenticated [${user.username}] via Form Input Auth`);
         req.user = user;
         next();
       });
     }
     else {
-      M.log.warn(`"${req.originalUrl}" requested with`
+      M.log.verbose(`"${req.originalUrl}" requested with`
                     + ' no valid authentication method provided.'
                     + ' Redirecting to "/login" ...');
       return (req.originalUrl.startsWith('/api'))
