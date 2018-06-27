@@ -174,9 +174,7 @@ class OrganizationController {
 
       // Check if org already exists
       OrganizationController.findOrg(user, orgID)
-      .then((org) => {
-        return reject(new Error('An org with the same ID already exists.'));
-      })
+      .then((org) => reject(new Error('An org with the same ID already exists.')))
       .catch((findOrgError) => {
         // Org not found is what we want, so proceed when this error
         // occurs since we aim to create a new org.
@@ -197,7 +195,7 @@ class OrganizationController {
               return reject(saveOrgErr);
             }
             resolve(newOrg);
-          })
+          });
         }
         else {
           // There was some other error, return it.
@@ -271,9 +269,7 @@ class OrganizationController {
           return resolve(org);
         });
       })
-      .catch((error) => {
-        return reject(error);
-      });
+      .catch((error) => reject(error));
     });
   }
 
@@ -523,9 +519,7 @@ class OrganizationController {
           return resolve(org);
         });
       })
-      .catch((error) => {
-        return reject(error);
-      });
+      .catch((error) => reject(error));
     });
   }
 

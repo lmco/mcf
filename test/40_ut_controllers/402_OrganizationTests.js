@@ -178,7 +178,7 @@ function findExistingOrg(done) {
  * Tests updating an org
  */
 function updateOrg(done) {
-  OrgController.updateOrg(user, 'tv', {name: 'Interdimensional Cable'})
+  OrgController.updateOrg(user, 'tv', { name: 'Interdimensional Cable' })
   .then((retOrg) => {
     chai.expect(retOrg.name).to.equal('Interdimensional Cable');
     done();
@@ -186,7 +186,7 @@ function updateOrg(done) {
   .catch((error) => {
     chai.expect(error.message).to.equal(null);
     done();
-  })
+  });
 }
 
 /**
