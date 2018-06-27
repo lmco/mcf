@@ -478,12 +478,11 @@ class OrganizationController {
         const permLevels = org.getPermissionLevels();
 
         // Remove all current roles for the selected user
-        Object.keys(perm).forEach((roles) => {
-          // For some reason, list of keys includes $init, so ignore this key
-          if (permLevels.includes(roles)) {
-            const permVals = perm[roles].map(u => u._id.toString());
+        Object.keys(perm).forEach((r) => {
+          if (permLevels.includes(r)) {
+            const permVals = perm[r].map(u => u._id.toString());
             if (permVals.includes(setUser._id.toString())) {
-              perm[roles].splice(perm[roles].indexOf(setUser._id), 1);
+              perm[r].splice(perm[r].indexOf(setUser._id), 1);
             }
           }
         });
