@@ -232,30 +232,10 @@ class OrganizationController {
    */
   static updateOrg(user, organizationID, orgUpdate) {
     return new Promise((resolve, reject) => {
-      // TODO (JU & JK): Implement in APIController
-      /*
-      // If a given property is not an allowed property to be updated,
-      // return an error immediately.
-      const allowedProperties = ['name'];
-      const givenProperties = Object.keys(req.body);
-      for (let i = 0; i < givenProperties.length; i++) {
-        if (!allowedProperties.includes(givenProperties[i])) {
-          return res.status(400).send('Bad Request');
-        }
-      }
-      // If nothing is being changed, return.
-      if (givenProperties.length < 1) {
-        return res.status(400).send('Bad Request');
-      }
-      */
-
-      if (!orgUpdate.hasOwnProperty('name')) {
-        return reject(new Error('Organization does not have a name.'));
-      }
-
-      // Sanitize fields
+      // Sanitize input argument
       const orgID = M.lib.sani.html(organizationID);
-      const newOrgName = M.lib.sani.html(orgUpdate.name);
+
+      // Check if org exists
       OrganizationController.findOrg(user, orgID)
       .then((org) => {
         // Error check - Make sure user is admin
@@ -264,18 +244,52 @@ class OrganizationController {
           return reject(new Error('User cannot create orgs.'));
         }
 
-        // Update the name
-        org.name = newOrgName;
-        org.save((saveErr) => {
-          if (saveErr) {
+        // get list of keys the user is trying to update
+        const orgUpdateFields = Object.keys(orgUpdate);
+        // Get list of parameters which can be updated from model
+        const validUpdateFields = org.getValidUpdateFields();
+        // Allocate update val and field before for loop
+        let updateVal = '';
+        let updateField = '';
+
+        // Check if passed in object contains fields to be updated
+        for (let i = 0; i < orgUpdateFields.length; i++) {
+          updateField = orgUpdateFields[i];
+          // Error Check - Check if updated field also exists in the original org.
+          if (!org.toJSON().hasOwnProperty(updateField)) {
+            return reject(new Error(`Organization does not contain field ${updateField}`));
+          }
+          // if parameter is the same don't bother updating it
+          if (org[updateField] === orgUpdate[updateField]) {
+            continue;
+          }
+          // Error Check - Check if field can be updated
+          if (!validUpdateFields.includes(updateField)) {
+            return reject(new Error(`Users cannot update [${updateField}] of organizations.`));
+          }
+          // Error Check - Check if updated field is of type string
+          if (typeof orgUpdate[updateField] !== 'string') {
+            return reject(new Error(`The Organization [${updateField}] is not of type String`));
+          }
+
+
+          // sanitize field
+          updateVal = M.lib.sani.sanitize(orgUpdate[updateField]);
+          // Update field in org object
+          org[updateField] = updateVal;
+        }
+
+        // Save updated org
+        org.save((saveOrgErr) => {
+          if (saveOrgErr) {
             // If error occurs, return it
-            return reject(saveErr);
+            return reject(saveOrgErr);
           }
           // Return updated org
           return resolve(org);
         });
       })
-      .catch((error) => reject(error));
+      .catch((findOrgErr) => reject(findOrgErr));
     });
   }
 
@@ -476,7 +490,6 @@ class OrganizationController {
         // Ensure user is an admin within the organization
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!reqUser.admin || !orgAdmins.includes(reqUser._id.toString())) {
-          M.log.verbose('User cannot change permissions');
           return reject(new Error('User cannot change permissions.'));
         }
 
