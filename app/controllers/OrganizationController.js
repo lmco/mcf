@@ -223,6 +223,7 @@ class OrganizationController {
    *
    *
    * @param  {User} The object containing the  requesting user.
+   * @param  {String} The organization ID.
    * @param  {String} The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
