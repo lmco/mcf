@@ -173,34 +173,36 @@ class OrganizationController {
       }
 
       // Check if org already exists
-      Organization.find({ id: orgID })
-      .populate()
-      .exec((findOrgErr, orgs) => {
-        // If error occurs, return it
-        if (findOrgErr) {
-          return reject(findOrgErr);
+      OrganizationController.findOrg(user, orgID)
+      .then((org) => {
+        return reject(new Error('An org with the same ID already exists.'));
+      })
+      .catch((findOrgError) => {
+        // Org not found is what we want, so proceed when this error
+        // occurs since we aim to create a new org.
+        if (findOrgError.message === 'Org not found.') {
+          // Create the new org
+          const newOrg = new Organization({
+            id: orgID,
+            name: orgName,
+            permissions: {
+              admin: [user._id],
+              write: [user._id],
+              read: [user._id]
+            }
+          });
+          // Save and resolve the new error
+          newOrg.save((saveOrgErr) => {
+            if (saveOrgErr) {
+              return reject(saveOrgErr);
+            }
+            resolve(newOrg);
+          })
         }
-        // If org already exists, throw an error
-        if (orgs.length >= 1) {
-          return reject(new Error('Organization already exists.'));
+        else {
+          // There was some other error, return it.
+          return reject(findOrgError);
         }
-        // Create the new org
-        const newOrg = new Organization({
-          id: orgID,
-          name: orgName,
-          permissions: {
-            admin: [user._id],
-            write: [user._id],
-            read: [user._id]
-          }
-        });
-        // Save and resolve the new error
-        newOrg.save((saveOrgErr) => {
-          if (saveOrgErr) {
-            return reject(saveOrgErr);
-          }
-          resolve(newOrg);
-        });
       });
     });
   }
