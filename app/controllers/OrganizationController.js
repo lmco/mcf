@@ -468,12 +468,8 @@ class OrganizationController {
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
-      Organization.findOne({ id: orgID })
-      .populate()
-      .exec((err, org) => {
-        if (err) {
-          return reject(err);
-        }
+      OrganizationController.findOrg(reqUser, orgID)
+      .then((org) => {
         // Ensure user is an admin within the organization
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!reqUser.admin || !orgAdmins.includes(reqUser._id.toString())) {
@@ -486,7 +482,7 @@ class OrganizationController {
         // Remove all current roles for the selected user
         Object.keys(perm).forEach((roles) => {
           // For some reason, list of keys includes $init, so ignore this key
-          if (roles !== '$init') {
+          if (Organization.getPermissionLevels().includes(roles)) {
             const permVals = perm[roles].map(u => u._id.toString());
             if (permVals.includes(setUser._id.toString())) {
               perm[roles].splice(perm[roles].indexOf(setUser._id), 1);
@@ -524,6 +520,9 @@ class OrganizationController {
           // Return updated org
           return resolve(org);
         });
+      })
+      .catch((error) => {
+        return reject(error);
       });
     });
   }
