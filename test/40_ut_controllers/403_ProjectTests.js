@@ -26,6 +26,8 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.load('controllers/ProjectController');
+const UserController = M.load('controllers/UserController');
+const OrgController = M.load('controllers/OrganizationController');
 const Org = M.load('models/Organization');
 const User = M.load('models/User');
 
@@ -47,56 +49,88 @@ let org = null;
  *       Main
  *------------------------------------*/
 
-describe(name, () => {
+describe(name, function() {
   before(function(done) {
-  // NOTE: Changed from arrow function to allow for use of
-  // this so that a larger timeout could be set
-    this.timeout(5000);
+    this.timeout(6000);
     const db = M.load('lib/db');
     db.connect();
 
-    // The admin user
-    user = new User({
-      username: 'rsanchez',
-      password: 'impicklerick',
-      fname: 'Rick',
-      lname: 'Sanchez',
-      admin: true
-    });
-    user.save((err) => {
-      chai.expect(err).to.equal(null);
-      nonAuser = new User({
-        username: 'msmith',
-        password: 'doihavetorick',
-        fname: 'Morty',
-        lname: 'Smith',
-        admin: false
-      });
-      nonAuser.save((err) => {
+    // Finding a Requesting Admin
+    const username = 'mbee';
+    UserController.findUser(username)
+    .then(function(searchUser) {
+      allSeeingUser = searchUser;
+      chai.expect(searchUser.username).to.equal('mbee');
+      const userData = {
+        username: 'rsanchez',
+        password: 'impicklerick',
+        fname: 'Rick',
+        lname: 'Sanchez',
+        admin: true
+      };
+      UserController.createUser(searchUser, userData)
+      .then(function(newAu) {
+        user = newAu;
+        chai.expect(newAu.username).to.equal('rsanchez');
+        chai.expect(newAu.fname).to.equal('Rick');
+        chai.expect(newAu.lname).to.equal('Sanchez');
+        const nonAuserData = {
+          username: 'msmith',
+          password: 'awwgeezrick',
+          fname: 'Morty',
+          lname: 'Smith',
+          admin: false
+        };
+        UserController.createUser(searchUser, nonAuserData)
+        .then(function(nonAu) {
+          nonAuser = nonAu;
+          chai.expect(nonAu.username).to.equal('msmith');
+          chai.expect(nonAu.fname).to.equal('Morty');
+          chai.expect(nonAu.lname).to.equal('Smith');
+          const orgData = {
+            id: 'council',
+            name: 'Council of Ricks',
+            permissions: {
+              admin: [user._id],
+              write: [user._id],
+              read: [user._id]
+            }
+          };
+          OrgController.createOrg(user, orgData)
+          .then((retOrg) => {
+            org = retOrg;
+            chai.expect(retOrg.id).to.equal('council');
+            chai.expect(retOrg.name).to.equal('Council of Ricks');
+            chai.expect(retOrg.permissions.read).to.include(user._id.toString());
+            chai.expect(retOrg.permissions.write).to.include(user._id.toString());
+            chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
+            done();
+          })
+          .catch((firsterr) => {
+            chai.expect(firsterr).to.equal(null);
+            done();
+          });
+        })
+        .catch(function(err){
           chai.expect(err).to.equal(null);
-
-        // Create the organization
-        org = new Org({
-          id: 'council',
-          name: 'Council of Ricks',
-          permissions: {
-            admin: [user._id],
-            write: [user._id],
-            read: [user._id]
-          }
-        });
-        org.save((orgErr) => {
-          chai.expect(orgErr).to.equal(null);
           done();
         });
+      })
+      .catch(function(error){
+        chai.expect(error).to.equal(null);
+        done();
       });
+    })
+    .catch(function(lasterr){
+      chai.expect(lasterr).to.equal(null);
+      done();
     });
   });
 
   after((done) => {
     // Delete the org
     Org.findOneAndRemove({
-      id: org.id
+      id: 'council'
     },
     (err, foundOrg) => {
       chai.expect(err).to.equal(null);

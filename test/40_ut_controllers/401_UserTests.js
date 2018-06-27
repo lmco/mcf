@@ -17,6 +17,14 @@
  * @description This class defines basic tests of the User data model.
  */
 
+
+ /**
+  * NOTE:
+  * NEED TO CONFIRM THE NUMBER OF USERS THAT ARE IN DATABASE
+  * BEFORE RUNNING TESTS. DUE TO THOSE EFFECT THE NUMBER OF 
+  * USERS FOUND IN THE FINDUSERS TEST RUN.
+  */
+
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
@@ -29,6 +37,7 @@ const User = M.load('models/User');
 const UserController = M.load('controllers/UserController');
 
 let reqUser = null;
+let nonAUser = null;
 /*------------------------------------
  *       Main
  *------------------------------------*/
@@ -40,50 +49,67 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    // Finding a Requesting Admin 
-    User.findOne({ username: 'mbee' }, function(errUser, user) {
-      reqUser = user;
-      // Check if error occured
-      if (errUser) {
-        M.log.error(errUser);
-      }// A non-admin user
-      nonAUser = new User({
+    const username = 'mbee';
+    // Finding a Requesting Admin
+    UserController.findUser(username)
+    .then(function(searchUser) {
+      reqUser = searchUser;
+      chai.expect(searchUser.username).to.equal('mbee');
+      const userData = {
         username: 'darthsidious',
         password: 'sithlord',
         fname: 'Darth',
         lname: 'Sidious',
         admin: false
-      });
-      nonAUser.save((error) => {  
-        chai.expect(error).to.equal(null);
+      };
+      UserController.createUser(searchUser, userData)
+      .then(function(newUser) {
+        nonAUser = newUser;
+        chai.expect(newUser.username).to.equal('darthsidious');
+        chai.expect(newUser.fname).to.equal('Darth');
+        chai.expect(newUser.lname).to.equal('Sidious');
+        done();
+      })
+      .catch(function(err){
+        chai.expect(err).to.equal(null);
         done();
       });
+    })
+    .catch(function(error){
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
   // runs after all tests
   after(function(done) {
-    User.findOneAndRemove({
-      username: 'darthsidious'
-    },function(userError){
-      chai.expect(userError).to.equal(null);
+    const username = 'darthsidious';
+    UserController.deleteUser(reqUser, username)
+    .then(function(delUser) {
+      chai.expect(delUser).to.equal('darthsidious');
+      mongoose.connection.close();
+      done();
+    })
+    .catch(function(err){
+      chai.expect(err).to.equal(null);
       mongoose.connection.close();
       done();
     });
   });
-//ASK ABOUT USER ADMIN AND FIND USERS
+
   it('should create a user', createNewUser).timeout(3000);
-  //it('should create an admin user', createAUser).timeout(3000);
+  it('should create an admin user', createAUser).timeout(3000);
   it('should create a second user', createUser02).timeout(3000);
   it('should reject a user with no input to username', badUser).timeout(3000);
   it('should reject username with invalid input', invalidUser).timeout(3000);
   it('should reject username already in database', copyCatUser).timeout(3000);
   it('should update the users last name', updateLName).timeout(3000);
   it('should reject update from non A user', updateAttempt).timeout(3000);
-  //it('should find users', findUsers).timeout(3000);
+  it('should find users', findUsers).timeout(3000);
   it('should find user', findUser).timeout(3000);
   it('should delete user created', deleteUser).timeout(3000);
   it('should delete second user created', deleteUser02).timeout(3000);
+  it('should delete admin user created', deleteAUser).timeout(3000);
 });
 
 
@@ -193,8 +219,8 @@ function createUser02(done) {
     chai.assert(true === false);
     done();
   })
-  .catch(function(error){
-    chai.assert(error.message.startsWith('User validation failed:'));
+  .catch(function(err){
+    chai.assert(err.message.startsWith('User validation failed:'));
     done();
   });
 }
@@ -219,8 +245,8 @@ function invalidUser(done){
     chai.assert(true==false);
     done();
   })
-  .catch(function(error){
-    chai.assert(error.message.startsWith('User validation failed:'));
+  .catch(function(err){
+    chai.assert(err.message.startsWith('User validation failed:'));
     done();
   });
 }
@@ -245,8 +271,8 @@ function copyCatUser(done){
     chai.assert(true==false);
     done();
   })
-  .catch(function(error){
-    chai.expect(error.message).to.equal('User already exists');
+  .catch(function(err){
+    chai.expect(err.message).to.equal('User already exists');
     done();
   });
 }
@@ -267,8 +293,8 @@ function updateLName(done) {
     chai.expect(updatedUser.lname).to.equal('Solo');
     done();
   })
-  .catch(function(error){
-    chai.expect(error).to.equal(null);
+  .catch(function(err){
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -288,23 +314,27 @@ function updateAttempt(done) {
     chai.assert(true === false);
     done();
   })
-  .catch(function(error){
-    chai.expect(error.message).to.equal('User is not an admin');
+  .catch(function(err){
+    chai.expect(err.message).to.equal('User is not an admin');
     done();
   });
 }
       
 /**
  * Finding users
+ * NOTE: There are 3 other users in the database 
+ * that were not created in this test. 4 users
+ * were cretaed in this test, so the addition 3
+ * come from the database
  */
 function findUsers(done) {
   UserController.findUsers()
   .then(function(searchUser) {
-    chai.expect(searchUser.length).to.equal(5);
+    chai.expect(searchUser.length).to.equal(7);
     done();
   })
-  .catch(function(error){
-    chai.expect(error).to.equal(null);
+  .catch(function(err){
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -321,8 +351,8 @@ function findUser(done) {
     chai.expect(searchUser.lname).to.equal('Solo');
     done();
   })
-  .catch(function(error){
-    chai.expect(error).to.equal(null);
+  .catch(function(err){
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -339,7 +369,6 @@ function deleteUser(done) {
     done();
   })
   .catch(function(err){
-    console.log(err.message);
     chai.expect(err).to.equal(null);
     done();
   });
@@ -357,7 +386,23 @@ function deleteUser02(done) {
     done();
   })
   .catch(function(err){
-    console.log(err.message);
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/*
+* Deletes the admin user created.
+*/
+
+function deleteAUser(done) {
+  const username = 'darthvader';
+  UserController.deleteUser(reqUser, username)
+  .then(function(delUser) {
+    chai.expect(delUser).to.equal('darthvader');
+    done();
+  })
+  .catch(function(err){
     chai.expect(err).to.equal(null);
     done();
   });
