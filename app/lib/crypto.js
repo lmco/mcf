@@ -14,7 +14,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines common cryptographic functions.
+ * @description Defines common cryptographic functions.
  */
 
 const path = require('path');
