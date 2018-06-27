@@ -131,7 +131,7 @@ class BaseStrategy {
       }
       // Other authorization header
       else {
-        M.log.verbose('Invalid authorization scheme.');
+        M.log.error('Invalid authorization scheme.');
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
           : res.redirect(`/login?next=${req.originalUrl}`);
@@ -193,7 +193,7 @@ class BaseStrategy {
       });
     }
     else {
-      M.log.verbose(`"${req.originalUrl}" requested with`
+      M.log.error(`"${req.originalUrl}" requested with`
                     + ' no valid authentication method provided.'
                     + ' Redirecting to "/login" ...');
       return (req.originalUrl.startsWith('/api'))
