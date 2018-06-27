@@ -165,6 +165,7 @@ describe(name, () => {
 
   it('should create a new org', addNewOrg).timeout(2500);
   it('should find an existing org', findExistingOrg).timeout(2500);
+  it('should update an orgs name', updateOrg).timeout(2500);
   it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
   it('should soft delete an existing org', softDeleteExistingOrg).timeout(2500);
   it('should delete an existing org', deleteExistingOrg).timeout(2500);
@@ -173,10 +174,10 @@ describe(name, () => {
   it('should add a user to an org', addUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
   it('should get all members with permissions in an org and their permissions', getMembers).timeout(2500);
+  it('should throw an error saying the user is not an admin', nonAdminChangeRole).timeout(2500);
   it('should remove a users role within an org', removeUserRole).timeout(2500);
   it('should throw an error saying the user is not in the org', getOldUserRoles).timeout(2500);
   it('should throw an error saying the user cannot change their own role', changeOwnRole).timeout(2500);
-  it('should throw an error saying the user is not an admin', nonAdminChangeRole).timeout(2500);
   it('should throw an error the permission is not valid', invalidPermission).timeout(2500);
   it('should throw an error saying the user is not an admin', nonAdminGetPermissions).timeout(2500);
 });
@@ -219,6 +220,21 @@ function findExistingOrg(done) {
   })
   .catch((error) => {
     chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests updating an org
+ */
+function updateOrg(done) {
+  OrgController.updateOrg(user, 'tv', { name: 'Interdimensional Cable' })
+  .then((retOrg) => {
+    chai.expect(retOrg.name).to.equal('Interdimensional Cable');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -363,13 +379,20 @@ function addUserRole(done) {
   // Increase a users role
   OrgController.setPermissions(user, org.id.toString(), newUser, 'write')
   .then((retOrg) => {
-    chai.expect(retOrg.permissions.write).to.include(newUser._id.toString());
-    chai.expect(retOrg.permissions.read).to.include(newUser._id.toString());
-    chai.expect(org.permissions.admin).to.not.include(newUser._id.toString());
-    done();
+    OrgController.findOrg(user, org.id.toString())
+    .then((retOrg2) => {
+      chai.expect(retOrg2.permissions.write[1]._id.toString()).to.equal(newUser._id.toString());
+      chai.expect(retOrg2.permissions.read[1]._id.toString()).to.equal(newUser._id.toString());
+      chai.expect(retOrg2.permissions.admin.length).to.equal(1);
+      done();
+    })
+    .catch((err) => {
+      chai.expect(err.message).to.equal(null);
+      done();
+    });
   })
   .catch((error) => {
-    chai.expect(error).to.equal(null);
+    chai.expect(error.message).to.equal(null);
   });
 }
 
@@ -405,6 +428,21 @@ function getMembers(done) {
   })
   .catch((error) => {
     chai.expect(error).to.equal(null);
+  });
+}
+
+/*
+ * Non-admin try to change a users role
+ */
+function nonAdminChangeRole(done) {
+  OrgController.setPermissions(newUser, org.id.toString(), user, 'REMOVE_ALL')
+  .then((retOrg) => {
+    chai.fail('A non-admin should not be able to change permissions');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.message).to.equal('User cannot change permissions.');
+    done();
   });
 }
 
@@ -450,21 +488,6 @@ function changeOwnRole(done) {
   })
   .catch((error) => {
     chai.expect(error.message).to.equal('User cannot change their own permissions.');
-    done();
-  });
-}
-
-/*
- * Non-admin try to change a users role
- */
-function nonAdminChangeRole(done) {
-  OrgController.setPermissions(newUser, org.id.toString(), user, 'REMOVE_ALL')
-  .then((retOrg) => {
-    chai.fail('A non-admin should not be able to change permissions');
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.message).to.equal('User cannot change permissions.');
     done();
   });
 }

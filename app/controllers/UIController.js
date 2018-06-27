@@ -9,6 +9,13 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
+/**
+ * @module  controllers/ui-controller
+ *
+ * @description  This implements the behavior and logic for the user interface.
+ * All UI routes map to this controller which in turn uses other controllers to
+ * handle other object behaviors.
+ */
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));

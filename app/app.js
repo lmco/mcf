@@ -32,6 +32,7 @@ const app = express();       // Initializes our application
 M.lib.db.connect();       // Connect to the database
 app.use(bodyParser.json());  // Allows receiving JSON in the request body
 app.use(bodyParser.urlencoded({ extended: true }));
+app.enable('trust proxy'); // Allow full trace of IP address using LM Proxy
 
 // Sets our static/public directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
@@ -60,6 +61,11 @@ app.use(session({
   cookie: { maxAge: M.config.auth.session.expires * units },
   store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
+
+
+// Log IP address of all incoming requests
+const Middleware = M.load('lib/middleware');
+app.use(Middleware.logIP);
 
 // Load the API Routes
 if (M.config.server.api.enabled) {
