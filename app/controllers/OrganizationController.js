@@ -272,7 +272,6 @@ class OrganizationController {
             return reject(new Error(`The Organization [${updateField}] is not of type String`));
           }
 
-
           // sanitize field
           updateVal = M.lib.sani.sanitize(orgUpdate[updateField]);
           // Update field in org object
