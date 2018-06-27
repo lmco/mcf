@@ -506,23 +506,17 @@ class OrganizationController {
 
         // Add user to admin array
         if (role === 'admin') {
-          if (!perm.admin.includes(setUser._id)) {
-            perm.admin.push(setUser._id);
-          }
+          perm.admin.push(setUser._id);
         }
 
         // Add user to write array if admin or write
         if (role === 'admin' || role === 'write') {
-          if (!perm.write.includes(setUser._id)) {
-            perm.write.push(setUser._id);
-          }
+          perm.write.push(setUser._id);
         }
 
         // Add user to read array if admin, write or read
         if (role === 'admin' || role === 'write' || role === 'read') {
-          if (!perm.read.includes(setUser._id)) {
-            perm.read.push(setUser._id);
-          }
+          perm.read.push(setUser._id);
         }
 
         // Save the modified organization
