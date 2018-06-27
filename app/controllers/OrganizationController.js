@@ -179,34 +179,34 @@ class OrganizationController {
       }
 
       // Check if org already exists
-      Organization.find({ id: orgID })
-      .populate()
-      .exec((findOrgErr, orgs) => {
-        // If error occurs, return it
-        if (findOrgErr) {
-          return reject(findOrgErr);
+      OrganizationController.findOrg(user, orgID)
+      .then((org) => reject(new Error('An org with the same ID already exists.')))
+      .catch((findOrgError) => {
+        // Org not found is what we want, so proceed when this error
+        // occurs since we aim to create a new org.
+        if (findOrgError.message === 'Org not found.') {
+          // Create the new org
+          const newOrg = new Organization({
+            id: orgID,
+            name: orgName,
+            permissions: {
+              admin: [user._id],
+              write: [user._id],
+              read: [user._id]
+            }
+          });
+          // Save and resolve the new error
+          newOrg.save((saveOrgErr) => {
+            if (saveOrgErr) {
+              return reject(saveOrgErr);
+            }
+            resolve(newOrg);
+          });
         }
-        // If org already exists, throw an error
-        if (orgs.length >= 1) {
-          return reject(new Error('Organization already exists.'));
+        else {
+          // There was some other error, return it.
+          return reject(findOrgError);
         }
-        // Create the new org
-        const newOrg = new Organization({
-          id: orgID,
-          name: orgName,
-          permissions: {
-            admin: [user._id],
-            write: [user._id],
-            read: [user._id]
-          }
-        });
-        // Save and resolve the new error
-        newOrg.save((saveOrgErr) => {
-          if (saveOrgErr) {
-            return reject(saveOrgErr);
-          }
-          resolve(newOrg);
-        });
       });
     });
   }
@@ -227,10 +227,11 @@ class OrganizationController {
    *
    *
    * @param  {User} The object containing the  requesting user.
+   * @param  {String} The organization ID.
    * @param  {String} The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // TODO (JU & JK): Implement in APIController
       /*
       // If a given property is not an allowed property to be updated,
@@ -255,23 +256,8 @@ class OrganizationController {
       // Sanitize fields
       const orgID = M.lib.sani.html(organizationID);
       const newOrgName = M.lib.sani.html(orgUpdate.name);
-      Organization.find({ id: orgID })
-      .populate('permissions.admin')
-      .exec((err, orgs) => {
-        // If error occurs, return it
-        if (err) {
-          return reject(err);
-        }
-        // Error check - validate only 1 org was found
-        if (orgs.length > 1) {
-          return reject(new Error('Too many orgs found with same ID'));
-        }
-        if (orgs.length < 1) {
-          return reject(new Error('Organization not found.'));
-        }
-
-        // allocation for convenience
-        const org = orgs[0];
+      OrganizationController.findOrg(user, orgID)
+      .then((org) => {
         // Error check - Make sure user is admin
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!user.admin && !orgAdmins.includes(user._id.toString())) {
@@ -288,8 +274,9 @@ class OrganizationController {
           // Return updated org
           return resolve(org);
         });
-      });
-    }));
+      })
+      .catch((error) => reject(error));
+    });
   }
 
 
@@ -461,8 +448,8 @@ class OrganizationController {
    *
    *
    * @param  {User} The object containing the requesting user.
-   * @param  {User} The object containing the user whose roles are to be changed.
    * @param  {string} The ID of the org being deleted.
+   * @param  {User} The object containing the user whose roles are to be changed.
    * @param  {string} The new role for the user.
    */
   static setPermissions(reqUser, organizationID, setUser, role) {
@@ -484,12 +471,8 @@ class OrganizationController {
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
-      Organization.findOne({ id: orgID })
-      .populate()
-      .exec((err, org) => {
-        if (err) {
-          return reject(err);
-        }
+      OrganizationController.findOrg(reqUser, orgID)
+      .then((org) => {
         // Ensure user is an admin within the organization
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!reqUser.admin || !orgAdmins.includes(reqUser._id.toString())) {
@@ -498,37 +481,31 @@ class OrganizationController {
         }
 
         const perm = org.permissions;
+        const permLevels = org.getPermissionLevels();
 
         // Remove all current roles for the selected user
-        Object.keys(perm).forEach((roles) => {
-          // For some reason, list of keys includes $init, so ignore this key
-          if (roles !== '$init') {
-            const permVals = perm[roles].map(u => u._id.toString());
+        Object.keys(perm).forEach((r) => {
+          if (permLevels.includes(r)) {
+            const permVals = perm[r].map(u => u._id.toString());
             if (permVals.includes(setUser._id.toString())) {
-              perm[roles].splice(perm[roles].indexOf(setUser._id), 1);
+              perm[r].splice(perm[r].indexOf(setUser._id), 1);
             }
           }
         });
 
         // Add user to admin array
         if (role === 'admin') {
-          if (!perm.admin.includes(setUser._id)) {
-            perm.admin.push(setUser._id);
-          }
+          perm.admin.push(setUser._id);
         }
 
         // Add user to write array if admin or write
         if (role === 'admin' || role === 'write') {
-          if (!perm.write.includes(setUser._id)) {
-            perm.write.push(setUser._id);
-          }
+          perm.write.push(setUser._id);
         }
 
         // Add user to read array if admin, write or read
         if (role === 'admin' || role === 'write' || role === 'read') {
-          if (!perm.read.includes(setUser._id)) {
-            perm.read.push(setUser._id);
-          }
+          perm.read.push(setUser._id);
         }
 
         // Save the modified organization
@@ -540,7 +517,8 @@ class OrganizationController {
           // Return updated org
           return resolve(org);
         });
-      });
+      })
+      .catch((error) => reject(error));
     });
   }
 
