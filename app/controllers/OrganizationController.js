@@ -442,8 +442,8 @@ class OrganizationController {
    *
    *
    * @param  {User} The object containing the requesting user.
-   * @param  {User} The object containing the user whose roles are to be changed.
    * @param  {string} The ID of the org being deleted.
+   * @param  {User} The object containing the user whose roles are to be changed.
    * @param  {string} The new role for the user.
    */
   static setPermissions(reqUser, organizationID, setUser, role) {
