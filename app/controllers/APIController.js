@@ -250,7 +250,7 @@ class APIController {
     })
     .catch((error) => {
       M.log.warn(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error.status).send(error);
     });
   }
 
