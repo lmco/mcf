@@ -116,7 +116,7 @@ function createProject(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    chai.expect(err.message).to.equal(null);
     done();
   });
 }
@@ -160,7 +160,7 @@ function deleteProject(done) {
     });
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    chai.expect(err.message).to.equal(null);
     done();
   });
 }
