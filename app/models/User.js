@@ -103,7 +103,7 @@ const UserSchema = new mongoose.Schema({
      * @property  lname
      * @type  {String}
      *
-     * @description  
+     * @description
      * The `lname` property is the user's last name.
      */
   lname: {

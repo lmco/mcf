@@ -147,14 +147,14 @@ OrganizationSchema.methods.getPublicData = function() {
   };
 };
 
-/** 
+/**
   * Returns the permission levels in order of inheritance for an organization.
   */
 OrganizationSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
 
-/** 
+/**
   * Returns the fields which users are allowed to update on an organization.
   */
 OrganizationSchema.methods.getValidUpdateFields = function() {

@@ -146,14 +146,14 @@ const ProjectSchema = new mongoose.Schema({
   }
 });
 
-/** 
+/**
   * Returns the permission levels in order of inheritance for projects.
   */
 ProjectSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
 
-/** 
+/**
   * Returns the fields which users are allowed to update on a project.
   */
 ProjectSchema.methods.getValidUpdateFields = function() {
