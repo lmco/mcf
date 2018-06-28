@@ -39,8 +39,7 @@ let org = null;
  *  -string for id
  *  -string for name
  *  -string for org
- *  -Set permissions for a user on project
- *
+ *  -Set permissions for a user
  */
 
 /*------------------------------------
