@@ -114,7 +114,7 @@ class UserController {
         if (users.length >= 1) {
           return reject(new Error('User already exists'));
         }
-        //console.log(M.lib.sani.sanitize(newUser));
+        // console.log(M.lib.sani.sanitize(newUser));
         // Create the new user
         // We should just need to sanitize the input, the model should handle
         // data validation
@@ -123,7 +123,7 @@ class UserController {
           if (saveErr) {
             return reject(saveErr);
           }
-          //console.log(user);
+          // console.log(user);
           return resolve(user);
         });
       });

@@ -18,10 +18,10 @@
  */
 
 
- /**
+/**
   * NOTE:
   * NEED TO CONFIRM THE NUMBER OF USERS THAT ARE IN DATABASE
-  * BEFORE RUNNING TESTS. DUE TO THOSE EFFECT THE NUMBER OF 
+  * BEFORE RUNNING TESTS. DUE TO THOSE EFFECT THE NUMBER OF
   * USERS FOUND IN THE FINDUSERS TEST RUN.
   */
 
@@ -33,7 +33,6 @@ const filename = module.filename;
 const name = filename.split('/')[filename.split('/').length - 1];
 
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.load('models/User');
 const UserController = M.load('controllers/UserController');
 
 let reqUser = null;
@@ -62,6 +61,7 @@ describe(name, function() {
         lname: 'Sidious',
         admin: false
       };
+      // Creating a new non-admin user
       UserController.createUser(searchUser, userData)
       .then(function(newUser) {
         nonAUser = newUser;
@@ -70,12 +70,12 @@ describe(name, function() {
         chai.expect(newUser.lname).to.equal('Sidious');
         done();
       })
-      .catch(function(err){
+      .catch(function(err) {
         chai.expect(err).to.equal(null);
         done();
       });
     })
-    .catch(function(error){
+    .catch(function(error) {
       chai.expect(error).to.equal(null);
       done();
     });
@@ -83,6 +83,7 @@ describe(name, function() {
 
   // runs after all tests
   after(function(done) {
+    // Deleting the user created in the before function
     const username = 'darthsidious';
     UserController.deleteUser(reqUser, username)
     .then(function(delUser) {
@@ -90,7 +91,7 @@ describe(name, function() {
       mongoose.connection.close();
       done();
     })
-    .catch(function(err){
+    .catch(function(err) {
       chai.expect(err).to.equal(null);
       mongoose.connection.close();
       done();
@@ -124,32 +125,32 @@ describe(name, function() {
  * NOTE: As of right now the password key becomes a hash
  * need to eventually made password tests.
  */
- function createNewUser(done) {
-    const userData = {
-      username: 'lskywalker',
-      password: 'iamajedi',
-      fname: 'Leigh',
-      lname: 'Skywalker'
-    };
-    UserController.createUser(reqUser, userData)
-    .then(function(newUser) {
-      chai.expect(newUser.username).to.equal('lskywalker');
-      chai.expect(newUser.fname).to.equal('Leigh');
-      chai.expect(newUser.lname).to.equal('Skywalker');
-      done();
-    })
-    .catch(function(err){
-      chai.expect(err).to.equal(null);
-    });
-  }
+function createNewUser(done) {
+  const userData = {
+    username: 'lskywalker',
+    password: 'iamajedi',
+    fname: 'Leigh',
+    lname: 'Skywalker'
+  };
+  UserController.createUser(reqUser, userData)
+  .then(function(newUser) {
+    chai.expect(newUser.username).to.equal('lskywalker');
+    chai.expect(newUser.fname).to.equal('Leigh');
+    chai.expect(newUser.lname).to.equal('Skywalker');
+    done();
+  })
+  .catch(function(err) {
+    chai.expect(err).to.equal(null);
+  });
+}
 
-  /**
+/**
  * Creates a user using the User Controller.
  * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
  * NOTE: As of right now the password key becomes a hash
  * need to eventually made password tests.
  */
- function createAUser(done) {
+function createAUser(done) {
   const userData = {
     username: 'darthvader',
     password: 'iamthechoosenone',
@@ -165,7 +166,7 @@ describe(name, function() {
     chai.expect(newUser.admin).to.equal(true);
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err).to.equal(null);
     done();
   });
@@ -191,21 +192,21 @@ function createUser02(done) {
     chai.expect(newUser.lname).to.equal('Solo');
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err).to.equal(null);
   });
 }
 
-  /*
+/*
   * Tests a user creating a username
-  * that inputted no username and should 
+  * that inputted no username and should
   * return an error.
-  * NOTE: Is it correct to run test and then pass in 
+  * NOTE: Is it correct to run test and then pass in
   * what the error message should be by copy and pasting
   * it?... I am guessing that is bad practice
   */
-  
- function badUser(done) {
+
+function badUser(done) {
   const userData = {
     username: '',
     password: 'iamnotajedi',
@@ -214,12 +215,12 @@ function createUser02(done) {
   };
   UserController.createUser(reqUser, userData)
   .then(function() {
-    //then function should never hit
-    //below causes failure
+    // then function should never hit
+    // below causes failure
     chai.assert(true === false);
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.assert(err.message.startsWith('User validation failed:'));
     done();
   });
@@ -231,7 +232,7 @@ function createUser02(done) {
 * and return it successfully.
 * NOTE: Invalid username test!
 */
-function invalidUser(done){
+function invalidUser(done) {
   const userData = {
     username: '33leah',
     password: 'iaminvalid',
@@ -240,24 +241,24 @@ function invalidUser(done){
   };
   UserController.createUser(reqUser, userData)
   .then(function() {
-    //then function should never be hit
-    //below causes failure
-    chai.assert(true==false);
+    // then function should never be hit
+    // below causes failure
+    chai.assert(true === false);
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.assert(err.message.startsWith('User validation failed:'));
     done();
   });
 }
-  
+
 /**
-* Tests finding a user that inputted 
+* Tests finding a user that inputted
 * the same username that is already
-* in the database. This should fail. 
+* in the database. This should fail.
 */
 
-function copyCatUser(done){
+function copyCatUser(done) {
   const userData = {
     username: 'lskywalker',
     password: 'nottherealLuke',
@@ -266,12 +267,12 @@ function copyCatUser(done){
   };
   UserController.createUser(reqUser, userData)
   .then(function() {
-    //then function should never be hit
-    //below causes failure
-    chai.assert(true==false);
+    // then function should never be hit
+    // below causes failure
+    chai.assert(true === false);
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err.message).to.equal('User already exists');
     done();
   });
@@ -293,12 +294,12 @@ function updateLName(done) {
     chai.expect(updatedUser.lname).to.equal('Solo');
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err).to.equal(null);
     done();
   });
 }
-     
+
 /**
  * Attempting to update second user, but should be denied
  * because non A user
@@ -314,15 +315,15 @@ function updateAttempt(done) {
     chai.assert(true === false);
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err.message).to.equal('User is not an admin');
     done();
   });
 }
-      
+
 /**
  * Finding users
- * NOTE: There are 3 other users in the database 
+ * NOTE: There are 3 other users in the database
  * that were not created in this test. 4 users
  * were cretaed in this test, so the addition 3
  * come from the database
@@ -333,7 +334,7 @@ function findUsers(done) {
     chai.expect(searchUser.length).to.equal(7);
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err).to.equal(null);
     done();
   });
@@ -351,7 +352,7 @@ function findUser(done) {
     chai.expect(searchUser.lname).to.equal('Solo');
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err).to.equal(null);
     done();
   });
@@ -368,7 +369,7 @@ function deleteUser(done) {
     chai.expect(delUser).to.equal('lskywalker');
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err).to.equal(null);
     done();
   });
@@ -385,7 +386,7 @@ function deleteUser02(done) {
     chai.expect(delUser).to.equal('hsolo');
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err).to.equal(null);
     done();
   });
@@ -402,7 +403,7 @@ function deleteAUser(done) {
     chai.expect(delUser).to.equal('darthvader');
     done();
   })
-  .catch(function(err){
+  .catch(function(err) {
     chai.expect(err).to.equal(null);
     done();
   });

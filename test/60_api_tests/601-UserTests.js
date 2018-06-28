@@ -32,7 +32,7 @@ const test = M.config.test;
  *------------------------------------*/
 
 describe(name, function() {
-    it('should get a username', getUser).timeout(3000);
+  it('should get a username', getUser).timeout(3000);
 });
 
 /**---------------------------------------------------
@@ -40,33 +40,33 @@ describe(name, function() {
    ----------------------------------------------------*/
 
 /**
- * Makes a GET request to /api/user/:username. This is to 
+ * Makes a GET request to /api/user/:username. This is to
  * call a username and get it. So the response should suceed with ausername.
  */
 function getUser(done) {
-    request({
-      url: `${test.url}/api/user/mbee`,
-      headers: getHeaders()
-    },
-    function(response, body) {
-      const json = JSON.parse(body);
-      chia.expect(json.username).to.equal('mbee');
-      chai.expect(response.statusCode).to.equal(200);
-      done();
-    });
-  }
-  
-  
+  request({
+    url: `${test.url}/api/user/mbee`,
+    headers: getHeaders()
+  },
+  function(response, body) {
+    const json = JSON.parse(body);
+    chai.expect(json.username).to.equal('mbee');
+    chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
+}
+
+
 /* ----------( Helper Functions )----------*/
 
 /**
  * Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-    const c = `${M.config.test.username}:${M.config.test.password}`;
-    const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
-    return {
-      'Content-Type': 'application/json',
-      authorization: s
-  }
-}  
+  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
+  return {
+    'Content-Type': 'application/json',
+    authorization: s
+  };
+}

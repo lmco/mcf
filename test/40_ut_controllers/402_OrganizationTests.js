@@ -26,8 +26,6 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
 const UserController = M.load('controllers/UserController');
-const Org = M.load('models/Organization');
-const User = M.load('models/User');
 
 let user = null;
 let newUser = null;
@@ -42,7 +40,7 @@ let allSeeingUser = null;
 describe(name, () => {
   // NOTE: Changed from arrow function to allow for use of
   // this so that a larger timeout could be set
-  
+
   before(function(done) {
     this.timeout(6000);
     const db = M.load('lib/db');
@@ -52,8 +50,10 @@ describe(name, () => {
     const username = 'mbee';
     UserController.findUser(username)
     .then(function(searchUser) {
+      // Setting it equal to global variable
       allSeeingUser = searchUser;
       chai.expect(searchUser.username).to.equal('mbee');
+      // Creating a new admin user
       const userData = {
         username: 'rsanchez',
         password: 'impicklerick',
@@ -67,6 +67,7 @@ describe(name, () => {
         chai.expect(newAu.username).to.equal('rsanchez');
         chai.expect(newAu.fname).to.equal('Rick');
         chai.expect(newAu.lname).to.equal('Sanchez');
+        // Creating a new non-admin user
         const nonAuserData = {
           username: 'msmith',
           password: 'awwgeezrick',
@@ -80,6 +81,7 @@ describe(name, () => {
           chai.expect(nonAu.username).to.equal('msmith');
           chai.expect(nonAu.fname).to.equal('Morty');
           chai.expect(nonAu.lname).to.equal('Smith');
+          // Creating a new organization used in the tests
           const orgData = {
             id: 'council',
             name: 'Council of Ricks',
@@ -104,17 +106,17 @@ describe(name, () => {
             done();
           });
         })
-        .catch(function(err){
+        .catch(function(err) {
           chai.expect(err).to.equal(null);
           done();
         });
       })
-      .catch(function(error){
+      .catch(function(error) {
         chai.expect(error).to.equal(null);
         done();
       });
     })
-    .catch(function(lasterr){
+    .catch(function(lasterr) {
       chai.expect(lasterr).to.equal(null);
       done();
     });
@@ -122,29 +124,34 @@ describe(name, () => {
 
   // runs after all tests in this block
   after((done) => {
+    // Removing the Organization
     OrgController.removeOrg(user, 'council', { soft: false })
     .then(() => {
+      // Finding it and checking it is not there
       OrgController.findOrg(user, 'council')
       .then((retOrg) => {
         chai.expect(retOrg).to.equal(null);
+        // Deleting the admin user created
         const userOne = 'rsanchez';
         UserController.deleteUser(allSeeingUser, userOne)
         .then(function(delUser) {
           chai.expect(delUser).to.equal('rsanchez');
+          // Deleting the non admin user created
           const userTwo = 'msmith';
           UserController.deleteUser(allSeeingUser, userTwo)
           .then(function(delUser2) {
             chai.expect(delUser2).to.equal('msmith');
+            // Closing the db connection
             mongoose.connection.close();
             done();
           })
-          .catch(function(err1){
+          .catch(function(err1) {
             chai.expect(err1).to.equal(null);
             mongoose.connection.close();
             done();
           });
         })
-        .catch(function(err2){
+        .catch(function(err2) {
           chai.expect(err2).to.equal(null);
           mongoose.connection.close();
           done();

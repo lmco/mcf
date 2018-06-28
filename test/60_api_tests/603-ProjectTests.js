@@ -36,7 +36,6 @@ const request = require('request');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const Org = M.load('models/Organization');
 const UserController = M.load('controllers/UserController');
 const OrgController = M.load('controllers/OrganizationController');
 
@@ -56,7 +55,6 @@ let user = null;
 // runs before all tests in this block
 
 describe(name, function() {
-
   before(function(done) {
     this.timeout(6000);
     const db = M.load('lib/db');
@@ -68,6 +66,7 @@ describe(name, function() {
     .then(function(searchUser) {
       user = searchUser;
       chai.expect(searchUser.username).to.equal('mbee');
+      // Creating an Organization used in the tests
       const orgData = {
         id: 'hogwarts',
         name: 'Gryffindor',
@@ -92,7 +91,7 @@ describe(name, function() {
         done();
       });
     })
-    .catch(function(error){
+    .catch(function(error) {
       chai.expect(error).to.equal(null);
       done();
     });
@@ -100,14 +99,14 @@ describe(name, function() {
 
   // runs after all the tests are done
   after(function(done) {
+    // Removing the Organization created in the before
     OrgController.removeOrg(user, 'hogwarts', { soft: false })
     .then((proj) => {
       chai.expect(proj.id).to.equal('hogwarts');
       mongoose.connection.close();
       done();
     })
-    .catch(function(err2){
-      console.log(err2);
+    .catch(function(err2) {
       chai.expect(err2).to.equal(null);
       mongoose.connection.close();
       done();
