@@ -198,8 +198,9 @@ class ProjectController {
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
    * @param  {String} The project ID of the Project which is being searched for.
+   * @param. {Boolean} The flag to control whether or not to find softDeleted projects.
    */
-  static findProject(reqUser, organizationId, projectId) {
+  static findProject(reqUser, organizationId, projectId, softDeleted = false) {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
@@ -214,8 +215,14 @@ class ProjectController {
       const projID = M.lib.sani.html(projectId);
       const projUID = `${orgID}:${projID}`;
 
+      let searchParams = { uid: projUID, deleted: false };
+
+      if (softDeleted && reqUser.admin) {
+        searchParams = { uid: projUID };
+      }
+
       // Search for project
-      Project.find({ uid: projUID, deleted: false })
+      Project.find(searchParams)
       .populate('org permissions.read permissions.write permissions.admin')
       .exec((err, projects) => {
         // Error Check - Database/Server Error
@@ -475,38 +482,32 @@ class ProjectController {
       const projID = M.lib.sani.html(projectId);
       const projUID = `${orgID}:${projID}`;
 
-      // Check if project exists
-      Project.find({ uid: projUID })
-      .populate('permissions.admin')
-      .exec((findProjErr, projects) => {
-        // Error Check - Return error if database query does not work
-        if (findProjErr) {
-          return reject(findProjErr);
-        }
-        // Error Check - Check number of projects
-        if (projects.length < 1) {
-          return reject(new Error('Project not found.'));
-        }
-
+      // Find the project, even if it has already been soft deleted
+      ProjectController.findProject(reqUser, orgID, projID, true)
+      .then((project) => {
         // Check Permissions
-        const project = projects[0];
         const admins = project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
           return reject(new Error('User does not have permission.'));
         }
 
         if (softDelete) {
-          project.deletedOn = Date.now();
-          project.deleted = true;
-          project.save((saveErr) => {
-            if (saveErr) {
-              // If error occurs, return it
-              return reject(saveErr);
-            }
+          if (!project.deleted) {
+            project.deletedOn = Date.now();
+            project.deleted = true;
+            project.save((saveErr) => {
+              if (saveErr) {
+                // If error occurs, return it
+                return reject(saveErr);
+              }
 
-            // Return updated project
-            return resolve(project);
-          });
+              // Return updated project
+              return resolve(project);
+            });
+          }
+          else {
+            return reject(new Error("Project no longer exists."));
+          }
         }
         else {
           // Remove the Project
@@ -517,6 +518,10 @@ class ProjectController {
             return resolve(projectRemoved);
           });
         }
+      })
+      .catch((error) => {
+        // Error while trying to find the project
+        return reject(error);
       });
     });
   }
