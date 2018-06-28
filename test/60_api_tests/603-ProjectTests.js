@@ -37,9 +37,10 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.load('models/Organization');
+const UserController = M.load('controllers/UserController');
+const OrgController = M.load('controllers/OrganizationController');
 
 const test = M.config.test;
-const User = M.load('models/User');
 /**
  * APIProjectTest
  *
@@ -55,43 +56,59 @@ let user = null;
 // runs before all tests in this block
 
 describe(name, function() {
-  before(function() {
+
+  before(function(done) {
+    this.timeout(6000);
     const db = M.load('lib/db');
     db.connect();
-    return new Promise(function(resolve) {
-      User.findOne({ username: 'mbee' }, function(errUser, foundUser) {
-        user = foundUser;
-        // Check if error occured
-        if (errUser) {
-          M.log.error(errUser);
+
+    const username = 'mbee';
+    // Finding a Requesting Admin
+    UserController.findUser(username)
+    .then(function(searchUser) {
+      user = searchUser;
+      chai.expect(searchUser.username).to.equal('mbee');
+      const orgData = {
+        id: 'hogwarts',
+        name: 'Gryffindor',
+        permissions: {
+          admin: [searchUser._id],
+          write: [searchUser._id],
+          read: [searchUser._id]
         }
-        // Otherwise,
-        // Create a parent organization before creating any projects
-        org = new Org({
-          id: 'hogwarts',
-          name: 'Gryffindor',
-          permissions: {
-            admin: [user._id],
-            write: [user._id],
-            read: [user._id]
-          }
-        });
-        org.save(function(err) {
-          if (err) {
-            M.log.error(err);
-          }
-          return resolve();
-        });
+      };
+      OrgController.createOrg(user, orgData)
+      .then((retOrg) => {
+        org = retOrg;
+        chai.expect(retOrg.id).to.equal('hogwarts');
+        chai.expect(retOrg.name).to.equal('Gryffindor');
+        chai.expect(retOrg.permissions.read).to.include(searchUser._id.toString());
+        chai.expect(retOrg.permissions.write).to.include(searchUser._id.toString());
+        chai.expect(retOrg.permissions.admin).to.include(searchUser._id.toString());
+        done();
+      })
+      .catch((firsterr) => {
+        chai.expect(firsterr).to.equal(null);
+        done();
       });
+    })
+    .catch(function(error){
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
+
   // runs after all the tests are done
   after(function(done) {
-    Org.findOneAndRemove({ id: 'hogwarts' }, (err) => {
-      if (err) {
-        M.log.error(err);
-      }
-      chai.assert(err === null);
+    OrgController.removeOrg(user, 'hogwarts', { soft: false })
+    .then((proj) => {
+      chai.expect(proj.id).to.equal('hogwarts');
+      mongoose.connection.close();
+      done();
+    })
+    .catch(function(err2){
+      console.log(err2);
+      chai.expect(err2).to.equal(null);
       mongoose.connection.close();
       done();
     });
