@@ -35,7 +35,7 @@ const Schema = mongoose.Schema;
 const ProjectSchema = new Schema({
   id: {
     type: String,
-    require: true,
+    required: true,
     index: true,
     match: RegExp(M.lib.validators.project.id),
     maxlength: [36, 'Too many characters in username']
@@ -44,7 +44,7 @@ const ProjectSchema = new Schema({
   org: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
-    require: true
+    required: true
   },
 
   uid: {
@@ -54,7 +54,7 @@ const ProjectSchema = new Schema({
 
   name: {
     type: String,
-    requite: true,
+    required: true,
     match: RegExp(M.lib.validators.project.name)
   },
 
