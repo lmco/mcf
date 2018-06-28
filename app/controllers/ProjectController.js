@@ -371,55 +371,88 @@ class ProjectController {
    */
   static updateProject(reqUser, organizationId, projectId, projectUpdated) {
     return new Promise((resolve, reject) => {
-      if (!projectUpdated.hasOwnProperty('name')) {
-        return reject(new Error('Project does not have attribute (name)'));
-      }
-      // Error check - Verify id, name, and org.id are of type string for sanitization.
+      // Error check - Verify parameters are correct type.
       if (typeof organizationId !== 'string') {
         return reject(new Error('Organization ID is not of type String.'));
       }
       if (typeof projectId !== 'string') {
         return reject(new Error('Project ID is not of type String.'));
       }
-      if (typeof projectUpdated.name !== 'string') {
-        return reject(new Error('New project name is not of type String.'));
+      if (typeof projectUpdated !== 'object') {
+        return reject(new Error('Updated project is not of type Object'));
+      }
+
+      // If mongoose model, convert to plain JSON
+      if (projectUpdated instanceof Project) {
+        // Disabling linter because the reasign is needed to convert the object to JSON
+        projectUpdated = projectUpdated.toJSON(); // eslint-disable-line no-param-reassign
       }
 
       // Sanitize project properties
       const orgID = M.lib.sani.html(organizationId);
       const projID = M.lib.sani.html(projectId);
-      const projNameUpdated = M.lib.sani.html(projectUpdated.name);
 
-      // Error check - make sure project ID and project name are valid
-      if (!RegExp(M.lib.validators.project.id).test(projID)) {
-        return reject(new Error('Project ID is not valid.'));
-      }
-      if (!RegExp(M.lib.validators.project.name).test(projNameUpdated)) {
-        return reject(new Error('Project Name is not valid.'));
-      }
+      // Error check - check if the project already exists
+      ProjectController.findProject(reqUser, orgID, projID)
+      .then((project) => {
+        // Check Permissions
+        const admins = project.permissions.admin.map(u => u._id.toString());
+        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+          return reject(new Error('User does not have permission.'));
+        }
 
-      // Error Check - check if the organization for the project exists
-      OrgController.findOrg(reqUser, orgID)
-      .then((org) => {
-        // Error check - check if the project already exists
-        ProjectController.findProject(reqUser, orgID, projID)
-        .then((project) => {
-          // Check Permissions
-          const admins = project.permissions.admin.map(u => u._id.toString());
-          if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-            return reject(new Error('User does not have permission.'));
+        // get list of keys the user is trying to update
+        const projUpdateFields = Object.keys(projectUpdated);
+        // Get list of parameters which can be updated from model
+        const validUpdateFields = project.getValidUpdateFields();
+        // Allocate update val and field before for loop
+        let updateVal = '';
+        let updateField = '';
+
+        // Check if passed in object contains fields to be updated
+        for (let i = 0; i < projUpdateFields.length; i++) {
+          updateField = projUpdateFields[i];
+          // Error Check - Check if updated field also exists in the original project.
+          if (!project.toJSON().hasOwnProperty(updateField)) {
+            return reject(new Error(`Project does not contain field ${updateField}`));
+          }
+          // if parameter is of type object, stringify and compare
+          if (typeof projectUpdated[updateField] === 'object') {
+            if (JSON.stringify(project[updateField])
+              === JSON.stringify(projectUpdated[updateField])) {
+              continue;
+            }
+          }
+          // if parameter is the same don't bother updating it
+          if (project[updateField] === projectUpdated[updateField]) {
+            continue;
+          }
+          // Error Check - Check if field can be updated
+          if (!validUpdateFields.includes(updateField)) {
+            return reject(new Error(`Users cannot update [${updateField}] of Projects.`));
+          }
+          // Error Check - Check if updated field is of type string
+          if (typeof projectUpdated[updateField] !== 'string') {
+            return reject(new Error(`The Project [${updateField}] is not of type String`));
           }
 
-          // Currently we only support updating the name
-          project.name = projNameUpdated; // eslint-disable-line no-param-reassign
-          project.save();
+          // sanitize field
+          updateVal = M.lib.sani.sanitize(projectUpdated[updateField]);
+          // Update field in project object
+          project[updateField] = updateVal;
+        }
+
+        // Save updated org
+        project.save((saveProjErr) => {
+          if (saveProjErr) {
+            return reject(saveProjErr);
+          }
 
           // Return the updated project object
           return resolve(project);
-        })
-        .catch((error) => reject(error));
+        });
       })
-      .catch((error2) => reject(error2));
+      .catch((findProjErr) => reject(findProjErr));
     });
   }
 

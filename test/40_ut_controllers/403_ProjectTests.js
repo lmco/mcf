@@ -36,7 +36,9 @@ let org = null;
  *------------------------------------*/
 
 describe(name, () => {
-  before((done) => {
+  before(function(done) {
+    this.timeout(5000);
+
     const db = M.load('lib/db');
     db.connect();
 
@@ -89,6 +91,10 @@ describe(name, () => {
   });
 
   it('should create a new project', createProject).timeout(2500);
+  it('should throw an error saying the field cannot be updated', updateFieldError).timeout(2500);
+  it('should throw an error saying the field is not of type string', updateTypeError).timeout(2500);
+  it('should update a project', updateProject).timeout(2500);
+  it('should update a project using the Project object', updateProjectObject).timeout(2500);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
   it('should delete a project', deleteProject).timeout(2500);
 });
@@ -117,6 +123,62 @@ function createProject(done) {
   })
   .catch((err) => {
     chai.expect(err.message).to.equal(null);
+    done();
+  });
+}
+
+function updateFieldError(done) {
+  ProjController.updateProject(user, org.id, 'prtlgn', { id: 'shouldNotChange' })
+  .then((project) => {
+    chai.expect(typeof project).to.equal('undefined');
+    done();
+  })
+  .catch((updateProjErr) => {
+    chai.expect(updateProjErr.message).to.equal('Users cannot update [id] of Projects.');
+    done();
+  });
+}
+
+function updateTypeError(done) {
+  ProjController.updateProject(user, org.id, 'prtlgn', { name: [] })
+  .then((project) => {
+    chai.expect(typeof project).to.equal('undefined');
+    done();
+  })
+  .catch((updateProjErr) => {
+    chai.expect(updateProjErr.message).to.equal('The Project [name] is not of type String');
+    done();
+  });
+}
+
+function updateProject(done) {
+  ProjController.updateProject(user, org.id, 'prtlgn', { id: 'prtlgn', name: 'portal gun changed' })
+  .then((project) => {
+    chai.expect(project.name).to.equal('portal gun changed');
+    done();
+  })
+  .catch((updateProjErr) => {
+    chai.expect(updateProjErr).to.equal(null);
+    done();
+  });
+}
+
+function updateProjectObject(done) {
+  ProjController.findProject(user, org.id, 'prtlgn')
+  .then((projectFound) => {
+    projectFound.name = 'portal gun changed again';
+    ProjController.updateProject(user, org.id, 'prtlgn', projectFound)
+    .then((projectUpdated) => {
+      chai.expect(projectUpdated.name).to.equal('portal gun changed again');
+      done();
+    })
+    .catch((updateProjErr) => {
+      chai.expect(updateProjErr).to.equal(null);
+      done();
+    });
+  })
+  .catch((findProjErr) => {
+    chai.expect(findProjErr).to.equal(null);
     done();
   });
 }

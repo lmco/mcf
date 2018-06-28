@@ -232,6 +232,20 @@ class OrganizationController {
    */
   static updateOrg(user, organizationID, orgUpdate) {
     return new Promise((resolve, reject) => {
+      // Error check - Verify parameters are correct type.
+      if (typeof organizationID !== 'string') {
+        return reject(new Error('Organization ID is not of type String.'));
+      }
+      if (typeof orgUpdate !== 'object') {
+        return reject(new Error('Updated Organization is not of type Object'));
+      }
+
+      // If mongoose model, convert to plain JSON
+      if (orgUpdate instanceof Organization) {
+        // Disabling linter because the reasign is needed to convert the object to JSON
+        orgUpdate = orgUpdate.toJSON(); // eslint-disable-line no-param-reassign
+      }
+
       // Sanitize input argument
       const orgID = M.lib.sani.html(organizationID);
 
@@ -258,6 +272,12 @@ class OrganizationController {
           // Error Check - Check if updated field also exists in the original org.
           if (!org.toJSON().hasOwnProperty(updateField)) {
             return reject(new Error(`Organization does not contain field ${updateField}`));
+          }
+          // if parameter is of type object, stringify and compare
+          if (typeof orgUpdate[updateField] === 'object') {
+            if (JSON.stringify(org[updateField]) === JSON.stringify(orgUpdate[updateField])) {
+              continue;
+            }
           }
           // if parameter is the same don't bother updating it
           if (org[updateField] === orgUpdate[updateField]) {
