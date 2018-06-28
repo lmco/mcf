@@ -30,7 +30,6 @@ const UserController = M.load('controllers/UserController');
 let user = null;
 let newUser = null;
 let org = null;
-let allSeeingUser = null;
 
 
 /*------------------------------------
@@ -51,63 +50,44 @@ describe(name, () => {
     UserController.findUser(username)
     .then(function(searchUser) {
       // Setting it equal to global variable
-      allSeeingUser = searchUser;
+      user = searchUser;
       chai.expect(searchUser.username).to.equal('mbee');
-      // Creating a new admin user
-      const userData = {
-        username: 'rsanchez',
-        password: 'impicklerick',
-        fname: 'Rick',
-        lname: 'Sanchez',
-        admin: true
+      // Creating a new non-admin user
+      const nonAuserData = {
+        username: 'msmith',
+        password: 'awwgeezrick',
+        fname: 'Morty',
+        lname: 'Smith',
+        admin: false
       };
-      UserController.createUser(searchUser, userData)
-      .then(function(newAu) {
-        user = newAu;
-        chai.expect(newAu.username).to.equal('rsanchez');
-        chai.expect(newAu.fname).to.equal('Rick');
-        chai.expect(newAu.lname).to.equal('Sanchez');
-        // Creating a new non-admin user
-        const nonAuserData = {
-          username: 'msmith',
-          password: 'awwgeezrick',
-          fname: 'Morty',
-          lname: 'Smith',
-          admin: false
+      UserController.createUser(user, nonAuserData)
+      .then(function(nonAu) {
+        newUser = nonAu;
+        chai.expect(nonAu.username).to.equal('msmith');
+        chai.expect(nonAu.fname).to.equal('Morty');
+        chai.expect(nonAu.lname).to.equal('Smith');
+        // Creating a new organization used in the tests
+        const orgData = {
+          id: 'council',
+          name: 'Council of Ricks',
+          permissions: {
+            admin: [user._id],
+            write: [user._id],
+            read: [user._id]
+          }
         };
-        UserController.createUser(searchUser, nonAuserData)
-        .then(function(nonAu) {
-          newUser = nonAu;
-          chai.expect(nonAu.username).to.equal('msmith');
-          chai.expect(nonAu.fname).to.equal('Morty');
-          chai.expect(nonAu.lname).to.equal('Smith');
-          // Creating a new organization used in the tests
-          const orgData = {
-            id: 'council',
-            name: 'Council of Ricks',
-            permissions: {
-              admin: [user._id],
-              write: [user._id],
-              read: [user._id]
-            }
-          };
-          OrgController.createOrg(user, orgData)
-          .then((retOrg) => {
-            org = retOrg;
-            chai.expect(retOrg.id).to.equal('council');
-            chai.expect(retOrg.name).to.equal('Council of Ricks');
-            chai.expect(retOrg.permissions.read).to.include(user._id.toString());
-            chai.expect(retOrg.permissions.write).to.include(user._id.toString());
-            chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
-            done();
-          })
-          .catch((firsterr) => {
-            chai.expect(firsterr).to.equal(null);
-            done();
-          });
+        OrgController.createOrg(user, orgData)
+        .then((retOrg) => {
+          org = retOrg;
+          chai.expect(retOrg.id).to.equal('council');
+          chai.expect(retOrg.name).to.equal('Council of Ricks');
+          chai.expect(retOrg.permissions.read).to.include(user._id.toString());
+          chai.expect(retOrg.permissions.write).to.include(user._id.toString());
+          chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
+          done();
         })
-        .catch(function(err) {
-          chai.expect(err).to.equal(null);
+        .catch((firsterr) => {
+          chai.expect(firsterr).to.equal(null);
           done();
         });
       })
@@ -124,47 +104,25 @@ describe(name, () => {
 
   // runs after all tests in this block
   after((done) => {
-    // Removing the Organization
+    // Removing the organization created
     OrgController.removeOrg(user, 'council', { soft: false })
     .then(() => {
-      // Finding it and checking it is not there
-      OrgController.findOrg(user, 'council')
-      .then((retOrg) => {
-        chai.expect(retOrg).to.equal(null);
-        // Deleting the admin user created
-        const userOne = 'rsanchez';
-        UserController.deleteUser(allSeeingUser, userOne)
-        .then(function(delUser) {
-          chai.expect(delUser).to.equal('rsanchez');
-          // Deleting the non admin user created
-          const userTwo = 'msmith';
-          UserController.deleteUser(allSeeingUser, userTwo)
-          .then(function(delUser2) {
-            chai.expect(delUser2).to.equal('msmith');
-            // Closing the db connection
-            mongoose.connection.close();
-            done();
-          })
-          .catch(function(err1) {
-            chai.expect(err1).to.equal(null);
-            mongoose.connection.close();
-            done();
-          });
-        })
-        .catch(function(err2) {
-          chai.expect(err2).to.equal(null);
-          mongoose.connection.close();
-          done();
-        });
+      // Removing the non admin user
+      const userTwo = 'msmith';
+      UserController.deleteUser(user, userTwo)
+      .then(function(delUser2) {
+        chai.expect(delUser2).to.equal('msmith');
+        mongoose.connection.close();
+        done();
       })
-      .catch((error1) => {
-        chai.expect(error1.message).to.equal('Org not found.');
+      .catch(function(err1) {
+        chai.expect(err1).to.equal(null);
         mongoose.connection.close();
         done();
       });
     })
-    .catch((error2) => {
-      chai.expect(error2.message).to.equal('Org not found.');
+    .catch(function(err2) {
+      chai.expect(err2).to.equal(null);
       mongoose.connection.close();
       done();
     });
