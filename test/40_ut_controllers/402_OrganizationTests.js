@@ -118,6 +118,7 @@ describe(name, () => {
   it('should throw an error saying the field cannot be updated', updateOrgFieldErr).timeout(2500);
   it('should throw an error saying the name field is not a string', updateOrgTypeErr).timeout(2500);
   it('should update an orgs name', updateOrg).timeout(2500);
+  it('should update an orgs name using model object', updateOrgObject).timeout(2500);
   it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
   it('should soft delete an existing org', softDeleteExistingOrg).timeout(2500);
   it('should delete an existing org', deleteExistingOrg).timeout(2500);
@@ -178,13 +179,13 @@ function findExistingOrg(done) {
 
 function updateOrgFieldErr(done) {
   this.timeout(5000);
-  OrgController.updateOrg(user, 'tv', { id: 'shouldNotChange' })
+  OrgController.updateOrg(user, 'tv', { permissions: 'shouldNotChange' })
   .then((retOrg) => {
     chai.expect(typeof retOrg).to.equal('undefined');
     done();
   })
   .catch((error) => {
-    chai.expect(error.message).to.equal('Users cannot update [id] of organizations.');
+    chai.expect(error.message).to.equal('Users cannot update [permissions] of organizations.');
     done();
   });
 }
@@ -213,6 +214,29 @@ function updateOrg(done) {
   })
   .catch((error) => {
     chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests updating an org
+ */
+function updateOrgObject(done) {
+  OrgController.findOrg(user, 'tv')
+  .then((retOrg) => {
+    retOrg.name = 'Interdimensional Cable Changed';
+    OrgController.updateOrg(user, 'tv', retOrg)
+    .then((retOrgUpdate) => {
+      chai.expect(retOrgUpdate.name).to.equal('Interdimensional Cable Changed');
+      done();
+    })
+    .catch((orgUpdateErr) => {
+      chai.expect(orgUpdateErr.message).to.equal(null);
+      done();
+    });
+  })
+  .catch((orgFindErr) => {
+    chai.expect(orgFindErr.message).to.equal(null);
     done();
   });
 }
