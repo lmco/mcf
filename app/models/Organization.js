@@ -30,7 +30,7 @@ const OrganizationSchema = new mongoose.Schema({
     */
   id: {
     type: String,
-    require: true,
+    required: true,
     index: true,
     unique: true,
     match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
@@ -44,7 +44,7 @@ const OrganizationSchema = new mongoose.Schema({
     */
   name: {
     type: String,
-    requite: true,
+    required: true,
     unique: true,
     match: RegExp('^([a-zA-Z0-9-\\s])+$')
   },
