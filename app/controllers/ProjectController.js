@@ -22,7 +22,6 @@ const path = require('path');
 /* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const OrgController = M.load('controllers/OrganizationController');
-const Organization = M.load('models/Organization');
 const Project = M.load('models/Project');
 
 // We are disabling the eslint consistent-return rule for this file.
@@ -295,7 +294,6 @@ class ProjectController {
       const projID = M.lib.sani.html(project.id);
       const projName = M.lib.sani.html(project.name);
       const orgID = M.lib.sani.html(project.org.id);
-      const projUID = `${orgID}:${projID}`;
 
       // Error check - make sure project ID and project name are valid
       if (!RegExp(M.lib.validators.project.id).test(projID)) {
@@ -317,9 +315,7 @@ class ProjectController {
 
         // Error check - check if the project already exists
         ProjectController.findProject(reqUser, org.id, projID)
-        .then((proj) => {
-          return reject(new Error("Project already exists."));
-        })
+        .then((proj) => reject(new Error('Project already exists.')))
         .catch((error) => {
           // This is ok, we dont want the project to already exist.
           if (error.message === 'Project not found') {
@@ -350,9 +346,7 @@ class ProjectController {
           }
         });
       })
-      .catch((error2) => {
-        return reject(error2);
-      });
+      .catch((error2) => reject(error2));
     });
   }
 
@@ -395,7 +389,6 @@ class ProjectController {
       const orgID = M.lib.sani.html(organizationId);
       const projID = M.lib.sani.html(projectId);
       const projNameUpdated = M.lib.sani.html(projectUpdated.name);
-      const projUID = `${orgID}:${projID}`;
 
       // Error check - make sure project ID and project name are valid
       if (!RegExp(M.lib.validators.project.id).test(projID)) {
@@ -424,15 +417,9 @@ class ProjectController {
           // Return the updated project object
           return resolve(project);
         })
-        .catch((error) => {
-          // Error trying to find the project
-          return reject(error);
-        });
+        .catch((error) => reject(error));
       })
-      .catch((error2) => {
-        // Error trying to find the org.
-        return reject(error2);
-      });
+      .catch((error2) => reject(error2));
     });
   }
 
@@ -481,7 +468,6 @@ class ProjectController {
       // Sanitize project properties
       const orgID = M.lib.sani.html(organizationId);
       const projID = M.lib.sani.html(projectId);
-      const projUID = `${orgID}:${projID}`;
 
       // Find the project, even if it has already been soft deleted
       ProjectController.findProject(reqUser, orgID, projID, true)
@@ -507,7 +493,7 @@ class ProjectController {
             });
           }
           else {
-            return reject(new Error("Project no longer exists."));
+            return reject(new Error('Project no longer exists.'));
           }
         }
         else {
@@ -520,10 +506,7 @@ class ProjectController {
           });
         }
       })
-      .catch((error) => {
-        // Error while trying to find the project
-        return reject(error);
-      });
+      .catch((error) => reject(error));
     });
   }
 
