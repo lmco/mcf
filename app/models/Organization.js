@@ -157,8 +157,14 @@ OrganizationSchema.methods.getPublicData = function() {
   };
 };
 
+// The permission levels in order of inheritance for an organization.
 OrganizationSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
+};
+
+// Fields which users are allowed to update.
+OrganizationSchema.methods.getValidUpdateFields = function() {
+  return ['name'];
 };
 
 // Required for virtual getters
