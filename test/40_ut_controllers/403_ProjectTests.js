@@ -412,11 +412,11 @@ function nonACreator(done) {
   };
   ProjController.createProject(nonAuser, projData)
   .then(function(error) {
-    chai.expect(error).to.equal('User does not have permission.');
+    chai.expect(error.message).to.equal('User does not have permissions.');
     done();
   })
   .catch(function(err) {
-    chai.expect(err.message).to.equal('User does not have permission.');
+    chai.expect(err.message).to.equal('User does not have permissions.');
     done();
   });
 }
@@ -524,7 +524,7 @@ function updateNonA(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err.message).to.equal('User does not have permission.');
+    chai.expect(err.message).to.equal('User does not have permissions.');
     done();
   });
 }
