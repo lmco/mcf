@@ -263,7 +263,7 @@ class ProjectController {
    *
    *
    * @param  {User} The object containing the requesting user.
-   * @param  {Project} The object of the project being created.
+   * @param  {Object} The object of the project being created.
    */
   static createProject(reqUser, project) {
     return new Promise((resolve, reject) => {
@@ -371,8 +371,9 @@ class ProjectController {
    *
    *
    * @param  {User} The object containing the requesting user.
-   * @param  {Project} The object of the existing project.
-   * @param  {Project} The object of the updated project.
+   * @param  {String} The organization ID of the project.
+   * @param  {String} The project ID.
+   * @param  {Object} The object of the updated project.
    */
   static updateProject(reqUser, organizationId, projectId, projectUpdated) {
     return new Promise((resolve, reject) => {
