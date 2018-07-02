@@ -180,8 +180,9 @@ class APIController {
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
-      M.log.error(error.description);
-      return res.status(error.status).send(error);
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -249,8 +250,9 @@ class APIController {
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
-      M.log.error(error.description);
-      return res.status(error.status).send(error);
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -298,8 +300,9 @@ class APIController {
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
-      M.log.error(error.description);
-      return res.status(error.status).send(error);
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -343,8 +346,9 @@ class APIController {
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
-      M.log.error(error.description);
-      return res.status(error.status).send(error);
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -372,8 +376,9 @@ class APIController {
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
-      M.log.error(error.description);
-      return res.status(error.status).send(error);
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -400,8 +405,9 @@ class APIController {
       })
       .catch((error) => {
         // If error occurs, log error and return 500 status.
-        M.log.error(error.description);
-        return res.status(error.status).send(error);
+        const err = JSON.parse(error.message);
+        M.log.error(err.description);
+        return res.status(err.status).send(err);
       });
     })
     .catch((err) => {
@@ -440,8 +446,9 @@ class APIController {
       })
       .catch((error) => {
         // If error occurs, log error and return 500 status.
-        M.log.error(error.description);
-        return res.status(error.status).send(error);
+        const err = JSON.parse(error.message);
+        M.log.error(err.description);
+        return res.status(err.status).send(err);
       });
     })
     .catch((err) => {
@@ -473,8 +480,9 @@ class APIController {
       })
       .catch((error) => {
         // If error occurs, log error and return 500 status.
-        M.log.error(error.description);
-        return res.status(error.status).send(error);
+        const err = JSON.parse(error.message);
+        M.log.error(err.description);
+        return res.status(err.status).send(err);
       });
     })
     .catch((err) => {
@@ -504,8 +512,9 @@ class APIController {
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
-      M.log.error(error.description);
-      return res.status(error.status).send(error);
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
