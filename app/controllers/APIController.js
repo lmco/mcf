@@ -542,10 +542,11 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.send(APIController.formatJSON(projects));
     })
-    .catch((err) => {
-      // Log error and send error response
-      M.log.error(err.stack);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      // If error occurs, log error and return 500 status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -611,9 +612,11 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
     })
-    .catch((err) => {
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      // If error occurs, log error and return 500 status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -681,9 +684,11 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
     })
-    .catch((err) => {
-      M.log.error(err.stack);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      // If error occurs, log error and return 500 status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -745,9 +750,11 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
     })
-    .catch((err) => {
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      // If error occurs, log error and return 500 status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -773,9 +780,11 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
     })
-    .catch((err) => {
-      M.log.error(err.stack);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      // If error occurs, log error and return 500 status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -795,9 +804,11 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(permissions));
     })
-    .catch((findProjErr) => {
-      M.log.error(findProjErr.stack);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      // If error occurs, log error and return 500 status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -821,9 +832,11 @@ class APIController {
         res.header('Content-Type', 'application/json');
         return res.status(200).send(APIController.formatJSON(permissions));
       })
-      .catch((findProjErr) => {
-        M.log.error(findProjErr.stack);
-        return res.status(500).send('Internal Server Error');
+      .catch((error) => {
+        // If error occurs, log error and return 500 status.
+        const err = JSON.parse(error.message);
+        M.log.error(err.description);
+        return res.status(err.status).send(err);
       });
     })
     .catch((findUserErr) => {
@@ -854,9 +867,11 @@ class APIController {
         return res.status(200).send(APIController.formatJSON(project));
       })
       // Return and log error if caught
-      .catch((setPermErr) => {
-        M.log.error(setPermErr.stack);
-        return res.status(500).send('Internal Server Error');
+      .catch((error) => {
+        // If error occurs, log error and return 500 status.
+        const err = JSON.parse(error.message);
+        M.log.error(err.description);
+        return res.status(err.status).send(err);
       });
     })
     // Return and log error if caught
@@ -888,9 +903,11 @@ class APIController {
         return res.status(200).send(APIController.formatJSON(project));
       })
       // Return and log error if caught
-      .catch((setPermErr) => {
-        M.log.error(setPermErr.stack);
-        return res.status(500).send('Internal Server Error');
+      .catch((error) => {
+        // If error occurs, log error and return 500 status.
+        const err = JSON.parse(error.message);
+        M.log.error(err.description);
+        return res.status(err.status).send(err);
       });
     })
     // Return and log error if caught
