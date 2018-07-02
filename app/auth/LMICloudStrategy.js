@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module auth/lmi-cloud-strategy
+ * @module auth.lmi-cloud-strategy
  *
  * @authorized Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

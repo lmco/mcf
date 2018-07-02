@@ -10,12 +10,12 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  models/User
+ * @module  models.user
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @fileOverview This file creates a mongoose model to interact with the
+ * @description This file creates a mongoose model to interact with the
  * MongoDB Database in order to find, save, update, and delete organizations.
  */
 
