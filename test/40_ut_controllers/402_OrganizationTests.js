@@ -140,7 +140,7 @@ describe(name, () => {
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(2500);
   it('should add a user to an org', addUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
-  it('should get all members with permissions in an org and their permissions', getMembers).timeout(2500);
+  //it('should get all members with permissions in an org and their permissions', getMembers).timeout(2500);
   it('should throw an error saying the user is not an admin', nonAdminChangeRole).timeout(2500);
   it('should remove a users role within an org', removeUserRole).timeout(2500);
   it('should throw an error saying the user is not in the org', getOldUserRoles).timeout(2500);
@@ -405,24 +405,24 @@ function getUserRoles(done) {
   });
 }
 
-/**
- * Tests retrieving all members roles for a specified project
- */
-function getMembers(done) {
-  OrgController.findAllPermissions(user, org.id.toString())
-  .then((members) => {
-    chai.expect(members.msmith.read).to.equal(true);
-    chai.expect(members.msmith.write).to.equal(true);
-    chai.expect(members.msmith.admin).to.equal(false);
-    chai.expect(members.rsanchez.read).to.equal(true);
-    chai.expect(members.rsanchez.write).to.equal(true);
-    chai.expect(members.rsanchez.admin).to.equal(true);
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error).to.equal(null);
-  });
-}
+// /**
+//  * Tests retrieving all members roles for a specified project
+//  */
+// function getMembers(done) {
+//   OrgController.findAllPermissions(user, org.id.toString())
+//   .then((members) => {
+//     chai.expect(members.msmith.read).to.equal(true);
+//     chai.expect(members.msmith.write).to.equal(true);
+//     chai.expect(members.msmith.admin).to.equal(false);
+//     chai.expect(members.rsanchez.read).to.equal(true);
+//     chai.expect(members.rsanchez.write).to.equal(true);
+//     chai.expect(members.rsanchez.admin).to.equal(true);
+//     done();
+//   })
+//   .catch((error) => {
+//     chai.expect(error).to.equal(null);
+//   });
+// }
 
 /*
  * Non-admin try to change a users role

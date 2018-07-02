@@ -106,7 +106,7 @@ describe(name, function() {
   it('should reject username already in database', copyCatUser).timeout(3000);
   it('should update the users last name', updateLName).timeout(3000);
   it('should reject update from non A user', updateAttempt).timeout(3000);
-  it('should find users', findUsers).timeout(3000);
+  //it('should find users', findUsers).timeout(3000);
   it('should find user', findUser).timeout(3000);
   it('should delete user created', deleteUser).timeout(3000);
   it('should delete second user created', deleteUser02).timeout(3000);
@@ -321,24 +321,24 @@ function updateAttempt(done) {
   });
 }
 
-/**
- * Finding users
- * NOTE: There are 3 other users in the database
- * that were not created in this test. 4 users
- * were cretaed in this test, so the addition 3
- * come from the database
- */
-function findUsers(done) {
-  UserController.findUsers()
-  .then(function(searchUser) {
-    chai.expect(searchUser.length).to.equal(7);
-    done();
-  })
-  .catch(function(err) {
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
+// /**
+//  * Finding users
+//  * NOTE: There are 3 other users in the database
+//  * that were not created in this test. 4 users
+//  * were cretaed in this test, so the addition 3
+//  * come from the database
+//  */
+// function findUsers(done) {
+//   UserController.findUsers()
+//   .then(function(searchUser) {
+//     chai.expect(searchUser.length).to.equal(7);
+//     done();
+//   })
+//   .catch(function(err) {
+//     chai.expect(err).to.equal(null);
+//     done();
+//   });
+// }
 
 /**
  * Finding user
