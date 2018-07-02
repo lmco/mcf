@@ -65,7 +65,7 @@ M.load = m => require(path.join(__dirname, 'app', m)); // eslint-disable-line gl
 M.require = m => {
   const p = path.join(__dirname, 'app', m.replace('.', path.sep));
   return require(p); // eslint-disable-line global-require
-}
+};
 
 // This exports the basic MBEE version and config data so that modules may
 // have access to that data when they are loaded.
