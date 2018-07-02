@@ -182,7 +182,7 @@ class APIController {
       // If error occurs, log error and return 500 status.
       M.log.error(error);
       M.log.error(error.stack);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error.status).send(error);
     });
   }
 
@@ -249,8 +249,9 @@ class APIController {
       return res.send(APIController.formatJSON(org.getPublicData()));
     })
     .catch((error) => {
-      M.log.warn(error);
-      return res.status(error.status).send(error);
+      M.log.warn(error.message);
+      const err = JSON.parse(error.message)
+      return res.status(err.status).send(err);
     });
   }
 
@@ -298,7 +299,7 @@ class APIController {
     })
     .catch((error) => {
       M.log.error(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error.status).send(error);
     });
   }
 
@@ -346,7 +347,7 @@ class APIController {
     })
     .catch((error) => {
       M.log.error(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error.status).send(error);
     });
   }
 
@@ -374,7 +375,7 @@ class APIController {
     })
     .catch((error) => {
       M.log.warn(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error.status).send(error);
     });
   }
 
@@ -401,7 +402,7 @@ class APIController {
       })
       .catch((error) => {
         M.log.warn(error);
-        return res.status(500).send('Internal Server Error');
+        return res.status(error.status).send(error);
       });
     })
     .catch((err) => {
@@ -440,7 +441,7 @@ class APIController {
       })
       .catch((error) => {
         M.log.warn(error);
-        return res.status(500).send('Internal Server Error');
+        return res.status(error.status).send(error);
       });
     })
     .catch((err) => {
@@ -472,7 +473,7 @@ class APIController {
       })
       .catch((error) => {
         M.log.warn(error);
-        return res.status(500).send('Internal Server Error');
+        return res.status(error.status).send(error);
       });
     })
     .catch((err) => {
@@ -502,7 +503,7 @@ class APIController {
     })
     .catch((error) => {
       M.log.warn(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error.status).send(error);
     });
   }
 
