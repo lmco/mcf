@@ -8,14 +8,31 @@
  *                                                                            *
  * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
  * control laws. Contact legal and export compliance prior to distribution.   *
- ******************************************************************************
- *
- * @module Element.js
+ ******************************************************************************/
+/**
+ * @module models.element
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @fileOverview  This file defines the database schema and data model for
- * project elements.
+ * @description
+ *
+ * <p>This file defines the data model and schema for Elements. Using
+ * <a href="http://mongoosejs.com/docs/discriminators.html">Mongoose discriminators</a>,
+ * a variety of 'types' of elements are defined that each inherit the base
+ * schema definition from the more generic 'Element'.</p>
+ *
+ * <p>The following element types are defined: Block, Relationship, and Package.
+ * Currently, a block does not extend the Element schema other than applying
+ * adding the 'type' of 'Block'. Relationships add 'source' and 'target' fields
+ * that reference other elements, allowing relationships to represent a link
+ * between other elements. A package adds a 'contains' field which references
+ * other elements, allowing packages to be used to structure the model.</p>
+ *
+ * <p>A project will have one root element whose "parent" field will
+ * be null. All other elements will have a parent that should be a package (
+ * either the root package or some other package in the hierarchy).</p>
+ *
+ * @tutorial  elements
  */
 
 const path = require('path');
@@ -31,7 +48,9 @@ const options = { discriminatorKey: 'type' };
  ******************************************************************************/
 
 /**
- * Defines the schema for an Element
+ * @class  Element
+ *
+ * @classdesc Defines the schema for an Element
  */
 const ElementSchema = new mongoose.Schema({
 

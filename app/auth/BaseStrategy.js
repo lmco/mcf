@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  auth/base-strategy
+ * @module  auth.base_strategy
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

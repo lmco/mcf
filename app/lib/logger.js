@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module lib/logger
+ * @module lib.logger
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

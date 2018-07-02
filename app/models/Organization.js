@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module OrganizationModel.js
+ * @module models.organization
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
