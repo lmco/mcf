@@ -126,7 +126,7 @@ ProjectSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
 
-ProjectSchema.methods.getEditableFields = function() {
+ProjectSchema.methods.getValidUpdateFields = function() {
   return ['name', 'delete', 'deletedOn'];
 };
 

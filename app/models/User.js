@@ -189,10 +189,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
     set: function(v) {  // eslint-disable-line no-unused-vars, arrow-body-style
-      return (this.deletedOn !== null);
+      return (this.deletedOn !== null && this.deletedOn !== undefined);
     },
     get: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
-      return (this.deletedOn !== null);
+      return (this.deletedOn !== null && this.deletedOn !== undefined);
     }
   }
 
