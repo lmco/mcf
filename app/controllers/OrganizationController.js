@@ -112,8 +112,7 @@ class OrganizationController {
 
         // If user is not a member
         // TODO - Is there a way we can include this as part of the query?
-        const members = org.members.map(u => u._id.toString());
-
+        const members = org.permissions.read.map(u => u._id.toString());
         if (!members.includes(user._id.toString())) {
           return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
         }
@@ -199,6 +198,9 @@ class OrganizationController {
           });
         }
         else {
+          if (findOrgError.message === 'User does not have permissions.') {
+            return reject(new Error('An org with the same ID already exists.'));
+          }
           // There was some other error, return it.
           return reject(findOrgError);
         }
@@ -582,7 +584,7 @@ class OrganizationController {
       // Find the org
       OrganizationController.findOrg(user, orgID)
       .then((org) => {
-        const users = org.members;
+        const users = org.permissions.read;
 
         // Loop through each user in the org
         users.forEach((u) => {

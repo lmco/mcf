@@ -34,6 +34,7 @@ const UserSchema = new mongoose.Schema({
   /**
      * @memberOf  User
      * @property  username
+     * @type {String}
      *
      * @description  The `username` property is the user's unique name.
      * It is indexed for faster lookup.
@@ -52,8 +53,9 @@ const UserSchema = new mongoose.Schema({
   /**
      * @memberOf  User
      * @property password
+     * @type {String}
      *
-     * The `password` property stores the user's hashed password.
+     * @description  The `password` property stores the user's hashed password.
      */
   password: {
     type: String,
@@ -72,8 +74,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
-     * @property {String} [email] [description]
-     * The `email` property is the user's email address.
+     * @property  email
+     * @type  {String}
+     *
+     * @descriptions  The `email` property is the user's email address.
      * RegEx Source: http://regexlib.com/Search.aspx?k=email
      */
   email: {
@@ -83,7 +87,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
-     * The `fname` property is the user's first name.
+     * @property  fname
+     * @type  {String}
+     *
+     * @description  The `fname` property is the user's first name.
      */
   fname: {
     type: String,
@@ -93,6 +100,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
+     * @property  lname
+     * @type  {String}
+     *
+     * @description
      * The `lname` property is the user's last name.
      */
   lname: {
@@ -103,7 +114,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
-     * The `name` property stores the user's full name.
+     * @property  name
+     * @type  {String}
+     *
+     * @description  The `name` property stores the user's full name.
      * It it set based on the fname and lname properties.
      */
   name: {
@@ -124,7 +138,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
-     * The `admin` property defines whether or not the user is a global admin.
+     * @property  admin
+     * @type  {Boolean}
+     *
+     * @description  The `admin` property defines whether or not the user is a global admin.
      * This refers to whether or not the user is a site-wide admin.
      */
   admin: {
@@ -134,7 +151,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
-     * The `isLDAPUser` property defines whether or not the user is an LDAP
+     * @property  isLDAPUser
+     * @type  {Boolean}
+     *
+     * @description  The `isLDAPUser` property defines whether or not the user is an LDAP
      * user. This impacts how the user is authenticated
      */
   isLDAPUser: {
@@ -144,7 +164,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
-     * The date on which the user was created.
+     * @property  createdOn
+     * @type  {Date}
+     *
+     * @description  The date on which the user was created.
      * The setter is defined to only ever re-set to the current value.
      * This should prevent the created field from being overwritten.
      */
@@ -159,7 +182,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
-     * The date on which the user object was last updated.
+     * @property  updatedOn
+     * @type  {Date}
+     *
+     * @description  The date on which the user object was last updated.
      * The setter is run using pre-save middleware.
      */
   updatedOn: {
@@ -170,7 +196,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
-     * The date on which the user was deleted.
+     * @property  deletedOn
+     * @type  {Date}
+     *
+     * @description  The date on which the user was deleted.
      * This is used to provide soft-delete functionality.
      */
   deletedOn: {
@@ -181,8 +210,10 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
+     * @property  deleted
+     * @type  {Boolean}
      *
-     * This is the Boolean value that tells us whether or not the user has
+     * @description  This is the Boolean value that tells us whether or not the user has
      * been deleted. It just makes is easier to check if a user is deleted.
      */
   deleted: {
@@ -198,20 +229,13 @@ const UserSchema = new mongoose.Schema({
 
 });
 
-
-// Changing the callback to arrow notation causes this.orgPermissions to be null when
-// this function os executed. TODO (jk, ju) - understand this.
-/* eslint-disable prefer-arrow-callback */
-
 /**
- * This is a getter which can be used in order to populate a list of
- * all organizations the user has write or admin permissions to.
- */
-
-/**
- * This is the list of orgs the user has read access to.
- * @type {Organization}
- */
+  * @memberOf  User
+  * @property  orgs.read
+  * @type  {Organization}
+  *
+  * @description  This is the list of orgs the user has read access to.
+  */
 UserSchema.virtual('orgs.read', {
   ref: 'Organization',
   localField: '_id',
@@ -220,9 +244,12 @@ UserSchema.virtual('orgs.read', {
 });
 
 /**
- * This is the list of orgs the user has write access to.
- * @type {Organization}
- */
+  * @memberOf  User
+  * @property  orgs.write
+  * @type  {Organization}
+  *
+  * @description  This is the list of orgs the user has write access to.
+  */
 UserSchema.virtual('orgs.write', {
   ref: 'Organization',
   localField: '_id',
@@ -231,9 +258,12 @@ UserSchema.virtual('orgs.write', {
 });
 
 /**
- * This is the list of orgs the user has admin access to.
- * @type {Organization}
- */
+  * @memberOf  User
+  * @property  orgs.admin
+  * @type  {Organization}
+  *
+  * @description  This is the list of orgs the user has admin access to.
+  */
 UserSchema.virtual('orgs.admin', {
   ref: 'Organization',
   localField: '_id',
@@ -241,6 +271,13 @@ UserSchema.virtual('orgs.admin', {
   justOne: false
 });
 
+/**
+  * @memberOf  User
+  * @property  proj.read
+  * @type  {Project}
+  *
+  * @description  This is the list of projects the user has read access to.
+  */
 UserSchema.virtual('proj.read', {
   ref: 'Project',
   localField: '_id',
@@ -248,6 +285,13 @@ UserSchema.virtual('proj.read', {
   justOne: false
 });
 
+/**
+  * @memberOf  User
+  * @property  proj.write
+  * @type  {Project}
+  *
+  * @description  This is the list of projects the user has write access to.
+  */
 UserSchema.virtual('proj.write', {
   ref: 'Project',
   localField: '_id',
@@ -255,6 +299,13 @@ UserSchema.virtual('proj.write', {
   justOne: false
 });
 
+/**
+  * @memberOf  User
+  * @property  proj.admin
+  * @type  {Project}
+  *
+  * @description  This is the list of projects the user has admin access to.
+  */
 UserSchema.virtual('proj.admin', {
   ref: 'Project',
   localField: '_id',
@@ -262,16 +313,8 @@ UserSchema.virtual('proj.admin', {
   justOne: false
 });
 
-
 /* eslint-enable prefer-arrow-callback */
 
-// Necessary for virtual getters to be executed.
-UserSchema.set('toJSON', { virtuals: true });
-UserSchema.set('toObject', { virtuals: true });
-
-UserSchema.pre('find', function() {
-  this.populate('orgs.write orgs.admin proj.read proj.write proj.admin');
-});
 
 /**
  * @memberOf  User
@@ -285,7 +328,9 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
-
+/**
+ * An object contining what is allowed on an update to a user.
+ */
 UserSchema.methods.isUpdateAllowed = function(field) {
   const allowedMap = {
     username: false,
@@ -326,6 +371,10 @@ UserSchema.methods.getPublicData = function() {
   };
 };
 
+
+// Necessary for virtual getters to be executed.
+UserSchema.set('toJSON', { virtuals: true });
+UserSchema.set('toObject', { virtuals: true });
 
 // Export mongoose model as "Organization"
 module.exports = mongoose.model('User', UserSchema);
