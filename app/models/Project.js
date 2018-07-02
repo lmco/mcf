@@ -10,10 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * ProjectsModel.js
+ * @module models.project
  *
- * Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
+ * @description
  * The ProjectModel.js file creates a mongoose model to interact with the MongoDB
  * Database in order to find, save, update, and delete projects.
  */
@@ -23,16 +24,19 @@ const mongoose = require('mongoose');
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-// Create Project Model Schema:
-const Schema = mongoose.Schema;
-
-// TODO (JU) - Discuss use of '_id' vs 'id'
-//
-// id       = Primary Key
-// name     = Name of project
-// projects = Organization the project belongs to referenced from the
-//            Organization Model
-const ProjectSchema = new Schema({
+/**
+ * @class Project
+ *
+ * @classdesc Defines the Project Schema
+ */
+const ProjectSchema = new mongoose.Schema({
+  /**
+    * @memberOf  Project
+    * @property  id
+    * @type {String}
+    *
+    * @description  The 'id' holds a non-unique project id.
+  */
   id: {
     type: String,
     required: true,
@@ -41,34 +45,76 @@ const ProjectSchema = new Schema({
     maxlength: [36, 'Too many characters in username']
   },
 
+  /**
+    * @memberOf  Project
+    * @property  org
+    * @type {Organization}
+    *
+    * @description  The 'org' holds a reference to the organization which it belongs t0.
+    */
   org: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
     required: true
   },
 
+  /**
+    * @memberOf  Project
+    * @property  uid
+    * @type {String}
+    *
+    * @description  The 'uid' holds a unique project id which is the concatonation of the projects
+    * org id and it's own id. example uid = 'starkIndustries:arcReactor'.
+    */
   uid: {
     type: String,
     unique: true
   },
 
+  /**
+    * @memberOf  Project
+    * @property  name
+    * @type {String}
+    *
+    * @description  The 'name' holds a project name to be displayed for an
+    * project.
+    */
   name: {
     type: String,
     required: true,
     match: RegExp(M.lib.validators.project.name)
   },
 
+  /**
+    * @memberOf  Project
+    * @property  permissions
+    *
+    * @description  Permissions includes lists of users with certain permission levels
+    * or "roles" within project.
+    */
   permissions: {
+    /**
+     * @description  Contains the list of users with read access to the project.
+     * @type {Array}
+     */
     read: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
 
+    /**
+     * @description   Contains the list of users with write access to the project.
+     * @type  {Array}
+     */
     write: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
 
+    /**
+     * @description  Contains the list of users with admin access to the project.
+     * @type {Array}
+     */
     admin: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
@@ -76,7 +122,11 @@ const ProjectSchema = new Schema({
   },
 
   /**
-    * The date the project was soft-deleted on.
+    * @memberOf  Project
+    * @property  deletedOn
+    * @type {Date}
+    *
+    * @description  The date the project was soft-deleted on.
     */
   deletedOn: {
     type: Date,
@@ -84,7 +134,11 @@ const ProjectSchema = new Schema({
   },
 
   /**
-    * A boolean value displaying whether or not the project
+    * @memberOf  Project
+    * @property  deleted
+    * @type {Boolean}
+    *
+    * @description  A boolean value displaying whether or not the project
     * has been soft deleted.
     */
   deleted: {
@@ -93,39 +147,16 @@ const ProjectSchema = new Schema({
   }
 });
 
-// NOTE: Commented out on 6/19 due to decision that members was no longer needed
-
-// ProjectSchema.virtual('members').get(function() {
-//   // Grab the write and admin permissions lists
-//   const read = this.permissions.read;
-//   const write = this.permissions.write;
-//   const admin = this.permissions.admin;
-
-//   // set member to a copy of write
-//   const member = read.slice();
-//   const memberMap = member.map(u => u.username);
-
-//   // Add admins that aren't already in the member list,
-//   // creating a unique list of members
-//   for (let i = 0; i < write.length; i++) {
-//     if (!memberMap.includes(write[i].username)) {
-//       member.push(write[i]);
-//     }
-//   }
-
-//   for (let i = 0; i < admin.length; i++) {
-//     if (!memberMap.includes(admin[i].username)) {
-//       member.push(admin[i]);
-//     }
-//   }
-
-//   return member;
-// });
-
+/**
+  * Returns the permission levels in order of inheritance for projects.
+  */
 ProjectSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
 
+/**
+  * Returns the fields which users are allowed to update on a project.
+  */
 ProjectSchema.methods.getValidUpdateFields = function() {
   return ['name', 'delete', 'deletedOn'];
 };
