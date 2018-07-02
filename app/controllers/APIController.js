@@ -179,7 +179,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(orgsPublicData));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -249,7 +249,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(org.getPublicData()));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -305,7 +305,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(org));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -357,7 +357,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(org));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -387,7 +387,7 @@ class APIController {
       return res.send(APIController.formatJSON(org.getPublicData()));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -418,15 +418,16 @@ class APIController {
         return res.status(200).send(APIController.formatJSON(roles));
       })
       .catch((error) => {
-        // If error occurs, log error and return 500 status.
+        // If error occurs, log error and return status.
         const err = JSON.parse(error.message);
         M.log.error(err.description);
         return res.status(err.status).send(err);
       });
     })
-    .catch((err) => {
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -463,15 +464,16 @@ class APIController {
         return res.status(200).send(APIController.formatJSON(org.getPublicData()));
       })
       .catch((error) => {
-        // If error occurs, log error and return 500 status.
+        // If error occurs, log error and return status.
         const err = JSON.parse(error.message);
         M.log.error(err.description);
         return res.status(err.status).send(err);
       });
     })
-    .catch((err) => {
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -499,15 +501,16 @@ class APIController {
         return res.status(200).send(APIController.formatJSON(org.getPublicData()));
       })
       .catch((error) => {
-        // If error occurs, log error and return 500 status.
+        // If error occurs, log error and return status.
         const err = JSON.parse(error.message);
         M.log.error(err.description);
         return res.status(err.status).send(err);
       });
     })
-    .catch((err) => {
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -533,7 +536,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(members));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -565,7 +568,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(projects));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -637,7 +640,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(project));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -721,7 +724,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(project));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -799,7 +802,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(project));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -831,7 +834,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(project));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -857,7 +860,7 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(permissions));
     })
     .catch((error) => {
-      // If error occurs, log error and return 500 status.
+      // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
       return res.status(err.status).send(err);
@@ -887,15 +890,16 @@ class APIController {
         return res.status(200).send(APIController.formatJSON(permissions));
       })
       .catch((error) => {
-        // If error occurs, log error and return 500 status.
+        // If error occurs, log error and return status.
         const err = JSON.parse(error.message);
         M.log.error(err.description);
         return res.status(err.status).send(err);
       });
     })
-    .catch((findUserErr) => {
-      M.log.error(findUserErr.stack);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -922,16 +926,17 @@ class APIController {
       })
       // Return and log error if caught
       .catch((error) => {
-        // If error occurs, log error and return 500 status.
+        // If error occurs, log error and return status.
         const err = JSON.parse(error.message);
         M.log.error(err.description);
         return res.status(err.status).send(err);
       });
     })
     // Return and log error if caught
-    .catch((findUserErr) => {
-      M.log.error(findUserErr.stack);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -960,16 +965,17 @@ class APIController {
       })
       // Return and log error if caught
       .catch((error) => {
-        // If error occurs, log error and return 500 status.
+        // If error occurs, log error and return status.
         const err = JSON.parse(error.message);
         M.log.error(err.description);
         return res.status(err.status).send(err);
       });
     })
     // Return and log error if caught
-    .catch((findUserErr) => {
-      M.log.error(findUserErr.stack);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
@@ -994,9 +1000,10 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(user.getPublicData()));
     })
-    .catch((err) => {
-      M.log.error(err);
-      return res.status(500).send('Internal Server Error');
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     });
   }
 
