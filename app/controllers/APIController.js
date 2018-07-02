@@ -334,12 +334,8 @@ class APIController {
 
     // Sanitize the input
     const organizationID = M.lib.sani.sanitize(req.params.orgid);
-    const organizationName = M.lib.sani.sanitize(req.body.name);
 
-    OrgController.updateOrg(req.user, organizationID, {
-      id: organizationID,
-      name: organizationName
-    })
+    OrgController.updateOrg(req.user, organizationID, req.body)
     .then((org) => {
       // Return OK status and the created org
       res.header('Content-Type', 'application/json');
@@ -727,16 +723,9 @@ class APIController {
     }
 
     const projectId = M.lib.sani.html(req.params.projectid);
-    const projectName = M.lib.sani.html(req.body.name);
     const orgId = M.lib.sani.html(req.params.orgid);
 
-    ProjectController.updateProject(req.user, orgId, projectId, {
-      id: projectId,
-      name: projectName,
-      org: {
-        id: orgId
-      }
-    })
+    ProjectController.updateProject(req.user, orgId, projectId, req.body)
     .then((project) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
