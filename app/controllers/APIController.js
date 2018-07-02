@@ -246,7 +246,7 @@ class APIController {
     OrgController.findOrg(req.user, orgid)
     .then((org) => {
       res.header('Content-Type', 'application/json');
-      return res.send(APIController.formatJSON(org.getPublicData()));
+      return res.status(200).send(APIController.formatJSON(org.getPublicData()));
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
@@ -268,21 +268,27 @@ class APIController {
   static postOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
-      M.log.error('Organization ID in body does not match ID in params.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Verify that orgID and name are strings
     if (typeof req.params.orgid !== 'string' || typeof req.body.name !== 'string') {
-      M.log.error('Given data is not of expected type, string.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Sanitize the input
@@ -318,21 +324,27 @@ class APIController {
   static putOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
-      M.log.error('Organization ID in body does not match ID in params.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Verify that orgID and name are strings
     if (typeof req.params.orgid !== 'string' || typeof req.body.name !== 'string') {
-      M.log.error('Given data is not of expected type, string.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Sanitize the input
@@ -391,8 +403,10 @@ class APIController {
   static getOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
@@ -401,7 +415,7 @@ class APIController {
       OrgController.findPermissions(req.user, user, orgID)
       .then((roles) => {
         res.header('Content-Type', 'application/json');
-        return res.send(APIController.formatJSON(roles));
+        return res.status(200).send(APIController.formatJSON(roles));
       })
       .catch((error) => {
         // If error occurs, log error and return 500 status.
@@ -426,14 +440,18 @@ class APIController {
   static postOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // If no role in the request body
     if (!req.body.hasOwnProperty('role')) {
-      M.log.error('Request body does not contain a role field.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request body does not contain a role field.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
@@ -442,7 +460,7 @@ class APIController {
       OrgController.setPermissions(req.user, orgID, user, req.body.role)
       .then((org) => {
         res.header('Content-Type', 'application/json');
-        return res.send(APIController.formatJSON(org.getPublicData()));
+        return res.status(200).send(APIController.formatJSON(org.getPublicData()));
       })
       .catch((error) => {
         // If error occurs, log error and return 500 status.
@@ -466,8 +484,10 @@ class APIController {
   static deleteOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
@@ -476,7 +496,7 @@ class APIController {
       OrgController.setPermissions(req.user, orgID, user, 'REMOVE_ALL')
       .then((org) => {
         res.header('Content-Type', 'application/json');
-        return res.send(APIController.formatJSON(org.getPublicData()));
+        return res.status(200).send(APIController.formatJSON(org.getPublicData()));
       })
       .catch((error) => {
         // If error occurs, log error and return 500 status.
@@ -500,15 +520,17 @@ class APIController {
   static getAllOrgRoles(req, res) {
     // If no user in the request
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
     OrgController.findAllPermissions(req.user, orgID)
     .then((members) => {
       res.header('Content-Type', 'application/json');
-      return res.send(APIController.formatJSON(members));
+      return res.status(200).send(APIController.formatJSON(members));
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
@@ -540,7 +562,7 @@ class APIController {
     .then((projects) => {
       // Return project
       res.header('Content-Type', 'application/json');
-      return res.send(APIController.formatJSON(projects));
+      return res.status(200).send(APIController.formatJSON(projects));
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
@@ -600,8 +622,10 @@ class APIController {
   static getProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     const orgid = M.lib.sani.html(req.params.orgid);
@@ -630,43 +654,55 @@ class APIController {
   static postProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('org')) {
       if (req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
-        M.log.error('Organization ID in body does not match ID in params.');
-        return res.status(400).send('Bad Request');
+        const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
       }
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.projectid)) {
-      M.log.error('Project ID in body does not match ID in params.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID in the body does not match ID in the params.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (!req.body.hasOwnProperty('name')) {
-      M.log.error('Project name not found in request body.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name not found in request body.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Verify that orgID is a string
     if (typeof req.params.orgid !== 'string') {
-      M.log.error('Given data is not of expected type, string.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Verify that projID and name are strings
     if (typeof req.params.projectid !== 'string' || typeof req.body.name !== 'string') {
-      M.log.error('Given data is not of expected type, string.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     const projectId = M.lib.sani.html(req.params.projectid);
@@ -703,43 +739,55 @@ class APIController {
   static putProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('org')) {
       if (req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
-        M.log.error('Organization ID in body does not match ID in params.');
-        return res.status(400).send('Bad Request');
+        const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
       }
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && req.body.id !== req.params.projectid) {
-      M.log.error('Project ID in body does not match ID in params.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID in the body does not match ID in the params.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (!req.body.hasOwnProperty('name')) {
-      M.log.error('Project name not found in request body.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name not found in request body.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Verify that orgID is a string
     if (typeof req.params.orgid !== 'string') {
-      M.log.error('Given data is not of expected type, string.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Verify that projID and name are strings
     if (typeof req.params.projectid !== 'string' || typeof req.body.name !== 'string') {
-      M.log.error('Given data is not of expected type, string.');
-      return res.status(400).send('Bad Request');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     const projectId = M.lib.sani.html(req.params.projectid);
@@ -768,8 +816,10 @@ class APIController {
   static deleteProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     const orgId = M.lib.sani.html(req.params.orgid);
@@ -790,8 +840,10 @@ class APIController {
 
   static getProjectRoles(req, res) {
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Sanitize Inputs
@@ -814,8 +866,10 @@ class APIController {
 
   static getProjectRole(req, res) {
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Sanitize Inputs
@@ -883,8 +937,10 @@ class APIController {
 
   static deleteProjectRole(req, res) {
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Sanitize Inputs
@@ -928,8 +984,10 @@ class APIController {
   static getUser(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
     .then((user) => {
@@ -950,8 +1008,10 @@ class APIController {
   static whoami(req, res) {
     // Sanity check - make sure we have user with a username
     if (!req.user) {
-      M.log.warn('Invalid req.user object');
-      return res.status(500).send('Internal Server Error');
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
     }
 
     // Otherwise return 200 and the user's public JSON

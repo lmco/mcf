@@ -202,7 +202,8 @@ function postOrg02Err(done) {
   },
   function(err, response, body) {
     chai.expect(response.statusCode).to.equal(400);
-    chai.expect(body).to.equal('Bad Request');
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
@@ -243,7 +244,8 @@ function postOrg03(done) {
   },
   function(err, response, body) {
     chai.expect(response.statusCode).to.equal(400);
-    chai.expect(body).to.equal('Bad Request');
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
@@ -264,7 +266,8 @@ function postEmptyOrg(done) {
   },
   function(err, response, body) {
     chai.expect(response.statusCode).to.equal(400);
-    chai.expect(body).to.equal('Bad Request');
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
