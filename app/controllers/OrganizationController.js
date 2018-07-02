@@ -370,7 +370,8 @@ class OrganizationController {
       })
       .catch((deleteErr) => {
         // There are simply no projects associated with this org to delete
-        if (deleteErr.message === 'Projects not found') {
+        const error = JSON.parse(deleteErr.message);
+        if (error.description === 'No projects found.') {
           OrganizationController.removeOrgHelper(user, orgID, softDelete)
           .then((retOrg) => resolve(retOrg))
           .catch((err) => reject(err));

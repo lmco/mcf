@@ -122,7 +122,7 @@ function createProject(done) {
     done();
   })
   .catch((error) => {
-    cconst err = JSON.parse(error.message);
+    const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
   });
@@ -202,7 +202,7 @@ function softDeleteProject(done) {
     })
     .catch((error) => {
       const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal('Project not found');
+      chai.expect(err.description).to.equal('Project not found.');
       done();
     });
   })
@@ -226,7 +226,7 @@ function deleteProject(done) {
     })
     .catch((error) => {
       const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal('Project not found');
+      chai.expect(err.description).to.equal('Project not found.');
       done();
     });
   })

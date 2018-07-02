@@ -318,7 +318,8 @@ class ProjectController {
         .then((proj) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project already exists.' }))))
         .catch((error) => {
           // This is ok, we dont want the project to already exist.
-          if (error.message === 'Project not found') {
+          const err = JSON.parse(error.message);
+          if (err.description === 'Project not found.') {
             // Create the new project and save it
             const newProject = new Project({
               id: projID,

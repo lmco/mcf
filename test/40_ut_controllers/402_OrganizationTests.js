@@ -335,7 +335,8 @@ function softDeleteProjectAndOrg(done) {
           done();
         })
         .catch((error) => {
-          chai.expect(error.message).to.equal('Project not found');
+          const err = JSON.parse(error.message);
+          chai.expect(err.description).to.equal('Project not found.');
           done();
         });
       })
@@ -379,7 +380,8 @@ function hardDeleteProjectAndOrg(done) {
       done();
     })
     .catch((error) => {
-      chai.expect(error.message).to.equal('Project not found');
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal('Project not found.');
       done();
     });
   })
