@@ -55,7 +55,7 @@ let user = null;
 // runs before all tests in this block
 
 describe(name, function() {
-  before(function() {
+  before(function(done) {
     this.timeout(5000);
     const db = M.load('lib/db');
     db.connect();

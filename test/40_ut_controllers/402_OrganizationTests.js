@@ -141,7 +141,7 @@ describe(name, () => {
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(2500);
   it('should add a user to an org', addUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
-  //it('should get all members with permissions in an org and their permissions', getMembers).timeout(2500);
+  // it('should get all members with permissions in an org', getMembers).timeout(2500);
   it('should throw an error saying the user is not an admin', nonAdminChangeRole).timeout(2500);
   it('should remove a users role within an org', removeUserRole).timeout(2500);
   it('should throw an error saying the user is not in the org', getOldUserRoles).timeout(2500);

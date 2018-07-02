@@ -106,7 +106,7 @@ describe(name, function() {
   it('should reject username already in database', copyCatUser).timeout(3000);
   it('should update the users last name', updateLName).timeout(3000);
   it('should reject update from non A user', updateAttempt).timeout(3000);
-  //it('should find users', findUsers).timeout(3000);
+  // it('should find users', findUsers).timeout(3000);
   it('should find user', findUser).timeout(3000);
   it('should delete user created', deleteUser).timeout(3000);
   it('should delete second user created', deleteUser02).timeout(3000);

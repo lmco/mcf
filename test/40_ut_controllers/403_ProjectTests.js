@@ -192,7 +192,7 @@ function createProject(done) {
 }
 
 function updateFieldError(done) {
-  ProjController.updateProject(user, org.id, 'prtlgn', { id: 'shouldNotChange' })
+  ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'shouldNotChange' })
   .then((project) => {
     chai.expect(typeof project).to.equal('undefined');
     done();
@@ -204,7 +204,7 @@ function updateFieldError(done) {
 }
 
 function updateTypeError(done) {
-  ProjController.updateProject(user, org.id, 'prtlgn', { name: [] })
+  ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { name: [] })
   .then((project) => {
     chai.expect(typeof project).to.equal('undefined');
     done();
@@ -216,7 +216,7 @@ function updateTypeError(done) {
 }
 
 function updateProject(done) {
-  ProjController.updateProject(user, org.id, 'prtlgn', { id: 'prtlgn', name: 'portal gun changed' })
+  ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'prtlgn', name: 'portal gun changed' })
   .then((project) => {
     chai.expect(project.name).to.equal('portal gun changed');
     done();
@@ -228,10 +228,10 @@ function updateProject(done) {
 }
 
 function updateProjectObject(done) {
-  ProjController.findProject(user, org.id, 'prtlgn')
+  ProjController.findProject(allSeeingUser, org.id, 'prtlgn')
   .then((projectFound) => {
     projectFound.name = 'portal gun changed again';
-    ProjController.updateProject(user, org.id, 'prtlgn', projectFound)
+    ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', projectFound)
     .then((projectUpdated) => {
       chai.expect(projectUpdated.name).to.equal('portal gun changed again');
       done();
