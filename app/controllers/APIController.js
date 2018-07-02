@@ -668,9 +668,9 @@ class APIController {
     if (req.body.hasOwnProperty('org')) {
       if (req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
         const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+        const err = JSON.parse(error.message);
+        M.log.error(err.description);
+        return res.status(err.status).send(err);
       }
     }
 
@@ -753,9 +753,9 @@ class APIController {
     if (req.body.hasOwnProperty('org')) {
       if (req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
         const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+        const err = JSON.parse(error.message);
+        M.log.error(err.description);
+        return res.status(err.status).send(err);
       }
     }
 
