@@ -50,7 +50,6 @@ const test = M.config.test;
  * when making changes/ updates to the code we want to make sure everything still 
  * works as it should.
  * 
- * 
  */
 
 /*------------------------------------
@@ -121,6 +120,8 @@ describe(name, function() {
 
   it('should POST a project to the organization', postProject01);
   it('should GET the previously posted project', getProject01);
+  it('should reject a POST of invalid name to organization', postBadProject);
+  it('should reject a POST to an organization that doesnt exist', postBadOrg);
   it('should PUT an update to posted project', putOrg01);
   it('should POST second project', postProject02);
   it('should DELETE the first project to the organization', deleteProject01);
@@ -176,6 +177,66 @@ function getProject01(done) {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
     chai.expect(json.name).to.equal('Youre a wizard Harry');
+    done();
+  });
+}
+
+/**
+ * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
+ * This should pass, but the result should be an error.
+ */
+function postBadProject(done) {
+  const id = 'DobbyIsaBadElf';
+  request({
+    url: `${test.url}/api/orgs/hogwarts/projects/DobbyIsaBadElf`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      id: id,
+      name: 'Dobby must be punished',
+      org: org._id,
+      permissions: {
+        admin: [user._id],
+        write: [user._id],
+        read: [user._id]
+      },
+      uid: `${id}:${org.id}`
+    })
+  },
+  function(err, response, body) {
+    const json = JSON.parse(body);
+    chai.expect(body).to.equal('Bad Request');
+    chai.expect(response.statusCode).to.equal(400);
+    done();
+  });
+}
+
+/**
+ * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
+ * This should pass, but the result should be an error.
+ */
+function postBadOrg(done) {
+  const id = 'dudlydursley';
+  request({
+    url: `${test.url}/api/orgs/muggle/projects/dudlydursley`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      id: id,
+      name: 'I dont belong at howgarts',
+      org: org._id,
+      permissions: {
+        admin: [user._id],
+        write: [user._id],
+        read: [user._id]
+      },
+      uid: `${id}:${org.id}`
+    })
+  },
+  function(err, response, body) {
+    const json = JSON.parse(body);
+    chai.expect(body).to.equal('Bad Request');
+    chai.expect(response.statusCode).to.equal(400);
     done();
   });
 }
