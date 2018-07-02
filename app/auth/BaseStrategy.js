@@ -168,7 +168,7 @@ class BaseStrategy {
      */
     else if (req.body.username && req.body.password) {
       M.log.verbose('Authenticating user via Form Input Auth ...');
-      username = req.body.username;
+      username = sani.sanitize(req.body.username);
       password = req.body.password;
       // Error check - make sure username/password are not empty
       if (!username || !password || username === '' || password === '') {
