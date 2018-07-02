@@ -137,9 +137,9 @@ const UserSchema = new mongoose.Schema({
      * The `isLDAPUser` property defines whether or not the user is an LDAP
      * user. This impacts how the user is authenticated
      */
-  isLDAPUser: {
-    type: Boolean,
-    default: false
+  providerLDAP: {
+    type: String,
+    default: 'none'
   },
 
   /**

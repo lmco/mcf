@@ -101,7 +101,7 @@ class LMICloudStrategy extends BaseStrategy {
       }
       // If user found and not LDAP (e.g. a local user),
       // do local authentication
-      if (users.length === 1 && !users[0].isLDAPUser) {
+      if (users.length === 1 && users[0].providerLDAP === 'none') {
         M.log.debug('Attempting to authenticate as local user.');
         // Compute the password hash on given password
         const hash = crypto.createHash('sha256');
@@ -120,7 +120,7 @@ class LMICloudStrategy extends BaseStrategy {
       // User is not found locally
       // or is found and is an LDAP user,
       // try LDAP authentication
-      else if (users.length === 0 || (users.length === 1 && users[0].isLDAPUser)) {
+      else if (users.length === 0 || (users.length === 1 && users[0].providerLDAP === 'LMICloud')) {
         // Bind the resource account we will use to do our lookups
         // The initCallback function kicks off the search/auth process
         self.client.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (bindErr) => {
@@ -230,7 +230,7 @@ class LMICloudStrategy extends BaseStrategy {
       const initData = {
         username: ldapUser[M.config.auth.ldap.username_attribute],
         password: 'NO_PASSWORD',
-        isLDAPUser: true
+        providerLDAP: 'LMICloud'
       };
 
       const user = (users.length === 0) ? new User(initData) : users[0];
