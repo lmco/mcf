@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  controllers/api-controller
+ * @module  controllers.api_controller
  *
  * @description  This implement all of the API functionality. All API routes
  * map to function in this controller which in turn uses other controllers that

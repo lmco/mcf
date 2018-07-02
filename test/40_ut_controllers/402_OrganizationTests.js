@@ -36,7 +36,7 @@ let org = null;
  *       Main
  *------------------------------------*/
 
-describe(name, () => {
+describe(name, function() {
   // NOTE: Changed from arrow function to allow for use of
   // this so that a larger timeout could be set
 

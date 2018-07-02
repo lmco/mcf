@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  controllers/organization-controller
+ * @module  controllers.organization_controller
  *
  * @description  This implements the behavior and logic for an organization and
  * provides functions for interacting with organizations.
@@ -113,8 +113,7 @@ class OrganizationController {
 
         // If user is not a member
         // TODO - Is there a way we can include this as part of the query?
-        const members = org.members.map(u => u._id.toString());
-
+        const members = org.permissions.read.map(u => u._id.toString());
         if (!members.includes(user._id.toString())) {
           return reject(new Error('User does not have permissions.'));
         }
@@ -204,6 +203,9 @@ class OrganizationController {
           });
         }
         else {
+          if (findOrgError.message === 'User does not have permissions.') {
+            return reject(new Error('An org with the same ID already exists.'));
+          }
           // There was some other error, return it.
           return reject(findOrgError);
         }
@@ -255,7 +257,7 @@ class OrganizationController {
         // Error check - Make sure user is admin
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!user.admin && !orgAdmins.includes(user._id.toString())) {
-          return reject(new Error('User cannot create orgs.'));
+          return reject(new Error('User cannot update orgs.'));
         }
 
         // get list of keys the user is trying to update
@@ -589,7 +591,7 @@ class OrganizationController {
       // Find the org
       OrganizationController.findOrg(user, orgID)
       .then((org) => {
-        const users = org.members;
+        const users = org.permissions.read;
 
         // Loop through each user in the org
         users.forEach((u) => {

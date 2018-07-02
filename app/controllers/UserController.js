@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  controllers/user-controller
+ * @module  controllers.user_controller
  *
  * @description  This implements the behavior and logic for a user and
  * provides functions for interacting with users.
@@ -28,7 +28,7 @@ const User = M.load('models/User');
 /* eslint-disable consistent-return */
 
 /**
- * UserController.js
+ * @class  UserController
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

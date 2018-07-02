@@ -1,0 +1,24 @@
+{
+    "app": {
+      "title": "1.0 Application",
+      "children": {
+        "models": {
+          "title": "1.1 Models",
+          "children": {
+              "orgs-projects": {
+                  "title": "1.1.1 Organizations and Projects"
+              },
+              "elements": {
+                  "title": "1.1.2 Elements"
+              }
+          }
+        },
+        "controllers": {
+          "title": "1.2 Controllers"
+        }
+      }
+    },
+    "plugins": {
+      "title": "2.0 Plugins"
+    }
+ }

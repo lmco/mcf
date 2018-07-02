@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  controllers/ui-controller
+ * @module  controllers.ui_controller
  *
  * @description  This implements the behavior and logic for the user interface.
  * All UI routes map to this controller which in turn uses other controllers to
