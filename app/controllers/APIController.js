@@ -180,8 +180,7 @@ class APIController {
     })
     .catch((error) => {
       // If error occurs, log error and return 500 status.
-      M.log.error(error);
-      M.log.error(error.stack);
+      M.log.error(error.description);
       return res.status(error.status).send(error);
     });
   }
@@ -249,9 +248,9 @@ class APIController {
       return res.send(APIController.formatJSON(org.getPublicData()));
     })
     .catch((error) => {
-      M.log.warn(error.message);
-      const err = JSON.parse(error.message)
-      return res.status(err.status).send(err);
+      // If error occurs, log error and return 500 status.
+      M.log.error(error.description);
+      return res.status(error.status).send(error);
     });
   }
 
@@ -298,7 +297,8 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(org));
     })
     .catch((error) => {
-      M.log.error(error);
+      // If error occurs, log error and return 500 status.
+      M.log.error(error.description);
       return res.status(error.status).send(error);
     });
   }
@@ -342,7 +342,8 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(org));
     })
     .catch((error) => {
-      M.log.error(error);
+      // If error occurs, log error and return 500 status.
+      M.log.error(error.description);
       return res.status(error.status).send(error);
     });
   }
@@ -370,7 +371,8 @@ class APIController {
       return res.send(APIController.formatJSON(org.getPublicData()));
     })
     .catch((error) => {
-      M.log.warn(error);
+      // If error occurs, log error and return 500 status.
+      M.log.error(error.description);
       return res.status(error.status).send(error);
     });
   }
@@ -397,7 +399,8 @@ class APIController {
         return res.send(APIController.formatJSON(roles));
       })
       .catch((error) => {
-        M.log.warn(error);
+        // If error occurs, log error and return 500 status.
+        M.log.error(error.description);
         return res.status(error.status).send(error);
       });
     })
@@ -436,7 +439,8 @@ class APIController {
         return res.send(APIController.formatJSON(org.getPublicData()));
       })
       .catch((error) => {
-        M.log.warn(error);
+        // If error occurs, log error and return 500 status.
+        M.log.error(error.description);
         return res.status(error.status).send(error);
       });
     })
@@ -468,7 +472,8 @@ class APIController {
         return res.send(APIController.formatJSON(org.getPublicData()));
       })
       .catch((error) => {
-        M.log.warn(error);
+        // If error occurs, log error and return 500 status.
+        M.log.error(error.description);
         return res.status(error.status).send(error);
       });
     })
@@ -498,7 +503,8 @@ class APIController {
       return res.send(APIController.formatJSON(members));
     })
     .catch((error) => {
-      M.log.warn(error);
+      // If error occurs, log error and return 500 status.
+      M.log.error(error.description);
       return res.status(error.status).send(error);
     });
   }

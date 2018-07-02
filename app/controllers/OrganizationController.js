@@ -55,7 +55,7 @@ class OrganizationController {
       .exec((err, orgs) => {
         // If error occurs, return it
         if (err) {
-          return reject({ status: 500, message: err.message });
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: err.message })));
         }
         // Resolve the list of orgs
         return resolve(orgs);
@@ -87,7 +87,7 @@ class OrganizationController {
     return new Promise((resolve, reject) => {
       // Error check - Make sure orgID is a string. Otherwise, reject.
       if (typeof organizationID !== 'string') {
-        return reject({ status: 400, message: 'orgID is not a string' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
@@ -102,18 +102,12 @@ class OrganizationController {
       .exec((err, org) => {
         // If error occurs, return it
         if (err) {
-          return reject({ status: 500, message: err.message });
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: err.message })));
         }
 
         // If no org is found, reject
         if (!org) {
-          // const err = new Error('Org not found');
-          // err.status = 400
-          // err.description = 'Org not found message';
-          // console.log(err);
-          // console.log(err.message);
-          return reject(new Error(JSON.stringify({status: 500, message: 'Internal Server Error'})));
-          // return reject({ status: 400, message: 'Org not found.' });
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Org not found.' })));
         }
 
         // If user is not a member
@@ -121,7 +115,7 @@ class OrganizationController {
         const members = org.members.map(u => u._id.toString());
 
         if (!members.includes(user._id.toString())) {
-          return reject({ status: 401, message: 'User does not have permissions.' });
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
         }
 
         // If we find one org (which we should if it exists)
@@ -152,15 +146,15 @@ class OrganizationController {
     return new Promise((resolve, reject) => {
       // Error check - Make sure user is admin
       if (!user.admin) {
-        return reject({ status: 401, message: 'User cannot create orgs.' });
+        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to create organizations.' })));
       }
 
       // Error check - Make sure organization body has an organization id and name
       if (!orgInfo.hasOwnProperty('id')) {
-        return reject({ status: 400, message: 'Organization ID not included.' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID not included in the request body.' })));
       }
       if (!orgInfo.hasOwnProperty('name')) {
-        return reject({ status: 400, message: 'Organization does not have a name.' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization name not included in the request body.' })));
       }
 
       // Sanitize fields
@@ -169,27 +163,23 @@ class OrganizationController {
 
       // Error check - Make sure a valid orgID and name is given
       if (!RegExp(orgID).test(orgID)) {
-        return reject({ status: 400, message: 'Organization ID is not valid.' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not valid.' })));
       }
       if (!RegExp(M.lib.validators.org.name).test(orgName)) {
-        return reject({ status: 400, message: 'Organization name is not valid.' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization name is not valid.' })));
       }
-
-      // Error check - Make sure a valid orgID and name is given
       if (!RegExp(M.lib.validators.org.id).test(orgID)) {
-        return reject({ status: 400, message: 'Organization ID is not valid.' });
-      }
-      if (!RegExp(M.lib.validators.org.name).test(orgName)) {
-        return reject({ status: 400, message: 'Organization name is not valid.' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not valid.' })));
       }
 
       // Check if org already exists
       OrganizationController.findOrg(user, orgID)
-      .then((org) => reject({ status: 400, message: 'An org with the same ID already exists.' }))
+      .then((org) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'An organization with the same ID already exists.' }))))
       .catch((findOrgError) => {
         // Org not found is what we want, so proceed when this error
         // occurs since we aim to create a new org.
-        if (findOrgError.message === 'Org not found.') {
+        const err = JSON.parse(findOrgError.message);
+        if (err.description === 'Org not found.') {
           // Create the new org
           const newOrg = new Organization({
             id: orgID,
@@ -203,7 +193,7 @@ class OrganizationController {
           // Save and resolve the new error
           newOrg.save((saveOrgErr) => {
             if (saveOrgErr) {
-              return reject({ status: 500, message: saveOrgErr.message });
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveOrgErr.message })));
             }
             resolve(newOrg);
           });
@@ -239,10 +229,10 @@ class OrganizationController {
     return new Promise((resolve, reject) => {
       // Error check - Verify parameters are correct type.
       if (typeof organizationID !== 'string') {
-        return reject(new Error('Organization ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
       if (typeof orgUpdate !== 'object') {
-        return reject(new Error('Updated Organization is not of type Object'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Updated organization is not an object.' })));
       }
 
       // If mongoose model, convert to plain JSON
@@ -260,7 +250,7 @@ class OrganizationController {
         // Error check - Make sure user is admin
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!user.admin && !orgAdmins.includes(user._id.toString())) {
-          return reject({ status: 401, message: 'User cannot create orgs.' });
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot update organizations.' })));
         }
 
         // get list of keys the user is trying to update
@@ -276,7 +266,7 @@ class OrganizationController {
           updateField = orgUpdateFields[i];
           // Error Check - Check if updated field also exists in the original org.
           if (!org.toJSON().hasOwnProperty(updateField)) {
-            return reject({ status: 400, message: `Organization does not contain field ${updateField}` });
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Organization does not contain field ${updateField}` })));
           }
           // if parameter is of type object, stringify and compare
           if (typeof orgUpdate[updateField] === 'object') {
@@ -290,11 +280,11 @@ class OrganizationController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject({ status: 400, message: `Users cannot update [${updateField}] of organizations.` });
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Users cannot update [${updateField}] of organizations.` })));
           }
           // Error Check - Check if updated field is of type string
           if (typeof orgUpdate[updateField] !== 'string') {
-            return reject({ status: 400, message: `The Organization [${updateField}] is not of type String` });
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `The Organization [${updateField}] is not of type String` })));
           }
 
           // sanitize field
@@ -307,7 +297,7 @@ class OrganizationController {
         org.save((saveOrgErr) => {
           if (saveOrgErr) {
             // If error occurs, return it
-            return reject({ status: 500, message: saveOrgErr.message });
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveOrgErr.message })));
           }
           // Return updated org
           return resolve(org);
@@ -344,12 +334,12 @@ class OrganizationController {
     return new Promise((resolve, reject) => {
       // Error check - Make sure user is admin
       if (!user.admin) {
-        return reject({ status: 401, message: 'User cannot delete orgs.' });
+        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot delete organizations.' })));
       }
 
       // Error check - Make sure orgID is a string. Otherwise, reject.
       if (typeof organizationID !== 'string') {
-        return reject({ status: 400, message: 'Organization ID is not a string' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
 
       // Decide whether or not to soft delete the org
@@ -360,10 +350,10 @@ class OrganizationController {
           softDelete = false;
         }
         else if (options.soft === false && !user.admin) {
-          return reject({ status: 401, message: 'User does not have permissions to hard-delete an organization.' });
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions to permanently delete an organization.' })));
         }
         else if (options.soft !== false && options.soft !== true) {
-          return reject({ status: 400, message: 'Invalid argument for the \'soft\' field.' });
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
         }
       }
 
@@ -419,7 +409,7 @@ class OrganizationController {
           org.save((saveErr) => {
             if (saveErr) {
               // If error occurs, return it
-              return reject({ status: 500, message: saveErr.message });
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
             }
             return resolve(org);
           });
@@ -431,7 +421,7 @@ class OrganizationController {
         .populate()
         .exec((err, org) => {
           if (err) {
-            return reject({ status: 500, message: err.message });
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: err.message })));
           }
           return resolve(org);
         });
@@ -462,7 +452,7 @@ class OrganizationController {
       OrganizationController.findAllPermissions(user, organizationID)
       .then(users => {
         if (users[username.username] === undefined) {
-          return reject({ status: 401, message: 'User is not a member of the organization.' });
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'User is not part of this organization.' })));
         }
         return resolve(users[username.username]);
       })
@@ -493,18 +483,17 @@ class OrganizationController {
     return new Promise((resolve, reject) => {
       // Stop a user from changing their own permissions
       if (reqUser._id.toString() === setUser._id.toString()) {
-        return reject({ status: 401, message: 'User cannot change their own permissions.' });
+        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot change their own permissions.' })));
       }
 
       // Ensure organizationID is a string
       if (typeof organizationID !== 'string') {
-        M.log.verbose('Organization ID is not a string');
-        return reject({ status: 400, message: 'Organization ID is not a string' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
 
       // Ensure the role is a valid role
       if (!['admin', 'write', 'read', 'REMOVE_ALL'].includes(role)) {
-        return reject({ status: 400, message: 'The permission enetered is not a valid permission.' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'The permission entered is not a valid permission.' })));
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
@@ -513,7 +502,7 @@ class OrganizationController {
         // Ensure user is an admin within the organization
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!reqUser.admin || !orgAdmins.includes(reqUser._id.toString())) {
-          return reject({ status: 401, message: 'User cannot change permissions.' });
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot change organization permissions.' })));
         }
 
         const perm = org.permissions;
@@ -548,7 +537,7 @@ class OrganizationController {
         org.save((saveErr) => {
           if (saveErr) {
           // If error occurs, return it
-            return reject({ status: 500, message: saveErr.message });
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
           }
           // Return updated org
           return resolve(org);
@@ -579,12 +568,12 @@ class OrganizationController {
     return new Promise((resolve, reject) => {
     // Ensure organizationID is a string
       if (typeof organizationID !== 'string') {
-        return reject({ status: 400, message: 'Organization ID is not a string' });
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
 
       // Ensure the requesting user is an admin
       if (!user.admin) {
-        return reject({ status: 401, message: 'User does not have permissions to retreive others permissions.' });
+        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions to view others permissions.' })));
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
