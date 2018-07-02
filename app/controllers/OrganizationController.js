@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  controllers/organization-controller
+ * @module  controllers.organization_controller
  *
  * @description  This implements the behavior and logic for an organization and
  * provides functions for interacting with organizations.

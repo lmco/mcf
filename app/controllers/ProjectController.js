@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  controllers/project-controller
+ * @module  controllers.project_controller
  *
  * @description  This implements the behavior and logic for a project and
  * provides functions for interacting with projects.
