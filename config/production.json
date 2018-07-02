@@ -11,7 +11,7 @@
       "bind_dn": "mbee-query@us.lmco.com",
       "bind_dn_pass": "SuaIZh4oIPCRD9g",
       "username_attribute": "sAMAccountName",
-      "filter": "(memberOf=CN=SSC.MBEE.Dev,ou=Groups,ou=SSC,dc=us,dc=lmco,dc=com)",
+      "filter": "(memberOf=CN=dl-SSC\\, MBEE-Developers,OU=DistributionLists,OU=LMXpress,OU=EntOpr,DC=us,DC=lmco,DC=com)",
       "attributes": [
         "dn",
         "sAMAccountName",
