@@ -75,6 +75,8 @@ class ProjectController {
         //   return reject(new Error('Project not found'));
         // }
 
+        const popQuery = 'org'
+
         // Search for project
         Project.find({ org: org._id, 'permissions.read': reqUser._id })
         .populate(popQuery)
@@ -85,9 +87,9 @@ class ProjectController {
           }
 
           // Error Check - Ensure at least one project is found
-          if (projects.length < 1) {
-            return reject(new Error('Projects not found'));
-          }
+          // if (projects.length < 1) {
+          //   return reject(new Error('Projects not found'));
+          // }
 
 
           // Return resulting project

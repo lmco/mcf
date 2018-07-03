@@ -19,6 +19,7 @@
 
 const fs = require('fs');
 const path = require('path');
+
 const { execSync } = require('child_process');
 
 const M = require(path.join(__dirname, '..', 'mbee.js'));
@@ -36,11 +37,23 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
 
   // Clone the git repository
   M.log.info(`Cloning plugin ${metadata.name} from ${metadata.repository} ...`);
-  const cmd = [
-    `GIT_SSH_COMMAND="ssh -i ${metadata.deployKey} -oStrictHostKeyChecking=no"`,
-    `git clone ${metadata.repository} plugins/${metadata.name}`
-  ].join(' ');
-
+  
+  // Determine if plugin is local or from git
+  var cmd;
+  if (metadata.repository.substr(metadata.repository.length - 4) == ".git"){
+    const command = [
+      `GIT_SSH_COMMAND="ssh -i ${metadata.deployKey} -oStrictHostKeyChecking=no"`,
+      `git clone ${metadata.repository} plugins/${metadata.name}`
+    ].join(' ');
+    cmd = command;
+  }
+  else {
+    const command = [
+      `GIT_SSH_COMMAND="ssh -i ${metadata.deployKey} -oStrictHostKeyChecking=no"`,
+      `cp -r ${metadata.repository} plugins/${metadata.name}`
+    ].join(' ');
+    cmd = command;
+  }
   // Clone the repo
   stdout = execSync(cmd);
   M.log.verbose(stdout.toString());
@@ -77,7 +90,7 @@ files.forEach((f) => {
     pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
   }
   catch (err) {
-    M.log.error(`Could not install plugin ${namespace}, error thrown:`);
+    M.log.error(`Could not install plugin ${namespace}, error:`);
     M.log.error(err);
     return;
   }
