@@ -182,7 +182,7 @@ class BaseStrategy {
           M.log.error(err);
           return (req.originalUrl.startsWith('/api'))
             ? res.status(401).send('Unauthorized')
-            : res.redirect(`/login?next=${req.originalUrl}`);
+            : res.redirect(`/login?next=${req.originalUrl}&err=${err}`);
         }
 
         M.log.info(`Authenticated [${user.username}] via Form Input Auth`);
