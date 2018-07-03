@@ -257,7 +257,6 @@ function nonACreate(done) {
     done();
   })
   .catch(function(err) {
-    json = JSON.parse(err.message)
     chai.expect(JSON.parse(err.message).description).to.equal('User does not have permission.');
     done();
   });
