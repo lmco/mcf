@@ -60,7 +60,7 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
-        return reject(new Error('Organization ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
 
       // Sanitize project properties
@@ -71,7 +71,7 @@ class ProjectController {
         const orgReaders = org.permissions.read.map(u => u.username);
         // Error Check - See if user has read permissions on org
         if (!orgReaders.includes(reqUser.username)) {
-          return reject(new Error('User does not have permissions'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
         }
 
         // Error Check - Ensure only 1 project is found
@@ -91,10 +91,9 @@ class ProjectController {
           }
 
           // Error Check - Ensure at least one project is found
-          // if (projects.length < 1) {
-          //   return reject(new Error('Projects not found'));
-          // }
-
+          if (projects.length < 1) {
+            return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'No projects found.' })));
+          }
 
           // Return resulting project
           return resolve(projects);
@@ -126,7 +125,7 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       // Error check - Verify id is of type string for sanitization.
       if (typeof organizationId !== 'string') {
-        return reject(new Error('Organization ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
 
       // Determine whether to soft delete or not
@@ -137,10 +136,10 @@ class ProjectController {
           softDelete = false;
         }
         else if (options.soft === false && !reqUser.admin) {
-          return reject(new Error('User does not have permissions to hard-delete an organization.'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
         }
         else if (options.soft !== false && options.soft !== true) {
-          return reject(new Error('Invalid argument for the \'soft\' field.'));
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
         }
       }
 
@@ -159,7 +158,7 @@ class ProjectController {
             projects[proj].deleted = true;
             projects[proj].save((saveErr) => {
               if (saveErr) {
-                return reject(saveErr);
+                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
               }
             });
           }
@@ -174,7 +173,7 @@ class ProjectController {
           // Hard-delete any projects with the matching orgID
           Project.deleteMany({ org: org._id }, (deleteError, projectsDeleted) => {
             if (deleteError) {
-              return reject(deleteError);
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
             }
 
             return resolve(projectsDeleted);
@@ -208,10 +207,10 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
-        return reject(new Error('Organization ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
       if (typeof projectId !== 'string') {
-        return reject(new Error('Project ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
       }
 
       // Sanitize project properties
@@ -231,19 +230,19 @@ class ProjectController {
       .exec((err, projects) => {
         // Error Check - Database/Server Error
         if (err) {
-          return reject(err);
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
         }
 
         // Error Check - Ensure only 1 project is found
         if (projects.length < 1) {
-          return reject(new Error('Project not found'));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Project not found.' })));
         }
 
         // Check Permissions
         const project = projects[0];
         const members = project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error('User does not have permission.'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
         }
 
         // Return resulting project
@@ -273,26 +272,26 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       // Error check - id, name, and org.id are in project variable.
       if (!project.hasOwnProperty('id')) {
-        return reject(new Error('Project does not have attribute (id)'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (id).' })));
       }
       if (!project.hasOwnProperty('name')) {
-        return reject(new Error('Project does not have attribute (name)'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (name).' })));
       }
       if (!project.hasOwnProperty('org')) {
         if (!project.org.hasOwnProperty('id')) {
-          return reject(new Error('Project does not have attribute (org.id)'));
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (org.id).' })));
         }
       }
 
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof project.id !== 'string') {
-        return reject(new Error('Project ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
       }
       if (typeof project.name !== 'string') {
-        return reject(new Error('Project name is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name is not a string.' })));
       }
       if (typeof project.org.id !== 'string') {
-        return reject(new Error('Organization ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
 
       // Sanitize project properties
@@ -302,10 +301,10 @@ class ProjectController {
 
       // Error check - make sure project ID and project name are valid
       if (!RegExp(M.lib.validators.project.id).test(projID)) {
-        return reject(new Error('Project ID is not valid.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not valid.' })));
       }
       if (!RegExp(M.lib.validators.project.name).test(projName)) {
-        return reject(new Error('Project Name is not valid.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name is not valid.' })));
       }
 
       // Error check - Make sure the org exists
@@ -315,15 +314,16 @@ class ProjectController {
         const writers = org.permissions.write.map(u => u._id.toString());
 
         if (!writers.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error('User does not have permission.'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
         }
 
         // Error check - check if the project already exists
         ProjectController.findProject(reqUser, org.id, projID)
-        .then((proj) => reject(new Error('Project already exists.')))
+        .then((proj) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project already exists.' }))))
         .catch((error) => {
           // This is ok, we dont want the project to already exist.
-          if (error.message === 'Project not found') {
+          const err = JSON.parse(error.message);
+          if (err.description === 'Project not found.') {
             // Create the new project and save it
             const newProject = new Project({
               id: projID,
@@ -339,7 +339,7 @@ class ProjectController {
 
             newProject.save((saveErr, projectUpdated) => {
               if (saveErr) {
-                return reject(saveErr);
+                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
               }
               // Return success and the JSON object
               return resolve(projectUpdated);
@@ -378,13 +378,13 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       // Error check - Verify parameters are correct type.
       if (typeof organizationId !== 'string') {
-        return reject(new Error('Organization ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
       if (typeof projectId !== 'string') {
-        return reject(new Error('Project ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
       }
       if (typeof projectUpdated !== 'object') {
-        return reject(new Error('Updated project is not of type Object'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Updated project is not an object.' })));
       }
 
       // If mongoose model, convert to plain JSON
@@ -403,7 +403,7 @@ class ProjectController {
         // Check Permissions
         const admins = project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error('User does not have permission.'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
         }
 
         // get list of keys the user is trying to update
@@ -419,7 +419,7 @@ class ProjectController {
           updateField = projUpdateFields[i];
           // Error Check - Check if updated field also exists in the original project.
           if (!project.toJSON().hasOwnProperty(updateField)) {
-            return reject(new Error(`Project does not contain field ${updateField}`));
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Project does not contain field ${updateField}` })));
           }
           // if parameter is of type object, stringify and compare
           if (typeof projectUpdated[updateField] === 'object') {
@@ -434,11 +434,11 @@ class ProjectController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject(new Error(`Users cannot update [${updateField}] of Projects.`));
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Users cannot update [${updateField}] of Projects.` })));
           }
           // Error Check - Check if updated field is of type string
           if (typeof projectUpdated[updateField] !== 'string') {
-            return reject(new Error(`The Project [${updateField}] is not of type String`));
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `The Project [${updateField}] is not of type String` })));
           }
 
           // sanitize field
@@ -450,7 +450,7 @@ class ProjectController {
         // Save updated org
         project.save((saveProjErr) => {
           if (saveProjErr) {
-            return reject(saveProjErr);
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
           }
 
           // Return the updated project object
@@ -484,10 +484,10 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
-        return reject(new Error('Organization ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
       if (typeof projectId !== 'string') {
-        return reject(new Error('Project ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
       }
 
       let softDelete = true;
@@ -496,10 +496,10 @@ class ProjectController {
           softDelete = false;
         }
         else if (options.soft === false && !reqUser.admin) {
-          return reject(new Error('User does not have permissions to hard-delete an organization.'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
         }
         else if (options.soft !== false && options.soft !== true) {
-          return reject(new Error('Invalid argument for the \'soft\' field.'));
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
         }
       }
 
@@ -513,7 +513,7 @@ class ProjectController {
         // Check Permissions
         const admins = project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error('User does not have permission.'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
         }
 
         if (softDelete) {
@@ -523,7 +523,7 @@ class ProjectController {
             project.save((saveErr) => {
               if (saveErr) {
                 // If error occurs, return it
-                return reject(saveErr);
+                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
               }
 
               // Return updated project
@@ -531,20 +531,20 @@ class ProjectController {
             });
           }
           else {
-            return reject(new Error('Project no longer exists.'));
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project no longer exists.' })));
           }
         }
         else {
           // Remove the Project
           Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
             if (removeProjErr) {
-              return reject(removeProjErr);
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
             }
             return resolve(projectRemoved);
           });
         }
       })
-      .catch((error) => reject(error));
+      .catch((findProjError) => reject(findProjError));
     });
   }
 
@@ -579,7 +579,7 @@ class ProjectController {
 
         // Check permissions
         if (!memberList.includes(reqUser.username)) {
-          return reject(new Error('User does not have permissions'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
         }
 
         const roleList = {};
@@ -630,7 +630,7 @@ class ProjectController {
       ProjectController.findAllPermissions(reqUser, orgID, projectID)
       .then((permissionList) => {
         if (!permissionList.hasOwnProperty(user.username)) {
-          return reject(new Error('User not found.'));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'User not found.' })));
         }
 
         return resolve(permissionList[user.username]);
@@ -663,15 +663,15 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       // Error check - Verify perm type of type string for sanitization.
       if (typeof organizationID !== 'string') {
-        return reject(new Error('Organization ID is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
       // Error check - Verify perm type of type string for sanitization.
       if (typeof projectID !== 'string') {
-        return reject(new Error('Project ID type is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
       }
       // Error check - Verify perm type of type string for sanitization.
       if (typeof permissionType !== 'string') {
-        return reject(new Error('Permission type is not of type String.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Permission type is not a string.' })));
       }
 
       // Sanitize input
@@ -685,7 +685,7 @@ class ProjectController {
         // Check permissions
         const admins = project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error('User does not have permissions'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
         }
 
         // Grab permissions levels from Project schema method
@@ -693,12 +693,12 @@ class ProjectController {
 
         // Error Check - Make sure that a valid permissions type was passed
         if (!permissionLevels.includes(permType)) {
-          return reject(new Error('Permissions type not found.'));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Permission type not found.' })));
         }
 
         // Error Check - Do not allow admin user to downgrade their permissions
         if (reqUser.username === setUser.username && permType !== permissionLevels[-1]) {
-          return reject(new Error('User cannot remove their own admin privlages.'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot change their own permissions.' })));
         }
 
         // Grab the index of the permission type
@@ -734,7 +734,7 @@ class ProjectController {
           pushPullRoles,
           (saveProjErr, projectSaved) => {
             if (saveProjErr) {
-              return reject(saveProjErr);
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
             }
             // Check if user has org read permissions
             OrgController.findPermissions(reqUser, setUser, orgID)
