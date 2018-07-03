@@ -268,14 +268,14 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       // Error check - id, name, and org.id are in project variable.
       if (!project.hasOwnProperty('id')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attirbute (id).' })));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (id).' })));
       }
       if (!project.hasOwnProperty('name')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attirbute (name).' })));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (name).' })));
       }
       if (!project.hasOwnProperty('org')) {
         if (!project.org.hasOwnProperty('id')) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attirbute (org.id).' })));
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (org.id).' })));
         }
       }
 
