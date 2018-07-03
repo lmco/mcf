@@ -47,10 +47,10 @@ describe(name, function() {
   it('should POST second organization', postOrg02).timeout(3000);
   it('should GET 2 organizations', getTwoOrgs).timeout(3000);
   it('should reject a POST with ID mismatch', postOrg02Err).timeout(3000);
-  it('should reject a POST with invalid org id', postInvalidOrg).timeout(3000);
+  it('should reject a POST with invalid org id', postInvalidOrg).timeout(5000);
   it('should reject a POST with missing org name', postOrg03).timeout(3000);
   it('should reject a POST with an empty name', postEmptyOrg).timeout(3000);
-  it('should reject a POST of a repeat org', postOrg04).timeout(3000);
+  it('should reject a POST of a repeat org', postOrg04).timeout(5000);
   it('should DELETE organization', deleteOrg01).timeout(3000);
   it('should DELETE second organization', deleteOrg02).timeout(3000);
   it('should GET 0 organizations', getOrgs03).timeout(3000);
@@ -202,7 +202,8 @@ function postOrg02Err(done) {
   },
   function(err, response, body) {
     chai.expect(response.statusCode).to.equal(400);
-    chai.expect(body).to.equal('Bad Request');
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
@@ -223,7 +224,6 @@ function postInvalidOrg(done) {
   },
   function(err, response) {
     chai.expect(response.statusCode).to.not.equal(200);
-    // chai.expect(body).to.equal('Internal Server Error');
     done();
   });
 }
@@ -244,7 +244,8 @@ function postOrg03(done) {
   },
   function(err, response, body) {
     chai.expect(response.statusCode).to.equal(400);
-    chai.expect(body).to.equal('Bad Request');
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
@@ -265,7 +266,8 @@ function postEmptyOrg(done) {
   },
   function(err, response, body) {
     chai.expect(response.statusCode).to.equal(400);
-    chai.expect(body).to.equal('Bad Request');
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
@@ -286,8 +288,9 @@ function postOrg04(done) {
     })
   },
   function(err, response, body) {
-    chai.expect(response.statusCode).to.equal(500);
-    chai.expect(body).to.equal('Internal Server Error');
+    chai.expect(response.statusCode).to.equal(400);
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
