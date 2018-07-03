@@ -209,7 +209,7 @@ function postOrg02Err(done) {
 
 /**
  * Makes a POST request to /api/orgs/:orgid to create an org.
- * This deliberately provides and invalid org ID and expects a
+ * This deliberately provides an invalid org ID and expects a
  * response of 400 Bad Request.
  */
 function postInvalidOrg(done) {

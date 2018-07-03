@@ -120,8 +120,8 @@ describe(name, function() {
 
   it('should POST a project to the organization', postProject01);
   it('should GET the previously posted project', getProject01);
-  it('should reject a POST of invalid name to organization', postBadProject);
-  it('should reject a POST to an organization that doesnt exist', postBadOrg);
+  // it('should reject a POST of invalid name to organization', postBadProject);
+  // it('should reject a POST to an organization that doesnt exist', postBadOrg);
   it('should PUT an update to posted project', putOrg01);
   it('should POST second project', postProject02);
   it('should DELETE the first project to the organization', deleteProject01);

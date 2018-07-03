@@ -25,6 +25,7 @@
   * USERS FOUND IN THE FINDUSERS TEST RUN.
   */
 
+  //LOOK AT FAKE DELETE USER
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
@@ -37,6 +38,7 @@ const UserController = M.load('controllers/UserController');
 
 let reqUser = null;
 let nonAUser = null;
+// let stupidAUser = null;
 /*------------------------------------
  *       Main
  *------------------------------------*/
@@ -69,6 +71,26 @@ describe(name, function() {
         chai.expect(newUser.fname).to.equal('Darth');
         chai.expect(newUser.lname).to.equal('Sidious');
         done();
+        // const userData2 = {
+        //   username: 'jubbathehut',
+        //   password: 'ilovetoeat',
+        //   fname: 'Jubba',
+        //   lname: 'The Hut',
+        //   admin: true
+        // };
+        // // Creating a new non-admin user
+        // UserController.createUser(searchUser, userData2)
+        // .then(function(anotherUser) {
+        //   stupidAUser = anotherUser;
+        //   chai.expect(anotherUser.username).to.equal('jubbathehut');
+        //   chai.expect(anotherUser.fname).to.equal('Jubba');
+        //   chai.expect(anotherUser.lname).to.equal('The Hut');
+        //   done();
+        // })
+        // .catch(function(err) {
+        //   chai.expect(err).to.equal(null);
+        //   done();
+        // });
       })
       .catch(function(err) {
         chai.expect(err).to.equal(null);
@@ -83,15 +105,32 @@ describe(name, function() {
 
   // runs after all tests
   after(function(done) {
+    this.timeout(5000);
     // Deleting the user created in the before function
     const username = 'darthsidious';
     UserController.deleteUser(reqUser, username)
     .then(function(delUser) {
+      // console.log('I am here');
       chai.expect(delUser).to.equal('darthsidious');
       mongoose.connection.close();
       done();
+      // const user2 = 'jubbathehut';
+      // UserController.deleteUser(reqUser, user2)
+      // .then(function(delStupidUser) {
+      //   console.log('no I am here');
+      //   chai.expect(delStupidUser).to.equal('jubbathehut');
+      //   mongoose.connection.close();
+      //   done();
+      // })
+      // .catch(function (error){
+      //   console.log(error);
+      //   chai.expect(error).to.equal(null);
+      //   mongoose.connection.close();
+      //   done();
+      // });
     })
     .catch(function(err) {
+      console.log(err);
       chai.expect(err).to.equal(null);
       mongoose.connection.close();
       done();
@@ -101,13 +140,17 @@ describe(name, function() {
   it('should create a user', createNewUser).timeout(3000);
   it('should create an admin user', createAUser).timeout(3000);
   it('should create a second user', createUser02).timeout(3000);
+  it('should reject a creating a user with non A req user', nonACreate).timeout(3000);
   it('should reject a user with no input to username', badUser).timeout(3000);
   it('should reject username with invalid input', invalidUser).timeout(3000);
   it('should reject username already in database', copyCatUser).timeout(3000);
   it('should update the users last name', updateLName).timeout(3000);
+  it('should reject updating a user that does not exist', updateNoUser).timeout(3000);
   it('should reject update from non A user', updateAttempt).timeout(3000);
-  // it('should find users', findUsers).timeout(3000);
   it('should find user', findUser).timeout(3000);
+  //it('should reject deleting a user that doesnt exist', fakeDelete).timeout(3000);
+  it('should reject deleting a user with a non admin user', nonADelete).timeout(3000);
+  //it('should reject deleting themselves', deleteSelf).timeout(3000);
   it('should delete user created', deleteUser).timeout(3000);
   it('should delete second user created', deleteUser02).timeout(3000);
   it('should delete admin user created', deleteAUser).timeout(3000);
@@ -194,6 +237,30 @@ function createUser02(done) {
   })
   .catch(function(err) {
     chai.expect(err).to.equal(null);
+  });
+}
+
+/**
+ * Creates a user using the User Controller with a non admin user
+ * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
+ * NOTE: As of right now the password key becomes a hash
+ * need to eventually made password tests.
+ */
+function nonACreate(done) {
+  const userData = {
+    username: 'kyloren',
+    password: 'fakevader',
+    fname: 'Kylo',
+    lname: 'Ren'
+  };
+  UserController.createUser(nonAUser, userData)
+  .then(function(newUser) {
+    chai.assert(true===false);
+    done();
+  })
+  .catch(function(err) {
+    chai.expect(err.message).to.equal('User is not an admin.');
+    done();
   });
 }
 
@@ -311,7 +378,7 @@ function updateAttempt(done) {
     lname: 'Faker'
   };
   UserController.updateUser(nonAUser, username, userData)
-  .then(function(updatedUser) {
+  .then(function() {
     chai.assert(true === false);
     done();
   })
@@ -321,24 +388,26 @@ function updateAttempt(done) {
   });
 }
 
-// /**
-//  * Finding users
-//  * NOTE: There are 3 other users in the database
-//  * that were not created in this test. 4 users
-//  * were cretaed in this test, so the addition 3
-//  * come from the database
-//  */
-// function findUsers(done) {
-//   UserController.findUsers()
-//   .then(function(searchUser) {
-//     chai.expect(searchUser.length).to.equal(7);
-//     done();
-//   })
-//   .catch(function(err) {
-//     chai.expect(err).to.equal(null);
-//     done();
-//   });
-// }
+/**
+ * Attempting to update a user that doesnt exist.
+ */
+
+function updateNoUser(done) {
+  const username = 'fakelia';
+  const userData = {
+    lname: 'Leah'
+  };
+  UserController.updateUser(reqUser, username, userData)
+  .then(function() {
+    chai.assert(true === false);
+    done();
+  })
+  .catch(function(err) {
+    chai.expect(err.message).to.equal('User does not exist');
+    done();
+  });
+}
+
 
 /**
  * Finding user
@@ -357,6 +426,61 @@ function findUser(done) {
     done();
   });
 }
+
+// /*
+// * Attempts deleting the user that
+// * that does not exist.
+// */
+
+// function fakeDelete(done) {
+//   const username = 'notreal';
+//   UserController.deleteUser(reqUser, username)
+//   .then(function(delUser) {
+//     chai.assert(true===false);
+//     done();
+//   })
+//   .catch(function(err) {
+//     chai.expect(err.message).to.equal('User does not exist');
+//     done();
+//   });
+// }
+
+/*
+* Attempts deleting the user that 
+* with a non admin user.
+*/
+
+function nonADelete(done) {
+  const username = 'lskywalker';
+  UserController.deleteUser(nonAUser, username)
+  .then(function(delUser) {
+    chai.assert(true===false);
+    done();
+  })
+  .catch(function(err) {
+    chai.expect(err.message).to.equal('User is not an admin.');
+    done();
+  });
+}
+
+// /*
+// * User attempts deleting themselves.
+// */
+
+// function deleteSelf(done) {
+//   const username = 'jubbathehut';
+//   UserController.deleteUser(stupidAUser, username)
+//   .then(function() {
+//     chai.assert(true===false);
+//     done();
+//   })
+//   .catch(function(err) {
+//     chai.expect(err.message).to.equal('User cannot delete self.');
+//     done();
+//   });
+// }
+
+
 
 /*
 * Deletes the user.
