@@ -182,10 +182,10 @@ class LMICloudStrategy extends BaseStrategy {
       });
       result.on('end', (status) => {
         M.log.debug(status);
-        if (person)
-          self.doAuthentication(person.object, password, next);
-        else
-          return next('Error: Invalid username or password.');
+        if (person) {
+          return self.doAuthentication(person.object, password, next);
+        }
+        return next('Error: Invalid username or password.');
       });
     });
   }
