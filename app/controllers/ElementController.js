@@ -273,10 +273,120 @@ class ElementController {
     });
   }
 
+  /**
+   * @description  The function updates an element.
+   *
+   * @example
+   * ElementController.updateElement('austin', 'lockheed', 'mbee', 'elem1', { name: 'New Name'} )
+   * .then(function(org) {
+   *   // do something with the updated element.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {String} The organization ID of the project.
+   * @param  {String} The project ID.
+   * @param  {String} The element ID.
+   * @param  {Object} The object of the updated element.
+   */
+  static updateElement(reqUser, organizationID, projectID, elementID, elementUpdated) {
+    return new Promise((resolve, reject) => {
+      // Ensure all IDs are strings
+      if (typeof organizationID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      }
+      if (typeof projectID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      }
+      if (typeof elementID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element ID is not a string.' })));
+      }
+      if (typeof elementUpdated !== 'object') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Updated element is not an object.' })));
+      }
+
+      // If mongoose model, convert to plain JSON
+      if (elementUpdated instanceof Element) {
+        // Disabling linter because the reasign is needed to convert the object to JSON
+        elementUpdated = elementUpdated.toJSON(); // eslint-disable-line no-param-reassign
+      }
+
+      // Sanitize inputs
+      const orgID = M.lib.sani.html(organizationID);
+      const projID = M.lib.sani.html(projectID);
+      const elemID = M.lib.sani.html(elementID);
+
+      // Get the element
+      ElementController.findElement(reqUser, orgID, projID, elemID)
+      .then((element) => {
+        // Check Permissions
+        const admins = element.project.permissions.admin.map(u => u._id.toString());
+        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
+        }
+
+        // get list of keys the user is trying to update
+        const elemUpdateFields = Object.keys(elementUpdated);
+        // Get list of parameters which can be updated from model
+        const validUpdateFields = element.getValidUpdateFields();
+        // Allocate update val and field before for loop
+        let updateVal = '';
+        let updateField = '';
+
+        // Check if passed in object contains fields to be updated
+        for (let i = 0; i < elemUpdateFields.length; i++) {
+          updateField = elemUpdateFields[i];
+          // Error Check - Check if updated field also exists in the original element.
+          if (!element.toJSON().hasOwnProperty(updateField)) {
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Element does not contain field ${updateField}` })));
+          }
+          // if parameter is of type object, stringify and compare
+          if (typeof elementUpdated[updateField] === 'object') {
+            if (JSON.stringify(element[updateField])
+              === JSON.stringify(elementUpdated[updateField])) {
+              continue;
+            }
+          }
+          // if parameter is the same don't bother updating it
+          if (element[updateField] === elementUpdated[updateField]) {
+            continue;
+          }
+          // Error Check - Check if field can be updated
+          if (!validUpdateFields.includes(updateField)) {
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Users cannot update [${updateField}] of Elements.` })));
+          }
+          // Error Check - Check if updated field is of type string
+          if (typeof elementUpdated[updateField] !== 'string') {
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `The Element [${updateField}] is not of type String` })));
+          }
+
+          // sanitize field
+          updateVal = M.lib.sani.sanitize(elementUpdated[updateField]);
+          // Update field in element object
+          element[updateField] = updateVal;
+        }
+
+        // Save updated org
+        element.save((saveElemErr) => {
+          if (saveElemErr) {
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+          }
+
+          // Return the updated element object
+          return resolve(element);
+        });
+      })
+      .catch((findElementError) => reject(findElementError));
+    });
+  }
+
 
   /**
    * @description  This function takes a user, orgID, projID, elementID
-   * and JSON object of options and deletes a project.
+   * and JSON object of options and deletes an element.
    *
    * @example
    * ElementController.findElement('austin', 'lockheed', 'mbee', 'elem1', { soft: false} )
@@ -366,6 +476,7 @@ class ElementController {
       .catch((findElemError) => reject(findElemError));
     });
   }
+
 }
 
 // Expose `ElementController`
