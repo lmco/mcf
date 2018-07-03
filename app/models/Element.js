@@ -209,13 +209,7 @@ const ElementSchema = new mongoose.Schema({
    */
   deleted: {
     type: Boolean,
-    default: false,
-    set: function(v) {  // eslint-disable-line no-unused-vars, arrow-body-style
-      return (this.deletedOn !== null && this.deletedOn !== undefined);
-    },
-    get: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
-      return (this.deletedOn !== null && this.deletedOn !== undefined);
-    }
+    default: false
   }
 
 }, options); // end of ElementSchema

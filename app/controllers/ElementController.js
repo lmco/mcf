@@ -140,7 +140,7 @@ class ElementController {
 
         // Ensure only one project is returned
         if (!element) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element not found.' })));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Element not found.' })));
         }
 
         // Ensure user is part of the project
@@ -273,6 +273,99 @@ class ElementController {
     });
   }
 
+
+  /**
+   * @description  This function takes a user, orgID, projID, elementID
+   * and JSON object of options and deletes a project.
+   *
+   * @example
+   * ElementController.findElement('austin', 'lockheed', 'mbee', 'elem1', { soft: false} )
+   * .then(function(element) {
+   *   // do something with the element
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The user object of the requesting user.
+   * @param  {String} The organization ID.
+   * @param  {String} The project ID.
+   * @param  {String} The element ID.
+   * @param  {Object} An object with delete options.
+   */
+  static removeElement(reqUser, organizationID, projectID, elementID, options) {
+    return new Promise((resolve, reject) => {
+      // Ensure all IDs are strings
+      if (typeof organizationID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      }
+      if (typeof projectID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      }
+      if (typeof elementID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element ID is not a string.' })));
+      }
+
+      // Set the soft delete flag
+      let softDelete = true;
+      if (options.hasOwnProperty('soft')) {
+        if (options.soft === false && reqUser.admin) {
+          softDelete = false;
+        }
+        else if (options.soft === false && !reqUser.admin) {
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
+        }
+        else if (options.soft !== false && options.soft !== true) {
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
+        }
+      }
+
+      // Sanitize inputs
+      const orgID = M.lib.sani.html(organizationID);
+      const projID = M.lib.sani.html(projectID);
+      const elemID = M.lib.sani.html(elementID);
+
+      // Find the element, even if it has already been soft deleted
+      ElementController.findElement(reqUser, orgID, projID, elemID, softDelete)
+      .then((element) => {
+        // Check Permissions
+        const admins = element.project.permissions.admin.map(u => u._id.toString());
+        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
+        }
+
+        if (softDelete) {
+          if (!element.deleted) {
+            element.deletedOn = Date.now();
+            element.deleted = true;
+            element.save((saveErr) => {
+              if (saveErr) {
+                // If error occurs, return it
+                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+              }
+
+              // Return updated element
+              return resolve(element);
+            });
+          }
+          else {
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element no longer exists.' })));
+          }
+        }
+        else {
+          // Remove the Element
+          Element.findByIdAndRemove(element._id, (removeElemErr, elementRemoved) => {
+            if (removeElemErr) {
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
+            }
+            return resolve(elementRemoved);
+          });
+        }
+      })
+      .catch((findElemError) => reject(findElemError));
+    });
+  }
 }
 
 // Expose `ElementController`

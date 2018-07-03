@@ -103,6 +103,7 @@ describe(name, function() {
   it('should create an element', createElement);
   it('should find all elements for a project', findElements);
   it('should find an element', findElement);
+  it('should soft delete an element', softDeleteElement);
 });
 
 
@@ -164,6 +165,32 @@ function findElement(done) {
     chai.expect(retElem.name).to.equal('Death Star Arbitrary Element');
     chai.expect(retElem.id).to.equal('elem0');
     done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Soft deletes an element
+ */
+function softDeleteElement(done) {
+  ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: true })
+  .then((retElem) => {
+    chai.expect(retElem.deleted).to.equal(true);
+    ElemController.findElement(user, org.id, proj.id, 'elem0')
+    .then((retElem2) => {
+      chai.expect(retElem2).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal('Element not found.');
+      chai.expect(err.status).to.equal(404);
+      done();
+    });
   })
   .catch((error) => {
     const err = JSON.parse(error.message);
