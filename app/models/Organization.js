@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module OrganizationModel.js
+ * @module models.organization
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
@@ -21,38 +21,50 @@
 const mongoose = require('mongoose');
 
 /**
- * Defines the Role Schema
- * @constructor Role
+ * @class Organization
+ *
+ * @classdesc Defines the Organization Schema
  */
 const OrganizationSchema = new mongoose.Schema({
   /**
-    * The 'id' holds a unique organization id for reference from the database.
+    * @memberOf Organization
+    * @property id
+    * @type {String}
+    *
+    * @description 'id' holds a unique organization id for reference from the database.
     */
   id: {
     type: String,
-    require: true,
+    required: true,
     index: true,
     unique: true,
     match: RegExp('^([a-z])([a-z0-9-]){0,}$'),
     maxlength: [36, 'Too many characters in username']
   },
 
-
   /**
-    * The 'name' holds a unique organization name to be displayed for an
+    * @memberOf Organization
+    * @property name
+    * @type {String}
+    *
+    * @description The 'name' holds a unique organization name to be displayed for an
     * organization.
     */
   name: {
     type: String,
-    requite: true,
+    required: true,
     unique: true,
     match: RegExp('^([a-zA-Z0-9-\\s])+$')
   },
 
   /**
-   * Permissions includes lists of users with certain permission levels
-   * or "roles" within an organization.
-   */
+    * @memberOf Organization
+    * @property permissions
+    *
+    *
+    * @description Permissions includes lists of users with certain permission levels
+    * or "roles" within an organization.
+    */
   permissions: {
     /**
      * Contains the list of users with read access to the organization.
@@ -83,7 +95,11 @@ const OrganizationSchema = new mongoose.Schema({
   },
 
   /**
-    * The date the project was soft-deleted on.
+    * @memberOf Organization
+    * @property deletedOn
+    * @type {Date}
+    *
+    * @description The date the project was soft-deleted on.
     */
   deletedOn: {
     type: Date,
@@ -91,24 +107,25 @@ const OrganizationSchema = new mongoose.Schema({
   },
 
   /**
-    * A boolean value displaying whether or not the project
+    * @memberOf Organization
+    * @property deleted
+    * @type {Boolean}
+    *
+    * @description A boolean value displaying whether or not the project
     * has been soft deleted.
     */
   deleted: {
     type: Boolean,
-    default: false,
-    set: function(v) {
-      return (this.deletedOn !== null);
-    },
-    get: function(v) {
-      return (this.deletedOn !== null);
-    }
+    default: false
   }
 });
 
-
 /**
-  * The 'project' holds a list of references to projects which belong to
+  * @memberOf Organization
+  * @property projects
+  * @type {Project}
+  *
+  * @description The 'project' holds a list of references to projects which belong to
   * the organzation
   */
 OrganizationSchema.virtual('projects', {
@@ -118,59 +135,35 @@ OrganizationSchema.virtual('projects', {
   justOne: false
 });
 
-
 /**
- * The 'permissions.member' is a virtual getter to users with admin
- * and/or write permissions to the organization.
- *
- * TODO - Check out a post org and figure out why this gets called three times.
- */
-OrganizationSchema.virtual('members').get(function() {
-  // Grab the read, write and admin permissions lists
-  const write = this.permissions.write;
-  const admin = this.permissions.admin;
-
-  // set member to a copy of write
-  const member = write.slice();
-  const memberMap = member.map(u => u.username);
-
-  // Add admins that aren't already in the member list,
-  // creating a unique list of members
-  for (let i = 0; i < admin.length; i++) {
-    if (!memberMap.includes(admin[i].username)) {
-      member.push(admin[i]);
-    }
-  }
-  return member;
-});
-
-OrganizationSchema.pre('find', function() {
-  // this.populate('projects');
-  // this.populate('permissions.read');
-  // this.populate('permissions.write');
-  // this.populate('permissions.admin');
-});
-
-/**
- * Returns the orgs's public data.
- * TODO (ju) - Add permissions to public data?
- */
+  * Returns the orgs's Public data.
+  */
 OrganizationSchema.methods.getPublicData = function() {
   return {
     id: this.username,
     name: this.name,
-    projects: this.projects
+    projects: this.projects,
+    permissions: this.permissions
   };
 };
 
+/**
+  * Returns the permission levels in order of inheritance for an organization.
+  */
 OrganizationSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
+};
+
+/**
+  * Returns the fields which users are allowed to update on an organization.
+  */
+OrganizationSchema.methods.getValidUpdateFields = function() {
+  return ['name'];
 };
 
 // Required for virtual getters
 OrganizationSchema.set('toJSON', { virtuals: true });
 OrganizationSchema.set('toObject', { virtuals: true });
-
 
 // Export mongoose model as "Organization"
 module.exports = mongoose.model('Organization', OrganizationSchema);

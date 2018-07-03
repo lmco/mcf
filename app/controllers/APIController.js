@@ -9,6 +9,13 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
+/**
+ * @module  controllers.api_controller
+ *
+ * @description  This implement all of the API functionality. All API routes
+ * map to function in this controller which in turn uses other controllers that
+ * define behaviors for specific objects.
+ */
 
 const path = require('path');
 const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
@@ -20,11 +27,11 @@ const ProjectController = mbee.load('controllers/ProjectController');
 const UserController = mbee.load('controllers/UserController');
 
 /**
- * APIController.js
+ * @class  APIController
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines API-related control functionality.
+ * @description  Defines API-related control functionality.
  */
 class APIController {
 
@@ -326,12 +333,8 @@ class APIController {
 
     // Sanitize the input
     const organizationID = M.lib.sani.sanitize(req.params.orgid);
-    const organizationName = M.lib.sani.sanitize(req.body.name);
 
-    OrgController.updateOrg(req.user, organizationID, {
-      id: organizationID,
-      name: organizationName
-    })
+    OrgController.updateOrg(req.user, organizationID, req.body)
     .then((org) => {
       // Return OK status and the created org
       res.header('Content-Type', 'application/json');
@@ -347,9 +350,9 @@ class APIController {
   /**
    * DELETE /api/orgs/:orgid
    *
-   * @description  Takes an orgid in the URI and soft-deletes the corresponding
-   * organization. Returns a success message if successful, otherwise an error
-   * message is returned.
+   * @description  Takes an orgid in the URI and options in the body and
+   * deletes the corresponding organization. Returns a success message if
+   * successful, otherwise an error message is returned.
    */
   static deleteOrg(req, res) {
     // If for some reason we don't have a user, fail.
@@ -360,7 +363,7 @@ class APIController {
 
     const orgid = M.lib.sani.sanitize(req.params.orgid);
 
-    OrgController.removeOrg(req.user, orgid)
+    OrgController.removeOrg(req.user, orgid, req.body)
     .then((org) => {
       res.header('Content-Type', 'application/json');
       return res.send(APIController.formatJSON(org.getPublicData()));
@@ -600,7 +603,7 @@ class APIController {
 
 
   /**
-   * POST /api/org/:orgid/projects/:projectid
+   * POST /api/orgs/:orgid/projects/:projectid
    *
    * @description Takes a project object in the request body and creates the
    * project.
@@ -670,7 +673,7 @@ class APIController {
 
 
   /**
-   * PUT /api/org/:orgid/projects/:projectid
+   * PUT /api/orgs/:orgid/projects/:projectid
    *
    * @description  Takes an organization ID and project ID in the URI and JSON
    * encoded project data in the body. Updates the project corresponding to the
@@ -719,16 +722,9 @@ class APIController {
     }
 
     const projectId = M.lib.sani.html(req.params.projectid);
-    const projectName = M.lib.sani.html(req.body.name);
     const orgId = M.lib.sani.html(req.params.orgid);
 
-    ProjectController.updateProject(req.user, orgId, projectId, {
-      id: projectId,
-      name: projectName,
-      org: {
-        id: orgId
-      }
-    })
+    ProjectController.updateProject(req.user, orgId, projectId, req.body)
     .then((project) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
@@ -741,7 +737,7 @@ class APIController {
 
 
   /**
-   * DELETE /api/org/:orgid/projects:projectid
+   * DELETE /api/orgs/:orgid/projects:projectid
    *
    * Takes an organization ID and project ID in the URI and deletes the
    * corresponding project.
@@ -752,10 +748,11 @@ class APIController {
       M.log.error('Request does not have a user.');
       return res.status(500).send('Internal Server Error');
     }
+
     const orgId = M.lib.sani.html(req.params.orgid);
     const projectId = M.lib.sani.html(req.params.projectid);
 
-    ProjectController.removeProject(req.user, orgId, projectId)
+    ProjectController.removeProject(req.user, orgId, projectId, req.body)
     .then((project) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));

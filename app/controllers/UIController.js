@@ -9,6 +9,13 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
+/**
+ * @module  controllers.ui_controller
+ *
+ * @description  This implements the behavior and logic for the user interface.
+ * All UI routes map to this controller which in turn uses other controllers to
+ * handle other object behaviors.
+ */
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
@@ -31,7 +38,6 @@ class UIController {
    */
 
   static home(req, res) {
-    M.log.info(`GET ${req.originalUrl} requested by ${req.user.username}`);
     return res.render('home', {
       ui: M.config.server.ui,
       user: req.user.getPublicData(),
@@ -47,7 +53,6 @@ class UIController {
    */
 
   static mbee(req, res) {
-    M.log.info(`GET ${req.originalUrl} requested by ${req.user.username}`);
     return res.render('mbee', {
       ui: M.config.server.ui,
       renderer: 'mbee-renderer',
@@ -94,8 +99,6 @@ class UIController {
         req.user = user;
       }
       // Disables because database document is being directly used
-      user = (req.user) ? req.user.username.toString() : 'anonymous'; // eslint-disable-line no-param-reassign
-      M.log.info(`GET "/about" requested by  ${user}`);
       return res.render('about', {
         ui: M.config.server.ui,
         user: req.user,
@@ -115,10 +118,6 @@ class UIController {
    * login.
    */
   static showLoginPage(req, res) {
-    // log the request
-    const user = (req.user) ? req.user.username.toString() : 'anonymous';
-    M.log.info(`GET ${req.originalUrl} requested by  ${user}`);
-
     let next = '';
     // make sure the passed in "next" parameter is valid
     if (RegExp(M.lib.validators.url.next).test(req.query.next)) {
@@ -142,10 +141,6 @@ class UIController {
    * successful. It handles the appropriate redirect for the user.
    */
   static login(req, res) {
-    // log the request
-    const user = (req.user) ? req.user.username.toString() : 'anonymous';
-    M.log.info(`POST ${req.originalUrl}" requested by ${user}.`);
-
     // make sure the passed in "next" parameter is valid
     let next = null;
     if (RegExp(M.lib.validators.url.next).test(req.body.next)) {
@@ -167,10 +162,6 @@ class UIController {
    */
 
   static logout(req, res) {
-    // log the request
-    const user = (req.user) ? req.user.username.toString() : 'anonymous';
-    M.log.info(`GET "/logout" requested by ${user}`);
-
     // destroy the session
     req.user = null;
     req.session.destroy();

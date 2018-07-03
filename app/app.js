@@ -32,6 +32,7 @@ const app = express();       // Initializes our application
 M.lib.db.connect();       // Connect to the database
 app.use(bodyParser.json());  // Allows receiving JSON in the request body
 app.use(bodyParser.urlencoded({ extended: true }));
+app.enable('trust proxy'); // Allow full trace of IP address using LM Proxy
 
 // Sets our static/public directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
@@ -41,12 +42,6 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 
-// Logging Middleware
-app.use((req, res, next) => {
-  const username = (req.user) ? req.user.username : 'anonymous';
-  M.log.info(`${req.method} "${req.originalUrl}" requested by ${username}`);
-  next();
-});
 
 // Convenient conversions from ms to other times units
 const units = {
@@ -67,10 +62,14 @@ app.use(session({
   store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
 
+
+// Log IP address of all incoming requests
+const Middleware = M.load('lib/middleware');
+app.use(Middleware.logIP);
+
 // Load the API Routes
 if (M.config.server.api.enabled) {
-  const APIRoutesPath = path.join(__dirname, 'api_routes.js');
-  const APIRouter = require(APIRoutesPath); // eslint-disable-line global-require
+  const APIRouter = M.load('api_routes');
   app.use('/api', APIRouter);
 }
 // Load the plugin routes
@@ -81,8 +80,7 @@ if (M.config.server.plugins.enabled) {
 }
 // Load the UI/other routes
 if (M.config.server.ui.enabled) {
-  const RoutesPath = path.join(__dirname, 'routes.js');
-  const Router = require(RoutesPath); // eslint-disable-line global-require
+  const Router = M.load('routes');
   app.use('/', Router);
 }
 

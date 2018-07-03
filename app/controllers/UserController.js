@@ -9,6 +9,12 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
+/**
+ * @module  controllers.user_controller
+ *
+ * @description  This implements the behavior and logic for a user and
+ * provides functions for interacting with users.
+ */
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
@@ -22,7 +28,7 @@ const User = M.load('models/User');
 /* eslint-disable consistent-return */
 
 /**
- * UserController.js
+ * @class  UserController
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

@@ -18,9 +18,10 @@
 const path = require('path');
 const express = require('express');
 const M = require(path.join(__dirname, '..', 'mbee.js'));
-const getController = x => path.join(__dirname, 'controllers', x);
-const UIController = require(getController('UIController'));
-const AuthController = require(path.join(__dirname, 'lib', 'auth'));
+
+const UIController = M.load('controllers/UIController');
+const AuthController = M.load('lib/auth');
+const Middleware = M.load('lib/middleware');
 
 const router = express.Router();
 
@@ -29,18 +30,29 @@ const router = express.Router();
  * Unauthenticated Routes
  **********************************************/
 
+
+router.route('/about')
 /* This renders the about page */
-router.get('/about', UIController.showAboutPage);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  UIController.showAboutPage
+);
 
+router.route('/login')
 /* GET /login shows the login page. */
-router.get('/login', UIController.showLoginPage);
-
+.get(
+  Middleware.logRoute,
+  UIController.showLoginPage
+)
 /* POST is the route that actually logs in the user.
  * It's the login form's submit action. */
-router.post('/login',
+.post(
   AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
   AuthController.doLogin,
-  UIController.login);
+  UIController.login
+);
 
 
 /**********************************************
@@ -48,20 +60,37 @@ router.post('/login',
  **********************************************/
 
 /* This renders the home page for logged in users */
-router.get('/', AuthController.authenticate.bind(AuthController), UIController.home);
+router.route('/')
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  UIController.home
+);
 
 /* This renders the home page for logged in users */
-router.get(`/:org(${M.lib.validators.org.id})/:project`,
+router.route(`/:org(${M.lib.validators.org.id})/:project`)
+.get(
   AuthController.authenticate.bind(AuthController),
-  UIController.mbee);
+  Middleware.logRoute,
+  UIController.mbee
+);
 
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */
 router.route('/logout')
-.get(AuthController.authenticate.bind(AuthController), UIController.logout);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  UIController.logout
+);
 
 /* Renders the admin console */
-router.get('/admin/console', AuthController.authenticate.bind(AuthController), UIController.admin);
+router.route('/admin/console')
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  UIController.admin
+);
 
 module.exports = router;

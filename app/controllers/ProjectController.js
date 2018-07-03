@@ -9,6 +9,12 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
+/**
+ * @module  controllers.project_controller
+ *
+ * @description  This implements the behavior and logic for a project and
+ * provides functions for interacting with projects.
+ */
 
 /* Node.js Modules */
 const path = require('path');
@@ -16,7 +22,6 @@ const path = require('path');
 /* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const OrgController = M.load('controllers/OrganizationController');
-const Organization = M.load('models/Organization');
 const Project = M.load('models/Project');
 
 // We are disabling the eslint consistent-return rule for this file.
@@ -36,12 +41,12 @@ const Project = M.load('models/Project');
 class ProjectController {
 
   /**
-   * @description  The function finds a project.
+   * @description  The function finds all projects for a given orgID.
    *
    * @example
-   * ProjectController.findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
+   * ProjectController.findProjects({Tony Stark}, 'StarkIndustries')
    * .then(function(org) {
-   *   // do something with the returned project
+   *   // do something with the returned projects
    * })
    * .catch(function(error) {
    *   M.log.error(error);
@@ -50,7 +55,6 @@ class ProjectController {
    *
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {String} The project ID of the Project which is being searched for.
    */
   static findProjects(reqUser, organizationId) {
     return new Promise((resolve, reject) => {
@@ -78,7 +82,7 @@ class ProjectController {
         const popQuery = 'org'
 
         // Search for project
-        Project.find({ org: org._id, 'permissions.read': reqUser._id })
+        Project.find({ org: org._id, 'permissions.read': reqUser._id, deleted: false })
         .populate(popQuery)
         .exec((err, projects) => {
           // Error Check - Database/Server Error
@@ -102,6 +106,87 @@ class ProjectController {
   }
 
   /**
+   * @description  The function deletes all projects for an org.
+   *
+   * @example
+   * ProjectController.removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
+   * .then(function(org) {
+   *   // Delete projects
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {String} The organization ID for the Organization the project belongs to.
+   * @param  {Object} Contains a list of delete options.
+   */
+  static removeProjects(reqUser, organizationId, options) {
+    return new Promise((resolve, reject) => {
+      // Error check - Verify id is of type string for sanitization.
+      if (typeof organizationId !== 'string') {
+        return reject(new Error('Organization ID is not of type String.'));
+      }
+
+      // Determine whether to soft delete or not
+      let softDelete = true;
+      if (options.hasOwnProperty('soft')) {
+        // User must be a system admin to hard delete
+        if (options.soft === false && reqUser.admin) {
+          softDelete = false;
+        }
+        else if (options.soft === false && !reqUser.admin) {
+          return reject(new Error('User does not have permissions to hard-delete an organization.'));
+        }
+        else if (options.soft !== false && options.soft !== true) {
+          return reject(new Error('Invalid argument for the \'soft\' field.'));
+        }
+      }
+
+      // Sanitize the orgid
+      const orgID = M.lib.sani.html(organizationId);
+
+
+      // Delete the projects
+      if (softDelete) {
+        // Find the projects
+        ProjectController.findProjects(reqUser, orgID)
+        .then((projects) => {
+          // Mark each of them as deleted
+          for (let proj = 0; proj < projects.length; proj++) {
+            projects[proj].deletedOn = Date.now();
+            projects[proj].deleted = true;
+            projects[proj].save((saveErr) => {
+              if (saveErr) {
+                return reject(saveErr);
+              }
+            });
+          }
+          return resolve(projects);
+        })
+        .catch((deleteError) => reject(deleteError));
+      }
+      else {
+        // Find the org
+        OrgController.findOrg(reqUser, orgID, true)
+        .then((org) => {
+          // Hard-delete any projects with the matching orgID
+          Project.deleteMany({ org: org._id }, (deleteError, projectsDeleted) => {
+            if (deleteError) {
+              return reject(deleteError);
+            }
+
+            return resolve(projectsDeleted);
+          });
+        })
+        .catch((findOrgErr) => reject(findOrgErr));
+      }
+    });
+  }
+
+
+  /**
    * @description  The function finds a project.
    *
    * @example
@@ -117,8 +202,9 @@ class ProjectController {
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
    * @param  {String} The project ID of the Project which is being searched for.
+   * @param. {Boolean} The flag to control whether or not to find softDeleted projects.
    */
-  static findProject(reqUser, organizationId, projectId) {
+  static findProject(reqUser, organizationId, projectId, softDeleted = false) {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
@@ -133,8 +219,14 @@ class ProjectController {
       const projID = M.lib.sani.html(projectId);
       const projUID = `${orgID}:${projID}`;
 
+      let searchParams = { uid: projUID, deleted: false };
+
+      if (softDeleted && reqUser.admin) {
+        searchParams = { uid: projUID };
+      }
+
       // Search for project
-      Project.find({ uid: projUID })
+      Project.find(searchParams)
       .populate('org permissions.read permissions.write permissions.admin')
       .exec((err, projects) => {
         // Error Check - Database/Server Error
@@ -175,7 +267,7 @@ class ProjectController {
    *
    *
    * @param  {User} The object containing the requesting user.
-   * @param  {Project} The object of the project being created.
+   * @param  {Object} The object of the project being created.
    */
   static createProject(reqUser, project) {
     return new Promise((resolve, reject) => {
@@ -207,7 +299,6 @@ class ProjectController {
       const projID = M.lib.sani.html(project.id);
       const projName = M.lib.sani.html(project.name);
       const orgID = M.lib.sani.html(project.org.id);
-      const projUID = `${orgID}:${projID}`;
 
       // Error check - make sure project ID and project name are valid
       if (!RegExp(M.lib.validators.project.id).test(projID)) {
@@ -218,18 +309,9 @@ class ProjectController {
       }
 
       // Error check - Make sure the org exists
-      Organization.find({ id: orgID })
-      .populate('permissions.write')
-      .exec((findOrgErr, orgs) => {
-        if (findOrgErr) {
-          return reject(new Error(findOrgErr));
-        }
-        if (orgs.length < 1) {
-          return reject(new Error('Org not found.'));
-        }
-
+      OrgController.findOrg(reqUser, orgID)
+      .then((org) => {
         // Check Permissions
-        const org = orgs[0];
         const writers = org.permissions.write.map(u => u._id.toString());
 
         if (!writers.includes(reqUser._id.toString()) && !reqUser.admin) {
@@ -237,36 +319,39 @@ class ProjectController {
         }
 
         // Error check - check if the project already exists
-        Project.find({ uid: projUID }, (findProjErr, projects) => {
-          if (findProjErr) {
-            return reject(new Error(findProjErr));
-          }
-          if (projects.length >= 1) {
-            return reject(new Error('Project already exists.'));
-          }
+        ProjectController.findProject(reqUser, org.id, projID)
+        .then((proj) => reject(new Error('Project already exists.')))
+        .catch((error) => {
+          // This is ok, we dont want the project to already exist.
+          if (error.message === 'Project not found') {
+            // Create the new project and save it
+            const newProject = new Project({
+              id: projID,
+              name: projName,
+              org: org._id,
+              permissions: {
+                read: [reqUser._id],
+                write: [reqUser._id],
+                admin: [reqUser._id]
+              },
+              uid: `${orgID}:${projID}`
+            });
 
-          // Create the new project and save it
-          const newProject = new Project({
-            id: projID,
-            name: projName,
-            org: orgs[0]._id,
-            permissions: {
-              read: [reqUser._id],
-              write: [reqUser._id],
-              admin: [reqUser._id]
-            },
-            uid: `${orgID}:${projID}`
-          });
-
-          newProject.save((saveErr, projectUpdated) => {
-            if (saveErr) {
-              return reject(saveErr);
-            }
-            // Return success and the JSON object
-            return resolve(projectUpdated);
-          });
+            newProject.save((saveErr, projectUpdated) => {
+              if (saveErr) {
+                return reject(saveErr);
+              }
+              // Return success and the JSON object
+              return resolve(projectUpdated);
+            });
+          }
+          else {
+            // Some other error occured, return it.
+            return reject(error);
+          }
         });
-      });
+      })
+      .catch((error2) => reject(error2));
     });
   }
 
@@ -285,75 +370,94 @@ class ProjectController {
    *
    *
    * @param  {User} The object containing the requesting user.
-   * @param  {Project} The object of the existing project.
-   * @param  {Project} The object of the updated project.
+   * @param  {String} The organization ID of the project.
+   * @param  {String} The project ID.
+   * @param  {Object} The object of the updated project.
    */
   static updateProject(reqUser, organizationId, projectId, projectUpdated) {
     return new Promise((resolve, reject) => {
-      if (!projectUpdated.hasOwnProperty('name')) {
-        return reject(new Error('Project does not have attribute (name)'));
-      }
-      // Error check - Verify id, name, and org.id are of type string for sanitization.
+      // Error check - Verify parameters are correct type.
       if (typeof organizationId !== 'string') {
         return reject(new Error('Organization ID is not of type String.'));
       }
       if (typeof projectId !== 'string') {
         return reject(new Error('Project ID is not of type String.'));
       }
-      if (typeof projectUpdated.name !== 'string') {
-        return reject(new Error('New project name is not of type String.'));
+      if (typeof projectUpdated !== 'object') {
+        return reject(new Error('Updated project is not of type Object'));
+      }
+
+      // If mongoose model, convert to plain JSON
+      if (projectUpdated instanceof Project) {
+        // Disabling linter because the reasign is needed to convert the object to JSON
+        projectUpdated = projectUpdated.toJSON(); // eslint-disable-line no-param-reassign
       }
 
       // Sanitize project properties
       const orgID = M.lib.sani.html(organizationId);
       const projID = M.lib.sani.html(projectId);
-      const projNameUpdated = M.lib.sani.html(projectUpdated.name);
-      const projUID = `${orgID}:${projID}`;
 
-      // Error check - make sure project ID and project name are valid
-      if (!RegExp(M.lib.validators.project.id).test(projID)) {
-        return reject(new Error('Project ID is not valid.'));
-      }
-      if (!RegExp(M.lib.validators.project.name).test(projNameUpdated)) {
-        return reject(new Error('Project Name is not valid.'));
-      }
-
-      // Error Check - check if the organization for the project exists
-      Organization.find({ id: orgID }, (findOrgErr, orgs) => {
-        if (findOrgErr) {
-          return reject(findOrgErr);
-        }
-        if (orgs.length < 1) {
-          return reject(new Error('Org not found.'));
+      // Error check - check if the project already exists
+      ProjectController.findProject(reqUser, orgID, projID)
+      .then((project) => {
+        // Check Permissions
+        const admins = project.permissions.admin.map(u => u._id.toString());
+        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+          return reject(new Error('User does not have permission.'));
         }
 
-        // Error check - check if the project already exists
-        Project.find({ uid: projUID })
-        .populate('permissions.admin')
-        .exec((findProjErr, projects) => {
-          if (findProjErr) {
-            return reject(findProjErr);
+        // get list of keys the user is trying to update
+        const projUpdateFields = Object.keys(projectUpdated);
+        // Get list of parameters which can be updated from model
+        const validUpdateFields = project.getValidUpdateFields();
+        // Allocate update val and field before for loop
+        let updateVal = '';
+        let updateField = '';
+
+        // Check if passed in object contains fields to be updated
+        for (let i = 0; i < projUpdateFields.length; i++) {
+          updateField = projUpdateFields[i];
+          // Error Check - Check if updated field also exists in the original project.
+          if (!project.toJSON().hasOwnProperty(updateField)) {
+            return reject(new Error(`Project does not contain field ${updateField}`));
           }
-          // Error Check - make sure project exists
-          if (projects.length < 1) {
-            return reject(new Error('Project not found.'));
+          // if parameter is of type object, stringify and compare
+          if (typeof projectUpdated[updateField] === 'object') {
+            if (JSON.stringify(project[updateField])
+              === JSON.stringify(projectUpdated[updateField])) {
+              continue;
+            }
+          }
+          // if parameter is the same don't bother updating it
+          if (project[updateField] === projectUpdated[updateField]) {
+            continue;
+          }
+          // Error Check - Check if field can be updated
+          if (!validUpdateFields.includes(updateField)) {
+            return reject(new Error(`Users cannot update [${updateField}] of Projects.`));
+          }
+          // Error Check - Check if updated field is of type string
+          if (typeof projectUpdated[updateField] !== 'string') {
+            return reject(new Error(`The Project [${updateField}] is not of type String`));
           }
 
-          // Check Permissions
-          const project = projects[0];
-          const admins = project.permissions.admin.map(u => u._id.toString());
-          if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-            return reject(new Error('User does not have permission.'));
-          }
+          // sanitize field
+          updateVal = M.lib.sani.sanitize(projectUpdated[updateField]);
+          // Update field in project object
+          project[updateField] = updateVal;
+        }
 
-          // Currently we only support updating the name
-          project.name = projNameUpdated; // eslint-disable-line no-param-reassign
-          project.save();
+        // Save updated org
+        project.save((saveProjErr) => {
+          if (saveProjErr) {
+            return reject(saveProjErr);
+          }
 
           // Return the updated project object
           return resolve(project);
         });
-      });
+      })
+      .catch((findProjErr) => reject(findProjErr));
     });
   }
 
@@ -362,7 +466,7 @@ class ProjectController {
    * The function deletes a project.
    *
    * @example
-   * ProjectController.removeProject({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
    * .then(function(org) {
    *   // do something with the newly created project.
    * })
@@ -374,8 +478,9 @@ class ProjectController {
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
    * @param  {String} The project ID of the Project which is being deleted.
+   * @param  {Object} Contains the list of delete options.
    */
-  static removeProject(reqUser, organizationId, projectId) {
+  static removeProject(reqUser, organizationId, projectId, options) {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
@@ -385,39 +490,61 @@ class ProjectController {
         return reject(new Error('Project ID is not of type String.'));
       }
 
+      let softDelete = true;
+      if (options.hasOwnProperty('soft')) {
+        if (options.soft === false && reqUser.admin) {
+          softDelete = false;
+        }
+        else if (options.soft === false && !reqUser.admin) {
+          return reject(new Error('User does not have permissions to hard-delete an organization.'));
+        }
+        else if (options.soft !== false && options.soft !== true) {
+          return reject(new Error('Invalid argument for the \'soft\' field.'));
+        }
+      }
+
       // Sanitize project properties
       const orgID = M.lib.sani.html(organizationId);
       const projID = M.lib.sani.html(projectId);
-      const projUID = `${orgID}:${projID}`;
 
-      // Check if project exists
-      Project.find({ uid: projUID })
-      .populate('permissions.admin')
-      .exec((findProjErr, projects) => {
-        // Error Check - Return error if database query does not work
-        if (findProjErr) {
-          return reject(findProjErr);
-        }
-        // Error Check - Check number of projects
-        if (projects.length < 1) {
-          return reject(new Error('Project not found.'));
-        }
-
+      // Find the project, even if it has already been soft deleted
+      ProjectController.findProject(reqUser, orgID, projID, true)
+      .then((project) => {
         // Check Permissions
-        const project = projects[0];
         const admins = project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
           return reject(new Error('User does not have permission.'));
         }
 
-        // Remove the Project
-        Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
-          if (removeProjErr) {
-            return reject(removeProjErr);
+        if (softDelete) {
+          if (!project.deleted) {
+            project.deletedOn = Date.now();
+            project.deleted = true;
+            project.save((saveErr) => {
+              if (saveErr) {
+                // If error occurs, return it
+                return reject(saveErr);
+              }
+
+              // Return updated project
+              return resolve(project);
+            });
           }
-          return resolve(projectRemoved);
-        });
-      });
+          else {
+            return reject(new Error('Project no longer exists.'));
+          }
+        }
+        else {
+          // Remove the Project
+          Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
+            if (removeProjErr) {
+              return reject(removeProjErr);
+            }
+            return resolve(projectRemoved);
+          });
+        }
+      })
+      .catch((error) => reject(error));
     });
   }
 
@@ -425,7 +552,7 @@ class ProjectController {
    * The function finds a projects permissions.
    *
    * @example
-   * ProjectController.findAllPermissions({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.findAllPermissions({Tony Stark}, 'stark', 'arc')
    * .then(function(org) {
    *   // do something with the newly created project.
    * })
@@ -480,7 +607,7 @@ class ProjectController {
    * The function finds a projects permissions.
    *
    * @example
-   * ProjectController.findAllPermissions({Tony Stark}, {Arc Reactor 1})
+   * ProjectController.findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
    * .then(function(org) {
    *   // do something with the newly created project.
    * })

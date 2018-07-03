@@ -9,13 +9,13 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/*
- * LocalStrategy.js
+/**
+ * @module auth.local-strategy
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This implements an authentication strategy for local authentication.
- * This should be the default authentication strategy for MBEE.
+ * @description This implements an authentication strategy for local
+ * authentication. This should be the default authentication strategy for MBEE.
  */
 
 const path = require('path');

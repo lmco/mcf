@@ -56,6 +56,7 @@ let user = null;
 
 describe(name, function() {
   before(function() {
+    this.timeout(5000);
     const db = M.load('lib/db');
     db.connect();
     return new Promise(function(resolve) {
@@ -171,13 +172,7 @@ function putOrg01(done) {
     method: 'PUT',
     body: JSON.stringify({
       id: id,
-      name: 'I know',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      }
+      name: 'I know'
     })
   },
   function(err, response, body) {
@@ -227,7 +222,10 @@ function deleteProject01(done) {
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
     headers: getHeaders(),
-    method: 'DELETE'
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
   },
   function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
@@ -243,7 +241,10 @@ function deleteProject02(done) {
   request({
     url: `${test.url}/api/orgs/hogwarts/projects/ronweasly`,
     headers: getHeaders(),
-    method: 'DELETE'
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
   },
   function(err, response) {
     chai.expect(response.statusCode).to.equal(200);

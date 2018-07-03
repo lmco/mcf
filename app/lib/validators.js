@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  lib/validators
+ * @module  lib.validators
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -27,6 +27,12 @@ module.exports.org = {
 
 module.exports.project = {
   id: '^([a-z])([a-z0-9-]){0,}$',
+  name: '^([a-zA-Z0-9-\\s])+$'
+};
+
+module.exports.element = {
+  uid: '^([a-zA-Z0-9])([a-zA-Z0-9-:]){0,}$',
+  id: '^([a-zA-Z0-9])([a-zA-Z0-9-]){0,}$',
   name: '^([a-zA-Z0-9-\\s])+$'
 };
 

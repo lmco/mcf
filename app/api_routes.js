@@ -30,8 +30,9 @@ const path = require('path');
 const express = require('express');
 const M = require(path.join(__dirname, '..', 'mbee.js'));
 
-const APIController = M.load('controllers/APIController');
-const AuthController = M.load('lib/auth');
+const Middleware = M.require('lib.middleware');
+const APIController = M.require('controllers.APIController');
+const AuthController = M.require('lib.auth');
 
 const api = express.Router();
 
@@ -49,7 +50,7 @@ const api = express.Router();
  *       200:
  *         description: Success
  */
-api.get('/test', APIController.test);
+api.get('/test', Middleware.logRoute, APIController.test);
 
 
 /**
@@ -65,7 +66,7 @@ api.get('/test', APIController.test);
  *       200:
  *         description: Success
  */
-api.get('/doc', APIController.swaggerDoc);
+api.get('/doc', Middleware.logRoute, APIController.swaggerDoc);
 
 /**
  * @swagger
@@ -80,7 +81,7 @@ api.get('/doc', APIController.swaggerDoc);
  *       200:
  *         description: Success
  */
-api.get('/doc/swagger.json', APIController.swaggerJSON);
+api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
 
 /**
  * @swagger
@@ -102,11 +103,13 @@ api.get('/doc/swagger.json', APIController.swaggerJSON);
 api.route('/login')
 .get(
   AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
   AuthController.doLogin,
   APIController.login
 )
 .post(
   AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
   AuthController.doLogin,
   APIController.login
 );
@@ -128,7 +131,11 @@ api.route('/login')
  *         description: Internal Server Error
  */
 api.route('/version')
-.get(AuthController.authenticate.bind(AuthController), APIController.version);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.version
+);
 
 
 /**
@@ -171,10 +178,26 @@ api.route('/version')
  *         description: Not Implemented
  */
 api.route('/orgs')
-.get(AuthController.authenticate.bind(AuthController), APIController.getOrgs)
-.post(AuthController.authenticate.bind(AuthController), APIController.postOrgs)
-.put(AuthController.authenticate.bind(AuthController), APIController.putOrgs)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrgs);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getOrgs
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postOrgs
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.putOrgs
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.deleteOrgs
+);
 
 
 /**
@@ -328,10 +351,26 @@ api.route('/orgs')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid')
-.get(AuthController.authenticate.bind(AuthController), APIController.getOrg)
-.post(AuthController.authenticate.bind(AuthController), APIController.postOrg)
-.put(AuthController.authenticate.bind(AuthController), APIController.putOrg)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrg);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getOrg
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postOrg
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.putOrg
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.deleteOrg
+);
 
 
 /**
@@ -391,10 +430,26 @@ api.route('/orgs/:orgid')
  *         description: Not Implemented
  */
 api.route('/orgs/:orgid/projects')
-.get(AuthController.authenticate.bind(AuthController), APIController.getProjects)
-.post(AuthController.authenticate.bind(AuthController), APIController.postProjects)
-.put(AuthController.authenticate.bind(AuthController), APIController.putProjects)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteProjects);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getProjects
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postProjects
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.putProjects
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.deleteProjects
+);
 
 /**
  * @swagger
@@ -574,10 +629,26 @@ api.route('/orgs/:orgid/projects')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid')
-.get(AuthController.authenticate.bind(AuthController), APIController.getProject)
-.post(AuthController.authenticate.bind(AuthController), APIController.postProject)
-.put(AuthController.authenticate.bind(AuthController), APIController.putProject)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteProject);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getProject
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postProject
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.putProject
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.deleteProject
+);
 
 /**
  * @swagger
@@ -603,7 +674,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                    server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/members')
-.get(AuthController.authenticate.bind(AuthController), APIController.getAllOrgRoles);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getAllOrgRoles
+);
 
 /**
  * @swagger
@@ -719,10 +794,26 @@ api.route('/orgs/:orgid/members')
 // 6/20/18
 // NOTE: POST and PUT have the same functionality, thus they map to the same route.
 api.route('/orgs/:orgid/members/:username')
-.get(AuthController.authenticate.bind(AuthController), APIController.getOrgRole)
-.post(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
-.put(AuthController.authenticate.bind(AuthController), APIController.postOrgRole)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteOrgRole);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getOrgRole
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postOrgRole
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postOrgRole
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.deleteOrgRole
+);
 
 /**
  * @swagger
@@ -753,7 +844,11 @@ api.route('/orgs/:orgid/members/:username')
  *                    server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members')
-.get(AuthController.authenticate.bind(AuthController), APIController.getProjectRoles);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getProjectRoles
+);
 
 /**
  * @swagger
@@ -886,10 +981,244 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *                    server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:username')
-.get(AuthController.authenticate.bind(AuthController), APIController.getProjectRole)
-.post(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
-.put(AuthController.authenticate.bind(AuthController), APIController.postProjectRole)
-.delete(AuthController.authenticate.bind(AuthController), APIController.deleteProjectRole);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getProjectRole
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postProjectRole
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postProjectRole
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.deleteProjectRole
+);
+
+
+/**
+ * @swagger
+ * /orgs/:orgid/projects/:projectid/elements/:elementid:
+ *   get:
+ *     tags:
+ *       - model management
+ *     summary: Gets an element by ID
+ *     description: >
+ *       Retrieves a single element. An element is uniquely identified by its
+ *       organization, project, and element IDs.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization the project is in.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The element was successfully retrieved.
+ *                      The element is returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
+ *                      authorization to view this organization or project.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
+ *   post:
+ *     tags:
+ *       - model management
+ *     description: Creates a new element.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project. A valid project ID must consist
+ *                      of only lowercase letters, numbers, and dashes (e.g.
+ *                      "-") and must begin with a letter.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: id
+ *         description: The ID of the element. If this is provided, it must
+ *                      match the element ID provided in the URI.
+ *         in: body
+ *         required: false
+ *         type: string
+ *       - name: name
+ *         description: The name for the element.
+ *         in: body
+ *         required: false
+ *         type: string
+ *       - name: documentation
+ *         description: The documentation for the element.
+ *         in: body
+ *         required: false
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The element was successfully created.
+ *                      The new/updated element is returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
+ *                      authorization to view this org/project.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
+ *   put:
+ *     tags:
+ *       - model management
+ *     description: Creates or replaces an element. If the element does not yet
+ *                  exist, it will be created (just like a POST). If it does
+ *                  exist, the element will be replaced with
+ *                  data provided.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project to create/replace. A valid project
+ *                      ID must consist of only lowercase letters, numbers, and
+ *                      dashes (e.g. "-") and must begin with a letter.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: id
+ *         description: The ID of the element. If this is provided, it must
+ *                      match the element ID provided in the URI.
+ *         in: body
+ *         required: false
+ *         type: string
+ *       - name: name
+ *         description: The name for the element.
+ *         in: body
+ *         required: false
+ *         type: string
+ *       - name: documentation
+ *         description: The documentation for the element.
+ *         in: body
+ *         required: false
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The element was successfully created.
+ *                      The new/updated element is returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
+ *                      authorization to view this organization or project.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
+ *   delete:
+ *     tags:
+ *       -  model management
+ *     description: Deletes an element
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element to delete.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The element was successfully deleted.
+ *                      The element ID is returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
+ *                      authorization to view this organization or project.
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
+ */
+api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+);
+
 
 /**
  * @swagger
@@ -939,10 +1268,10 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         description: Not Implemented
  */
 api.route('/users')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented)
+.post(APIController.notImplemented)
+.put(APIController.notImplemented)
+.delete(APIController.notImplemented);
 
 /**
  * @swagger
@@ -1097,10 +1426,10 @@ api.route('/users')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/users/:username')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented)
+.post(APIController.notImplemented)
+.put(APIController.notImplemented)
+.delete(APIController.notImplemented);
 
 /**
  * @swagger
@@ -1135,10 +1464,10 @@ api.route('/users/:username')
  *         description: Not Implemented
  */
 api.route('/users/:username/roles')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented)
+.post(APIController.notImplemented)
+.put(APIController.notImplemented)
+.delete(APIController.notImplemented);
 
 
 /**
@@ -1174,10 +1503,10 @@ api.route('/users/:username/roles')
  *         description: Not Implemented
  */
 api.route('/users/:username/groups')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.post(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.put(AuthController.authenticate.bind(AuthController), APIController.notImplemented)
-.delete(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented)
+.post(APIController.notImplemented)
+.put(APIController.notImplemented)
+.delete(APIController.notImplemented);
 
 
 /**
@@ -1198,7 +1527,7 @@ api.route('/users/:username/groups')
  *         description: Internal Server Error
  */
 api.route('/users/whoami')
-.get(AuthController.authenticate.bind(AuthController), APIController.notImplemented);
+.get(APIController.notImplemented);
 
 
 // Export the API router

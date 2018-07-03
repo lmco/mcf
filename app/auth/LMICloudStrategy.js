@@ -9,12 +9,13 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/*
- * @module auth/LMICloudStrategy
+/**
+ * @module auth.lmi-cloud-strategy
  *
  * @authorized Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * TODO - This file is old and needs to be updated before use.
+ * @description This file implements our authentication strategy for cloud-based
+ * deployments on the LMI.
  */
 
 const fs = require('fs');
@@ -98,9 +99,10 @@ class LMICloudStrategy extends BaseStrategy {
       if (err) {
         cb(err);
       }
-      // If user found and not LDAP (e.g. a local user),
+      // If user found and their provider is local,
       // do local authentication
-      if (users.length === 1 && !users[0].isLDAPUser) {
+      if (users.length === 1 && users[0].provider === 'local') {
+        M.log.debug('Attempting to authenticate as local user.');
         // Compute the password hash on given password
         const hash = crypto.createHash('sha256');
         // salt the hash, the ._id is seen by eslint as a dangling underscore, disabling
@@ -116,9 +118,9 @@ class LMICloudStrategy extends BaseStrategy {
         }
       }
       // User is not found locally
-      // or is found and is an LDAP user,
+      // or is found and has the LMICloud provider,
       // try LDAP authentication
-      else if (users.length === 0 || (users.length === 1 && users[0].isLDAPUser)) {
+      else if (users.length === 0 || (users.length === 1 && users[0].provider === 'ldap')) {
         // Bind the resource account we will use to do our lookups
         // The initCallback function kicks off the search/auth process
         self.client.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (bindErr) => {
@@ -126,6 +128,7 @@ class LMICloudStrategy extends BaseStrategy {
             cb('An error has occured binding to the LDAP server.');
           }
           else {
+            M.log.debug('Attempting to authentcate as LDAP user.');
             self.doSearch(username, password, cb);
           }
         });
@@ -214,6 +217,7 @@ class LMICloudStrategy extends BaseStrategy {
    * TODO - Pass original query result through to avoid a second query.
    */
   syncLDAPUser(ldapUser, next) {
+    M.log.debug('Synchronizing LDAP user with local database.');
     User.find({
       username: ldapUser[M.config.auth.ldap.username_attribute]
     })
@@ -226,7 +230,7 @@ class LMICloudStrategy extends BaseStrategy {
       const initData = {
         username: ldapUser[M.config.auth.ldap.username_attribute],
         password: 'NO_PASSWORD',
-        isLDAPUser: true
+        provider: 'ldap'
       };
 
       const user = (users.length === 0) ? new User(initData) : users[0];

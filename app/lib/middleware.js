@@ -10,23 +10,42 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module lib.auth
+ * @module  lib.middleware
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This file loads and instantiates the authentication strategy as
- * a controller. It ensures that the auth strategy defined in the config.json.
+ * @description  This class Defines middleware functions which can be used by
+ * routes in order to implement route logging or other various functionality.
  */
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-const BaseStrategy = require(path.join(__dirname, '..', 'auth', 'BaseStrategy'));
-const AuthStrategy = require(path.join(__dirname, '..', 'auth', M.config.auth.strategy));
-const AuthController = new AuthStrategy();
 
-if (!(AuthController instanceof BaseStrategy)) {
-  throw new Error('Error: Authentication strategy does not extend BaseStrategy class!');
+/**
+ * MiddleWare.js
+ *
+ * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
+ *
+ * @description  This class Defines middleware functions which can be used by
+ * routes in order to implement route logging or other various functionality.
+ */
+class Middleware {
+
+  /**
+   * Log the route being accessed by a user.
+   */
+  static logRoute(req, res, next) {
+    const username = (req.user) ? req.user.username : 'anonymous';
+    M.log.info(`${req.method} "${req.originalUrl}" requested by ${username}`);
+    next();
+  }
+
+  static logIP(req, res, next) {
+    M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${req.ip}`);
+    next();
+  }
+
 }
 
-module.exports = AuthController;
+module.exports = Middleware;

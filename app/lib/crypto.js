@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  lib/crypto
+ * @module  lib.crypto
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines common cryptographic functions.
+ * @description Defines common cryptographic functions.
  */
 
 const path = require('path');

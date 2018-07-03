@@ -9,13 +9,13 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
-/*
- * auth/_BaseStrategy.js
+/**
+ * @module  auth.base_strategy
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This implements a BaseStrategy class that defines the interface expected
- * from an authentication controller.
+ * @description This implements a BaseStrategy class that defines the interface
+ * expected from an authentication controller.
  */
 
 // Disabling consistent return in this file because of the nature of how
@@ -53,6 +53,7 @@ class BaseStrategy {
     let password = null;
 
     if (authorization) {
+      M.log.debug('Authorization header found');
       // Check it is a valid auth header
       const parts = authorization.split(' ');
       if (parts.length < 2) {
@@ -83,7 +84,7 @@ class BaseStrategy {
         password = credentials[1];
         // Error check - make sure username/password are not empty
         if (!username || !password || username === '' || password === '') {
-          M.log.verbose('Username or password not provided.');
+          M.log.debug('Username or password not provided.');
           return (req.originalUrl.startsWith('/api'))
             ? res.status(401).send('Unauthorized')
             : res.redirect(`/login?next=${req.originalUrl}`);
@@ -97,7 +98,7 @@ class BaseStrategy {
               : res.redirect(`/login?next=${req.originalUrl}`);
           }
 
-          M.log.verbose(`Authenticated [${user.username}] via Basic Auth`);
+          M.log.info(`Authenticated [${user.username}] via Basic Auth`);
           req.user = user;
           next();
         });
@@ -111,7 +112,7 @@ class BaseStrategy {
        * or some other external method such as a microservice.
        */
       else if (RegExp('Bearer').test(scheme)) {
-        M.log.debug('Authenticating user via Token Auth ...');
+        M.log.verbose('Authenticating user via Token Auth ...');
         const token = Buffer.from(parts[1], 'utf8').toString();
         this.handleTokenAuth(req, res, token, (err, user) => {
           if (err) {
@@ -121,7 +122,7 @@ class BaseStrategy {
               : res.redirect(`/login?next=${req.originalUrl}`);
           }
 
-          M.log.verbose(`Authenticated [${user.username}] via Token Auth`);
+          M.log.info(`Authenticated [${user.username}] via Token Auth`);
           req.user = user;
           next();
         });
@@ -151,7 +152,7 @@ class BaseStrategy {
             ? res.status(401).send('Unauthorized')
             : res.redirect(`/login?next=${req.originalUrl}`);
         }
-        M.log.verbose(`Authenticated [${user.username}] via Session Token Auth`);
+        M.log.info(`Authenticated [${user.username}] via Session Token Auth`);
         req.user = user;
         next();
       });
@@ -167,11 +168,11 @@ class BaseStrategy {
      */
     else if (req.body.username && req.body.password) {
       M.log.verbose('Authenticating user via Form Input Auth ...');
-      username = req.body.username;
+      username = sani.sanitize(req.body.username);
       password = req.body.password;
       // Error check - make sure username/password are not empty
       if (!username || !password || username === '' || password === '') {
-        M.log.verbose('Username or password not provided.');
+        M.log.debug('Username or password not provided.');
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
           : res.redirect(`/login?next=${req.originalUrl}`);
@@ -184,13 +185,13 @@ class BaseStrategy {
             : res.redirect(`/login?next=${req.originalUrl}`);
         }
 
-        M.log.verbose(`Authenticated [${user.username}] via Form Input Auth`);
+        M.log.info(`Authenticated [${user.username}] via Form Input Auth`);
         req.user = user;
         next();
       });
     }
     else {
-      M.log.warn(`"${req.originalUrl}" requested with`
+      M.log.verbose(`"${req.originalUrl}" requested with`
                     + ' no valid authentication method provided.'
                     + ' Redirecting to "/login" ...');
       return (req.originalUrl.startsWith('/api'))

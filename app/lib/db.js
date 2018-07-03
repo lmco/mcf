@@ -10,12 +10,12 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module lib/db
+ * @module lib.db
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines the database connection. This module defines a connect function
- * which when called connects to the database.
+ * @description  Defines the database connection. This module defines a
+ * connect function which when called connects to the database.
  */
 
 const fs = require('fs');

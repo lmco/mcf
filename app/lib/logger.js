@@ -10,12 +10,12 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module lib/logger
+ * @module lib.logger
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines the MBEE logger. The logger should be used everywhere instead of
- * using `console.log`.
+ * @description Defines the MBEE logger. The logger should be used everywhere
+ * instead of using `console.log`.
  *
  * To use the logger simple require this file (e.g.
  * `const log = require('logger.js')`. You can the use the logger:
@@ -104,7 +104,12 @@ const formatter = printf((msg) => {
   if (mbee.config.log.colorize) {
     const ts = `${fmt.color.grey}${msg.timestamp}${fmt.color.esc}`; // timestamp
     const f = `${fmt.color.cyan}${file}${fmt.color.esc}`;           // file
-    return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msg.message}`;
+    // Print stack for error and critical logs
+    let msgPrint = msg.message;
+    if (msg.level.includes('error') || msg.level.includes('critical')) {
+      msgPrint += `\n${msg.stack || stack}`;
+    }
+    return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msgPrint}`;
   }
   // If colorize is false, we remove colors from the log level.
 
