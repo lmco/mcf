@@ -42,7 +42,7 @@ describe(name, function() {
    * This function runs before all the tests in this test suite.
    */
   before(function(done) {
-    this.timeout(5000);
+    this.timeout(10000);
     const db = M.load('lib/db');
     db.connect();
 
@@ -104,8 +104,8 @@ describe(name, function() {
   it('should find all elements for a project', findElements);
   it('should find an element', findElement);
   it('should update an element', updateElement);
-  it('should soft delete an element', softDeleteElement);
-  it('should hard delete an element', hardDeleteElement);
+  it('should soft delete an element', softDeleteElement).timeout(10000);
+  it('should hard delete an element', hardDeleteElement).timeout(10000);
 });
 
 
@@ -127,6 +127,7 @@ function createElement(done) {
         id: org.id
       }
     },
+    type: 'Element',
     parent: null
   };
   ElemController.createElement(user, newElement)
@@ -210,7 +211,7 @@ function softDeleteElement(done) {
       chai.expect(err.status).to.equal(404);
 
       // Search for soft deleted elements
-      ElemController.findElement(user, org.id, proj.id, 'elem0', true)
+      ElemController.findElement(user, org.id, proj.id, 'elem0', '', true)
       .then((retElem2) => {
         chai.expect(retElem2.id).to.equal('elem0');
         done();
@@ -236,7 +237,7 @@ function hardDeleteElement(done) {
   ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: false })
   .then((retElem) => {
     chai.expect(retElem.deleted).to.equal(true);
-    ElemController.findElement(user, org.id, proj.id, 'elem0', true)
+    ElemController.findElement(user, org.id, proj.id, 'elem0', '', true)
     .then((retElem2) => {
       chai.expect(retElem2).to.equal(null);
       done();
