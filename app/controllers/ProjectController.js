@@ -79,7 +79,7 @@ class ProjectController {
         //   return reject(new Error('Project not found'));
         // }
 
-        const popQuery = 'org'
+        const popQuery = 'org';
 
         // Search for project
         Project.find({ org: org._id, 'permissions.read': reqUser._id, deleted: false })

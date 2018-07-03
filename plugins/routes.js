@@ -27,6 +27,8 @@ const M = require(path.join(__dirname, '..', 'mbee.js'));
 const express = require('express');
 const pluginRouter = express.Router();
 
+let cmd = [];
+
 // Clone plugins
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   const metadata = M.config.server.plugins.plugins[i];
@@ -37,11 +39,11 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
 
   // Clone the git repository
   M.log.info(`Cloning plugin ${metadata.name} from ${metadata.repository} ...`);
-  
+
+  execSync(`chmod 400 ${metadata.deployKey}`);
+
   // Determine if plugin is local or from git
-  execSync(`chmod 400 ${metadata.deployKey}`)
-  var cmd;
-  if (metadata.repository.substr(metadata.repository.length - 4) == ".git"){
+  if (metadata.repository.substr(metadata.repository.length - 4) === '.git') {
     const command = [
       `GIT_SSH_COMMAND="ssh -i ${metadata.deployKey} -oStrictHostKeyChecking=no"`,
       `git clone ${metadata.repository} plugins/${metadata.name}`
