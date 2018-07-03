@@ -169,14 +169,23 @@ class LMICloudStrategy extends BaseStrategy {
       attributes: M.config.auth.ldap.attributes
     };
 
+    let person = false;
+
     // Execute the search
     this.client.search('dc=us,dc=lmco,dc=com', opts, (err, result) => {
       result.on('searchEntry', (entry) => {
         M.log.debug('Search complete. Entry found.');
-        self.doAuthentication(entry.object, password, next);
+        person = entry;
       });
       result.on('error', (error) => {
-        next(`error: ${error.message}`);
+        next(`Error: ${error.message}`);
+      });
+      result.on('end', (status) => {
+        M.log.debug(status);
+        if (person)
+          self.doAuthentication(person.object, password, next);
+        else
+          return next('Error: Invalid username or password.');
       });
     });
   }
