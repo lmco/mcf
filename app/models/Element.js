@@ -82,17 +82,17 @@ const ElementSchema = new mongoose.Schema({
     required: true,
     match: RegExp(M.lib.validators.element.id),
     maxlength: [36, 'Element ID is too long'],
-    minlength: [2, 'Element ID is too short'],
-    default: function() {
-      const parts = this.uid.split(':');  // split on the ':'' separator
-      const id = parts[parts.length - 1]; // the last part
-      return id;
-    },
-    set: function() {
-      const parts = this.uid.split(':');  // split on the ':'' separator
-      const id = parts[parts.length - 1]; // the last part
-      return id;
-    }
+    minlength: [2, 'Element ID is too short']
+    // default: function() {
+    //   const parts = this.uid.split(':');  // split on the ':'' separator
+    //   const id = parts[parts.length - 1]; // the last part
+    //   return id;
+    // },
+    // set: function() {
+    //   const parts = this.uid.split(':');  // split on the ':'' separator
+    //   const id = parts[parts.length - 1]; // the last part
+    //   return id;
+    // }
   },
 
   /**
@@ -354,7 +354,7 @@ const Package = Element.discriminator('Package', PackageSchema);
 
 
 // Expose models
-module.exports.Element = Element;
-module.exports.Block = Block;
-module.exports.Relationship = Relationship;
-module.exports.Package = Package;
+module.exports = Element;
+// module.exports.Block = Block;
+// module.exports.Relationship = Relationship;
+// module.exports.Package = Package;

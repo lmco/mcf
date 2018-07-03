@@ -78,23 +78,19 @@ class ElementController {
         searchParams = { uid: elemUID };
       }
 
-      Element.find(searchParams)
+      Element.findOne(searchParams)
       .populate('project parent')
-      .exec((err, elements) => {
+      .exec((err, element) => {
         if (err) {
           return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: err.message })));
         }
 
         // Ensure only one project is returned
-        if (elements.length < 1) {
+        if (!element) {
           return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element not found.' })));
-        }
-        if (elements.length > 1) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'More than one element found.' })));
         }
 
         // Ensure user is part of the project
-        const element = elements[0];
         const members = element.project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
           return reject(new Error('User does not have permission.'));
@@ -130,25 +126,24 @@ class ElementController {
       if (!element.hasOwnProperty('id')) {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (id).' })));
       }
-      if (!element.hasOwnProperty('proj')) {
-        if (!element.proj.hasOwnProperty('id')) {
+      if (!element.hasOwnProperty('project')) {
+        if (!element.project.hasOwnProperty('id')) {
           return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.id).' })));
         }
-        if (!element.proj.hasOwnProperty('org')) {
-          if (!element.proj.org.hasOwnProperty('id')) {
+        if (!element.project.hasOwnProperty('org')) {
+          if (!element.project.org.hasOwnProperty('id')) {
             return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org.id).' })));
           }
         }
       }
-
       // Ensure all pieces of data are strings
       if (typeof element.id !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element ID is not a string.' })));
       }
-      if (typeof element.proj.id !== 'string') {
+      if (typeof element.project.id !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
       }
-      if (typeof element.proj.org.id !== 'string') {
+      if (typeof element.project.org.id !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
       if (element.hasOwnProperty('name')) {
@@ -161,8 +156,8 @@ class ElementController {
       // TODO: Check element parent for valid data
 
       const elemID = M.lib.sani.html(element.id);
-      const projID = M.lib.sani.html(element.proj.id);
-      const orgID = M.lib.sani.html(element.proj.org.id);
+      const projID = M.lib.sani.html(element.project.id);
+      const orgID = M.lib.sani.html(element.project.org.id);
       const elemUID = `${orgID}:${projID}:${elemID}`;
       let elemName = null;
       if (element.hasOwnProperty('name')) {
