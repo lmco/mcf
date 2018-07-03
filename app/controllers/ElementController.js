@@ -64,7 +64,6 @@ class ElementController {
 
       ProjController.findProject(reqUser, orgID, projID)
       .then((project) => {
-
         // Ensure user is part of the project
         const members = project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {

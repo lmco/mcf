@@ -37,7 +37,7 @@ let proj = null;
  *       Main
  *------------------------------------*/
 
- describe(name, function() {
+describe(name, function() {
   /**
    * This function runs before all the tests in this test suite.
    */
@@ -59,14 +59,14 @@ let proj = null;
 
       user = retUser;
 
-      const orgData =  {
+      const orgData = {
         id: 'empire',
         name: 'Galactic Empire'
       };
       OrgController.createOrg(user, orgData)
       .then((retOrg) => {
         org = retOrg;
-        ProjController.createProject(user, { id: 'deathstar', name: 'Death Star', org: { id: org.id }})
+        ProjController.createProject(user, { id: 'deathstar', name: 'Death Star', org: { id: org.id } })
         .then((retProj) => {
           proj = retProj;
           done();
@@ -79,7 +79,7 @@ let proj = null;
       .catch((orgError) => {
         chai.expect(orgError.message).to.equal(null);
         done();
-      })
+      });
     });
   });
 
@@ -88,7 +88,7 @@ let proj = null;
    */
   after(function(done) {
     // Remove the project and org together
-    OrgController.removeOrg(user, org.id, {soft: false})
+    OrgController.removeOrg(user, org.id, { soft: false })
     .then((retOrg) => {
       // Once db items are removed, close the db connection and finish
       mongoose.connection.close();
@@ -101,7 +101,8 @@ let proj = null;
   });
 
   it('should create an element', createElement);
-  it('should find an element', findElements);
+  it('should find all elements for a project', findElements);
+  it('should find an element', findElement);
 });
 
 
@@ -151,10 +152,22 @@ function findElements(done) {
     const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
-  })
+  });
 }
 
-
-
-
-
+/**
+ * Finds a single element
+ */
+function findElement(done) {
+  ElemController.findElement(user, org.id, proj.id, 'elem0')
+  .then((retElem) => {
+    chai.expect(retElem.name).to.equal('Death Star Arbitrary Element');
+    chai.expect(retElem.id).to.equal('elem0');
+    done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
