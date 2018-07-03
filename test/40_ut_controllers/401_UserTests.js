@@ -25,7 +25,7 @@
   * USERS FOUND IN THE FINDUSERS TEST RUN.
   */
 
-  //LOOK AT FAKE DELETE USER
+// LOOK AT FAKE DELETE USER
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
@@ -110,7 +110,6 @@ describe(name, function() {
     const username = 'darthsidious';
     UserController.deleteUser(reqUser, username)
     .then(function(delUser) {
-      // console.log('I am here');
       chai.expect(delUser).to.equal('darthsidious');
       mongoose.connection.close();
       done();
@@ -130,7 +129,6 @@ describe(name, function() {
       // });
     })
     .catch(function(err) {
-      console.log(err);
       chai.expect(err).to.equal(null);
       mongoose.connection.close();
       done();
@@ -148,9 +146,9 @@ describe(name, function() {
   it('should reject updating a user that does not exist', updateNoUser).timeout(3000);
   it('should reject update from non A user', updateAttempt).timeout(3000);
   it('should find user', findUser).timeout(3000);
-  //it('should reject deleting a user that doesnt exist', fakeDelete).timeout(3000);
+  // it('should reject deleting a user that doesnt exist', fakeDelete).timeout(3000);
   it('should reject deleting a user with a non admin user', nonADelete).timeout(3000);
-  //it('should reject deleting themselves', deleteSelf).timeout(3000);
+  // it('should reject deleting themselves', deleteSelf).timeout(3000);
   it('should delete user created', deleteUser).timeout(3000);
   it('should delete second user created', deleteUser02).timeout(3000);
   it('should delete admin user created', deleteAUser).timeout(3000);
@@ -255,7 +253,7 @@ function nonACreate(done) {
   };
   UserController.createUser(nonAUser, userData)
   .then(function(newUser) {
-    chai.assert(true===false);
+    chai.assert(true === false);
     done();
   })
   .catch(function(err) {
@@ -446,7 +444,7 @@ function findUser(done) {
 // }
 
 /*
-* Attempts deleting the user that 
+* Attempts deleting the user that
 * with a non admin user.
 */
 
@@ -454,7 +452,7 @@ function nonADelete(done) {
   const username = 'lskywalker';
   UserController.deleteUser(nonAUser, username)
   .then(function(delUser) {
-    chai.assert(true===false);
+    chai.assert(true === false);
     done();
   })
   .catch(function(err) {
@@ -479,7 +477,6 @@ function nonADelete(done) {
 //     done();
 //   });
 // }
-
 
 
 /*

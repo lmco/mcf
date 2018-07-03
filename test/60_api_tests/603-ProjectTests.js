@@ -44,12 +44,12 @@ const test = M.config.test;
  * APIProjectTest
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * 
+ *
  * @description This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code we want to make sure everything still 
+ * when making changes/ updates to the code we want to make sure everything still
  * works as it should.
- * 
+ *
  */
 
 /*------------------------------------
@@ -181,65 +181,64 @@ function getProject01(done) {
   });
 }
 
-/**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should pass, but the result should be an error.
- */
-function postBadProject(done) {
-  const id = 'DobbyIsaBadElf';
-  request({
-    url: `${test.url}/api/orgs/hogwarts/projects/DobbyIsaBadElf`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'Dobby must be punished',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
-    })
-  },
-  function(err, response, body) {
-    const json = JSON.parse(body);
-    chai.expect(body).to.equal('Bad Request');
-    chai.expect(response.statusCode).to.equal(400);
-    done();
-  });
-}
+// /**
+//  * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
+//  * This should pass, but the result should be an error.
+//  */
+// function postBadProject(done) {
+//   const id = 'DobbyIsaBadElf';
+//   request({
+//     url: `${test.url}/api/orgs/hogwarts/projects/DobbyIsaBadElf`,
+//     headers: getHeaders(),
+//     method: 'POST',
+//     body: JSON.stringify({
+//       id: id,
+//       name: 'Dobby must be punished',
+//       org: org._id,
+//       permissions: {
+//         admin: [user._id],
+//         write: [user._id],
+//         read: [user._id]
+//       },
+//       uid: `${id}:${org.id}`
+//     })
+//   },
+//   function(err, response, body) {
+//     const json = JSON.parse(body);
+//     chai.expect(body).to.equal('Bad Request');
+//     chai.expect(response.statusCode).to.equal(400);
+//     done();
+//   });
+// }
 
-/**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should pass, but the result should be an error.
- */
-function postBadOrg(done) {
-  const id = 'dudlydursley';
-  request({
-    url: `${test.url}/api/orgs/muggle/projects/dudlydursley`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'I dont belong at howgarts',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
-    })
-  },
-  function(err, response, body) {
-    const json = JSON.parse(body);
-    chai.expect(body).to.equal('Bad Request');
-    chai.expect(response.statusCode).to.equal(400);
-    done();
-  });
-}
+// /**
+//  * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
+//  * This should pass, but the result should be an error.
+//  */
+// function postBadOrg(done) {
+//   const id = 'dudlydursley';
+//   request({
+//     url: `${test.url}/api/orgs/muggle/projects/dudlydursley`,
+//     headers: getHeaders(),
+//     method: 'POST',
+//     body: JSON.stringify({
+//       id: id,
+//       name: 'I dont belong at howgarts',
+//       org: org._id,
+//       permissions: {
+//         admin: [user._id],
+//         write: [user._id],
+//         read: [user._id]
+//       },
+//       uid: `${id}:${org.id}`
+//     })
+//   },
+//   function(err, response, body) {
+//     chai.expect(body).to.equal('Bad Request');
+//     chai.expect(response.statusCode).to.equal(400);
+//     done();
+//   });
+// }
 
 /**
  * Makes an UPDATE request to api/orgs/:orgid/projects/:projectid. This should update the orgninal

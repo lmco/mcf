@@ -451,7 +451,6 @@ function getUserRoles(done) {
   });
 }
 
-<<<<<<< HEAD
 // /**
 //  * Tests retrieving all members roles for a specified project
 //  */
@@ -467,30 +466,10 @@ function getUserRoles(done) {
 //     done();
 //   })
 //   .catch((error) => {
-//     chai.expect(error).to.equal(null);
+//     const err = JSON.parse(error.message);
+//     chai.expect(err.description).to.equal(null);
 //   });
 // }
-=======
-/**
- * Tests retrieving all members roles for a specified project
- */
-function getMembers(done) {
-  OrgController.findAllPermissions(user, org.id.toString())
-  .then((members) => {
-    chai.expect(members.msmith.read).to.equal(true);
-    chai.expect(members.msmith.write).to.equal(true);
-    chai.expect(members.msmith.admin).to.equal(false);
-    chai.expect(members.rsanchez.read).to.equal(true);
-    chai.expect(members.rsanchez.write).to.equal(true);
-    chai.expect(members.rsanchez.admin).to.equal(true);
-    done();
-  })
-  .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
-  });
-}
->>>>>>> master
 
 /*
  * Non-admin try to change a users role
