@@ -40,6 +40,7 @@ let org = null;
  *  -string for name
  *  -string for org
  *  -Set permissions for a user
+ *  -other tests
  */
 
 /*------------------------------------
