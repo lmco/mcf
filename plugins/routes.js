@@ -39,6 +39,7 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   M.log.info(`Cloning plugin ${metadata.name} from ${metadata.repository} ...`);
   
   // Determine if plugin is local or from git
+  execSync(`chmod 400 ${metadata.deployKey}`)
   var cmd;
   if (metadata.repository.substr(metadata.repository.length - 4) == ".git"){
     const command = [
