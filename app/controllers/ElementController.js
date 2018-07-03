@@ -21,6 +21,8 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.load('controllers/ProjectController');
 const Element = M.load('models/Element');
 
+console.log(Element);
+
 /**
  * @class  APIController
  *

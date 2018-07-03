@@ -355,7 +355,7 @@ const Package = Element.discriminator('Package', PackageSchema);
 
 
 // Expose models
-module.exports = Element;
-// module.exports.Block = Block;
-// module.exports.Relationship = Relationship;
-// module.exports.Package = Package;
+module.exports.Element = Element;
+module.exports.Block = Block;
+module.exports.Relationship = Relationship;
+module.exports.Package = Package;
