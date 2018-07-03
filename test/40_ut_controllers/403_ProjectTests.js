@@ -293,8 +293,8 @@ function createLongId(done) {
     chai.assert(true === false);
     done();
   })
-  .catch((error) => {
-    chai.assert(error.message.startsWith('Project validation failed:'));
+  .catch((err) => {
+    chai.expect(JSON.parse(err.message).description).to.equal('Save failed.');
     done();
   });
 }
@@ -365,7 +365,7 @@ function createPeriodName(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err.message).to.equal('Project Name is not valid.');
+    chai.expect(JSON.parse(err.message).description).to.equal('Project name is not valid.');
     done();
   });
 }
@@ -389,7 +389,7 @@ function recreateProject(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err.message).to.equal('Project already exists.');
+    chai.expect(JSON.parse(err.message).description).to.equal('Project already exists.');
     done();
   });
 }
@@ -408,11 +408,11 @@ function noId(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then((error) => {
-    chai.expect(error).to.equal('Project ID is not valid.');
+    chai.assert(true === false);
     done();
   })
   .catch((err) => {
-    chai.expect(err.message).to.equal('Project ID is not valid.');
+    chai.expect(JSON.parse(err.message).description).to.equal('Project ID is not valid.');
     done();
   });
 }
@@ -431,11 +431,11 @@ function noName(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then((error) => {
-    chai.expect(error).to.equal('Project Name is not valid.');
+    chai.assert(true === false);
     done();
   })
   .catch((err) => {
-    chai.expect(err.message).to.equal('Project Name is not valid.');
+    chai.expect(JSON.parse(err.message).description).to.equal('Project name is not valid.');
     done();
   });
 }
@@ -454,11 +454,11 @@ function noOrg(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then((error) => {
-    chai.expect(error).to.equal('Org not found.');
+    chai.assert(true === false);
     done();
   })
   .catch((err) => {
-    chai.expect(err.message).to.equal('Org not found.');
+    chai.expect(JSON.parse(err.message).description).to.equal('Org not found.');
     done();
   });
 }
@@ -478,11 +478,11 @@ function nonACreator(done) {
   };
   ProjController.createProject(nonAuser, projData)
   .then(function(error) {
-    chai.expect(error.message).to.equal('User does not have permissions.');
+    chai.assert(true === false);
     done();
   })
   .catch(function(err) {
-    chai.expect(err.message).to.equal('User does not have permissions.');
+    chai.expect(JSON.parse(err.message).description).to.equal('User does not have permissions.');
     done();
   });
 }
@@ -499,7 +499,7 @@ function findProj(done) {
   ProjController.findProject(allSeeingUser, orgId, projId)
   .then(function(proj) {
     chai.expect(proj.id).to.equal('prtlgn');
-    chai.expect(proj.name).to.equal('portal gun');
+    chai.expect(proj.name).to.equal('portal gun changed again');
     done();
   })
   .catch(function(err) {
@@ -524,7 +524,7 @@ function noProj(done) {
   })
   .catch(function(err) {
     // chai.expect(error).to.not.equal(null);
-    chai.expect(err.message).to.equal('Project not found');
+    chai.expect(JSON.parse(err.message).description).to.equal('Project not found.');
     done();
   });
 }
@@ -539,11 +539,11 @@ function nonAUser(done) {
   const projId = 'prtlgn';
   ProjController.findProject(nonAuser, orgId, projId)
   .then(function(error) {
-    chai.expect(error).to.equal('User does not have permission.');
+    chai.assert(true === false);
     done();
   })
   .catch(function(err) {
-    chai.expect(err.message).to.equal('User does not have permission.');
+    chai.expect(JSON.parse(err.message).description).to.equal('User does not have permission.');
     done();
   });
 }
@@ -590,7 +590,7 @@ function updateNonA(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err.message).to.equal('User does not have permissions.');
+    chai.expect(JSON.parse(err.message).description).to.equal('User does not have permission.');
     done();
   });
 }
@@ -691,12 +691,12 @@ function deleteProject02(done) {
       done();
     })
     .catch((err2) => {
-      chai.expect(err2.message).to.equal('Project not found');
+      chai.expect(JSON.parse(err2.message).description).to.equal('Project not found.');
       done();
     });
   })
   .catch((err) => {
-    chai.expect(err.message).to.equal('Project not found');
+    chai.expect(JSON.parse(err.message).description).to.equal('Project not found');
     done();
   });
 }
@@ -713,7 +713,7 @@ function deleteOthers(done) {
       done();
     })
     .catch((error) => {
-      chai.expect(error.message).to.equal('Project not found');
+      chai.expect(JSON.parse(error.message).description).to.equal('Project not found.');
       ProjController.removeProject(allSeeingUser, org.id, 'vlongnametwo', { soft: false })
       .then(() => {
         ProjController.findProject(allSeeingUser, org.id, 'vlongnametwo')
@@ -722,7 +722,7 @@ function deleteOthers(done) {
           done();
         })
         .catch((err2) => {
-          chai.expect(err2.message).to.equal('Project not found');
+          chai.expect(JSON.parse(err2.message).description).to.equal('Project not found.');
           done();
         });
       })
