@@ -32,6 +32,60 @@ const Element = M.load('models/Element');
 class ElementController {
 
   /**
+   * @description  This function takes a user, orgID, and projID
+   * and returns all elements attached to the project.
+   *
+   * @example
+   * ElementController.findElements('austin', 'lockheed', 'mbee')
+   * .then(function(element) {
+   *   // do something with the element
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The user object of the requesting user.
+   * @param  {String} The organization ID.
+   * @param  {String} The project ID.
+   */
+  static findElements(reqUser, organizationID, projectID) {
+    return new Promise((resolve, reject) => {
+      // Ensure all incoming IDs are strings
+      if (typeof organizationID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      }
+      if (typeof projectID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      }
+
+      const orgID = M.lib.sani.sanitize(organizationID);
+      const projID = M.lib.sani.sanitize(projectID);
+
+      ProjController.findProject(reqUser, orgID, projID)
+      .then((project) => {
+
+        // Ensure user is part of the project
+        const members = project.permissions.read.map(u => u._id.toString());
+        if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
+          return reject(new Error('User does not have permission.'));
+        }
+
+        Element.find({ project: project._id })
+        .populate('parent project')
+        .exec((err, elements) => {
+          if (err) {
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
+          }
+
+          return resolve(elements);
+        });
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
+  /**
    * @description  This function takes a user, orgID, projID, elementID
    * and optional boolean flag and returns the element if it's found.
    *
@@ -82,7 +136,7 @@ class ElementController {
       .populate('project parent')
       .exec((err, element) => {
         if (err) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: err.message })));
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
         }
 
         // Ensure only one project is returned

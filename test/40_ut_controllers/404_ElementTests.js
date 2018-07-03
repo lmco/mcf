@@ -101,7 +101,7 @@ let proj = null;
   });
 
   it('should create an element', createElement);
-  // it('should succeed', testTest);
+  it('should find an element', findElements);
 });
 
 
@@ -131,15 +131,27 @@ function createElement(done) {
     done();
   })
   .catch((error) => {
-    console.log(error);
     const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
   });
 }
 
-function testTest(done) {
-  done();
+/**
+ * Finds all elements for a project
+ */
+function findElements(done) {
+  ElemController.findElements(user, org.id, proj.id)
+  .then((retElems) => {
+    chai.expect(retElems.length).to.equal(1);
+    chai.expect(retElems[0].id).to.equal('elem0');
+    done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  })
 }
 
 
