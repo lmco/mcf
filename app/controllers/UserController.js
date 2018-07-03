@@ -48,7 +48,7 @@ class UserController {
       .exec((err, users) => {
         // Check if error occured
         if (err) {
-          return reject(err);
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
         }
         // Convert to public user data
         const publicUsers = users.map(u => u.getPublicData());
@@ -71,7 +71,7 @@ class UserController {
       .exec((err, user) => {
         // Check if error occured
         if (err) {
-          return reject(err);
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
         }
 
         // Otherwise return 200 and the user's public JSON
@@ -90,17 +90,17 @@ class UserController {
     return new Promise(((resolve, reject) => {
       // Error check - make sure the user is defined
       if (!requestingUser) {
-        return reject(new Error('Requesting user is not defined.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Requesting user is not defined.' })));
       }
 
       // Make sure user is an admin
       if (!requestingUser.admin) {
-        return reject(new Error('User is not an admin.'));
+        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
       }
 
       // New users require a username
       if (!newUser.hasOwnProperty('username')) {
-        return reject(new Error('Username not provided.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Username not provided.' })));
       }
 
       User.find({ username: M.lib.sani.sanitize(newUser.username) })
@@ -112,7 +112,7 @@ class UserController {
 
         // Make sure user doesn't already exist
         if (users.length >= 1) {
-          return reject(new Error('User already exists'));
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'User already exists.' })));
         }
         // console.log(M.lib.sani.sanitize(newUser));
         // Create the new user
@@ -121,7 +121,7 @@ class UserController {
         const user = new User(M.lib.sani.sanitize(newUser));
         user.save((saveErr) => {
           if (saveErr) {
-            return reject(saveErr);
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
           }
           // console.log(user);
           return resolve(user);
@@ -138,12 +138,12 @@ class UserController {
     return new Promise(((resolve, reject) => {
       // Error check - make sure the user is defined
       if (!requestingUser) {
-        return reject(new Error('Requesting user is not defined'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Requesting user is not defined.' })));
       }
 
       // Make sure user is an admin
       if (!requestingUser.admin) {
-        return reject(new Error('User is not an admin'));
+        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
       }
 
       // Check if user exists
@@ -156,11 +156,11 @@ class UserController {
         }
         // Fail, too many users found. This should never get hit
         if (users.length > 1) {
-          return reject(new Error('Too any users found'));
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Too many users found.' })));
         }
         // Fail, user does not exist
         if (users.length < 1) {
-          return reject(new Error('User does not exist'));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'User does not exist.' })));
         }
 
         const user = users[0];
@@ -179,7 +179,7 @@ class UserController {
         // Save the user
         user.save((saveErr, updatedUser) => {
           if (saveErr) {
-            return reject(saveErr);
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
           }
           return resolve(updatedUser.getPublicData());
         });
@@ -195,18 +195,18 @@ class UserController {
     return new Promise(((resolve, reject) => {
       // Error check - make sure the user is defined
       if (!requestingUser) {
-        return reject(new Error('Requesting user is not defined.'));
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Requesting user is not defined.' })));
       }
 
       // Make sure user is an admin
       if (!requestingUser.admin) {
-        return reject(new Error('User is not an admin.'));
+        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
       }
 
       // Error check - prevent user from being stupid
       if (requestingUser.username === usernameToDelete) {
         M.log.warn(`${requestingUser.username} tried to delete themselves.`);
-        return reject(new Error('User cannot delete self.'));
+        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot delete themselves.' })));
       }
 
       // Do the deletion
@@ -214,7 +214,7 @@ class UserController {
       .populate()
       .exec((err) => {
         if (err) {
-          return reject(err);
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find and delete failed.' })));
         }
         return resolve(usernameToDelete);
       });

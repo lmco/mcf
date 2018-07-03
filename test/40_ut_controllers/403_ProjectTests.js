@@ -185,8 +185,9 @@ function createProject(done) {
     chai.expect(proj.name).to.equal('portal gun');
     done();
   })
-  .catch((err) => {
-    chai.expect(err.message).to.equal(null);
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
     done();
   });
 }
@@ -197,8 +198,9 @@ function updateFieldError(done) {
     chai.expect(typeof project).to.equal('undefined');
     done();
   })
-  .catch((updateProjErr) => {
-    chai.expect(updateProjErr.message).to.equal('Users cannot update [id] of Projects.');
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal('Users cannot update [id] of Projects.');
     done();
   });
 }
@@ -209,8 +211,9 @@ function updateTypeError(done) {
     chai.expect(typeof project).to.equal('undefined');
     done();
   })
-  .catch((updateProjErr) => {
-    chai.expect(updateProjErr.message).to.equal('The Project [name] is not of type String');
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal('The Project [name] is not of type String');
     done();
   });
 }
@@ -221,8 +224,9 @@ function updateProject(done) {
     chai.expect(project.name).to.equal('portal gun changed');
     done();
   })
-  .catch((updateProjErr) => {
-    chai.expect(updateProjErr).to.equal(null);
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
     done();
   });
 }
@@ -236,13 +240,15 @@ function updateProjectObject(done) {
       chai.expect(projectUpdated.name).to.equal('portal gun changed again');
       done();
     })
-    .catch((updateProjErr) => {
-      chai.expect(updateProjErr).to.equal(null);
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal(null);
       done();
     });
   })
-  .catch((findProjErr) => {
-    chai.expect(findProjErr).to.equal(null);
+  .catch((error2) => {
+    const err = JSON.parse(error2.message);
+    chai.expect(err.description).to.equal(null);
     done();
   });
 }
@@ -636,13 +642,15 @@ function softDeleteProject(done) {
       chai.expect(proj2).to.equal(null);
       done();
     })
-    .catch((err2) => {
-      chai.expect(err2.message).to.equal('Project not found');
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal('Project not found.');
       done();
     });
   })
-  .catch((err) => {
-    chai.expect(err).to.equal(null);
+  .catch((error2) => {
+    const err = JSON.parse(error2.message);
+    chai.expect(err.description).to.equal(null);
     done();
   });
 }
@@ -658,13 +666,15 @@ function deleteProject(done) {
       chai.expect(proj2).to.equal(null);
       done();
     })
-    .catch((err2) => {
-      chai.expect(err2.message).to.equal('Project not found');
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal('Project not found.');
       done();
     });
   })
-  .catch((err) => {
-    chai.expect(err.message).to.equal(null);
+  .catch((error2) => {
+    const err = JSON.parse(error2.message);
+    chai.expect(err.description).to.equal(null);
     done();
   });
 }
