@@ -257,7 +257,8 @@ function nonACreate(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err.message).to.equal('User is not an admin.');
+    json = JSON.parse(err.message)
+    chai.expect(JSON.parse(err.message).description).to.equal('User does not have permission.');
     done();
   });
 }
@@ -286,7 +287,7 @@ function badUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.assert(err.message.startsWith('User validation failed:'));
+    chai.expect(JSON.parse(err.message).description).to.equal('Save failed.');
     done();
   });
 }
@@ -312,7 +313,7 @@ function invalidUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.assert(err.message.startsWith('User validation failed:'));
+    chai.expect(JSON.parse(err.message).description).to.equal('Save failed.');
     done();
   });
 }
@@ -338,7 +339,7 @@ function copyCatUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err.message).to.equal('User already exists');
+    chai.expect(JSON.parse(err.message).description).to.equal('User already exists.');
     done();
   });
 }
@@ -381,7 +382,7 @@ function updateAttempt(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err.message).to.equal('User is not an admin');
+    chai.expect(JSON.parse(err.message).description).to.equal('User does not have permission.');
     done();
   });
 }
@@ -401,7 +402,7 @@ function updateNoUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err.message).to.equal('User does not exist');
+    chai.expect(JSON.parse(err.message).description).to.equal('User does not exist.');
     done();
   });
 }
@@ -456,7 +457,7 @@ function nonADelete(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err.message).to.equal('User is not an admin.');
+    chai.expect(JSON.parse(err.message).description).to.equal('User does not have permission.');
     done();
   });
 }
