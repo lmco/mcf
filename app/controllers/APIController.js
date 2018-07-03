@@ -268,9 +268,9 @@ class APIController {
   static postOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -324,9 +324,9 @@ class APIController {
   static putOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -375,8 +375,10 @@ class APIController {
   static deleteOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
     }
 
     const orgid = M.lib.sani.sanitize(req.params.orgid);
@@ -403,9 +405,9 @@ class APIController {
   static getOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -441,9 +443,9 @@ class APIController {
   static postOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -486,9 +488,9 @@ class APIController {
   static deleteOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -523,9 +525,9 @@ class APIController {
   static getAllOrgRoles(req, res) {
     // If no user in the request
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -625,9 +627,9 @@ class APIController {
   static getProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -657,9 +659,9 @@ class APIController {
   static postProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -742,9 +744,9 @@ class APIController {
   static putProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -819,9 +821,9 @@ class APIController {
   static deleteProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -843,9 +845,9 @@ class APIController {
 
   static getProjectRoles(req, res) {
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -869,9 +871,9 @@ class APIController {
 
   static getProjectRole(req, res) {
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -905,8 +907,10 @@ class APIController {
 
   static postProjectRole(req, res) {
     if (!req.user) {
-      M.log.error('Request does not have a user.');
-      return res.status(500).send('Internal Server Error');
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
     }
 
     // Sanitize Inputs
@@ -942,9 +946,9 @@ class APIController {
 
   static deleteProjectRole(req, res) {
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
@@ -990,9 +994,9 @@ class APIController {
   static getUser(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
@@ -1015,9 +1019,9 @@ class APIController {
   static whoami(req, res) {
     // Sanity check - make sure we have user with a username
     if (!req.user) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request does not have a user.' }));
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
       const err = JSON.parse(error.message);
-      M.log.error(err.description);
       return res.status(err.status).send(err);
     }
 
