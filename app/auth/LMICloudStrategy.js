@@ -99,9 +99,9 @@ class LMICloudStrategy extends BaseStrategy {
       if (err) {
         cb(err);
       }
-      // If user found and not LDAP (e.g. a local user),
+      // If user found and their provider is local,
       // do local authentication
-      if (users.length === 1 && !users[0].isLDAPUser) {
+      if (users.length === 1 && users[0].provider === 'local') {
         M.log.debug('Attempting to authenticate as local user.');
         // Compute the password hash on given password
         const hash = crypto.createHash('sha256');
@@ -118,9 +118,9 @@ class LMICloudStrategy extends BaseStrategy {
         }
       }
       // User is not found locally
-      // or is found and is an LDAP user,
+      // or is found and has the LMICloud provider,
       // try LDAP authentication
-      else if (users.length === 0 || (users.length === 1 && users[0].isLDAPUser)) {
+      else if (users.length === 0 || (users.length === 1 && users[0].provider === 'ldap')) {
         // Bind the resource account we will use to do our lookups
         // The initCallback function kicks off the search/auth process
         self.client.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (bindErr) => {
@@ -169,14 +169,23 @@ class LMICloudStrategy extends BaseStrategy {
       attributes: M.config.auth.ldap.attributes
     };
 
+    let person = false;
+
     // Execute the search
     this.client.search('dc=us,dc=lmco,dc=com', opts, (err, result) => {
       result.on('searchEntry', (entry) => {
         M.log.debug('Search complete. Entry found.');
-        self.doAuthentication(entry.object, password, next);
+        person = entry;
       });
       result.on('error', (error) => {
-        next(`error: ${error.message}`);
+        next(`Error: ${error.message}`);
+      });
+      result.on('end', (status) => {
+        M.log.debug(status);
+        if (person) {
+          return self.doAuthentication(person.object, password, next);
+        }
+        return next('Error: Invalid username or password.');
       });
     });
   }
@@ -230,7 +239,7 @@ class LMICloudStrategy extends BaseStrategy {
       const initData = {
         username: ldapUser[M.config.auth.ldap.username_attribute],
         password: 'NO_PASSWORD',
-        isLDAPUser: true
+        provider: 'ldap'
       };
 
       const user = (users.length === 0) ? new User(initData) : users[0];
