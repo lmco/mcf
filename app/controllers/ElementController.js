@@ -327,7 +327,7 @@ class ElementController {
       const elemID = M.lib.sani.html(elementID);
 
       // Find the element, even if it has already been soft deleted
-      ElementController.findElement(reqUser, orgID, projID, elemID, softDelete)
+      ElementController.findElement(reqUser, orgID, projID, elemID, true)
       .then((element) => {
         // Check Permissions
         const admins = element.project.permissions.admin.map(u => u._id.toString());

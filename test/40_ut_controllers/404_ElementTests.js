@@ -104,6 +104,7 @@ describe(name, function() {
   it('should find all elements for a project', findElements);
   it('should find an element', findElement);
   it('should soft delete an element', softDeleteElement);
+  it('should hard delete an element', hardDeleteElement);
 });
 
 
@@ -181,6 +182,43 @@ function softDeleteElement(done) {
   .then((retElem) => {
     chai.expect(retElem.deleted).to.equal(true);
     ElemController.findElement(user, org.id, proj.id, 'elem0')
+    .then((retElem2) => {
+      chai.expect(retElem2).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal('Element not found.');
+      chai.expect(err.status).to.equal(404);
+
+      // Search for soft deleted elements
+      ElemController.findElement(user, org.id, proj.id, 'elem0', true)
+      .then((retElem2) => {
+        chai.expect(retElem2.id).to.equal('elem0');
+        done();
+      })
+      .catch((error2) => {
+        const err = JSON.parse(error2.message);
+        chai.expect(err.description).to.equal(null);
+        done();
+      });
+    });
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Hard delete an element
+ */
+function hardDeleteElement(done) {
+  ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: false })
+  .then((retElem) => {
+    chai.expect(retElem.deleted).to.equal(true);
+    ElemController.findElement(user, org.id, proj.id, 'elem0', true)
     .then((retElem2) => {
       chai.expect(retElem2).to.equal(null);
       done();
