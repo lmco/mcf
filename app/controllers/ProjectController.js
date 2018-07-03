@@ -87,7 +87,7 @@ class ProjectController {
 
           // Error Check - Ensure at least one project is found
           if (projects.length < 1) {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'No projects found.' })));
+            return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'No projects found.' })));
           }
 
 
@@ -154,7 +154,7 @@ class ProjectController {
             projects[proj].deleted = true;
             projects[proj].save((saveErr) => {
               if (saveErr) {
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
+                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
               }
             });
           }
@@ -169,7 +169,7 @@ class ProjectController {
           // Hard-delete any projects with the matching orgID
           Project.deleteMany({ org: org._id }, (deleteError, projectsDeleted) => {
             if (deleteError) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: deleteError.message })));
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
             }
 
             return resolve(projectsDeleted);
@@ -226,12 +226,12 @@ class ProjectController {
       .exec((err, projects) => {
         // Error Check - Database/Server Error
         if (err) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: err.message })));
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
         }
 
         // Error Check - Ensure only 1 project is found
         if (projects.length < 1) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project not found.' })));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Project not found.' })));
         }
 
         // Check Permissions
@@ -335,7 +335,7 @@ class ProjectController {
 
             newProject.save((saveErr, projectUpdated) => {
               if (saveErr) {
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
+                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
               }
               // Return success and the JSON object
               return resolve(projectUpdated);
@@ -446,7 +446,7 @@ class ProjectController {
         // Save updated org
         project.save((saveProjErr) => {
           if (saveProjErr) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveProjErr.message })));
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
           }
 
           // Return the updated project object
@@ -519,7 +519,7 @@ class ProjectController {
             project.save((saveErr) => {
               if (saveErr) {
                 // If error occurs, return it
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
+                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
               }
 
               // Return updated project
@@ -534,7 +534,7 @@ class ProjectController {
           // Remove the Project
           Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
             if (removeProjErr) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: removeProjErr.message })));
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
             }
             return resolve(projectRemoved);
           });
@@ -626,7 +626,7 @@ class ProjectController {
       ProjectController.findAllPermissions(reqUser, orgID, projectID)
       .then((permissionList) => {
         if (!permissionList.hasOwnProperty(user.username)) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'User not found.' })));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'User not found.' })));
         }
 
         return resolve(permissionList[user.username]);
@@ -689,7 +689,7 @@ class ProjectController {
 
         // Error Check - Make sure that a valid permissions type was passed
         if (!permissionLevels.includes(permType)) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Permission type not found.' })));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Permission type not found.' })));
         }
 
         // Error Check - Do not allow admin user to downgrade their permissions
@@ -730,7 +730,7 @@ class ProjectController {
           pushPullRoles,
           (saveProjErr, projectSaved) => {
             if (saveProjErr) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveProjErr.message })));
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
             }
             // Check if user has org read permissions
             OrgController.findPermissions(reqUser, setUser, orgID)

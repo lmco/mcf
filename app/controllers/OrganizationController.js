@@ -55,7 +55,7 @@ class OrganizationController {
       .exec((err, orgs) => {
         // If error occurs, return it
         if (err) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: err.message })));
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
         }
         // Resolve the list of orgs
         return resolve(orgs);
@@ -102,12 +102,12 @@ class OrganizationController {
       .exec((err, org) => {
         // If error occurs, return it
         if (err) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: err.message })));
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
         }
 
         // If no org is found, reject
         if (!org) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Org not found.' })));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Org not found.' })));
         }
 
         // If user is not a member
@@ -192,7 +192,7 @@ class OrganizationController {
           // Save and resolve the new error
           newOrg.save((saveOrgErr) => {
             if (saveOrgErr) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveOrgErr.message })));
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
             }
             resolve(newOrg);
           });
@@ -299,7 +299,7 @@ class OrganizationController {
         org.save((saveOrgErr) => {
           if (saveOrgErr) {
             // If error occurs, return it
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveOrgErr.message })));
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
           }
           // Return updated org
           return resolve(org);
@@ -412,7 +412,7 @@ class OrganizationController {
           org.save((saveErr) => {
             if (saveErr) {
               // If error occurs, return it
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
             }
             return resolve(org);
           });
@@ -424,7 +424,7 @@ class OrganizationController {
         .populate()
         .exec((err, org) => {
           if (err) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: err.message })));
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
           }
           return resolve(org);
         });
@@ -540,7 +540,7 @@ class OrganizationController {
         org.save((saveErr) => {
           if (saveErr) {
           // If error occurs, return it
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
           }
           // Return updated org
           return resolve(org);
