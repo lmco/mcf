@@ -1201,7 +1201,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
 .get(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.getElement
 )
 .post(
   AuthController.authenticate.bind(AuthController),
