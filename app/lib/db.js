@@ -38,7 +38,7 @@ module.exports.connect = function() {
   let connectURL = 'mongodb://';
 
   // Create connection with or without authentication
-  if (dbUsername !== '' && dbPassword !== '') {
+  if ((dbUsername !== '' && dbPassword !== '') && (dbUsername !== undefined && dbPassword !== undefined)) {
     connectURL = `${connectURL + dbUsername}:${dbPassword}@`;
   }
   connectURL = `${connectURL + url}:${dbPort}/${dbName}`;
