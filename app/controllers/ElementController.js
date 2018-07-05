@@ -50,7 +50,7 @@ class ElementController {
    * @param  {String} The organization ID.
    * @param  {String} The project ID.
    */
-  static findElements(reqUser, organizationID, projectID, elementType = '') {
+  static findElements(reqUser, organizationID, projectID) {
     return new Promise((resolve, reject) => {
       // Ensure all incoming IDs are strings
       if (typeof organizationID !== 'string') {
@@ -63,67 +63,24 @@ class ElementController {
       const orgID = M.lib.sani.sanitize(organizationID);
       const projID = M.lib.sani.sanitize(projectID);
 
-      // Get the element type
-      let type = null;
-      if (elementType !== '') {
-        // The element type was specified
-        Object.keys(Element).forEach((k) => {
-          if (elementType === Element[k].modelName) {
-            type = k;
-          }
-        });
-      }
-      else {
-        // The type wasn't specified, we will check all
-        type = '';
-      }
-
       // Find the project
       ProjController.findProject(reqUser, orgID, projID)
       .then((project) => {
         // Ensure user is part of the project
         const members = project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error('User does not have permission.'));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
         }
 
-        // Find the elements
-        if (type !== '' && type !== null) {
-          Element[type].find({ project: project._id })
-          .populate('parent project')
-          .exec((err, elements) => {
-            if (err) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
-            }
+        Element.Element.find({ project: project._id })
+        .populate('parent project')
+        .exec((err, elements) => {
+          if (err) {
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
+          }
 
-            return resolve(elements);
-          });
-        }
-        else {
-          let retElements = [];
-          const numTypes = Object.keys(Element).length;
-          let iter = 0;
-
-          Object.keys(Element).forEach((i) => {
-            Element[i].find({ project: project._id })
-            .populate('parent project')
-            .exec((err, elements) => {
-              iter++;
-
-              if (err) {
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
-              }
-
-              // Append new elements to the list
-              retElements = retElements.concat(elements);
-
-              // If all the element types have been searched
-              if (iter === numTypes) {
-                return resolve(retElements);
-              }
-            });
-          });
-        }
+          return resolve(elements);
+        });
       })
       .catch((error) => reject(error));
     });
@@ -134,7 +91,7 @@ class ElementController {
    * and optional boolean flag and returns the element if it's found.
    *
    * @example
-   * ElementController.findElement('austin', 'lockheed', 'mbee', 'elem1', 'block', false)
+   * ElementController.findElement('austin', 'lockheed', 'mbee', 'elem1', false)
    * .then(function(element) {
    *   // do something with the element
    * })
@@ -147,11 +104,10 @@ class ElementController {
    * @param  {String} The organization ID.
    * @param  {String} The project ID.
    * @param  {String} The element ID.
-   * @parap  {String} The type of element.
    * @param  {Boolean} An optional flag that allows users to search for
    *                   soft deleted projects as well.
    */
-  static findElement(reqUser, organizationID, projectID, elementID, elementType = '', softDeleted = false) {
+  static findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
     return new Promise((resolve, reject) => {
       // Ensure all incoming IDs are strings
       if (typeof organizationID !== 'string') {
@@ -175,83 +131,28 @@ class ElementController {
         searchParams = { uid: elemUID };
       }
 
-      // Get the element type
-      let type = null;
-      if (elementType !== '') {
-        // The element type was specified
-        Object.keys(Element).forEach((k) => {
-          if (elementType === Element[k].modelName) {
-            type = k;
-          }
-        });
-      }
-      else {
-        // The type wasn't specified, we will check all
-        type = '';
-      }
+      Element.Element.findOne(searchParams)
+      .populate('parent project')
+      .exec((findElementError, element) => {
+        if (findElementError) {
+          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
+        }
 
-      // Find the element
-      if (type !== '' && type !== null) {
-        // If an element type is explicitly provided
-        Element[type].findOne(searchParams)
-        .populate('project parent')
-        .exec((err, element) => {
-          if (err) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
-          }
+        // Ensure only one element is returned
+        if (!element) {
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Element not found.' })));
+        }
 
-          // Ensure only one project is returned
-          if (!element) {
-            return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Element not found.' })));
-          }
+        // Ensure user is part of the project
+        const members = element.project.permissions.read.map(u => u._id.toString());
+        if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
+        }
 
-          // Ensure user is part of the project
-          const members = element.project.permissions.read.map(u => u._id.toString());
-          if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
-            return reject(new Error('User does not have permission.'));
-          }
-
-          // Return resulting element
-          return resolve(element);
-        });
-      }
-      else {
-        // If no type was included, search all types
-        const numTypes = Object.keys(Element).length;
-        let iter = 0;
-
-        Object.keys(Element).forEach((i) => {
-          Element[i].findOne(searchParams)
-          .populate('project parent')
-          .exec((err, element) => {
-            iter++;
-
-            // If theres an error, return it
-            if (err) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
-            }
-
-            // If the element is actually found
-            if (element !== null) {
-              // Ensure user is part of the project
-              const members = element.project.permissions.read.map(u => u._id.toString());
-              if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
-                return reject(new Error('User does not have permission.'));
-              }
-
-              // Return resulting element
-              return resolve(element);
-            }
-
-            // No elements found after looping through all elements
-            // Return the 404 message now
-            if (iter === numTypes) {
-              return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Element not found.' })));
-            }
-          });
-        }); // End of for loop
-      } // End of else
-    }); // End of Promise
+        // Return resulting element
+        return resolve(element);
+      });
+    });
   }
 
 
@@ -369,7 +270,7 @@ class ElementController {
         }
 
         // Error check - check if the element already exists
-        ElementController.findElement(reqUser, orgID, projID, elemID, elementType)
+        ElementController.findElement(reqUser, orgID, projID, elemID)
         .then((elem) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element already exists.' }))))
         .catch((error) => {
           // This is ok, we dont want the element to already exist.
@@ -605,7 +506,7 @@ class ElementController {
       const elemID = M.lib.sani.html(elementID);
 
       // Find the element, even if it has already been soft deleted
-      ElementController.findElement(reqUser, orgID, projID, elemID, '', true)
+      ElementController.findElement(reqUser, orgID, projID, elemID, true)
       .then((element) => {
         // Check Permissions
         const admins = element.project.permissions.admin.map(u => u._id.toString());

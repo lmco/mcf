@@ -178,14 +178,12 @@ function createChildElement(done) {
 function findElements(done) {
   ElemController.findElements(user, org.id, proj.id)
   .then((retElems) => {
-    chai.expect(retElems.length).to.equal(3);
-    // chai.expect(retElems[0].id).to.equal('elem0');
-    // chai.expect(retElems[1].id).to.equal('elem1');
-    console.log(retElems);
+    chai.expect(retElems.length).to.equal(2);
+    chai.expect(retElems[0].id).to.equal('elem0');
+    chai.expect(retElems[1].id).to.equal('elem1');
     done();
   })
   .catch((error) => {
-    console.log(error);
     const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
@@ -244,7 +242,7 @@ function softDeleteElement(done) {
       chai.expect(err.status).to.equal(404);
 
       // Search for soft deleted elements
-      ElemController.findElement(user, org.id, proj.id, 'elem0', '', true)
+      ElemController.findElement(user, org.id, proj.id, 'elem0', true)
       .then((retElem2) => {
         chai.expect(retElem2.id).to.equal('elem0');
         done();
@@ -269,8 +267,7 @@ function softDeleteElement(done) {
 function hardDeleteElement(done) {
   ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: false })
   .then((retElem) => {
-    chai.expect(retElem.deleted).to.equal(true);
-    ElemController.findElement(user, org.id, proj.id, 'elem0', '', true)
+    ElemController.findElement(user, org.id, proj.id, 'elem0', true)
     .then((retElem2) => {
       chai.expect(retElem2).to.equal(null);
       done();
@@ -295,8 +292,7 @@ function hardDeleteElement(done) {
 function hardDeleteChildElement(done) {
   ElemController.removeElement(user, org.id, proj.id, 'elem1', { soft: false })
   .then((retElem) => {
-    chai.expect(retElem.deleted).to.equal(true);
-    ElemController.findElement(user, org.id, proj.id, 'elem1', '', true)
+    ElemController.findElement(user, org.id, proj.id, 'elem1', true)
     .then((retElem2) => {
       chai.expect(retElem2).to.equal(null);
       done();
