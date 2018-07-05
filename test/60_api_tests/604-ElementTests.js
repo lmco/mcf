@@ -116,7 +116,7 @@ describe(name, function() {
   it('should create an element', postElement);
   it('should get an element', getElement);
   it('should update an elements name', putElement);
-
+  it('should delete an element', deleteElement);
 });
 
 /**---------------------------------------------------
@@ -174,6 +174,24 @@ function putElement(done) {
     method: 'PUT',
     body: JSON.stringify({
       name: 'Death Star Important Element'
+    })
+  },
+  function(err, response, body) {
+    chai.expect(response.statusCode).to.equal(501);
+    done();
+  });
+}
+
+/**
+ * Makes a DELETE request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ */
+function deleteElement(done) {
+  request({
+    url: `${test.url}/api/orgs/empire/projects/dthstr/elements/0000`,
+    headers: getHeaders(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
     })
   },
   function(err, response, body) {

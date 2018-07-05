@@ -1216,7 +1216,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
 .delete(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.deleteElement
 );
 
 
