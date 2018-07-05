@@ -274,20 +274,34 @@ class ElementController {
   // TODO: Handle an element parent
   static createElement(reqUser, element) {
     return new Promise((resolve, reject) => {
+      // Element ID and Type, Project ID and Org ID are all required
       // Ensure element object data contains all the proper fields
+
+      // Element ID
       if (!element.hasOwnProperty('id')) {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (id).' })));
       }
-      if (!element.hasOwnProperty('project')) {
+      // Project
+      if (element.hasOwnProperty('project')) {
+        // Project ID
         if (!element.project.hasOwnProperty('id')) {
           return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.id).' })));
         }
-        if (!element.project.hasOwnProperty('org')) {
+        // Porject Org
+        if (element.project.hasOwnProperty('org')) {
+          // Org ID
           if (!element.project.org.hasOwnProperty('id')) {
             return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org.id).' })));
           }
         }
+        else {
+          reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org).' })));
+        }
       }
+      else {
+        reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj).' })));
+      }
+      // Element Type
       if (!element.hasOwnProperty('type')) {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (type).' })));
       }
@@ -311,6 +325,12 @@ class ElementController {
       if (typeof element.type !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element type is not a string.' })));
       }
+      if (element.hasOwnProperty('parent')) {
+        // Element parent is not required, so check first if it exists.
+        if (typeof element.parent !== 'string') {
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element parent is not a string.' })));
+        }
+      }
 
       // TODO: Check element parent for valid data
 
@@ -320,8 +340,12 @@ class ElementController {
       const elemUID = `${orgID}:${projID}:${elemID}`;
       const elementType = M.lib.sani.html(element.type);
       let elemName = null;
+      let parentID = null;
       if (element.hasOwnProperty('name')) {
         elemName = M.lib.sani.html(element.name);
+      }
+      if (element.hasOwnProperty('parent')) {
+        parentID = M.lib.sani.html(element.parent);
       }
 
       // Error check - make sure element ID and element name are valid
@@ -365,23 +389,48 @@ class ElementController {
               return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid element type.' })));
             }
 
-            const newElement = new Element[type]({
-              id: elemID,
-              name: elemName,
-              project: proj._id,
-              uid: elemUID,
-              parent: null
-            });
+            if (parentID !== null) {
+              ElementController.findElement(reqUser, orgID, projID, parentID)
+              .then((parent) => {
+                const newElement = new Element[type]({
+                  id: elemID,
+                  name: elemName,
+                  project: proj._id,
+                  uid: elemUID,
+                  parent: parent._id
+                });
 
-            // Save the new element
-            newElement.save((saveErr, elementUpdated) => {
-              if (saveErr) {
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
-              }
+                // Save the new element
+                newElement.save((saveErr, elementUpdated) => {
+                  if (saveErr) {
+                    return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
+                  }
 
-              // Return the element if succesful
-              return resolve(elementUpdated);
-            });
+                  // Return the element if succesful
+                  return resolve(elementUpdated);
+                });
+              })
+              .catch((findParentError) => reject(findParentError));
+            }
+            else {
+              const newElement = new Element[type]({
+                id: elemID,
+                name: elemName,
+                project: proj._id,
+                uid: elemUID,
+                parent: null
+              });
+
+              // Save the new element
+              newElement.save((saveErr, elementUpdated) => {
+                if (saveErr) {
+                  return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
+                }
+
+                // Return the element if succesful
+                return resolve(elementUpdated);
+              });
+            }
           }
           else {
             // Some other error, return it.

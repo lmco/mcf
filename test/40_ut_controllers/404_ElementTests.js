@@ -101,11 +101,13 @@ describe(name, function() {
   });
 
   it('should create an element', createElement);
+  it('should create a child element', createChildElement);
   it('should find all elements for a project', findElements);
   it('should find an element', findElement);
   it('should update an element', updateElement);
-  it('should soft delete an element', softDeleteElement).timeout(10000);
-  it('should hard delete an element', hardDeleteElement).timeout(10000);
+  it('should soft delete an element', softDeleteElement).timeout(5000);
+  it('should hard delete an element', hardDeleteElement).timeout(5000);
+  it('should hard delete the child element', hardDeleteChildElement).timeout(5000);
 });
 
 
@@ -127,12 +129,40 @@ function createElement(done) {
         id: org.id
       }
     },
-    type: 'Element',
-    parent: null
+    type: 'Package'
   };
   ElemController.createElement(user, newElement)
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem0');
+    done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Creates a child element
+ */
+function createChildElement(done) {
+  const newElement = {
+    id: 'elem1',
+    name: 'Death Star Important Element',
+    project: {
+      id: proj.id,
+      org: {
+        id: org.id
+      }
+    },
+    type: 'Element',
+    parent: 'elem0'
+  };
+  ElemController.createElement(user, newElement)
+  .then((retElem) => {
+    chai.expect(retElem.id).to.equal('elem1');
+    chai.expect(retElem.parent).to.not.equal(null);
     done();
   })
   .catch((error) => {
@@ -148,11 +178,14 @@ function createElement(done) {
 function findElements(done) {
   ElemController.findElements(user, org.id, proj.id)
   .then((retElems) => {
-    chai.expect(retElems.length).to.equal(1);
-    chai.expect(retElems[0].id).to.equal('elem0');
+    chai.expect(retElems.length).to.equal(3);
+    // chai.expect(retElems[0].id).to.equal('elem0');
+    // chai.expect(retElems[1].id).to.equal('elem1');
+    console.log(retElems);
     done();
   })
   .catch((error) => {
+    console.log(error);
     const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
@@ -238,6 +271,32 @@ function hardDeleteElement(done) {
   .then((retElem) => {
     chai.expect(retElem.deleted).to.equal(true);
     ElemController.findElement(user, org.id, proj.id, 'elem0', '', true)
+    .then((retElem2) => {
+      chai.expect(retElem2).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal('Element not found.');
+      chai.expect(err.status).to.equal(404);
+      done();
+    });
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Hard delete child element
+ */
+function hardDeleteChildElement(done) {
+  ElemController.removeElement(user, org.id, proj.id, 'elem1', { soft: false })
+  .then((retElem) => {
+    chai.expect(retElem.deleted).to.equal(true);
+    ElemController.findElement(user, org.id, proj.id, 'elem1', '', true)
     .then((retElem2) => {
       chai.expect(retElem2).to.equal(null);
       done();
