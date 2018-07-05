@@ -170,9 +170,8 @@ class ElementController {
    *
    *
    * @param  {User} The user object of the requesting user.
-   * @param  {Object} The JSOn object containing the element data
+   * @param  {Object} The JSON object containing the element data
    */
-  // TODO: Handle an element parent
   static createElement(reqUser, element) {
     return new Promise((resolve, reject) => {
       // Element ID and Type, Project ID and Org ID are all required
@@ -233,8 +232,6 @@ class ElementController {
         }
       }
 
-      // TODO: Check element parent for valid data
-
       const elemID = M.lib.sani.html(element.id);
       const projID = M.lib.sani.html(element.project.id);
       const orgID = M.lib.sani.html(element.project.org.id);
@@ -272,12 +269,10 @@ class ElementController {
         // Error check - check if the element already exists
         ElementController.findElement(reqUser, orgID, projID, elemID)
         .then((elem) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element already exists.' }))))
-        .catch((error) => {
+        .catch((findError) => {
           // This is ok, we dont want the element to already exist.
-          const err = JSON.parse(error.message);
+          const err = JSON.parse(findError.message);
           if (err.description === 'Element not found.') {
-            // Create the new element
-
             // Get the element type
             let type = null;
             Object.keys(Element).forEach((k) => {
@@ -286,14 +281,37 @@ class ElementController {
               }
             });
 
+            // If the given type is not a type we specified
             if (type === null) {
               return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid element type.' })));
             }
-
-            if (parentID !== null) {
+            if (type === 'Relationship') {
+              ElementController.createRelationship(reqUser, orgID, proj,
+                elemID, elemUID, elemName, parentID, element)
+              .then((newElement) => resolve(newElement))
+              .catch((createRelationshipError) => reject(createRelationshipError));
+            }
+            else if (type === 'Package') {
+              ElementController.createPackage(reqUser, orgID, proj,
+                elemID, elemUID, elemName, parentID)
+              .then((newElement) => resolve(newElement))
+              .catch((createRelationshipError) => reject(createRelationshipError));
+            }
+            else if (type === 'Block') {
+              ElementController.createBlock(reqUser, orgID, proj,
+                elemID, elemUID, elemName, parentID)
+              .then((newElement) => resolve(newElement))
+              .catch((createRelationshipError) => reject(createRelationshipError));
+            }
+            else if (parentID !== null) {
               ElementController.findElement(reqUser, orgID, projID, parentID)
               .then((parent) => {
-                const newElement = new Element[type]({
+                // Ensure parent is of type Package
+                if (!parent.type === 'Package') {
+                  return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
+                }
+
+                const newElement = new Element.Element({
                   id: elemID,
                   name: elemName,
                   project: proj._id,
@@ -301,13 +319,13 @@ class ElementController {
                   parent: parent._id
                 });
 
-                // Save the new element
+                  // Save the new element
                 newElement.save((saveErr, elementUpdated) => {
                   if (saveErr) {
-                    return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
+                    return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
                   }
 
-                  ElementController.updateElement(reqUser, orgID, projID, parent.id, {contains: elementUpdated._id})
+                  ElementController.updateParent(reqUser, orgID, projID, parentID, newElement)
                   .then((parentUpdated) => resolve(elementUpdated))
                   .catch((parentUpdateError) => reject(parentUpdateError));
                 });
@@ -315,7 +333,7 @@ class ElementController {
               .catch((findParentError) => reject(findParentError));
             }
             else {
-              const newElement = new Element[type]({
+              const newElement = new Element.Element({
                 id: elemID,
                 name: elemName,
                 project: proj._id,
@@ -323,10 +341,10 @@ class ElementController {
                 parent: null
               });
 
-              // Save the new element
+                // Save the new element
               newElement.save((saveErr, elementUpdated) => {
                 if (saveErr) {
-                  return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
+                  return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
                 }
 
                 // Return the element if succesful
@@ -336,11 +354,278 @@ class ElementController {
           }
           else {
             // Some other error, return it.
-            return reject(error);
+            return reject(findError);
           }
         });
       })
-      .catch((error2) => reject(error2));
+      .catch((findProjectError) => reject(findProjectError));
+    });
+  }
+
+  /**
+   * @description  Handles additional step of creating a relationship
+   *
+   * @example
+   * ElementController.createRelationship({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null, {})
+   * .then(function(element) {
+   *   // return element to create function
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The user object of the requesting user.
+   * @param  {String} The organization ID.
+   * @param  {Project} The project object. Needed for both the id and _id.
+   * @param  {String} The element ID.
+   * @param  {String} The element UID, created in the createProject function.
+   * @param  {String} The element name, may be null.
+   * @param  {String} The parent ID, may be null.
+   * @param  {Object} The JSON object containing the element data. Should contain
+   *                  a source and target field.
+   */
+  static createRelationship(reqUser, orgID, proj, elemID, elemUID, elemName, parentID, elemInfo) {
+    return new Promise((resolve, reject) => {
+      // Check if source, target exist
+      if (!elemInfo.hasOwnProperty('target')) {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Relationship does not have attribute (target).' })));
+      }
+      if (!elemInfo.hasOwnProperty('source')) {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Relationship does not have attribute (source).' })));
+      }
+
+      // Check if source, target are strings
+      if (typeof elemInfo.target !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element target is not a string.' })));
+      }
+      if (typeof elemInfo.source !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project source is not a string.' })));
+      }
+
+      // Sanitize
+      const target = M.lib.sani.html(elemInfo.target);
+      const source = M.lib.sani.html(elemInfo.source);
+
+      // Find the target to make sure it exists
+      ElementController.findElement(reqUser, orgID, proj.id, target)
+      .then((targetElement) => {
+        // Find the source Element
+        ElementController.findElement(reqUser, orgID, proj.id, source)
+        .then((sourceElement) => {
+          if (parentID !== null) {
+            // Find the parent element
+            ElementController.findElement(reqUser, orgID, proj.id, parentID)
+            .then((parentElement) => {
+              // Ensure parent is of type Package
+              if (!parentElement.type === 'Package') {
+                return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
+              }
+
+              const newElement = new Element.Relationship({
+                id: elemID,
+                name: elemName,
+                project: proj._id,
+                uid: elemUID,
+                parent: parentElement._id,
+                target: targetElement._id,
+                source: sourceElement._id
+              });
+
+              // Save the new element
+              newElement.save((saveErr, elementUpdated) => {
+                if (saveErr) {
+                  return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+                }
+
+                // Update the parent elements 'contains' field
+                ElementController.updateParent(reqUser, orgID, proj.id, parentID, newElement)
+                .then((parentUpdated) => resolve(elementUpdated))
+                .catch((parentUpdateError) => reject(parentUpdateError));
+              });
+            })
+            .catch((findParentError) => reject(findParentError));
+          }
+          else {
+            // No parent element was provided
+            const newElement = new Element.Relationship({
+              id: elemID,
+              name: elemName,
+              project: proj._id,
+              uid: elemUID,
+              parent: null,
+              target: targetElement._id,
+              source: sourceElement._id
+            });
+
+            // Save the new element
+            newElement.save((saveErr, elementUpdated) => {
+              if (saveErr) {
+                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+              }
+
+              // Return the element if succesful
+              return resolve(elementUpdated);
+            });
+          }
+        })
+        .catch((findSourceError) => reject(findSourceError));
+      })
+      .catch((findTargetError) => reject(findTargetError));
+    });
+  }
+
+  /**
+   * @description  Handles additional step of creating a package.
+   *
+   * @example
+   * ElementController.createPackage({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null)
+   * .then(function(element) {
+   *   // return element to create function
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The user object of the requesting user.
+   * @param  {String} The organization ID.
+   * @param  {Project} The project object. Needed for both the id and _id.
+   * @param  {String} The element ID.
+   * @param  {String} The element UID, created in the createProject function.
+   * @param  {String} The element name, may be null.
+   * @param  {String} The parent ID, may be null.
+   */
+  static createPackage(reqUser, orgID, project, elemID, elemUID, elemName, parentID) {
+    return new Promise((resolve, reject) => {
+      if (parentID !== null) {
+        // Find the parent element
+        ElementController.findElement(reqUser, orgID, project.id, parentID)
+        .then((parentElement) => {
+          // Ensure parent is of type Package
+          if (!parentElement.type === 'Package') {
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
+          }
+
+          const newElement = new Element.Package({
+            id: elemID,
+            name: elemName,
+            project: project._id,
+            uid: elemUID,
+            parent: parentElement._id
+          });
+
+          // Save the new element
+          newElement.save((saveErr, elementUpdated) => {
+            if (saveErr) {
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+            }
+
+            // Update the parent elements 'contains' field
+            ElementController.updateParent(reqUser, orgID, project.id, parentID, newElement)
+            .then((parentUpdated) => resolve(elementUpdated))
+            .catch((parentUpdateError) => reject(parentUpdateError));
+          });
+        })
+        .catch((findParentError) => reject(findParentError));
+      }
+      else {
+        // No parent element was provided
+        const newElement = new Element.Package({
+          id: elemID,
+          name: elemName,
+          project: project._id,
+          uid: elemUID,
+          parent: null
+        });
+
+        // Save the new element
+        newElement.save((saveErr, elementUpdated) => {
+          if (saveErr) {
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+          }
+
+          // Return the element if succesful
+          return resolve(elementUpdated);
+        });
+      }
+    });
+  }
+
+  /**
+   * @description  Handles additional step of creating a block.
+   *
+   * @example
+   * ElementController.createBlock({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null)
+   * .then(function(element) {
+   *   // return element to create function
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The user object of the requesting user.
+   * @param  {String} The organization ID.
+   * @param  {Project} The project object. Needed for both the id and _id.
+   * @param  {String} The element ID.
+   * @param  {String} The element UID, created in the createProject function.
+   * @param  {String} The element name, may be null.
+   * @param  {String} The parent ID, may be null.
+   */
+  static createBlock(reqUser, orgID, project, elemID, elemUID, elemName, parentID) {
+    return new Promise((resolve, reject) => {
+      if (parentID !== null) {
+        // Find the parent element
+        ElementController.findElement(reqUser, orgID, project.id, parentID)
+        .then((parentElement) => {
+          // Ensure parent is of type Package
+          if (!parentElement.type === 'Package') {
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
+          }
+
+          const newElement = new Element.Block({
+            id: elemID,
+            name: elemName,
+            project: project._id,
+            uid: elemUID,
+            parent: parentElement._id
+          });
+
+          // Save the new element
+          newElement.save((saveErr, elementUpdated) => {
+            if (saveErr) {
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+            }
+
+            // Update the parent elements 'contains' field
+            ElementController.updateParent(reqUser, orgID, project.id, parentID, newElement)
+            .then((parentUpdated) => resolve(elementUpdated))
+            .catch((parentUpdateError) => reject(parentUpdateError));
+          });
+        })
+        .catch((findParentError) => reject(findParentError));
+      }
+      else {
+        // No parent element was provided
+        const newElement = new Element.Block({
+          id: elemID,
+          name: elemName,
+          project: project._id,
+          uid: elemUID,
+          parent: null
+        });
+
+        // Save the new element
+        newElement.save((saveErr, elementUpdated) => {
+          if (saveErr) {
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+          }
+
+          // Return the element if succesful
+          return resolve(elementUpdated);
+        });
+      }
     });
   }
 
@@ -440,7 +725,7 @@ class ElementController {
           element[updateField] = updateVal;
         }
 
-        // Save updated org
+        // Save updated element
         element.save((saveElemErr) => {
           if (saveElemErr) {
             return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
@@ -454,6 +739,45 @@ class ElementController {
     });
   }
 
+  /**
+   * @description  This function updates the parent element.
+   *
+   * @example
+   * ElementController.updateParent('austin', 'lockheed', 'mbee', 'elem0', {Elem1})
+   * .then(function(element) {
+   *   // do something with the element
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The user object of the requesting user.
+   * @param  {String} The organization ID.
+   * @param  {String} The project ID.
+   * @param  {String} The element ID.
+   * @param  {Element} The new child element.
+   */
+  static updateParent(reqUser, orgID, projID, elemID, newElement) {
+    return new Promise((resolve, reject) => {
+      ElementController.findElement(reqUser, orgID, projID, elemID)
+      .then((parentElement) => {
+        // Add _id to the array
+        parentElement.contains.push(newElement._id);
+
+        // Save the updated parentElement
+        parentElement.save((saveElemErr) => {
+          if (saveElemErr) {
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+          }
+
+          // Return the updated element object
+          return resolve(parentElement);
+        });
+      })
+      .catch((findParentError) => reject(findParentError));
+    });
+  }
 
   /**
    * @description  This function takes a user, orgID, projID, elementID

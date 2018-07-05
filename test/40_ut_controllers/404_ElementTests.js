@@ -102,12 +102,16 @@ describe(name, function() {
 
   it('should create an element', createElement);
   it('should create a child element', createChildElement);
+  it('should create a block element', createBlock);
+  it('should create a relationship', createRelationship);
   it('should find all elements for a project', findElements);
   it('should find an element', findElement);
   it('should update an element', updateElement);
-  it('should soft delete an element', softDeleteElement).timeout(5000);
-  it('should hard delete an element', hardDeleteElement).timeout(5000);
-  it('should hard delete the child element', hardDeleteChildElement).timeout(5000);
+  it('should soft delete an element', softDeleteElement);
+  it('should hard delete an element', hardDeleteElement);
+  it('should hard delete the child element', hardDeleteChildElement);
+  it('should hard delete the block element', hardDeleteBlock);
+  it('should hard delete the relationship', hardDeleteRelationship);
 });
 
 
@@ -163,7 +167,7 @@ function createChildElement(done) {
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem1');
     chai.expect(retElem.parent).to.not.equal(null);
-    ElementController.findElement(user, org.id, proj.id, 'elem0')
+    ElemController.findElement(user, org.id, proj.id, 'elem0')
     .then((retElem2) => {
       chai.expect(retElem2.contains.length).to.equal(1);
       done();
@@ -182,14 +186,81 @@ function createChildElement(done) {
 }
 
 /**
+ * Creates a block
+ */
+function createBlock(done) {
+  const newElement = {
+    id: 'elem2',
+    name: 'Death Star Important Block',
+    project: {
+      id: proj.id,
+      org: {
+        id: org.id
+      }
+    },
+    type: 'Block',
+    parent: 'elem0'
+  };
+  ElemController.createElement(user, newElement)
+  .then((retElem) => {
+    chai.expect(retElem.id).to.equal('elem2');
+    chai.expect(retElem.parent).to.not.equal(null);
+    ElemController.findElement(user, org.id, proj.id, 'elem0')
+    .then((retElem2) => {
+      chai.expect(retElem2.contains.length).to.equal(2);
+      done();
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal(null);
+      done();
+    });
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Creates a relationship
+ */
+function createRelationship(done) {
+  const newElement = {
+    id: 'rel1',
+    name: 'Death Star Relationship',
+    project: {
+      id: proj.id,
+      org: {
+        id: org.id
+      }
+    },
+    type: 'Relationship',
+    source: 'elem1',
+    target: 'elem2'
+  };
+  ElemController.createElement(user, newElement)
+  .then((retElem) => {
+    chai.expect(retElem.id).to.equal('rel1');
+    chai.expect(retElem.target).to.not.equal(null);
+    chai.expect(retElem.source).to.not.equal(null);
+    done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
  * Finds all elements for a project
  */
 function findElements(done) {
   ElemController.findElements(user, org.id, proj.id)
   .then((retElems) => {
-    chai.expect(retElems.length).to.equal(2);
-    chai.expect(retElems[0].id).to.equal('elem0');
-    chai.expect(retElems[1].id).to.equal('elem1');
+    chai.expect(retElems.length).to.equal(4);
     done();
   })
   .catch((error) => {
@@ -302,6 +373,56 @@ function hardDeleteChildElement(done) {
   ElemController.removeElement(user, org.id, proj.id, 'elem1', { soft: false })
   .then((retElem) => {
     ElemController.findElement(user, org.id, proj.id, 'elem1', true)
+    .then((retElem2) => {
+      chai.expect(retElem2).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal('Element not found.');
+      chai.expect(err.status).to.equal(404);
+      done();
+    });
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Hard delete block element
+ */
+function hardDeleteBlock(done) {
+  ElemController.removeElement(user, org.id, proj.id, 'elem2', { soft: false })
+  .then((retElem) => {
+    ElemController.findElement(user, org.id, proj.id, 'elem2', true)
+    .then((retElem2) => {
+      chai.expect(retElem2).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal('Element not found.');
+      chai.expect(err.status).to.equal(404);
+      done();
+    });
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Hard delete relationship element
+ */
+function hardDeleteRelationship(done) {
+  ElemController.removeElement(user, org.id, proj.id, 'rel1', { soft: false })
+  .then((retElem) => {
+    ElemController.findElement(user, org.id, proj.id, 'rel1', true)
     .then((retElem2) => {
       chai.expect(retElem2).to.equal(null);
       done();

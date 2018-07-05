@@ -231,7 +231,7 @@ ElementSchema.pre('save', function(next) {
   * Returns the fields which users are allowed to update on a element.
   */
 ElementSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'delete', 'deletedOn', 'contains'];
+  return ['name', 'delete', 'deletedOn'];
 };
 
 /**
