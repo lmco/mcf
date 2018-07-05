@@ -55,22 +55,7 @@ describe(name, function() {
     UserController.findUser(username)
     .then(function(searchUser) {
       reqUser = searchUser;
-      chai.expect(searchUser.username).to.equal('mbee');
-      const userData = {
-        username: 'darthsidious',
-        password: 'sithlord',
-        fname: 'Darth',
-        lname: 'Sidious',
-        admin: false
-      };
-      // Creating a new non-admin user
-      UserController.createUser(searchUser, userData)
-      .then(function(newUser) {
-        nonAUser = newUser;
-        chai.expect(newUser.username).to.equal('darthsidious');
-        chai.expect(newUser.fname).to.equal('Darth');
-        chai.expect(newUser.lname).to.equal('Sidious');
-        done();
+      chai.expect(searchUser.username).to.equal(M.config.test.username);
         // const userData2 = {
         //   username: 'jubbathehut',
         //   password: 'ilovetoeat',
@@ -137,6 +122,7 @@ describe(name, function() {
 
   it('should create a user', createNewUser).timeout(3000);
   it('should create an admin user', createAUser).timeout(3000);
+  it('should create a non admin user', createNonAUser).timeout(3000);
   it('should create a second user', createUser02).timeout(3000);
   it('should reject a creating a user with non A req user', nonACreate).timeout(3000);
   it('should reject a user with no input to username', badUser).timeout(3000);

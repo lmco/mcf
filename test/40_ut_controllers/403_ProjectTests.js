@@ -8,7 +8,6 @@
  *                                                                           *
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
- * WAITING FOR IMPLEMENTATION OF ERROR STRINGS                               *
  *****************************************************************************/
 /**
  * @module  Project Controller Tests
@@ -59,7 +58,7 @@ describe(name, () => {
     UserController.findUser(username)
     .then(function(searchUser) {
       allSeeingUser = searchUser;
-      chai.expect(searchUser.username).to.equal('mbee');
+      chai.expect(searchUser.username).to.equal(M.config.test.username);
       // Creating a non admin user
       const nonAuserData = {
         username: 'msmith',

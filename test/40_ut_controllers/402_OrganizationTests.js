@@ -51,7 +51,7 @@ describe(name, function() {
     .then(function(searchUser) {
       // Setting it equal to global variable
       user = searchUser;
-      chai.expect(searchUser.username).to.equal('mbee');
+      chai.expect(searchUser.username).to.equal(M.config.test.username);
       // Creating a new non-admin user
       const nonAuserData = {
         username: 'msmith',
