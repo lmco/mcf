@@ -115,6 +115,7 @@ describe(name, function() {
 
   it('should create an element', postElement);
   it('should get an element', getElement);
+  it('should get all elements for a project', getElements);
   it('should update an elements name', putElement);
   it('should delete an element', deleteElement);
 });
@@ -155,6 +156,21 @@ function postElement(done) {
 function getElement(done) {
   request({
     url: `${test.url}/api/orgs/empire/projects/dthstr/elements/0000`,
+    headers: getHeaders(),
+    method: 'GET'
+  },
+  function(err, response, body) {
+    chai.expect(response.statusCode).to.equal(501);
+    done();
+  });
+}
+
+/**
+ * Makes a GET request to /api/orgs/:orgid/projects/:projectid/elements
+ */
+function getElements(done) {
+  request({
+    url: `${test.url}/api/orgs/empire/projects/dthstr/elements`,
     headers: getHeaders(),
     method: 'GET'
   },
