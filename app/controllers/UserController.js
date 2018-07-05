@@ -188,9 +188,22 @@ class UserController {
 
 
   /**
-   * Deletes a user.
+   * @description  This function takes a user object and username and deletes a user.
+   *
+   * @example
+   * UserController.removeUser({Josh}, 'austin')
+   * .then(function(org) {
+   *   // do something with the newly deleted users username
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The object containing the requesting user.
+   * @param  {String} The username of the user to be deleted.
    */
-  static deleteUser(requestingUser, usernameToDelete) {
+  static removeUser(requestingUser, usernameToDelete) {
     return new Promise(((resolve, reject) => {
       // Error check - make sure the user is defined
       if (!requestingUser) {
