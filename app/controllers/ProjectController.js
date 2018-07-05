@@ -74,7 +74,6 @@ class ProjectController {
           return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
         }
 
-        // Error Check - Ensure only 1 project is found
         // if (projects.length < 1) {
         //   return reject(new Error('Project not found'));
         // }

@@ -19,7 +19,6 @@
 
 const fs = require('fs');
 const path = require('path');
-
 const { execSync } = require('child_process');
 
 const M = require(path.join(__dirname, '..', 'mbee.js'));
@@ -44,18 +43,16 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
 
   // Determine if plugin is local or from git
   if (metadata.repository.substr(metadata.repository.length - 4) === '.git') {
-    const command = [
+    cmd = [
       `GIT_SSH_COMMAND="ssh -i ${metadata.deployKey} -oStrictHostKeyChecking=no"`,
       `git clone ${metadata.repository} plugins/${metadata.name}`
     ].join(' ');
-    cmd = command;
   }
   else {
-    const command = [
+    cmd = [
       `GIT_SSH_COMMAND="ssh -i ${metadata.deployKey} -oStrictHostKeyChecking=no"`,
       `cp -r ${metadata.repository} plugins/${metadata.name}`
     ].join(' ');
-    cmd = command;
   }
   // Clone the repo
   stdout = execSync(cmd);
