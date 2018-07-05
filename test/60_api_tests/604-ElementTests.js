@@ -113,6 +113,7 @@ describe(name, function() {
     });
   });
 
+  it('should create an element', postElement);
   it('should get an element', getElement);
 });
 
@@ -120,6 +121,31 @@ describe(name, function() {
  *            Test Functions
   ----------------------------------------------------*/
 
+/**
+ * Makes a POST request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ */
+function postElement(done) {
+  request({
+    url: `${test.url}/api/orgs/empire/projects/dthstr/elements/0000`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      id: '0000',
+      name: 'Death Star Random Element',
+      project: {
+        id: proj.id,
+        org: {
+          id: org.id
+        }
+      },
+      type: 'Element'
+    })
+  },
+  function(err, response, body) {
+    chai.expect(response.statusCode).to.equal(501);
+    done();
+  });
+}
 
 /**
  * Makes a GET request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
