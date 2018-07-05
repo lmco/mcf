@@ -13,6 +13,7 @@
  * @module  TestAPIBasic.js
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * Tests Basic API functionality with Organizations.
  * NEED TO UNCOMMENT CODE AND RUN TESTS
@@ -28,12 +29,6 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 const test = M.config.test;
 
-/**
- * APIOrgTest
- *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- *
- */
 
 /*------------------------------------
  *       Main
@@ -210,7 +205,7 @@ function postOrg02Err(done) {
 
 /**
  * Makes a POST request to /api/orgs/:orgid to create an org.
- * This deliberately provides and invalid org ID and expects a
+ * This deliberately provides an invalid org ID and expects a
  * response of 400 Bad Request.
  */
 function postInvalidOrg(done) {
