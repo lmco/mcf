@@ -156,7 +156,7 @@ function addNewOrg(done) {
   });
 }
 
-function addSecondOrg(done){
+function addSecondOrg(done) {
   const orgData = {
     id: 'council',
     name: 'Council of Ricks',
@@ -168,7 +168,7 @@ function addSecondOrg(done){
   };
   OrgController.createOrg(user, orgData)
   .then((retOrg) => {
-    //Set org equal to global varaible to be use later
+    // Set org equal to global varaible to be use later
     org = retOrg;
     chai.expect(retOrg.id).to.equal('council');
     chai.expect(retOrg.name).to.equal('Council of Ricks');

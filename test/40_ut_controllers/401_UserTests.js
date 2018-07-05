@@ -57,25 +57,25 @@ describe(name, function() {
       reqUser = searchUser;
       chai.expect(searchUser.username).to.equal(M.config.test.username);
       done();
-        // const userData2 = {
-        //   username: 'jubbathehut',
-        //   password: 'ilovetoeat',
-        //   fname: 'Jubba',
-        //   lname: 'The Hut',
-        //   admin: true
-        // };
-        // UserController.createUser(searchUser, userData2)
-        // .then(function(anotherUser) {
-        //   badAUser = anotherUser;
-        //   chai.expect(anotherUser.username).to.equal('jubbathehut');
-        //   chai.expect(anotherUser.fname).to.equal('Jubba');
-        //   chai.expect(anotherUser.lname).to.equal('The Hut');
-        //   done();
-        // })
-        // .catch(function(err) {
-        //   chai.expect(err).to.equal(null);
-        //   done();
-        // });
+      // const userData2 = {
+      //   username: 'jubbathehut',
+      //   password: 'ilovetoeat',
+      //   fname: 'Jubba',
+      //   lname: 'The Hut',
+      //   admin: true
+      // };
+      // UserController.createUser(searchUser, userData2)
+      // .then(function(anotherUser) {
+      //   badAUser = anotherUser;
+      //   chai.expect(anotherUser.username).to.equal('jubbathehut');
+      //   chai.expect(anotherUser.fname).to.equal('Jubba');
+      //   chai.expect(anotherUser.lname).to.equal('The Hut');
+      //   done();
+      // })
+      // .catch(function(err) {
+      //   chai.expect(err).to.equal(null);
+      //   done();
+      // });
       // })
       // .catch(function(err) {
       //   chai.expect(err).to.equal(null);
