@@ -50,7 +50,6 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   }
   else {
     cmd = [
-      `GIT_SSH_COMMAND="ssh -i ${metadata.deployKey} -oStrictHostKeyChecking=no"`,
       `cp -r ${metadata.repository} plugins/${metadata.name}`
     ].join(' ');
   }
