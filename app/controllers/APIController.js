@@ -1141,6 +1141,18 @@ class APIController {
       return res.status(err.status).send(err);
     }
 
+    // ElementController.createElement(req.user, req.body)
+    // .then((element) => {
+    //   res.header('Content-Type', 'application/json');
+    //   return res.status(200).send(APIController.formatJSON(element));
+    // })
+    // .catch((error) => {
+    //   // If error occurs, log error and return status.
+    //   const err = JSON.parse(error.message);
+    //   M.log.error(err.description);
+    //   return res.status(err.status).send(err);
+    // });
+
     return res.status(501).send('Not Implemented.');
   }
 
