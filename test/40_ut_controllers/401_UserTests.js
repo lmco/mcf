@@ -50,7 +50,7 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    const username = 'mbee';
+    const username = M.config.test.username;
     // Finding a Requesting Admin
     UserController.findUser(username)
     .then(function(searchUser) {

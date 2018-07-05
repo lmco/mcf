@@ -114,7 +114,6 @@ class UserController {
         if (users.length >= 1) {
           return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'User already exists.' })));
         }
-        // console.log(M.lib.sani.sanitize(newUser));
         // Create the new user
         // We should just need to sanitize the input, the model should handle
         // data validation
@@ -123,7 +122,6 @@ class UserController {
           if (saveErr) {
             return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
           }
-          // console.log(user);
           return resolve(user);
         });
       });

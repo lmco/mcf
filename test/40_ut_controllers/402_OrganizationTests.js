@@ -46,7 +46,7 @@ describe(name, function() {
     db.connect();
 
     // Finding a Requesting Admin
-    const username = 'mbee';
+    const username = M.config.test.username;
     UserController.findUser(username)
     .then(function(searchUser) {
       // Setting it equal to global variable
