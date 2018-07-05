@@ -13,6 +13,15 @@
  %>
 
 <div class="container" style="max-width: 450px;" onkeypress="triggerModal(event)">
+  <% if (err) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+         style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%);">
+      <%= err %>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  <% } %>
   <form id="login-form" action="/login" method="POST" >
     <div class="form-group" >
       <label for="username">Username</label>
