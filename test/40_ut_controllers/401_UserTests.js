@@ -56,6 +56,7 @@ describe(name, function() {
     .then(function(searchUser) {
       reqUser = searchUser;
       chai.expect(searchUser.username).to.equal(M.config.test.username);
+      done();
         // const userData2 = {
         //   username: 'jubbathehut',
         //   password: 'ilovetoeat',
@@ -63,7 +64,6 @@ describe(name, function() {
         //   lname: 'The Hut',
         //   admin: true
         // };
-        // // Creating a new non-admin user
         // UserController.createUser(searchUser, userData2)
         // .then(function(anotherUser) {
         //   badAUser = anotherUser;
@@ -76,11 +76,11 @@ describe(name, function() {
         //   chai.expect(err).to.equal(null);
         //   done();
         // });
-      })
-      .catch(function(err) {
-        chai.expect(err).to.equal(null);
-        done();
-      });
+      // })
+      // .catch(function(err) {
+      //   chai.expect(err).to.equal(null);
+      //   done();
+      // });
     })
     .catch(function(error) {
       chai.expect(error).to.equal(null);
@@ -191,6 +191,34 @@ function createAUser(done) {
     chai.expect(newUser.fname).to.equal('Aniken');
     chai.expect(newUser.lname).to.equal('Skywalker');
     chai.expect(newUser.admin).to.equal(true);
+    done();
+  })
+  .catch(function(err) {
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Creates a non admin user using the User Controller.
+ * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
+ * NOTE: As of right now the password key becomes a hash
+ * need to eventually made password tests.
+ */
+function createNonAUser(done) {
+  const userData = {
+    username: 'darthsidious',
+    password: 'sithlord',
+    fname: 'Darth',
+    lname: 'Sidious',
+    admin: false
+  };
+  UserController.createUser(reqUser, userData)
+  .then(function(newUser) {
+    nonAUser = newUser;
+    chai.expect(newUser.username).to.equal('darthsidious');
+    chai.expect(newUser.fname).to.equal('Darth');
+    chai.expect(newUser.lname).to.equal('Sidious');
     done();
   })
   .catch(function(err) {
