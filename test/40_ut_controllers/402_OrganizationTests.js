@@ -13,6 +13,7 @@
  * @module  Organization Controller Tests
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description  Tests the org controller
  */
@@ -66,30 +67,7 @@ describe(name, function() {
         chai.expect(nonAu.username).to.equal('msmith');
         chai.expect(nonAu.fname).to.equal('Morty');
         chai.expect(nonAu.lname).to.equal('Smith');
-        // Creating a new organization used in the tests
-        const orgData = {
-          id: 'council',
-          name: 'Council of Ricks',
-          permissions: {
-            admin: [user._id],
-            write: [user._id],
-            read: [user._id]
-          }
-        };
-        OrgController.createOrg(user, orgData)
-        .then((retOrg) => {
-          org = retOrg;
-          chai.expect(retOrg.id).to.equal('council');
-          chai.expect(retOrg.name).to.equal('Council of Ricks');
-          chai.expect(retOrg.permissions.read).to.include(user._id.toString());
-          chai.expect(retOrg.permissions.write).to.include(user._id.toString());
-          chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
-          done();
-        })
-        .catch((firsterr) => {
-          chai.expect(firsterr).to.equal(null);
-          done();
-        });
+        done();
       })
       .catch(function(error) {
         chai.expect(error).to.equal(null);
@@ -129,6 +107,7 @@ describe(name, function() {
   });
 
   it('should create a new org', addNewOrg).timeout(2500);
+  it('should create a second org', addSecondOrg).timeout(2500);
   it('should find an existing org', findExistingOrg).timeout(2500);
   it('should throw an error saying the field cannot be updated', updateOrgFieldErr).timeout(2500);
   it('should throw an error saying the name field is not a string', updateOrgTypeErr).timeout(2500);
@@ -174,6 +153,33 @@ function addNewOrg(done) {
   })
   .catch((error) => {
     chai.expect(error).to.equal(null);
+  });
+}
+
+function addSecondOrg(done){
+  const orgData = {
+    id: 'council',
+    name: 'Council of Ricks',
+    permissions: {
+      admin: [user._id],
+      write: [user._id],
+      read: [user._id]
+    }
+  };
+  OrgController.createOrg(user, orgData)
+  .then((retOrg) => {
+    //Set org equal to global varaible to be use later
+    org = retOrg;
+    chai.expect(retOrg.id).to.equal('council');
+    chai.expect(retOrg.name).to.equal('Council of Ricks');
+    chai.expect(retOrg.permissions.read).to.include(user._id.toString());
+    chai.expect(retOrg.permissions.write).to.include(user._id.toString());
+    chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
+    done();
+  })
+  .catch((firsterr) => {
+    chai.expect(firsterr).to.equal(null);
+    done();
   });
 }
 
