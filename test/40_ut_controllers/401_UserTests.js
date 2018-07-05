@@ -19,11 +19,11 @@
 
 
 /**
-  * NOTE:
-  * NEED TO CONFIRM THE NUMBER OF USERS THAT ARE IN DATABASE
-  * BEFORE RUNNING TESTS. DUE TO THOSE EFFECT THE NUMBER OF
-  * USERS FOUND IN THE FINDUSERS TEST RUN.
-  */
+ * NOTE:
+ * NEED TO CONFIRM THE NUMBER OF USERS THAT ARE IN DATABASE
+ * BEFORE RUNNING TESTS. DUE TO THOSE EFFECT THE NUMBER OF
+ * USERS FOUND IN THE FINDUSERS TEST RUN.
+ */
 
 // LOOK AT FAKE DELETE USER
 const path = require('path');
@@ -38,7 +38,7 @@ const UserController = M.load('controllers/UserController');
 
 let reqUser = null;
 let nonAUser = null;
-// let stupidAUser = null;
+// let badAUser = null;
 /*------------------------------------
  *       Main
  *------------------------------------*/
@@ -81,7 +81,7 @@ describe(name, function() {
         // // Creating a new non-admin user
         // UserController.createUser(searchUser, userData2)
         // .then(function(anotherUser) {
-        //   stupidAUser = anotherUser;
+        //   badAUser = anotherUser;
         //   chai.expect(anotherUser.username).to.equal('jubbathehut');
         //   chai.expect(anotherUser.fname).to.equal('Jubba');
         //   chai.expect(anotherUser.lname).to.equal('The Hut');
@@ -262,14 +262,14 @@ function nonACreate(done) {
   });
 }
 
-/*
-  * Tests a user creating a username
-  * that inputted no username and should
-  * return an error.
-  * NOTE: Is it correct to run test and then pass in
-  * what the error message should be by copy and pasting
-  * it?... I am guessing that is bad practice
-  */
+/**
+ * Tests a user creating a username
+ * that inputted no username and should
+ * return an error.
+ * NOTE: Is it correct to run test and then pass in
+ * what the error message should be by copy and pasting
+ * it?... I am guessing that is bad practice
+ */
 
 function badUser(done) {
   const userData = {
@@ -292,11 +292,11 @@ function badUser(done) {
 }
 
 /**
-* Tests a user that inputted html elements
-* into their username. This should santize the name
-* and return it successfully.
-* NOTE: Invalid username test!
-*/
+ * Tests a user that inputted html elements
+ * into their username. This should santize the name
+ * and return it successfully.
+ * NOTE: Invalid username test!
+ */
 function invalidUser(done) {
   const userData = {
     username: '33leah',
@@ -318,10 +318,10 @@ function invalidUser(done) {
 }
 
 /**
-* Tests finding a user that inputted
-* the same username that is already
-* in the database. This should fail.
-*/
+ * Tests finding a user that inputted
+ * the same username that is already
+ * in the database. This should fail.
+ */
 
 function copyCatUser(done) {
   const userData = {
@@ -426,9 +426,9 @@ function findUser(done) {
 }
 
 // /*
-// * Attempts deleting the user that
-// * that does not exist.
-// */
+//  * Attempts deleting the user that
+//  * that does not exist.
+//  */
 
 // function fakeDelete(done) {
 //   const username = 'notreal';
@@ -444,9 +444,9 @@ function findUser(done) {
 // }
 
 /*
-* Attempts deleting the user that
-* with a non admin user.
-*/
+ * Attempts deleting the user that
+ * with a non admin user.
+ */
 
 function nonADelete(done) {
   const username = 'lskywalker';
@@ -462,12 +462,12 @@ function nonADelete(done) {
 }
 
 // /*
-// * User attempts deleting themselves.
-// */
+//  * User attempts deleting themselves.
+//  */
 
 // function deleteSelf(done) {
 //   const username = 'jubbathehut';
-//   UserController.deleteUser(stupidAUser, username)
+//   UserController.deleteUser(badAUser, username)
 //   .then(function() {
 //     chai.assert(true===false);
 //     done();
@@ -480,8 +480,8 @@ function nonADelete(done) {
 
 
 /*
-* Deletes the user.
-*/
+ * Deletes the user.
+ */
 
 function deleteUser(done) {
   const username = 'lskywalker';
@@ -497,8 +497,8 @@ function deleteUser(done) {
 }
 
 /*
-* Deletes the second user created.
-*/
+ * Deletes the second user created.
+ */
 
 function deleteUser02(done) {
   const username = 'hsolo';
@@ -514,8 +514,8 @@ function deleteUser02(done) {
 }
 
 /*
-* Deletes the admin user created.
-*/
+ * Deletes the admin user created.
+ */
 
 function deleteAUser(done) {
   const username = 'darthvader';

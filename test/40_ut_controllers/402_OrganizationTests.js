@@ -471,7 +471,7 @@ function getUserRoles(done) {
 //   });
 // }
 
-/*
+/**
  * Non-admin try to change a users role
  */
 function nonAdminChangeRole(done) {
