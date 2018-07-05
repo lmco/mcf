@@ -37,7 +37,7 @@ class ElementController {
    * and returns all elements attached to the project.
    *
    * @example
-   * ElementController.findElements('austin', 'lockheed', 'mbee')
+   * ElementController.findElements({Austin}, 'lockheed', 'mbee')
    * .then(function(element) {
    *   // do something with the element
    * })
@@ -91,7 +91,7 @@ class ElementController {
    * and optional boolean flag and returns the element if it's found.
    *
    * @example
-   * ElementController.findElement('austin', 'lockheed', 'mbee', 'elem1', false)
+   * ElementController.findElement({Austin}, 'lockheed', 'mbee', 'elem1', false)
    * .then(function(element) {
    *   // do something with the element
    * })
@@ -160,7 +160,7 @@ class ElementController {
    * @description  This function takes a user and element data, and creates a project.
    *
    * @example
-   * ElementController.findElement({Tony Stark}, {Element 1})
+   * ElementController.createElement({Austin}, {Element 1})
    * .then(function(element) {
    *   // do something with the element
    * })
@@ -784,7 +784,7 @@ class ElementController {
    * and JSON object of options and deletes an element.
    *
    * @example
-   * ElementController.findElement('austin', 'lockheed', 'mbee', 'elem1', { soft: false} )
+   * ElementController.removeElement({Austin}, 'lockheed', 'mbee', 'elem1', {soft: false} )
    * .then(function(element) {
    *   // do something with the element
    * })
