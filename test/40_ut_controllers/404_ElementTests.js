@@ -163,7 +163,16 @@ function createChildElement(done) {
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem1');
     chai.expect(retElem.parent).to.not.equal(null);
-    done();
+    ElementController.findElement(user, org.id, proj.id, 'elem0')
+    .then((retElem2) => {
+      chai.expect(retElem2.contains.length).to.equal(1);
+      done();
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal(null);
+      done();
+    });
   })
   .catch((error) => {
     const err = JSON.parse(error.message);

@@ -307,8 +307,9 @@ class ElementController {
                     return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: saveErr.message })));
                   }
 
-                  // Return the element if succesful
-                  return resolve(elementUpdated);
+                  ElementController.updateElement(reqUser, orgID, projID, parent.id, {contains: elementUpdated._id})
+                  .then((parentUpdated) => resolve(elementUpdated))
+                  .catch((parentUpdateError) => reject(parentUpdateError));
                 });
               })
               .catch((findParentError) => reject(findParentError));
