@@ -115,6 +115,7 @@ describe(name, function() {
 
   it('should create an element', postElement);
   it('should get an element', getElement);
+  it('should update an elements name', putElement);
 });
 
 /**---------------------------------------------------
@@ -155,6 +156,24 @@ function getElement(done) {
     url: `${test.url}/api/orgs/empire/projects/dthstr/elements/0000`,
     headers: getHeaders(),
     method: 'GET'
+  },
+  function(err, response, body) {
+    chai.expect(response.statusCode).to.equal(501);
+    done();
+  });
+}
+
+/**
+ * Makes a PUT request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ */
+function putElement(done) {
+  request({
+    url: `${test.url}/api/orgs/empire/projects/dthstr/elements/0000`,
+    headers: getHeaders(),
+    method: 'PUT',
+    body: JSON.stringify({
+      name: 'Death Star Important Element'
+    })
   },
   function(err, response, body) {
     chai.expect(response.statusCode).to.equal(501);

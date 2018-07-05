@@ -1043,7 +1043,7 @@ class APIController {
    * element's public data as JSON.
    */
   static getElement(req, res) {
-    // Make sure user is provided
+    // If for some reason we don't have a user, fail
     if (!req.user) {
       M.log.critical('Request does not have a user');
       const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
@@ -1080,6 +1080,58 @@ class APIController {
     const elemid = M.lib.sani.sanitize(req.params.elementid);
 
     // ElementController.findElement(req.user, orgid, projid, elemid)
+    // .then((element) => {
+    //   res.header('Content-Type', 'application/json');
+    //   return res.status(200).send(APIController.formatJSON(element));
+    // })
+    // .catch((error) => {
+    //   // If error occurs, log error and return status.
+    //   const err = JSON.parse(error.message);
+    //   M.log.error(err.description);
+    //   return res.status(err.status).send(err);
+    // });
+
+    return res.status(501).send('Not Implemented.');
+  }
+
+  /**
+   * POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
+   *
+   * @description Creates the element whose ID is 'elementid' and returns the
+   * element's public data as JSON.
+   */
+  static postElement(req, res) {
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    return res.status(501).send('Not Implemented.');
+  }
+
+  /**
+   * PUT /api/orgs/:orgid/projects/:projectid/elements/:elementid
+   *
+   * @description Updates the element whose ID is 'elementid' and returns the
+   * element's public data as JSON.
+   */
+  static putElement(req, res) {
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    const orgid = M.lib.sani.sanitize(req.params.orgid);
+    const projid = M.lib.sani.sanitize(req.params.projectid);
+    const elemid = M.lib.sani.sanitize(req.params.elementid);
+
+    // ElementController.updateElement(req.user, orgid, projid, elemid, req.body)
     // .then((element) => {
     //   res.header('Content-Type', 'application/json');
     //   return res.status(200).send(APIController.formatJSON(element));

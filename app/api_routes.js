@@ -1211,7 +1211,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
 .put(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.putElement
 )
 .delete(
   AuthController.authenticate.bind(AuthController),
