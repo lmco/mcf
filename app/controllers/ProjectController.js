@@ -477,6 +477,10 @@ class ProjectController {
    * @param  {Object} Contains the list of delete options.
    */
   static removeProject(reqUser, organizationId, projectId, options) {
+    // Loading controller function wide since the element controller loads
+    // the project controller globally. Both files cannot load each other globally.
+    const ElemController = M.load('controllers/ElementController');
+
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
