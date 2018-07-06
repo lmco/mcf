@@ -63,7 +63,7 @@ function docker(args) {
   }
 
   // Build the Docker image
-  if (args.includes('--build')) {
+  else if (args.includes('--build')) {
     console.info('Building Docker Image ...');
 
     // Build docker by running: "docker build -f .../Dockerfile -t mbee ."
@@ -88,7 +88,7 @@ function docker(args) {
   }
 
   // Run the Docker container
-  if (args.includes('--run')) {
+  else if (args.includes('--run')) {
     console.log('Running Docker Container ...');
 
     // Build the "docker run" command
@@ -122,7 +122,7 @@ function docker(args) {
   }
 
   // Get the Docker logs
-  if (args.includes('--get-logs')) {
+  else if (args.includes('--get-logs')) {
     console.log('Getting docker logs ...');
 
     // Build the "docker run" command
@@ -141,5 +141,8 @@ function docker(args) {
       }
     });
     console.log('End of Docker logs.');
+  }
+  else {
+    console.log('Invalid arguments');
   }
 }

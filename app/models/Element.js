@@ -82,17 +82,17 @@ const ElementSchema = new mongoose.Schema({
     required: true,
     match: RegExp(M.lib.validators.element.id),
     maxlength: [36, 'Element ID is too long'],
-    minlength: [2, 'Element ID is too short'],
-    default: function() {
-      const parts = this.uid.split(':');  // split on the ':'' separator
-      const id = parts[parts.length - 1]; // the last part
-      return id;
-    },
-    set: function() {
-      const parts = this.uid.split(':');  // split on the ':'' separator
-      const id = parts[parts.length - 1]; // the last part
-      return id;
-    }
+    minlength: [2, 'Element ID is too short']
+    // default: function() {
+    //   const parts = this.uid.split(':');  // split on the ':'' separator
+    //   const id = parts[parts.length - 1]; // the last part
+    //   return id;
+    // },
+    // set: function() {
+    //   const parts = this.uid.split(':');  // split on the ':'' separator
+    //   const id = parts[parts.length - 1]; // the last part
+    //   return id;
+    // }
   },
 
   /**
@@ -209,13 +209,7 @@ const ElementSchema = new mongoose.Schema({
    */
   deleted: {
     type: Boolean,
-    default: false,
-    set: function(v) {  // eslint-disable-line no-unused-vars, arrow-body-style
-      return (this.deletedOn !== null);
-    },
-    get: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
-      return (this.deletedOn !== null);
-    }
+    default: false
   }
 
 }, options); // end of ElementSchema
@@ -232,6 +226,13 @@ ElementSchema.pre('save', function(next) {
   this.deleted = '';
   next();
 });
+
+/**
+  * Returns the fields which users are allowed to update on a element.
+  */
+ElementSchema.methods.getValidUpdateFields = function() {
+  return ['name', 'delete', 'deletedOn'];
+};
 
 /**
  * The Element Model
