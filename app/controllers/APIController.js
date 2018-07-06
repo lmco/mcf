@@ -22,6 +22,7 @@ const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
 
+// const ElemController = mbee.load('controllers/ElementController');
 const OrgController = mbee.load('controllers/OrganizationController');
 const ProjectController = mbee.load('controllers/ProjectController');
 const UserController = mbee.load('controllers/UserController');

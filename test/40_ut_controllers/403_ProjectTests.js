@@ -116,7 +116,7 @@ describe(name, () => {
     .then(() => {
       // Removing the non admin user
       const userTwo = 'msmith';
-      UserController.deleteUser(allSeeingUser, userTwo)
+      UserController.removeUser(allSeeingUser, userTwo)
       .then(function(delUser2) {
         chai.expect(delUser2).to.equal('msmith');
         mongoose.connection.close();

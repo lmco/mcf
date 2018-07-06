@@ -93,13 +93,13 @@ describe(name, function() {
     this.timeout(5000);
     // Deleting the user created in the before function
     const username = 'darthsidious';
-    UserController.deleteUser(reqUser, username)
+    UserController.removeUser(reqUser, username)
     .then(function(delUser) {
       chai.expect(delUser).to.equal('darthsidious');
       mongoose.connection.close();
       done();
       // const user2 = 'jubbathehut';
-      // UserController.deleteUser(reqUser, user2)
+      // UserController.removeUser(reqUser, user2)
       // .then(function(delStupidUser) {
       //   console.log('no I am here');
       //   chai.expect(delStupidUser).to.equal('jubbathehut');
@@ -446,7 +446,7 @@ function findUser(done) {
 
 // function fakeDelete(done) {
 //   const username = 'notreal';
-//   UserController.deleteUser(reqUser, username)
+//   UserController.removeUser(reqUser, username)
 //   .then(function(delUser) {
 //     chai.assert(true===false);
 //     done();
@@ -464,7 +464,7 @@ function findUser(done) {
 
 function nonADelete(done) {
   const username = 'lskywalker';
-  UserController.deleteUser(nonAUser, username)
+  UserController.removeUser(nonAUser, username)
   .then(function(delUser) {
     chai.assert(true === false);
     done();
@@ -481,7 +481,7 @@ function nonADelete(done) {
 
 // function deleteSelf(done) {
 //   const username = 'jubbathehut';
-//   UserController.deleteUser(badAUser, username)
+//   UserController.removeUser(badAUser, username)
 //   .then(function() {
 //     chai.assert(true===false);
 //     done();
@@ -499,7 +499,7 @@ function nonADelete(done) {
 
 function deleteUser(done) {
   const username = 'lskywalker';
-  UserController.deleteUser(reqUser, username)
+  UserController.removeUser(reqUser, username)
   .then(function(delUser) {
     chai.expect(delUser).to.equal('lskywalker');
     done();
@@ -516,7 +516,7 @@ function deleteUser(done) {
 
 function deleteUser02(done) {
   const username = 'hsolo';
-  UserController.deleteUser(reqUser, username)
+  UserController.removeUser(reqUser, username)
   .then(function(delUser) {
     chai.expect(delUser).to.equal('hsolo');
     done();
@@ -533,7 +533,7 @@ function deleteUser02(done) {
 
 function deleteAUser(done) {
   const username = 'darthvader';
-  UserController.deleteUser(reqUser, username)
+  UserController.removeUser(reqUser, username)
   .then(function(delUser) {
     chai.expect(delUser).to.equal('darthvader');
     done();
