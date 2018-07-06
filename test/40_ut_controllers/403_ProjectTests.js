@@ -161,9 +161,9 @@ describe(name, () => {
   it('should find the permissions on the project', findPerm).timeout(2500);
   // it('should set the permissions on the project', setPerm).timeout(2500);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
-  it('should delete a project', deleteProject).timeout(2500);
-  it('should delete second project', deleteProject02).timeout(2500);
-  it('should delete projects that were created with long names', deleteOthers).timeout(2500);
+  it('should delete a project', deleteProject).timeout(5000);
+  it('should delete second project', deleteProject02).timeout(5000);
+  it('should delete projects that were created with long names', deleteOthers).timeout(5000);
 });
 
 

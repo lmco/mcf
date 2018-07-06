@@ -33,7 +33,7 @@ const Element = M.require('models.Element');
 class ElementController {
 
   /**
-   * @description  This function takes a user, orgID, projID and boolean flag
+   * @description  This function takes a user, orgID, and projID
    * and returns all elements attached to the project.
    *
    * @example
@@ -49,10 +49,9 @@ class ElementController {
    * @param  {User} The user object of the requesting user.
    * @param  {String} The organization ID.
    * @param  {String} The project ID.
-   * @param  {Boolean} Optional flag denoting choice to find softDeleted.
    */
   // TODO: Add query based on type
-  static findElements(reqUser, organizationID, projectID, softDeleted = true) {
+  static findElements(reqUser, organizationID, projectID) {
     return new Promise((resolve, reject) => {
       // Ensure all incoming IDs are strings
       if (typeof organizationID !== 'string') {
@@ -66,7 +65,7 @@ class ElementController {
       const projID = M.lib.sani.sanitize(projectID);
 
       // Find the project
-      ProjController.findProject(reqUser, orgID, projID, softDeleted)
+      ProjController.findProject(reqUser, orgID, projID)
       .then((project) => {
         // Ensure user is part of the project
         const members = project.permissions.read.map(u => u._id.toString());
@@ -74,13 +73,7 @@ class ElementController {
           return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
         }
 
-        let searchParams = { project: project._id, deleted: false };
-
-        if (softDeleted && reqUser.admin) {
-          searchParams = { project: project._id };
-        }
-
-        Element.Element.find(searchParams)
+        Element.Element.find({ project: project._id })
         .populate('parent project source target contains')
         .exec((err, elements) => {
           if (err) {
@@ -123,84 +116,65 @@ class ElementController {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
       }
 
-      // // Set the soft delete flag
-      // let softDelete = true;
-      // if (options.hasOwnProperty('soft')) {
-      //   if (options.soft === false && reqUser.admin) {
-      //     softDelete = false;
-      //   }
-      //   else if (options.soft === false && !reqUser.admin) {
-      //     return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
-      //   }
-      //   else if (options.soft !== false && options.soft !== true) {
-      //     return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
-      //   }
-      // }
+      // Set the soft delete flag
+      let softDelete = true;
+      if (options.hasOwnProperty('soft')) {
+        if (options.soft === false && reqUser.admin) {
+          softDelete = false;
+        }
+        else if (options.soft === false && !reqUser.admin) {
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
+        }
+        else if (options.soft !== false && options.soft !== true) {
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
+        }
+      }
 
       // Sanitize the parameters
       const orgID = M.lib.sani.sanitize(organizationID);
       const projID = M.lib.sani.sanitize(projectID);
 
-      // Ensure the project exists
+      // Ensure the project still exists
       ProjController.findProject(reqUser, orgID, projID, true)
       .then((project) => {
-        ElementController.findElements(reqUser, orgID, projID, true)
-        .then((elements) => {
-          for (let i = 0; i < elements.length; i++) {
-            ElementController.removeElement(reqUser, orgID, projID, elements[i].id, options)
-            .then((element) => {
-              if (i === elements.length-1) {
-                return resolve(elements);
-              }
-            })
-            .catch((removeElementsError) => reject(removeElementsError));
-          }
-        })
-        .catch((findElementsError) => reject(findElementsError));
+        if (softDelete) {
+          // Find the elements
+          ElementController.findElements(reqUser, orgID, projID)
+          .then((elements) => {
+            // If there are no elements found, return an error
+            if (elements.length === 0) {
+              return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'No elements found.' })));
+            }
+
+            for (let i = 0; i < elements.length; i++) {
+              // Update the elements deleted and deletedOn fields
+              elements[i].deletedOn = Date.now();
+              elements[i].deleted = true;
+              elements[i].save((saveErr) => {
+                if (saveErr) {
+                  // If error occurs, return it
+                  return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+                }
+              });
+            }
+
+            // Return the updated elements
+            return resolve(elements);
+          })
+          .catch((findElementsError) => reject(findElementsError));
+        }
+        else {
+          // Hard delete the elements
+          Element.Element.deleteMany({ project: project._id }, (deleteError, elementsDeleted) => {
+            if (deleteError) {
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
+            }
+
+            return resolve(elementsDeleted);
+          });
+        }
       })
       .catch((findProjectError) => reject(findProjectError));
-
-      // // Ensure the project still exists
-      // ProjController.findProject(reqUser, orgID, projID, true)
-      // .then((project) => {
-      //   if (softDelete) {
-      //     // Find the elements
-      //     ElementController.findElements(reqUser, orgID, projID)
-      //     .then((elements) => {
-      //       // If there are no elements found, return an error
-      //       if (elements.length === 0) {
-      //         return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'No elements found.' })));
-      //       }
-
-      //       for (let i = 0; i < elements.length; i++) {
-      //         // Update the elements deleted and deletedOn fields
-      //         elements[i].deletedOn = Date.now();
-      //         elements[i].deleted = true;
-      //         elements[i].save((saveErr) => {
-      //           if (saveErr) {
-      //             // If error occurs, return it
-      //             return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
-      //           }
-      //         });
-      //       }
-
-      //       // Return the updated elements
-      //       return resolve(elements);
-      //     })
-      //     .catch((findElementsError) => reject(findElementsError));
-      //   }
-      //   else {
-      //     // Hard delete the elements
-      //     Element.Element.deleteMany({ project: project._id }, (deleteError, elementsDeleted) => {
-      //       if (deleteError) {
-      //         return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
-      //       }
-
-      //       return resolve(elementsDeleted);
-      //     });
-      //   }
-      // })
-      // .catch((findProjectError) => reject(findProjectError));
     });
   }
 
