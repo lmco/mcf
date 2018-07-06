@@ -27,14 +27,15 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.load('controllers/ProjectController');
 const UserController = M.load('controllers/UserController');
 const OrgController = M.load('controllers/OrganizationController');
+const ProjController = M.load('controllers/ProjectController');
 
 let nonAuser = null;
 let allSeeingUser = null;
 let org = null;
+let project = null;
 
 /**
  * Other tests to test:
- *  -long names for name
  *  -string for id
  *  -string for name
  *  -string for org
@@ -156,7 +157,7 @@ describe(name, () => {
   it('should reject non-A user from finding a project', nonAUser).timeout(2500);
   it('should reject updating due to non-A user', updateNonA).timeout(2500);
   it('should find the permissions on the project', findPerm).timeout(2500);
-  // it('should set the permissions on the project', setPerm).timeout(2500);
+  it('should set the permissions on the project', setPerm).timeout(2500);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
   it('should delete a project', deleteProject).timeout(2500);
   it('should delete second project', deleteProject02).timeout(2500);
@@ -266,6 +267,7 @@ function createProject02(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then((proj) => {
+    project = proj;
     chai.expect(proj.id).to.equal('dimc137rick');
     chai.expect(proj.name).to.equal('Mad Scientist');
     done();
@@ -612,24 +614,33 @@ function findPerm(done) {
   });
 }
 
-// /**
-//  * Tests setting permissions on the project.
-//  */
-// function setPerm(done) {
-//   permType = 'write';
-//   ProjController.setPermissions(allSeeingUser, org.id, 'dimc137rick', nonAuser, permType)
-//   .then((perm) => {
-//     chai.expect(perm.read).to.equal(true);
-//     chai.expect(perm.write).to.equal(true);
-//     chai.expect(perm.admin).to.equal(false);
-//     done();
-//   })
-//   .catch((err2) => {
-//     console.log(err2.message);
-//     chai.expect(err2.message).to.equal(null);
-//     done();
-//   });
-// }
+/**
+ * Tests setting permissions on the project where you need
+ * permission to acces the org so you need to set those
+ * permissions before setting the project permissions.
+ */
+function setPerm(done) {
+  permType = 'write';
+  OrgController.setPermissions(allSeeingUser, org.id.toString(), nonAuser, 'write');
+  ProjController.setPermissions(allSeeingUser, org.id.toString(), project.id.toString(), nonAuser, permType)
+  .then(() => {
+    ProjController.findProject(allSeeingUser, project.id.toString())
+    .then((retProj) => {
+      chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
+      chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
+      chai.expect(retProj.permissions.admin.length).to.equal(1);
+      done();
+    })
+    .catch((err) => {
+      chai.expect(err).to.equal(null);
+      done();
+    });
+  })
+  .catch((err2) => {
+    chai.expect(err2.message).to.equal(null);
+    done();
+  });
+}
 
 /**
  * Tests soft-deleting a project

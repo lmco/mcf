@@ -19,8 +19,13 @@
 
 
 /**
- * NOTE:
- * NEED TO CONFIRM THE NUMBER OF USERS THAT ARE IN DATABASE
+ * NOTES:
+ * 
+ * -COMMENTED OUT TESTS ARE IN PROCESS OF GETTING FIXED--
+ * TASKS HAVE BEEN MADE IN JIRA FOR THEM
+ * 
+ * 
+ * -NEED TO CONFIRM THE NUMBER OF USERS THAT ARE IN DATABASE
  * BEFORE RUNNING TESTS. DUE TO THOSE EFFECT THE NUMBER OF
  * USERS FOUND IN THE FINDUSERS TEST RUN.
  */
@@ -459,14 +464,15 @@ function findUser(done) {
 /**
  * This is to attempt to find a user that does not exist.
  * This should throw an error. I would assume an internal 
- * error with Find failed. However, is that the error
- * we want to see?
+ * error with Find failed. 
+ * it returns that the delUser is null. 
+ * Is that what we want?
  */
 function noFindUser(done) {
   const username = 'nouser';
   UserController.findUser(username)
   .then(function(searchUser) {
-    chai.assert(true === false);
+    chai.expect(searchUser).to.equal('nouser');
     done();
   })
   .catch(function(err) {
@@ -479,14 +485,14 @@ function noFindUser(done) {
 
 /*
  * Attempts deleting the user that
- * that does not exist.
+ * that does not exist. 
  */
 
 function fakeDelete(done) {
   const username = 'notreal';
   UserController.removeUser(reqUser, username)
   .then(function(delUser) {
-    chai.assert(true===false);
+    chai.expect(delUser).to.equal('notreal');
     done();
   })
   .catch(function(err) {
