@@ -74,11 +74,6 @@ class ProjectController {
           return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
         }
 
-        // Error Check - Ensure only 1 project is found
-        if (projects.length < 1) {
-          return reject(new Error('Project not found'));
-        }
-
         const popQuery = 'org';
 
         // Search for project
@@ -94,6 +89,7 @@ class ProjectController {
           if (projects.length < 1) {
             return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'No projects found.' })));
           }
+
 
           // Return resulting project
           return resolve(projects);
