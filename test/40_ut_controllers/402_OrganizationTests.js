@@ -46,70 +46,62 @@ describe(name, function() {
     db.connect();
 
     // The first admin user
-    user = new User({
-      username: 'rsanchez',
-      password: 'impicklerick',
-      fname: 'Rick',
-      lname: 'Sanchez',
-      admin: true
-    });
-    user.save((err) => {
-      chai.expect(err).to.equal(null);
-
-      // A second non-admin user
-      newUser = new User({
+    const username = M.config.test.username;
+    UserController.findUser(username)
+    .then(function(searchUser) {
+      // Setting it equal to global variable
+      user = searchUser;
+      chai.expect(searchUser.username).to.equal(M.config.test.username);
+      // Creating a new non-admin user
+      const nonAuserData = {
         username: 'msmith',
-        password: 'awwgeez',
+        password: 'awwgeezrick',
         fname: 'Morty',
         lname: 'Smith',
         admin: false
-      });
-      newUser.save((error) => {
+      };
+      UserController.createUser(user, nonAuserData)
+      .then(function(nonAu) {
+        newUser = nonAu;
+        chai.expect(nonAu.username).to.equal('msmith');
+        chai.expect(nonAu.fname).to.equal('Morty');
+        chai.expect(nonAu.lname).to.equal('Smith');
+        done();
+      })
+      .catch(function(error) {
         chai.expect(error).to.equal(null);
-
-        // Create the organization
-        org = new Org({
-          id: 'council',
-          name: 'Council of Ricks',
-          permissions: {
-            admin: [user._id],
-            write: [user._id],
-            read: [user._id]
-          }
-        });
-
-        org.save((orgErr) => {
-          chai.expect(orgErr).to.equal(null);
-          done();
-        });
+        done();
       });
+    })
+    .catch(function(lasterr) {
+      chai.expect(lasterr).to.equal(null);
+      done();
     });
   });
 
   // runs after all tests in this block
   after((done) => {
-    // Delete the org
-    Org.findOneAndRemove({
-      id: org.id
-    },
-    (err, foundOrg) => {
-      chai.expect(err).to.equal(null);
-
-      // Delete the first user
-      User.findOneAndRemove({
-        username: 'rsanchez'
-      }, (userErrorOne) => {
-        chai.expect(userErrorOne).to.equal(null);
-
-        // Delete second user
-        User.findOneAndRemove({
-          username: 'msmith'
-        }, (userErrorTwo) => {
-          chai.expect(userErrorTwo).to.equal(null);
-          mongoose.connection.close();
-          done();
-        });
+    // Removing the organization created
+    OrgController.removeOrg(user, 'council', { soft: false })
+    .then(() => {
+      // Removing the non admin user
+      const userTwo = 'msmith';
+      UserController.deleteUser(user, userTwo)
+      .then(function(delUser2) {
+        chai.expect(delUser2).to.equal('msmith');
+        mongoose.connection.close();
+        done();
+      })
+      .catch(function(err1) {
+        chai.expect(err1).to.equal(null);
+        mongoose.connection.close();
+        done();
       });
+    })
+    .catch(function(err2) {
+      chai.expect(err2).to.equal(null);
+      mongoose.connection.close();
+      done();
     });
   });
 
