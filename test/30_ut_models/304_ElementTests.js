@@ -166,6 +166,7 @@ describe(name, function() {
  */
 function createElement(done) {
   const newElement = new Element.Element({
+    id: '0000',
     uid: 'empire:deathstar:0000',
     name: 'Death Star Model Arbitrary Element',
     project: project._id,
@@ -202,6 +203,7 @@ function deleteElement(done) {
 function createRootPackage(done) {
   // Create the new package
   const newPackage = new Element.Package({
+    id: '0001',
     uid: 'empire:deathstar:0001',
     name: 'Death Star Model Root Package',
     project: project._id,
@@ -252,6 +254,7 @@ function createBlock01(done) {
 
     // Create the new block
     const newBlock = new Element.Block({
+      id: '0002',
       uid: 'empire:deathstar:0002',
       name: 'Core Reactor',
       project: project._id,
@@ -298,6 +301,7 @@ function createBlock02(done) {
 
     // Create the new block
     const newBlock = new Element.Block({
+      id: '0003',
       uid: 'empire:deathstar:0003',
       name: 'Thermal Exhaust Port',
       project: project._id,
@@ -348,6 +352,7 @@ function createRelationship(done) {
 
     // Create the new block
     const newRelationship = new Element.Relationship({
+      id: '0004',
       uid: 'empire:deathstar:0004',
       name: 'Dependency Link',
       project: project._id,

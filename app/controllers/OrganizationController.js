@@ -80,7 +80,7 @@ class OrganizationController {
    *
    * @param  {String} The string containing the username of the requesting user.
    * @param  {String} The string of the org ID.
-   * @param  {Boolean} An optinal flag that allows users to search for
+   * @param  {Boolean} An optional flag that allows users to search for
    *                   soft deleted projects as well.
    */
   static findOrg(user, organizationID, softDeleted = false) {
