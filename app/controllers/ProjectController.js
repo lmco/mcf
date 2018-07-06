@@ -55,8 +55,9 @@ class ProjectController {
    *
    * @param  {User} The object containing the requesting user.
    * @param  {String} The organization ID for the Organization the project belongs to.
+   * @param  {Boolean} The optional flag to denote searching for deleted projects
    */
-  static findProjects(reqUser, organizationId) {
+  static findProjects(reqUser, organizationId, softDeleted = false) {
     return new Promise((resolve, reject) => {
       // Error check - Verify id, name, and org.id are of type string for sanitization.
       if (typeof organizationId !== 'string') {
@@ -66,7 +67,7 @@ class ProjectController {
       // Sanitize project properties
       const orgID = M.lib.sani.html(organizationId);
 
-      OrgController.findOrg(reqUser, orgID)
+      OrgController.findOrg(reqUser, orgID, softDeleted)
       .then((org) => {
         const orgReaders = org.permissions.read.map(u => u.username);
         // Error Check - See if user has read permissions on org
@@ -76,8 +77,14 @@ class ProjectController {
 
         const popQuery = 'org';
 
+        let searchParams = { org: org._id, 'permissions.read': reqUser._id, deleted: false };
+
+        if (softDeleted && reqUser.admin) {
+          searchParams = { org: org._id, 'permissions.read': reqUser._id };
+        }
+
         // Search for project
-        Project.find({ org: org._id, 'permissions.read': reqUser._id, deleted: false })
+        Project.find(searchParams)
         .populate(popQuery)
         .exec((err, projects) => {
           // Error Check - Database/Server Error
@@ -124,59 +131,27 @@ class ProjectController {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
 
-      // Determine whether to soft delete or not
-      let softDelete = true;
-      if (options.hasOwnProperty('soft')) {
-        // User must be a system admin to hard delete
-        if (options.soft === false && reqUser.admin) {
-          softDelete = false;
-        }
-        else if (options.soft === false && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
-        }
-        else if (options.soft !== false && options.soft !== true) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
-        }
-      }
-
       // Sanitize the orgid
       const orgID = M.lib.sani.html(organizationId);
 
-
-      // Delete the projects
-      if (softDelete) {
-        // Find the projects
-        ProjectController.findProjects(reqUser, orgID)
+      // Ensure the org exists
+      OrgController.findOrg(reqUser, orgID, true)
+      .then((org) => {
+        ProjectController.findProjects(reqUser, org.id, true)
         .then((projects) => {
-          // Mark each of them as deleted
-          for (let proj = 0; proj < projects.length; proj++) {
-            projects[proj].deletedOn = Date.now();
-            projects[proj].deleted = true;
-            projects[proj].save((saveErr) => {
-              if (saveErr) {
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+          for (let i = 0; i < projects.length; i++) {
+            ProjectController.removeProject(reqUser, orgID, projects[i].id, options)
+            .then((project) => {
+              if (i === projects.length - 1) {
+                return resolve(projects);
               }
-            });
+            })
+            .catch((deleteProjError) => reject(deleteProjError));
           }
-          return resolve(projects);
         })
-        .catch((deleteError) => reject(deleteError));
-      }
-      else {
-        // Find the org
-        OrgController.findOrg(reqUser, orgID, true)
-        .then((org) => {
-          // Hard-delete any projects with the matching orgID
-          Project.deleteMany({ org: org._id }, (deleteError, projectsDeleted) => {
-            if (deleteError) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
-            }
-
-            return resolve(projectsDeleted);
-          });
-        })
-        .catch((findOrgErr) => reject(findOrgErr));
-      }
+        .catch((findProjectsError) => reject(findProjectsError));
+      })
+      .catch((findOrgError) => reject(findOrgError));
     });
   }
 
