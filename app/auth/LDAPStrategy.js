@@ -87,9 +87,8 @@ class LDAPStrategy extends BaseStrategy {
 
 
   ldapSearch(ldapClient, username, password) {
+    M.log.debug('Attempting to search for LDAP user.');
     return new Promise((resolve, reject) => {
-      M.log.debug('Attempting to search for LDAP user.');
-
       const filter = `${'(&'                 // the escape is part of the ldap query
                    + '(objectclass\=person)' // eslint-disable-line no-useless-escape
                    + '('}${M.config.auth.ldap.username_attribute}=${username})`
@@ -125,8 +124,8 @@ class LDAPStrategy extends BaseStrategy {
 
 
   ldapAuth(ldapClient, user, password) {
+    M.log.debug(`Authenticating ${user[M.config.auth.ldap.username_attribute]} ...`);
     return new Promise((resolve, reject) => {
-      M.log.debug(`Authenticating ${user[M.config.auth.ldap.username_attribute]} ...`);
       ldapClient.bind(user.dn, password, (err) => {
         // If an error occurs, fail.
         if (err) {
@@ -143,9 +142,8 @@ class LDAPStrategy extends BaseStrategy {
 
 
   ldapSync(user) {
+    M.log.debug('Synchronizing LDAP user with local database.');
     return new Promise((resolve, reject) => {
-      M.log.debug('Synchronizing LDAP user with local database.');
-
       UserController.findUser(user[M.config.auth.ldap.username_attribute])
       .then(foundUser => {
         const initData = {

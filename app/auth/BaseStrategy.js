@@ -38,10 +38,10 @@ class BaseStrategy {
    * @description  The `BaseStrategy` constructor.
    */
   constructor() {
-   this.name = 'base-strategy';
-   this.authenticate = this.authenticate.bind(this);
-   this.handleBasicAuth = this.handleBasicAuth.bind(this);
-   this.handleTokenAuth = this.handleTokenAuth.bind(this);
+    this.name = 'base-strategy';
+    this.authenticate = this.authenticate.bind(this);
+    this.handleBasicAuth = this.handleBasicAuth.bind(this);
+    this.handleTokenAuth = this.handleTokenAuth.bind(this);
   }
 
 
@@ -116,17 +116,17 @@ class BaseStrategy {
       else if (RegExp('Bearer').test(scheme)) {
         M.log.verbose('Authenticating user via Token Auth ...');
         const token = Buffer.from(parts[1], 'utf8').toString();
-        this.handleTokenAuth(req, res, token, (err, user) => {
-          if (err) {
-            M.log.error(err);
-            return (req.originalUrl.startsWith('/api'))
-              ? res.status(401).send('Unauthorized')
-              : res.redirect(`/login?next=${req.originalUrl}`);
-          }
-
+        this.handleTokenAuth(req, res, token)
+        .then(user => {
           M.log.info(`Authenticated [${user.username}] via Token Auth`);
           req.user = user;
           next();
+        })
+        .catch(err => {
+          M.log.error(err);
+          return (req.originalUrl.startsWith('/api'))
+            ? res.status(401).send('Unauthorized')
+            : res.redirect(`/login?next=${req.originalUrl}`);
         });
       }
       // Other authorization header
@@ -147,16 +147,17 @@ class BaseStrategy {
     else if (req.session.token) {
       M.log.verbose('Authenticating user via Session Token Auth...');
       const token = req.session.token;
-      this.handleTokenAuth(req, res, token, (err, user) => {
-        if (err) {
-          M.log.error(err);
-          return (req.originalUrl.startsWith('/api'))
-            ? res.status(401).send('Unauthorized')
-            : res.redirect(`/login?next=${req.originalUrl}`);
-        }
+      this.handleTokenAuth(req, res, token)
+      .then(user => {
         M.log.info(`Authenticated [${user.username}] via Session Token Auth`);
         req.user = user;
         next();
+      })
+      .catch(err => {
+        M.log.error(err);
+        return (req.originalUrl.startsWith('/api'))
+          ? res.status(401).send('Unauthorized')
+          : res.redirect(`/login?next=${req.originalUrl}`);
       });
     }
 
@@ -179,17 +180,18 @@ class BaseStrategy {
           ? res.status(401).send('Unauthorized')
           : res.redirect(`/login?next=${req.originalUrl}`);
       }
-      this.handleBasicAuth(req, res, username, password, (err, user) => {
-        if (err) {
-          M.log.error(err);
-          return (req.originalUrl.startsWith('/api'))
-            ? res.status(401).send('Unauthorized')
-            : res.redirect(`/login?next=${req.originalUrl}&err=${err}`);
-        }
-
-        M.log.info(`Authenticated [${user.username}] via Form Input Auth`);
+      // Handle basic auth
+      this.handleBasicAuth(req, res, username, password)
+      .then(user => {
+        M.log.info(`Authenticated [${user.username}] via Form Input`);
         req.user = user;
         next();
+      })
+      .catch(err => {
+        M.log.error(err);
+        return (req.originalUrl.startsWith('/api'))
+          ? res.status(401).send('Unauthorized')
+          : res.redirect(`/login?next=${req.originalUrl}`);
       });
     }
     else {
