@@ -26,6 +26,7 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ElemController = M.load('controllers/ElementController');
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
+const UserController = M.load('controllers/UserController');
 const User = M.load('models/User');
 
 let user = null;
@@ -46,17 +47,8 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    // Ensure the test user exists
-    User.findOne({
-      username: M.config.test.username
-    })
-    .exec((errUser, retUser) => {
-      // Check if error occurred
-      if (errUser) {
-        M.log.error(errUser);
-        chai.expect(errUser.message).to.equal(null);
-      }
-
+    UserController.findUser(M.config.test.username)
+    .then((retUser) => {
       user = retUser;
 
       const orgData = {
@@ -80,6 +72,10 @@ describe(name, function() {
         chai.expect(orgError.message).to.equal(null);
         done();
       });
+    })
+    .catch((userError) => {
+      chai.expect(userError.message).to.equal(null);
+      done();
     });
   });
 
