@@ -111,6 +111,7 @@ describe(name, function() {
   it('should find an existing org', findExistingOrg).timeout(2500);
   it('should throw an error saying the field cannot be updated', updateOrgFieldErr).timeout(2500);
   it('should throw an error saying the name field is not a string', updateOrgTypeErr).timeout(2500);
+  it('should reject update from non admin user',nonAUpdate).timeout(2500);
   it('should update an orgs name', updateOrg).timeout(2500);
   it('should update an orgs name using model object', updateOrgObject).timeout(2500);
   it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
@@ -119,8 +120,11 @@ describe(name, function() {
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg).timeout(5000);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(2500);
   it('should add a user to an org', addUserRole).timeout(2500);
+  //TEST FAILING: dont think it should be
+  it('should let the non-admin user write to the org that was given permissions', orgWritePerm).timeout(2500);
+  it('should reject user changing their permissions', rejectUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
-  // it('should get all members with permissions in an org', getMembers).timeout(2500);
+  it('should get all members with permissions in an org', getMembers).timeout(2500);
   it('should throw an error saying the user is not an admin', nonAdminChangeRole).timeout(2500);
   it('should remove a users role within an org', removeUserRole).timeout(2500);
   it('should throw an error saying the user is not in the org', getOldUserRoles).timeout(2500);
@@ -226,6 +230,28 @@ function updateOrgTypeErr(done) {
   });
 }
 
+/** 
+ * Testing to see if the code will reject the update
+ * from a user that does not have admin rights.
+ * This test should throw an error.
+ */
+
+function nonAUpdate(done) {
+  OrgController.updateOrg(newUser, 'tv', { name: 'betterreject' })
+  .then(() => {
+    //should not come into then function
+    //fail test if does
+    chai.AssertionError(true === false);
+    done();
+  })
+  .catch(function(error) {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal('User does not have permissions.');
+    done();
+  });
+}
+
+
 /**
  * Tests updating an org
  */
@@ -273,12 +299,10 @@ function updateOrgObject(done) {
 function findAllExistingOrgs(done) {
   OrgController.findOrgs(user)
   .then((orgs) => {
-    chai.expect(orgs.length).to.equal(1);
+    chai.expect(orgs.length).to.equal(2);
     done();
   })
   .catch((error) => {
-    console.log(error)
-    const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
   });
@@ -336,7 +360,7 @@ function deleteExistingOrg(done) {
  * Tests that projects are soft deleted with orgs
  */
 function softDeleteProjectAndOrg(done) {
-  OrgController.createOrg(user, { id: 'tv', name: 'Intergalactic Cable' })
+  OrgController.createOrg(user, { id: 'tv', name: 'Intergalactic' })
   .then((retOrg) => {
     ProjController.createProject(user, { id: 'prtlgn', name: 'portal gun', org: { id: 'tv' } })
     .then((retProj) => {
@@ -442,6 +466,43 @@ function addUserRole(done) {
 }
 
 /**
+ * Test to see if the newUser can actually write to the 
+ * organization now that new permissions have been set
+ * FAILED? But doesnt it have write permissions?...
+ */
+
+function orgWritePerm(done) {
+  OrgController.updateOrg(newUser, 'council', { id: 'council', name: 'No more Ricks' })
+  .then((retOrg) => {
+    chai.expect(retOrg.name).to.equal('No more Ricks');
+    done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Test is to set the permissions of the owner
+ * of the org, which should get denied.
+ */
+
+function rejectUserRole(done){
+  OrgController.setPermissions(user, 'tv', user, 'REMOVE_ALL')
+  .then(() =>{
+    chai.AssertionError(true === false);
+    done();
+  })
+  .catch((error) => {
+    const json = JSON.parse(error.message);
+    chai.expect(json.description).to.equal('User cannot change their own permissions.');
+    done();
+  })
+}
+
+/**
  * Tests retrieving the roles a specific user has
  */
 function getUserRoles(done) {
@@ -458,25 +519,25 @@ function getUserRoles(done) {
   });
 }
 
-// /**
-//  * Tests retrieving all members roles for a specified project
-//  */
-// function getMembers(done) {
-//   OrgController.findAllPermissions(user, org.id.toString())
-//   .then((members) => {
-//     chai.expect(members.msmith.read).to.equal(true);
-//     chai.expect(members.msmith.write).to.equal(true);
-//     chai.expect(members.msmith.admin).to.equal(false);
-//     chai.expect(members.rsanchez.read).to.equal(true);
-//     chai.expect(members.rsanchez.write).to.equal(true);
-//     chai.expect(members.rsanchez.admin).to.equal(true);
-//     done();
-//   })
-//   .catch((error) => {
-//     const err = JSON.parse(error.message);
-//     chai.expect(err.description).to.equal(null);
-//   });
-// }
+/**
+ * Tests retrieving all members roles for a specified project
+ */
+function getMembers(done) {
+  OrgController.findAllPermissions(user, org.id.toString())
+  .then((members) => {
+    chai.expect(members.msmith.read).to.equal(true);
+    chai.expect(members.msmith.write).to.equal(true);
+    chai.expect(members.msmith.admin).to.equal(false);
+    chai.expect(members.mbee.read).to.equal(true);
+    chai.expect(members.mbee.write).to.equal(true);
+    chai.expect(members.mbee.admin).to.equal(true);
+    done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+  });
+}
 
 /**
  * Non-admin try to change a users role
