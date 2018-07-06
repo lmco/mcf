@@ -25,8 +25,7 @@ const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
-const Org = M.load('models/Organization');
-const User = M.load('models/User');
+const UserController = M.load('controllers/UserController');
 
 let user = null;
 let newUser = null;
@@ -244,10 +243,11 @@ function updateOrgObject(done) {
 function findAllExistingOrgs(done) {
   OrgController.findOrgs(user)
   .then((orgs) => {
-    chai.expect(orgs.length).to.equal(2);
+    chai.expect(orgs.length).to.equal(1);
     done();
   })
   .catch((error) => {
+    console.log(error)
     const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
