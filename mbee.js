@@ -30,6 +30,13 @@ M.version = require(`${__dirname}/package.json`).version;
 M.build = require(`${__dirname}/package.json`).buildNumber;
 M.version4 = (M.build !== 'NO_BUILD_NUMBER') ? `${M.version}.${M.build}` : `${M.version}.0`;
 M.config = require(`${__dirname}/config/${M.env}.json`);
+
+// Set config secret if it's set to RANDOM
+if (M.config.server.secret === 'RANDOM') {
+  M.config.server.secret = Math.random().toString(36).substring(2, 15)
+    + Math.random().toString(36).substring(2, 15);
+}
+
 M.root = __dirname;
 M.path = {
   lib: s => path.join(__dirname, 'app', 'lib', s),
