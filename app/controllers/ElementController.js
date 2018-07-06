@@ -18,8 +18,8 @@
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const ProjController = M.load('controllers/ProjectController');
-const Element = M.load('models/Element');
+const ProjController = M.require('controllers.ProjectController');
+const Element = M.require('models.Element');
 
 
 /**
@@ -50,6 +50,7 @@ class ElementController {
    * @param  {String} The organization ID.
    * @param  {String} The project ID.
    */
+   // TODO: Add query based on type
   static findElements(reqUser, organizationID, projectID) {
     return new Promise((resolve, reject) => {
       // Ensure all incoming IDs are strings
@@ -73,7 +74,7 @@ class ElementController {
         }
 
         Element.Element.find({ project: project._id })
-        .populate('parent project')
+        .populate('parent project source target contains')
         .exec((err, elements) => {
           if (err) {
             return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
@@ -132,7 +133,7 @@ class ElementController {
       }
 
       Element.Element.findOne(searchParams)
-      .populate('parent project')
+      .populate('parent project source target contains')
       .exec((findElementError, element) => {
         if (findElementError) {
           return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
@@ -176,6 +177,8 @@ class ElementController {
     return new Promise((resolve, reject) => {
       // Element ID and Type, Project ID and Org ID are all required
       // Ensure element object data contains all the proper fields
+
+      // TODO: Clean up error check code.
 
       // Element ID
       if (!element.hasOwnProperty('id')) {
@@ -760,6 +763,7 @@ class ElementController {
    */
   static updateParent(reqUser, orgID, projID, elemID, newElement) {
     return new Promise((resolve, reject) => {
+      // Find the parent element
       ElementController.findElement(reqUser, orgID, projID, elemID)
       .then((parentElement) => {
         // Add _id to the array
