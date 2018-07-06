@@ -13,7 +13,6 @@
  * @module  Project Controller Tests
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description  Tests the project controller
  */
@@ -156,7 +155,7 @@ describe(name, () => {
   it('should reject non-A user from finding a project', nonAUser).timeout(2500);
   it('should reject updating due to non-A user', updateNonA).timeout(2500);
   it('should find the permissions on the project', findPerm).timeout(2500);
-  // it('should set the permissions on the project', setPerm).timeout(2500);
+  it('should set the permissions on the project', setPerm).timeout(2500);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
   it('should delete a project', deleteProject).timeout(2500);
   it('should delete second project', deleteProject02).timeout(2500);
@@ -612,24 +611,24 @@ function findPerm(done) {
   });
 }
 
-// /**
-//  * Tests setting permissions on the project.
-//  */
-// function setPerm(done) {
-//   permType = 'write';
-//   ProjController.setPermissions(allSeeingUser, org.id, 'dimc137rick', nonAuser, permType)
-//   .then((perm) => {
-//     chai.expect(perm.read).to.equal(true);
-//     chai.expect(perm.write).to.equal(true);
-//     chai.expect(perm.admin).to.equal(false);
-//     done();
-//   })
-//   .catch((err2) => {
-//     console.log(err2.message);
-//     chai.expect(err2.message).to.equal(null);
-//     done();
-//   });
-// }
+/**
+ * Tests setting permissions on the project.
+ */
+function setPerm(done) {
+  permType = 'write';
+  ProjController.setPermissions(allSeeingUser, org.id, 'dimc137rick', nonAuser, permType)
+  .then((perm) => {
+    chai.expect(perm.read).to.equal(true);
+    chai.expect(perm.write).to.equal(true);
+    chai.expect(perm.admin).to.equal(false);
+    done();
+  })
+  .catch((err2) => {
+    console.log(err2.message);
+    chai.expect(err2.message).to.equal(null);
+    done();
+  });
+}
 
 /**
  * Tests soft-deleting a project

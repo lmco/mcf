@@ -123,7 +123,7 @@ class UserController {
           if (saveErr) {
             return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
           }
-          return resolve(user.getPublicData());
+          return resolve(user);
         });
       });
     }));
