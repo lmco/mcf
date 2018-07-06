@@ -507,44 +507,79 @@ class ProjectController {
       const orgID = M.lib.sani.html(organizationId);
       const projID = M.lib.sani.html(projectId);
 
-      // Find the project, even if it has already been soft deleted
+      // Make sure the project exists first, even if it has already been soft deleted
       ProjectController.findProject(reqUser, orgID, projID, true)
       .then((project) => {
-        // Check Permissions
-        const admins = project.permissions.admin.map(u => u._id.toString());
-        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
-        }
-
-        if (softDelete) {
-          if (!project.deleted) {
-            project.deletedOn = Date.now();
-            project.deleted = true;
-            project.save((saveErr) => {
-              if (saveErr) {
-                // If error occurs, return it
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
-              }
-
-              // Return updated project
-              return resolve(project);
-            });
+        // Delete any elements attached to the project first
+        ElemController.removeElements(reqUser, orgID, projID, options)
+        .then((elements) => {
+          ProjectController.removeProjectHelper(project, softDelete)
+          .then((deletedProject) => resolve(deletedProject))
+          .catch((deleteProjectError) => reject(deleteProjectError));
+        })
+        .catch((removeElementsError) => {
+          // There are simply no elements associated with this project to delete
+          const error = JSON.parse(removeElementsError.message);
+          if (error.description === 'No elements found.') {
+            ProjectController.removeProjectHelper(project, softDelete)
+            .then((deletedProject) => resolve(deletedProject))
+            .catch((deleteProjectError) => reject(deleteProjectError));
           }
           else {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project no longer exists.' })));
+            // Some other error when deleting the elements
+            return reject(removeElementsError);
           }
-        }
-        else {
-          // Remove the Project
-          Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
-            if (removeProjErr) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
+        });
+      })
+      .catch((findProjectError) => reject(findProjectError));
+    });
+  }
+
+  /**
+   * The function actualy deletes the project.
+   *
+   * @example
+   * ProjectController.removeProjectHelper({Arc}, true)
+   * .then(function(org) {
+   *   // do something with the newly created project.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {Project} The project object to delete
+   * @param  {Boolean} Flag denoting whether to soft delete or not.
+   */
+  static removeProjectHelper(project, softDelete) {
+    return new Promise((resolve, reject) => {
+      if (softDelete) {
+        if (!project.deleted) {
+          project.deletedOn = Date.now();
+          project.deleted = true;
+          project.save((saveErr) => {
+            if (saveErr) {
+              // If error occurs, return it
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
             }
-            return resolve(projectRemoved);
+
+            // Return updated project
+            return resolve(project);
           });
         }
-      })
-      .catch((findProjError) => reject(findProjError));
+        else {
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project no longer exists.' })));
+        }
+      }
+      else {
+        // Remove the Project
+        Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
+          if (removeProjErr) {
+            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
+          }
+          return resolve(projectRemoved);
+        });
+      }
     });
   }
 

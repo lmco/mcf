@@ -27,6 +27,8 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.load('controllers/ProjectController');
 const UserController = M.load('controllers/UserController');
 const OrgController = M.load('controllers/OrganizationController');
+const ElemController = M.load('controllers/ElementController');
+const Element = M.load('models/Element');
 
 let nonAuser = null;
 let allSeeingUser = null;
@@ -136,6 +138,7 @@ describe(name, () => {
   });
 
   it('should create a new project', createProject).timeout(2500);
+  it('should create elements for the project', createElements).timeout(2500);
   it('should throw an error saying the field cannot be updated', updateFieldError).timeout(2500);
   it('should throw an error saying the field is not of type string', updateTypeError).timeout(2500);
   it('should update a project', updateProject).timeout(2500);
@@ -184,6 +187,51 @@ function createProject(done) {
     chai.expect(proj.id).to.equal('prtlgn');
     chai.expect(proj.name).to.equal('portal gun');
     done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Creates elements for the main project
+ */
+function createElements(done) {
+  const elem0 = {
+    id: '0000',
+    name: 'Trigger',
+    project: {
+      id: 'prtlgn',
+      org: {
+        id: 'council'
+      }
+    },
+    type: 'Element'
+  };
+  ElemController.createElement(allSeeingUser, elem0)
+  .then((element) => {
+    const elem1 = {
+      id: '0001',
+      name: 'Handle',
+      project: {
+        id: 'prtlgn',
+        org: {
+          id: 'council'
+        }
+      },
+      type: 'Element'
+    };
+    ElemController.createElement(allSeeingUser, elem1)
+    .then((element2) => {
+      done();
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal(null);
+      done();
+    });
   })
   .catch((error) => {
     const err = JSON.parse(error.message);
@@ -664,7 +712,13 @@ function deleteProject(done) {
     ProjController.findProject(allSeeingUser, org.id, 'prtlgn')
     .then((proj2) => {
       chai.expect(proj2).to.equal(null);
-      done();
+      // Check if elements still exist
+      Element.Element.find({ id: '0000' })
+      .populate()
+      .exec((findElementError, element) => {
+        chai.expect(element).to.equal(null);
+        done();
+      });
     })
     .catch((error) => {
       const err = JSON.parse(error.message);
@@ -672,8 +726,8 @@ function deleteProject(done) {
       done();
     });
   })
-  .catch((error2) => {
-    const err = JSON.parse(error2.message);
+  .catch((error3) => {
+    const err = JSON.parse(error3.message);
     chai.expect(err.description).to.equal(null);
     done();
   });

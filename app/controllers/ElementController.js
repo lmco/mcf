@@ -135,12 +135,17 @@ class ElementController {
       const projID = M.lib.sani.sanitize(projectID);
 
       // Ensure the project still exists
-      ProjController.findProject(reqUser, orgID, projID)
+      ProjController.findProject(reqUser, orgID, projID, true)
       .then((project) => {
         if (softDelete) {
           // Find the elements
           ElementController.findElements(reqUser, orgID, projID)
           .then((elements) => {
+            // If there are no elements found, return an error
+            if (elements.length === 0) {
+              return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'No elements found.' })));
+            }
+
             for (let i = 0; i < elements.length; i++) {
               // Update the elements deleted and deletedOn fields
               elements[i].deletedOn = Date.now();

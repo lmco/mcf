@@ -27,7 +27,6 @@ const ElemController = M.load('controllers/ElementController');
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
 const UserController = M.load('controllers/UserController');
-const User = M.load('models/User');
 
 let user = null;
 let org = null;
@@ -379,7 +378,6 @@ function softDeleteAllElements(done) {
     });
   })
   .catch((error) => {
-    console.log(error);
     const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
