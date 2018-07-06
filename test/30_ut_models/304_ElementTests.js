@@ -145,14 +145,14 @@ describe(name, function() {
   });
 
   it('should create a generic element', createElement);
-  // it('should delete the generic element', deleteElement);
+  it('should delete the generic element', deleteElement);
   it('should create a root package', createRootPackage);
   it('should create a block (1)', createBlock01);
   it('should create a block (2)', createBlock02);
   it('should create a relationship between blocks', createRelationship);
-  // it('should delete blocks and relationships', deleteBlocksAndRelationships);
-  // it('should soft-delete the root package', softDeleteRootPackage);
-  // it('should delete the root package', deleteRootPackage);
+  it('should delete blocks and relationships', deleteBlocksAndRelationships);
+  it('should soft-delete the root package', softDeleteRootPackage);
+  it('should delete the root package', deleteRootPackage);
 });
 
 

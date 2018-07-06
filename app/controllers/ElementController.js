@@ -50,7 +50,7 @@ class ElementController {
    * @param  {String} The organization ID.
    * @param  {String} The project ID.
    */
-   // TODO: Add query based on type
+  // TODO: Add query based on type
   static findElements(reqUser, organizationID, projectID) {
     return new Promise((resolve, reject) => {
       // Ensure all incoming IDs are strings
