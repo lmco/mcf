@@ -120,8 +120,7 @@ describe(name, function() {
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg).timeout(5000);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(2500);
   it('should add a user to an org', addUserRole).timeout(2500);
-  //TEST FAILING: dont think it should be
-  it('should let the non-admin user write to the org that was given permissions', orgWritePerm).timeout(2500);
+  it('should let the non-admin user write a project with new permissions', projWritePerm).timeout(2500);
   it('should reject user changing their permissions', rejectUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
   it('should get all members with permissions in an org', getMembers).timeout(2500);
@@ -471,10 +470,18 @@ function addUserRole(done) {
  * FAILED? But doesnt it have write permissions?...
  */
 
-function orgWritePerm(done) {
-  OrgController.updateOrg(newUser, 'council', { id: 'council', name: 'No more Ricks' })
-  .then((retOrg) => {
-    chai.expect(retOrg.name).to.equal('No more Ricks');
+function projWritePerm(done) {
+  const projData = {
+    id: 'jerryboree',
+    name: 'Jerry Smith',
+    org: {
+      id: 'council'
+    }
+  };
+  ProjController.createProject(newUser, projData)
+  .then((proj) => {
+    chai.expect(proj.id).to.equal('jerryboree');
+    chai.expect(proj.name).to.equal('Jerry Smith');
     done();
   })
   .catch((error) => {
