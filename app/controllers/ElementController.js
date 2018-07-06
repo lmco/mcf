@@ -143,9 +143,9 @@ class ElementController {
           .then((elements) => {
             for (let i = 0; i < elements.length; i++) {
               // Update the elements deleted and deletedOn fields
-              element.deletedOn = Date.now();
-              element.deleted = true;
-              element.save((saveErr) => {
+              elements[i].deletedOn = Date.now();
+              elements[i].deleted = true;
+              elements[i].save((saveErr) => {
                 if (saveErr) {
                   // If error occurs, return it
                   return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
@@ -160,7 +160,7 @@ class ElementController {
         }
         else {
           // Hard delete the elements
-          Element.Element.deleteMany({project: project._id}, (deleteError, elementsDeleted) => {
+          Element.Element.deleteMany({ project: project._id }, (deleteError, elementsDeleted) => {
             if (deleteError) {
               return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
             }
