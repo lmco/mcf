@@ -38,8 +38,10 @@ class BaseStrategy {
    * @description  The `BaseStrategy` constructor.
    */
   constructor() {
-    this.name = 'base-strategy';
-    this.authenticate.bind(this);
+   this.name = 'base-strategy';
+   this.authenticate = this.authenticate.bind(this);
+   this.handleBasicAuth = this.handleBasicAuth.bind(this);
+   this.handleTokenAuth = this.handleTokenAuth.bind(this);
   }
 
 
@@ -90,17 +92,17 @@ class BaseStrategy {
             : res.redirect(`/login?next=${req.originalUrl}`);
         }
         // Handle basic auth
-        this.handleBasicAuth(req, res, username, password, (err, user) => {
-          if (err) {
-            M.log.error(err);
-            return (req.originalUrl.startsWith('/api'))
-              ? res.status(401).send('Unauthorized')
-              : res.redirect(`/login?next=${req.originalUrl}`);
-          }
-
+        this.handleBasicAuth(req, res, username, password)
+        .then(user => {
           M.log.info(`Authenticated [${user.username}] via Basic Auth`);
           req.user = user;
           next();
+        })
+        .catch(err => {
+          M.log.error(err);
+          return (req.originalUrl.startsWith('/api'))
+            ? res.status(401).send('Unauthorized')
+            : res.redirect(`/login?next=${req.originalUrl}`);
         });
       }
 
