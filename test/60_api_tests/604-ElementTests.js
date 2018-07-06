@@ -145,7 +145,8 @@ function postElement(done) {
     })
   },
   function(err, response, body) {
-    chai.expect(response.statusCode).to.equal(501);
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(body.id).to.equal('0000');
     done();
   });
 }
@@ -160,7 +161,8 @@ function getElement(done) {
     method: 'GET'
   },
   function(err, response, body) {
-    chai.expect(response.statusCode).to.equal(501);
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(body.id).to.equal('0000');
     done();
   });
 }
@@ -175,7 +177,7 @@ function getElements(done) {
     method: 'GET'
   },
   function(err, response, body) {
-    chai.expect(response.statusCode).to.equal(501);
+    chai.expect(response.statusCode).to.equal(200);
     done();
   });
 }
@@ -193,7 +195,8 @@ function putElement(done) {
     })
   },
   function(err, response, body) {
-    chai.expect(response.statusCode).to.equal(501);
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(body.name).to.equal('Death Star Important Element');
     done();
   });
 }
@@ -211,7 +214,8 @@ function deleteElement(done) {
     })
   },
   function(err, response, body) {
-    chai.expect(response.statusCode).to.equal(501);
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(body.id).to.equal('0000');
     done();
   });
 }

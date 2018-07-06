@@ -21,7 +21,7 @@ const path = require('path');
 const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
-
+const ElementController = mbee.load('controllers/ElementController');
 const OrgController = mbee.load('controllers/OrganizationController');
 const ProjectController = mbee.load('controllers/ProjectController');
 const UserController = mbee.load('controllers/UserController');
@@ -1111,19 +1111,17 @@ class APIController {
     const projid = M.lib.sani.sanitize(req.params.projectid);
     const elemid = M.lib.sani.sanitize(req.params.elementid);
 
-    // ElementController.findElement(req.user, orgid, projid, elemid)
-    // .then((element) => {
-    //   res.header('Content-Type', 'application/json');
-    //   return res.status(200).send(APIController.formatJSON(element));
-    // })
-    // .catch((error) => {
-    //   // If error occurs, log error and return status.
-    //   const err = JSON.parse(error.message);
-    //   M.log.error(err.description);
-    //   return res.status(err.status).send(err);
-    // });
-
-    return res.status(501).send('Not Implemented.');
+    ElementController.findElement(req.user, orgid, projid, elemid)
+    .then((element) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(element));
+    })
+    .catch((error) => {
+      // If error occurs, log error and return status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
   }
 
   /**
@@ -1141,19 +1139,18 @@ class APIController {
       return res.status(err.status).send(err);
     }
 
-    // ElementController.createElement(req.user, req.body)
-    // .then((element) => {
-    //   res.header('Content-Type', 'application/json');
-    //   return res.status(200).send(APIController.formatJSON(element));
-    // })
-    // .catch((error) => {
-    //   // If error occurs, log error and return status.
-    //   const err = JSON.parse(error.message);
-    //   M.log.error(err.description);
-    //   return res.status(err.status).send(err);
-    // });
-
-    return res.status(501).send('Not Implemented.');
+    ElementController.createElement(req.user, req.body)
+    .then((element) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(element));
+    })
+    .catch((error) => {
+      console.log(error);
+      // If error occurs, log error and return status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
   }
 
   /**
@@ -1175,19 +1172,17 @@ class APIController {
     const projid = M.lib.sani.sanitize(req.params.projectid);
     const elemid = M.lib.sani.sanitize(req.params.elementid);
 
-    // ElementController.updateElement(req.user, orgid, projid, elemid, req.body)
-    // .then((element) => {
-    //   res.header('Content-Type', 'application/json');
-    //   return res.status(200).send(APIController.formatJSON(element));
-    // })
-    // .catch((error) => {
-    //   // If error occurs, log error and return status.
-    //   const err = JSON.parse(error.message);
-    //   M.log.error(err.description);
-    //   return res.status(err.status).send(err);
-    // });
-
-    return res.status(501).send('Not Implemented.');
+    ElementController.updateElement(req.user, orgid, projid, elemid, req.body)
+    .then((element) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(element));
+    })
+    .catch((error) => {
+      // If error occurs, log error and return status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
   }
 
   /**
@@ -1209,19 +1204,17 @@ class APIController {
     const projid = M.lib.sani.sanitize(req.params.projectid);
     const elemid = M.lib.sani.sanitize(req.params.elementid);
 
-    // ElementController.removeElement(req.user, orgid, projid, elemid, req.body)
-    // .then((element) => {
-    //   res.header('Content-Type', 'application/json');
-    //   return res.status(200).send(APIController.formatJSON(element));
-    // })
-    // .catch((error) => {
-    //   // If error occurs, log error and return status.
-    //   const err = JSON.parse(error.message);
-    //   M.log.error(err.description);
-    //   return res.status(err.status).send(err);
-    // });
-
-    return res.status(501).send('Not Implemented.');
+    ElementController.removeElement(req.user, orgid, projid, elemid, req.body)
+    .then((element) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(element));
+    })
+    .catch((error) => {
+      // If error occurs, log error and return status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
   }
 
 }
