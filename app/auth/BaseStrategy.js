@@ -115,8 +115,12 @@ class BaseStrategy {
         M.log.verbose('Authenticating user via Token Auth ...');
         const token = Buffer.from(parts[1], 'utf8').toString();
         this.handleTokenAuth(req, res, token, (err, user) => {
-          console.log(!user)
           if (err || !user) {
+            // Resetting request(ip,route,etc) to NULL
+            req.user = null;
+            // No valid user, destroy any previously valid sessions 
+            req.session.destroy();
+
             M.log.error(err);
             return (req.originalUrl.startsWith('/api'))
               ? res.status(401).send('Unauthorized')
