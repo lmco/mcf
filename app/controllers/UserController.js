@@ -76,7 +76,7 @@ class UserController {
 
         // Check if user exists
         if (user === null) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Bad Request', description: 'Cannot find user' })));
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not found', description: 'Cannot find user' })));
         }
 
         // Otherwise return 200 and the user's public JSON
@@ -174,9 +174,12 @@ class UserController {
         // Update user with properties found in newUserData
         const props = Object.keys(newUserData);
         for (let i = 0; i < props.length; i++) {
-          if (user.isUpdateAllowed(props[i])) {
-            user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
+          // Error check - make sure the properties exist and can be changed
+          if (!user.isUpdateAllowed(props[i])) {
+            return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'Update not allowed' })));
           }
+          user.isUpdateAllowed(props[i]);
+          user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
         }
 
         // Save the user
