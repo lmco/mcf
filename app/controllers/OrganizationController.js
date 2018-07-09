@@ -378,7 +378,6 @@ class OrganizationController {
         }
         else {
           // If there is some other issue in deleting the projects.
-          console.log(deleteErr);
           return reject(deleteErr);
         }
       });
