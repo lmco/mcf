@@ -107,7 +107,7 @@ class ElementController {
    * @param  {Object} Delete options.
    */
   static removeElements(reqUser, organizationID, projectID, options) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Ensure all incoming IDs are strings
       if (typeof organizationID !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
@@ -150,7 +150,7 @@ class ElementController {
               // Update the elements deleted and deletedOn fields
               elements[i].deletedOn = Date.now();
               elements[i].deleted = true;
-              elements[i].save((saveErr) => {
+              elements[i].save((saveErr) => { // eslint-disable-line consistent-return
                 if (saveErr) {
                   // If error occurs, return it
                   return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
