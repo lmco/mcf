@@ -35,6 +35,7 @@ const test = M.config.test;
 describe(name, function() {
   it('should get a username', getUser).timeout(3000);
   it('should create a user', postUser).timeout(3000);
+  it('should update a user', putUser).timeout(3000);
 });
 
 /**---------------------------------------------------
@@ -78,6 +79,28 @@ function postUser(done) {
     const json = JSON.parse(body);
     chai.expect(json.username).to.equal('lskywalker');
     chai.expect(json.fname).to.equal('Luke');
+    chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
+}
+
+/**
+ * Makes a PUT request to /api/users/:username. This is to
+ * update a user. Response should succeed with a user object returned.
+ */
+function putUser(done) {
+  request({
+    url: `${test.url}/api/users/lskywalker`,
+    headers: getHeaders(),
+    method: 'PUT',
+    body: JSON.stringify({
+      fname: 'Leia'
+    })
+  },
+  function(err, response, body) {
+    const json = JSON.parse(body);
+    chai.expect(json.username).to.equal('lskywalker');
+    chai.expect(json.fname).to.equal('Leia');
     chai.expect(response.statusCode).to.equal(200);
     done();
   });

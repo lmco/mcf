@@ -1016,7 +1016,7 @@ class APIController {
   /**
    * POST /api/users/:username
    *
-   * @description Creates a new user
+   * @description Creates a new user.
    */
   static postUser(req, res) {
     // If for some reason we don't have a user, fail.
@@ -1042,6 +1042,58 @@ class APIController {
     }
 
     UserController.createUser(req.user, req.body)
+    .then((user) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * PUT /api/users/:username
+   *
+   * @description Updates a user.
+   */
+  static putUser(req, res) {
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    UserController.updateUser(req.user, req.params.username, req.body)
+    .then((user) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * DELERE /api/users/:username
+   *
+   * @description Deletes a user.
+   */
+  static deleteUser(req, res) {
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    UserController.removeUser(req.user, req.params.username)
     .then((user) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(user.getPublicData()));

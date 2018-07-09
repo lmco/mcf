@@ -1522,12 +1522,12 @@ api.route('/users/:username')
 .put(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.putUser
 )
 .delete(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.deleteUser
 );
 
 /**
