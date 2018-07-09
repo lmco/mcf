@@ -33,7 +33,7 @@ const Element = M.require('models.Element');
 class ElementController {
 
   /**
-   * @description  This function takes a user, orgID, and projID
+   * @description  This function takes a user, orgID, projID and optional type
    * and returns all elements attached to the project.
    *
    * @example
@@ -49,9 +49,10 @@ class ElementController {
    * @param  {User} The user object of the requesting user.
    * @param  {String} The organization ID.
    * @param  {String} The project ID.
+   * @param  {String} An optional string denoting the type of element.
    */
   // TODO: Add query based on type
-  static findElements(reqUser, organizationID, projectID) {
+  static findElements(reqUser, organizationID, projectID, elemType = '') {
     return new Promise((resolve, reject) => {
       // Ensure all incoming IDs are strings
       if (typeof organizationID !== 'string') {
@@ -63,6 +64,28 @@ class ElementController {
 
       const orgID = M.lib.sani.sanitize(organizationID);
       const projID = M.lib.sani.sanitize(projectID);
+      let type = elemType;
+
+      // Ensure that the provided type is a valid one
+      if (elemType !== '' ) {
+        type = M.lib.sani.sanitize(elemType);
+
+        let typeExists = false;
+        Object.keys(Element).forEach((k) => {
+          if (type === Element[k].modelName) {
+            typeExists = true;
+          }
+        });
+
+        // Handle Element case, where type should be null
+        if (type === 'Element') {
+          type = null;
+        }
+
+        if (!typeExists) {
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid element type.' })));
+        }
+      }
 
       // Find the project
       ProjController.findProject(reqUser, orgID, projID)
@@ -73,7 +96,13 @@ class ElementController {
           return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
         }
 
-        Element.Element.find({ project: project._id })
+        // Create the list of search parameters
+        let searchParams = { project: project._id };
+        if (type !== '') {
+          searchParams = { project: project._id, type: type};
+        }
+
+        Element.Element.find(searchParams)
         .populate('parent project source target contains')
         .exec((err, elements) => {
           if (err) {

@@ -105,6 +105,8 @@ describe(name, function() {
   it('should create a block element', createBlock);
   it('should create a relationship', createRelationship);
   it('should find all elements for a project', findElements);
+  it('should find all elements of a specific type', findElementsSpecificType);
+  it('should throw an error for tryng to find an invalid element type', findElementsBadType);
   it('should find an element', findElement);
   it('should update an element', updateElement);
   it('should soft delete an element', softDeleteElement);
@@ -266,6 +268,39 @@ function findElements(done) {
   .catch((error) => {
     const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Finds all elements of type Element for a project
+ */
+function findElementsSpecificType(done) {
+  ElemController.findElements(user, org.id, proj.id, 'Package')
+  .then((retElems) => {
+    chai.expect(retElems.length).to.equal(1);
+    done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests trying to find an invalid type of element
+ */
+function findElementsBadType(done) {
+  ElemController.findElements(user, org.id, proj.id, 'Parent')
+  .then((retElems) => {
+    chai.expect(retElems).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal('Invalid element type.');
+    chai.expect(err.status).to.equal(400);
     done();
   });
 }
