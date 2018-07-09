@@ -1041,7 +1041,7 @@ class APIController {
    *
    * @description Gets all elements for a given project
    */
-  static getElements(req, res) {
+  static getElements(req, res) {  // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -1072,7 +1072,7 @@ class APIController {
    * @description Gets the element whose ID is 'elementid' and returns the
    * element's public data as JSON.
    */
-  static getElement(req, res) {
+  static getElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -1128,7 +1128,7 @@ class APIController {
    * @description Creates the element whose ID is 'elementid' and returns the
    * element's public data as JSON.
    */
-  static postElement(req, res) {
+  static postElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -1143,7 +1143,6 @@ class APIController {
       return res.status(200).send(APIController.formatJSON(element));
     })
     .catch((error) => {
-      console.log(error);
       // If error occurs, log error and return status.
       const err = JSON.parse(error.message);
       M.log.error(err.description);
@@ -1157,7 +1156,7 @@ class APIController {
    * @description Updates the element whose ID is 'elementid' and returns the
    * element's public data as JSON.
    */
-  static putElement(req, res) {
+  static putElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -1189,7 +1188,7 @@ class APIController {
    * @description Deletes the element whose ID is 'elementid' and returns the
    * element's public data as JSON.
    */
-  static deleteElement(req, res) {
+  static deleteElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
