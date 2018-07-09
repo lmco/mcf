@@ -154,7 +154,7 @@ describe(name, () => {
   it('should reject updating due to non-A user', updateNonA).timeout(2500);
   it('should find the permissions on the project', findPerm).timeout(2500);
   //FAILING 
-  //it('should set the permissions on the project', setPerm).timeout(2500);
+  it('should set the permissions on the project', setPerm).timeout(2500);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
   it('should delete a project', deleteProject).timeout(2500);
   it('should delete second project', deleteProject02).timeout(2500);
@@ -640,24 +640,31 @@ function findPerm(done) {
  * permissions before setting the project permissions.
  */
 function setPerm(done) {
-  ProjController.setPermissions(allSeeingUser, 'council', 'dimc137rick', nonAuser, 'write')
-  .then(() => {
-    ProjController.findProject(allSeeingUser, 'dimc137rick')
-    .then((retProj) => {
-      chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
-      chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
-      chai.expect(retProj.permissions.admin.length).to.equal(1);
-      done();
+  OrgController.setPermissions(allSeeingUser, 'council', nonAuser, 'write')
+  .then(()=> {
+    ProjController.setPermissions(allSeeingUser, 'council', project.id.toString(), nonAuser, 'write')
+    .then(() => {
+      ProjController.findProject(allSeeingUser, project.id.toString())
+      .then((retProj) => {
+        chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
+        chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
+        chai.expect(retProj.permissions.admin.length).to.equal(1);
+        done();
+      })
+      .catch((err) => {
+        console.log(project.id.toString());
+        chai.expect(err).to.equal(null);
+        done();
+      });
     })
-    .catch((err) => {
-      chai.expect(err).to.equal(null);
+    .catch((err2) => {
+      chai.expect(err2.message).to.equal(null);
       done();
     });
   })
-  .catch((err2) => {
-    chai.expect(err2.message).to.equal(null);
-    done();
-  });
+  .catch((error)=>{
+    chai.expec(err.message).to.equal(null);
+  })
 }
 
 /**
