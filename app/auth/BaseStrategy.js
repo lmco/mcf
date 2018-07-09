@@ -118,7 +118,7 @@ class BaseStrategy {
           if (err || !user) {
             // Resetting request(ip,route,etc) to NULL
             req.user = null;
-            // No valid user, destroy any previously valid sessions 
+            // No valid user, destroy any previously valid sessions
             req.session.destroy();
 
             M.log.error(err);
@@ -152,10 +152,10 @@ class BaseStrategy {
       const token = req.session.token;
       this.handleTokenAuth(req, res, token, (err, user) => {
         // Check for error or if NULL user
-        if (err|| !user) {
+        if (err || !user) {
           // Resetting request(ip,route,etc) to NULL
           req.user = null;
-          // No valid user, destroy any previously valid sessions 
+          // No valid user, destroy any previously valid sessions
           req.session.destroy();
 
           M.log.error(err);
