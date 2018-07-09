@@ -147,7 +147,7 @@ class BaseStrategy {
       M.log.verbose('Authenticating user via Session Token Auth...');
       const token = req.session.token;
       this.handleTokenAuth(req, res, token, (err, user) => {
-        if (err|| !user) {
+        if (err) {
           M.log.error(err);
           return (req.originalUrl.startsWith('/api'))
             ? res.status(401).send('Unauthorized')
