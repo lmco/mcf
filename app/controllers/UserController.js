@@ -74,6 +74,11 @@ class UserController {
           return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
         }
 
+        // Check if user exists
+        if (user === null) {
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Cannot find user' })));
+        }
+
         // Otherwise return 200 and the user's public JSON
         return resolve(user);
       });
