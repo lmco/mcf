@@ -84,7 +84,7 @@ class OrganizationController {
    *                   soft deleted projects as well.
    */
   static findOrg(user, organizationID, softDeleted = false) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Error check - Make sure orgID is a string. Otherwise, reject.
       if (typeof organizationID !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
@@ -142,7 +142,7 @@ class OrganizationController {
    * @param  {Org} The JSON of the new org.
    */
   static createOrg(user, orgInfo) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Error check - Make sure user is admin
       if (!user.admin) {
         return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to create organizations.' })));
@@ -174,7 +174,7 @@ class OrganizationController {
       // Check if org already exists
       OrganizationController.findOrg(user, orgID)
       .then((org) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'An organization with the same ID already exists.' }))))
-      .catch((findOrgError) => {
+      .catch((findOrgError) => { // eslint-disable-line consistent-return
         // Org not found is what we want, so proceed when this error
         // occurs since we aim to create a new org.
         const err = JSON.parse(findOrgError.message);
@@ -190,7 +190,7 @@ class OrganizationController {
             }
           });
           // Save and resolve the new error
-          newOrg.save((saveOrgErr) => {
+          newOrg.save((saveOrgErr) => { // eslint-disable-line consistent-return
             if (saveOrgErr) {
               return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
             }
@@ -228,7 +228,7 @@ class OrganizationController {
    * @param  {String} The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Error check - Verify parameters are correct type.
       if (typeof organizationID !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
@@ -248,7 +248,7 @@ class OrganizationController {
 
       // Check if org exists
       OrganizationController.findOrg(user, orgID)
-      .then((org) => {
+      .then((org) => { // eslint-disable-line consistent-return
         // Error check - Make sure user is admin
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!user.admin && !orgAdmins.includes(user._id.toString())) {
@@ -333,7 +333,7 @@ class OrganizationController {
     // the org controller globally. Both files cannot load each other globally.
     const ProjController = M.load('controllers/ProjectController');
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Error check - Make sure user is admin
       if (!user.admin) {
         return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot delete organizations.' })));
@@ -368,7 +368,7 @@ class OrganizationController {
         .then((retOrg) => resolve(retOrg))
         .catch((err) => reject(err));
       })
-      .catch((deleteErr) => {
+      .catch((deleteErr) => { // eslint-disable-line consistent-return
         // There are simply no projects associated with this org to delete
         const error = JSON.parse(deleteErr.message);
         if (error.description === 'No projects found.') {
@@ -483,7 +483,7 @@ class OrganizationController {
    * @param  {string} The new role for the user.
    */
   static setPermissions(reqUser, organizationID, setUser, role) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Stop a user from changing their own permissions
       if (reqUser._id.toString() === setUser._id.toString()) {
         return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot change their own permissions.' })));
@@ -501,7 +501,7 @@ class OrganizationController {
 
       const orgID = M.lib.sani.sanitize(organizationID);
       OrganizationController.findOrg(reqUser, orgID)
-      .then((org) => {
+      .then((org) => { // eslint-disable-line consistent-return
         // Ensure user is an admin within the organization
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!reqUser.admin || !orgAdmins.includes(reqUser._id.toString())) {
@@ -568,7 +568,7 @@ class OrganizationController {
    * @param  {string} The ID of the org being deleted.
    */
   static findAllPermissions(user, organizationID) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
     // Ensure organizationID is a string
       if (typeof organizationID !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
