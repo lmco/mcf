@@ -24,6 +24,7 @@ const mongoose = require('mongoose');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const ElemController = M.load('controllers/ElementController');
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
 const UserController = M.load('controllers/UserController');
@@ -363,42 +364,50 @@ function softDeleteProjectAndOrg(done) {
   .then((retOrg) => {
     ProjController.createProject(user, { id: 'prtlgn', name: 'portal gun', org: { id: 'tv' } })
     .then((retProj) => {
-      OrgController.removeOrg(user, 'tv', { soft: true })
-      .then((retOrg2) => {
-        OrgController.findOrg(user, 'tv')
-        .then((retOrg3) => {
-          chai.expect(retOrg3).to.equal(null);
-          done();
+      ElemController.createElement(user, { id: '0000', project: { id: 'prtlgn', org: { id: 'tv' } }, type: 'Element' })
+      .then((retElem) => {
+        OrgController.removeOrg(user, 'tv', { soft: true })
+        .then((retOrg2) => {
+          OrgController.findOrg(user, 'tv')
+          .then((retOrg3) => {
+            chai.expect(retOrg3).to.equal(null);
+            done();
+          })
+          .catch((error) => {
+            const err = JSON.parse(error.message);
+            chai.expect(err.description).to.equal('Org not found.');
+          });
+          ProjController.findProject(user, 'tv', 'prtlgn')
+          .then((retProj2) => {
+            chai.expect(retProj2).to.equal(null);
+            done();
+          })
+          .catch((error) => {
+            const err = JSON.parse(error.message);
+            chai.expect(err.description).to.equal('Project not found.');
+            done();
+          });
         })
-        .catch((error) => {
-          const err = JSON.parse(error.message);
-          chai.expect(err.description).to.equal('Org not found.');
-        });
-        ProjController.findProject(user, 'tv', 'prtlgn')
-        .then((retProj2) => {
-          chai.expect(retProj2).to.equal(null);
-          done();
-        })
-        .catch((error) => {
-          const err = JSON.parse(error.message);
-          chai.expect(err.description).to.equal('Project not found.');
+        .catch((error2) => {
+          const err = JSON.parse(error2.message);
+          chai.expect(err.description).to.equal(null);
           done();
         });
       })
-      .catch((error2) => {
-        const err = JSON.parse(error2.message);
+      .catch((error3) => {
+        const err = JSON.parse(error3.message);
         chai.expect(err.description).to.equal(null);
         done();
       });
     })
-    .catch((error3) => {
-      const err = JSON.parse(error3.message);
+    .catch((error4) => {
+      const err = JSON.parse(error4.message);
       chai.expect(err.description).to.equal(null);
       done();
     });
   })
-  .catch((error4) => {
-    const err = JSON.parse(error4.message);
+  .catch((error5) => {
+    const err = JSON.parse(error5.message);
     chai.expect(err.description).to.equal(null);
     done();
   });
@@ -419,7 +428,7 @@ function hardDeleteProjectAndOrg(done) {
       const err = JSON.parse(error.message);
       chai.expect(err.description).to.equal('Org not found.');
     });
-    ProjController.findProject(user, 'tv', 'prtlgn')
+    ProjController.findProject(user, 'tv', 'prtlgn', true)
     .then((retProj2) => {
       chai.expect(retProj2).to.equal(null);
       done();
