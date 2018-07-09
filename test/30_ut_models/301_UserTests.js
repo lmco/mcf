@@ -190,7 +190,7 @@ function loginLDAPUser(done) {
     chai.expect(err).to.equal(null);
     chai.expect(user.username).to.equal(M.config.test.username);
 
-    User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, (updateErr, userUpdate) => {
+    User.findOneAndUpdate({ username: u }, { admin: true }, (updateErr, userUpdate) => {
       chai.expect(updateErr).to.equal(null);
     });
     done();

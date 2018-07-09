@@ -29,8 +29,6 @@ const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 const test = M.config.test;
-const user = M.config.test.username;
-
 
 /*------------------------------------
  *       Main
@@ -218,9 +216,10 @@ function rejectPutID(done) {
 }
 
 /*
- * Makes a request to get the organization roles for 
+ * Makes a request to get the organization roles for
  * the user. This should passwith a 200 code.
  */
+
 function orgRole(done) {
   request({
     url: `${test.url}/api/orgs/org1/members/${M.config.test.username}`,
@@ -237,8 +236,8 @@ function orgRole(done) {
 }
 
 /*
- * Attempts to make a request to get the organization roles for 
- * the another user then the request. 
+ * Attempts to make a request to get the organization roles for
+ * the another user then the request.
  * Not sure if it shoud throw an error or pass.
  */
 function rejectRole(done) {

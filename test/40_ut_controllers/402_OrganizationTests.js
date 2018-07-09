@@ -82,13 +82,13 @@ describe(name, function() {
   });
 
   // runs after all tests in this block
-  after((done) => {
-    //Removing project
+  after(function(done) {
+    // Removing project
     ProjController.removeProject(user, org.id, 'jerryboree', { soft: false })
-    .then(()=> {
+    .then(function() {
     // Removing the organization created
       OrgController.removeOrg(user, 'council', { soft: false })
-      .then(() => {
+      .then(function() {
         // Removing the non admin user
         const userTwo = 'msmith';
         UserController.removeUser(user, userTwo)
@@ -109,7 +109,7 @@ describe(name, function() {
         done();
       });
     })
-    .catch((lasterror)=>{
+    .catch(function(lasterror) {
       chai.expect(lasterror).to.equal(null);
     });
   });
@@ -119,7 +119,7 @@ describe(name, function() {
   it('should find an existing org', findExistingOrg).timeout(2500);
   it('should throw an error saying the field cannot be updated', updateOrgFieldErr).timeout(2500);
   it('should throw an error saying the name field is not a string', updateOrgTypeErr).timeout(2500);
-  it('should reject update from non admin user',nonAUpdate).timeout(2500);
+  it('should reject update from non admin user', nonAUpdate).timeout(2500);
   it('should update an orgs name', updateOrg).timeout(2500);
   it('should update an orgs name using model object', updateOrgObject).timeout(2500);
   it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
@@ -237,7 +237,7 @@ function updateOrgTypeErr(done) {
   });
 }
 
-/** 
+/**
  * Testing to see if the code will reject the update
  * from a user that does not have admin rights.
  * This test should throw an error.
@@ -246,8 +246,8 @@ function updateOrgTypeErr(done) {
 function nonAUpdate(done) {
   OrgController.updateOrg(newUser, 'tv', { name: 'betterreject' })
   .then(() => {
-    //should not come into then function
-    //fail test if does
+    // should not come into then function
+    // fail test if does
     chai.AssertionError(true === false);
     done();
   })
@@ -481,7 +481,7 @@ function addUserRole(done) {
 }
 
 /**
- * Test to see if the newUser can actually write to the 
+ * Test to see if the newUser can actually write to the
  * organization now that new permissions have been set
  * FAILED? But doesnt it have write permissions?...
  */
@@ -512,9 +512,9 @@ function projWritePerm(done) {
  * of the org, which should get denied.
  */
 
-function rejectUserRole(done){
+function rejectUserRole(done) {
   OrgController.setPermissions(user, 'tv', user, 'REMOVE_ALL')
-  .then(() =>{
+  .then(() => {
     chai.AssertionError(true === false);
     done();
   })
@@ -522,7 +522,7 @@ function rejectUserRole(done){
     const json = JSON.parse(error.message);
     chai.expect(json.description).to.equal('User cannot change their own permissions.');
     done();
-  })
+  });
 }
 
 /**

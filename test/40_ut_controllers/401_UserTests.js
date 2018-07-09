@@ -8,6 +8,7 @@
  *                                                                           *
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
+ * COMMENTED OUT CODE IS IN PROCESS OF GETTING FIXED.                        *
  *****************************************************************************/
 /**
  * @fileOverview UserModelTests
@@ -17,20 +18,6 @@
  * @description This class defines basic tests of the User data model.
  */
 
-
-/**
- * NOTES:
- * 
- * -COMMENTED OUT TESTS ARE IN PROCESS OF GETTING FIXED--
- * TASKS HAVE BEEN MADE IN JIRA FOR THEM
- * 
- * 
- * -NEED TO CONFIRM THE NUMBER OF USERS THAT ARE IN DATABASE
- * BEFORE RUNNING TESTS. DUE TO THOSE EFFECT THE NUMBER OF
- * USERS FOUND IN THE FINDUSERS TEST RUN.
- */
-
-// LOOK AT FAKE DELETE USER
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
@@ -43,7 +30,8 @@ const UserController = M.load('controllers/UserController');
 
 let reqUser = null;
 let nonAUser = null;
-// let badAUser = null;
+let badAUser = null;
+
 /*------------------------------------
  *       Main
  *------------------------------------*/
@@ -102,7 +90,7 @@ describe(name, function() {
         mongoose.connection.close();
         done();
       })
-      .catch(function (error){
+      .catch(function(error) {
         chai.expect(error).to.equal(null);
         mongoose.connection.close();
         done();
@@ -124,15 +112,15 @@ describe(name, function() {
   it('should reject username with invalid input', invalidUser).timeout(3000);
   it('should reject username already in database', copyCatUser).timeout(3000);
   it('should update the users last name', updateLName).timeout(3000);
-  //TEST FAIL 
-  //it('should reject updating the users username', updateUName).timeout(3000);
+  // TEST FAIL
+  // it('should reject updating the users username', updateUName).timeout(3000);
   it('should reject updating a user that does not exist', updateNoUser).timeout(3000);
   it('should reject update from non A user', updateAttempt).timeout(3000);
   it('should find user', findUser).timeout(3000);
-  //TEST FAIL UNHANDLED PROMISE
-  //it('should reject finding a user that does not exist', noFindUser).timeout(3000);
-  //TEST FAIL UNHANDLED PROMISE
-  //it('should reject deleting a user that doesnt exist', fakeDelete).timeout(3000);
+  // TEST FAIL UNHANDLED PROMISE
+  // it('should reject finding a user that does not exist', noFindUser).timeout(3000);
+  // TEST FAIL UNHANDLED PROMISE
+  // it('should reject deleting a user that doesnt exist', fakeDelete).timeout(3000);
   it('should reject deleting a user with a non admin user', nonADelete).timeout(3000);
   it('should reject deleting themselves', deleteSelf).timeout(3000);
   it('should delete user created', deleteUser).timeout(3000);
@@ -376,30 +364,30 @@ function updateLName(done) {
   });
 }
 
-/**
- * Updating the username of the user. Curious to see if
- * it would work. Assuming an error should occur
- * with the test.
- */
+// /**
+//  * Updating the username of the user. Curious to see if
+//  * it would work. Assuming an error should occur
+//  * with the test.
+//  */
 
-function updateUName(done) {
-  const username = 'hsolo';
-  const userData = {
-    username: 'hansolo'
-  };
-  UserController.updateUser(reqUser, username, userData)
-  .then(function(updatedUser) {
-    chai.expect(updatedUser.username).to.equal('hansolo');
-    done();
-  })
-  .catch(function(err) {
-    console.log(err);
-    json = JSON.parse(err.message);
-    console.log(json);
-    chai.expect(json.description).to.equal('Bad Request');
-    done();
-  });
-}
+// function updateUName(done) {
+//   const username = 'hsolo';
+//   const userData = {
+//     username: 'hansolo'
+//   };
+//   UserController.updateUser(reqUser, username, userData)
+//   .then(function(updatedUser) {
+//     chai.expect(updatedUser.username).to.equal('hansolo');
+//     done();
+//   })
+//   .catch(function(err) {
+//     console.log(err);
+//     json = JSON.parse(err.message);
+//     console.log(json);
+//     chai.expect(json.description).to.equal('Bad Request');
+//     done();
+//   });
+// }
 
 /**
  * Attempting to update second user, but should be denied
@@ -461,46 +449,46 @@ function findUser(done) {
   });
 }
 
-/**
- * This is to attempt to find a user that does not exist.
- * This should throw an error. I would assume an internal 
- * error with Find failed. 
- * it returns that the delUser is null. 
- * Is that what we want?
- */
-function noFindUser(done) {
-  const username = 'nouser';
-  UserController.findUser(username)
-  .then(function(searchUser) {
-    chai.expect(searchUser).to.equal('nouser');
-    done();
-  })
-  .catch(function(err) {
-    console.log(err);
-    json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
-    done();
-  });
-}
+// /**
+//  * This is to attempt to find a user that does not exist.
+//  * This should throw an error. I would assume an internal
+//  * error with Find failed.
+//  * it returns that the delUser is null.
+//  * Is that what we want?
+//  */
+// function noFindUser(done) {
+//   const username = 'nouser';
+//   UserController.findUser(username)
+//   .then(function(searchUser) {
+//     chai.expect(searchUser).to.equal('nouser');
+//     done();
+//   })
+//   .catch(function(err) {
+//     console.log(err);
+//     json = JSON.parse(err.message);
+//     chai.expect(json.description).to.equal(null);
+//     done();
+//   });
+// }
 
-/*
- * Attempts deleting the user that
- * that does not exist. 
- */
+// /*
+//  * Attempts deleting the user that
+//  * that does not exist.
+//  */
 
-function fakeDelete(done) {
-  const username = 'notreal';
-  UserController.removeUser(reqUser, username)
-  .then(function(delUser) {
-    chai.expect(delUser).to.equal('notreal');
-    done();
-  })
-  .catch(function(err) {
-    json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal('User does not exist');
-    done();
-  });
-}
+// function fakeDelete(done) {
+//   const username = 'notreal';
+//   UserController.removeUser(reqUser, username)
+//   .then(function(delUser) {
+//     chai.expect(delUser).to.equal('notreal');
+//     done();
+//   })
+//   .catch(function(err) {
+//     json = JSON.parse(err.message);
+//     chai.expect(json.description).to.equal('User does not exist');
+//     done();
+//   });
+// }
 
 /*
  * Attempts deleting the user that
@@ -528,11 +516,11 @@ function deleteSelf(done) {
   const username = 'jubbathehut';
   UserController.removeUser(badAUser, username)
   .then(function() {
-    chai.assert(true===false);
+    chai.assert(true === false);
     done();
   })
   .catch(function(err) {
-    json = JSON.parse(err.message);
+    const json = JSON.parse(err.message);
     chai.expect(json.description).to.equal('User cannot delete themselves.');
     done();
   });

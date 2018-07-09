@@ -156,7 +156,6 @@ describe(name, () => {
   it('should reject non-A user from finding a project', nonAUser).timeout(2500);
   it('should reject updating due to non-A user', updateNonA).timeout(2500);
   it('should find the permissions on the project', findPerm).timeout(2500);
-  // FAILING 
   it('should set the permissions on the project', setPerm).timeout(5000);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
   it('should delete a project', deleteProject).timeout(5000);
@@ -240,8 +239,8 @@ function createElements(done) {
 
 function updateFieldError(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'shouldNotChange' })
-  .then((project) => {
-    chai.expect(typeof project).to.equal('undefined');
+  .then((proj) => {
+    chai.expect(typeof proj).to.equal('undefined');
     done();
   })
   .catch((error) => {
@@ -253,8 +252,8 @@ function updateFieldError(done) {
 
 function updateTypeError(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { name: [] })
-  .then((project) => {
-    chai.expect(typeof project).to.equal('undefined');
+  .then((proj) => {
+    chai.expect(typeof proj).to.equal('undefined');
     done();
   })
   .catch((error) => {
@@ -266,8 +265,8 @@ function updateTypeError(done) {
 
 function updateProject(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'prtlgn', name: 'portal gun changed' })
-  .then((project) => {
-    chai.expect(project.name).to.equal('portal gun changed');
+  .then((proj) => {
+    chai.expect(proj.name).to.equal('portal gun changed');
     done();
   })
   .catch((error) => {
@@ -635,7 +634,7 @@ function updateID(done) {
     done();
   })
   .catch((err) => {
-    json = JSON.parse(err.message);
+    const json = JSON.parse(err.message);
     chai.expect(json.description).to.equal('Users cannot update [id] of Projects.');
     done();
   });
@@ -689,7 +688,7 @@ function findPerm(done) {
  */
 function setPerm(done) {
   OrgController.setPermissions(allSeeingUser, 'council', nonAuser, 'write')
-  .then(()=> {
+  .then(() => {
     ProjController.setPermissions(allSeeingUser, 'council', project.id.toString(), nonAuser, 'write')
     .then(() => {
       ProjController.findProject(allSeeingUser, 'council', project.id.toString())
@@ -709,10 +708,10 @@ function setPerm(done) {
       done();
     });
   })
-  .catch((error)=> {
+  .catch((error) => {
     chai.expect(error.message).to.equal(null);
     done();
-  })
+  });
 }
 
 /**
@@ -798,8 +797,8 @@ function deleteOthers(done) {
   ProjController.removeProject(allSeeingUser, org.id, 'vlongname', { soft: false })
   .then(() => {
     ProjController.findProject(allSeeingUser, org.id, 'vlongname')
-    .then((project) => {
-      chai.expect(project).to.equal(null);
+    .then((proj) => {
+      chai.expect(proj).to.equal(null);
       done();
     })
     .catch((error) => {

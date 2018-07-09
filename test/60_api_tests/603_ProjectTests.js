@@ -52,10 +52,10 @@ const test = M.config.test;
  *       Main
  *------------------------------------*/
 let org = null;
-// let secondOrg = null;
 let user = null;
-// runs before all tests in this block
+// let secondOrg= null;
 
+// runs before all tests in this block
 describe(name, function() {
   before(function(done) {
     this.timeout(5000);
@@ -86,29 +86,30 @@ describe(name, function() {
         chai.expect(retOrg.permissions.read).to.include(searchUser._id.toString());
         chai.expect(retOrg.permissions.write).to.include(searchUser._id.toString());
         chai.expect(retOrg.permissions.admin).to.include(searchUser._id.toString());
-        const orgData = {
-          id: 'durmstranginstitute',
-          name: 'Durmstrang',
-          permissions: {
-            admin: [searchUser._id],
-            write: [searchUser._id],
-            read: [searchUser._id]
-          }
-        };
-        OrgController.createOrg(user, orgData)
-        .then((orgTwo) => {
-          secondOrg = orgTwo;
-          chai.expect(orgTwo.id).to.equal('durmstranginstitute');
-          chai.expect(orgTwo.name).to.equal('Durmstrang');
-          chai.expect(orgTwo.permissions.read).to.include(searchUser._id.toString());
-          chai.expect(orgTwo.permissions.write).to.include(searchUser._id.toString());
-          chai.expect(orgTwo.permissions.admin).to.include(searchUser._id.toString());
-          done();
-        })
-        .catch((err) => {
-          chai.expect(err).to.equal(null);
-          done();
-        });
+        done();
+        // const orgData2 = {
+        //   id: 'durmstranginstitute',
+        //   name: 'Durmstrang',
+        //   permissions: {
+        //     admin: [searchUser._id],
+        //     write: [searchUser._id],
+        //     read: [searchUser._id]
+        //   }
+        // };
+        // OrgController.createOrg(user, orgData2)
+        // .then((orgTwo) => {
+        //   secondOrg = orgTwo;
+        //   chai.expect(orgTwo.id).to.equal('durmstranginstitute');
+        //   chai.expect(orgTwo.name).to.equal('Durmstrang');
+        //   chai.expect(orgTwo.permissions.read).to.include(searchUser._id.toString());
+        //   chai.expect(orgTwo.permissions.write).to.include(searchUser._id.toString());
+        //   chai.expect(orgTwo.permissions.admin).to.include(searchUser._id.toString());
+        //   done();
+        // })
+        // .catch((err) => {
+        //   chai.expect(err).to.equal(null);
+        //   done();
+        // });
       })
       .catch((firsterr) => {
         chai.expect(firsterr).to.equal(null);
@@ -125,19 +126,20 @@ describe(name, function() {
   after(function(done) {
     // Removing the Organization created in the before
     OrgController.removeOrg(user, 'hogwarts', { soft: false })
-    .then((proj) => {
-      chai.expect(proj.id).to.equal('hogwarts');
-      OrgController.removeOrg(user, 'durmstranginstitute', { soft: false })
-      .then((proj) => {
-        chai.expect(proj.id).to.equal('durmstranginstitute');
-        mongoose.connection.close();
-        done();
-      })
-      .catch(function(err) {
-        chai.expect(err).to.equal(null);
-        mongoose.connection.close();
-        done();
-      });
+    .then((retOrg) => {
+      chai.expect(retOrg.id).to.equal('hogwarts');
+      done();
+      // OrgController.removeOrg(user, 'durmstranginstitute', { soft: false })
+      // .then((proj) => {
+      //   chai.expect(proj.id).to.equal('durmstranginstitute');
+      //   mongoose.connection.close();
+      //   done();
+      // })
+      // .catch(function(err) {
+      //   chai.expect(err).to.equal(null);
+      //   mongoose.connection.close();
+      //   done();
+      // });
     })
     .catch(function(err2) {
       chai.expect(err2).to.equal(null);
