@@ -26,7 +26,7 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ElemController = M.load('controllers/ElementController');
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
-const User = M.load('models/User');
+const UserController = M.load('controllers/UserController');
 
 let user = null;
 let org = null;
@@ -46,17 +46,8 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    // Ensure the test user exists
-    User.findOne({
-      username: M.config.test.username
-    })
-    .exec((errUser, retUser) => {
-      // Check if error occurred
-      if (errUser) {
-        M.log.error(errUser);
-        chai.expect(errUser.message).to.equal(null);
-      }
-
+    UserController.findUser(M.config.test.username)
+    .then((retUser) => {
       user = retUser;
 
       const orgData = {
@@ -80,6 +71,10 @@ describe(name, function() {
         chai.expect(orgError.message).to.equal(null);
         done();
       });
+    })
+    .catch((userError) => {
+      chai.expect(userError.message).to.equal(null);
+      done();
     });
   });
 
@@ -109,9 +104,8 @@ describe(name, function() {
   it('should update an element', updateElement);
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
-  it('should hard delete the child element', hardDeleteChildElement);
-  it('should hard delete the block element', hardDeleteBlock);
-  it('should hard delete the relationship', hardDeleteRelationship);
+  it('should soft delete all elements', softDeleteAllElements);
+  it('should hard delete all elements', hardDeleteAllElements);
 });
 
 
@@ -367,20 +361,19 @@ function hardDeleteElement(done) {
 }
 
 /**
- * Hard delete child element
+ * Soft delete all elements on a project
  */
-function hardDeleteChildElement(done) {
-  ElemController.removeElement(user, org.id, proj.id, 'elem1', { soft: false })
-  .then((retElem) => {
-    ElemController.findElement(user, org.id, proj.id, 'elem1', true)
-    .then((retElem2) => {
-      chai.expect(retElem2).to.equal(null);
+function softDeleteAllElements(done) {
+  ElemController.removeElements(user, org.id, proj.id, { soft: true })
+  .then((retElems) => {
+    ElemController.findElements(user, org.id, proj.id)
+    .then((retElems2) => {
+      chai.expect(retElems2.length).to.equal(3);
       done();
     })
     .catch((error) => {
       const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal('Element not found.');
-      chai.expect(err.status).to.equal(404);
+      chai.expect(err.description).to.equal(null);
       done();
     });
   })
@@ -392,45 +385,19 @@ function hardDeleteChildElement(done) {
 }
 
 /**
- * Hard delete block element
+ * Hard delete all elements on a project
  */
-function hardDeleteBlock(done) {
-  ElemController.removeElement(user, org.id, proj.id, 'elem2', { soft: false })
-  .then((retElem) => {
-    ElemController.findElement(user, org.id, proj.id, 'elem2', true)
-    .then((retElem2) => {
-      chai.expect(retElem2).to.equal(null);
+function hardDeleteAllElements(done) {
+  ElemController.removeElements(user, org.id, proj.id, { soft: false })
+  .then((retElems) => {
+    ElemController.findElements(user, org.id, proj.id)
+    .then((retElems2) => {
+      chai.expect(retElems2.length).to.equal(0);
       done();
     })
     .catch((error) => {
       const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal('Element not found.');
-      chai.expect(err.status).to.equal(404);
-      done();
-    });
-  })
-  .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * Hard delete relationship element
- */
-function hardDeleteRelationship(done) {
-  ElemController.removeElement(user, org.id, proj.id, 'rel1', { soft: false })
-  .then((retElem) => {
-    ElemController.findElement(user, org.id, proj.id, 'rel1', true)
-    .then((retElem2) => {
-      chai.expect(retElem2).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal('Element not found.');
-      chai.expect(err.status).to.equal(404);
+      chai.expect(err.description).to.equal(null);
       done();
     });
   })
