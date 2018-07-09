@@ -9,5 +9,6 @@ public/
 yarn.lock
 *.log
 *.DS_Store
+.idea/
 
 
