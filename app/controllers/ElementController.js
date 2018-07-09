@@ -67,7 +67,7 @@ class ElementController {
       let type = elemType;
 
       // Ensure that the provided type is a valid one
-      if (elemType !== '' ) {
+      if (elemType !== '') {
         type = M.lib.sani.sanitize(elemType);
 
         let typeExists = false;
@@ -99,7 +99,7 @@ class ElementController {
         // Create the list of search parameters
         let searchParams = { project: project._id };
         if (type !== '') {
-          searchParams = { project: project._id, type: type};
+          searchParams = { project: project._id, type: type };
         }
 
         Element.Element.find(searchParams)
