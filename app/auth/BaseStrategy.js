@@ -116,7 +116,7 @@ class BaseStrategy {
         const token = Buffer.from(parts[1], 'utf8').toString();
         this.handleTokenAuth(req, res, token, (err, user) => {
           console.log(!user)
-          if (err) {
+          if (err || !user) {
             M.log.error(err);
             return (req.originalUrl.startsWith('/api'))
               ? res.status(401).send('Unauthorized')
