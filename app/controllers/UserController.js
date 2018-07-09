@@ -76,7 +76,7 @@ class UserController {
 
         // Check if user exists
         if (user === null) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Cannot find user' })));
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Bad Request', description: 'Cannot find user' })));
         }
 
         // Otherwise return 200 and the user's public JSON
