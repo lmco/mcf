@@ -987,12 +987,13 @@ class APIController {
    * User API Endpoints
    ****************************************************************************/
   /**
-   * GET /api/user/:username
+   * GET /api/users/:username
    *
    * @description Gets and returns the user.
    */
   static getUser(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
+
     if (!req.user) {
       M.log.critical('Request does not have a user');
       const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));

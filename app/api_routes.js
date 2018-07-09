@@ -1509,10 +1509,26 @@ api.route('/users')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/users/:username')
-.get(APIController.notImplemented)
-.post(APIController.notImplemented)
-.put(APIController.notImplemented)
-.delete(APIController.notImplemented);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getUser
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+);
 
 /**
  * @swagger
