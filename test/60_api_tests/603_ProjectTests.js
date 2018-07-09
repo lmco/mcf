@@ -86,7 +86,6 @@ describe(name, function() {
         chai.expect(retOrg.permissions.read).to.include(searchUser._id.toString());
         chai.expect(retOrg.permissions.write).to.include(searchUser._id.toString());
         chai.expect(retOrg.permissions.admin).to.include(searchUser._id.toString());
-        done();
         const orgData = {
           id: 'durmstranginstitute',
           name: 'Durmstrang',
@@ -128,8 +127,6 @@ describe(name, function() {
     OrgController.removeOrg(user, 'hogwarts', { soft: false })
     .then((proj) => {
       chai.expect(proj.id).to.equal('hogwarts');
-      mongoose.connection.close();
-      done();
       OrgController.removeOrg(user, 'durmstranginstitute', { soft: false })
       .then((proj) => {
         chai.expect(proj.id).to.equal('durmstranginstitute');
@@ -279,44 +276,13 @@ function postBadOrg(done) {
 
 /**
  * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should pass, but the result should be an error.
- */
-function postInvalidProject(done) {
-  const id = 'attemptharry7';
-  request({
-    url: `${test.url}/api/orgs/hogwarts/projects/attemptharry7`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'Invalid Harry Potter',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
-    })
-  },
-  function(err, response, body) {
-    console.log(err);
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    chai.expect(response.statusCode).to.equal(400);
-    done();
-  });
-}
-
-/**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
  * This is testing when there is a request with two different orgs.
  * The result should be an error.
  */
 function confusingOrg(done) {
   const id = 'victorkrum';
   request({
-    url: `${test.url}/api/orgs/durmstranginstitute/projects/victorkrum`,
+    url: `${test.url}/api/orgs/durmstranginstitute/projects/victorkrum3`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
@@ -333,40 +299,8 @@ function confusingOrg(done) {
   },
   function(err, response, body) {
     const json = JSON.parse(body);
-    console.log(json);
-    chai.expect(json.description).to.equal('Org not found.')
-    chai.expect(json.message).to.equal('Not Found');
-    chai.expect(response.statusCode).to.equal(404);
-    done();
-  });
-}
-
-/**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should pass, but the result should be an error.
- */
-function postBadProject(done) {
-  const id = 'DobbyIsaBadElf';
-  request({
-    url: `${test.url}/api/orgs/hogwarts/projects/DobbyIsaBadElf`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'Dobby must be punished',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
-    })
-  },
-  function(err, response, body) {
-    const json = JSON.parse(body);
-    chai.expect(json.description).to.equal('Project ID is not valid.');
     chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.description).to.equal('Project ID in the body does not match ID in the params.');
     chai.expect(response.statusCode).to.equal(400);
     done();
   });
@@ -376,41 +310,10 @@ function postBadProject(done) {
  * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
  * This should pass, but the result should be an error.
  */
-function postBadOrg(done) {
-  const id = 'dudlydursley';
-  request({
-    url: `${test.url}/api/orgs/muggle/projects/dudlydursley`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'I dont belong at howgarts',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
-    })
-  },
-  function(err, response, body) {
-    const json = JSON.parse(body);
-    chai.expect(json.description).to.equal('Org not found.');
-    chai.expect(json.message).to.equal('Not Found');
-    chai.expect(response.statusCode).to.equal(404);
-    done();
-  });
-}
-
-/**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should pass, but the result should be an error.
- */
 function postInvalidProject(done) {
-  const id = 'attemptharry7';
+  const id = '!attemptharry7';
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/attemptharry7`,
+    url: `${test.url}/api/orgs/hogwarts/projects/!attemptharry7`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
@@ -426,43 +329,9 @@ function postInvalidProject(done) {
     })
   },
   function(err, response, body) {
-    console.log(err);
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
     chai.expect(response.statusCode).to.equal(400);
-    done();
-  });
-}
-
-/**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This is testing when there is a request with two different orgs.
- * The result should be an error.
- */
-function confusingOrg(done) {
-  const id = 'victorkrum';
-  request({
-    url: `${test.url}/api/orgs/durmstranginstitute/projects/victorkrum`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'Victor Krum',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
-    })
-  },
-  function(err, response, body) {
-    const json = JSON.parse(body);
-    console.log(json);
-    chai.expect(json.description).to.equal('Org not found.')
-    chai.expect(json.message).to.equal('Not Found');
-    chai.expect(response.statusCode).to.equal(404);
     done();
   });
 }
@@ -508,9 +377,8 @@ function badPut(done) {
   },
   function(err, response, body) {
     const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal(id);
-    chai.expect(json.name).to.equal('I know');
+    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

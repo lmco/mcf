@@ -83,27 +83,34 @@ describe(name, function() {
 
   // runs after all tests in this block
   after((done) => {
+    //Removing project
+    ProjController.removeProject(user, org.id, 'jerryboree', { soft: false })
+    .then(()=> {
     // Removing the organization created
-    OrgController.removeOrg(user, 'council', { soft: false })
-    .then(() => {
-      // Removing the non admin user
-      const userTwo = 'msmith';
-      UserController.removeUser(user, userTwo)
-      .then(function(delUser2) {
-        chai.expect(delUser2).to.equal('msmith');
-        mongoose.connection.close();
-        done();
+      OrgController.removeOrg(user, 'council', { soft: false })
+      .then(() => {
+        // Removing the non admin user
+        const userTwo = 'msmith';
+        UserController.removeUser(user, userTwo)
+        .then(function(delUser2) {
+          chai.expect(delUser2).to.equal('msmith');
+          mongoose.connection.close();
+          done();
+        })
+        .catch(function(err1) {
+          chai.expect(err1).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       })
-      .catch(function(err1) {
-        chai.expect(err1).to.equal(null);
+      .catch(function(err2) {
+        chai.expect(err2).to.equal(null);
         mongoose.connection.close();
         done();
       });
     })
-    .catch(function(err2) {
-      chai.expect(err2).to.equal(null);
-      mongoose.connection.close();
-      done();
+    .catch((lasterror)=>{
+      chai.expect(lasterror).to.equal(null);
     });
   });
 
@@ -303,7 +310,7 @@ function findAllExistingOrgs(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -539,14 +546,15 @@ function getUserRoles(done) {
  * Tests retrieving all members roles for a specified project
  */
 function getMembers(done) {
+  const mber = M.config.test.username;
   OrgController.findAllPermissions(user, org.id.toString())
   .then((members) => {
     chai.expect(members.msmith.read).to.equal(true);
     chai.expect(members.msmith.write).to.equal(true);
     chai.expect(members.msmith.admin).to.equal(false);
-    chai.expect(members.mbee.read).to.equal(true);
-    chai.expect(members.mbee.write).to.equal(true);
-    chai.expect(members.mbee.admin).to.equal(true);
+    chai.expect(members[mber].read).to.equal(true);
+    chai.expect(members[mber].write).to.equal(true);
+    chai.expect(members[mber].admin).to.equal(true);
     done();
   })
   .catch((error) => {

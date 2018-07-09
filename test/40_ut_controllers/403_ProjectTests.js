@@ -156,8 +156,8 @@ describe(name, () => {
   it('should reject non-A user from finding a project', nonAUser).timeout(2500);
   it('should reject updating due to non-A user', updateNonA).timeout(2500);
   it('should find the permissions on the project', findPerm).timeout(2500);
-  //FAILING 
-  it('should set the permissions on the project', setPerm).timeout(2500);
+  // FAILING 
+  it('should set the permissions on the project', setPerm).timeout(5000);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
   it('should delete a project', deleteProject).timeout(5000);
   it('should delete second project', deleteProject02).timeout(5000);
@@ -692,7 +692,7 @@ function setPerm(done) {
   .then(()=> {
     ProjController.setPermissions(allSeeingUser, 'council', project.id.toString(), nonAuser, 'write')
     .then(() => {
-      ProjController.findProject(allSeeingUser, project.id.toString())
+      ProjController.findProject(allSeeingUser, 'council', project.id.toString())
       .then((retProj) => {
         chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
         chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
@@ -700,7 +700,6 @@ function setPerm(done) {
         done();
       })
       .catch((err) => {
-        console.log(project.id.toString());
         chai.expect(err).to.equal(null);
         done();
       });
@@ -710,8 +709,9 @@ function setPerm(done) {
       done();
     });
   })
-  .catch((error)=>{
-    chai.expec(err.message).to.equal(null);
+  .catch((error)=> {
+    chai.expect(error.message).to.equal(null);
+    done();
   })
 }
 

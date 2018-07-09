@@ -45,12 +45,12 @@
 //  */
 // function getUser(done) {
 //   request({
-//     url: `${test.url}/api/user/mbee`,
+//     url: `${test.url}/api/user/${M.config.test.username},
 //     headers: getHeaders()
 //   },
 //   function(response, body) {
 //     const json = JSON.parse(body);
-//     chai.expect(json.username).to.equal('mbee');
+//     chai.expect(json.username).to.equal(M.config.test.username);
 //     chai.expect(response.statusCode).to.equal(200);
 //     done();
 //   });
