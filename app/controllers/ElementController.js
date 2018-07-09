@@ -52,8 +52,9 @@ class ElementController {
    * @param  {String} An optional string denoting the type of element.
    */
   // TODO: Add query based on type
+
   static findElements(reqUser, organizationID, projectID, elemType = '') {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Ensure all incoming IDs are strings
       if (typeof organizationID !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
@@ -89,7 +90,7 @@ class ElementController {
 
       // Find the project
       ProjController.findProject(reqUser, orgID, projID)
-      .then((project) => {
+      .then((project) => { // eslint-disable-line consistent-return
         // Ensure user is part of the project
         const members = project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
@@ -117,6 +118,97 @@ class ElementController {
   }
 
   /**
+   * @description  This function takes a user, orgID, projID and a
+   * list of options all removes all elements  attatched to a project.
+   *
+   * @example
+   * ElementController.removeElements({Austin}, 'lockheed', 'mbee', {soft: false})
+   * .then(function(element) {
+   *   // do something with the elements
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} The user object of the requesting user.
+   * @param  {String} The organization ID.
+   * @param  {String} The project ID.
+   * @param  {Object} Delete options.
+   */
+  static removeElements(reqUser, organizationID, projectID, options) {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+      // Ensure all incoming IDs are strings
+      if (typeof organizationID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      }
+      if (typeof projectID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      }
+
+      // Set the soft delete flag
+      let softDelete = true;
+      if (options.hasOwnProperty('soft')) {
+        if (options.soft === false && reqUser.admin) {
+          softDelete = false;
+        }
+        else if (options.soft === false && !reqUser.admin) {
+          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
+        }
+        else if (options.soft !== false && options.soft !== true) {
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
+        }
+      }
+
+      // Sanitize the parameters
+      const orgID = M.lib.sani.sanitize(organizationID);
+      const projID = M.lib.sani.sanitize(projectID);
+
+      // Ensure the project still exists
+      ProjController.findProject(reqUser, orgID, projID, true)
+      .then((project) => {
+        if (softDelete) {
+          // Find the elements
+          ElementController.findElements(reqUser, orgID, projID)
+          .then((elements) => {
+            // If there are no elements found, return an error
+            if (elements.length === 0) {
+              return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'No elements found.' })));
+            }
+
+            for (let i = 0; i < elements.length; i++) {
+              // Update the elements deleted and deletedOn fields
+              elements[i].deletedOn = Date.now();
+              elements[i].deleted = true;
+              elements[i].save((saveErr) => { // eslint-disable-line consistent-return
+                if (saveErr) {
+                  // If error occurs, return it
+                  return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+                }
+              });
+            }
+
+            // Return the updated elements
+            return resolve(elements);
+          })
+          .catch((findElementsError) => reject(findElementsError));
+        }
+        else {
+          // Hard delete the elements
+          Element.Element.deleteMany({ project: project._id }, (deleteError, elementsDeleted) => {
+            if (deleteError) {
+              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
+            }
+
+            return resolve(elementsDeleted);
+          });
+        }
+      })
+      .catch((findProjectError) => reject(findProjectError));
+    });
+  }
+
+  /**
    * @description  This function takes a user, orgID, projID, elementID
    * and optional boolean flag and returns the element if it's found.
    *
@@ -138,7 +230,7 @@ class ElementController {
    *                   soft deleted projects as well.
    */
   static findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Ensure all incoming IDs are strings
       if (typeof organizationID !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
@@ -203,7 +295,7 @@ class ElementController {
    * @param  {Object} The JSON object containing the element data
    */
   static createElement(reqUser, element) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Element ID and Type, Project ID and Org ID are all required
       // Ensure element object data contains all the proper fields
 
@@ -290,7 +382,7 @@ class ElementController {
 
       // Error check - make sure the project exists
       ProjController.findProject(reqUser, orgID, projID)
-      .then((proj) => {
+      .then((proj) => { // eslint-disable-line consistent-return
         // Check Permissions
         const writers = proj.permissions.write.map(u => u._id.toString());
 
@@ -301,7 +393,7 @@ class ElementController {
         // Error check - check if the element already exists
         ElementController.findElement(reqUser, orgID, projID, elemID)
         .then((elem) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element already exists.' }))))
-        .catch((findError) => {
+        .catch((findError) => { // eslint-disable-line consistent-return
           // This is ok, we dont want the element to already exist.
           const err = JSON.parse(findError.message);
           if (err.description === 'Element not found.') {
@@ -337,7 +429,7 @@ class ElementController {
             }
             else if (parentID !== null) {
               ElementController.findElement(reqUser, orgID, projID, parentID)
-              .then((parent) => {
+              .then((parent) => { // eslint-disable-line consistent-return
                 // Ensure parent is of type Package
                 if (!parent.type === 'Package') {
                   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
@@ -352,13 +444,13 @@ class ElementController {
                 });
 
                   // Save the new element
-                newElement.save((saveErr, elementUpdated) => {
+                newElement.save((saveErr, elemUpdate) => { // eslint-disable-line consistent-return
                   if (saveErr) {
                     return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
                   }
 
                   ElementController.updateParent(reqUser, orgID, projID, parentID, newElement)
-                  .then((parentUpdated) => resolve(elementUpdated))
+                  .then((parentUpdated) => resolve(elemUpdate))
                   .catch((parentUpdateError) => reject(parentUpdateError));
                 });
               })
@@ -374,13 +466,13 @@ class ElementController {
               });
 
                 // Save the new element
-              newElement.save((saveErr, elementUpdated) => {
+              newElement.save((saveErr, elemUpdate) => {
                 if (saveErr) {
                   return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
                 }
 
                 // Return the element if succesful
-                return resolve(elementUpdated);
+                return resolve(elemUpdate);
               });
             }
           }
@@ -418,7 +510,7 @@ class ElementController {
    *                  a source and target field.
    */
   static createRelationship(reqUser, orgID, proj, elemID, elemUID, elemName, parentID, elemInfo) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Check if source, target exist
       if (!elemInfo.hasOwnProperty('target')) {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Relationship does not have attribute (target).' })));
@@ -448,7 +540,7 @@ class ElementController {
           if (parentID !== null) {
             // Find the parent element
             ElementController.findElement(reqUser, orgID, proj.id, parentID)
-            .then((parentElement) => {
+            .then((parentElement) => { // eslint-disable-line consistent-return
               // Ensure parent is of type Package
               if (!parentElement.type === 'Package') {
                 return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
@@ -465,14 +557,14 @@ class ElementController {
               });
 
               // Save the new element
-              newElement.save((saveErr, elementUpdated) => {
+              newElement.save((saveErr, elemUpdate) => { // eslint-disable-line consistent-return
                 if (saveErr) {
                   return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
                 }
 
                 // Update the parent elements 'contains' field
                 ElementController.updateParent(reqUser, orgID, proj.id, parentID, newElement)
-                .then((parentUpdated) => resolve(elementUpdated))
+                .then((parentUpdated) => resolve(elemUpdate))
                 .catch((parentUpdateError) => reject(parentUpdateError));
               });
             })
@@ -491,13 +583,13 @@ class ElementController {
             });
 
             // Save the new element
-            newElement.save((saveErr, elementUpdated) => {
+            newElement.save((saveErr, elemUpdate) => {
               if (saveErr) {
                 return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
               }
 
               // Return the element if succesful
-              return resolve(elementUpdated);
+              return resolve(elemUpdate);
             });
           }
         })
@@ -533,7 +625,7 @@ class ElementController {
       if (parentID !== null) {
         // Find the parent element
         ElementController.findElement(reqUser, orgID, project.id, parentID)
-        .then((parentElement) => {
+        .then((parentElement) => { // eslint-disable-line consistent-return
           // Ensure parent is of type Package
           if (!parentElement.type === 'Package') {
             return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
@@ -548,7 +640,7 @@ class ElementController {
           });
 
           // Save the new element
-          newElement.save((saveErr, elementUpdated) => {
+          newElement.save((saveErr, elementUpdated) => { // eslint-disable-line consistent-return
             if (saveErr) {
               return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
             }
@@ -610,7 +702,7 @@ class ElementController {
       if (parentID !== null) {
         // Find the parent element
         ElementController.findElement(reqUser, orgID, project.id, parentID)
-        .then((parentElement) => {
+        .then((parentElement) => { // eslint-disable-line consistent-return
           // Ensure parent is of type Package
           if (!parentElement.type === 'Package') {
             return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
@@ -625,7 +717,7 @@ class ElementController {
           });
 
           // Save the new element
-          newElement.save((saveErr, elementUpdated) => {
+          newElement.save((saveErr, elementUpdated) => { // eslint-disable-line consistent-return
             if (saveErr) {
               return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
             }
@@ -681,7 +773,7 @@ class ElementController {
    * @param  {Object} The object of the updated element.
    */
   static updateElement(reqUser, organizationID, projectID, elementID, elementUpdated) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Ensure all IDs are strings
       if (typeof organizationID !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
@@ -709,7 +801,7 @@ class ElementController {
 
       // Get the element
       ElementController.findElement(reqUser, orgID, projID, elemID)
-      .then((element) => {
+      .then((element) => { // eslint-disable-line consistent-return
         // Check Permissions
         const admins = element.project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
@@ -833,7 +925,7 @@ class ElementController {
    * @param  {Object} An object with delete options.
    */
   static removeElement(reqUser, organizationID, projectID, elementID, options) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Ensure all IDs are strings
       if (typeof organizationID !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
@@ -865,7 +957,7 @@ class ElementController {
 
       // Find the element, even if it has already been soft deleted
       ElementController.findElement(reqUser, orgID, projID, elemID, true)
-      .then((element) => {
+      .then((element) => { // eslint-disable-line consistent-return
         // Check Permissions
         const admins = element.project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
