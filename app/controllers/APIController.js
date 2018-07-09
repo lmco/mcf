@@ -265,7 +265,7 @@ class APIController {
    * A valid orgid consists of only lowercase letters, numbers, and dashes
    * and must begin with a letter.
    */
-  static postOrg(req, res) {
+  static postOrg(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -321,7 +321,7 @@ class APIController {
    * The organization ID cannot be updated and should not be provided in the
    * body.
    */
-  static putOrg(req, res) {
+  static putOrg(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -372,7 +372,7 @@ class APIController {
    * deletes the corresponding organization. Returns a success message if
    * successful, otherwise an error message is returned.
    */
-  static deleteOrg(req, res) {
+  static deleteOrg(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -402,7 +402,7 @@ class APIController {
    * @description  Takes an orgid and username in the URI and returns
    * a list of roles which the user has within the organization
    */
-  static getOrgRole(req, res) {
+  static getOrgRole(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -440,7 +440,7 @@ class APIController {
    * @description  Takes an orgid and username in the URI and updates a given
    * members role within the organization. Requires a role in the body
    */
-  static postOrgRole(req, res) {
+  static postOrgRole(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -485,7 +485,7 @@ class APIController {
    * @description  Takes an orgid and username in the URI and removes the
    * given user from all permissions within the organization.
    */
-  static deleteOrgRole(req, res) {
+  static deleteOrgRole(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -522,7 +522,7 @@ class APIController {
    * @description  Takes an orgid and return a list of members
    * and the permissions they have
    */
-  static getAllOrgRoles(req, res) {
+  static getAllOrgRoles(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -624,7 +624,7 @@ class APIController {
    *
    * @description  Gets and returns a list of all projects.
    */
-  static getProject(req, res) {
+  static getProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -656,7 +656,7 @@ class APIController {
    * @description Takes a project object in the request body and creates the
    * project.
    */
-  static postProject(req, res) {
+  static postProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -741,7 +741,7 @@ class APIController {
    * encoded project data in the body. Updates the project corresponding to the
    * URI with the data passed in the body.
    */
-  static putProject(req, res) {
+  static putProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -818,7 +818,7 @@ class APIController {
    * Takes an organization ID and project ID in the URI and deletes the
    * corresponding project.
    */
-  static deleteProject(req, res) {
+  static deleteProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
@@ -843,7 +843,7 @@ class APIController {
     });
   }
 
-  static getProjectRoles(req, res) {
+  static getProjectRoles(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
       M.log.critical('Request does not have a user');
       const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
@@ -869,7 +869,7 @@ class APIController {
     });
   }
 
-  static getProjectRole(req, res) {
+  static getProjectRole(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
       M.log.critical('Request does not have a user');
       const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
@@ -905,7 +905,7 @@ class APIController {
     });
   }
 
-  static postProjectRole(req, res) {
+  static postProjectRole(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
       M.log.critical('Request does not have a user');
       const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
@@ -944,7 +944,7 @@ class APIController {
     });
   }
 
-  static deleteProjectRole(req, res) {
+  static deleteProjectRole(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
       M.log.critical('Request does not have a user');
       const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
@@ -991,7 +991,7 @@ class APIController {
    *
    * @description Gets and returns the user.
    */
-  static getUser(req, res) {
+  static getUser(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       M.log.critical('Request does not have a user');
