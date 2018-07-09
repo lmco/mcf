@@ -17,6 +17,7 @@
  *
  * Tests Basic API functionality with Organizations.
  * ASK ABOUT REJECT PUT NAME
+ * ASK ABOUT TESTING WITH NO USER
  */
 
 const path = require('path');
@@ -28,6 +29,7 @@ const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 const test = M.config.test;
+const user = M.config.test.username;
 
 
 /*------------------------------------
@@ -43,6 +45,8 @@ describe(name, function() {
   //Giving 500 error wondering if wanted a 400 error
   it('should reject a PUT with invalid name', rejectPutName).timeout(3000);
   it('should reject a PUT to the org ID', rejectPutID).timeout(3000);
+  it('should get organization roles for a user', orgRole).timeout(3000);
+  it('should reject a get org roles for another user', rejectRole).timeout(3000);
   it('should GET 2 organizations', getTwoOrgs).timeout(3000);
   it('should reject a POST with ID mismatch', postOrg02Err).timeout(3000);
   it('should reject a POST with invalid org id', postInvalidOrg).timeout(5000);
@@ -212,6 +216,46 @@ function rejectPutID(done) {
     done();
   });
 }
+
+/*
+ * Makes a request to get the organization roles for 
+ * the user. This should passwith a 200 code.
+ */
+function orgRole(done) {
+  request({
+    url: `${test.url}/api/orgs/org1/members/${M.config.test.username}`,
+    headers: getHeaders()
+  },
+  function(err, response, body) {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(json.write).to.equal(true);
+    chai.expect(json.read).to.equal(true);
+    chai.expect(json.admin).to.equal(true);
+    done();
+  });
+}
+
+/*
+ * Attempts to make a request to get the organization roles for 
+ * the another user then the request. 
+ * Not sure if it shoud throw an error or pass.
+ */
+function rejectRole(done) {
+  request({
+    url: `${test.url}/api/orgs/org1/members/${M.config.test.username}`,
+    headers: getHeaders()
+  },
+  function(err, response, body) {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(json.write).to.equal(true);
+    chai.expect(json.read).to.equal(true);
+    chai.expect(json.admin).to.equal(true);
+    done();
+  });
+}
+
 
 /*
  * Makes a GET request to /api/orgs. At this point we should have 2 orgs
