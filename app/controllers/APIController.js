@@ -986,6 +986,8 @@ class APIController {
   /****************************************************************************
    * User API Endpoints
    ****************************************************************************/
+
+
   /**
    * GET /api/users/:username
    *
@@ -993,7 +995,6 @@ class APIController {
    */
   static getUser(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
-
     if (!req.user) {
       M.log.critical('Request does not have a user');
       const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
@@ -1001,6 +1002,46 @@ class APIController {
       return res.status(err.status).send(err);
     }
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
+    .then((user) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * POST /api/users/:username
+   *
+   * @description Creates a new user
+   */
+  static postUser(req, res) {
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    if (!req.body.hasOwnProperty('username')) {
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Username not found in request body.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    }
+
+    if (req.body.username !== req.params.username) {
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Username in body does not match username in params.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    }
+
+    UserController.createUser(req.user, req.body)
     .then((user) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(user.getPublicData()));

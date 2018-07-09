@@ -1517,7 +1517,7 @@ api.route('/users/:username')
 .post(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.postUser
 )
 .put(
   AuthController.authenticate.bind(AuthController),

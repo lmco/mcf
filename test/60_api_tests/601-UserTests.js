@@ -34,6 +34,7 @@ const test = M.config.test;
 
 describe(name, function() {
   it('should get a username', getUser).timeout(3000);
+  it('should create a user', postUser).timeout(3000);
 });
 
 /**---------------------------------------------------
@@ -42,7 +43,7 @@ describe(name, function() {
 
 /**
  * Makes a GET request to /api/users/:username. This is to
- * call a username and get it. So the response should suceed with ausername.
+ * call a username and get it. So the response should succeed with a username.
  */
 function getUser(done) {
   request({
@@ -52,6 +53,31 @@ function getUser(done) {
   function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(json.username).to.equal('mbee');
+    chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
+}
+
+/**
+ * Makes a POST request to /api/users/:username. This is to
+ * create a user. Response should succeed with a user object returned.
+ */
+function postUser(done) {
+  request({
+    url: `${test.url}/api/users/lskywalker`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      username: 'lskywalker',
+      password: 'iamajedi',
+      fname: 'Luke',
+      lname: 'Skywalker'
+    })
+  },
+  function(err, response, body) {
+    const json = JSON.parse(body);
+    chai.expect(json.username).to.equal('lskywalker');
+    chai.expect(json.fname).to.equal('Luke');
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
