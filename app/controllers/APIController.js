@@ -21,8 +21,7 @@ const path = require('path');
 const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
-
-// const ElemController = mbee.load('controllers/ElementController');
+const ElementController = mbee.load('controllers/ElementController');
 const OrgController = mbee.load('controllers/OrganizationController');
 const ProjectController = mbee.load('controllers/ProjectController');
 const UserController = mbee.load('controllers/UserController');
@@ -1029,6 +1028,190 @@ class APIController {
     // Otherwise return 200 and the user's public JSON
     res.header('Content-Type', 'application/json');
     return res.status(200).send(APIController.formatJSON(req.user.getPublicData()));
+  }
+
+
+  /****************************************************************************
+   * Element API Endpoints
+   ****************************************************************************/
+
+
+  /**
+   * GET /api/orgs/:orgid/projects/:projectid/elements/
+   *
+   * @description Gets all elements for a given project
+   */
+  static getElements(req, res) {  // eslint-disable-line consistent-return
+    // If for some reason we don't have a user, fail
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    const orgid = M.lib.sani.sanitize(req.params.orgid);
+    const projid = M.lib.sani.sanitize(req.params.projectid);
+
+    ElementController.findElements(req.user, orgid, projid)
+    .then((elements) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(elements));
+    })
+    .catch((error) => {
+      // If error occurs, log error and return status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * GET /api/orgs/:orgid/projects/:projectid/elements/:elementid
+   *
+   * @description Gets the element whose ID is 'elementid' and returns the
+   * element's public data as JSON.
+   */
+  static getElement(req, res) { // eslint-disable-line consistent-return
+    // If for some reason we don't have a user, fail
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    // Verify that orgID is a string
+    if (typeof req.params.orgid !== 'string') {
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    }
+
+    // Verify that projectID is a string
+    if (typeof req.params.projectid !== 'string') {
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    }
+
+    // Verify that elementID is a string
+    if (typeof req.params.projectid !== 'string') {
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    }
+
+    const orgid = M.lib.sani.sanitize(req.params.orgid);
+    const projid = M.lib.sani.sanitize(req.params.projectid);
+    const elemid = M.lib.sani.sanitize(req.params.elementid);
+
+    ElementController.findElement(req.user, orgid, projid, elemid)
+    .then((element) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(element));
+    })
+    .catch((error) => {
+      // If error occurs, log error and return status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
+   *
+   * @description Creates the element whose ID is 'elementid' and returns the
+   * element's public data as JSON.
+   */
+  static postElement(req, res) { // eslint-disable-line consistent-return
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    ElementController.createElement(req.user, req.body)
+    .then((element) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(element));
+    })
+    .catch((error) => {
+      // If error occurs, log error and return status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * PUT /api/orgs/:orgid/projects/:projectid/elements/:elementid
+   *
+   * @description Updates the element whose ID is 'elementid' and returns the
+   * element's public data as JSON.
+   */
+  static putElement(req, res) { // eslint-disable-line consistent-return
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    const orgid = M.lib.sani.sanitize(req.params.orgid);
+    const projid = M.lib.sani.sanitize(req.params.projectid);
+    const elemid = M.lib.sani.sanitize(req.params.elementid);
+
+    ElementController.updateElement(req.user, orgid, projid, elemid, req.body)
+    .then((element) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(element));
+    })
+    .catch((error) => {
+      // If error occurs, log error and return status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
+   *
+   * @description Deletes the element whose ID is 'elementid' and returns the
+   * element's public data as JSON.
+   */
+  static deleteElement(req, res) { // eslint-disable-line consistent-return
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    const orgid = M.lib.sani.sanitize(req.params.orgid);
+    const projid = M.lib.sani.sanitize(req.params.projectid);
+    const elemid = M.lib.sani.sanitize(req.params.elementid);
+
+    ElementController.removeElement(req.user, orgid, projid, elemid, req.body)
+    .then((element) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(element));
+    })
+    .catch((error) => {
+      // If error occurs, log error and return status.
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
   }
 
 }
