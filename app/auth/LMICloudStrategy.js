@@ -290,10 +290,7 @@ class LMICloudStrategy extends BaseStrategy {
         deletedOn: null
       })
       .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
-      // TODO: Still valid token, deleted user from DB
-      // Still reach this code, User returns as null
       .exec((err, user) => {
-        //
         cb((err) || null, user);
       });
     }
