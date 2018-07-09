@@ -56,8 +56,8 @@ class LDAPStrategy extends BaseStrategy {
   handleBasicAuth(req, res, username, password) {
     return new Promise((resolve, reject) => {
       this.ldapConnect()
-      .then(() => this.ldapSearch(this.ldapClient, username, password))
-      .then((userFound) => this.ldapAuth(this.ldapClient, userFound, password))
+      .then(() => this.ldapSearch(username))
+      .then((userFound) => this.ldapAuth(userFound, password))
       .then((userAuth) => this.ldapSync(userAuth))
       .then((userSynced) => resolve(userSynced))
       .catch((handleBasicAuthErr) => reject(handleBasicAuthErr));
@@ -86,7 +86,7 @@ class LDAPStrategy extends BaseStrategy {
   }
 
 
-  ldapSearch(ldapClient, username, password) {
+  ldapSearch(username) {
     M.log.debug('Attempting to search for LDAP user.');
     return new Promise((resolve, reject) => {
       const filter = `${'(&'                 // the escape is part of the ldap query
@@ -105,7 +105,7 @@ class LDAPStrategy extends BaseStrategy {
 
       let person = false;
       // Execute the search
-      ldapClient.search('dc=us,dc=lmco,dc=com', opts, (err, result) => {
+      this.ldapClient.search('dc=us,dc=lmco,dc=com', opts, (err, result) => {
         result.on('searchEntry', (entry) => {
           M.log.debug('Search complete. Entry found.');
           person = entry;
@@ -114,6 +114,7 @@ class LDAPStrategy extends BaseStrategy {
         result.on('end', (status) => {
           M.log.debug(status);
           if (!person) {
+            this.ldapClient.destroy();
             return reject(new Error('Error: Invalid username or password.'));
           }
           return resolve(person.object);
@@ -123,18 +124,19 @@ class LDAPStrategy extends BaseStrategy {
   }
 
 
-  ldapAuth(ldapClient, user, password) {
+  ldapAuth(user, password) {
     M.log.debug(`Authenticating ${user[M.config.auth.ldap.username_attribute]} ...`);
     return new Promise((resolve, reject) => {
-      ldapClient.bind(user.dn, password, (err) => {
+      this.ldapClient.bind(user.dn, password, (err) => {
         // If an error occurs, fail.
         if (err) {
+          this.ldapClient.destroy();
           return reject(new Error(`An error has occured on user bind:${err}`));
         }
 
         M.log.debug(`User [${user[M.config.auth.ldap.username_attribute]
         }] authenticated successfully via LDAP.`);
-        ldapClient.destroy();
+        this.ldapClient.destroy();
         return resolve(user);
       });
     });
