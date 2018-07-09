@@ -293,6 +293,7 @@ class LMICloudStrategy extends BaseStrategy {
       // TODO: Still valid token, deleted user from DB
       // Still reach this code, User returns as null
       .exec((err, user) => {
+        //
         cb((err) || null, user);
       });
     }
