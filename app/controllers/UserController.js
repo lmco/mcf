@@ -178,7 +178,6 @@ class UserController {
           if (!user.isUpdateAllowed(props[i])) {
             return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'Update not allowed' })));
           }
-          user.isUpdateAllowed(props[i]);
           user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
         }
 
