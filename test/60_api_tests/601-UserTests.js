@@ -33,9 +33,11 @@ const test = M.config.test;
  *------------------------------------*/
 
 describe(name, function() {
-  it('should get a username', getUser).timeout(3000);
-  it('should create a user', postUser).timeout(3000);
-  it('should update a user', putUser).timeout(3000);
+  it('should get a username', getUser).timeout(5000);
+  it('should create a user', postUser).timeout(5000);
+  it('should get all users', getUsers).timeout(5000);
+  it('should update a user', putUser).timeout(5000);
+  it('should delete a user', deleteUser).timeout(5000);
 });
 
 /**---------------------------------------------------
@@ -44,7 +46,7 @@ describe(name, function() {
 
 /**
  * Makes a GET request to /api/users/:username. This is to
- * call a username and get it. So the response should succeed with a username.
+ * get a user. So the response should succeed with a username.
  */
 function getUser(done) {
   request({
@@ -85,6 +87,23 @@ function postUser(done) {
 }
 
 /**
+ * Makes a GET request to /api/users/. This is to
+ * get all users. So the response should succeed with a username.
+ */
+function getUsers(done) {
+  request({
+    url: `${test.url}/api/users`,
+    headers: getHeaders()
+  },
+  function(err, response, body) {
+    chai.expect(body).to.include('mbee');
+    chai.expect(body).to.include('lskywalker');
+    chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
+}
+
+/**
  * Makes a PUT request to /api/users/:username. This is to
  * update a user. Response should succeed with a user object returned.
  */
@@ -101,6 +120,27 @@ function putUser(done) {
     const json = JSON.parse(body);
     chai.expect(json.username).to.equal('lskywalker');
     chai.expect(json.fname).to.equal('Leia');
+    chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
+}
+
+/**
+ * Makes a DELETE request to /api/users/:username. This is to
+ * delete a user. Response should succeed with a user object returned.
+ */
+function deleteUser(done) {
+  request({
+    url: `${test.url}/api/users/lskywalker`,
+    headers: getHeaders(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
+  },
+  function(err, response, body) {
+    const json = JSON.parse(body);
+    chai.expect(json).to.equal('lskywalker');
     chai.expect(response.statusCode).to.equal(200);
     done();
   });

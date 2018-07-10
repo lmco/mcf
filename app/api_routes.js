@@ -1351,7 +1351,11 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *         description: Not Implemented
  */
 api.route('/users')
-.get(APIController.notImplemented)
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getUsers
+)
 .post(APIController.notImplemented)
 .put(APIController.notImplemented)
 .delete(APIController.notImplemented);
