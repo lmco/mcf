@@ -260,6 +260,7 @@ function findElements(done) {
     done();
   })
   .catch((error) => {
+    console.log(error);
     const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
@@ -286,7 +287,7 @@ function findElementsSpecificType(done) {
  * Tests trying to find an invalid type of element
  */
 function findElementsBadType(done) {
-  ElemController.findElements(user, org.id, proj.id, 'Parent')
+  ElemController.findElements(user, 4, proj.id, 'Parent')
   .then((retElems) => {
     chai.expect(retElems).to.equal(null);
     done();

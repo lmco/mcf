@@ -55,12 +55,10 @@ class ElementController {
   static findElements(reqUser, organizationID, projectID, elemType = '') {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Ensure all incoming IDs are strings
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        M.lib.errors.checkType([organizationID, projectID], 'string');
       }
-      if (typeof projectID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
-      }
+      catch (error) { return reject(error); }
 
       const orgID = M.lib.sani.sanitize(organizationID);
       const projID = M.lib.sani.sanitize(projectID);
@@ -300,33 +298,41 @@ class ElementController {
       // TODO: Clean up error check code.
 
       // Element ID
-      if (!element.hasOwnProperty('id')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (id).' })));
+      // if (!element.hasOwnProperty('id')) {
+      //   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (id).' })));
+      // }
+      // // Project
+      // if (element.hasOwnProperty('project')) {
+      //   // Project ID
+      //   if (!element.project.hasOwnProperty('id')) {
+      //     return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.id).' })));
+      //   }
+      //   // Porject Org
+      //   if (element.project.hasOwnProperty('org')) {
+      //     // Org ID
+      //     if (!element.project.org.hasOwnProperty('id')) {
+      //       return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org.id).' })));
+      //     }
+      //   }
+      //   else {
+      //     reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org).' })));
+      //   }
+      // }
+      // else {
+      //   reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj).' })));
+      // }
+      // // Element Type
+      // if (!element.hasOwnProperty('type')) {
+      //   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (type).' })));
+      // }
+
+      try {
+        M.lib.errors.checkExists(['id', 'project.id', 'project.org.id', 'type'], element);
       }
-      // Project
-      if (element.hasOwnProperty('project')) {
-        // Project ID
-        if (!element.project.hasOwnProperty('id')) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.id).' })));
-        }
-        // Porject Org
-        if (element.project.hasOwnProperty('org')) {
-          // Org ID
-          if (!element.project.org.hasOwnProperty('id')) {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org.id).' })));
-          }
-        }
-        else {
-          reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org).' })));
-        }
+      catch (error) {
+        return reject(error);
       }
-      else {
-        reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj).' })));
-      }
-      // Element Type
-      if (!element.hasOwnProperty('type')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (type).' })));
-      }
+
 
       // Ensure all pieces of data are strings
       if (typeof element.id !== 'string') {
