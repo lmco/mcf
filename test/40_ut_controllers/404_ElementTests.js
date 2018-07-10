@@ -287,7 +287,7 @@ function findElementsSpecificType(done) {
  * Tests trying to find an invalid type of element
  */
 function findElementsBadType(done) {
-  ElemController.findElements(user, 4, proj.id, 'Parent')
+  ElemController.findElements(user, org.id, proj.id, 'Parent')
   .then((retElems) => {
     chai.expect(retElems).to.equal(null);
     done();
