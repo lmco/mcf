@@ -72,12 +72,14 @@ describe(name, function() {
         done();
       })
       .catch(function(error) {
-        chai.expect(error).to.equal(null);
+        json1 = JSON.parse(error.message);
+        chai.expect(json1.description).to.equal(null);
         done();
       });
     })
     .catch(function(lasterr) {
-      chai.expect(lasterr).to.equal(null);
+      json2 = JSON.parse(lasterr.message);
+      chai.expect(json2.description).to.equal(null);
       done();
     });
   });
@@ -96,13 +98,15 @@ describe(name, function() {
         done();
       })
       .catch(function(err1) {
-        chai.expect(err1).to.equal(null);
+        jsErr = JSON.parse(err1.message);
+        chai.expect(jsErr.description).to.equal(null);
         mongoose.connection.close();
         done();
       });
      })
      .catch(function(err2) {
-       chai.expect(err2).to.equal(null);
+       jsErr2 = JSON.parse(err2.message);
+       chai.expect(jsErr2.description).to.equal(null);
       mongoose.connection.close();
       done();
     });
@@ -157,7 +161,8 @@ function addNewOrg(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error).to.equal(null);
+    json = JSON.parse(error.message);
+    chai.expect(json.description).to.equal(null);
   });
 }
 
@@ -183,7 +188,8 @@ function addSecondOrg(done) {
     done();
   })
   .catch((firsterr) => {
-    chai.expect(firsterr).to.equal(null);
+    json = JSON.parse(firsterr.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -198,7 +204,8 @@ function findExistingOrg(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error).to.equal(null);
+    json = JSON.parse(error.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -263,7 +270,8 @@ function updateOrg(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    json = JSON.parse(error.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -281,12 +289,14 @@ function updateOrgObject(done) {
       done();
     })
     .catch((orgUpdateErr) => {
-      chai.expect(orgUpdateErr.description).to.equal(null);
+      json1 = JSON.parse(orgFindErr.message);
+      chai.expect(json1.description).to.equal(null);
       done();
     });
   })
   .catch((orgFindErr) => {
-    chai.expect(orgFindErr.description).to.equal(null);
+    json = JSON.parse(orgFindErr0.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -301,7 +311,8 @@ function findAllExistingOrgs(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    json = JSON.parse(error);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -311,7 +322,7 @@ function findAllExistingOrgs(done) {
  */
 function softDeleteExistingOrg(done) {
   OrgController.removeOrg(user, 'tv', { soft: true })
-  .then((retOrg) => {
+  .then(() => {
     OrgController.findOrg(user, 'tv')
     .then((orgTwo) => {
       chai.expect(orgTwo).to.equal(null);

@@ -71,7 +71,8 @@ describe(name, function() {
       // });
     })
     .catch(function(error) {
-      chai.expect(error).to.equal(null);
+      json = JSON.parse(error.message);
+      chai.expect(json.description).to.equal(null);
       done();
     });
   });
@@ -100,7 +101,8 @@ describe(name, function() {
       // });
     })
     .catch(function(err) {
-      chai.expect(err).to.equal(null);
+      error = JSON.parse(err.message);
+      chai.expect(error.description).to.equal(null);
       mongoose.connection.close();
       done();
     });
@@ -158,7 +160,8 @@ function createNewUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
   });
 }
 
@@ -185,7 +188,8 @@ function createAUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -213,7 +217,8 @@ function createNonAUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -239,7 +244,8 @@ function createUser02(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
   });
 }
 
@@ -362,7 +368,8 @@ function updateLName(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -447,7 +454,8 @@ function findUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -542,7 +550,8 @@ function deleteUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -559,7 +568,8 @@ function deleteUser02(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -576,7 +586,8 @@ function deleteAUser(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }

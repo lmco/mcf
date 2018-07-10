@@ -92,17 +92,20 @@ describe(name, () => {
           done();
         })
         .catch((firsterr) => {
-          chai.expect(firsterr).to.equal(null);
+          err1 = JSON.parse(firsterr.message);
+          chai.expect(err1.description).to.equal(null);
           done();
         });
       })
       .catch(function(error) {
-        chai.expect(error).to.equal(null);
+        err2 = JSON.parse(error.message);
+        chai.expect(err2.description).to.equal(null);
         done();
       });
     })
     .catch(function(lasterr) {
-      chai.expect(lasterr).to.equal(null);
+      json = JSON.parse(lasterr.message);
+      chai.expect(json.description).to.equal(null);
       done();
     });
   });
@@ -121,13 +124,15 @@ describe(name, () => {
         done();
       })
       .catch(function(err1) {
-        chai.expect(err1).to.equal(null);
+        error1 = JSON.parse(err1.message);
+        chai.expect(error1.description).to.equal(null);
         mongoose.connection.close();
         done();
       });
     })
     .catch(function(err2) {
-      chai.expect(err2).to.equal(null);
+      error2 = JSON.parse(err2.message);
+      chai.expect(error2.description).to.equal(null);
       mongoose.connection.close();
       done();
     });
@@ -317,7 +322,8 @@ function createProject02(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -364,7 +370,8 @@ function createLongName(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -388,7 +395,8 @@ function createLongName02(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -549,7 +557,8 @@ function findProj(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -612,7 +621,8 @@ function updateProj(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -676,7 +686,8 @@ function findPerm(done) {
     done();
   })
   .catch((err2) => {
-    chai.expect(err2.message).to.equal(null);
+    json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -699,17 +710,20 @@ function setPerm(done) {
         done();
       })
       .catch((err) => {
-        chai.expect(err).to.equal(null);
+        json = JSON.parse(err.message);
+        chai.expect(json.description).to.equal(null);
         done();
       });
     })
     .catch((err2) => {
-      chai.expect(err2.message).to.equal(null);
+      json2 = JSON.parse(err2.message);
+      chai.expect(json2.description).to.equal(null);
       done();
     });
   })
   .catch((error) => {
-    chai.expect(error.message).to.equal(null);
+    json3 = JSON.parse(error.message);
+    chai.expect(json3.description).to.equal(null);
     done();
   });
 }

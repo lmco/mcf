@@ -112,12 +112,14 @@ describe(name, function() {
         // });
       })
       .catch((firsterr) => {
-        chai.expect(firsterr).to.equal(null);
+        error1 = JSON.parse(firsterr.message);
+        chai.expect(error1.description).to.equal(null);
         done();
       });
     })
     .catch(function(error) {
-      chai.expect(error).to.equal(null);
+      error2 = JSON.parse(error.message);
+      chai.expect(error2.description).to.equal(null);
       done();
     });
   });
@@ -143,7 +145,8 @@ describe(name, function() {
       // });
     })
     .catch(function(err2) {
-      chai.expect(err2).to.equal(null);
+      error = JSON.parse(err2.message);
+      chai.expect(error2.description).to.equal(null);
       mongoose.connection.close();
       done();
     });
