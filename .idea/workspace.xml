@@ -2,9 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d3d8988-8621-4ae4-93ea-c2d0ab6cc6ab" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/app/lib/parseJSON.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/parseJSON.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mbee.js" beforeDir="false" afterPath="$PROJECT_DIR$/mbee.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/20_ut_lib/203_LibParseJSON.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/20_ut_lib/203_LibParseJSON.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/certs/gitlab_mbee-plugin-jira-integration.key" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/60_api_tests/604-ElementTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api_routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/api_routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth/BaseStrategy.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/BaseStrategy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/APIController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/APIController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/ElementController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/ElementController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/OrganizationController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/OrganizationController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/ProjectController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/ProjectController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/UserController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/UserController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plugins/routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/40_ut_controllers/402_OrganizationTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/40_ut_controllers/402_OrganizationTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/40_ut_controllers/403_ProjectTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/40_ut_controllers/403_ProjectTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/40_ut_controllers/404_ElementTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/40_ut_controllers/404_ElementTests.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -22,16 +34,28 @@
         <entry file="file://$PROJECT_DIR$/app/lib/parseJSON.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="252">
-              <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+              <caret line="22" selection-start-line="22" selection-end-line="22" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="mbee.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="mbee.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mbee.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="582">
               <caret line="45" column="2" selection-start-line="45" selection-start-column="2" selection-end-line="45" selection-end-column="2" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BaseStrategy.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/auth/BaseStrategy.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="525">
+              <caret line="148" column="38" selection-start-line="148" selection-start-column="38" selection-end-line="148" selection-end-column="38" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -67,6 +91,7 @@
         <option value="$PROJECT_DIR$/config/dev.json" />
         <option value="$PROJECT_DIR$/mbee.js" />
         <option value="$PROJECT_DIR$/app/lib/parseJSON.js" />
+        <option value="$PROJECT_DIR$/app/auth/BaseStrategy.js" />
       </list>
     </option>
   </component>
@@ -110,6 +135,12 @@
               <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
               <item name="mbee" type="462c0819:PsiDirectoryNode" />
               <item name="app" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mbee" type="462c0819:PsiDirectoryNode" />
+              <item name="app" type="462c0819:PsiDirectoryNode" />
+              <item name="auth" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
@@ -197,12 +228,12 @@
       <workItem from="1531154717315" duration="619000" />
       <workItem from="1531155355272" duration="1016000" />
       <workItem from="1531156411451" duration="11438000" />
-      <workItem from="1531232178453" duration="9561000" />
+      <workItem from="1531232178453" duration="9684000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="22634000" />
+    <option name="totallyTimeSpent" value="22757000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1200" extended-state="0" />
@@ -296,16 +327,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
           <caret line="20" selection-start-line="20" selection-end-line="20" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/auth/BaseStrategy.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3129">
-          <caret line="149" column="33" selection-start-line="149" selection-start-column="33" selection-end-line="149" selection-end-column="33" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -406,7 +427,7 @@
     <entry file="file://$PROJECT_DIR$/app/lib/parseJSON.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
-          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+          <caret line="22" selection-start-line="22" selection-end-line="22" />
         </state>
       </provider>
     </entry>
@@ -414,6 +435,16 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="582">
           <caret line="45" column="2" selection-start-line="45" selection-start-column="2" selection-end-line="45" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/auth/BaseStrategy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="148" column="38" selection-start-line="148" selection-start-column="38" selection-end-line="148" selection-end-column="38" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
