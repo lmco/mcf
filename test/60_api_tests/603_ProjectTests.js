@@ -128,6 +128,7 @@ describe(name, function() {
     OrgController.removeOrg(user, 'hogwarts', { soft: false })
     .then((retOrg) => {
       chai.expect(retOrg.id).to.equal('hogwarts');
+      mongoose.connection.close();
       done();
       // OrgController.removeOrg(user, 'durmstranginstitute', { soft: false })
       // .then((proj) => {
