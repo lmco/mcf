@@ -98,7 +98,7 @@ class ElementController {
         // Create the list of search parameters
         const searchParams = { project: project._id };
         if (type !== '') {
-          searchParams.type = type ;
+          searchParams.type = type;
         }
 
         Element.Element.find(searchParams)
