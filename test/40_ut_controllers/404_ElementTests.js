@@ -270,7 +270,7 @@ function findElements(done) {
  * Finds all elements of type Element for a project
  */
 function findElementsSpecificType(done) {
-  ElemController.findElements(user, org.id, proj.id, 'Package')
+  ElemController.findElements(user, org.id, proj.id, 'Element')
   .then((retElems) => {
     chai.expect(retElems.length).to.equal(1);
     done();

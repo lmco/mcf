@@ -19,6 +19,7 @@
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.require('controllers.ProjectController');
+// Element refers to the Element.js file, not the Element model
 const Element = M.require('models.Element');
 
 
@@ -46,13 +47,11 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The user object of the requesting user.
-   * @param  {String} The organization ID.
-   * @param  {String} The project ID.
-   * @param  {String} An optional string denoting the type of element.
+   * @param  {User} reqUser   The user object of the requesting user.
+   * @param  {String} organizationID   The organization ID.
+   * @param  {String} projectID   The project ID.
+   * @param  {String} elemType   An optional string denoting the type of element.
    */
-  // TODO: Add query based on type
-
   static findElements(reqUser, organizationID, projectID, elemType = '') {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Ensure all incoming IDs are strings
@@ -71,12 +70,11 @@ class ElementController {
       if (elemType !== '') {
         type = M.lib.sani.sanitize(elemType);
 
-        let typeExists = false;
-        Object.keys(Element).forEach((k) => {
-          if (type === Element[k].modelName) {
-            typeExists = true;
-          }
-        });
+        // Checks to see if the type provided is either a model
+        // or discriminator from Element.js. Do not confuse
+        // this Element as the Element model; it's just the exported file
+        // containing the Elelment model along with Relationship, Block, etc.
+        const typeExists = Object.keys(Element).includes(type);
 
         // Handle Element case, where type should be null
         if (type === 'Element') {
@@ -98,9 +96,9 @@ class ElementController {
         }
 
         // Create the list of search parameters
-        let searchParams = { project: project._id };
+        const searchParams = { project: project._id };
         if (type !== '') {
-          searchParams = { project: project._id, type: type };
+          searchParams.type = type ;
         }
 
         Element.Element.find(searchParams)
