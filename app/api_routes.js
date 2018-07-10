@@ -1351,7 +1351,11 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *         description: Not Implemented
  */
 api.route('/users')
-.get(APIController.notImplemented)
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getUsers
+)
 .post(APIController.notImplemented)
 .put(APIController.notImplemented)
 .delete(APIController.notImplemented);
@@ -1509,10 +1513,26 @@ api.route('/users')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/users/:username')
-.get(APIController.notImplemented)
-.post(APIController.notImplemented)
-.put(APIController.notImplemented)
-.delete(APIController.notImplemented);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getUser
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postUser
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.putUser
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.deleteUser
+);
 
 /**
  * @swagger
