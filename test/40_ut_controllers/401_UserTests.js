@@ -30,7 +30,7 @@ const UserController = M.load('controllers/UserController');
 
 let reqUser = null;
 let nonAUser = null;
-let badAUser = null;
+// let badAUser = null;
 
 /*------------------------------------
  *       Main
@@ -49,25 +49,26 @@ describe(name, function() {
     .then(function(searchUser) {
       reqUser = searchUser;
       chai.expect(searchUser.username).to.equal(M.config.test.username);
-      const userData2 = {
-        username: 'jubbathehut',
-        password: 'ilovetoeat',
-        fname: 'Jubba',
-        lname: 'The Hut',
-        admin: true
-      };
-      UserController.createUser(searchUser, userData2)
-      .then(function(anotherUser) {
-        badAUser = anotherUser;
-        chai.expect(anotherUser.username).to.equal('jubbathehut');
-        chai.expect(anotherUser.fname).to.equal('Jubba');
-        chai.expect(anotherUser.lname).to.equal('The Hut');
-        done();
-      })
-      .catch(function(err) {
-        chai.expect(err).to.equal(null);
-        done();
-      });
+      done();
+      // const userData2 = {
+      //   username: 'jubbathehut',
+      //   password: 'ilovetoeat',
+      //   fname: 'Jubba',
+      //   lname: 'The Hut',
+      //   admin: true
+      // };
+      // UserController.createUser(searchUser, userData2)
+      // .then(function(anotherUser) {
+      //   badAUser = anotherUser;
+      //   chai.expect(anotherUser.username).to.equal('jubbathehut');
+      //   chai.expect(anotherUser.fname).to.equal('Jubba');
+      //   chai.expect(anotherUser.lname).to.equal('The Hut');
+      //   done();
+      // })
+      // .catch(function(err) {
+      //   chai.expect(err).to.equal(null);
+      //   done();
+      // });
     })
     .catch(function(error) {
       chai.expect(error).to.equal(null);
@@ -83,18 +84,20 @@ describe(name, function() {
     UserController.removeUser(reqUser, username)
     .then(function(delUser) {
       chai.expect(delUser).to.equal('darthsidious');
-      const user2 = 'jubbathehut';
-      UserController.removeUser(reqUser, user2)
-      .then(function(delBadUser) {
-        chai.expect(delBadUser).to.equal('jubbathehut');
-        mongoose.connection.close();
-        done();
-      })
-      .catch(function(error) {
-        chai.expect(error).to.equal(null);
-        mongoose.connection.close();
-        done();
-      });
+      mongoose.connection.close();
+      done();
+      // const user2 = 'jubbathehut';
+      // UserController.removeUser(reqUser, user2)
+      // .then(function(delBadUser) {
+      //   chai.expect(delBadUser).to.equal('jubbathehut');
+      //   mongoose.connection.close();
+      //   done();
+      // })
+      // .catch(function(error) {
+      //   chai.expect(error).to.equal(null);
+      //   mongoose.connection.close();
+      //   done();
+      // });
     })
     .catch(function(err) {
       chai.expect(err).to.equal(null);
@@ -122,7 +125,7 @@ describe(name, function() {
   // TEST FAIL UNHANDLED PROMISE
   // it('should reject deleting a user that doesnt exist', fakeDelete).timeout(3000);
   it('should reject deleting a user with a non admin user', nonADelete).timeout(3000);
-  it('should reject deleting themselves', deleteSelf).timeout(3000);
+  // it('should reject deleting themselves', deleteSelf).timeout(3000);
   it('should delete user created', deleteUser).timeout(3000);
   it('should delete second user created', deleteUser02).timeout(3000);
   it('should delete admin user created', deleteAUser).timeout(3000);
@@ -508,23 +511,23 @@ function nonADelete(done) {
   });
 }
 
-/*
- * User attempts deleting themselves.
- */
+// /*
+//  * User attempts deleting themselves.
+//  */
 
-function deleteSelf(done) {
-  const username = 'jubbathehut';
-  UserController.removeUser(badAUser, username)
-  .then(function() {
-    chai.assert(true === false);
-    done();
-  })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal('User cannot delete themselves.');
-    done();
-  });
-}
+// function deleteSelf(done) {
+//   const username = 'jubbathehut';
+//   UserController.removeUser(badAUser, username)
+//   .then(function() {
+//     chai.assert(true === false);
+//     done();
+//   })
+//   .catch(function(err) {
+//     const json = JSON.parse(err.message);
+//     chai.expect(json.description).to.equal('User cannot delete themselves.');
+//     done();
+//   });
+// }
 
 
 /*
