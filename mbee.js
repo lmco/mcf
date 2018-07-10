@@ -23,13 +23,14 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
+const parseJSON = require(`${__dirname}/app/lib/parseJSON`);
 
 // Global MBEE helper object
 const M = { env: process.env.NODE_ENV || 'dev' };
 M.version = require(`${__dirname}/package.json`).version;
 M.build = require(`${__dirname}/package.json`).buildNumber;
 M.version4 = (M.build !== 'NO_BUILD_NUMBER') ? `${M.version}.${M.build}` : `${M.version}.0`;
-M.config = require(`${__dirname}/config/${M.env}.json`);
+M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.json`)));
 
 // Set config secret if it's set to RANDOM
 if (M.config.server.secret === 'RANDOM') {
@@ -43,6 +44,20 @@ M.path = {
   controllers: s => path.join(__dirname, 'app', 'controllers', s),
   models: s => path.join(__dirname, 'app', 'models', s)
 };
+
+/**
+ * This function provides a useful utility for requiring other MBEE modules in the app directory.
+ * This should allow the path to the modules to be a bit simpler.
+ * The global-require is explicitely disabled here due to the nature of this function.
+ */
+M.load = m => require(path.join(__dirname, 'app', m)); // eslint-disable-line global-require
+
+// Similar to M.load, this is the future
+M.require = m => {
+  const p = path.join(__dirname, 'app', m.replace('.', path.sep));
+  return require(p); // eslint-disable-line global-require
+};
+
 
 // M.util = {
 //    /**
@@ -60,19 +75,6 @@ M.path = {
 //        }
 //    }
 // }
-
-/**
- * This function provides a useful utility for requiring other MBEE modules in the app directory.
- * This should allow the path to the modules to be a bit simpler.
- * The global-require is explicitely disabled here due to the nature of this function.
- */
-M.load = m => require(path.join(__dirname, 'app', m)); // eslint-disable-line global-require
-
-// Similar to M.load, this is the future
-M.require = m => {
-  const p = path.join(__dirname, 'app', m.replace('.', path.sep));
-  return require(p); // eslint-disable-line global-require
-};
 
 // This exports the basic MBEE version and config data so that modules may
 // have access to that data when they are loaded.
@@ -191,7 +193,8 @@ function initialize(args) {
     db: M.load('lib/db'),
     sani: M.load('lib/sanitization'),
     startup: M.load('lib/startup'),
-    validators: M.load('lib/validators')
+    validators: M.load('lib/validators'),
+    parseJSON: M.load('lib/parseJson')
   };
   // Re-export mbee after initialization
   module.exports = M;

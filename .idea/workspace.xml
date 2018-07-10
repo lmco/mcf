@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d3d8988-8621-4ae4-93ea-c2d0ab6cc6ab" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/test/20_ut_lib/203_LibParseJSON.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/testParse.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lib/parseJSON.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/parseJSON.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/dev.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/dev.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mbee.js" beforeDir="false" afterPath="$PROJECT_DIR$/mbee.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/20_ut_lib/203_LibParseJSON.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/20_ut_lib/203_LibParseJSON.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -19,11 +18,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="parseJSON.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="parseJSON.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/lib/parseJSON.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
-              <caret line="29" column="77" lean-forward="true" selection-start-line="29" selection-start-column="77" selection-end-line="29" selection-end-column="77" />
+            <state relative-caret-position="252">
+              <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="mbee.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/mbee.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="582">
+              <caret line="45" column="2" selection-start-line="45" selection-start-column="2" selection-end-line="45" selection-end-column="2" />
             </state>
           </provider>
         </entry>
@@ -31,8 +39,8 @@
       <file leaf-file-name="dev.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config/dev.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="21">
-              <caret line="1" column="11" selection-start-line="1" selection-start-column="11" selection-end-line="1" selection-end-column="11" />
+            <state>
+              <caret column="1" selection-start-column="1" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -56,8 +64,9 @@
         <option value="$PROJECT_DIR$/app/auth/LDAPStrategy.js" />
         <option value="$PROJECT_DIR$/test/testParse.config" />
         <option value="$PROJECT_DIR$/test/20_ut_lib/203_LibParseJSON.js" />
-        <option value="$PROJECT_DIR$/app/lib/parseJSON.js" />
         <option value="$PROJECT_DIR$/config/dev.json" />
+        <option value="$PROJECT_DIR$/mbee.js" />
+        <option value="$PROJECT_DIR$/app/lib/parseJSON.js" />
       </list>
     </option>
   </component>
@@ -106,12 +115,7 @@
               <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
               <item name="mbee" type="462c0819:PsiDirectoryNode" />
               <item name="app" type="462c0819:PsiDirectoryNode" />
-              <item name="controllers" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="mbee" type="462c0819:PsiDirectoryNode" />
-              <item name="config" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
@@ -142,7 +146,7 @@
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.selected.package.eslint" value="$PROJECT_DIR$/node_modules/eslint" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Language Defaults" />
+    <property name="settings.editor.selected.configurable" value="http.certificates" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -193,12 +197,12 @@
       <workItem from="1531154717315" duration="619000" />
       <workItem from="1531155355272" duration="1016000" />
       <workItem from="1531156411451" duration="11438000" />
-      <workItem from="1531232178453" duration="5232000" />
+      <workItem from="1531232178453" duration="9561000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="18305000" />
+    <option name="totallyTimeSpent" value="22634000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1200" extended-state="0" />
@@ -268,13 +272,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4600">
           <caret line="221" column="85" lean-forward="true" selection-start-line="221" selection-start-column="85" selection-end-line="221" selection-end-column="85" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mbee.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="146">
-          <caret line="21" column="8" selection-start-line="21" selection-start-column="6" selection-end-line="21" selection-end-column="8" />
         </state>
       </provider>
     </entry>
@@ -391,8 +388,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/20_ut_lib/203_LibParseJSON.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="966">
-          <caret line="46" column="24" lean-forward="true" selection-start-line="46" selection-start-column="24" selection-end-line="46" selection-end-column="24" />
+        <state relative-caret-position="1021">
+          <caret line="60" column="1" lean-forward="true" selection-start-line="60" selection-start-column="1" selection-end-line="60" selection-end-column="1" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
@@ -401,15 +398,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/config/dev.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="1" column="11" selection-start-line="1" selection-start-column="11" selection-end-line="1" selection-end-column="11" />
+        <state>
+          <caret column="1" selection-start-column="1" selection-end-column="1" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/lib/parseJSON.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="29" column="77" lean-forward="true" selection-start-line="29" selection-start-column="77" selection-end-line="29" selection-end-column="77" />
+        <state relative-caret-position="252">
+          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mbee.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="582">
+          <caret line="45" column="2" selection-start-line="45" selection-start-column="2" selection-end-line="45" selection-end-column="2" />
         </state>
       </provider>
     </entry>

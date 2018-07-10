@@ -42,27 +42,20 @@ describe(name, () => {
  * Checks to make sure the file is being properly parsed
  */
 function parseTest(done) {
-  parseJSON.removeComments('test/testParse.config')
-  .then(parseString => {
-    const checkString = '{\n' +
-      '    key1: null\n' +
-      '    key2: 1234567890\n' +
-      '    key3: \'string1\'\n' +
-      '    key4:\n' +
-      '    {\n' +
-      '        nestedKey1: null\n' +
-      '        nestedKey3: \'string2\'\n' +
-      '    }\n' +
-      '    key1: [\'val1\', \'val2\', \'val3\']\n' +
-      '}' +
-      '\n';
+  const parseString = parseJSON.removeComments('test/testParse.config');
+  const checkString = '{\n'
+      + '    key1: null\n'
+      + '    key2: 1234567890\n'
+      + '    key3: \'string1\'\n'
+      + '    key4:\n'
+      + '    {\n'
+      + '        nestedKey1: null\n'
+      + '        nestedKey3: \'string2\'\n'
+      + '    }\n'
+      + '    key1: [\'val1\', \'val2\', \'val3\']\n'
+      + '}'
+      + '\n';
 
-    chai.expect(parseString).to.equal(checkString);
-    done();
-  })
-  .catch(err => {
-    console.log(err.stack);
-    chai.expect(err).to.equal(null);
-    done();
-  });
+  chai.expect(parseString).to.equal(checkString);
+  done();
 }

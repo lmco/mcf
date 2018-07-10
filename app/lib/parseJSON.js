@@ -20,7 +20,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 /**
  * ParseJSON.js
@@ -38,29 +37,26 @@ class ParseJSON {
    * application.
    */
   static removeComments(filename) {
-    return new Promise((resolve, reject) => {
-      // Error Check - Make sure the filename parameter passed in is of type string
-      if (typeof filename !== 'string') {
-        return reject(new Error('Error: filename is not of type String.'));
-      }
+    // Error Check - Make sure the filename parameter passed in is of type string
+    if (typeof filename !== 'string') {
+      return new Error('Error: filename is not of type String.');
+    }
 
-      // Attempt to read file into array separated by each newline character.
-      let configArray = null;
-      try {
-        configArray = fs.readFileSync(path.resolve(__dirname, '../..', filename))
-        .toString()
-        .split('\n');
-      }
-      catch (err) {
-        M.log.debug(err);
-        return reject(err);
-      }
-      // remove all array elements that start with '//'
-      const configParsed = configArray.filter(line => !RegExp(/^ *\/\//).test(line));
+    // Attempt to read file into array separated by each newline character.
+    let configArray = null;
+    try {
+      configArray = fs.readFileSync(path.join(__dirname, '..', '..', filename))
+      .toString()
+      .split('\n');
+    }
+    catch (err) {
+      return err;
+    }
+    // remove all array elements that start with '//'
+    const configParsed = configArray.filter(line => !RegExp(/^ *\/\//).test(line));
 
-      // Join the array into a single string separated by new line characters
-      return resolve(configParsed.join('\n'));
-    });
+    // Join the array into a single string separated by new line characters
+    return configParsed.join('\n');
   }
 
 }
