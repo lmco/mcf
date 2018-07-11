@@ -104,15 +104,6 @@ let cmd = []; // TODO - Reduce scope of this variable
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   const metadata = M.config.server.plugins.plugins[i];
 
-  // Remove the old directory if it exists
-  // TODO  - Remove shouldn't happen if plugin is local and is in ./plugins
-  // TODO - Windows support
-  let stdout = execSync(`rm -rf plugins/${metadata.name}`);
-  M.log.verbose(stdout.toString());
-
-  // TODO - Check if deploykey given
-  execSync(`chmod 400 ${metadata.deployKey}`);
-
   // Determine if plugin is local or from git
   // TODO - Git repos don't have to end in .git. How do we want to handle this?
   if (metadata.repository.endsWith('.git')) {
