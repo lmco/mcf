@@ -34,7 +34,7 @@ function start(args) {
   M.lib.startup();                                 // Print startup banner
 
   // Import the app, disable the global-import rule for this
-  const app = require(`${__dirname}/app/app.js`);   // eslint-disable-line global-require
+  const app = M.require('app');   // eslint-disable-line global-require
 
 
   /* eslint-disable no-var, vars-on-top, block-scoped-var */
@@ -48,8 +48,8 @@ function start(args) {
   if (M.config.server.https.enabled) {
     const keyPath = path.join('certs', `${M.config.server.https.sslCertName}.key`);
     const crtPath = path.join('certs', `${M.config.server.https.sslCertName}.crt`);
-    const privateKey = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
-    const certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
+    const privateKey = fs.readFileSync(path.join(M.root, keyPath), 'utf8');
+    const certificate = fs.readFileSync(path.join(M.root, crtPath), 'utf8');
     const credentials = {
       key: privateKey,
       cert: certificate

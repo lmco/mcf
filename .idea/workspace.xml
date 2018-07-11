@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d3d8988-8621-4ae4-93ea-c2d0ab6cc6ab" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/scripts/start.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/logger.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/logger.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mbee.js" beforeDir="false" afterPath="$PROJECT_DIR$/mbee.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/start.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/start.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -24,8 +25,8 @@
       <file leaf-file-name="mbee.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mbee.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="435">
-              <caret line="69" column="32" lean-forward="true" selection-start-line="69" selection-start-column="32" selection-end-line="69" selection-end-column="32" />
+            <state relative-caret-position="588">
+              <caret line="119" column="9" selection-start-line="119" selection-start-column="9" selection-end-line="119" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -33,16 +34,17 @@
       <file leaf-file-name="start.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/start.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-252">
-              <caret line="20" column="57" selection-start-line="20" selection-start-column="57" selection-end-line="20" selection-end-column="57" />
+            <state relative-caret-position="1378">
+              <caret line="68" column="38" selection-start-line="68" selection-start-column="38" selection-end-line="68" selection-end-column="38" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="docker.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/docker.js">
+      <file leaf-file-name="logger.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/lib/logger.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-286">
+            <state relative-caret-position="580">
+              <caret line="29" selection-start-line="29" selection-end-line="29" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -53,8 +55,8 @@
       <file leaf-file-name="build.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/build.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="17" column="29" selection-start-line="17" selection-start-column="29" selection-end-line="17" selection-end-column="29" />
+            <state relative-caret-position="132">
+              <caret line="44" column="21" selection-start-line="44" selection-start-column="21" selection-end-line="44" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -67,6 +69,7 @@
       <find>try</find>
       <find>RegExp</find>
       <find>httpServer</find>
+      <find>console</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -83,6 +86,8 @@
         <option value="$PROJECT_DIR$/app/lib/parseJSON.js" />
         <option value="$PROJECT_DIR$/app/auth/BaseStrategy.js" />
         <option value="$PROJECT_DIR$/config/production.json" />
+        <option value="$PROJECT_DIR$/app/lib/logger.js" />
+        <option value="$PROJECT_DIR$/scripts/build.js" />
         <option value="$PROJECT_DIR$/scripts/start.js" />
         <option value="$PROJECT_DIR$/mbee.js" />
       </list>
@@ -97,7 +102,6 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="NodeModulesDirectoryManager">
-    <handled-path value="$PROJECT_DIR$/node_modules" />
     <handled-path value="$PROJECT_DIR$/plugins/developers/node_modules" />
   </component>
   <component name="NodePackageJsonFileManager">
@@ -107,8 +111,8 @@
     </packageJsonPaths>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="23" />
-    <option name="y" value="35" />
+    <option name="x" value="32" />
+    <option name="y" value="22" />
     <option name="width" value="1844" />
     <option name="height" value="1116" />
   </component>
@@ -127,6 +131,17 @@
             <path>
               <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
               <item name="mbee" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mbee" type="462c0819:PsiDirectoryNode" />
+              <item name="app" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mbee" type="462c0819:PsiDirectoryNode" />
+              <item name="app" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
@@ -202,7 +217,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="29821000" />
+    <option name="totallyTimeSpent" value="34232000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -214,7 +229,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="23" y="35" width="1844" height="1116" extended-state="0" />
+    <frame x="32" y="22" width="1844" height="1116" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.7772957" visible="true" weight="0.14370933" />
@@ -225,16 +240,28 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info id="npm" order="1" side_tool="true" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="right" id="Structure" order="4" sideWeight="0.074074075" side_tool="true" visible="true" weight="0.15347071" />
+      <window_info anchor="right" id="Structure" order="4" sideWeight="0.074074075" side_tool="true" visible="true" weight="0.10032538" />
       <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.5002045" side_tool="true" weight="0.13376717" />
       <window_info id="Favorites" order="2" sideWeight="0.22270426" side_tool="true" weight="0.10838446" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Docker" order="6" weight="0.18927445" />
+      <window_info id="npm" order="1" side_tool="true" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.7772957" visible="true" weight="0.14370933" />
+      <window_info anchor="right" id="Structure" order="4" sideWeight="0.074074075" side_tool="true" visible="true" weight="0.15347071" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" id="TODO" order="3" sideWeight="0.4997955" side_tool="true" weight="0.1374233" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.5002045" side_tool="true" weight="0.13376717" />
+      <window_info id="Favorites" order="2" sideWeight="0.22270426" side_tool="true" weight="0.10838446" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -252,146 +279,10 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js" />
-    <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js" />
-    <entry file="file://$PROJECT_DIR$/app/models/Element.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-7" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/lib/crypto.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/lib/middleware.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="16" selection-start-line="16" selection-end-line="16" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/lib/json-parse.js" />
-    <entry file="file://$PROJECT_DIR$/app/routes.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="689">
-          <caret line="84" column="14" selection-start-line="84" selection-start-column="2" selection-end-line="84" selection-end-column="14" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/UIController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="731">
-          <caret line="166" selection-start-line="166" selection-end-line="167" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="20" selection-start-line="20" selection-end-line="20" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/lib/validators.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-92">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/auth/LMICloudStrategy.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1559">
-          <caret line="175" column="28" selection-start-line="175" selection-start-column="25" selection-end-line="175" selection-end-column="28" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/20_ut_lib/201_LibCrypto.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/data.json">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/20_ut_lib/200_LibTests.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-319">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/40_ut_controllers/401_UserTests.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="365">
-          <caret line="32" selection-start-line="32" selection-end-line="33" selection-end-column="65" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/20_ut_lib/202_LibSanitization.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="464">
-          <caret line="31" column="13" selection-start-line="31" selection-start-column="9" selection-end-line="31" selection-end-column="13" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/OrganizationController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="142">
-          <caret line="158" column="24" lean-forward="true" selection-start-line="158" selection-start-column="24" selection-end-line="158" selection-end-column="24" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/testParse.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/20_ut_lib/203_LibParseJSON.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1021">
-          <caret line="60" column="1" lean-forward="true" selection-start-line="60" selection-start-column="1" selection-end-line="60" selection-end-column="1" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/lib/parseJSON.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
           <caret line="22" selection-start-line="22" selection-end-line="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config/dev.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="1" selection-start-column="1" selection-end-column="1" />
         </state>
       </provider>
     </entry>
@@ -433,15 +324,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plugins/routes.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-436">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/config/Jenkinsfile">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="672">
@@ -470,6 +352,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/start.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-252">
+          <caret line="20" column="57" selection-start-line="20" selection-start-column="57" selection-end-line="20" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/dev.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="673">
+          <caret line="83" column="18" selection-start-line="83" selection-start-column="7" selection-end-line="83" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/docker.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-286">
@@ -479,17 +375,241 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/mbee.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="712">
+          <caret line="86" column="15" selection-start-line="86" selection-start-column="15" selection-end-line="86" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugins/routes.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2136">
+          <caret line="176" column="55" lean-forward="true" selection-start-line="176" selection-start-column="55" selection-end-line="176" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js" />
+    <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js" />
+    <entry file="file://$PROJECT_DIR$/app/models/Element.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-7" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/lib/crypto.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/lib/middleware.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="16" selection-start-line="16" selection-end-line="16" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/lib/json-parse.js" />
+    <entry file="file://$PROJECT_DIR$/app/routes.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="689">
+          <caret line="84" column="14" selection-start-line="84" selection-start-column="2" selection-end-line="84" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/UIController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="731">
+          <caret line="166" selection-start-line="166" selection-end-line="167" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="20" selection-start-line="20" selection-end-line="20" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/lib/validators.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-92" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/auth/LMICloudStrategy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1559">
+          <caret line="175" column="28" selection-start-line="175" selection-start-column="25" selection-end-line="175" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/20_ut_lib/201_LibCrypto.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/data.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/20_ut_lib/200_LibTests.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-319" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/40_ut_controllers/401_UserTests.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="365">
+          <caret line="32" selection-start-line="32" selection-end-line="33" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/20_ut_lib/202_LibSanitization.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="464">
+          <caret line="31" column="13" selection-start-line="31" selection-start-column="9" selection-end-line="31" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/OrganizationController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="142">
+          <caret line="158" column="24" lean-forward="true" selection-start-line="158" selection-start-column="24" selection-end-line="158" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/testParse.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/20_ut_lib/203_LibParseJSON.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1021">
+          <caret line="60" column="1" lean-forward="true" selection-start-line="60" selection-start-column="1" selection-end-line="60" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/lib/parseJSON.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="22" selection-start-line="22" selection-end-line="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/ElementController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="389">
+          <caret line="26" column="24" selection-start-line="26" selection-start-column="24" selection-end-line="26" selection-end-column="24" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/stage.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="620">
+          <caret line="54" column="18" selection-start-line="54" selection-start-column="14" selection-end-line="54" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/production.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="54" column="17" selection-start-line="54" selection-start-column="14" selection-end-line="54" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/test.Jenkinsfile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="664">
+          <caret line="73" column="33" selection-start-line="73" selection-start-column="29" selection-end-line="73" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/test.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2079">
+          <caret line="99" column="19" selection-start-line="99" selection-start-column="19" selection-end-line="99" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/Jenkinsfile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="672">
+          <caret line="34" column="13" lean-forward="true" selection-start-line="34" selection-start-column="13" selection-end-line="34" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/Dockerfile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="639">
+          <caret line="31" column="18" lean-forward="true" selection-start-line="31" selection-start-column="18" selection-end-line="31" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/auth/BaseStrategy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-282">
+          <caret line="39" column="2" selection-start-line="39" selection-start-column="2" selection-end-line="39" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/60_api_tests/602-OrganizationTests.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="277">
+          <caret line="23" selection-start-line="23" selection-end-line="23" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/dev.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="673">
+          <caret line="83" column="18" selection-start-line="83" selection-start-column="7" selection-end-line="83" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/docker.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-286">
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugins/routes.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="436">
+          <caret line="33" selection-start-line="33" selection-end-line="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/build.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="44" column="21" selection-start-line="44" selection-start-column="21" selection-end-line="44" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/lib/logger.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="580">
+          <caret line="29" selection-start-line="29" selection-end-line="29" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/start.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-252">
-          <caret line="20" column="57" selection-start-line="20" selection-start-column="57" selection-end-line="20" selection-end-column="57" />
+        <state relative-caret-position="1378">
+          <caret line="68" column="38" selection-start-line="68" selection-start-column="38" selection-end-line="68" selection-end-column="38" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mbee.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="69" column="32" lean-forward="true" selection-start-line="69" selection-start-column="32" selection-end-line="69" selection-end-column="32" />
+        <state relative-caret-position="588">
+          <caret line="119" column="9" selection-start-line="119" selection-start-column="9" selection-end-line="119" selection-end-column="9" />
         </state>
       </provider>
     </entry>
