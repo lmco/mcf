@@ -407,7 +407,6 @@ class OrganizationController {
       if (softDelete) {
         OrganizationController.findOrg(user, orgID)
         .then((org) => {
-          org.deletedOn = Date.now();
           org.deleted = true;
           org.save((saveErr) => {
             if (saveErr) {

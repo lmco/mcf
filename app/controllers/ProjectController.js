@@ -530,7 +530,6 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       if (softDelete) {
         if (!project.deleted) {
-          project.deletedOn = Date.now();
           project.deleted = true;
           project.save((saveErr) => {
             if (saveErr) {
