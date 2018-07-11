@@ -23,6 +23,7 @@ const { execSync } = require('child_process');
 const M = require(path.join(__dirname, '..', 'mbee.js'));
 const express = require('express');
 const pluginRouter = express.Router();
+const del = require('del');
 
 /**
  * Clones the plugin from a Git repository and places in the appropriate
@@ -32,7 +33,7 @@ const pluginRouter = express.Router();
 function clonePluginFromGitRepo(data) {
   // Remove plugin if it already exists in plugins directory
   const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
-  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(plugins, data.name)}`);
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join('plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
   // Set deploy key file permissions
@@ -43,7 +44,7 @@ function clonePluginFromGitRepo(data) {
   // Create the git clone command
   const cmd = [
     `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no"`,
-    `git clone ${data.source} ${path.join(plugins, data.name)}`
+    `git clone ${data.source} ${path.join('plugins', data.name)}`
   ].join(' ');
 
   // Clone the repo
@@ -69,7 +70,25 @@ function getPluginFromURL(data) {
  * @param data
  */
 function copyPluginFromLocalDir(data) {
-  // TODO
+  // Make sure source plugin is not in plugins directory
+  if (path.resolve(data.source).startsWith(path.resolve(__dirname))) {
+    return;
+  }
+
+  // Remove plugin if it already exists in plugins directory
+  const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join('plugins', data.name)}`);
+  M.log.verbose(stdoutRmCmd.toString());
+
+  // Generate the copy command
+  let cmd = (process.platform === 'win32') ? 'xcopy /E' : 'cp -r ';
+  cmd = `${cmd} ${data.source} ${path.join('plugins', data.name)}`;
+
+  // Execute the copy command
+  M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
+  const stdout = execSync(cmd);
+  M.log.verbose(stdout.toString());
+  M.log.info('Copy complete');
 }
 
 /**
@@ -120,38 +139,21 @@ function extractGz(data) {
 }
 
 
-let cmd = []; // TODO - Reduce scope of this variable
-
 // Clone plugins
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
-  const metadata = M.config.server.plugins.plugins[i];
+  const data = M.config.server.plugins.plugins[i];
 
-  // Determine if plugin is local or from git
-  // TODO - Git repos don't have to end in .git. How do we want to handle this?
-  if (metadata.repository.endsWith('.git')) {
-    clonePluginFromGitRepo(M.config.server.plugins.plugins[i]);
+  // Handle Git repos
+  if (data.source.endsWith('.git')) {
+    clonePluginFromGitRepo(data);
   }
-  else if (metadata.repository.endsWith('.zip')) {
-    // TODO
-  }
-  else if (metadata.repository.endsWith('.tar.gz')) {
-    // TODO
-  }
-  else if (metadata.repository.endsWith('.gz')) {
-    // TODO
-  }
-  // TODO - Add support for .zip, .tar.gz, and .gz
-  // TODO - Should check that the path is a valid local path
-  else if (metadata.repository.startsWith('/') || metadata.repository.startsWith('.')) {
-    cmd = [
-      `cp -r ${metadata.repository} plugins/${metadata.name}`
-    ].join(' ');
+  // Handle local plugins
+  else if (data.source.startsWith('/') || data.source.startsWith('.')) {
+    copyPluginFromLocalDir(data);
   }
   else {
-    // TODO - handle unknown case
+    M.log.warn('Plugin type unknown');
   }
-
-
 }
 
 // Load plugin routes
@@ -169,13 +171,12 @@ files.forEach((f) => {
   const namespace = f.toLowerCase();
   M.log.info(`Loading plugin '${namespace}' ...`);
 
-  // TODO - Windows support
+  // Install the dependencies
   const commands = [
     `cd ${pluginPath}`,
-    'yarn install --modules-folder ../../node_modules',
-    'echo $?'
+    `yarn install --modules-folder ${path.join('..', '..', 'node_modules')}`,
+    `echo ${(process.platform === 'win32') ? '%errorlevel%' : '$?'}`
   ];
-
   const stdout = execSync(commands.join('; '));
   M.log.verbose(stdout.toString());
 
