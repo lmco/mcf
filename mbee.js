@@ -20,8 +20,6 @@
 
 // Node.js Built-in Modules
 const fs = require('fs');
-const http = require('http');
-const https = require('https');
 const path = require('path');
 const parseJSON = require(`${__dirname}/app/lib/parseJSON`);
 
@@ -85,7 +83,7 @@ M.require = m => {
 module.exports = M;
 
 // If dependecies have been installed, initialize the MBEE helper object
-if (fs.existsSync(`${__dirname}/node_modules`)) {
+if (fs.existsSync(`${__dirname}/node_modules`) && fs.existsSync(`${__dirname}/public`)) {
   initialize();
 }
 
@@ -93,6 +91,7 @@ const build = require(`${__dirname}/scripts/build`);
 const clean = require(`${__dirname}/scripts/clean`);
 const docker = require(`${__dirname}/scripts/docker`);
 const lint = require(`${__dirname}/scripts/linter`);
+const start = require(`${__dirname}/scripts/start`);
 const test = require(`${__dirname}/scripts/test`);
 
 // Call main
@@ -124,59 +123,6 @@ function main() {
   else {
     console.log('Unknown command.'); // eslint-disable-line no-console
   }
-}
-
-
-/**
- * Runs the MBEE server based on the configuration provided in the environment
- * config file.
- */
-
-function start(args) {
-  initialize();
-  M.log.debug(`${`+ mbee.js executed as ${process.argv.join(' ')} `
-                  + `with env=${M.env} and configuration: `}${JSON.stringify(M.config)}`);
-
-  M.lib.startup();                                 // Print startup banner
-
-  // Import the app, disable the global-import rule for this
-  const app = require(`${__dirname}/app/app.js`);   // eslint-disable-line global-require
-
-
-  /* eslint-disable no-var, vars-on-top, block-scoped-var */
-
-  // Create HTTP Server
-  if (M.config.server.http.enabled) {
-    var httpServer = http.createServer(app);
-  }
-
-  // Create HTTPS Server
-  if (M.config.server.https.enabled) {
-    const keyPath = path.join('certs', `${M.config.server.https.sslCertName}.key`);
-    const crtPath = path.join('certs', `${M.config.server.https.sslCertName}.crt`);
-    const privateKey = fs.readFileSync(path.join(__dirname, keyPath), 'utf8');
-    const certificate = fs.readFileSync(path.join(__dirname, crtPath), 'utf8');
-    const credentials = { key: privateKey, cert: certificate };
-    var httpsServer = https.createServer(credentials, app);
-  }
-
-  // Run HTTP Server
-  if (M.config.server.http.enabled) {
-    httpServer.listen(M.config.server.http.port, () => {
-      const port = M.config.server.http.port;
-      M.log.info(`MBEE server listening on port ${port}!`);
-    });
-  }
-
-  // Run HTTPS Server
-  if (M.config.server.https.enabled) {
-    httpsServer.listen(M.config.server.https.port, () => {
-      const port = M.config.server.https.port;
-      M.log.info(`MBEE server listening on port ${port}!`);
-    });
-  }
-
-  /* eslint-enable no-var, vars-on-top */
 }
 
 
