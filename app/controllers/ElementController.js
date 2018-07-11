@@ -55,10 +55,12 @@ class ElementController {
   static findElements(reqUser, organizationID, projectID, elemType = '') {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Ensure all incoming IDs are strings
-      try {
-        M.lib.errors.checkType([organizationID, projectID], 'string');
+      if (typeof organizationID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
       }
-      catch (error) { return reject(error); }
+      if (typeof projectID !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      }
 
       const orgID = M.lib.sani.sanitize(organizationID);
       const projID = M.lib.sani.sanitize(projectID);
@@ -298,39 +300,32 @@ class ElementController {
       // TODO: Clean up error check code.
 
       // Element ID
-      // if (!element.hasOwnProperty('id')) {
-      //   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (id).' })));
-      // }
-      // // Project
-      // if (element.hasOwnProperty('project')) {
-      //   // Project ID
-      //   if (!element.project.hasOwnProperty('id')) {
-      //     return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.id).' })));
-      //   }
-      //   // Porject Org
-      //   if (element.project.hasOwnProperty('org')) {
-      //     // Org ID
-      //     if (!element.project.org.hasOwnProperty('id')) {
-      //       return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org.id).' })));
-      //     }
-      //   }
-      //   else {
-      //     reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org).' })));
-      //   }
-      // }
-      // else {
-      //   reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj).' })));
-      // }
-      // // Element Type
-      // if (!element.hasOwnProperty('type')) {
-      //   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (type).' })));
-      // }
-
-      try {
-        M.lib.errors.checkExists(['id', 'project.id', 'project.org.id', 'type'], element);
+      if (!element.hasOwnProperty('id')) {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (id).' })));
       }
-      catch (error) {
-        return reject(error);
+      // Project
+      if (element.hasOwnProperty('project')) {
+        // Project ID
+        if (!element.project.hasOwnProperty('id')) {
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.id).' })));
+        }
+        // Project Org
+        if (element.project.hasOwnProperty('org')) {
+          // Org ID
+          if (!element.project.org.hasOwnProperty('id')) {
+            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org.id).' })));
+          }
+        }
+        else {
+          reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org).' })));
+        }
+      }
+      else {
+        reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj).' })));
+      }
+      // Element Type
+      if (!element.hasOwnProperty('type')) {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (type).' })));
       }
 
 
