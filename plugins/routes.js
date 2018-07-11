@@ -117,26 +117,21 @@ function extractGz(data) {
 }
 
 
-let cmd = []; // TODO - Reduce scope of this variable
-
 // Clone plugins
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
+  const data = M.config.server.plugins.plugins[i];
+
   // Handle Git repos
-  if (metadata.source.endsWith('.git')) {
-    clonePluginFromGitRepo(M.config.server.plugins.plugins[i]);
+  if (data.source.endsWith('.git')) {
+    clonePluginFromGitRepo(data);
   }
   // Handle local plugins
-  else if (metadata.source.startsWith('/') || metadata.source.startsWith('.')) {
-    copyPluginFromLocalDir(M.config.server.plugins.plugins[i]);
-    //cmd = [
-    //  `cp -r ${metadata.repository} plugins/${metadata.name}`
-    //]
+  else if (data.source.startsWith('/') || data.source.startsWith('.')) {
+    copyPluginFromLocalDir(data);
   }
   else {
-    // TODO - handle unknown case
+    M.log.warn('Plugin type unknown');
   }
-
-
 }
 
 // Load plugin routes
