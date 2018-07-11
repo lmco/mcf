@@ -106,10 +106,11 @@ if (fs.existsSync(`${__dirname}/node_modules`) && fs.existsSync(`${__dirname}/pu
   };
   module.exports = M;
 }
-else if (subcommand !== 'build') {
+else if (subcommand === 'start') {
+// eslint-disable-next-line no-console
   console.log('\nERROR: Please run the build script before attempting other commands\n\n'
     + '     node mbee build\n');
-  return;
+  process.exit(0);
 }
 
 const build = require(`${__dirname}/scripts/build`);
@@ -144,5 +145,4 @@ function main() {
   else {
     console.log('Unknown command.'); // eslint-disable-line no-console
   }
-
 }

@@ -58,7 +58,7 @@ class LDAPStrategy extends BaseStrategy {
       this.ldapConnect()
       .then(() => this.ldapSearch(username))
       .then((userFound) => this.ldapAuth(userFound, password))
-      .then((userAuth) => this.ldapSync(userAuth))
+      .then((userAuth) => LDAPStrategy.ldapSync(userAuth))
       .then((userSynced) => resolve(userSynced))
       .catch((handleBasicAuthErr) => reject(handleBasicAuthErr));
     });
@@ -143,7 +143,7 @@ class LDAPStrategy extends BaseStrategy {
   }
 
 
-  ldapSync(user) {
+  static ldapSync(user) {
     M.log.debug('Synchronizing LDAP user with local database.');
     return new Promise((resolve, reject) => {
       UserController.findUser(user[M.config.auth.ldap.username_attribute])
@@ -179,8 +179,8 @@ class LDAPStrategy extends BaseStrategy {
    * If an error is passed into the callback, authentication fails.
    * If the callback is called with no parameters, the user is authenticated.
    */
-  handleTokenAuth(req, res, _token) {
-    return new Promise((resolve, reject) => {
+  static handleTokenAuth(req, res, _token) {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Try to decrypt the token
       let token = null;
       try {
@@ -231,7 +231,7 @@ class LDAPStrategy extends BaseStrategy {
    * object to the newly created token.
    */
 
-  doLogin(req, res, next) {
+  static doLogin(req, res, next) {
     M.log.info(`${req.originalUrl} requested by ${req.user.username}`);
 
     // Convenient conversions from ms
