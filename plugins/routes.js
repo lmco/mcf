@@ -77,8 +77,26 @@ function copyPluginFromLocalDir(data) {
  * @param data
  */
 function extractZip(data) {
-  if (process.platform !== 'win32') {
 
+  clonePluginFromGitRepo(data);
+
+  if (process.platform !== 'win32') {
+    // Check if plugin already exists
+    try {
+      const lscmd = [`ls ${path.join(plugins, data.name)}`]
+      const lsstdout = execSync(lscmd);
+    }
+    catch (err) {
+      // Unzip the file
+      const cmd = [`unzip ${data.source} -d ${path.join(plugins, data.name)}`].join(' ');
+      const stdout = execSync(cmd);
+      M.log.verbose(stdout.toString());
+
+      // Delete the zip
+      const cmd2 = [`rm ${data.source}`].join(' ');
+      const stdout2 = execSync(cmd2);
+      M.log.verbose(stdout2.toString());
+    }
   }
 }
 
