@@ -327,7 +327,7 @@ class ElementController {
       if (!element.hasOwnProperty('type')) {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (type).' })));
       }
-      
+
       // Ensure all pieces of data are strings
       if (typeof element.id !== 'string') {
         return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element ID is not a string.' })));
