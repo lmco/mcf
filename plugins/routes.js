@@ -1,18 +1,18 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
+/******************************************************************************
+ * Classification: UNCLASSIFIED                                               *
+ *                                                                            *
+ * Copyright (C) 2018, Lockheed Martin Corporation                            *
+ *                                                                            *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
+ * It is not approved for public release or redistribution.                   *
+ *                                                                            *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
+ * control laws. Contact legal and export compliance prior to distribution.   *
+ ******************************************************************************/
 /*
- * plugin_routes.js
+ * @module plugin.routes
  *
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * This file defines the the plugin router.
  */
@@ -20,45 +20,138 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-
 const M = require(path.join(__dirname, '..', 'mbee.js'));
-
 const express = require('express');
 const pluginRouter = express.Router();
 
-let cmd = [];
+/**
+ * Clones the plugin from a Git repository and places in the appropriate
+ * location in the plugins directory.
+ * @param data
+ */
+function clonePluginFromGitRepo(data) {
+  // Remove plugin if it already exists in plugins directory
+  const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join('plugins', data.name)}`);
+  M.log.verbose(stdoutRmCmd.toString());
 
-// Clone plugins
-for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
-  const metadata = M.config.server.plugins.plugins[i];
-
-  // Remove the old directory if it exists
-  let stdout = execSync(`rm -rf plugins/${metadata.name}`);
-  M.log.verbose(stdout.toString());
-
-  // Clone the git repository
-  M.log.info(`Cloning plugin ${metadata.name} from ${metadata.repository} ...`);
-
-  execSync(`chmod 400 ${metadata.deployKey}`);
-
-  // Determine if plugin is local or from git
-  if (metadata.repository.substr(metadata.repository.length - 4) === '.git') {
-    cmd = [
-      `GIT_SSH_COMMAND="ssh -i ${metadata.deployKey} -oStrictHostKeyChecking=no"`,
-      `git clone ${metadata.repository} plugins/${metadata.name}`
-    ].join(' ');
+  // Set deploy key file permissions
+  if (data.hasOwnProperty('deployKey') && process.platform !== 'win32') {
+    execSync(`chmod 400 ${data.deployKey}`);
   }
-  else {
-    cmd = [
-      `cp -r ${metadata.repository} plugins/${metadata.name}`
-    ].join(' ');
-  }
+
+  // Create the git clone command
+  const cmd = [
+    `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no"`,
+    `git clone ${data.source} ${path.join('plugins', data.name)}`
+  ].join(' ');
+
   // Clone the repo
-  stdout = execSync(cmd);
-  M.log.verbose(stdout.toString());
+  M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
+  const stdout2 = execSync(cmd);
+  M.log.verbose(stdout2.toString());
   M.log.info('Clone complete.');
 }
 
+/**
+ * Gets the plugin from a URL and places it in a specified location in the
+ * plugins directory.
+ * @param data
+ */
+// function getPluginFromURL(data) {
+//  // TODO
+// }
+
+/**
+ * Copies the plugin from a local directory to the plugins directory.
+ * If the plugin location is already in the local directory, it should do
+ * nothing.
+ * @param data
+ */
+function copyPluginFromLocalDir(data) {
+  // Make sure source plugin is not in plugins directory
+  if (path.resolve(data.source).startsWith(path.resolve(__dirname))) {
+    return;
+  }
+
+  // Remove plugin if it already exists in plugins directory
+  const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join('plugins', data.name)}`);
+  M.log.verbose(stdoutRmCmd.toString());
+
+  // Generate the copy command
+  let cmd = (process.platform === 'win32') ? 'xcopy /E' : 'cp -r ';
+  cmd = `${cmd} ${data.source} ${path.join('plugins', data.name)}`;
+
+  // Execute the copy command
+  M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
+  const stdout = execSync(cmd);
+  M.log.verbose(stdout.toString());
+  M.log.info('Copy complete');
+}
+
+/**
+ * Extracts a zip file into the appropriate location in the plugins directory.
+ * @param data
+ */
+// function extractZip(data) {
+//
+//   getPluginFromURL(data);
+//
+//   if (process.platform !== 'win32') {
+//     // Check if plugin already exists
+//     try {
+//       const lscmd = [`ls ${path.join(plugins, data.name)}`]
+//       const lsstdout = execSync(lscmd);
+//     }
+//     catch (err) {
+//       // Unzip the file
+//       const cmd = [`unzip ${data.source} -d ${path.join(plugins, data.name)}`].join(' ');
+//       const stdout = execSync(cmd);
+//       M.log.verbose(stdout.toString());
+//
+//       // Delete the zip
+//       const cmd2 = [`rm ${data.source}`].join(' ');
+//       const stdout2 = execSync(cmd2);
+//       M.log.verbose(stdout2.toString());
+//     }
+//   }
+// }
+
+/**
+ * Extracts a tar.gz file into the appropriate location in the plugins
+ * directory.
+ * @param data
+ */
+// function extractTarGz(data) {
+//   // TODO
+// }
+
+/**
+ * Extracts a gzip file into the appropriate location in the plugins directory.
+ * @param data
+ */
+// function extractGz(data) {
+//   // TODO
+// }
+
+
+// Clone plugins
+for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
+  const data = M.config.server.plugins.plugins[i];
+
+  // Handle Git repos
+  if (data.source.endsWith('.git')) {
+    clonePluginFromGitRepo(data);
+  }
+  // Handle local plugins
+  else if (data.source.startsWith('/') || data.source.startsWith('.')) {
+    copyPluginFromLocalDir(data);
+  }
+  else {
+    M.log.warn('Plugin type unknown');
+  }
+}
 
 // Load plugin routes
 const files = fs.readdirSync(__dirname);
@@ -75,12 +168,12 @@ files.forEach((f) => {
   const namespace = f.toLowerCase();
   M.log.info(`Loading plugin '${namespace}' ...`);
 
+  // Install the dependencies
   const commands = [
     `cd ${pluginPath}`,
-    'yarn install --modules-folder ../../node_modules',
-    'echo $?'
+    `yarn install --modules-folder ${path.join('..', '..', 'node_modules')}`,
+    `echo ${(process.platform === 'win32') ? '%errorlevel%' : '$?'}`
   ];
-
   const stdout = execSync(commands.join('; '));
   M.log.verbose(stdout.toString());
 
