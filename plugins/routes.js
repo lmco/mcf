@@ -23,6 +23,7 @@ const { execSync } = require('child_process');
 const M = require(path.join(__dirname, '..', 'mbee.js'));
 const express = require('express');
 const pluginRouter = express.Router();
+const del = require('del');
 
 /**
  * Clones the plugin from a Git repository and places in the appropriate
@@ -85,17 +86,26 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   const metadata = M.config.server.plugins.plugins[i];
 
   // Remove the old directory if it exists
-  // TODO  - Remove shouldn't happen if plugin is local and is in ./plugins
-  // TODO - Windows support
-  let stdout = execSync(`rm -rf plugins/${metadata.name}`);
+  if (metadata.repository.startsWith('/') || metadata.repository.startsWith('.')){
+	// Do nothing  
+  }
+  // If not a windows system
+  else if(process.platform != "win32) {
+	  let stdout = execSync(`rm -rf plugins/${metadata.name}`);
+  }
+  else {
+	  let stdout = del.sync(`plugins/${metadata.name}`);
+  }
   M.log.verbose(stdout.toString());
-
+  
   // Clone the git repository
   // TODO - Move this
   M.log.info(`Cloning plugin ${metadata.name} from ${metadata.repository} ...`);
 
   // TODO - Check if deploykey given
-  execSync(`chmod 400 ${metadata.deployKey}`);
+  if (metadata.deployKey && process.platform != "win32) {
+	execSync(`chmod 400 ${metadata.deployKey}`);
+  }
 
   // Determine if plugin is local or from git
   // TODO - Git repos don't have to end in .git. How do we want to handle this?
@@ -146,12 +156,17 @@ files.forEach((f) => {
   const namespace = f.toLowerCase();
   M.log.info(`Loading plugin '${namespace}' ...`);
 
-  // TODO - Windows support
-  const commands = [
-    `cd ${pluginPath}`,
-    'yarn install --modules-folder ../../node_modules',
-    'echo $?'
-  ];
+  // If not a Windows system
+  if (process.platform != "win32){
+    const commands = [
+      `cd ${pluginPath}`,
+      'yarn install --modules-folder ../../node_modules',
+      'echo $?'
+    ];
+  }
+  else {
+	commands = `npm install ${pluginPath}`;
+  }
 
   const stdout = execSync(commands.join('; '));
   M.log.verbose(stdout.toString());
