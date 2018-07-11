@@ -10,12 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Lib Tests
+ * @module  Lib Error Tests
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- @description  This is currently a test of loading the Crypto Library and seeing if encrypt and
- decrypt are defined in the code.
+ @description  This file tests basic CustomError functionality.
  */
 
 const chai = require('chai');
@@ -34,6 +33,7 @@ describe(name, () => {
   it('should create an error with no status code', noStatusCode);
   it('should create a error with a 400 status code', status400);
   it('should log a critical error', critical);
+  it('should return the custom error json', toJSON);
 });
 
 
@@ -70,9 +70,20 @@ function status400(done) {
  */
 function critical(done) {
   const err = new errors.CustomError('I need some coffee.', 418, 'critical');
-  console.log(err);
   chai.expect(err.status).to.equal(418);
   chai.expect(err.message).to.equal('I\'m a teapot');
   chai.expect(err.description).to.equal('I need some coffee.');
+  done();
+}
+
+/**
+ * @description  Returns the error in JSON format
+ */
+function toJSON(done) {
+  const err = new errors.CustomError('Where did it go...', 404, 'error');
+  const json = err.toJSON();
+  chai.expect(json.status).to.equal(404);
+  chai.expect(json.message).to.equal('Not Found');
+  chai.expect(json.description).to.equal('Where did it go...');
   done();
 }

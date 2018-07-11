@@ -52,6 +52,6 @@ module.exports.checkExists = function(params, obj, parent = null) {
 
 module.exports.checkAdmin = function(user) {
   if (!user.admin) {
-    throw new errors.CustomError('User does not have permissions', 400);
+    throw new errors.CustomError('User does not have permissions', 401);
   }
 };
