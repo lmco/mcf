@@ -99,6 +99,7 @@ describe(name, function() {
 
   // runs after all the tests are done
   after(function(done) {
+    this.timeout(5000);
     // Delete the org
     OrgController.removeOrg(user, 'empire', { soft: false })
     .then((retOrg) => {

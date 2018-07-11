@@ -61,7 +61,7 @@
     "file": "logs/mbee.log",
     "error_file": "logs/mbee-error.log",
     "debug_file": "logs/mbee-debug.log",
-    "colorize": true
+    "colorize": false
   },
   "server": {
     "http": {
