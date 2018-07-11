@@ -49,7 +49,12 @@ function getPluginFromURL(data) {
  * @param data
  */
 function copyPluginFromLocalDir(data) {
-  // TODO
+  cmd = [
+    `cp -r ${data.source} plugins/${data.name}`
+  ].join(' ')
+
+  M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
+  M.log.verbose(stdout.toString());
 }
 
 /**
@@ -119,7 +124,7 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   else if (metadata.repository.startsWith('/') || metadata.repository.startsWith('.')) {
     cmd = [
       `cp -r ${metadata.repository} plugins/${metadata.name}`
-    ].join(' ');
+    ]
   }
   else {
     // TODO - handle unknown case
