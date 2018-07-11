@@ -33,6 +33,7 @@ COPY ./certs certs
 COPY ./config/production.json config/
 COPY ./config/*.json config/
 COPY ./plugins plugins
+COPY ./doc doc
 COPY ./public public
 COPY ./scripts scripts
 COPY ./package.json package.json
