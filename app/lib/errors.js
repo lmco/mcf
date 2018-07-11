@@ -14,54 +14,13 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  Defines the custom error format.
+ * @description  Defines the custom error class.
  */
 
 const M = require('../../mbee.js');
 const logger = M.load('lib/logger');
 
-module.exports.checkType = function(params, type) {
-  Object.keys(params).forEach((param) => {
-    if (typeof params[param] !== type) { // eslint-disable-line valid-typeof
-      throw new CustomError(`Value is not a [${type}].`, 400);
-    }
-  });
-};
-
-module.exports.checkExists = function(params, obj, parent = null) {
-  Object.keys(params).forEach((param) => {
-    if (!(params[param] in obj)) {
-      let parentString = parent;
-      if (parent === null) {
-        parentString = 'request';
-      }
-      if (params[param].includes('.')) {
-        const splitString = params[param].split('.', 1)[0];
-        const leftoverString = params[param].split(`${splitString}.`)[1];
-        if (!obj[splitString]) {
-          throw new CustomError(`There is no attribute [${params[param]}] in the ${parentString} body.`, 400);
-        }
-        this.checkExists([leftoverString], obj[splitString], splitString);
-      }
-      else {
-        throw new CustomError(`There is no attribute [${params[param]}] in the ${parentString} body.`, 400);
-      }
-    }
-  });
-};
-
-module.exports.checkAdmin = function(user) {
-  if (!user.admin) {
-    throw new Error(JSON.stringify({
-      status: 401,
-      message: 'Unauthorized',
-      description: 'User does not have permission.'
-    }));
-  }
-};
-
-
-global.CustomError = class CustomError extends Error {
+module.exports.CustomError = class CustomError extends Error {
 
   /**
    * @description  The CustomError constructor. It requires a description
@@ -123,35 +82,23 @@ global.CustomError = class CustomError extends Error {
    * @param  {String} level  The optional level parameter.
    */
   log(level = 'warn') {
-    switch (level) {
+    switch (level.toLowerCase()) {
       case 'warn':
-      case 'WARN':
-      case 'Warn':
         logger.warn(this.description);
         break;
       case 'error':
-      case 'ERROR':
-      case 'Error':
         logger.error(this.description);
         break;
       case 'critical':
-      case 'CRITICAL':
-      case 'Critical':
         logger.critical(this.description);
         break;
       case 'info':
-      case 'INFO':
-      case 'Info':
         logger.info(this.description);
         break;
       case 'debug':
-      case 'DEBUG':
-      case 'Debug':
         logger.debug(this.description);
         break;
       case 'verbose':
-      case 'VERBOSE':
-      case 'Verbose':
         logger.verbose(this.description);
         break;
       default:
@@ -162,7 +109,7 @@ global.CustomError = class CustomError extends Error {
   /**
    * @description  Returns a JSON Object containing the custom error fields.
    */
-  body() {
+  toJSON() {
     return {
       status: this.status,
       message: this.message,

@@ -22,6 +22,9 @@ const chai = require('chai');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
+const M = require('../../mbee.js');
+const errors = M.load('lib/errors');
+
 /*------------------------------------
  *       Main
  *------------------------------------
@@ -42,7 +45,7 @@ describe(name, () => {
  * @description  Creates an error with no status code
  */
 function noStatusCode(done) {
-  const err = new CustomError('Database save failed.');
+  const err = new errors.CustomError('Database save failed.');
   chai.expect(err.status).to.equal(500);
   chai.expect(err.message).to.equal('Internal Server Error');
   chai.expect(err.description).to.equal('Database save failed.');
@@ -54,7 +57,8 @@ function noStatusCode(done) {
  * @description  Creates an error with no 400 code
  */
 function status400(done) {
-  const err = new CustomError('Project id not provided.', 400);
+  const err = new errors.CustomError('Project id not provided.', 400);
+  err.log();
   chai.expect(err.status).to.equal(400);
   chai.expect(err.message).to.equal('Bad Request');
   chai.expect(err.description).to.equal('Project id not provided.');
@@ -65,7 +69,7 @@ function status400(done) {
  * @description  Logs a critical error
  */
 function critical(done) {
-  const err = new CustomError('I need some coffee.', 418, 'critical');
+  const err = new errors.CustomError('I need some coffee.', 418, 'critical');
   console.log(err);
   chai.expect(err.status).to.equal(418);
   chai.expect(err.message).to.equal('I\'m a teapot');
