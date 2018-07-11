@@ -23,7 +23,6 @@ const { execSync } = require('child_process');
 const M = require(path.join(__dirname, '..', 'mbee.js'));
 const express = require('express');
 const pluginRouter = express.Router();
-const del = require('del');
 
 /**
  * Clones the plugin from a Git repository and places in the appropriate
@@ -59,9 +58,9 @@ function clonePluginFromGitRepo(data) {
  * plugins directory.
  * @param data
  */
-function getPluginFromURL(data) {
- // TODO
-}
+// function getPluginFromURL(data) {
+//  // TODO
+// }
 
 /**
  * Copies the plugin from a local directory to the plugins directory.
@@ -86,7 +85,6 @@ function copyPluginFromLocalDir(data) {
 
   // Execute the copy command
   M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
-  console.log(cmd)
   const stdout = execSync(cmd);
   M.log.verbose(stdout.toString());
   M.log.info('Copy complete');
