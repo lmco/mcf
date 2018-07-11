@@ -42,7 +42,7 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
     return new Promise(function(resolve) {
-      User.findOne({ username: 'mbee' }, function(errUser, user) {
+      User.findOne({ username: M.config.test.username }, function(errUser, user) {
         // Check if error occured
         if (errUser) {
           M.log.error(errUser);
@@ -95,7 +95,7 @@ describe(name, function() {
  * Creates a user using the User model.
  */
 function createProject(done) {
-  User.findOne({ username: 'mbee' }, function(errUser, user) {
+  User.findOne({ username: M.config.test.username }, function(errUser, user) {
     // Check if error occured
     if (errUser) {
       M.log.error(errUser);

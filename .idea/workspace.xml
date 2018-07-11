@@ -2,7 +2,24 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d3d8988-8621-4ae4-93ea-c2d0ab6cc6ab" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/mbee.js" beforeDir="false" afterPath="$PROJECT_DIR$/mbee.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/60_api_tests/601_UserTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api_routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/api_routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/APIController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/APIController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/UserController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/UserController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/config/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/production.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/production.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/stage.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/stage.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/test.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/test.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plugins/routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/30_ut_models/301_UserTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/30_ut_models/301_UserTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/30_ut_models/303_ProjectTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/30_ut_models/303_ProjectTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/40_ut_controllers/401_UserTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/40_ut_controllers/401_UserTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/40_ut_controllers/402_OrganizationTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/40_ut_controllers/402_OrganizationTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/40_ut_controllers/403_ProjectTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/40_ut_controllers/403_ProjectTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/60_api_tests/601-UserTests.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/60_api_tests/602-OrganizationTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/60_api_tests/602_OrganizationTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/60_api_tests/603-ProjectTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/60_api_tests/603_ProjectTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/60_api_tests/604-ElementTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/60_api_tests/604-ElementTests.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -19,11 +36,32 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="mbee.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="mbee.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mbee.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="586">
-              <caret line="124" column="1" selection-start-line="124" selection-start-column="1" selection-end-line="124" selection-end-column="1" />
+            <state relative-caret-position="796">
+              <caret line="134" column="27" selection-start-line="134" selection-start-column="27" selection-end-line="134" selection-end-column="27" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="301_UserTests.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/test/30_ut_models/301_UserTests.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="604">
+              <caret line="190" column="40" lean-forward="true" selection-start-line="190" selection-start-column="40" selection-end-line="190" selection-end-column="62" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dev.json" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/config/dev.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1136">
+              <caret line="83" column="18" selection-start-line="83" selection-start-column="7" selection-end-line="83" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -87,6 +125,7 @@
         <option value="$PROJECT_DIR$/scripts/build.js" />
         <option value="$PROJECT_DIR$/scripts/start.js" />
         <option value="$PROJECT_DIR$/mbee.js" />
+        <option value="$PROJECT_DIR$/test/30_ut_models/301_UserTests.js" />
       </list>
     </option>
   </component>
@@ -144,7 +183,18 @@
             <path>
               <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
               <item name="mbee" type="462c0819:PsiDirectoryNode" />
-              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+              <item name="config" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mbee" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mbee" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="30_ut_models" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -215,7 +265,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34416000" />
+    <option name="totallyTimeSpent" value="34687000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -277,13 +327,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/lib/parseJSON.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="22" selection-start-line="22" selection-end-line="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/controllers/ElementController.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="389">
@@ -557,13 +600,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/dev.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="673">
-          <caret line="83" column="18" selection-start-line="83" selection-start-column="7" selection-end-line="83" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/docker.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-286">
@@ -606,8 +642,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/mbee.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="586">
-          <caret line="124" column="1" selection-start-line="124" selection-start-column="1" selection-end-line="124" selection-end-column="1" />
+        <state relative-caret-position="796">
+          <caret line="134" column="27" selection-start-line="134" selection-start-column="27" selection-end-line="134" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/dev.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1136">
+          <caret line="83" column="18" selection-start-line="83" selection-start-column="7" selection-end-line="83" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/30_ut_models/301_UserTests.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="604">
+          <caret line="190" column="40" lean-forward="true" selection-start-line="190" selection-start-column="40" selection-end-line="190" selection-end-column="62" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

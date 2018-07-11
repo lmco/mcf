@@ -986,8 +986,35 @@ class APIController {
   /****************************************************************************
    * User API Endpoints
    ****************************************************************************/
+
+
   /**
-   * GET /api/user/:username
+   * GET /api/users
+   *
+   * @description Gets and returns all users.
+   */
+  static getUsers(req, res) { // eslint-disable-line consistent-return
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+    UserController.findUsers()
+    .then((users) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(users));
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * GET /api/users/:username
    *
    * @description Gets and returns the user.
    */
@@ -1003,6 +1030,98 @@ class APIController {
     .then((user) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * POST /api/users/:username
+   *
+   * @description Creates a new user.
+   */
+  static postUser(req, res) { // eslint-disable-line consistent-return
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    if (!req.body.hasOwnProperty('username')) {
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Username not found in request body.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    }
+
+    if (req.body.username !== req.params.username) {
+      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Username in body does not match username in params.' }));
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    }
+
+    UserController.createUser(req.user, req.body)
+    .then((user) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * PUT /api/users/:username
+   *
+   * @description Updates a user.
+   */
+  static putUser(req, res) { // eslint-disable-line consistent-return
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    UserController.updateUser(req.user, req.params.username, req.body)
+    .then((user) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      M.log.error(err.description);
+      return res.status(err.status).send(err);
+    });
+  }
+
+  /**
+   * DELERE /api/users/:username
+   *
+   * @description Deletes a user.
+   */
+  static deleteUser(req, res) { // eslint-disable-line consistent-return
+    // If for some reason we don't have a user, fail.
+    if (!req.user) {
+      M.log.critical('Request does not have a user');
+      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
+      const err = JSON.parse(error.message);
+      return res.status(err.status).send(err);
+    }
+
+    UserController.removeUser(req.user, req.params.username)
+    .then((user) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(user));
     })
     .catch((error) => {
       const err = JSON.parse(error.message);
