@@ -87,14 +87,6 @@ M.path = {
 // is re-exported after the modules loading is complete (see below)
 module.exports = M;
 
-const build = require(`${__dirname}/scripts/build`);
-const clean = require(`${__dirname}/scripts/clean`);
-const docker = require(`${__dirname}/scripts/docker`);
-const lint = require(`${__dirname}/scripts/linter`);
-const start = require(`${__dirname}/scripts/start`);
-const test = require(`${__dirname}/scripts/test`);
-
-
 const subcommand = process.argv.slice(2, 3)[0];
 const opts = process.argv.slice(3);
 
@@ -119,6 +111,13 @@ else if (subcommand !== 'build') {
     + '     node mbee build\n');
   return;
 }
+
+const build = require(`${__dirname}/scripts/build`);
+const clean = require(`${__dirname}/scripts/clean`);
+const docker = require(`${__dirname}/scripts/docker`);
+const lint = require(`${__dirname}/scripts/linter`);
+const start = require(`${__dirname}/scripts/start`);
+const test = require(`${__dirname}/scripts/test`);
 
 // Call main
 if (module.parent == null) {
