@@ -30,7 +30,27 @@ const pluginRouter = express.Router();
  * @param data
  */
 function clonePluginFromGitRepo(data) {
-  // TODO
+  // Remove plugin if it already exists in plugins directory
+  const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(plugins, data.name)}`);
+  M.log.verbose(stdoutRmCmd.toString());
+
+  // Set deploy key file permissions
+  if (data.hasOwnProperty('deployKey') && process.platform !== 'win32') {
+    execSync(`chmod 400 ${data.deployKey}`);
+  }
+
+  // Create the git clone command
+  const cmd = [
+    `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no"`,
+    `git clone ${data.source} ${path.join(plugins, data.name)}`
+  ].join(' ');
+
+  // Clone the repo
+  M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
+  const stdout2 = execSync(cmd);
+  M.log.verbose(stdout2.toString());
+  M.log.info('Clone complete.');
 }
 
 /**
@@ -54,6 +74,7 @@ function copyPluginFromLocalDir(data) {
   ].join(' ')
 
   M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
+  const stdout2 = execSync(cmd);
   M.log.verbose(stdout.toString());
 }
 
@@ -89,26 +110,10 @@ let cmd = []; // TODO - Reduce scope of this variable
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   const metadata = M.config.server.plugins.plugins[i];
 
-  // Remove the old directory if it exists
-  // TODO  - Remove shouldn't happen if plugin is local and is in ./plugins
-  // TODO - Windows support
-  let stdout = execSync(`rm -rf plugins/${metadata.name}`);
-  M.log.verbose(stdout.toString());
-
-  // Clone the git repository
-  // TODO - Move this
-  M.log.info(`Cloning plugin ${metadata.name} from ${metadata.repository} ...`);
-
-  // TODO - Check if deploykey given
-  execSync(`chmod 400 ${metadata.deployKey}`);
-
   // Determine if plugin is local or from git
   // TODO - Git repos don't have to end in .git. How do we want to handle this?
   if (metadata.repository.endsWith('.git')) {
-    cmd = [
-      `GIT_SSH_COMMAND="ssh -i ${metadata.deployKey} -oStrictHostKeyChecking=no"`,
-      `git clone ${metadata.repository} plugins/${metadata.name}`
-    ].join(' ');
+    clonePluginFromGitRepo(M.config.server.plugins.plugins[i]);
   }
   else if (metadata.repository.endsWith('.zip')) {
     // TODO
@@ -130,10 +135,7 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
     // TODO - handle unknown case
   }
 
-  // Clone the repo
-  stdout = execSync(cmd);
-  M.log.verbose(stdout.toString());
-  M.log.info('Clone complete.');
+
 }
 
 // Load plugin routes
