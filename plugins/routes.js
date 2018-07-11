@@ -57,7 +57,9 @@ function copyPluginFromLocalDir(data) {
  * @param data
  */
 function extractZip(data) {
-  // TODO
+  if (process.platform !== 'win32') {
+
+  }
 }
 
 /**
