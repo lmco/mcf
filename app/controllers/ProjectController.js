@@ -242,33 +242,28 @@ class ProjectController {
   static createProject(reqUser, project) {
     return new Promise((resolve, reject) => {
       // Error check - id, name, and org.id are in project variable.
-      // if (!project.hasOwnProperty('id')) {
-      //   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (id).' })));
-      // }
-      // if (!project.hasOwnProperty('name')) {
-      //   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (name).' })));
-      // }
-      // if (!project.hasOwnProperty('org')) {
-      //   if (!project.org.hasOwnProperty('id')) {
-      //     return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (org.id).' })));
-      //   }
-      // }
-      //
-      // // Error check - Verify id, name, and org.id are of type string for sanitization.
-      // if (typeof project.id !== 'string') {
-      //   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
-      // }
-      // if (typeof project.name !== 'string') {
-      //   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name is not a string.' })));
-      // }
-      // if (typeof project.org.id !== 'string') {
-      //   return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
-      // }
-      try {
-        M.lib.errors.checkExists(['id', 'name', 'org.id'], project);
-        M.lib.errors.checkType([project.id, project.name, project.org.id], 'string');
+      if (!project.hasOwnProperty('id')) {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (id).' })));
       }
-      catch (error) { return reject(error); }
+      if (!project.hasOwnProperty('name')) {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (name).' })));
+      }
+      if (!project.hasOwnProperty('org')) {
+        if (!project.org.hasOwnProperty('id')) {
+          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (org.id).' })));
+        }
+      }
+
+      // Error check - Verify id, name, and org.id are of type string for sanitization.
+      if (typeof project.id !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      }
+      if (typeof project.name !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name is not a string.' })));
+      }
+      if (typeof project.org.id !== 'string') {
+        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      }
 
       // Sanitize project properties
       const projID = M.lib.sani.html(project.id);
