@@ -33,7 +33,7 @@ const del = require('del');
 function clonePluginFromGitRepo(data) {
   // Remove plugin if it already exists in plugins directory
   const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
-  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(plugins, data.name)}`);
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join('plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
   // Set deploy key file permissions
@@ -44,7 +44,7 @@ function clonePluginFromGitRepo(data) {
   // Create the git clone command
   const cmd = [
     `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no"`,
-    `git clone ${data.source} ${path.join(plugins, data.name)}`
+    `git clone ${data.source} ${path.join('plugins', data.name)}`
   ].join(' ');
 
   // Clone the repo
@@ -71,26 +71,24 @@ function getPluginFromURL(data) {
  */
 function copyPluginFromLocalDir(data) {
   // Make sure source plugin is not in plugins directory
-  if (!data.source.startsWith("plugins")){
-    let cmd = [];
-    // Windows command
-    if (process.platform === 'win32'){
-      cmd = [
-        `xcopy ${data.source} plugins/${data.name} /E`
-      ]
-    }
-    // Bash command
-    else {
-      cmd = [
-        `cp -r ${data.source} plugins/${data.name}`
-      ]
-    }
-    // Execute
-    M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
-    const stdout2 = execSync(cmd);
-    M.log.verbose(stdout.toString());
-    M.log.info('Copy complete')
+  if (path.resolve(data.source).startsWith(path.resolve(__dirname))) {
+    return;
   }
+
+  // Remove plugin if it already exists in plugins directory
+  const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join('plugins', data.name)}`);
+  M.log.verbose(stdoutRmCmd.toString());
+
+  // Generate the copy command
+  let cmd = (process.platform === 'win32') ? 'xcopy /E' : 'cp -r ';
+  cmd = `${cmd} ${data.source} ${path.join('plugins', data.name)}`;
+
+  // Execute the copy command
+  M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
+  const stdout = execSync(cmd);
+  M.log.verbose(stdout.toString());
+  M.log.info('Copy complete');
 }
 
 /**
@@ -123,32 +121,16 @@ let cmd = []; // TODO - Reduce scope of this variable
 
 // Clone plugins
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
-  const metadata = M.config.server.plugins.plugins[i];
-
-  // Clone the git repository
-  // TODO - Move this
-  M.log.info(`Cloning plugin ${metadata.name} from ${metadata.repository} ...`);
-
-  // Determine if plugin is local or from git
-  // TODO - Git repos don't have to end in .git. How do we want to handle this?
-  if (metadata.repository.endsWith('.git')) {
+  // Handle Git repos
+  if (metadata.source.endsWith('.git')) {
     clonePluginFromGitRepo(M.config.server.plugins.plugins[i]);
   }
-  else if (metadata.repository.endsWith('.zip')) {
-    // TODO
-  }
-  else if (metadata.repository.endsWith('.tar.gz')) {
-    // TODO
-  }
-  else if (metadata.repository.endsWith('.gz')) {
-    // TODO
-  }
-  // TODO - Add support for .zip, .tar.gz, and .gz
-  // TODO - Should check that the path is a valid local path
-  else if (metadata.repository.startsWith('/') || metadata.repository.startsWith('.')) {
-    cmd = [
-      `cp -r ${metadata.repository} plugins/${metadata.name}`
-    ]
+  // Handle local plugins
+  else if (metadata.source.startsWith('/') || metadata.source.startsWith('.')) {
+    copyPluginFromLocalDir(M.config.server.plugins.plugins[i]);
+    //cmd = [
+    //  `cp -r ${metadata.repository} plugins/${metadata.name}`
+    //]
   }
   else {
     // TODO - handle unknown case
