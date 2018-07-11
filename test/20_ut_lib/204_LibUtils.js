@@ -146,7 +146,7 @@ function multipleExist(done) {
  * @description  Check that a user is an admin and succeed.
  */
 function userIsAdmin(done) {
-  const user = {name: 'Darth Vader', admin: true};
+  const user = { name: 'Darth Vader', admin: true };
   try {
     utils.checkAdmin(user);
     done();
@@ -161,7 +161,7 @@ function userIsAdmin(done) {
  * @description  Check that a user is an admin and fail.
  */
 function userIsNotAdmin(done) {
-  const user = {name: 'Stormtrooper 123', admin: false};
+  const user = { name: 'Stormtrooper 123', admin: false };
   try {
     utils.checkAdmin(user);
     chai.expect(true).to.equal(false);

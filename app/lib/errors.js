@@ -123,4 +123,5 @@ module.exports.CustomError = class CustomError extends Error {
   inspect() {
     return `${this.status} ERROR: ${this.description}`;
   }
+
 };

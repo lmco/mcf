@@ -260,7 +260,6 @@ function findElements(done) {
     done();
   })
   .catch((error) => {
-    console.log(error);
     const err = JSON.parse(error.message);
     chai.expect(err.description).to.equal(null);
     done();
