@@ -23,6 +23,7 @@ const { execSync } = require('child_process');
 const M = require(path.join(__dirname, '..', 'mbee.js'));
 const express = require('express');
 const pluginRouter = express.Router();
+const del = require('del');
 
 /**
  * Clones the plugin from a Git repository and places in the appropriate
@@ -69,13 +70,27 @@ function getPluginFromURL(data) {
  * @param data
  */
 function copyPluginFromLocalDir(data) {
-  cmd = [
-    `cp -r ${data.source} plugins/${data.name}`
-  ].join(' ')
-
-  M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
-  const stdout2 = execSync(cmd);
-  M.log.verbose(stdout.toString());
+  // Make sure source plugin is not in plugins directory
+  if (!data.source.startsWith("plugins")){
+    let cmd = [];
+    // Windows command
+    if (process.platform === 'win32'){
+      cmd = [
+        `xcopy ${data.source} plugins/${data.name} /E`
+      ]
+    }
+    // Bash command
+    else {
+      cmd = [
+        `cp -r ${data.source} plugins/${data.name}`
+      ]
+    }
+    // Execute
+    M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
+    const stdout2 = execSync(cmd);
+    M.log.verbose(stdout.toString());
+    M.log.info('Copy complete')
+  }
 }
 
 /**
@@ -109,6 +124,10 @@ let cmd = []; // TODO - Reduce scope of this variable
 // Clone plugins
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   const metadata = M.config.server.plugins.plugins[i];
+  
+  // Clone the git repository
+  // TODO - Move this
+  M.log.info(`Cloning plugin ${metadata.name} from ${metadata.repository} ...`);
 
   // Determine if plugin is local or from git
   // TODO - Git repos don't have to end in .git. How do we want to handle this?
@@ -153,12 +172,17 @@ files.forEach((f) => {
   const namespace = f.toLowerCase();
   M.log.info(`Loading plugin '${namespace}' ...`);
 
-  // TODO - Windows support
-  const commands = [
-    `cd ${pluginPath}`,
-    'yarn install --modules-folder ../../node_modules',
-    'echo $?'
-  ];
+  // If not a Windows system
+  if (process.platform != "win32){
+    const commands = [
+      `cd ${pluginPath}`,
+      'yarn install --modules-folder ../../node_modules',
+      'echo $?'
+    ];
+  }
+  else {
+	commands = `npm install ${pluginPath}`;
+  }
 
   const stdout = execSync(commands.join('; '));
   M.log.verbose(stdout.toString());
