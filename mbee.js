@@ -192,6 +192,7 @@ function initialize(args) {
     errors: M.load('lib/errors'),
     sani: M.load('lib/sanitization'),
     startup: M.load('lib/startup'),
+    utils: M.load('lib/utils'),
     validators: M.load('lib/validators')
   };
   // Re-export mbee after initialization
