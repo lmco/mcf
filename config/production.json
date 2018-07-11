@@ -61,7 +61,7 @@
     "file": "logs/mbee.log",
     "error_file": "logs/mbee-error.log",
     "debug_file": "logs/mbee-debug.log",
-    "colorize": true
+    "colorize": false
   },
   "server": {
     "http": {
@@ -83,7 +83,7 @@
       "enabled": true,
       "plugins": [{
         "name": "developers",
-        "repository": "git@gitlab.lmms.lmco.com:mbee/mbee-integrations/plugin-developers.git",
+        "source": "git@gitlab.lmms.lmco.com:mbee/mbee-integrations/plugin-developers.git",
         "deployKey": "./certs/gitlab-plugins-developers.key"
       }]
     },

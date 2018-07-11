@@ -188,9 +188,9 @@ function loginLDAPUser(done) {
   const p = M.config.test.password;
   AuthController.handleBasicAuth(null, null, u, p, (err, user) => {
     chai.expect(err).to.equal(null);
-    chai.expect(user.username).to.equal('mbee');
+    chai.expect(user.username).to.equal(M.config.test.username);
 
-    User.findOneAndUpdate({ username: 'mbee' }, { admin: true }, (updateErr, userUpdate) => {
+    User.findOneAndUpdate({ username: u }, { admin: true }, (updateErr, userUpdate) => {
       chai.expect(updateErr).to.equal(null);
     });
     done();

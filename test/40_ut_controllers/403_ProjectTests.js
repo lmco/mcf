@@ -27,17 +27,15 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.load('controllers/ProjectController');
 const UserController = M.load('controllers/UserController');
 const OrgController = M.load('controllers/OrganizationController');
+const ElemController = M.load('controllers/ElementController');
+const Element = M.load('models/Element');
 
 let nonAuser = null;
 let allSeeingUser = null;
 let org = null;
+let project = null;
 
 /**
- * Other tests to test:
- *  -long names for name
- *  -string for id
- *  -string for name
- *  -string for org
  *  -Set permissions for a user
  *  -other tests
  */
@@ -94,17 +92,20 @@ describe(name, () => {
           done();
         })
         .catch((firsterr) => {
-          chai.expect(firsterr).to.equal(null);
+          const err1 = JSON.parse(firsterr.message);
+          chai.expect(err1.description).to.equal(null);
           done();
         });
       })
       .catch(function(error) {
-        chai.expect(error).to.equal(null);
+        const err2 = JSON.parse(error.message);
+        chai.expect(err2.description).to.equal(null);
         done();
       });
     })
     .catch(function(lasterr) {
-      chai.expect(lasterr).to.equal(null);
+      const json = JSON.parse(lasterr.message);
+      chai.expect(json.description).to.equal(null);
       done();
     });
   });
@@ -123,19 +124,22 @@ describe(name, () => {
         done();
       })
       .catch(function(err1) {
-        chai.expect(err1).to.equal(null);
+        const error1 = JSON.parse(err1.message);
+        chai.expect(error1.description).to.equal(null);
         mongoose.connection.close();
         done();
       });
     })
     .catch(function(err2) {
-      chai.expect(err2).to.equal(null);
+      const error2 = JSON.parse(err2.message);
+      chai.expect(error2.description).to.equal(null);
       mongoose.connection.close();
       done();
     });
   });
 
   it('should create a new project', createProject).timeout(2500);
+  it('should create elements for the project', createElements).timeout(2500);
   it('should throw an error saying the field cannot be updated', updateFieldError).timeout(2500);
   it('should throw an error saying the field is not of type string', updateTypeError).timeout(2500);
   it('should update a project', updateProject).timeout(2500);
@@ -153,14 +157,15 @@ describe(name, () => {
   it('should find a project', findProj).timeout(2500);
   it('should not find a project', noProj).timeout(2500);
   it('should update the original project', updateProj).timeout(2500);
+  it('should reject update to the id name', updateID).timeout(2500);
   it('should reject non-A user from finding a project', nonAUser).timeout(2500);
   it('should reject updating due to non-A user', updateNonA).timeout(2500);
   it('should find the permissions on the project', findPerm).timeout(2500);
-  // it('should set the permissions on the project', setPerm).timeout(2500);
+  it('should set the permissions on the project', setPerm).timeout(5000);
   it('should soft-delete a project', softDeleteProject).timeout(2500);
-  it('should delete a project', deleteProject).timeout(2500);
-  it('should delete second project', deleteProject02).timeout(2500);
-  it('should delete projects that were created with long names', deleteOthers).timeout(2500);
+  it('should delete a project', deleteProject).timeout(5000);
+  it('should delete second project', deleteProject02).timeout(5000);
+  it('should delete projects that were created with long names', deleteOthers).timeout(5000);
 });
 
 
@@ -192,10 +197,55 @@ function createProject(done) {
   });
 }
 
+/**
+ * Creates elements for the main project
+ */
+function createElements(done) {
+  const elem0 = {
+    id: '0000',
+    name: 'Trigger',
+    project: {
+      id: 'prtlgn',
+      org: {
+        id: 'council'
+      }
+    },
+    type: 'Element'
+  };
+  ElemController.createElement(allSeeingUser, elem0)
+  .then((element) => {
+    const elem1 = {
+      id: '0001',
+      name: 'Handle',
+      project: {
+        id: 'prtlgn',
+        org: {
+          id: 'council'
+        }
+      },
+      type: 'Element'
+    };
+    ElemController.createElement(allSeeingUser, elem1)
+    .then((element2) => {
+      done();
+    })
+    .catch((error) => {
+      const err = JSON.parse(error.message);
+      chai.expect(err.description).to.equal(null);
+      done();
+    });
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+    done();
+  });
+}
+
 function updateFieldError(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'shouldNotChange' })
-  .then((project) => {
-    chai.expect(typeof project).to.equal('undefined');
+  .then((proj) => {
+    chai.expect(typeof proj).to.equal('undefined');
     done();
   })
   .catch((error) => {
@@ -207,8 +257,8 @@ function updateFieldError(done) {
 
 function updateTypeError(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { name: [] })
-  .then((project) => {
-    chai.expect(typeof project).to.equal('undefined');
+  .then((proj) => {
+    chai.expect(typeof proj).to.equal('undefined');
     done();
   })
   .catch((error) => {
@@ -220,8 +270,8 @@ function updateTypeError(done) {
 
 function updateProject(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'prtlgn', name: 'portal gun changed' })
-  .then((project) => {
-    chai.expect(project.name).to.equal('portal gun changed');
+  .then((proj) => {
+    chai.expect(proj.name).to.equal('portal gun changed');
     done();
   })
   .catch((error) => {
@@ -266,12 +316,14 @@ function createProject02(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then((proj) => {
+    project = proj;
     chai.expect(proj.id).to.equal('dimc137rick');
     chai.expect(proj.name).to.equal('Mad Scientist');
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    const json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -318,7 +370,8 @@ function createLongName(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    const json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -342,7 +395,8 @@ function createLongName02(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    const json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -503,7 +557,8 @@ function findProj(done) {
     done();
   })
   .catch(function(err) {
-    chai.expect(err).to.equal(null);
+    const json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -566,7 +621,31 @@ function updateProj(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err).to.equal(null);
+    const json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests for updating the projects id name.
+ * This should get denied.
+ */
+
+function updateID(done) {
+  const orgId = 'council';
+  const projId = 'prtlgn';
+  const updateData = {
+    id: 'freezeray'
+  };
+  ProjController.updateProject(allSeeingUser, orgId, projId, updateData)
+  .then((proj) => {
+    chai.expect(proj.id).to.equal('freezeray');
+    done();
+  })
+  .catch((err) => {
+    const json = JSON.parse(err.message);
+    chai.expect(json.description).to.equal('Users cannot update [id] of Projects.');
     done();
   });
 }
@@ -607,29 +686,47 @@ function findPerm(done) {
     done();
   })
   .catch((err2) => {
-    chai.expect(err2.message).to.equal(null);
+    const json = JSON.parse(err2.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
 
-// /**
-//  * Tests setting permissions on the project.
-//  */
-// function setPerm(done) {
-//   permType = 'write';
-//   ProjController.setPermissions(allSeeingUser, org.id, 'dimc137rick', nonAuser, permType)
-//   .then((perm) => {
-//     chai.expect(perm.read).to.equal(true);
-//     chai.expect(perm.write).to.equal(true);
-//     chai.expect(perm.admin).to.equal(false);
-//     done();
-//   })
-//   .catch((err2) => {
-//     console.log(err2.message);
-//     chai.expect(err2.message).to.equal(null);
-//     done();
-//   });
-// }
+/**
+ * Tests setting permissions on the project where you need
+ * permission to acces the org so you need to set those
+ * permissions before setting the project permissions.
+ */
+function setPerm(done) {
+  OrgController.setPermissions(allSeeingUser, 'council', nonAuser, 'write')
+  .then(() => {
+    ProjController.setPermissions(allSeeingUser, 'council', project.id.toString(), nonAuser, 'write')
+    .then(() => {
+      ProjController.findProject(allSeeingUser, 'council', project.id.toString())
+      .then((retProj) => {
+        chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
+        chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
+        chai.expect(retProj.permissions.admin.length).to.equal(1);
+        done();
+      })
+      .catch((err) => {
+        const json = JSON.parse(err.message);
+        chai.expect(json.description).to.equal(null);
+        done();
+      });
+    })
+    .catch((err2) => {
+      const json2 = JSON.parse(err2.message);
+      chai.expect(json2.description).to.equal(null);
+      done();
+    });
+  })
+  .catch((error) => {
+    const json3 = JSON.parse(error.message);
+    chai.expect(json3.description).to.equal(null);
+    done();
+  });
+}
 
 /**
  * Tests soft-deleting a project
@@ -664,7 +761,13 @@ function deleteProject(done) {
     ProjController.findProject(allSeeingUser, org.id, 'prtlgn')
     .then((proj2) => {
       chai.expect(proj2).to.equal(null);
-      done();
+      // Check if elements still exist
+      Element.Element.find({ id: '0000' })
+      .populate()
+      .exec((findElementError, element) => {
+        chai.expect(element).to.equal(null);
+        done();
+      });
     })
     .catch((error) => {
       const err = JSON.parse(error.message);
@@ -672,8 +775,8 @@ function deleteProject(done) {
       done();
     });
   })
-  .catch((error2) => {
-    const err = JSON.parse(error2.message);
+  .catch((error3) => {
+    const err = JSON.parse(error3.message);
     chai.expect(err.description).to.equal(null);
     done();
   });
@@ -708,8 +811,8 @@ function deleteOthers(done) {
   ProjController.removeProject(allSeeingUser, org.id, 'vlongname', { soft: false })
   .then(() => {
     ProjController.findProject(allSeeingUser, org.id, 'vlongname')
-    .then((project) => {
-      chai.expect(project).to.equal(null);
+    .then((proj) => {
+      chai.expect(proj).to.equal(null);
       done();
     })
     .catch((error) => {

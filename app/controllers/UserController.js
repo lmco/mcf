@@ -38,8 +38,16 @@ const User = M.load('models/User');
 class UserController {
 
   /**
-   * @description  Gets a list of all users and returns their public data in
-   * JSON format.
+   * @description  This function finds all users.
+   *
+   * @example
+   * UserController.findUsers()
+   * .then(function(org) {
+   *   // do something with the found users
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
    */
   static findUsers() {
     return new Promise(((resolve, reject) => {
@@ -60,7 +68,19 @@ class UserController {
 
 
   /**
-   * Gets a user by username and returns the user's public JSON data.
+   * @description  This function takes a username and finds a user
+   *
+   * @example
+   * UserController.findUser('austin')
+   * .then(function(org) {
+   *   // do something with the user
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {String} searchedUsername  The username of the searched user.
    */
   static findUser(searchedUsername) {
     return new Promise(((resolve, reject) => {
@@ -74,6 +94,11 @@ class UserController {
           return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
         }
 
+        // Check if user exists
+        if (user === null) {
+          return reject(new Error(JSON.stringify({ status: 404, message: 'Not found', description: 'Cannot find user' })));
+        }
+
         // Otherwise return 200 and the user's public JSON
         return resolve(user);
       });
@@ -82,9 +107,21 @@ class UserController {
 
 
   /**
-   * Creates a user. Expects the user data to be in the request body.
-   * Note: for some of the controllers we must explicitly disable ESLint's
-   * consistent-return rule.
+   * @description  This function takes a user object and new user data
+   * and creates a new user.
+   *
+   * @example
+   * UserController.createUser({Josh}, {username: 'abieber', fname: 'Austin', lname: 'Bieber'})
+   * .then(function(org) {
+   *   // do something with the newly created user
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} requestingUser  The object containing the requesting user.
+   * @param  {Object} newUser  Object containing new user data.
    */
   static createUser(requestingUser, newUser) { // eslint-disable-line consistent-return
     return new Promise(((resolve, reject) => {
@@ -130,7 +167,22 @@ class UserController {
 
 
   /**
-   * Updates a user.
+   * @description  This function takes a user object, username and
+   * JSON data and updates a users.
+   *
+   * @example
+   * UserController.updateUser({Josh}, 'austin', {fname: 'Austin'})
+   * .then(function(org) {
+   *   // do something with the newly update user
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {User} requestingUser  The object containing the requesting user.
+   * @param  {String} usernameToUpdate  The username of the user to be updated.
+   * @param  {Object} newUserData  Object containing new user data.
    */
   static updateUser(requestingUser, usernameToUpdate, newUserData) {
     return new Promise(((resolve, reject) => {
@@ -169,9 +221,11 @@ class UserController {
         // Update user with properties found in newUserData
         const props = Object.keys(newUserData);
         for (let i = 0; i < props.length; i++) {
-          if (user.isUpdateAllowed(props[i])) {
-            user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
+          // Error check - make sure the properties exist and can be changed
+          if (!user.isUpdateAllowed(props[i])) {
+            return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'Update not allowed' })));
           }
+          user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
         }
 
         // Save the user
@@ -179,7 +233,7 @@ class UserController {
           if (saveErr) {
             return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
           }
-          return resolve(updatedUser.getPublicData());
+          return resolve(updatedUser);
         });
       });
     }));
@@ -199,8 +253,8 @@ class UserController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The username of the user to be deleted.
+   * @param  {User} requestingUser  The object containing the requesting user.
+   * @param  {String} usernameToDelete  The username of the user to be deleted.
    */
   static removeUser(requestingUser, usernameToDelete) {
     return new Promise(((resolve, reject) => {

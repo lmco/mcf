@@ -8,6 +8,7 @@
  *                                                                           *
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
+ * NOTE: Commented out test waiting for a bug to be fixed                    *
  *****************************************************************************/
 /**
  * @module  Organization Controller Tests
@@ -24,6 +25,7 @@ const mongoose = require('mongoose');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const ElemController = M.load('controllers/ElementController');
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
 const UserController = M.load('controllers/UserController');
@@ -70,21 +72,23 @@ describe(name, function() {
         done();
       })
       .catch(function(error) {
-        chai.expect(error).to.equal(null);
+        const json1 = JSON.parse(error.message);
+        chai.expect(json1.description).to.equal(null);
         done();
       });
     })
     .catch(function(lasterr) {
-      chai.expect(lasterr).to.equal(null);
+      const json2 = JSON.parse(lasterr.message);
+      chai.expect(json2.description).to.equal(null);
       done();
     });
   });
 
   // runs after all tests in this block
-  after((done) => {
+  after(function(done) {
     // Removing the organization created
     OrgController.removeOrg(user, 'council', { soft: false })
-    .then(() => {
+    .then(function() {
       // Removing the non admin user
       const userTwo = 'msmith';
       UserController.removeUser(user, userTwo)
@@ -94,13 +98,15 @@ describe(name, function() {
         done();
       })
       .catch(function(err1) {
-        chai.expect(err1).to.equal(null);
+        const jsErr = JSON.parse(err1.message);
+        chai.expect(jsErr.description).to.equal(null);
         mongoose.connection.close();
         done();
       });
     })
     .catch(function(err2) {
-      chai.expect(err2).to.equal(null);
+      const jsErr2 = JSON.parse(err2.message);
+      chai.expect(jsErr2.description).to.equal(null);
       mongoose.connection.close();
       done();
     });
@@ -111,16 +117,19 @@ describe(name, function() {
   it('should find an existing org', findExistingOrg).timeout(2500);
   it('should throw an error saying the field cannot be updated', updateOrgFieldErr).timeout(2500);
   it('should throw an error saying the name field is not a string', updateOrgTypeErr).timeout(2500);
+  it('should reject update from non admin user', nonAUpdate).timeout(2500);
   it('should update an orgs name', updateOrg).timeout(2500);
   it('should update an orgs name using model object', updateOrgObject).timeout(2500);
   it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
   it('should soft delete an existing org', softDeleteExistingOrg).timeout(2500);
   it('should delete an existing org', deleteExistingOrg).timeout(2500);
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg).timeout(5000);
-  it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(2500);
+  it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(5000);
   it('should add a user to an org', addUserRole).timeout(2500);
+  // it('should let the non-admin user write a project', projWritePerm).timeout(2500);
+  it('should reject user changing their permissions', rejectUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
-  // it('should get all members with permissions in an org', getMembers).timeout(2500);
+  it('should get all members with permissions in an org', getMembers).timeout(2500);
   it('should throw an error saying the user is not an admin', nonAdminChangeRole).timeout(2500);
   it('should remove a users role within an org', removeUserRole).timeout(2500);
   it('should throw an error saying the user is not in the org', getOldUserRoles).timeout(2500);
@@ -152,7 +161,8 @@ function addNewOrg(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error).to.equal(null);
+    const json = JSON.parse(error.message);
+    chai.expect(json.description).to.equal(null);
   });
 }
 
@@ -178,7 +188,8 @@ function addSecondOrg(done) {
     done();
   })
   .catch((firsterr) => {
-    chai.expect(firsterr).to.equal(null);
+    const json = JSON.parse(firsterr.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -193,7 +204,8 @@ function findExistingOrg(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error).to.equal(null);
+    const json = JSON.parse(error.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -227,6 +239,28 @@ function updateOrgTypeErr(done) {
 }
 
 /**
+ * Testing to see if the code will reject the update
+ * from a user that does not have admin rights.
+ * This test should throw an error.
+ */
+
+function nonAUpdate(done) {
+  OrgController.updateOrg(newUser, 'tv', { name: 'betterreject' })
+  .then(() => {
+    // should not come into then function
+    // fail test if does
+    chai.AssertionError(true === false);
+    done();
+  })
+  .catch(function(error) {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal('User does not have permissions.');
+    done();
+  });
+}
+
+
+/**
  * Tests updating an org
  */
 function updateOrg(done) {
@@ -236,8 +270,8 @@ function updateOrg(done) {
     done();
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    const json = JSON.parse(error.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -255,14 +289,14 @@ function updateOrgObject(done) {
       done();
     })
     .catch((orgUpdateErr) => {
-      const err = JSON.parse(orgUpdateErr.message);
-      chai.expect(err.description).to.equal(null);
+      const json1 = JSON.parse(orgUpdateErr.message);
+      chai.expect(json1.description).to.equal(null);
       done();
     });
   })
   .catch((orgFindErr) => {
-    const err = JSON.parse(orgFindErr.message);
-    chai.expect(err.description).to.equal(null);
+    const json = JSON.parse(orgFindErr.message);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -277,8 +311,8 @@ function findAllExistingOrgs(done) {
     done();
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    const json = JSON.parse(error);
+    chai.expect(json.description).to.equal(null);
     done();
   });
 }
@@ -288,7 +322,7 @@ function findAllExistingOrgs(done) {
  */
 function softDeleteExistingOrg(done) {
   OrgController.removeOrg(user, 'tv', { soft: true })
-  .then((retOrg) => {
+  .then(() => {
     OrgController.findOrg(user, 'tv')
     .then((orgTwo) => {
       chai.expect(orgTwo).to.equal(null);
@@ -335,46 +369,54 @@ function deleteExistingOrg(done) {
  * Tests that projects are soft deleted with orgs
  */
 function softDeleteProjectAndOrg(done) {
-  OrgController.createOrg(user, { id: 'tv', name: 'Intergalactic Cable' })
+  OrgController.createOrg(user, { id: 'tv', name: 'Intergalactic' })
   .then((retOrg) => {
     ProjController.createProject(user, { id: 'prtlgn', name: 'portal gun', org: { id: 'tv' } })
     .then((retProj) => {
-      OrgController.removeOrg(user, 'tv', { soft: true })
-      .then((retOrg2) => {
-        OrgController.findOrg(user, 'tv')
-        .then((retOrg3) => {
-          chai.expect(retOrg3).to.equal(null);
-          done();
+      ElemController.createElement(user, { id: '0000', project: { id: 'prtlgn', org: { id: 'tv' } }, type: 'Element' })
+      .then((retElem) => {
+        OrgController.removeOrg(user, 'tv', { soft: true })
+        .then((retOrg2) => {
+          OrgController.findOrg(user, 'tv')
+          .then((retOrg3) => {
+            chai.expect(retOrg3).to.equal(null);
+            done();
+          })
+          .catch((error) => {
+            const err = JSON.parse(error.message);
+            chai.expect(err.description).to.equal('Org not found.');
+          });
+          ProjController.findProject(user, 'tv', 'prtlgn')
+          .then((retProj2) => {
+            chai.expect(retProj2).to.equal(null);
+            done();
+          })
+          .catch((error) => {
+            const err = JSON.parse(error.message);
+            chai.expect(err.description).to.equal('Project not found.');
+            done();
+          });
         })
-        .catch((error) => {
-          const err = JSON.parse(error.message);
-          chai.expect(err.description).to.equal('Org not found.');
-        });
-        ProjController.findProject(user, 'tv', 'prtlgn')
-        .then((retProj2) => {
-          chai.expect(retProj2).to.equal(null);
-          done();
-        })
-        .catch((error) => {
-          const err = JSON.parse(error.message);
-          chai.expect(err.description).to.equal('Project not found.');
+        .catch((error2) => {
+          const err = JSON.parse(error2.message);
+          chai.expect(err.description).to.equal(null);
           done();
         });
       })
-      .catch((error2) => {
-        const err = JSON.parse(error2.message);
+      .catch((error3) => {
+        const err = JSON.parse(error3.message);
         chai.expect(err.description).to.equal(null);
         done();
       });
     })
-    .catch((error3) => {
-      const err = JSON.parse(error3.message);
+    .catch((error4) => {
+      const err = JSON.parse(error4.message);
       chai.expect(err.description).to.equal(null);
       done();
     });
   })
-  .catch((error4) => {
-    const err = JSON.parse(error4.message);
+  .catch((error5) => {
+    const err = JSON.parse(error5.message);
     chai.expect(err.description).to.equal(null);
     done();
   });
@@ -395,7 +437,7 @@ function hardDeleteProjectAndOrg(done) {
       const err = JSON.parse(error.message);
       chai.expect(err.description).to.equal('Org not found.');
     });
-    ProjController.findProject(user, 'tv', 'prtlgn')
+    ProjController.findProject(user, 'tv', 'prtlgn', true)
     .then((retProj2) => {
       chai.expect(retProj2).to.equal(null);
       done();
@@ -440,6 +482,52 @@ function addUserRole(done) {
   });
 }
 
+// /**
+//  * Test to see if the newUser can actually write to the
+//  * organization now that new permissions have been set.
+//  * This means they can create a project.
+//  * NOTE: Bug fix in JIRA, waiting for update.
+//  */
+
+// function projWritePerm(done) {
+//   const projData = {
+//     id: 'jerryboree',
+//     name: 'Jerry Smith',
+//     org: {
+//       id: 'council'
+//     }
+//   };
+//   ProjController.createProject(newUser, projData)
+//   .then((proj) => {
+//     chai.expect(proj.id).to.equal('jerryboree');
+//     chai.expect(proj.name).to.equal('Jerry Smith');
+//     done();
+//   })
+//   .catch((error) => {
+//     const err = JSON.parse(error.message);
+//     chai.expect(err.description).to.equal(null);
+//     done();
+//   });
+// }
+
+/**
+ * Test is to set the permissions of the owner
+ * of the org, which should get denied.
+ */
+
+function rejectUserRole(done) {
+  OrgController.setPermissions(user, 'tv', user, 'REMOVE_ALL')
+  .then(() => {
+    chai.AssertionError(true === false);
+    done();
+  })
+  .catch((error) => {
+    const json = JSON.parse(error.message);
+    chai.expect(json.description).to.equal('User cannot change their own permissions.');
+    done();
+  });
+}
+
 /**
  * Tests retrieving the roles a specific user has
  */
@@ -457,25 +545,26 @@ function getUserRoles(done) {
   });
 }
 
-// /**
-//  * Tests retrieving all members roles for a specified project
-//  */
-// function getMembers(done) {
-//   OrgController.findAllPermissions(user, org.id.toString())
-//   .then((members) => {
-//     chai.expect(members.msmith.read).to.equal(true);
-//     chai.expect(members.msmith.write).to.equal(true);
-//     chai.expect(members.msmith.admin).to.equal(false);
-//     chai.expect(members.rsanchez.read).to.equal(true);
-//     chai.expect(members.rsanchez.write).to.equal(true);
-//     chai.expect(members.rsanchez.admin).to.equal(true);
-//     done();
-//   })
-//   .catch((error) => {
-//     const err = JSON.parse(error.message);
-//     chai.expect(err.description).to.equal(null);
-//   });
-// }
+/**
+ * Tests retrieving all members roles for a specified project
+ */
+function getMembers(done) {
+  const mber = M.config.test.username;
+  OrgController.findAllPermissions(user, org.id.toString())
+  .then((members) => {
+    chai.expect(members.msmith.read).to.equal(true);
+    chai.expect(members.msmith.write).to.equal(true);
+    chai.expect(members.msmith.admin).to.equal(false);
+    chai.expect(members[mber].read).to.equal(true);
+    chai.expect(members[mber].write).to.equal(true);
+    chai.expect(members[mber].admin).to.equal(true);
+    done();
+  })
+  .catch((error) => {
+    const err = JSON.parse(error.message);
+    chai.expect(err.description).to.equal(null);
+  });
+}
 
 /**
  * Non-admin try to change a users role

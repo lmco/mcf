@@ -1005,6 +1005,89 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
 
 /**
  * @swagger
+ * /orgs/:orgid/projects/:projectid/elements:
+ *   get:
+ *     tags:
+ *       - elements
+ *     description: Gets a list of all elements the user has access to on a project.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose projects to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Success - The projects were successfully retrieved.
+ *                      A list of projects is returned as JSON.
+ *       400:
+ *         description: Bad Request - This implies that the request is invalid
+ *                      or malformed.
+ *       401:
+ *         description: Unauthorized - This implies that the user is not
+ *                      authorized to perform this function. Either
+ *                      authentication failed or the user does not have
+ *                      authorization to view this org.
+ *       404:
+ *         description: Not Found - This implies no elements were found on the project.
+ *
+ *       500:
+ *         description: Internal Server Error - Something went wrong on the
+ *                      server side. Details may exist in the application logs.
+ *   post:
+ *     tags:
+ *       - elements
+ *     description: Not implemented, reserved for future use.
+ *     responses:
+ *       501:
+ *         description: Not Implemented
+ *   put:
+ *     tags:
+ *       - elements
+ *     description: Not implemented, reserved for future use.
+ *     responses:
+ *       501:
+ *         description: Not Implemented
+ *   delete:
+ *     tags:
+ *       - elements
+ *     description: Not implemented, reserved for future use. If implemented,
+ *                  this would delete all elements in a project.
+ *     responses:
+ *       501:
+ *         description: Not Implemented
+ */
+api.route('/orgs/:orgid/projects/:projectid/elements')
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getElements
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.notImplemented
+);
+
+/**
+ * @swagger
  * /orgs/:orgid/projects/:projectid/elements/:elementid:
  *   get:
  *     tags:
@@ -1201,22 +1284,22 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
 .get(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.getElement
 )
 .post(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.postElement
 )
 .put(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.putElement
 )
 .delete(
   AuthController.authenticate.bind(AuthController),
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.deleteElement
 );
 
 
@@ -1268,7 +1351,11 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *         description: Not Implemented
  */
 api.route('/users')
-.get(APIController.notImplemented)
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getUsers
+)
 .post(APIController.notImplemented)
 .put(APIController.notImplemented)
 .delete(APIController.notImplemented);
@@ -1426,10 +1513,26 @@ api.route('/users')
  *                      server side. Details may exist in the application logs.
  */
 api.route('/users/:username')
-.get(APIController.notImplemented)
-.post(APIController.notImplemented)
-.put(APIController.notImplemented)
-.delete(APIController.notImplemented);
+.get(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.getUser
+)
+.post(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.postUser
+)
+.put(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.putUser
+)
+.delete(
+  AuthController.authenticate.bind(AuthController),
+  Middleware.logRoute,
+  APIController.deleteUser
+);
 
 /**
  * @swagger
