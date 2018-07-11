@@ -80,6 +80,8 @@ function extractZip(data) {
 
   clonePluginFromGitRepo(data);
 
+  getPluginFromURL(data);
+
   if (process.platform !== 'win32') {
     // Check if plugin already exists
     try {
