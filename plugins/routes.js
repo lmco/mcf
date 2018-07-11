@@ -104,7 +104,7 @@ let cmd = []; // TODO - Reduce scope of this variable
 // Clone plugins
 for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
   const metadata = M.config.server.plugins.plugins[i];
-  
+
   // Clone the git repository
   // TODO - Move this
   M.log.info(`Cloning plugin ${metadata.name} from ${metadata.repository} ...`);
@@ -152,18 +152,12 @@ files.forEach((f) => {
   const namespace = f.toLowerCase();
   M.log.info(`Loading plugin '${namespace}' ...`);
 
-  // If not a Windows system
-  if (process.platform != "win32){
-    const commands = [
-      `cd ${pluginPath}`,
-      'yarn install --modules-folder ../../node_modules',
-      'echo $?'
-    ];
-  }
-  else {
-	commands = `npm install ${pluginPath}`;
-  }
-
+  // Install the dependencies
+  const commands = [
+    `cd ${pluginPath}`,
+    `yarn install --modules-folder ${path.join('..', '..', 'node_modules')}`,
+    `echo ${(process.platform === 'win32') ? '%errorlevel%' : '$?'}`
+  ];
   const stdout = execSync(commands.join('; '));
   M.log.verbose(stdout.toString());
 
