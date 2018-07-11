@@ -86,6 +86,7 @@ function copyPluginFromLocalDir(data) {
 
   // Execute the copy command
   M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
+  console.log(cmd)
   const stdout = execSync(cmd);
   M.log.verbose(stdout.toString());
   M.log.info('Copy complete');
@@ -95,48 +96,46 @@ function copyPluginFromLocalDir(data) {
  * Extracts a zip file into the appropriate location in the plugins directory.
  * @param data
  */
-function extractZip(data) {
-
-  clonePluginFromGitRepo(data);
-
-  getPluginFromURL(data);
-
-  if (process.platform !== 'win32') {
-    // Check if plugin already exists
-    try {
-      const lscmd = [`ls ${path.join(plugins, data.name)}`]
-      const lsstdout = execSync(lscmd);
-    }
-    catch (err) {
-      // Unzip the file
-      const cmd = [`unzip ${data.source} -d ${path.join(plugins, data.name)}`].join(' ');
-      const stdout = execSync(cmd);
-      M.log.verbose(stdout.toString());
-
-      // Delete the zip
-      const cmd2 = [`rm ${data.source}`].join(' ');
-      const stdout2 = execSync(cmd2);
-      M.log.verbose(stdout2.toString());
-    }
-  }
-}
+// function extractZip(data) {
+//
+//   getPluginFromURL(data);
+//
+//   if (process.platform !== 'win32') {
+//     // Check if plugin already exists
+//     try {
+//       const lscmd = [`ls ${path.join(plugins, data.name)}`]
+//       const lsstdout = execSync(lscmd);
+//     }
+//     catch (err) {
+//       // Unzip the file
+//       const cmd = [`unzip ${data.source} -d ${path.join(plugins, data.name)}`].join(' ');
+//       const stdout = execSync(cmd);
+//       M.log.verbose(stdout.toString());
+//
+//       // Delete the zip
+//       const cmd2 = [`rm ${data.source}`].join(' ');
+//       const stdout2 = execSync(cmd2);
+//       M.log.verbose(stdout2.toString());
+//     }
+//   }
+// }
 
 /**
  * Extracts a tar.gz file into the appropriate location in the plugins
  * directory.
  * @param data
  */
-function extractTarGz(data) {
-  // TODO
-}
+// function extractTarGz(data) {
+//   // TODO
+// }
 
 /**
  * Extracts a gzip file into the appropriate location in the plugins directory.
  * @param data
  */
-function extractGz(data) {
-  // TODO
-}
+// function extractGz(data) {
+//   // TODO
+// }
 
 
 // Clone plugins
