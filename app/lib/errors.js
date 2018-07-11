@@ -63,17 +63,31 @@ module.exports.checkAdmin = function(user) {
 
 global.CustomError = class CustomError extends Error {
 
+  /**
+   * @description  The CustomError constructor. It requires a description
+   * and can optionally take a status and level. If not provided, the status
+   * defaults to 500 and the level to null.
+   *
+   * @param  {String} description  The custom error description.
+   * @param  {Number} status  The HTTP status code. Defaults to 500.
+   * @param  {String} level  The errors logger level. If provided,
+   *         will cause the logger to log automatically. Defaults to null.
+   */
   constructor(description, status = 500, level = null) {
     super();
     this.status = status;
     this.message = this.getMessage();
-    Error.captureStackTrace(this, CustomError);
     this.description = description;
+
+    // Logs the error if specified
     if (level) {
       this.log(level);
     }
   }
 
+  /**
+   * @description  Returns a HTTP message based on the status code.
+   */
   getMessage() {
     switch (this.status) {
       case 200:
@@ -103,18 +117,21 @@ global.CustomError = class CustomError extends Error {
     }
   }
 
+  /**
+   * @description  Logs the error based on the input level.
+   *
+   * @param  {String} level  The optional level parameter.
+   */
   log(level = 'warn') {
     switch (level) {
       case 'warn':
       case 'WARN':
       case 'Warn':
-      case 400:
         logger.warn(this.description);
         break;
       case 'error':
       case 'ERROR':
       case 'Error':
-      case 500:
         logger.error(this.description);
         break;
       case 'critical':
@@ -142,6 +159,9 @@ global.CustomError = class CustomError extends Error {
     }
   }
 
+  /**
+   * @description  Returns a JSON Object containing the custom error fields.
+   */
   body() {
     return {
       status: this.status,
@@ -150,6 +170,9 @@ global.CustomError = class CustomError extends Error {
     };
   }
 
+  /**
+   * @description  Overrides the console.log output of the CustomError.
+   */
   inspect() {
     return `${this.status} ERROR: ${this.description}`;
   }
