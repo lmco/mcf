@@ -19,6 +19,26 @@
 
 const M = require('../../mbee.js');
 const errors = M.load('lib/errors');
+const path = require('path');
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const fs = require('fs');
+let pluginFiles = null;
+
+module.exports.getPluginNames = function getPluginNames() {
+  if (M.config.server.plugins.enabled) {
+    // Create a list of available plugins
+    const pluginPath = path.join(__dirname, '..', '..', 'plugins');
+    pluginFiles = fs.readdirSync(pluginPath);
+    for (let i = pluginFiles.length - 1; i >= 0; i--) {
+      // If package.json doesn't exist, skip it
+      const eachPluginPath = path.join(pluginPath, pluginFiles[i]);
+      if (!fs.existsSync(path.join(eachPluginPath, 'package.json'))) {
+        pluginFiles.splice(i, 1);
+      }
+    }
+  }
+  return pluginFiles;
+}
 
 module.exports.checkType = function(params, type) {
   Object.keys(params).forEach((param) => {
