@@ -89,9 +89,10 @@ class LDAPStrategy extends BaseStrategy {
   ldapSearch(username) {
     M.log.debug('Attempting to search for LDAP user.');
     return new Promise((resolve, reject) => {
-      const filter = '(&'
+      const filter = '(&'                 // the escape is part of the ldap query
                    + `(${M.config.auth.ldap.username_attribute}=${username})`
                    + `${M.config.auth.ldap.filter})`;
+
 
       M.log.debug(`Using LDAP base: ${M.config.auth.ldap.base}`);
       M.log.debug(`Using search filter: ${filter}`);
