@@ -14,7 +14,7 @@
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description The configuration is tested. 
+ * @description Executes tests of the test framework itself.
  */
 
 const path = require('path');

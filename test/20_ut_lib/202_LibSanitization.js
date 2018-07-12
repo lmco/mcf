@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Lib Tests
+ * @module  test/202_LibSanitization
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
-@description  This is currently a test to see if encrypt returns a hex.
+ * @description  Tests to sanitize unwanted input.
  */
 
 const chai = require('chai');
@@ -43,25 +43,28 @@ describe(name, () => {
  *------------------------------------*/
 
 /**
- * Loads a library
+ * Loads the sanitization library.
  */
-
-
 function sanTest(done) {
   const mongoSan = sanitization.mongo({ $lt: 10 });
   chai.expect(typeof mongoSan).to.equal(typeof {});
   done();
 }
 
-/* This html test if failing due to mongo sanitize not being able to
-take in strings because mongo sanitize only takes in objects */
+/**
+ * Tests the html and mongo sanitization with input of
+ * html. Expected output to be an empty object
+ */
 function htmlMongoTest(done) {
   const mongohtmlSan = sanitization.mongo({ '$<script>': null });
   chai.expect(mongohtmlSan).to.not.equal({});
   done();
 }
 
-/* This key delete is failing not being able to compare to the key */
+/**
+ * Tests the key delete with potential unwanted input.
+ * Expected to delete key inputted.
+ */
 function keyDelete(done) {
   const v = { $lt: null };
   const mongoSanitize = sanitization.mongo(v);
@@ -70,6 +73,10 @@ function keyDelete(done) {
   done();
 }
 
+/**
+ * Tests the html santization with html input.
+ * Expected to change the html input.
+ */
 function htmlTest(done) {
   const htmlSan = sanitization.html('<script>');
   chai.expect(htmlSan).to.equal('&lt;script&gt;');

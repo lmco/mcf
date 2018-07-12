@@ -84,7 +84,6 @@ describe(name, function() {
  /*-------------------------------------
   * After: run after all tests
   *-------------------------------------*/
-  
   after(function(done) {
     this.timeout(5000);
     // Deleting the user created in the before function
