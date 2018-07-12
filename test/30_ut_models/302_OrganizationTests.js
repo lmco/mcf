@@ -74,21 +74,23 @@ function createOrg(done) {
  * Soft-deletes the org.
  */
 function softDeleteOrg(done) {
-  Org.findOneAndUpdate({
-    id: 'empire'
-  }, {
-    deletedOn: Date.now(),
-    deleted: true
-  },
-  (err, org) => {
-    Org.findOne({
-      id: org.id
-    }, (err2, org2) => {
-      // Verify soft delete
-      chai.expect(err2).to.equal(null);
-      chai.expect(org2.deletedOn).to.not.equal(null);
-      chai.expect(org2.deleted).to.equal(true);
-      done();
+  // LM: Changed from findOneAndUpdate to a find and then update
+  // findOneAndUpdate does not call setters, and was causing strange
+  // behavior with the deleted and deletedOn fields.
+  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
+  Org.findOne({ id: 'empire' })
+  .exec((err, org) => {
+    org.deleted = true;
+    org.save((saveErr) => {
+      Org.findOne({
+        id: org.id
+      }, (err2, org2) => {
+        // Verify soft delete
+        chai.expect(err2).to.equal(null);
+        chai.expect(org2.deletedOn).to.not.equal(null);
+        chai.expect(org2.deleted).to.equal(true);
+        done();
+      });
     });
   });
 }

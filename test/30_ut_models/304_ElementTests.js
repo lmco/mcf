@@ -421,23 +421,25 @@ function deleteBlocksAndRelationships(done) {
  * Soft deletes the previously created root package
  */
 function softDeleteRootPackage(done) {
-  Element.Package.findOneAndUpdate({
-    uid: 'empire:deathstar:0001'
-  }, {
-    deletedOn: Date.now(),
-    deleted: true
-  })
+  // LM: Changed from findOneAndUpdate to a find and then update
+  // findOneAndUpdate does not call setters, and was causing strange
+  // behavior with the deleted and deletedOn fields.
+  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
+  Element.Package.findOne({ uid: 'empire:deathstar:0001' })
   .exec((err, elem) => {
-    chai.expect(err).to.equal(null);
+    elem.deleted = true;
+    elem.save((saveErr) => {
+      chai.expect(err).to.equal(null);
 
-    Element.Package.findOne({
-      uid: 'empire:deathstar:0001'
-    })
-    .exec((findErr, foundElem) => {
-      chai.expect(findErr).to.equal(null);
-      chai.expect(foundElem.deleted).to.equal(true);
-      chai.expect(foundElem.deletedOn).to.not.equal(null);
-      done();
+      Element.Package.findOne({
+        uid: 'empire:deathstar:0001'
+      })
+      .exec((findErr, foundElem) => {
+        chai.expect(findErr).to.equal(null);
+        chai.expect(foundElem.deleted).to.equal(true);
+        chai.expect(foundElem.deletedOn).to.not.equal(null);
+        done();
+      });
     });
   });
 }

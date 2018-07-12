@@ -175,8 +175,7 @@ class ElementController {
             }
 
             for (let i = 0; i < elements.length; i++) {
-              // Update the elements deleted and deletedOn fields
-              elements[i].deletedOn = Date.now();
+              // Update the elements deleted fields
               elements[i].deleted = true;
               elements[i].save((saveErr) => { // eslint-disable-line consistent-return
                 if (saveErr) {
@@ -964,7 +963,6 @@ class ElementController {
 
         if (softDelete) {
           if (!element.deleted) {
-            element.deletedOn = Date.now();
             element.deleted = true;
             element.save((saveErr) => {
               if (saveErr) {

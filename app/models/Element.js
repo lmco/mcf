@@ -209,7 +209,13 @@ const ElementSchema = new mongoose.Schema({
    */
   deleted: {
     type: Boolean,
-    default: false
+    default: false,
+    set: function(v) {
+      if (v) {
+        this.deletedOn = Date.now();
+      }
+      return v;
+    }
   }
 
 }, options); // end of ElementSchema
