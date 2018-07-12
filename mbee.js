@@ -32,19 +32,17 @@ M.version4 = (M.build !== 'NO_BUILD_NUMBER') ? `${M.version}.${M.build}` : `${M.
 /**
  * This function provides a useful utility for requiring other MBEE modules in the app directory.
  * This should allow the path to the modules to be a bit simpler.
- * The global-require is explicitely disabled here due to the nature of this function.
+ * The global-require is explicitly disabled here due to the nature of this function.
  */
 M.load = m => require(path.join(__dirname, 'app', m)); // eslint-disable-line global-require
-
 // Similar to M.load, this is the future
 M.require = m => {
   const p = path.join(__dirname, 'app', m.replace('.', path.sep));
   return require(p); // eslint-disable-line global-require
 };
 
-// Pre-Configuration initialization
+// Configuration file parsing and initialization
 const parseJSON = M.require('lib.parseJson');
-// Specify configuration file
 M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.json`)));
 
 // Set config secret if it's set to RANDOM
@@ -62,23 +60,6 @@ M.path = {
 };
 
 
-// M.util = {
-//    /**
-//     * Takes a list of items, A, and a list of mutually exclusive items, B.
-//     * Returns false if than one item from B is found in A, true otherwise.
-//     */
-//    mutuallyExclusive: (A, B) => {
-//        let flags = 0;
-//        for (let i = 0; i < list.length; i++) {
-//            if (args.includes(list[i])) {
-//                flags++;
-//                if (flags > 1)
-//                    throw new Error('Too many mutually exclusive arguments.');
-//            }
-//        }
-//    }
-// }
-
 // This exports the basic MBEE version and config data so that modules may
 // have access to that data when they are loaded.
 // Other MBEE modules like lib and controllers are loaded after this.
@@ -87,6 +68,8 @@ M.path = {
 // is re-exported after the modules loading is complete (see below)
 module.exports = M;
 
+
+// Set argument commands for use in configuration lib and main function
 const subcommand = process.argv.slice(2, 3)[0];
 const opts = process.argv.slice(3);
 

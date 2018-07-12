@@ -69,7 +69,7 @@ class LDAPStrategy extends BaseStrategy {
     M.log.debug('Attempting to bind to the LDAP server.');
     return new Promise((resolve, reject) => {
       const ldapClient = ldap.createClient({
-        url: M.config.auth.ldap.server,
+        url: `${M.config.auth.ldap.url}:${M.config.auth.ldap.port}`,
         tlsOptions: {
           ca: this.cacerts
         }
@@ -89,11 +89,11 @@ class LDAPStrategy extends BaseStrategy {
   ldapSearch(username) {
     M.log.debug('Attempting to search for LDAP user.');
     return new Promise((resolve, reject) => {
-      const filter = `${'(&'                 // the escape is part of the ldap query
-                   + '(objectclass\=person)' // eslint-disable-line no-useless-escape
-                   + '('}${M.config.auth.ldap.username_attribute}=${username})`
+      const filter = '(&'
+                   + `(${M.config.auth.ldap.username_attribute}=${username})`
                    + `${M.config.auth.ldap.filter})`;
 
+      M.log.debug(`Using LDAP base: ${M.config.auth.ldap.base}`);
       M.log.debug(`Using search filter: ${filter}`);
       M.log.debug('Executing search ...');
 
@@ -105,7 +105,7 @@ class LDAPStrategy extends BaseStrategy {
 
       let person = false;
       // Execute the search
-      this.ldapClient.search('dc=us,dc=lmco,dc=com', opts, (err, result) => {
+      this.ldapClient.search(M.config.auth.ldap.base, opts, (err, result) => {
         result.on('searchEntry', (entry) => {
           M.log.debug('Search complete. Entry found.');
           person = entry;
