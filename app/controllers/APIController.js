@@ -25,6 +25,9 @@ const ElementController = mbee.load('controllers/ElementController');
 const OrgController = mbee.load('controllers/OrganizationController');
 const ProjectController = mbee.load('controllers/ProjectController');
 const UserController = mbee.load('controllers/UserController');
+const utils = M.require('lib.utils');
+
+const pluginFiles = utils.getPluginNames();
 
 /**
  * @class  APIController
@@ -93,7 +96,8 @@ class APIController {
       swagger: APIController.swaggerSpec(),
       ui: M.config.server.ui,
       user: null,
-      title: 'MBEE API Documentation'
+      title: 'MBEE API Documentation',
+	  pluginFiles: pluginFiles
     });
   }
 
