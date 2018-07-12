@@ -12,10 +12,9 @@
 /**
  * @module auth.lmi-cloud-strategy
  *
- * @authorized Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @authorized Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This file implements our authentication strategy for cloud-based
- * deployments on the LMI.
+ * @description This file implements our authentication using LDAP Active Directory.
  */
 
 const fs = require('fs');
@@ -27,11 +26,11 @@ const User = M.require('models.User');
 const UserController = M.require('controllers.userController');
 
 /**
- * LMICloudStrategy
+ * LDAPStrategy
  *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @classdesc This class defines authentication in the LMI cloud environemnt.
+ * @classdesc  This class defines authentication in the LMI cloud environment.
  */
 class LDAPStrategy extends BaseStrategy {
 
@@ -40,7 +39,7 @@ class LDAPStrategy extends BaseStrategy {
    */
   constructor() {
     super();
-    this.name = 'lmi-cloud-strategy';
+    this.name = 'LDAPStrategy';
 
     // Read the CA certs
     this.cacerts = [];
@@ -89,9 +88,9 @@ class LDAPStrategy extends BaseStrategy {
   ldapSearch(username) {
     M.log.debug('Attempting to search for LDAP user.');
     return new Promise((resolve, reject) => {
-      const filter = '(&'                 // the escape is part of the ldap query
-                   + `(${M.config.auth.ldap.username_attribute}=${username})`
-                   + `${M.config.auth.ldap.filter})`;
+      const filter = `${'(&'                 // the escape is part of the ldap query
+                   + `(${M.config.auth.ldap.attributes.username}=${username})`}${
+        `${M.config.auth.ldap.filter})`.replace('\\', '\\\\')}`; // avoids '\\\\' in JSON
 
 
       M.log.debug(`Using LDAP base: ${M.config.auth.ldap.base}`);
@@ -101,7 +100,12 @@ class LDAPStrategy extends BaseStrategy {
       const opts = {
         filter: filter,
         scope: 'sub',
-        attributes: M.config.auth.ldap.attributes
+        attributes: [
+          M.config.auth.ldap.attributes.username,
+          M.config.auth.ldap.attributes.firstName,
+          M.config.auth.ldap.attributes.lastName,
+          M.config.auth.ldap.attributes.eMail
+        ]
       };
 
       let person = false;
@@ -126,16 +130,16 @@ class LDAPStrategy extends BaseStrategy {
 
 
   ldapAuth(user, password) {
-    M.log.debug(`Authenticating ${user[M.config.auth.ldap.username_attribute]} ...`);
+    M.log.debug(`Authenticating ${user[M.config.auth.ldap.attributes.username]} ...`);
     return new Promise((resolve, reject) => {
       this.ldapClient.bind(user.dn, password, (err) => {
         // If an error occurs, fail.
         if (err) {
           this.ldapClient.destroy();
-          return reject(new Error(`An error has occured on user bind:${err}`));
+          return reject(new Error(`An error has occurred on user bind:${err}`));
         }
 
-        M.log.debug(`User [${user[M.config.auth.ldap.username_attribute]
+        M.log.debug(`User [${user[M.config.auth.ldap.attributes.username]
         }] authenticated successfully via LDAP.`);
         this.ldapClient.destroy();
         return resolve(user);
@@ -147,18 +151,13 @@ class LDAPStrategy extends BaseStrategy {
   static ldapSync(user) {
     M.log.debug('Synchronizing LDAP user with local database.');
     return new Promise((resolve, reject) => {
-      UserController.findUser(user[M.config.auth.ldap.username_attribute])
+      UserController.findUser(user[M.config.auth.ldap.attributes.username])
       .then(foundUser => {
-        const initData = {
-          username: user[M.config.auth.ldap.username_attribute],
-          password: 'NO_PASSWORD',
-          provider: 'ldap'
-        };
+        const userSave = foundUser;
 
-        const userSave = foundUser || new User(initData);
-        userSave.fname = user.givenName;
-        userSave.lname = user.sn;
-        userSave.email = user.mail;
+        userSave.fname = user[M.config.auth.ldap.attributes.firstName];
+        userSave.lname = user[M.config.auth.ldap.attributes.lastName];
+        userSave.email = user[M.config.auth.ldap.attributes.eMail];
 
         userSave.save((saveErr) => {
           if (saveErr) {
@@ -167,7 +166,30 @@ class LDAPStrategy extends BaseStrategy {
           return resolve(userSave);
         });
       })
-      .catch(findUserErr => reject(findUserErr));
+      .catch(findUserErr => {
+        const err = JSON.parse(findUserErr.message);
+        if (err.message !== 'Not found') {
+          return reject(findUserErr);
+        }
+
+        const initData = {
+          username: user[M.config.auth.ldap.attributes.username],
+          password: 'NO_PASSWORD',
+          fname: user[M.config.auth.ldap.attributes.firstName],
+          lname: user[M.config.auth.ldap.attributes.lastName],
+          email: user[M.config.auth.ldap.attributes.eMail],
+          provider: 'ldap'
+        };
+
+        const userSave = new User(initData);
+
+        userSave.save((saveErr) => {
+          if (saveErr) {
+            return reject(saveErr);
+          }
+          return resolve(userSave);
+        });
+      });
     });
   }
 
@@ -231,8 +253,7 @@ class LDAPStrategy extends BaseStrategy {
    * It creates a session token for the user and sets the req.session.token
    * object to the newly created token.
    */
-
-  static doLogin(req, res, next) {
+  doLogin(req, res, next) { // eslint-disable-line class-methods-use-this
     M.log.info(`${req.originalUrl} requested by ${req.user.username}`);
 
     // Convenient conversions from ms
