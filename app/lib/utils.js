@@ -20,7 +20,6 @@
 const M = require('../../mbee.js');
 const errors = M.load('lib/errors');
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const fs = require('fs');
 let pluginFiles = null;
 
