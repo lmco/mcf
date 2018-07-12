@@ -15,7 +15,12 @@
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * Tests Basic API functionality with Organizations.
+ * 
+ * @description This tests the API controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code we want to make sure everything still
+ * works as it should. These API controller tests are specifically for the User
+ * API tests.
  */
 
 const path = require('path');

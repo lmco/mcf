@@ -15,9 +15,10 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  Tests the project controller
+ * @description   This script defines basic tests for the Project controller tests.
  */
 
+ //Required imports to run tests
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
@@ -35,11 +36,6 @@ let allSeeingUser = null;
 let org = null;
 let project = null;
 
-/**
- *  -Set permissions for a user
- *  -other tests
- */
-
 /*------------------------------------
  *       Main
  *------------------------------------*/
@@ -50,6 +46,10 @@ describe(name, () => {
 
     const db = M.load('lib/db');
     db.connect();
+
+  /*-------------------------------------
+   * Before: run before all tests
+   *-------------------------------------*/
 
     // Finding a Requesting Admin
     const username = M.config.test.username;
@@ -110,6 +110,9 @@ describe(name, () => {
     });
   });
 
+  /*-------------------------------------
+   * After: run after all tests
+   *-------------------------------------*/
 
   after((done) => {
     // Removing the organization created
@@ -137,6 +140,10 @@ describe(name, () => {
       done();
     });
   });
+
+  /*----------
+   * Tests
+   *----------*/
 
   it('should create a new project', createProject).timeout(2500);
   it('should create elements for the project', createElements).timeout(2500);
@@ -242,8 +249,14 @@ function createElements(done) {
   });
 }
 
+/**
+ * Attempting to update a project field with an
+ * invalid attempt at updating the id. This 
+ * will reject and throw an error.
+ */
+
 function updateFieldError(done) {
-  ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'shouldNotChange' })
+  ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'shouldnotchange' })
   .then((proj) => {
     chai.expect(typeof proj).to.equal('undefined');
     done();
@@ -254,6 +267,12 @@ function updateFieldError(done) {
     done();
   });
 }
+
+/**
+ * Attempting to update a project with an invalid
+ * name for the project. This will reject and throw
+ * and error.
+ */
 
 function updateTypeError(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { name: [] })
@@ -268,6 +287,10 @@ function updateTypeError(done) {
   });
 }
 
+/**
+ * Testing updating a project with a 
+ * new name. This should pass.
+ */
 function updateProject(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'prtlgn', name: 'portal gun changed' })
   .then((proj) => {
@@ -281,6 +304,9 @@ function updateProject(done) {
   });
 }
 
+/**
+ * Testing updating a project with using project object. 
+ */
 function updateProjectObject(done) {
   ProjController.findProject(allSeeingUser, org.id, 'prtlgn')
   .then((projectFound) => {

@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Test Framework Test
+ * @module  test/101_ConfigTests 
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Executes tests of the test framework itself.
+ * @description The configuration is tested. 
  */
 
 const path = require('path');

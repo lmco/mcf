@@ -16,9 +16,10 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  Tests the org controller
+ * @description  This script defines basic tests for the Org controller tests.
  */
 
+ //Required imports to run tests
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
@@ -43,6 +44,9 @@ describe(name, function() {
   // NOTE: Changed from arrow function to allow for use of
   // this so that a larger timeout could be set
 
+  /*-------------------------------------
+   * Before: run before all tests
+   *-------------------------------------*/
   before(function(done) {
     this.timeout(6000);
     const db = M.load('lib/db');
@@ -84,7 +88,9 @@ describe(name, function() {
     });
   });
 
-  // runs after all tests in this block
+  /*-------------------------------------
+   * After: run after all tests
+   *-------------------------------------*/
   after(function(done) {
     // Removing the organization created
     OrgController.removeOrg(user, 'council', { soft: false })
@@ -111,6 +117,10 @@ describe(name, function() {
       done();
     });
   });
+
+  /*----------
+   * Tests
+   *----------*/
 
   it('should create a new org', addNewOrg).timeout(2500);
   it('should create a second org', addSecondOrg).timeout(2500);
@@ -166,6 +176,10 @@ function addNewOrg(done) {
   });
 }
 
+/**
+ * Test creating a second org
+ */
+
 function addSecondOrg(done) {
   const orgData = {
     id: 'council',
@@ -210,6 +224,10 @@ function findExistingOrg(done) {
   });
 }
 
+/**
+ * Attempting update to an org field with invalid permissions.
+ * Test should throw an error
+ */
 function updateOrgFieldErr(done) {
   this.timeout(5000);
   OrgController.updateOrg(user, 'tv', { permissions: 'shouldNotChange' })
@@ -224,6 +242,10 @@ function updateOrgFieldErr(done) {
   });
 }
 
+/**
+ * Attempting update to an org with invalid name field name.
+ * Test should throw an error
+ */
 function updateOrgTypeErr(done) {
   this.timeout(5000);
   OrgController.updateOrg(user, 'tv', { name: [] })

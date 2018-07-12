@@ -15,9 +15,10 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This class defines basic tests of the User data model.
+ * @description This script defines basic tests for the user controller tests.
  */
 
+ // Required imports to run tests
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
@@ -37,7 +38,10 @@ let nonAUser = null;
  *------------------------------------*/
 
 describe(name, function() {
-  // runs before all tests
+ 
+ /*-------------------------------------
+  * Before: run before all tests
+  *-------------------------------------*/
   before(function(done) {
     this.timeout(6000);
     const db = M.load('lib/db');
@@ -77,7 +81,10 @@ describe(name, function() {
     });
   });
 
-  // runs after all tests
+ /*-------------------------------------
+  * After: run after all tests
+  *-------------------------------------*/
+  
   after(function(done) {
     this.timeout(5000);
     // Deleting the user created in the before function
@@ -107,6 +114,10 @@ describe(name, function() {
       done();
     });
   });
+
+ /*----------
+  * Tests
+  *----------*/
 
   it('should create a user', createNewUser).timeout(3000);
   it('should create an admin user', createAUser).timeout(3000);

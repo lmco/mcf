@@ -14,14 +14,13 @@
  *
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * Tests Basic API functionality with Projects.
+ *  @description  This tests the API controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code we want to make sure everything still
+ * works as it should. These API controller tests are specifically for the Proejct
+ * API tests.
+ * 
  * UNCOMMENT WHEN NEED TO TEST
- */
-
-
-/** Tests that need to be made:
- *  - inputting a empty name in the name of the project (I am guessing should fail
- *
  */
 
 const path = require('path');
@@ -44,7 +43,8 @@ const test = M.config.test;
  * @description This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code we want to make sure everything still
- * works as it should.
+ * works as it should. These API controller tests are specifically for the Project
+ * API tests.
  *
  */
 
@@ -57,6 +57,10 @@ let user = null;
 
 // runs before all tests in this block
 describe(name, function() {
+
+  /*-------------------------------------
+   * Before: run before all tests
+   *-------------------------------------*/
   before(function(done) {
     this.timeout(5000);
     const db = M.load('lib/db');
@@ -124,7 +128,9 @@ describe(name, function() {
     });
   });
 
-  // runs after all the tests are done
+  /*-------------------------------------
+   * After: run after all tests
+   *-------------------------------------*/
   after(function(done) {
     // Removing the Organization created in the before
     OrgController.removeOrg(user, 'hogwarts', { soft: false })
@@ -151,6 +157,10 @@ describe(name, function() {
       done();
     });
   });
+
+ /*----------
+  * Tests
+  *----------*/
 
   it('should POST a project to the organization', postProject01);
   it('should GET the previously posted project', getProject01);

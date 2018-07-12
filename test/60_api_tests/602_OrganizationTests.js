@@ -15,7 +15,15 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * Tests Basic API functionality with Organizations.
+ * 
+ * @description  This tests the API controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code we want to make sure everything still
+ * works as it should. These API controller tests are specifically for the Organization
+ * API tests.
+ * 
+ * 
+ * NOTES: Tests Basic API functionality with Organizations.
  * ASK ABOUT REJECT PUT NAME
  * ASK ABOUT TESTING WITH NO USER
  */
