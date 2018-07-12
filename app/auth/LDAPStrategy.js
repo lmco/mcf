@@ -51,52 +51,97 @@ class LDAPStrategy extends BaseStrategy {
     }
   }
 
-
+  /**
+   * @description  This function overrides the handleBasicAuth of the BaseStrategy.js
+   * The purpose of this function is to implement authentication via LDAP using a
+   * username and password as well as the configuration set up in the config file used.
+   *
+   * @example
+   * AuthController.handleBasicAuth(req, res, username, password)
+   *   .then(user => {
+   *   // do something with authenticated user
+   *   })
+   *   .catch(err => {
+   *     console.log(err);
+   *   })
+   *
+   * @param req The request object from express
+   * @param res The response object from express
+   * @param username A string of the username for who is attempting to authenticate via LDAP AD
+   * @param password A string of the password for who is attempting to authenticate via LDAP AD
+   * @returns Promise The authenticated user as the User object or an error.
+   */
   handleBasicAuth(req, res, username, password) {
+    // Run through the LDAP helper functions bellow
     return new Promise((resolve, reject) => {
+      // Connect to database
       this.ldapConnect()
+      // Search for user
       .then(() => this.ldapSearch(username))
+      // Authenticate user
       .then((userFound) => this.ldapAuth(userFound, password))
+      // Sync user with local database
       .then((userAuth) => LDAPStrategy.ldapSync(userAuth))
+      // return authenticated user object
       .then((userSynced) => resolve(userSynced))
+      // Return any error that may have occurred in the above functions
       .catch((handleBasicAuthErr) => reject(handleBasicAuthErr));
     });
   }
 
-
+  /**
+   * @description  This is a helper function of the lDAPStrategy class that is used
+   * to set the this.ldapClient variable which is the object capable of binding to
+   * the ldap server.
+   *
+   * @returns Promise Either an error or it sets the ldap connection as a 'this' variable
+   */
   ldapConnect() {
     M.log.debug('Attempting to bind to the LDAP server.');
+    // define promise for function
     return new Promise((resolve, reject) => {
+      // Create ldapClient object with credentials and certs
       const ldapClient = ldap.createClient({
         url: `${M.config.auth.ldap.url}:${M.config.auth.ldap.port}`,
         tlsOptions: {
           ca: this.cacerts
         }
       });
-
+      // bind object to LDAP server
       ldapClient.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (bindErr) => {
+        // Error Check - Return error if LDAP server bind fails
         if (bindErr) {
           return reject(new Error('An error has occured binding to the LDAP server.'));
         }
+        // set this.ldapClient for the remaining functions and queries
         this.ldapClient = ldapClient;
         return resolve();
       });
     });
   }
 
-
+  /**
+   * @description  This is a helper function of the lDAPStrategy class that is used
+   * to search for a user within the specified base and filter from the configuration
+   * file.
+   *
+   * @returns Promise returns the user information from the ldap server or an err.
+   */
   ldapSearch(username) {
     M.log.debug('Attempting to search for LDAP user.');
+    // define promise for function
     return new Promise((resolve, reject) => {
-      const filter = `${'(&'                 // the escape is part of the ldap query
-                   + `(${M.config.auth.ldap.attributes.username}=${username})`}${
-        `${M.config.auth.ldap.filter})`.replace('\\', '\\\\')}`; // avoids '\\\\' in JSON
+      // set filter for query based on username attribute and the configuration filter
+      const filter = '(&'
+                   + `(${M.config.auth.ldap.attributes.username}=${username})`
+                   + `${M.config.auth.ldap.filter.replace('\\', '\\\\')}`; // avoids '\\\\' in JSON
 
-
+      // log base and filter used for query
       M.log.debug(`Using LDAP base: ${M.config.auth.ldap.base}`);
       M.log.debug(`Using search filter: ${filter}`);
       M.log.debug('Executing search ...');
 
+      // Set filter, attributes, and scope of the search
       const opts = {
         filter: filter,
         scope: 'sub',
@@ -108,18 +153,22 @@ class LDAPStrategy extends BaseStrategy {
         ]
       };
 
+      // Create person Boolean for proper error handling
       let person = false;
       // Execute the search
       this.ldapClient.search(M.config.auth.ldap.base, opts, (err, result) => {
+        // If entry found, log it and set person to the return object for the callback
         result.on('searchEntry', (entry) => {
           M.log.debug('Search complete. Entry found.');
           person = entry;
         });
+        // If error returned, reject eh search with an error
         result.on('error', (error) => reject(new Error(`Error: ${error.message}`)));
+        // On callback, return an error if the user was not found or return the ldap entry.
         result.on('end', (status) => {
           M.log.debug(status);
           if (!person) {
-            this.ldapClient.destroy();
+            this.ldapClient.destroy(); // Disconnect from ldap server on failure
             return reject(new Error('Error: Invalid username or password.'));
           }
           return resolve(person.object);
@@ -128,31 +177,46 @@ class LDAPStrategy extends BaseStrategy {
     });
   }
 
-
+  /**
+   * @description  This is a helper function of the lDAPStrategy class that is used
+   * to authenticate an ldap user after being found using their password.
+   *
+   * @returns Promise returns the user information from the ldap server or an err.
+   */
   ldapAuth(user, password) {
     M.log.debug(`Authenticating ${user[M.config.auth.ldap.attributes.username]} ...`);
+    // define promise for function
     return new Promise((resolve, reject) => {
       this.ldapClient.bind(user.dn, password, (err) => {
         // If an error occurs, fail.
         if (err) {
-          this.ldapClient.destroy();
+          this.ldapClient.destroy(); // Disconnect from ldap server on failure
           return reject(new Error(`An error has occurred on user bind:${err}`));
         }
 
         M.log.debug(`User [${user[M.config.auth.ldap.attributes.username]
         }] authenticated successfully via LDAP.`);
-        this.ldapClient.destroy();
+        this.ldapClient.destroy(); // Disconnect from ldap server after successful authentication
         return resolve(user);
       });
     });
   }
 
-
+  /**
+   * @description  This is a helper function of the lDAPStrategy class that is used
+   * to sync LDAP information to the local database including first name, last name,
+   * and email.
+   *
+   * @returns Promise returns the saved local user object or an err.
+   */
   static ldapSync(user) {
     M.log.debug('Synchronizing LDAP user with local database.');
+    // define promise for function
     return new Promise((resolve, reject) => {
+      // Search for user in local datavbse
       UserController.findUser(user[M.config.auth.ldap.attributes.username])
       .then(foundUser => {
+        // if found, update the names and emails of the user and re-save with the local database
         const userSave = foundUser;
 
         userSave.fname = user[M.config.auth.ldap.attributes.firstName];
@@ -168,10 +232,11 @@ class LDAPStrategy extends BaseStrategy {
       })
       .catch(findUserErr => { // eslint-disable-line consistent-return
         const err = JSON.parse(findUserErr.message);
+        // if the error message is anything but the user is not found, fail
         if (err.message !== 'Not found') {
           return reject(findUserErr);
         }
-
+        // if findUser failed with user not found, create the user in the local database
         const initData = {
           username: user[M.config.auth.ldap.attributes.username],
           password: 'NO_PASSWORD',
@@ -195,12 +260,23 @@ class LDAPStrategy extends BaseStrategy {
 
 
   /**
-   * Handles token authentication. This function gets called both for
-   * the case of a token auth header or a session token. Either way
-   * the token is provided to this function for auth.
+   * @description  This function overrides the handleTokenAuth of the BaseStrategy.js
+   * The purpose of this function is to implement authentication of a user who has
+   * passed in a session token or bearer token.
    *
-   * If an error is passed into the callback, authentication fails.
-   * If the callback is called with no parameters, the user is authenticated.
+   * @example
+   * AuthController.handleTokenAuth(req, res, _token)
+   *   .then(user => {
+   *   // do something with authenticated user
+   *   })
+   *   .catch(err => {
+   *     console.log(err);
+   *   })
+   *
+   * @param req The request object from express
+   * @param res The response object from express
+   * @param _token The token the user is attempting to authenticate with.
+   * @returns Promise The local database User object or an error.
    */
   static handleTokenAuth(req, res, _token) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -249,9 +325,12 @@ class LDAPStrategy extends BaseStrategy {
 
 
   /**
-   * This function gets called when the user is logged in.
-   * It creates a session token for the user and sets the req.session.token
-   * object to the newly created token.
+   * @description  This function overrides the doLogin of the BaseStrategy.js
+   * The purpose of this function is to set and return a token for future
+   * authentication through both the UI and API.
+   *
+   * @param req The request object from express
+   * @param res The response object from express
    */
   doLogin(req, res, next) { // eslint-disable-line class-methods-use-this
     M.log.info(`${req.originalUrl} requested by ${req.user.username}`);
@@ -281,4 +360,5 @@ class LDAPStrategy extends BaseStrategy {
 
 }
 
+// export module
 module.exports = LDAPStrategy;
