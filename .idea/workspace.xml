@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d3d8988-8621-4ae4-93ea-c2d0ab6cc6ab" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/e355635.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/e355635.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api_routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/api_routes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/auth/LDAPStrategy.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/LDAPStrategy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -30,11 +30,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LDAPStrategy.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="LDAPStrategy.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="588">
-              <caret line="38" column="5" lean-forward="true" selection-start-line="38" selection-start-column="5" selection-end-line="38" selection-end-column="5" />
+            <state relative-caret-position="983">
+              <caret line="146" column="7" lean-forward="true" selection-start-line="146" selection-start-column="7" selection-end-line="146" selection-end-column="7" />
             </state>
           </provider>
         </entry>
@@ -42,17 +42,29 @@
       <file leaf-file-name="BaseStrategy.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/auth/BaseStrategy.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="778">
+            <state relative-caret-position="4977">
               <caret line="247" column="2" selection-start-line="247" selection-start-column="2" selection-end-line="247" selection-end-column="2" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="api_routes.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="api_routes.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/api_routes.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2352">
-              <caret line="112" column="16" selection-start-line="112" selection-start-column="2" selection-end-line="112" selection-end-column="16" />
+            <state relative-caret-position="29791">
+              <caret line="1516" column="30" lean-forward="true" selection-start-line="1516" selection-start-column="30" selection-end-line="1516" selection-end-column="30" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="routes.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/routes.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1092">
+              <caret line="52" column="25" lean-forward="true" selection-start-line="52" selection-start-column="25" selection-end-line="52" selection-end-column="25" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -88,6 +100,7 @@
       <find>httpServer</find>
       <find>console</find>
       <find>ca</find>
+      <find>AuthController.authenticate.bind(AuthController)</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -109,6 +122,8 @@
         <option value="$PROJECT_DIR$/config/dev.json" />
         <option value="$PROJECT_DIR$/app/auth/BaseStrategy.js" />
         <option value="$PROJECT_DIR$/app/auth/LDAPStrategy.js" />
+        <option value="$PROJECT_DIR$/app/api_routes.js" />
+        <option value="$PROJECT_DIR$/app/routes.js" />
       </list>
     </option>
   </component>
@@ -236,12 +251,12 @@
       <workItem from="1531155355272" duration="1016000" />
       <workItem from="1531156411451" duration="11438000" />
       <workItem from="1531232178453" duration="16748000" />
-      <workItem from="1531401847253" duration="6703000" />
+      <workItem from="1531401847253" duration="7007000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="47470000" />
+    <option name="totallyTimeSpent" value="47774000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -260,6 +275,7 @@
       <window_info anchor="right" id="TODO" order="3" sideWeight="0.4997955" side_tool="true" weight="0.1374233" />
       <window_info anchor="bottom" id="Docker" order="6" weight="0.18927445" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
+      <window_info anchor="bottom" id="Find" order="1" visible="true" weight="0.3291506" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info id="npm" order="1" side_tool="true" />
@@ -273,7 +289,6 @@
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" />
     </layout>
     <layout-to-restore>
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -390,16 +405,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/lib/json-parse.js" />
-    <entry file="file://$PROJECT_DIR$/app/routes.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="689">
-          <caret line="84" column="14" selection-start-line="84" selection-start-column="2" selection-end-line="84" selection-end-column="14" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/controllers/UIController.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="731">
@@ -598,23 +603,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/api_routes.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2352">
-          <caret line="112" column="16" selection-start-line="112" selection-start-column="2" selection-end-line="112" selection-end-column="16" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/auth/BaseStrategy.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="778">
-          <caret line="247" column="2" selection-start-line="247" selection-start-column="2" selection-end-line="247" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/models/User.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="759">
@@ -634,8 +622,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="588">
-          <caret line="38" column="5" lean-forward="true" selection-start-line="38" selection-start-column="5" selection-end-line="38" selection-end-column="5" />
+        <state relative-caret-position="983">
+          <caret line="146" column="7" lean-forward="true" selection-start-line="146" selection-start-column="7" selection-end-line="146" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/auth/BaseStrategy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4977">
+          <caret line="247" column="2" selection-start-line="247" selection-start-column="2" selection-end-line="247" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/routes.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1092">
+          <caret line="52" column="25" lean-forward="true" selection-start-line="52" selection-start-column="25" selection-end-line="52" selection-end-column="25" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/api_routes.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="29791">
+          <caret line="1516" column="30" lean-forward="true" selection-start-line="1516" selection-start-column="30" selection-end-line="1516" selection-end-column="30" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

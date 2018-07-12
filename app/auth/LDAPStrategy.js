@@ -166,7 +166,7 @@ class LDAPStrategy extends BaseStrategy {
           return resolve(userSave);
         });
       })
-      .catch(findUserErr => {
+      .catch(findUserErr => { // eslint-disable-line consistent-return
         const err = JSON.parse(findUserErr.message);
         if (err.message !== 'Not found') {
           return reject(findUserErr);
