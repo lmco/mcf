@@ -37,7 +37,7 @@ module.exports.getPluginNames = function getPluginNames() {
     }
   }
   return pluginFiles;
-}
+};
 
 module.exports.checkType = function(params, type) {
   Object.keys(params).forEach((param) => {

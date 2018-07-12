@@ -97,7 +97,7 @@ class APIController {
       ui: M.config.server.ui,
       user: null,
       title: 'MBEE API Documentation',
-	  pluginFiles: pluginFiles
+      pluginFiles: pluginFiles
     });
   }
 
