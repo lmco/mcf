@@ -11,12 +11,11 @@
  * COMMENTED OUT CODE IS IN PROCESS OF GETTING FIXED.                        *
  *****************************************************************************/
 /**
- * @fileOverview UserModelTests
  * @module test/401_UserController
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This script defines basic tests for the user controller tests.
+ * @description This file defines basic tests of the User Controller.
  */
 
  // Required imports to run tests

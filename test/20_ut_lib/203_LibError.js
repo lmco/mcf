@@ -14,7 +14,7 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- @description  This file tests basic CustomError functionality.
+ * @description  This file tests basic CustomError functionality.
  */
 
 const chai = require('chai');

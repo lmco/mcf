@@ -15,7 +15,7 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  Tests the org model
+ * @description  This file defines basic tests of the Organization Model.
  */
 
 const path = require('path');

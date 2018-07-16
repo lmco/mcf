@@ -14,7 +14,7 @@
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  Tests the element controller
+ * @description  This file defines basic tests of the Element Controller.
  */
 
 const path = require('path');

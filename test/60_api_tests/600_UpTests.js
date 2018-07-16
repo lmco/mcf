@@ -14,7 +14,7 @@
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  Tests the project model
+ * @description  This file defines basic tests of the API being up.
  */
 
 const fs = require('fs');

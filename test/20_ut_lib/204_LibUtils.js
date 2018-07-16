@@ -14,7 +14,7 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- @description  This file tests the utility functions.
+ * @description  This file tests the utility functions.
  */
 
 const chai = require('chai');

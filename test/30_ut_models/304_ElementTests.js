@@ -14,7 +14,7 @@
  * 
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @fileOverview  Tests the Element data model and schema
+ * @description This file defines basic tests of the Element Model.
  */
 
 const path = require('path');

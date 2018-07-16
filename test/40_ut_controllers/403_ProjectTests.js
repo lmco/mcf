@@ -15,7 +15,7 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description   This script defines basic tests for the Project controller tests.
+ * @description   This file defines basic tests of the Project Controller.
  */
 
  //Required imports to run tests

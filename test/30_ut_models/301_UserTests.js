@@ -10,12 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @fileOverview UserModelTests
  * @module test/301_UserModel
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This class defines basic tests of the User data model.
+ * @description This file defines basic tests of the User data model.
  */
 
 const path = require('path');
