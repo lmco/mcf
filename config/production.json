@@ -263,7 +263,8 @@
     "url": "https://dev.mbee.us.lmco.com:443",
     // The location of the certification file relative to the main MBEE folder
     "ca": "./certs/LockheedMartinRootCertificationAuthority.pem",
-    // TODO: Figure out what this does
+    // An integer which indicated whether or not to accept self signed certificates.
+    // IMPORTANT: 0 means enable self signed certificates. 1 means disabled
     "NODE_TLS_REJECT_UNAUTHORIZED": "0",
     // The username of the user to authenticate and run tests with
     "username": "mbee",
