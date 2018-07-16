@@ -137,20 +137,24 @@ function updateUser(done) {
  * Soft-deletes the user.
  */
 function softDeleteUser(done) {
-  User.findOneAndUpdate({
-    username: 'ackbar'
-  }, {
-    deletedOn: Date.now()
-  },
-  (err, user) => {
-    User.findOne({
-      username: user.username
-    }, (err2, user2) => {
-      // Verify soft delete
-      chai.expect(err2).to.equal(null);
-      chai.expect(user2.deletedOn).to.not.equal(null);
-      chai.expect(user2.deleted).to.equal(true);
-      done();
+  // LM: Changed from findOneAndUpdate to a find and then update
+  // findOneAndUpdate does not call setters, and was causing strange
+  // behavior with the deleted and deletedOn fields.
+  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
+  User.findOne({ username: 'ackbar' })
+  .exec((err, user) => {
+    user.deleted = true;
+    user.save((saveErr) => {
+      chai.expect(saveErr).to.equal(null);
+      User.findOne({
+        username: user.username
+      }, (err2, user2) => {
+        // Verify soft delete
+        chai.expect(err2).to.equal(null);
+        chai.expect(user2.deletedOn).to.not.equal(null);
+        chai.expect(user2.deleted).to.equal(true);
+        done();
+      });
     });
   });
 }

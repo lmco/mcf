@@ -20,6 +20,9 @@
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.load('models/User');
+const utils = M.require('lib.utils');
+
+const pluginFiles = utils.getPluginNames();
 
 
 /**
@@ -41,7 +44,8 @@ class UIController {
     return res.render('home', {
       ui: M.config.server.ui,
       user: req.user.getPublicData(),
-      title: 'MBEE | Model-Based Engineering Environment'
+      title: 'MBEE | Model-Based Engineering Environment',
+      pluginFiles: pluginFiles
     });
   }
 
@@ -59,7 +63,8 @@ class UIController {
       user: req.user.getPublicData(),
       org: M.lib.sani.sanitize(req.params.org),
       project: M.lib.sani.sanitize(req.params.project),
-      title: 'MBEE | Model-Based Engineering Environment'
+      title: 'MBEE | Model-Based Engineering Environment',
+      pluginFiles: pluginFiles
     });
   }
 
@@ -75,7 +80,8 @@ class UIController {
       ui: M.config.server.ui,
       renderer: 'admin-renderer',
       user: req.user.getPublicData(),
-      title: 'Admin | Model-Based Engineering Environment'
+      title: 'Admin | Model-Based Engineering Environment',
+      pluginFiles: pluginFiles
     });
   }
 
@@ -105,7 +111,8 @@ class UIController {
         info: {
           version: M.version4
         },
-        title: 'About | Model-Based Engineering Environment'
+        title: 'About | Model-Based Engineering Environment',
+        pluginFiles: pluginFiles
       });
     });
   }
@@ -129,6 +136,7 @@ class UIController {
       ui: M.config.server.ui,
       user: '',
       title: 'Login | Model-Based Engineering Environment',
+      pluginFiles: pluginFiles,
       next: next,
       err: req.query.err
     });

@@ -189,8 +189,10 @@ function initialize(args) {
   M.lib = {
     crypto: M.load('lib/crypto'),
     db: M.load('lib/db'),
+    errors: M.load('lib/errors'),
     sani: M.load('lib/sanitization'),
     startup: M.load('lib/startup'),
+    utils: M.load('lib/utils'),
     validators: M.load('lib/validators')
   };
   // Re-export mbee after initialization

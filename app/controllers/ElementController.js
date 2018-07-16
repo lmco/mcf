@@ -175,8 +175,7 @@ class ElementController {
             }
 
             for (let i = 0; i < elements.length; i++) {
-              // Update the elements deleted and deletedOn fields
-              elements[i].deletedOn = Date.now();
+              // Update the elements deleted fields
               elements[i].deleted = true;
               elements[i].save((saveErr) => { // eslint-disable-line consistent-return
                 if (saveErr) {
@@ -309,7 +308,7 @@ class ElementController {
         if (!element.project.hasOwnProperty('id')) {
           return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.id).' })));
         }
-        // Porject Org
+        // Project Org
         if (element.project.hasOwnProperty('org')) {
           // Org ID
           if (!element.project.org.hasOwnProperty('id')) {
@@ -964,7 +963,6 @@ class ElementController {
 
         if (softDelete) {
           if (!element.deleted) {
-            element.deletedOn = Date.now();
             element.deleted = true;
             element.save((saveErr) => {
               if (saveErr) {
