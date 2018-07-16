@@ -128,19 +128,22 @@ function createProject(done) {
  * Soft deletes a project.
  */
 function softDeleteProject(done) {
-  Project.findOneAndUpdate({
-    id: 'dthstr'
-  }, {
-    deletedOn: Date.now(),
-    deleted: true
-  }, (err, proj) => {
-    Project.findOne({
-      id: proj.id
-    }, (err2, proj2) => {
-      chai.expect(err).to.equal(null);
-      chai.expect(proj2.deleted).to.equal(true);
-      chai.expect(proj2.deletedOn).to.not.equal(null);
-      done();
+  // LM: Changed from findOneAndUpdate to a find and then update
+  // findOneAndUpdate does not call setters, and was causing strange
+  // behavior with the deleted and deletedOn fields.
+  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
+  Project.findOne({ id: 'dthstr' })
+  .exec((err, proj) => {
+    proj.deleted = true;
+    proj.save((saveErr) => {
+      Project.findOne({
+        id: proj.id
+      }, (err2, proj2) => {
+        chai.expect(err).to.equal(null);
+        chai.expect(proj2.deleted).to.equal(true);
+        chai.expect(proj2.deletedOn).to.not.equal(null);
+        done();
+      });
     });
   });
 }

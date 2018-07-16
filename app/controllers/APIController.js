@@ -21,10 +21,15 @@ const path = require('path');
 const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
-const ElementController = mbee.require('controllers.ElementController');
-const OrgController = mbee.require('controllers.OrganizationController');
-const ProjectController = mbee.require('controllers.ProjectController');
-const UserController = mbee.require('controllers.UserController');
+
+const ElementController = mbee.load('controllers/ElementController');
+const OrgController = mbee.load('controllers/OrganizationController');
+const ProjectController = mbee.load('controllers/ProjectController');
+const UserController = mbee.load('controllers/UserController');
+const utils = M.require('lib.utils');
+
+const pluginFiles = utils.getPluginNames();
+
 
 /**
  * @class  APIController
@@ -93,7 +98,8 @@ class APIController {
       swagger: APIController.swaggerSpec(),
       ui: M.config.server.ui,
       user: null,
-      title: 'MBEE API Documentation'
+      title: 'MBEE API Documentation',
+      pluginFiles: pluginFiles
     });
   }
 
