@@ -38,7 +38,7 @@ const err = new CustomError('Issue saving organization.');
 
 const err2 = new CustomError('Project not found.', 400);
 
-const err3 = new CustomError('User can't delete themselves.', 401, 'warn');
+const err3 = new CustomError('User cannot delete themselves.', 401, 'warn');
 ```
 
 ### Additional Features
