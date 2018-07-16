@@ -25,13 +25,16 @@ const AuthModule = require(path.join(__dirname, '..', 'auth', M.config.auth.stra
 
 // Error Check - Verify the AuthModule that has been imported implements the proper functions
 if (!AuthModule.hasOwnProperty('handleBasicAuth')) {
-  // Fail out of startup
+  M.log.critical(`Error: Strategy (${M.config.auth.strategy}) does not implement handleBasicAuth`);
+  process.exit(0);
 }
 if (!AuthModule.hasOwnProperty('handleTokenAuth')) {
-  // Fail out of startup
+  M.log.critical(`Error: Strategy (${M.config.auth.strategy}) does not implement handleTokenAuth`);
+  process.exit(0);
 }
 if (!AuthModule.hasOwnProperty('doLogin')) {
-  // Fail out of startup
+  M.log.critical(`Error: Strategy (${M.config.auth.strategy}) does not implement doLogin`);
+  process.exit(0);
 }
 
 /******************************************************************************
