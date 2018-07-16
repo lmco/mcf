@@ -24,7 +24,15 @@ const sani = M.lib.sani;
 const AuthModule = require(path.join(__dirname, '..', 'auth', M.config.auth.strategy));
 
 // Error Check - Verify the AuthModule that has been imported implements the proper functions
-
+if (!AuthModule.hasOwnProperty('handleBasicAuth')) {
+  // Fail out of startup
+}
+if (!AuthModule.hasOwnProperty('handleTokenAuth')) {
+  // Fail out of startup
+}
+if (!AuthModule.hasOwnProperty('doLogin')) {
+  // Fail out of startup
+}
 
 /******************************************************************************
  *  Authentication functions                                                  *

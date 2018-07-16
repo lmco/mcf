@@ -34,16 +34,13 @@ const User = M.load('models/User');
 class LMICloudStrategy {
 
   /******************************************************************************
-   *  LMI CLOUD Authentication Implementations                                  *
+   *  LMI-CLOUD Authentication Implementations                                  *
    ******************************************************************************/
 
   /**
    * Handles basic-style authentication. This function gets called both for
    * the case of a basic auth header or for login form input. Either way
    * the username and password is provided to this function for auth.
-   *
-   * If an error is passed into the callback, authentication fails.
-   * If the callback is called with no parameters, the user is authenticated.
    */
   static handleBasicAuth(req, res, username, password) {
     return new Promise((resolve, reject) => {
