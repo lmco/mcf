@@ -113,7 +113,7 @@ the other hand they extend MBEE functionality in along a monolithic architecture
 rather than a distributed microservice architecture that is created by API-based
 integrations.
 
-The most important thing to realize here is that a plugin, one-installed, is 
+The most important thing to realize here is that a plugin, once-installed, is 
 part of MBEE. It is part of the same running process, has access to the running
 configuration (which can include DB and/or LDAP credentials), and can execute
 code on the server with the same privileges as the MBEE application.
