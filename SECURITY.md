@@ -1,6 +1,18 @@
 # MBEE Security
 
-TODO - Insert a high-level overview of MBEE security
+**Contents**
+- [Disclosure Policy](#disclosure-policy)
+- [Security Update Policy](#security-update-policy)
+- [Security Related Configuration](#security-related-configuration)
+  - [Plugins and Integrations](#plugins-and-integrations)
+  - [Ports](#ports)
+  - [Configuration JSON File](#configuration-json-file)
+  - [HTTPS](#https)
+  - [Server Secret Key](#server-secret-key)
+  - [MongoDB](#mongodb)
+  - [Authentication](#authentication)
+- [Security for Developers](#security-for-developers)
+
 
 ## Disclosure Policy
 
@@ -83,6 +95,32 @@ Upon public release of MBEE a security update policy will be defined for the
 open source version of MBEE. This might be as simple as a security mailing list.
 
 ## Security Related Configuration
+
+### Plugins and Integrations
+
+There are a few ways of writing applications that interact with MBEE. Client 
+applications and service-based integrations interact with MBEE via its API
+and don't require much discussion here. However, understanding plugins is 
+critical to maintaining the security posture of an MBEE instance.
+
+A plugin is a type of integration for MBEE that runs on the same server. In 
+fact, it is part of the same running process. It is a module or collection of 
+modules written in JavaScript as an Express application that is included by MBEE
+and used under namespaced routes. These plugins offer the ability to extend the
+functionality of MBEE. On one hand they allow for high-performance integrations
+with direct access to the underlying MBEE modules and database connections, on 
+the other hand they extend MBEE functionality in along a monolithic architecture
+rather than a distributed microservice architecture that is created by API-based
+integrations.
+
+The most important thing to realize here is that a plugin, one-installed, is 
+part of MBEE. It is part of the same running process, has access to the running
+configuration (which can include DB and/or LDAP credentials), and can execute
+code on the server with the same privileges as the MBEE application.
+
+This makes plugins critical to the running application's security posture.
+It is the responsibility of the MBEE administrator to fully vet and understand 
+any plugins being installed on an MBEE instance.
 
 ### Ports
 
