@@ -21,7 +21,6 @@
 const path = require('path');
 const crypto = require('crypto');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const BaseStrategy = M.load('auth/BaseStrategy');
 const User = M.load('models/User');
 const libCrypto = M.lib.crypto;
 const sani = M.lib.sani;
@@ -34,26 +33,7 @@ const sani = M.lib.sani;
  *
  * @classdesc This
  */
-class LocalStrategy extends BaseStrategy {
-
-  /**
-   * The `LocalStrategy` constructor.
-   */
-
-  constructor() {
-    super();
-    this.name = 'local-strategy';
-    this.authenticate.bind(this);
-    this.handleBasicAuth.bind(this);
-    this.handleTokenAuth.bind(this);
-    this.doLogin.bind(this);
-  }
-
-
-  // There are reasons to have class methods even when they don't use "this" you know?
-  // For example, when an instance of a class is overwriting and abstract base class
-  // to implement an authentication function. Disabling rule in this case.
-  /* eslint-disable class-methods-use-this */
+class LocalStrategy {
 
   /**
    * Handles basic-style authentication. This function gets called both for
@@ -63,38 +43,34 @@ class LocalStrategy extends BaseStrategy {
    * If an error is passed into the callback, authentication fails.
    * If the callback is called with no parameters, the user is authenticated.
    */
-  handleBasicAuth(req, res, username, password, cb) {
-    User.findOne({
-      username: username,
-      deletedOn: null
-    }, (err, user) => {
-      // Check for errors
-      if (err) {
-        cb(err);
-      }
-      if (!user) {
-        cb('Could not find user');
-      }
-      // Compute the password hash on given password
-      const hash = crypto.createHash('sha256');
-      hash.update(user._id.toString());       // salt
-      hash.update(password);                  // password
-      const pwdhash = hash.digest().toString('hex');
-      // Authenticate the user
-      if (user.password === pwdhash) {
-        cb(null, user);
-      }
-      else {
-        cb('Invalid password');
-      }
+  static handleBasicAuth(req, res, username, password) {
+    return new Promise((resolve, reject) => {
+      User.findOne({
+        username: username,
+        deletedOn: null
+      }, (err, user) => {
+        // Check for errors
+        if (err) {
+          return reject(err);
+        }
+        if (!user) {
+          return reject(new Error('Error, no user found'));
+        }
+        // Compute the password hash on given password
+        const hash = crypto.createHash('sha256');
+        hash.update(user._id.toString());       // salt
+        hash.update(password);                  // password
+        const pwdhash = hash.digest().toString('hex');
+
+        // Authenticate the user
+        if (user.password !== pwdhash) {
+          return reject(new Error('Invalid password'));
+        }
+
+        return resolve(user);
+      });
     });
   }
-
-  /* eslint-enable class-methods-use-this */
-
-  // Disabling class-methods-use-this because it doesn't need to do that here.
-  // TODO - Should we make these static methods? Is there a reason to do so or not?
-  /* eslint-disable class-methods-use-this */
 
 
   /**
@@ -105,57 +81,58 @@ class LocalStrategy extends BaseStrategy {
    * If an error is passed into the callback, authentication fails.
    * If the callback is called with no parameters, the user is authenticated.
    */
-  handleTokenAuth(req, res, _token, cb) {
-    // Try to decrypt the token
-    let token = null;
-    try {
-      token = libCrypto.inspectToken(_token);
-    }
-    // If it cannot be decrypted, it is not valid and the
-    // user is not authorized
-    catch (error) {
-      cb(error);
-    }
+  static handleTokenAuth(req, res, _token) {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+      // Try to decrypt the token
+      let token = null;
+      try {
+        token = libCrypto.inspectToken(_token);
+      }
+      // If it cannot be decrypted, it is not valid and the
+      // user is not authorized
+      catch (decryptErr) {
+        return reject(decryptErr);
+      }
 
-    // If this is a session token, we can authenticate the user via
-    // a valid session ID.
-    if (req.session.user) {
-      User.findOne({
-        username: sani.sanitize(req.session.user),
-        deletedOn: null
-      }, (err, user) => {
-        cb((err) || null, user);
-      });
-    }
-    // Otherwise, we must check the token (i.e. this was an API call or
-    // used a token authorization header).
-    // In this case, we make sure the token is not expired.
-    else if (Date.now() < Date.parse(token.expires)) {
-      User.findOne({
-        username: sani.sanitize(token.username),
-        deletedOn: null
-      }, (err, user) => {
-        cb((err) || null, user);
-      });
-    }
-    // If token is expired user is unauthorized
-    else {
-      cb('Token is expired or session is invalid');
-    }
+      // If this is a session token, we can authenticate the user via
+      // a valid session ID.
+      if (req.session.user) {
+        User.findOne({
+          username: sani.sanitize(req.session.user),
+          deletedOn: null
+        }, (findUserSessionErr, user) => {
+          if (findUserSessionErr) {
+            return reject(findUserSessionErr);
+          }
+          return resolve(user);
+        });
+      }
+      // Otherwise, we must check the token (i.e. this was an API call or
+      // used a token authorization header).
+      // In this case, we make sure the token is not expired.
+      else if (Date.now() < Date.parse(token.expires)) {
+        User.findOne({
+          username: sani.sanitize(token.username),
+          deletedOn: null
+        }, (findUserTokenErr, user) => {
+          if (findUserTokenErr) {
+            return reject(findUserTokenErr);
+          }
+          return resolve(user);
+        });
+      }
+      // If token is expired user is unauthorized
+      else {
+        return reject(new Error('Token is expired or session is invalid'));
+      }
+    });
   }
-  /* eslint-enable class-methods-use-this */
-
-
-  // Disabling class-methods-use-this because it doesn't need to do that here.
-  // TODO - Should we make these static methods? Is there a reason to do so or not?
-  /* eslint-disable class-methods-use-this */
 
   /**
    * If login was successful, we generate and auth token and return it to the
    * user.
    */
-
-  doLogin(req, res, next) {
+  static doLogin(req, res, next) {
     M.log.info(`${req.originalUrl} requested by ${req.user.username}`);
 
     // Convenient conversions from ms
@@ -180,8 +157,6 @@ class LocalStrategy extends BaseStrategy {
     M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
     next();
   }
-
-  /* eslint-enable class-methods-use-this */
 
 }
 
