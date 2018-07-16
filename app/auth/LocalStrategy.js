@@ -84,7 +84,7 @@ class LocalStrategy {
         if (user.password !== pwdhash) {
           return reject(new Error('Invalid password'));
         }
-
+        // return user object if authentication was successful
         return resolve(user);
       });
     });
@@ -156,6 +156,7 @@ class LocalStrategy {
           if (findUserTokenErr) {
             return reject(findUserTokenErr);
           }
+          // return User object if authentication was successful
           return resolve(user);
         });
       }
@@ -201,6 +202,7 @@ class LocalStrategy {
     req.session.user = req.user.username;
     req.session.token = token;
     M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
+    // Callback
     next();
   }
 

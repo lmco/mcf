@@ -158,6 +158,7 @@ class LDAPStrategy {
         if (bindErr) {
           return reject(new Error('An error has occured binding to the LDAP server.'));
         }
+        // If no error, return ldapClient bound object.
         return resolve(ldapClient);
       });
     });
@@ -214,6 +215,7 @@ class LDAPStrategy {
             ldapClient.destroy(); // Disconnect from ldap server on failure
             return reject(new Error('Error: Invalid username or password.'));
           }
+          // If entry is found, return LDAP object
           return resolve(person.object);
         });
       });
@@ -236,7 +238,7 @@ class LDAPStrategy {
           ldapClient.destroy(); // Disconnect from ldap server on failure
           return reject(new Error(`An error has occurred on user bind:${err}`));
         }
-
+        // If no error, unbind LDAP server and return the authenticated user object
         M.log.debug(`User [${user[M.config.auth.ldap.attributes.username]
         }] authenticated successfully via LDAP.`);
         ldapClient.destroy(); // Disconnect from ldap server after successful authentication
@@ -261,11 +263,11 @@ class LDAPStrategy {
       .then(foundUser => {
         // if found, update the names and emails of the user and re-save with the local database
         const userSave = foundUser;
-
+        // Update user properties
         userSave.fname = user[M.config.auth.ldap.attributes.firstName];
         userSave.lname = user[M.config.auth.ldap.attributes.lastName];
         userSave.email = user[M.config.auth.ldap.attributes.eMail];
-
+        // Save updated user in database
         userSave.save((saveErr) => {
           if (saveErr) {
             return reject(saveErr);
@@ -288,9 +290,9 @@ class LDAPStrategy {
           email: user[M.config.auth.ldap.attributes.eMail],
           provider: 'ldap'
         };
-
+        // Initialize User object to be saved
         const userSave = new User(initData);
-
+        // Save user in database
         userSave.save((saveErr) => {
           if (saveErr) {
             return reject(saveErr);
