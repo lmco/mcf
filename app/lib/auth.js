@@ -25,6 +25,21 @@ const AuthModule = require(path.join(__dirname, '..', 'auth', M.config.auth.stra
 
 // Error Check - Verify the AuthModule that has been imported implements the proper functions
 
+
+/******************************************************************************
+ *  Authentication functions                                                  *
+ ******************************************************************************/
+
+/**
+ * @description  This function is the main authenticate function that is used to handle any
+ * supported type of authentication from basic, token, and form. This function implements the
+ * different types of authentication according to the strategy set up in the configuration file.
+ *
+ *
+ * @param req The request object from express
+ * @param res The response object from express
+ * @param next The callback used to continue the express authentication flow.
+ */
 function authenticate(req, res, next) { // eslint-disable-line consistent-return
   const authorization = req.headers.authorization;
   let username = null;
@@ -181,21 +196,18 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
 }
 
 /**
- * If login was successful, we generate and auth token and return it to the
- * user.
+ * @description  This function implements doLogin. The purpose of this function is to preform
+ * login type functions such as setting session tokens, storing logged in user in a database, or
+ * writing login attempting in a log file.
+ *
+ * @param req The request object from express
+ * @param res The response object from express
+ * @param next The callback to continue in the express authentication flow.
  */
 function doLogin(req, res, next) {
   AuthModule.doLogin(req, res, next);
 }
 
-
-// const BaseStrategy = require(path.join(__dirname, '..', 'auth', 'BaseStrategy'));
-// const AuthStrategy = require(path.join(__dirname, '..', 'auth', M.config.auth.strategy));
-// const AuthController = new AuthStrategy();
-//
-// if (!(AuthController instanceof BaseStrategy)) {
-//   throw new Error('Error: Authentication strategy does not extend BaseStrategy class!');
-// }
-
+// Export above functions
 module.exports.authenticate = authenticate;
 module.exports.doLogin = doLogin;

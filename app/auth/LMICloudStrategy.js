@@ -29,9 +29,13 @@ const User = M.load('models/User');
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @classdesc This class defines authentication in the LMI cloud environemnt.
+ * @classdesc This class defines authentication in the LMI cloud environment.
  */
 class LMICloudStrategy {
+
+  /******************************************************************************
+   *  LMI CLOUD Authentication Implementations                                  *
+   ******************************************************************************/
 
   /**
    * Handles basic-style authentication. This function gets called both for
@@ -80,28 +84,43 @@ class LMICloudStrategy {
     });
   }
 
-
   /**
-   * Handles token authentication. This function gets called both for
-   * the case of a token auth header or a session token. Either way
-   * the token is provided to this function for auth.
+   * @description  This function implements handleTokenAuth called in the auth.js library file.
+   * The purpose of this function is to implement authentication of a user who has
+   * passed in a session token or bearer token. This particular instance just implements the same
+   * tokenAuth provided by the Local Strategy.
    *
-   * If an error is passed into the callback, authentication fails.
-   * If the callback is called with no parameters, the user is authenticated.
+   * @example
+   * AuthController.handleTokenAuth(req, res, _token)
+   *   .then(user => {
+   *   // do something with authenticated user
+   *   })
+   *   .catch(err => {
+   *     console.log(err);
+   *   })
+   *
+   * @param req The request object from express
+   * @param res The response object from express
+   * @param _token The token the user is attempting to authenticate with.
+   * @returns Promise The local database User object or an error.
    */
   static handleTokenAuth(req, res, _token) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       LocalStrategy.handleTokenAuth(req, res, _token)
-      .then(tokenUser => resolve(tokenUser))
-      .catch(tokenErr => reject(tokenErr));
+      .then(user => resolve(user))
+      .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
     });
   }
 
-
   /**
-   * This function gets called when the user is logged in.
-   * It creates a session token for the user and sets the req.session.token
-   * object to the newly created token.
+   * @description  This function implements doLogin called in the auth.js library file.
+   * The purpose of this function is to preform session or token setup for the node
+   * application so that users can be authorized via token after logging in. This particular
+   * implementation uses the Local Strategy doLogin function.
+   *
+   * @param req The request object from express
+   * @param res The response object from express
+   * @param next The callback to continue in the express authentication flow.
    */
   static doLogin(req, res, next) {
     LocalStrategy.doLogin(req, res, next);

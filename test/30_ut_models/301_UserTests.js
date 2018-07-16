@@ -187,7 +187,7 @@ function deleteUser(done) {
 }
 
 function loginLDAPUser(done) {
-  const AuthController = M.load('lib/auth');
+  const AuthController = M.require('auth.LDAPStrategy');
   const u = M.config.test.username;
   const p = M.config.test.password;
   AuthController.handleBasicAuth(null, null, u, p)

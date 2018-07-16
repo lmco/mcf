@@ -34,8 +34,12 @@ const UserController = M.require('controllers.userController');
  */
 class LDAPStrategy {
 
+  /******************************************************************************
+   *  LDAP Authentication Implementations                                       *
+   ******************************************************************************/
+
   /**
-   * @description  This function overrides the handleBasicAuth of the BaseStrategy.js
+   * @description  This function implements handleBasicAuth called in the auth.js library file.
    * The purpose of this function is to implement authentication via LDAP using a
    * username and password as well as the configuration set up in the config file used.
    *
@@ -55,7 +59,7 @@ class LDAPStrategy {
    * @returns Promise The authenticated user as the User object or an error.
    */
   static handleBasicAuth(req, res, username, password) {
-    // Run through the LDAP helper functions bellow
+    // Run through the LDAP helper functions defined below.
     return new Promise((resolve, reject) => {
       // Connect to database
       LDAPStrategy.ldapConnect()
@@ -76,9 +80,10 @@ class LDAPStrategy {
   }
 
   /**
-   * @description  This function overrides the handleTokenAuth of the BaseStrategy.js
+   * @description  This function implements handleTokenAuth called in the auth.js library file.
    * The purpose of this function is to implement authentication of a user who has
-   * passed in a session token or bearer token.
+   * passed in a session token or bearer token. This particular instance just implements the same
+   * tokenAuth provided by the Local Strategy.
    *
    * @example
    * AuthController.handleTokenAuth(req, res, _token)
@@ -102,10 +107,24 @@ class LDAPStrategy {
     });
   }
 
-
+  /**
+   * @description  This function implements doLogin called in the auth.js library file.
+   * The purpose of this function is to preform session or token setup for the node
+   * application so that users can be authorized via token after logging in. This particular
+   * implementation uses the Local Strategy doLogin function.
+   *
+   * @param req The request object from express
+   * @param res The response object from express
+   * @param next The callback to continue in the express authentication flow.
+   */
   static doLogin(req, res, next) {
     LocalStrategy.doLogin(req, res, next);
   }
+
+
+  /******************************************************************************
+   *  LDAP Helper Functions                                                     *
+   ******************************************************************************/
 
   /**
    * @description  This is a helper function of the lDAPStrategy class that is used

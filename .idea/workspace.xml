@@ -2,26 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d3d8988-8621-4ae4-93ea-c2d0ab6cc6ab" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/app/lib/errors.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/utils.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/20_ut_lib/203_LibError.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/20_ut_lib/204_LibUtils.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/APIController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/APIController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/ElementController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/ElementController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/OrganizationController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/OrganizationController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/ProjectController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/ProjectController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/UIController.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/UIController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/Element.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/Element.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/Organization.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/Organization.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/Project.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/Project.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/User.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/User.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/views/_includes/nav.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/_includes/nav.ejs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mbee.js" beforeDir="false" afterPath="$PROJECT_DIR$/mbee.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth/LDAPStrategy.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/LDAPStrategy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth/LMICloudStrategy.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/LMICloudStrategy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth/LocalStrategy.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/LocalStrategy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/auth.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/30_ut_models/301_UserTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/30_ut_models/301_UserTests.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/30_ut_models/302_OrganizationTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/30_ut_models/302_OrganizationTests.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/30_ut_models/303_ProjectTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/30_ut_models/303_ProjectTests.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/30_ut_models/304_ElementTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/30_ut_models/304_ElementTests.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -38,20 +23,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="LDAPStrategy.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="LDAPStrategy.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="825">
-              <caret line="178" selection-start-line="178" selection-end-line="178" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="mbee.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mbee.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1006">
-              <caret line="131" lean-forward="true" selection-start-line="131" selection-end-line="131" />
+            <state relative-caret-position="2604">
+              <caret line="134" column="5" lean-forward="true" selection-start-line="134" selection-start-column="5" selection-end-line="134" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -59,8 +35,8 @@
       <file leaf-file-name="LocalStrategy.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/auth/LocalStrategy.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="901">
-              <caret line="158" column="3" selection-start-line="158" selection-start-column="3" selection-end-line="158" selection-end-column="3" />
+            <state relative-caret-position="3696">
+              <caret line="176" column="4" lean-forward="true" selection-start-line="176" selection-start-column="4" selection-end-line="176" selection-end-column="4" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -71,20 +47,8 @@
       <file leaf-file-name="LMICloudStrategy.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/auth/LMICloudStrategy.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="775">
-              <caret line="101" column="25" selection-start-line="101" selection-start-column="25" selection-end-line="101" selection-end-column="25" />
-              <folding>
-                <element signature="n#!!doc" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="APIController.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/controllers/APIController.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="446">
-              <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
+            <state relative-caret-position="478">
+              <caret line="25" lean-forward="true" selection-start-line="25" selection-end-line="25" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -95,8 +59,8 @@
       <file leaf-file-name="auth.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/lib/auth.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="703">
-              <caret line="186" selection-start-line="186" selection-end-line="188" selection-end-column="1" />
+            <state relative-caret-position="2802">
+              <caret line="205" column="3" lean-forward="true" selection-start-line="205" selection-start-column="3" selection-end-line="205" selection-end-column="3" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -132,18 +96,18 @@
         <option value="$PROJECT_DIR$/config/production.json" />
         <option value="$PROJECT_DIR$/app/lib/logger.js" />
         <option value="$PROJECT_DIR$/scripts/build.js" />
-        <option value="$PROJECT_DIR$/test/30_ut_models/301_UserTests.js" />
         <option value="$PROJECT_DIR$/scripts/start.js" />
         <option value="$PROJECT_DIR$/config/dev.json" />
         <option value="$PROJECT_DIR$/app/api_routes.js" />
         <option value="$PROJECT_DIR$/app/routes.js" />
         <option value="$PROJECT_DIR$/app/auth/BaseStrategy.js" />
-        <option value="$PROJECT_DIR$/app/auth/LMICloudStrategy.js" />
-        <option value="$PROJECT_DIR$/app/auth/LocalStrategy.js" />
-        <option value="$PROJECT_DIR$/app/lib/auth.js" />
-        <option value="$PROJECT_DIR$/app/auth/LDAPStrategy.js" />
-        <option value="$PROJECT_DIR$/mbee.js" />
         <option value="$PROJECT_DIR$/app/controllers/APIController.js" />
+        <option value="$PROJECT_DIR$/test/30_ut_models/301_UserTests.js" />
+        <option value="$PROJECT_DIR$/mbee.js" />
+        <option value="$PROJECT_DIR$/app/auth/LocalStrategy.js" />
+        <option value="$PROJECT_DIR$/app/auth/LMICloudStrategy.js" />
+        <option value="$PROJECT_DIR$/app/auth/LDAPStrategy.js" />
+        <option value="$PROJECT_DIR$/app/lib/auth.js" />
       </list>
     </option>
   </component>
@@ -203,6 +167,17 @@
               <item name="mbee" type="462c0819:PsiDirectoryNode" />
               <item name="app" type="462c0819:PsiDirectoryNode" />
               <item name="controllers" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mbee" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mbee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mbee" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="30_ut_models" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -273,12 +248,12 @@
       <workItem from="1531156411451" duration="11438000" />
       <workItem from="1531232178453" duration="16748000" />
       <workItem from="1531401847253" duration="20038000" />
-      <workItem from="1531751957064" duration="6312000" />
+      <workItem from="1531751957064" duration="9492000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="67117000" />
+    <option name="totallyTimeSpent" value="70297000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -500,13 +475,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/30_ut_models/301_UserTests.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="852">
-          <caret line="196" column="17" selection-start-line="196" selection-start-column="17" selection-end-line="196" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/start.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="495">
@@ -586,10 +554,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/lib/auth.js">
+    <entry file="file://$PROJECT_DIR$/mbee.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="703">
-          <caret line="186" selection-start-line="186" selection-end-line="188" selection-end-column="1" />
+        <state relative-caret-position="251">
+          <caret line="35" column="3" lean-forward="true" selection-start-line="35" selection-start-column="3" selection-end-line="35" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/APIController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="488">
+          <caret line="33" column="3" lean-forward="true" selection-start-line="33" selection-start-column="3" selection-end-line="33" selection-end-column="3" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/30_ut_models/301_UserTests.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3465">
+          <caret line="175" lean-forward="true" selection-start-line="175" selection-end-line="175" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/auth/LMICloudStrategy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="478">
+          <caret line="25" lean-forward="true" selection-start-line="25" selection-end-line="25" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
@@ -598,18 +590,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/auth/LocalStrategy.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="901">
-          <caret line="158" column="3" selection-start-line="158" selection-start-column="3" selection-end-line="158" selection-end-column="3" />
+        <state relative-caret-position="3696">
+          <caret line="176" column="4" lean-forward="true" selection-start-line="176" selection-start-column="4" selection-end-line="176" selection-end-column="4" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/auth/LMICloudStrategy.js">
+    <entry file="file://$PROJECT_DIR$/app/lib/auth.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="775">
-          <caret line="101" column="25" selection-start-line="101" selection-start-column="25" selection-end-line="101" selection-end-column="25" />
+        <state relative-caret-position="2802">
+          <caret line="205" column="3" lean-forward="true" selection-start-line="205" selection-start-column="3" selection-end-line="205" selection-end-column="3" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
@@ -618,25 +610,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/auth/LDAPStrategy.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="825">
-          <caret line="178" selection-start-line="178" selection-end-line="178" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mbee.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1006">
-          <caret line="131" lean-forward="true" selection-start-line="131" selection-end-line="131" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/APIController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="446">
-          <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
+        <state relative-caret-position="2604">
+          <caret line="134" column="5" lean-forward="true" selection-start-line="134" selection-start-column="5" selection-end-line="134" selection-end-column="5" />
         </state>
       </provider>
     </entry>
