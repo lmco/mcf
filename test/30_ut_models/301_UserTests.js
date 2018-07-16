@@ -11,6 +11,7 @@
  *****************************************************************************/
 /**
  * @fileOverview UserModelTests
+ * @module test/301_UserModel
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

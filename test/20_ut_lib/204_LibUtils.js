@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Lib Utils Tests
+ * @module  test/202_LibUtils
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *

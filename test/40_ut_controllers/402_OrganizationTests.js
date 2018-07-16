@@ -11,7 +11,7 @@
  * NOTE: Commented out test waiting for a bug to be fixed                    *
  *****************************************************************************/
 /**
- * @module  Organization Controller Tests
+ * @module  test/402_OrganizationController
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>

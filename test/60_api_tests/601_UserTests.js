@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  TestAPIBasic.js
+ * @module  test/601_UserAPI
  *
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>

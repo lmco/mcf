@@ -10,6 +10,8 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************
  *
+ * @module test/304_ElementModel
+ * 
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @fileOverview  Tests the Element data model and schema

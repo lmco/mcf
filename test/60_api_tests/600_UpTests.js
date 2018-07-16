@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Project Model Tests
+ * @module test/600_UpAPI
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

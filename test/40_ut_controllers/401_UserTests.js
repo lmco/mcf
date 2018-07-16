@@ -12,6 +12,7 @@
  *****************************************************************************/
 /**
  * @fileOverview UserModelTests
+ * @module test/401_UserController
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *

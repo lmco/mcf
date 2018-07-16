@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Element API Tests
+ * @module  test/604_ElementAPI
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
