@@ -91,29 +91,6 @@ describe(name, function() {
         chai.expect(retOrg.permissions.write).to.include(searchUser._id.toString());
         chai.expect(retOrg.permissions.admin).to.include(searchUser._id.toString());
         done();
-        // const orgData2 = {
-        //   id: 'durmstranginstitute',
-        //   name: 'Durmstrang',
-        //   permissions: {
-        //     admin: [searchUser._id],
-        //     write: [searchUser._id],
-        //     read: [searchUser._id]
-        //   }
-        // };
-        // OrgController.createOrg(user, orgData2)
-        // .then((orgTwo) => {
-        //   secondOrg = orgTwo;
-        //   chai.expect(orgTwo.id).to.equal('durmstranginstitute');
-        //   chai.expect(orgTwo.name).to.equal('Durmstrang');
-        //   chai.expect(orgTwo.permissions.read).to.include(searchUser._id.toString());
-        //   chai.expect(orgTwo.permissions.write).to.include(searchUser._id.toString());
-        //   chai.expect(orgTwo.permissions.admin).to.include(searchUser._id.toString());
-        //   done();
-        // })
-        // .catch((err) => {
-        //   chai.expect(err).to.equal(null);
-        //   done();
-        // });
       })
       .catch((firsterr) => {
         const error1 = JSON.parse(firsterr.message);
@@ -138,17 +115,6 @@ describe(name, function() {
       chai.expect(retOrg.id).to.equal('hogwarts');
       mongoose.connection.close();
       done();
-      // OrgController.removeOrg(user, 'durmstranginstitute', { soft: false })
-      // .then((proj) => {
-      //   chai.expect(proj.id).to.equal('durmstranginstitute');
-      //   mongoose.connection.close();
-      //   done();
-      // })
-      // .catch(function(err) {
-      //   chai.expect(err).to.equal(null);
-      //   mongoose.connection.close();
-      //   done();
-      // });
     })
     .catch(function(err2) {
       const error2 = JSON.parse(err2.message);
