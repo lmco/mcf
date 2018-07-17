@@ -85,7 +85,7 @@ if (fs.existsSync(`${__dirname}/node_modules`) && fs.existsSync(`${__dirname}/pu
     sani: M.require('lib.sanitization'),
     startup: M.require('lib.startup'),
     validators: M.require('lib.validators'),
-    parseJSON: M.require('lib.parseJson')
+    parseJSON: M.require('lib.parse_json')
   };
   module.exports = M;
 }
