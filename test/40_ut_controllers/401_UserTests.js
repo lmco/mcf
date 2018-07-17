@@ -40,10 +40,9 @@ let badAUser = null;
  *------------------------------------*/
 
 describe(name, function() {
- 
- /*-------------------------------------
-  * Before: run before all tests
-  *-------------------------------------*/
+  /*-------------------------------------
+   * Before: run before all tests
+   *-------------------------------------*/
   before(function(done) {
     this.timeout(6000);
     const db = M.load('lib/db');
@@ -57,18 +56,18 @@ describe(name, function() {
       chai.expect(searchUser.username).to.equal(M.config.test.username);
       // Creating a new admin user
       const userData2 = {
-        username: 'jubbathehut',
-        password: 'ilovetoeat',
-        fname: 'Jubba',
-        lname: 'The Hut',
+        username: 'blackpanther',
+        password: 'theheartshapedherb',
+        fname: 'Black',
+        lname: 'Panther',
         admin: true
       };
       UserController.createUser(searchUser, userData2)
       .then(function(anotherUser) {
         badAUser = anotherUser;
-        chai.expect(anotherUser.username).to.equal('jubbathehut');
-        chai.expect(anotherUser.fname).to.equal('Jubba');
-        chai.expect(anotherUser.lname).to.equal('The Hut');
+        chai.expect(anotherUser.username).to.equal('blackpanther');
+        chai.expect(anotherUser.fname).to.equal('Black');
+        chai.expect(anotherUser.lname).to.equal('Panther');
         done();
       })
       .catch(function(err) {
@@ -83,20 +82,20 @@ describe(name, function() {
     });
   });
 
- /*-------------------------------------
-  * After: run after all tests
-  *-------------------------------------*/
+  /*-------------------------------------
+   * After: run after all tests
+   *-------------------------------------*/
   after(function(done) {
     this.timeout(5000);
     // Deleting users used during testing
-    const username = 'darthsidious';
+    const username = 'everettross';
     UserController.removeUser(reqUser, username)
     .then(function(delUser) {
-      chai.expect(delUser).to.equal('darthsidious');
-      const user2 = 'jubbathehut';
+      chai.expect(delUser).to.equal('everettross');
+      const user2 = 'blackpanther';
       UserController.removeUser(reqUser, user2)
       .then(function(delBadUser) {
-        chai.expect(delBadUser).to.equal('jubbathehut');
+        chai.expect(delBadUser).to.equal('blackpanther');
         // Closing db connection
         mongoose.connection.close();
         done();
@@ -115,9 +114,9 @@ describe(name, function() {
     });
   });
 
- /*----------
-  * Tests
-  *----------*/
+  /*----------
+   * Tests
+   *----------*/
   it('should create a user', createNewUser).timeout(3000);
   it('should create an admin user', createAUser).timeout(3000);
   it('should create a non admin user', createNonAUser).timeout(3000);
@@ -154,16 +153,16 @@ describe(name, function() {
  */
 function createNewUser(done) {
   const userData = {
-    username: 'lskywalker',
-    password: 'iamajedi',
-    fname: 'Leigh',
-    lname: 'Skywalker'
+    username: 'shuri',
+    password: 'iamaprincess',
+    fname: 'Shuri',
+    lname: 'Panther'
   };
   UserController.createUser(reqUser, userData)
   .then(function(newUser) {
-    chai.expect(newUser.username).to.equal('lskywalker');
-    chai.expect(newUser.fname).to.equal('Leigh');
-    chai.expect(newUser.lname).to.equal('Skywalker');
+    chai.expect(newUser.username).to.equal('shuri');
+    chai.expect(newUser.fname).to.equal('Shuri');
+    chai.expect(newUser.lname).to.equal('Panther');
     done();
   })
   .catch(function(err) {
@@ -180,17 +179,17 @@ function createNewUser(done) {
  */
 function createAUser(done) {
   const userData = {
-    username: 'darthvader',
-    password: 'iamthechoosenone',
-    fname: 'Aniken',
-    lname: 'Skywalker',
+    username: 'erikkillmonger',
+    password: 'iamtryingtobethepanther',
+    fname: 'Erik',
+    lname: 'Killmonger',
     admin: true
   };
   UserController.createUser(reqUser, userData)
   .then(function(newUser) {
-    chai.expect(newUser.username).to.equal('darthvader');
-    chai.expect(newUser.fname).to.equal('Aniken');
-    chai.expect(newUser.lname).to.equal('Skywalker');
+    chai.expect(newUser.username).to.equal('erikkillmonger');
+    chai.expect(newUser.fname).to.equal('Erik');
+    chai.expect(newUser.lname).to.equal('Killmonger');
     chai.expect(newUser.admin).to.equal(true);
     done();
   })
@@ -209,18 +208,18 @@ function createAUser(done) {
  */
 function createNonAUser(done) {
   const userData = {
-    username: 'darthsidious',
-    password: 'sithlord',
-    fname: 'Darth',
-    lname: 'Sidious',
+    username: 'klaw',
+    password: 'iendupdying',
+    fname: 'Klaw',
+    lname: 'Klaw',
     admin: false
   };
   UserController.createUser(reqUser, userData)
   .then(function(newUser) {
     nonAUser = newUser;
-    chai.expect(newUser.username).to.equal('darthsidious');
-    chai.expect(newUser.fname).to.equal('Darth');
-    chai.expect(newUser.lname).to.equal('Sidious');
+    chai.expect(newUser.username).to.equal('klaw');
+    chai.expect(newUser.fname).to.equal('Klaw');
+    chai.expect(newUser.lname).to.equal('Klaw');
     done();
   })
   .catch(function(err) {
@@ -238,16 +237,16 @@ function createNonAUser(done) {
  */
 function createUser02(done) {
   const userData = {
-    username: 'hsolo',
-    password: 'chewy',
-    fname: 'Han',
-    lname: 'Solo'
+    username: 'everettross',
+    password: 'iamFBI',
+    fname: 'Everett',
+    lname: 'K Ross'
   };
   UserController.createUser(reqUser, userData)
   .then(function(newUser) {
-    chai.expect(newUser.username).to.equal('hsolo');
-    chai.expect(newUser.fname).to.equal('Han');
-    chai.expect(newUser.lname).to.equal('Solo');
+    chai.expect(newUser.username).to.equal('everettross');
+    chai.expect(newUser.fname).to.equal('Everett');
+    chai.expect(newUser.lname).to.equal('K Ross');
     done();
   })
   .catch(function(err) {
@@ -257,16 +256,16 @@ function createUser02(done) {
 }
 
 /**
- * Attempts to create a user using the User Controller with a 
+ * Attempts to create a user using the User Controller with a
  * non admin user. An error should be thrown with this test
  * saying the requesting user does not have permissions.
  */
 function nonACreate(done) {
   const userData = {
-    username: 'kyloren',
-    password: 'fakevader',
-    fname: 'Kylo',
-    lname: 'Ren'
+    username: 'njobu',
+    password: 'fatheroferik',
+    fname: 'NJobi',
+    lname: 'Panther Dad'
   };
   UserController.createUser(nonAUser, userData)
   .then(function(newUser) {
@@ -281,16 +280,16 @@ function nonACreate(done) {
 
 /**
  * Tests creating a user with invalid input into
- * the username. An error should be thrown due to 
+ * the username. An error should be thrown due to
  * not being able to save the username.
  */
 
 function badUser(done) {
   const userData = {
     username: '',
-    password: 'iamnotajedi',
+    password: 'iamnotblackpanther',
     fname: 'Not',
-    lname: 'Skywalker'
+    lname: 'Black Panther'
   };
   UserController.createUser(reqUser, userData)
   .then(function() {
@@ -315,7 +314,7 @@ function invalidUser(done) {
     username: '$<script>',
     password: 'iaminvalid',
     fname: 'Fake',
-    lname: 'Leah'
+    lname: 'Panther'
   };
   UserController.createUser(reqUser, userData)
   .then(function() {
@@ -331,17 +330,17 @@ function invalidUser(done) {
 }
 
 /**
- * Tests creating a user with username already 
+ * Tests creating a user with username already
  * created. Test should throw an error saying
  * user already exists.
  */
 
 function copyCatUser(done) {
   const userData = {
-    username: 'lskywalker',
-    password: 'nottherealLuke',
-    fname: 'Leigh',
-    lname: 'Skywalker'
+    username: 'shuri',
+    password: 'nottherealShuri',
+    fname: 'Shuri',
+    lname: 'Shuri'
   };
   UserController.createUser(reqUser, userData)
   .then(function() {
@@ -357,20 +356,20 @@ function copyCatUser(done) {
 }
 
 /**
- * Updating the last name of the first user 
+ * Updating the last name of the first user
  * with the user controller.
  */
 
 function updateLName(done) {
-  const username = 'lskywalker';
+  const username = 'blackpanther';
   const userData = {
-    lname: 'Solo'
+    fname: 'Okoye'
   };
   UserController.updateUser(reqUser, username, userData)
   .then(function(updatedUser) {
-    chai.expect(updatedUser.username).to.equal('lskywalker');
-    chai.expect(updatedUser.fname).to.equal('Leigh');
-    chai.expect(updatedUser.lname).to.equal('Solo');
+    chai.expect(updatedUser.username).to.equal('blackpanther');
+    chai.expect(updatedUser.fname).to.equal('Okoye');
+    chai.expect(updatedUser.lname).to.equal('Panther');
     done();
   })
   .catch(function(err) {
@@ -387,13 +386,13 @@ function updateLName(done) {
  */
 
 function updateUName(done) {
-  const username = 'hsolo';
+  const username = 'erikkillmonger';
   const userData = {
-    username: 'hansolo'
+    username: 'goldpanther'
   };
   UserController.updateUser(reqUser, username, userData)
   .then(function(updatedUser) {
-    chai.expect(updatedUser.username).to.equal('hansolo');
+    chai.expect(updatedUser.username).to.equal('goldpanther');
     done();
   })
   .catch(function(err) {
@@ -404,14 +403,14 @@ function updateUName(done) {
 }
 
 /**
- * Tests to update second user with 
- * requesting user non admin user. 
+ * Tests to update second user with
+ * requesting user non admin user.
  * Test should throw error about user not
  * having permissions.
  */
 
 function updateAttempt(done) {
-  const username = 'hsolo';
+  const username = 'blackpanther';
   const userData = {
     lname: 'Faker'
   };
@@ -433,9 +432,9 @@ function updateAttempt(done) {
  */
 
 function updateNoUser(done) {
-  const username = 'fakelia';
+  const username = 'fakeblackpanther';
   const userData = {
-    lname: 'Leah'
+    fname: 'Nakia'
   };
   UserController.updateUser(reqUser, username, userData)
   .then(function() {
@@ -453,12 +452,12 @@ function updateNoUser(done) {
  * Tests finding the user with user controller.
  */
 function findUser(done) {
-  const username = 'hsolo';
+  const username = 'blackpanther';
   UserController.findUser(username)
   .then(function(searchUser) {
-    chai.expect(searchUser.username).to.equal('hsolo');
-    chai.expect(searchUser.fname).to.equal('Han');
-    chai.expect(searchUser.lname).to.equal('Solo');
+    chai.expect(searchUser.username).to.equal('blackpanther');
+    chai.expect(searchUser.fname).to.equal('Okoye');
+    chai.expect(searchUser.lname).to.equal('Panther');
     done();
   })
   .catch(function(err) {
@@ -474,10 +473,10 @@ function findUser(done) {
  * user.
  */
 function noFindUser(done) {
-  const username = 'nouser';
+  const username = 'nopanther';
   UserController.findUser(username)
   .then(function(searchUser) {
-    chai.expect(searchUser).to.equal('nouser');
+    chai.expect(searchUser).to.equal('nopanther');
     done();
   })
   .catch(function(err) {
@@ -487,17 +486,17 @@ function noFindUser(done) {
   });
 }
 
-/*
+/**
  * Tests deleting a user that does not exist.
  * An error is thrown saying the user does not
  * exist.
  */
 
 function fakeDelete(done) {
-  const username = 'notreal';
+  const username = 'wkabi';
   UserController.removeUser(reqUser, username)
   .then(function(delUser) {
-    chai.expect(delUser).to.equal('notreal');
+    chai.expect(delUser).to.equal('wkabi');
     done();
   })
   .catch(function(err) {
@@ -507,15 +506,15 @@ function fakeDelete(done) {
   });
 }
 
-/*
- * Tests deleting a user with a 
+/**
+ * Tests deleting a user with a
  * requesting user not an admin user.
- * An error should be thrown saying the user 
+ * An error should be thrown saying the user
  * does not have permissions.
  */
 
 function nonADelete(done) {
-  const username = 'lskywalker';
+  const username = 'shuri';
   UserController.removeUser(nonAUser, username)
   .then(function(delUser) {
     chai.assert(true === false);
@@ -527,13 +526,13 @@ function nonADelete(done) {
   });
 }
 
-/*
+/**
  * Tests a user attempting to delete themselves.
  * An error is thrown saying they cannot delete themselves.
  */
 
 function deleteSelf(done) {
-  const username = 'jubbathehut';
+  const username = 'blackpanther';
   UserController.removeUser(badAUser, username)
   .then(function() {
     chai.assert(true === false);
@@ -547,15 +546,15 @@ function deleteSelf(done) {
 }
 
 
-/*
+/**
  * Tests deleting a user with the user controller.
  */
 
 function deleteUser(done) {
-  const username = 'lskywalker';
+  const username = 'shuri';
   UserController.removeUser(reqUser, username)
   .then(function(delUser) {
-    chai.expect(delUser).to.equal('lskywalker');
+    chai.expect(delUser).to.equal('shuri');
     done();
   })
   .catch(function(err) {
@@ -565,16 +564,16 @@ function deleteUser(done) {
   });
 }
 
-/*
- * Tests deleting the second user using the user 
+/**
+ * Tests deleting the second user using the user
  * controller.
  */
 
 function deleteUser02(done) {
-  const username = 'hsolo';
+  const username = 'erikkillmonger';
   UserController.removeUser(reqUser, username)
   .then(function(delUser) {
-    chai.expect(delUser).to.equal('hsolo');
+    chai.expect(delUser).to.equal('erikkillmonger');
     done();
   })
   .catch(function(err) {
@@ -584,15 +583,15 @@ function deleteUser02(done) {
   });
 }
 
-/*
+/**
  * Tests deleting the user admin created.
  */
 
 function deleteAUser(done) {
-  const username = 'darthvader';
+  const username = 'klaw';
   UserController.removeUser(reqUser, username)
   .then(function(delUser) {
-    chai.expect(delUser).to.equal('darthvader');
+    chai.expect(delUser).to.equal('klaw');
     done();
   })
   .catch(function(err) {

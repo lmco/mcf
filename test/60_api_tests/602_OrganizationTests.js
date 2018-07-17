@@ -15,18 +15,13 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * 
+ *
  * @description  This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code we want to make sure everything still
  * works as it should. These API controller tests are specifically for the Organization
- * API tests: posting, putting, getting, and deleting orgs. Some tests are 
+ * API tests: posting, putting, getting, and deleting orgs. Some tests are
  * conducting with invalid inputs for the org api controlls.
- * 
- * 
- * NOTES: Tests Basic API functionality with Organizations.
- * ASK ABOUT REJECT PUT NAME
- * ASK ABOUT TESTING WITH NO USER
  */
 
 const path = require('path');
@@ -181,8 +176,8 @@ function putOrg01(done) {
  * Attempts to make an UPDATE request to api/orgs/org2. This has
  * an invalid name for updating the org and therefore
  * will throw an error.
- * Throws an internal service error?
- * Do we want that instead of bad request?
+ * Throws an internal service error 500 Internal Service Error
+ * JIRA TASK: MBX-220 bug fixes error code
  */
 
 function rejectPutName(done) {

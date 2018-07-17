@@ -40,6 +40,7 @@ describe(name, function() {
    * Before: runs before all tests
    *-------------------------------------*/
   before(function() {
+    this.timeout(5000);
     // Connect to database
     const db = M.load('lib/db');
     db.connect();
@@ -52,8 +53,8 @@ describe(name, function() {
         // Otherwise,
         // Create a parent organization before creating any projects
         org = new Org({
-          id: 'empire',
-          name: 'Galactic Empire',
+          id: 'avengers',
+          name: 'Age of Ultron',
           permissions: {
             admin: [user._id],
             write: [user._id],
@@ -109,10 +110,10 @@ function createProject(done) {
     }
     // Otherwise,
     // Create a project
-    const id = 'dthstr';
+    const id = 'gaurdiansofgalaxy';
     const newProject = new Project({
       id: id,
-      name: 'Death Star',
+      name: 'Gaurdians of the Galaxy',
       org: org._id,
       permissions: {
         admin: [user._id],
@@ -139,7 +140,7 @@ function softDeleteProject(done) {
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-  Project.findOne({ id: 'dthstr' })
+  Project.findOne({ id: 'gaurdiansofgalaxy' })
   .exec((err, proj) => {
     proj.deleted = true;
     proj.save((saveErr) => {
@@ -160,7 +161,7 @@ function softDeleteProject(done) {
  * Deletes the organization.
  */
 function deleteProject(done) {
-  Project.findOneAndRemove({ id: 'dthstr' }, function(err) {
+  Project.findOneAndRemove({ id: 'gaurdiansofgalaxy' }, function(err) {
     chai.expect(err).to.equal(null);
     done();
   });

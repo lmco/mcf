@@ -67,8 +67,8 @@ describe(name, () => {
  */
 function createOrg(done) {
   const org = new Org({
-    id: 'empire',
-    name: 'Galactic Empire'
+    id: 'avengers',
+    name: 'Infinity Stone'
   });
   org.save((err) => {
     if (err) {
@@ -87,7 +87,7 @@ function softDeleteOrg(done) {
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-  Org.findOne({ id: 'empire' })
+  Org.findOne({ id: 'avengers' })
   .exec((err, org) => {
     org.deleted = true;
     org.save((saveErr) => {
@@ -109,7 +109,7 @@ function softDeleteOrg(done) {
  */
 function deleteOrg(done) {
   Org.findOneAndRemove({
-    id: 'empire'
+    id: 'avengers'
   }, (err) => {
     chai.expect(err).to.equal(null);
     done();
