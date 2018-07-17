@@ -67,15 +67,11 @@ describe(name, function() {
           OrgController.createOrg(user, orgData)
           .then((retOrg) => {
             org = retOrg;
-            ProjController.createProject(user, { id: 'deathstar', name: 'Death Star', org: { id: org.id } })
-            .then((retProj) => {
-              proj = retProj;
-              done();
-            })
-            .catch((projError) => {
-              chai.expect(projError.message).to.equal(null);
-              done();
-            });
+            return ProjController.createProject(user, {id: 'deathstar', name: 'Death Star', org: {id: org.id}});
+          })
+          .then((retProj) => {
+            proj = retProj;
+            done();
           })
           .catch((orgError) => {
             chai.expect(orgError.message).to.equal(null);
@@ -119,7 +115,7 @@ describe(name, function() {
   it('should update an element', updateElement);
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
-  it('should soft delete all elements', softDeleteAllElements);
+  it('should soft delete all elements', softDeleteAllElements).timeout(3000);
   it('should hard delete all elements', hardDeleteAllElements);
 });
 
@@ -175,15 +171,11 @@ function createChildElement(done) {
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem1');
     chai.expect(retElem.parent).to.not.equal(null);
-    ElemController.findElement(user, org.id, proj.id, 'elem0')
-    .then((retElem2) => {
-      chai.expect(retElem2.contains.length).to.equal(1);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+    return ElemController.findElement(user, org.id, proj.id, 'elem0');
+  })
+  .then((retElem2) => {
+    chai.expect(retElem2.contains.length).to.equal(1);
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
@@ -211,15 +203,11 @@ function createBlock(done) {
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem2');
     chai.expect(retElem.parent).to.not.equal(null);
-    ElemController.findElement(user, org.id, proj.id, 'elem0')
-    .then((retElem2) => {
-      chai.expect(retElem2.contains.length).to.equal(2);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+    return ElemController.findElement(user, org.id, proj.id, 'elem0');
+  })
+  .then((retElem2) => {
+    chai.expect(retElem2.contains.length).to.equal(2);
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
@@ -342,29 +330,25 @@ function softDeleteElement(done) {
   ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: true })
   .then((retElem) => {
     chai.expect(retElem.deleted).to.equal(true);
-    ElemController.findElement(user, org.id, proj.id, 'elem0')
-    .then((retElem2) => {
-      chai.expect(retElem2).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Element not found.');
-      chai.expect(error.status).to.equal(404);
-
-      // Search for soft deleted elements
-      ElemController.findElement(user, org.id, proj.id, 'elem0', true)
-      .then((retElem2) => {
-        chai.expect(retElem2.id).to.equal('elem0');
-        done();
-      })
-      .catch((error2) => {
-        chai.expect(error2.description).to.equal(null);
-        done();
-      });
-    });
+    return ElemController.findElement(user, org.id, proj.id, 'elem0');
+  })
+  .then((retElem2) => {
+    chai.expect(retElem2).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.description).to.equal('Element not found.');
+    chai.expect(error.status).to.equal(404);
+  });
+
+  // Search for soft deleted elements
+  ElemController.findElement(user, org.id, proj.id, 'elem0', true)
+  .then((retElem2) => {
+    chai.expect(retElem2.id).to.equal('elem0');
+    done();
+  })
+  .catch((error2) => {
+    chai.expect(error2.description).to.equal(null);
     done();
   });
 }
@@ -375,19 +359,15 @@ function softDeleteElement(done) {
 function hardDeleteElement(done) {
   ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: false })
   .then(() => {
-    ElemController.findElement(user, org.id, proj.id, 'elem0', true)
-    .then((retElem2) => {
-      chai.expect(retElem2).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Element not found.');
-      chai.expect(error.status).to.equal(404);
-      done();
-    });
+    return ElemController.findElement(user, org.id, proj.id, 'elem0', true);
+  })
+  .then((retElem2) => {
+    chai.expect(retElem2).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.description).to.equal('Element not found.');
+    chai.expect(error.status).to.equal(404);
     done();
   });
 }
@@ -398,15 +378,11 @@ function hardDeleteElement(done) {
 function softDeleteAllElements(done) {
   ElemController.removeElements(user, org.id, proj.id, { soft: true })
   .then(() => {
-    ElemController.findElements(user, org.id, proj.id)
-    .then((retElems2) => {
-      chai.expect(retElems2.length).to.equal(3);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+    return ElemController.findElements(user, org.id, proj.id);
+  })
+  .then((retElems2) => {
+    chai.expect(retElems2.length).to.equal(3);
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
@@ -420,15 +396,11 @@ function softDeleteAllElements(done) {
 function hardDeleteAllElements(done) {
   ElemController.removeElements(user, org.id, proj.id, { soft: false })
   .then(() => {
-    ElemController.findElements(user, org.id, proj.id)
-    .then((retElems2) => {
-      chai.expect(retElems2.length).to.equal(0);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+    return ElemController.findElements(user, org.id, proj.id);
+  })
+  .then((retElems2) => {
+    chai.expect(retElems2.length).to.equal(0);
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
