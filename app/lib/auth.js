@@ -60,8 +60,10 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     M.log.debug('Authorization header found');
     // Check it is a valid auth header
     const parts = authorization.split(' ');
+    // Error Check - make sure two credentials were passed in
     if (parts.length < 2) {
       M.log.debug('Parts length < 2');
+      // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api')) ? res.status(400).send('Bad Request') : res.redirect('/login');
     }
     // Get the auth scheme and check auth scheme is basic
@@ -80,28 +82,34 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
       M.log.verbose('Authenticating user via Basic Token ...');
       // Get credentials from the auth header
       const credentials = Buffer.from(parts[1], 'base64').toString().split(':');
+      // Error Check - make sure two credentials were passed in
       if (credentials.length < 2) {
         M.log.debug('Credentials length < 2');
+        // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api')) ? res.status(400).send('Bad Request') : res.redirect('/login');
       }
+      // Sanitize username
       username = sani.sanitize(credentials[0]);
       password = credentials[1];
       // Error check - make sure username/password are not empty
       if (!username || !password || username === '' || password === '') {
         M.log.debug('Username or password not provided.');
+        // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
           : res.redirect(`/login?next=${req.originalUrl}`);
       }
-      // Handle basic auth
+      // Handle Basic Authentication
       AuthModule.handleBasicAuth(req, res, username, password)
       .then(user => {
         M.log.info(`Authenticated [${user.username}] via Basic Auth`);
+        // set user req object for express routes
         req.user = user;
         next();
       })
       .catch(err => {
-        M.log.error(err);
+        err.log();
+        // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
           : res.redirect(`/login?next=${req.originalUrl}`);
@@ -117,15 +125,19 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
      */
     else if (RegExp('Bearer').test(scheme)) {
       M.log.verbose('Authenticating user via Token Auth ...');
+      // Convert token to string
       const token = Buffer.from(parts[1], 'utf8').toString();
+      // Handle Token Authentication
       AuthModule.handleTokenAuth(req, res, token)
       .then(user => {
         M.log.info(`Authenticated [${user.username}] via Token Auth`);
+        // set user req object for express routes
         req.user = user;
         next();
       })
       .catch(err => {
-        M.log.error(err);
+        err.log();
+        // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
           : res.redirect(`/login?next=${req.originalUrl}`);
@@ -134,6 +146,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     // Other authorization header
     else {
       M.log.verbose('Invalid authorization scheme.');
+      // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
         : res.redirect(`/login?next=${req.originalUrl}`);
@@ -149,14 +162,17 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
   else if (req.session.token) {
     M.log.verbose('Authenticating user via Session Token Auth...');
     const token = req.session.token;
+    // Handle Token Authentication
     AuthModule.handleTokenAuth(req, res, token)
     .then(user => {
       M.log.info(`Authenticated [${user.username}] via Session Token Auth`);
+      // set user req object for express routes
       req.user = user;
       next();
     })
     .catch(err => {
-      M.log.error(err);
+      err.log();
+      // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
         : res.redirect(`/login?next=${req.originalUrl}`);
@@ -173,24 +189,28 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
    */
   else if (req.body.username && req.body.password) {
     M.log.verbose('Authenticating user via Form Input Auth ...');
+    // Sanitize username
     username = sani.sanitize(req.body.username);
     password = req.body.password;
     // Error check - make sure username/password are not empty
     if (!username || !password || username === '' || password === '') {
       M.log.debug('Username or password not provided.');
+      // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
         : res.redirect(`/login?next=${req.originalUrl}`);
     }
-    // Handle basic auth
+    // Handle Basic Authentication
     AuthModule.handleBasicAuth(req, res, username, password)
     .then(user => {
       M.log.info(`Authenticated [${user.username}] via Form Input`);
+      // set user req object for express routes
       req.user = user;
       next();
     })
     .catch(err => {
-      M.log.error(err);
+      err.log();
+      // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
         : res.redirect(`/login?next=${req.originalUrl}`);
@@ -200,6 +220,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     M.log.verbose(`"${req.originalUrl}" requested with`
       + ' no valid authentication method provided.'
       + ' Redirecting to "/login" ...');
+    // return proper error for API route or redirect for UI
     return (req.originalUrl.startsWith('/api'))
       ? res.status(401).send('Unauthorized')
       : res.redirect(`/login?next=${req.originalUrl}`);

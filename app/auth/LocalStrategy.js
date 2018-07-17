@@ -24,6 +24,7 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.load('models/User');
 const libCrypto = M.lib.crypto;
 const sani = M.lib.sani;
+const errors = M.require('lib/errors');
 
 
 /**
@@ -66,13 +67,13 @@ class LocalStrategy {
       User.findOne({
         username: username,
         deletedOn: null
-      }, (err, user) => {
+      }, (findUserErr, user) => {
         // Check for errors
-        if (err) {
-          return reject(err);
+        if (findUserErr) {
+          return reject(findUserErr);
         }
         if (!user) {
-          return reject(new Error('Error, no user found'));
+          return reject(new errors.CustomError('No user found', 401));
         }
         // Compute the password hash on given password
         const hash = crypto.createHash('sha256');
@@ -82,7 +83,7 @@ class LocalStrategy {
 
         // Authenticate the user
         if (user.password !== pwdhash) {
-          return reject(new Error('Invalid password'));
+          return reject(new errors.CustomError('Invalid password', 401));
         }
         // return user object if authentication was successful
         return resolve(user);
@@ -162,7 +163,7 @@ class LocalStrategy {
       }
       // If token is expired user is unauthorized
       else {
-        return reject(new Error('Token is expired or session is invalid'));
+        return reject(new errors.CustomError('Token is expired or session is invalid', 401));
       }
     });
   }

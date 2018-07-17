@@ -24,6 +24,7 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const LocalStrategy = M.require('auth.LocalStrategy');
 const User = M.require('models.User');
 const UserController = M.require('controllers.userController');
+const errors = M.require('lib.errors');
 
 /**
  * LDAPStrategy
@@ -156,7 +157,7 @@ class LDAPStrategy {
       ldapClient.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (bindErr) => {
         // Error Check - Return error if LDAP server bind fails
         if (bindErr) {
-          return reject(new Error('An error has occured binding to the LDAP server.'));
+          return reject(bindErr);
         }
         // If no error, return ldapClient bound object.
         return resolve(ldapClient);
@@ -207,13 +208,13 @@ class LDAPStrategy {
           person = entry;
         });
         // If error returned, reject eh search with an error
-        result.on('error', (error) => reject(new Error(`Error: ${error.message}`)));
+        result.on('error', (searchErr) => reject(searchErr));
         // On callback, return an error if the user was not found or return the ldap entry.
         result.on('end', (status) => {
           M.log.debug(status);
           if (!person) {
             ldapClient.destroy(); // Disconnect from ldap server on failure
-            return reject(new Error('Error: Invalid username or password.'));
+            return reject(new errors.CustomError('Error: Invalid username or password.', 401));
           }
           // If entry is found, return LDAP object
           return resolve(person.object);
@@ -232,11 +233,11 @@ class LDAPStrategy {
     M.log.debug(`Authenticating ${user[M.config.auth.ldap.attributes.username]} ...`);
     // define promise for function
     return new Promise((resolve, reject) => {
-      ldapClient.bind(user.dn, password, (err) => {
+      ldapClient.bind(user.dn, password, (authErr) => {
         // If an error occurs, fail.
-        if (err) {
+        if (authErr) {
           ldapClient.destroy(); // Disconnect from ldap server on failure
-          return reject(new Error(`An error has occurred on user bind:${err}`));
+          return reject(authErr);
         }
         // If no error, unbind LDAP server and return the authenticated user object
         M.log.debug(`User [${user[M.config.auth.ldap.attributes.username]

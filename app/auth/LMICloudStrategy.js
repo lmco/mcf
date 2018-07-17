@@ -23,6 +23,7 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const LocalStrategy = M.require('auth.LocalStrategy');
 const LDAPStrategy = M.require('auth.LDAPStrategy');
 const User = M.load('models/User');
+const errors = M.require('lib.errors');
 
 /**
  * LMICloudStrategy
@@ -50,10 +51,10 @@ class LMICloudStrategy {
         deletedOn: null
       })
       .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
-      .exec((err, users) => { // eslint-disable-line consistent-return
+      .exec((findUserErr, users) => { // eslint-disable-line consistent-return
         // Check for errors
-        if (err) {
-          return reject(err);
+        if (findUserErr) {
+          return reject(findUserErr);
         }
         // If user found and their provider is local,
         // do local authentication
@@ -75,7 +76,7 @@ class LMICloudStrategy {
         else {
           M.log.debug('Found Users: ');
           M.log.debug(users);
-          return reject(new Error('More than one User found'));
+          return reject(new errors.CustomError('More than one User found'));
         }
       });
     });
