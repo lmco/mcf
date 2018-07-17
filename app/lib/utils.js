@@ -23,6 +23,14 @@ const path = require('path');
 const fs = require('fs');
 let pluginFiles = null;
 
+module.exports.timeConversions = {
+  MILLISECONDS: 1,
+  SECONDS: 1000,
+  MINUTES: 60 * 1000,
+  HOURS: 60 * 60 * 1000,
+  DAYS: 24 * 60 * 60 * 1000
+};
+
 module.exports.getPluginNames = function getPluginNames() {
   if (M.config.server.plugins.enabled) {
     // Create a list of available plugins
