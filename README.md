@@ -96,6 +96,16 @@ different behavior between approaches.
 In short, you can also build MBEE with `npm run build`, `yarn build`, or
 `node scripts/build.js`. They'll all do the same thing.
 
+#### Gulp-React Warnings
+One Dev-Dependencies, [gulp-react](https://www.npmjs.com/package/gulp-react), 
+is currently dependent on two deprecated modules known as 
+[gulp-util](https://www.npmjs.com/package/gulp-util) and 
+[react-tools](https://www.npmjs.com/package/react-tools). As of now, gulp-react 
+has yet to update their module to remove these dependencies and thus, warnings
+occur. These warnings have no impact on MBEE or production code as the module
+is only used to build the application. If gulp-react is updated in the future,
+the module will be updated.
+
 ### Running MBEE
 
 The fastest and easiest way to run MBEE is to run `node mbee start`. This will
