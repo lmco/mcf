@@ -26,10 +26,12 @@ const User = M.require('models/User');
 const Org = M.require('models/Organization');
 const Project = M.require('models/Project');
 const Element = M.require('models/Element');
+const AuthController = M.load('lib/auth');
 
 // This is so the same org and project can be referenced across test functions
 let org = null;
 let project = null;
+let user = null;
 
 /*------------------------------------
  *       Main
@@ -47,64 +49,65 @@ describe(name, function() {
       const db = M.load('lib/db');
       db.connect();
 
-      // Ensure the test user exists
-      User.findOne({
-        username: M.config.test.username
-      })
-      .exec((errUser, user) => {
-        // Check if error occurred
-        if (errUser) {
-          M.log.error(errUser);
-          chai.expect(errUser).to.equal(null);
-        }
+      const u = M.config.test.username;
+      const p = M.config.test.password;
+      AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+        chai.expect(err).to.equal(null);
+        chai.expect(ldapuser.username).to.equal(M.config.test.username);
+        User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+          (updateErr, userUpdate) => {
+            chai.expect(updateErr).to.equal(null);
+            chai.expect(userUpdate).to.not.equal(null);
+            user = userUpdate;
 
-        // Create the org to be used for testing
-        const newOrg = new Org({
-          id: 'empire',
-          name: 'Galactic Empire',
-          permissions: {
-            admin: [user._id],
-            write: [user._id],
-            read: [user._id]
-          }
-        });
+            // Create the org to be used for testing
+            const newOrg = new Org({
+              id: 'empire',
+              name: 'Galactic Empire',
+              permissions: {
+                admin: [user._id],
+                write: [user._id],
+                read: [user._id]
+              }
+            });
 
-        // Save the org
-        newOrg.save((orgSaveErr, savedOrg) => {
-          // Error check - make sure there is no error on org save
-          if (orgSaveErr) {
-            M.log.error(orgSaveErr);
-            chai.expect(orgSaveErr).to.equal(null);
-          }
+            // Save the org
+            newOrg.save((orgSaveErr, savedOrg) => {
+              // Error check - make sure there is no error on org save
+              if (orgSaveErr) {
+                M.log.error(orgSaveErr);
+                chai.expect(orgSaveErr).to.equal(null);
+              }
 
-          org = savedOrg;
+              org = savedOrg;
 
-          // Create the new project
-          const newProject = new Project({
-            id: 'deathstar',
-            name: 'Death Star',
-            org: org._id,
-            permissions: {
-              admin: [user._id],
-              write: [user._id],
-              read: [user._id]
-            },
-            uid: `${org.id}:deathstar`
+              // Create the new project
+              const newProject = new Project({
+                id: 'deathstar',
+                name: 'Death Star',
+                org: org._id,
+                permissions: {
+                  admin: [user._id],
+                  write: [user._id],
+                  read: [user._id]
+                },
+                uid: `${org.id}:deathstar`
+              });
+
+              newProject.save((projectSaveErr, savedProject) => {
+                // Error check - make sure there is no error
+                if (projectSaveErr) {
+                  M.log.error(projectSaveErr);
+                  chai.expect(projectSaveErr).to.equal(null);
+                }
+
+                project = savedProject;
+
+                // Resolve the promise
+                return resolve();
+              });
+            });
           });
-
-          newProject.save((projectSaveErr, savedProject) => {
-            // Error check - make sure there is no error
-            if (projectSaveErr) {
-              M.log.error(projectSaveErr);
-              chai.expect(projectSaveErr).to.equal(null);
-            }
-
-            project = savedProject;
-
-            // Resolve the promise
-            return resolve();
-          });
-        });
       });
     });
   });
@@ -136,10 +139,14 @@ describe(name, function() {
         }
         // Expect error to be null
         chai.expect(orgRemoveErr).to.equal(null);
-
-        // Once db items are removed, close the db connection and finish
-        mongoose.connection.close();
-        done();
+        // Delete reqUser
+        User.findOneAndRemove({
+          username: M.config.test.username
+        }, (err) => {
+          chai.expect(err).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       });
     });
   });

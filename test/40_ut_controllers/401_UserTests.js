@@ -26,7 +26,9 @@ const filename = module.filename;
 const name = filename.split('/')[filename.split('/').length - 1];
 
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const User = M.require('models/User');
 const UserController = M.load('controllers/UserController');
+const AuthController = M.load('lib/auth');
 
 let reqUser = null;
 let nonAUser = null;
@@ -43,61 +45,66 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    const username = M.config.test.username;
-    // Finding a Requesting Admin
-    UserController.findUser(username)
-    .then(function(searchUser) {
-      reqUser = searchUser;
-      chai.expect(searchUser.username).to.equal(M.config.test.username);
-      done();
-      // const userData2 = {
-      //   username: 'jubbathehut',
-      //   password: 'ilovetoeat',
-      //   fname: 'Jubba',
-      //   lname: 'The Hut',
-      //   admin: true
-      // };
-      // UserController.createUser(searchUser, userData2)
-      // .then(function(anotherUser) {
-      //   badAUser = anotherUser;
-      //   chai.expect(anotherUser.username).to.equal('jubbathehut');
-      //   chai.expect(anotherUser.fname).to.equal('Jubba');
-      //   chai.expect(anotherUser.lname).to.equal('The Hut');
-      //   done();
-      // })
-      // .catch(function(err) {
-      //   chai.expect(err).to.equal(null);
-      //   done();
-      // });
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          reqUser = userUpdate;
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          done();
+          // const userData2 = {
+          //   username: 'jubbathehut',
+          //   password: 'ilovetoeat',
+          //   fname: 'Jubba',
+          //   lname: 'The Hut',
+          //   admin: true
+          // };
+          // UserController.createUser(searchUser, userData2)
+          // .then(function(anotherUser) {
+          //   badAUser = anotherUser;
+          //   chai.expect(anotherUser.username).to.equal('jubbathehut');
+          //   chai.expect(anotherUser.fname).to.equal('Jubba');
+          //   chai.expect(anotherUser.lname).to.equal('The Hut');
+          //   done();
+          // })
+          // .catch(function(err) {
+          //   chai.expect(err).to.equal(null);
+          //   done();
+          // });
+        });
     });
   });
 
   // runs after all tests
   after(function(done) {
     this.timeout(5000);
-    // Deleting the user created in the before function
     const username = 'darthsidious';
     UserController.removeUser(reqUser, username)
     .then((delUser) => {
       chai.expect(delUser).to.equal('darthsidious');
-      mongoose.connection.close();
-      done();
-      // const user2 = 'jubbathehut';
-      // UserController.removeUser(reqUser, user2)
-      // .then(function(delBadUser) {
-      //   chai.expect(delBadUser).to.equal('jubbathehut');
-      //   mongoose.connection.close();
-      //   done();
-      // })
-      // .catch(function(error) {
-      //   chai.expect(error).to.equal(null);
-      //   mongoose.connection.close();
-      //   done();
-      // });
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
+        mongoose.connection.close();
+        done();
+        // const user2 = 'jubbathehut';
+        // UserController.removeUser(reqUser, user2)
+        // .then(function(delBadUser) {
+        //   chai.expect(delBadUser).to.equal('jubbathehut');
+        //   mongoose.connection.close();
+        //   done();
+        // })
+        // .catch(function(error) {
+        //   chai.expect(error).to.equal(null);
+        //   mongoose.connection.close();
+        //   done();
+        // });
+      });
     })
     .catch((error) => {
       chai.expect(error.description).to.equal(null);

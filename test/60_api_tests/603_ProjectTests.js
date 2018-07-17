@@ -32,8 +32,9 @@ const request = require('request');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const UserController = M.load('controllers/UserController');
 const OrgController = M.load('controllers/OrganizationController');
+const AuthController = M.load('lib/auth');
+const User = M.require('models/User');
 
 const test = M.config.test;
 /**
@@ -62,65 +63,67 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    const username = M.config.test.username;
-    // Finding a Requesting Admin
-    UserController.findUser(username)
-    .then(function(searchUser) {
-      user = searchUser;
-      chai.expect(searchUser.username).to.equal(M.config.test.username);
-      // Creating an Organization used in the tests
-      const orgData = {
-        id: 'hogwarts',
-        name: 'Gryffindor',
-        permissions: {
-          admin: [searchUser._id],
-          write: [searchUser._id],
-          read: [searchUser._id]
-        }
-      };
-      OrgController.createOrg(user, orgData)
-      .then((retOrg) => {
-        org = retOrg;
-        chai.expect(retOrg.id).to.equal('hogwarts');
-        chai.expect(retOrg.name).to.equal('Gryffindor');
-        chai.expect(retOrg.permissions.read).to.include(searchUser._id.toString());
-        chai.expect(retOrg.permissions.write).to.include(searchUser._id.toString());
-        chai.expect(retOrg.permissions.admin).to.include(searchUser._id.toString());
-        done();
-        // const orgData2 = {
-        //   id: 'durmstranginstitute',
-        //   name: 'Durmstrang',
-        //   permissions: {
-        //     admin: [searchUser._id],
-        //     write: [searchUser._id],
-        //     read: [searchUser._id]
-        //   }
-        // };
-        // OrgController.createOrg(user, orgData2)
-        // .then((orgTwo) => {
-        //   secondOrg = orgTwo;
-        //   chai.expect(orgTwo.id).to.equal('durmstranginstitute');
-        //   chai.expect(orgTwo.name).to.equal('Durmstrang');
-        //   chai.expect(orgTwo.permissions.read).to.include(searchUser._id.toString());
-        //   chai.expect(orgTwo.permissions.write).to.include(searchUser._id.toString());
-        //   chai.expect(orgTwo.permissions.admin).to.include(searchUser._id.toString());
-        //   done();
-        // })
-        // .catch((err) => {
-        //   chai.expect(err).to.equal(null);
-        //   done();
-        // });
-      })
-      .catch((firsterr) => {
-        const error1 = JSON.parse(firsterr.message);
-        chai.expect(error1.description).to.equal(null);
-        done();
-      });
-    })
-    .catch(function(error) {
-      const error2 = JSON.parse(error.message);
-      chai.expect(error2.description).to.equal(null);
-      done();
+    // Creating a Requesting Admin
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          // Setting it equal to global variable
+          user = userUpdate;
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          // Creating an Organization used in the tests
+          const orgData = {
+            id: 'hogwarts',
+            name: 'Gryffindor',
+            permissions: {
+              admin: [user._id],
+              write: [user._id],
+              read: [user._id]
+            }
+          };
+          OrgController.createOrg(user, orgData)
+          .then((retOrg) => {
+            org = retOrg;
+            chai.expect(retOrg.id).to.equal('hogwarts');
+            chai.expect(retOrg.name).to.equal('Gryffindor');
+            chai.expect(retOrg.permissions.read).to.include(user._id.toString());
+            chai.expect(retOrg.permissions.write).to.include(user._id.toString());
+            chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
+            done();
+            // const orgData2 = {
+            //   id: 'durmstranginstitute',
+            //   name: 'Durmstrang',
+            //   permissions: {
+            //     admin: [user._id],
+            //     write: [user._id],
+            //     read: [user._id]
+            //   }
+            // };
+            // OrgController.createOrg(user, orgData2)
+            // .then((orgTwo) => {
+            //   secondOrg = orgTwo;
+            //   chai.expect(orgTwo.id).to.equal('durmstranginstitute');
+            //   chai.expect(orgTwo.name).to.equal('Durmstrang');
+            //   chai.expect(orgTwo.permissions.read).to.include(user._id.toString());
+            //   chai.expect(orgTwo.permissions.write).to.include(user._id.toString());
+            //   chai.expect(orgTwo.permissions.admin).to.include(user._id.toString());
+            //   done();
+            // })
+            // .catch((err) => {
+            //   chai.expect(err).to.equal(null);
+            //   done();
+            // });
+          })
+          .catch((firsterr) => {
+            const error1 = JSON.parse(firsterr.message);
+            chai.expect(error1.description).to.equal(null);
+            done();
+          });
+        });
     });
   });
 
@@ -130,8 +133,13 @@ describe(name, function() {
     OrgController.removeOrg(user, 'hogwarts', { soft: false })
     .then((retOrg) => {
       chai.expect(retOrg.id).to.equal('hogwarts');
-      mongoose.connection.close();
-      done();
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
+        mongoose.connection.close();
+        done();
+      });
       // OrgController.removeOrg(user, 'durmstranginstitute', { soft: false })
       // .then((proj) => {
       //   chai.expect(proj.id).to.equal('durmstranginstitute');

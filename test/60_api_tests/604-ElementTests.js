@@ -25,8 +25,9 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.load('controllers/ProjectController');
-const UserController = M.load('controllers/UserController');
 const OrgController = M.load('controllers/OrganizationController');
+const AuthController = M.load('lib/auth');
+const User = M.require('models/User');
 const test = M.config.test;
 
 let org = null;
@@ -43,57 +44,59 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    const username = M.config.test.username;
-    // Finding a Requesting Admin
-    UserController.findUser(username)
-    .then(function(searchUser) {
-      user = searchUser;
-      chai.expect(searchUser.username).to.equal(M.config.test.username);
+    // Creating a Requesting Admin
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          // Setting it equal to global variable
+          user = userUpdate;
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          // Creating an organization used in the tests
+          const orgData = {
+            id: 'empire',
+            name: 'Galactic Empire'
+          };
 
-      // Creating an organization used in the tests
-      const orgData = {
-        id: 'empire',
-        name: 'Galactic Empire'
-      };
+          OrgController.createOrg(user, orgData)
+          .then((retOrg) => {
+            org = retOrg;
+            chai.expect(retOrg.id).to.equal('empire');
+            chai.expect(retOrg.name).to.equal('Galactic Empire');
+            chai.expect(retOrg.permissions.read).to.include(user._id.toString());
+            chai.expect(retOrg.permissions.write).to.include(user._id.toString());
+            chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
 
-      OrgController.createOrg(user, orgData)
-      .then((retOrg) => {
-        org = retOrg;
-        chai.expect(retOrg.id).to.equal('empire');
-        chai.expect(retOrg.name).to.equal('Galactic Empire');
-        chai.expect(retOrg.permissions.read).to.include(searchUser._id.toString());
-        chai.expect(retOrg.permissions.write).to.include(searchUser._id.toString());
-        chai.expect(retOrg.permissions.admin).to.include(searchUser._id.toString());
+            // Creating a project used in the tests
+            const projData = {
+              id: 'dthstr',
+              name: 'Death Star',
+              org: {
+                id: 'empire'
+              }
+            };
 
-        // Creating a project used in the tests
-        const projData = {
-          id: 'dthstr',
-          name: 'Death Star',
-          org: {
-            id: 'empire'
-          }
-        };
-
-        ProjController.createProject(user, projData)
-        .then((retProj) => {
-          proj = retProj;
-          chai.expect(retProj.id).to.equal('dthstr');
-          chai.expect(retProj.name).to.equal('Death Star');
-          done();
-        })
-        .catch((error) => {
-          chai.expect(error.message).to.equal(null);
-          done();
+            ProjController.createProject(user, projData)
+            .then((retProj) => {
+              proj = retProj;
+              chai.expect(retProj.id).to.equal('dthstr');
+              chai.expect(retProj.name).to.equal('Death Star');
+              done();
+            })
+            .catch((error) => {
+              chai.expect(error.message).to.equal(null);
+              done();
+            });
+          })
+          .catch((error) => {
+            chai.expect(error.message).to.equal(null);
+            done();
+          });
         });
-      })
-      .catch((error) => {
-        chai.expect(error.message).to.equal(null);
-        done();
-      });
-    })
-    .catch((error) => {
-      chai.expect(error.message).to.equal(null);
-      done();
     });
   });
 
@@ -104,8 +107,13 @@ describe(name, function() {
     OrgController.removeOrg(user, 'empire', { soft: false })
     .then((retOrg) => {
       chai.expect(retOrg).to.not.equal(null);
-      mongoose.connection.close();
-      done();
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
+        mongoose.connection.close();
+        done();
+      });
     })
     .catch((error) => {
       chai.expect(error.message).to.equal(null);

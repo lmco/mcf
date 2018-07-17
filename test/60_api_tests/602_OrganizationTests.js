@@ -23,10 +23,13 @@
 const path = require('path');
 const chai = require('chai');
 const request = require('request');
+const mongoose = require('mongoose');
 
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const AuthController = M.load('lib/auth');
+const User = M.require('models/User');
 
 const test = M.config.test;
 
@@ -35,6 +38,38 @@ const test = M.config.test;
  *------------------------------------*/
 
 describe(name, function() {
+  before(function(done) {
+    this.timeout(5000);
+
+    const db = M.load('lib/db');
+    db.connect();
+
+    // Creating a Requesting Admin
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          // Setting it equal to global variable
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          done();
+        });
+    });
+  });
+
+  after((done) => {
+    User.findOneAndRemove({
+      username: M.config.test.username
+    }, (err) => {
+      chai.expect(err).to.equal(null);
+      mongoose.connection.close();
+      done();
+    });
+  });
+
   it('should GET an empty organization', getOrgs).timeout(3000);
   it('should POST an organization', postOrg01).timeout(3000);
   it('should POST second organization', postOrg02).timeout(3000);

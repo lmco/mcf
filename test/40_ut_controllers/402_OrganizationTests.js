@@ -29,6 +29,9 @@ const ElemController = M.load('controllers/ElementController');
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
 const UserController = M.load('controllers/UserController');
+const AuthController = M.load('lib/auth');
+const User = M.require('models/User');
+
 
 let user = null;
 let newUser = null;
@@ -47,38 +50,38 @@ describe(name, function() {
     this.timeout(6000);
     const db = M.load('lib/db');
     db.connect();
-
-    // Finding a Requesting Admin
-    const username = M.config.test.username;
-    UserController.findUser(username)
-    .then((searchUser) => {
-      // Setting it equal to global variable
-      user = searchUser;
-      chai.expect(searchUser.username).to.equal(M.config.test.username);
-      // Creating a new non-admin user
-      const nonAuserData = {
-        username: 'msmith',
-        password: 'awwgeezrick',
-        fname: 'Morty',
-        lname: 'Smith',
-        admin: false
-      };
-      UserController.createUser(user, nonAuserData)
-      .then((nonAu) => {
-        newUser = nonAu;
-        chai.expect(nonAu.username).to.equal('msmith');
-        chai.expect(nonAu.fname).to.equal('Morty');
-        chai.expect(nonAu.lname).to.equal('Smith');
-        done();
-      })
-      .catch((error) => {
-        chai.expect(error.description).to.equal(null);
-        done();
-      });
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          // Setting it equal to global variable
+          user = userUpdate;
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          // Creating a new non-admin user
+          const nonAuserData = {
+            username: 'msmith',
+            password: 'awwgeezrick',
+            fname: 'Morty',
+            lname: 'Smith',
+            admin: false
+          };
+          UserController.createUser(user, nonAuserData)
+          .then(function(nonAu) {
+            newUser = nonAu;
+            chai.expect(nonAu.username).to.equal('msmith');
+            chai.expect(nonAu.fname).to.equal('Morty');
+            chai.expect(nonAu.lname).to.equal('Smith');
+            done();
+          })
+          .catch(function(error) {
+            chai.expect(error.description).to.equal(null);
+            done();
+          });
+        });
     });
   });
 
@@ -92,8 +95,13 @@ describe(name, function() {
       UserController.removeUser(user, userTwo)
       .then((delUser2) => {
         chai.expect(delUser2).to.equal('msmith');
-        mongoose.connection.close();
-        done();
+        User.findOneAndRemove({
+          username: M.config.test.username
+        }, (err) => {
+          chai.expect(err).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       })
       .catch((error) => {
         chai.expect(error.description).to.equal(null);
