@@ -19,6 +19,8 @@
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Organization = M.load('models/Organization');
+const errors = M.load('lib/errors');
+const utils = M.load('lib/utils');
 
 
 /**
@@ -45,7 +47,7 @@ class OrganizationController {
    *     console.log(err);
    *   })
    *
-   * @param  {User} The user whose organizations to find
+   * @param  {User} user  The user whose organizations to find
    */
   static findOrgs(user) {
     return new Promise((resolve, reject) => {
@@ -55,7 +57,7 @@ class OrganizationController {
       .exec((err, orgs) => {
         // If error occurs, return it
         if (err) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
+          return reject(new errors.CustomError('Find failed.'));
         }
         // Resolve the list of orgs
         return resolve(orgs);
@@ -66,7 +68,7 @@ class OrganizationController {
 
   /**
    * @description  This function takes a user and orgID and resolves the
-   * organization.
+   *   organization.
    *
    * @example
    * OrganizationController.findOrg('josh', 'mbee-sw')
@@ -78,16 +80,19 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {String} The string containing the username of the requesting user.
-   * @param  {String} The string of the org ID.
-   * @param  {Boolean} An optional flag that allows users to search for
-   *                   soft deleted projects as well.
+   * @param  {User} user  The requesting user object.
+   * @param  {String} organizationID  The string of the org ID.
+   * @param  {Boolean} softDeleted  An optional flag that allows users to
+   *                   search for soft deleted projects as well.
    */
   static findOrg(user, organizationID, softDeleted = false) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Error check - Make sure orgID is a string. Otherwise, reject.
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID], 'string');
+      }
+      catch (error) {
+        return reject(error);
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
@@ -102,19 +107,19 @@ class OrganizationController {
       .exec((err, org) => {
         // If error occurs, return it
         if (err) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
+          return reject(new errors.CustomError('Find failed.'));
         }
 
         // If no org is found, reject
         if (!org) {
-          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Org not found.' })));
+          return reject(new errors.CustomError('Org not found.', 404));
         }
 
         // If user is not a member
         // TODO - Is there a way we can include this as part of the query?
         const members = org.permissions.read.map(u => u._id.toString());
         if (!members.includes(user._id.toString())) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
+          return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
         // If we find one org (which we should if it exists)
@@ -126,7 +131,7 @@ class OrganizationController {
 
   /**
    * @description  This function takes a user and dictionary containing
-   * the org id and name and creates a new organization.
+   *   the org id and name and creates a new organization.
    *
    * @example
    * OrganizationController.createOrg('josh', {mbee-sw})
@@ -138,22 +143,18 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} The object containing the user of the requesting user.
-   * @param  {Org} The JSON of the new org.
+   * @param  {User} user  The object containing the user of the requesting user.
+   * @param  {Org} orgInfo  The JSON of the new org.
    */
   static createOrg(user, orgInfo) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Error check - Make sure user is admin
-      if (!user.admin) {
-        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to create organizations.' })));
+      try {
+        utils.checkAdmin(user);
+        utils.checkExists(['id', 'name'], orgInfo);
+        utils.checkType([orgInfo.id, orgInfo.name], 'string');
       }
-
-      // Error check - Make sure organization body has an organization id and name
-      if (!orgInfo.hasOwnProperty('id')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID not included in the request body.' })));
-      }
-      if (!orgInfo.hasOwnProperty('name')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization name not included in the request body.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // Sanitize fields
@@ -161,24 +162,20 @@ class OrganizationController {
       const orgName = M.lib.sani.html(orgInfo.name);
 
       // Error check - Make sure a valid orgID and name is given
-      if (!RegExp(orgID).test(orgID)) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not valid.' })));
-      }
       if (!RegExp(M.lib.validators.org.name).test(orgName)) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization name is not valid.' })));
+        return reject(new errors.CustomError('Organization name is not valid.', 400));
       }
       if (!RegExp(M.lib.validators.org.id).test(orgID)) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not valid.' })));
+        return reject(new errors.CustomError('Organization ID is not valid.', 400));
       }
 
       // Check if org already exists
       OrganizationController.findOrg(user, orgID)
-      .then((org) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'An organization with the same ID already exists.' }))))
+      .then(() => reject(new errors.CustomError('An organization with the same ID already exists.', 400)))
       .catch((findOrgError) => { // eslint-disable-line consistent-return
         // Org not found is what we want, so proceed when this error
         // occurs since we aim to create a new org.
-        const err = JSON.parse(findOrgError.message);
-        if (err.description === 'Org not found.') {
+        if (findOrgError.description === 'Org not found.') {
           // Create the new org
           const newOrg = new Organization({
             id: orgID,
@@ -192,14 +189,14 @@ class OrganizationController {
           // Save and resolve the new error
           newOrg.save((saveOrgErr) => { // eslint-disable-line consistent-return
             if (saveOrgErr) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+              return reject(new errors.CustomError('Save failed.'));
             }
             resolve(newOrg);
           });
         }
         else {
-          if (findOrgError.message === 'User does not have permissions.') {
-            return reject(new Error('An org with the same ID already exists.'));
+          if (findOrgError.description === 'User does not have permissions.') {
+            return reject(new errors.CustomError('An org with the same ID already exists.', 400));
           }
           // There was some other error, return it.
           return reject(findOrgError);
@@ -211,7 +208,7 @@ class OrganizationController {
 
   /**
    * @description  This function takes a user and org object and updates an
-   * existing organization.
+   *   existing organization.
    *
    * @example
    * OrganizationController.updateOrg('josh', {mbee-sw})
@@ -223,18 +220,19 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} The object containing the  requesting user.
-   * @param  {String} The organization ID.
-   * @param  {String} The JSON of the updated org elements.
+   * @param  {User} user  The object containing the  requesting user.
+   * @param  {String} organizationID  The organization ID.
+   * @param  {String} orgUpdate  The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Error check - Verify parameters are correct type.
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID], 'string');
+        utils.checkType([orgUpdate], 'object');
       }
-      if (typeof orgUpdate !== 'object') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Updated organization is not an object.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // If mongoose model, convert to plain JSON
@@ -252,7 +250,7 @@ class OrganizationController {
         // Error check - Make sure user is admin
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
         if (!user.admin && !orgAdmins.includes(user._id.toString())) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot update organizations.' })));
+          return reject(new errors.CustomError('User cannot update organizations.', 401));
         }
 
         // get list of keys the user is trying to update
@@ -268,7 +266,7 @@ class OrganizationController {
           updateField = orgUpdateFields[i];
           // Error Check - Check if updated field also exists in the original org.
           if (!org.toJSON().hasOwnProperty(updateField)) {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Organization does not contain field ${updateField}` })));
+            return reject(new errors.CustomError(`Organization does not contain field ${updateField}`, 400));
           }
           // if parameter is of type object, stringify and compare
           if (typeof orgUpdate[updateField] === 'object') {
@@ -282,11 +280,11 @@ class OrganizationController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Users cannot update [${updateField}] of organizations.` })));
+            return reject(new errors.CustomError(`Users cannot update [${updateField}] of organizations.`, 400));
           }
           // Error Check - Check if updated field is of type string
           if (typeof orgUpdate[updateField] !== 'string') {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `The Organization [${updateField}] is not of type String` })));
+            return reject(new errors.CustomError(`The Organization [${updateField}] is not of type String`, 400));
           }
 
           // sanitize field
@@ -299,7 +297,7 @@ class OrganizationController {
         org.save((saveOrgErr) => {
           if (saveOrgErr) {
             // If error occurs, return it
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+            return reject(new errors.CustomError('Save failed.'));
           }
           // Return updated org
           return resolve(org);
@@ -311,11 +309,11 @@ class OrganizationController {
 
 
   /**
-   * This function takes a user object, org object, and boolean flag
-   * and (soft)deletes an existing organization.
+   * @description  This function takes a user object, org object, and boolean flag
+   *   and (soft)deletes an existing organization.
    *
    * @example
-   * OrganizationController.removerg('josh', {mbee-sw}, {soft: false})
+   * OrganizationController.removeOrg('josh', {mbee-sw}, {soft: false})
    * .then(function(org) {
    *   // do something with the newly updated org
    * })
@@ -324,9 +322,9 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} The object containing the  requesting user.
-   * @param  {string} The ID of the org being deleted.
-   * @param  {Object} Contains the list of delete options.
+   * @param  {User} user  The object containing the  requesting user.
+   * @param  {String} organizationID  The ID of the org being deleted.
+   * @param  {Object} options  Contains the list of delete options.
    */
   static removeOrg(user, organizationID, options) {
     // Loading controller function wide since the project controller loads
@@ -334,29 +332,17 @@ class OrganizationController {
     const ProjController = M.load('controllers/ProjectController');
 
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Error check - Make sure user is admin
-      if (!user.admin) {
-        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot delete organizations.' })));
-      }
-
-      // Error check - Make sure orgID is a string. Otherwise, reject.
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
-      }
-
-      // Decide whether or not to soft delete the org
       let softDelete = true;
-      if (options.hasOwnProperty('soft')) {
-        // User must be a system admin to hard delete
-        if (options.soft === false && user.admin) {
+      try {
+        utils.checkAdmin(user);
+        utils.checkType([organizationID], 'string');
+        utils.checkExists(['soft'], options);
+        if (options.soft === false) {
           softDelete = false;
         }
-        else if (options.soft === false && !user.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions to permanently delete an organization.' })));
-        }
-        else if (options.soft !== false && options.soft !== true) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
-        }
+      }
+      catch (error) {
+        return reject(error);
       }
 
       const orgID = M.lib.sani.html(organizationID);
@@ -370,8 +356,7 @@ class OrganizationController {
       })
       .catch((deleteErr) => { // eslint-disable-line consistent-return
         // There are simply no projects associated with this org to delete
-        const error = JSON.parse(deleteErr.message);
-        if (error.description === 'No projects found.') {
+        if (deleteErr.description === 'No projects found.') {
           OrganizationController.removeOrgHelper(user, orgID, softDelete)
           .then((retOrg) => resolve(retOrg))
           .catch((err) => reject(err));
@@ -385,8 +370,8 @@ class OrganizationController {
   }
 
   /**
-   * This function does the actual deletion or updating on an org.
-   * It was written to help clean up some code in the removeOrg function.
+   * @description  This function does the actual deletion or updating on an org.
+   *   It was written to help clean up some code in the removeOrg function.
    *
    * @example
    * OrganizationController.removeOrgHelper(Josh, 'mbee', true)
@@ -398,9 +383,9 @@ class OrganizationController {
    * });
    *
    *
-   * @param {User} The object containing the requesting user.
-   * @param {string} The organization ID.
-   * @param {boolean} THe flag indicating whether or not to soft delete.
+   * @param {User} user  The object containing the requesting user.
+   * @param {String} orgID  The organization ID.
+   * @param {Boolean} softDelete  The flag indicating whether or not to soft delete.
    */
   static removeOrgHelper(user, orgID, softDelete) {
     return new Promise((resolve, reject) => {
@@ -411,7 +396,7 @@ class OrganizationController {
           org.save((saveErr) => {
             if (saveErr) {
               // If error occurs, return it
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+              return reject(new errors.CustomError('Save failed.'));
             }
             return resolve(org);
           });
@@ -423,7 +408,7 @@ class OrganizationController {
         .populate()
         .exec((err, org) => {
           if (err) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
+            return reject(new errors.CustomError('Find failed.'));
           }
           return resolve(org);
         });
@@ -432,8 +417,8 @@ class OrganizationController {
   }
 
   /**
-   * This function takes a user, second user and orgID and returns the
-   * permissions the second user has within the org
+   * @description  This function takes a user, second user and orgID and returns the
+   *   permissions the second user has within the org
    *
    * @example
    * OrganizationController.findPermissions(Josh, Austin, 'mbee')
@@ -445,16 +430,16 @@ class OrganizationController {
    * });
    *
    *
-   * @param {User} The object containing the requesting user.
-   * @param {User} The object containing the user whose info is being returned
-   * @param {string} The ID of the organization
+   * @param {User} user  The object containing the requesting user.
+   * @param {User} username  The object containing the user whose info is being returned
+   * @param {string} organizationID  The ID of the organization
    */
   static findPermissions(user, username, organizationID) {
     return new Promise((resolve, reject) => {
       OrganizationController.findAllPermissions(user, organizationID)
       .then(users => {
         if (users[username.username] === undefined) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'User is not part of this organization.' })));
+          return reject(new errors.CustomError('User is not part of this organization.', 400));
         }
         return resolve(users[username.username]);
       })
@@ -463,8 +448,8 @@ class OrganizationController {
   }
 
   /**
-   * This function takes a user, second user, orgID and role and updates a
-   * users permissions within an organization
+   * @description  This function takes a user, second user, orgID and role and updates a
+   *   users permissions within an organization
    *
    * @example
    * OrganizationController.setPermissions(Josh, Austin, 'mbee', 'write')
@@ -476,26 +461,28 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {string} The ID of the org being deleted.
-   * @param  {User} The object containing the user whose roles are to be changed.
-   * @param  {string} The new role for the user.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The ID of the org being deleted.
+   * @param  {User} setUser  The object containing the user whose roles are to be changed.
+   * @param  {String} role  The new role for the user.
    */
   static setPermissions(reqUser, organizationID, setUser, role) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Stop a user from changing their own permissions
       if (reqUser._id.toString() === setUser._id.toString()) {
-        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot change their own permissions.' })));
+        return reject(new errors.CustomError('User cannot change their own permissions.', 401));
       }
 
-      // Ensure organizationID is a string
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID], 'string');
+      }
+      catch (error) {
+        return reject(error);
       }
 
       // Ensure the role is a valid role
       if (!['admin', 'write', 'read', 'REMOVE_ALL'].includes(role)) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'The permission entered is not a valid permission.' })));
+        return reject(new errors.CustomError('The permission entered is not a valid permission.', 400));
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
@@ -503,8 +490,8 @@ class OrganizationController {
       .then((org) => { // eslint-disable-line consistent-return
         // Ensure user is an admin within the organization
         const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-        if (!reqUser.admin || !orgAdmins.includes(reqUser._id.toString())) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot change organization permissions.' })));
+        if (!reqUser.admin && !orgAdmins.includes(reqUser._id.toString())) {
+          return reject(new errors.CustomError('User cannot change organization permissions.', 401));
         }
 
         const perm = org.permissions;
@@ -539,7 +526,7 @@ class OrganizationController {
         org.save((saveErr) => {
           if (saveErr) {
           // If error occurs, return it
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+            return reject(new errors.CustomError('Save failed.'));
           }
           // Return updated org
           return resolve(org);
@@ -550,8 +537,8 @@ class OrganizationController {
   }
 
   /**
-   * This function takes a user and ordID and returns the permissions
-   * object, displaying the users who have those permissions
+   * @description  This function takes a user and ordID and returns the permissions
+   *   object, displaying the users who have those permissions
    *
    * @example
    * OrganizationController.findAllPermissions(Austin, 'mbee')
@@ -563,19 +550,17 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {string} The ID of the org being deleted.
+   * @param  {User} user  The object containing the requesting user.
+   * @param  {String} organizationID  The ID of the org being deleted.
    */
   static findAllPermissions(user, organizationID) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-    // Ensure organizationID is a string
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkAdmin(user);
+        utils.checkType([organizationID], 'string');
       }
-
-      // Ensure the requesting user is an admin
-      if (!user.admin) {
-        return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions to view others permissions.' })));
+      catch (error) {
+        return reject(error);
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
