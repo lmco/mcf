@@ -20,7 +20,7 @@
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code we want to make sure everything still
  * works as it should. These API controller tests are specifically for the User
- * API tests.
+ * API tests: posting, putting, getting, and deleting a user.
  */
 
 const path = require('path');

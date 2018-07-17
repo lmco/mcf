@@ -16,11 +16,10 @@
  *
  *  @description  This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code we want to make sure everything still
- * works as it should. These API controller tests are specifically for the Proejct
- * API tests.
- * 
- * UNCOMMENT WHEN NEED TO TEST
+ * when making changes/ updates to the code. These API controller tests are 
+ * specifically for the Project API tests: posting, putting, getting, and deleting
+ * projects. Some tests are conducting with invalid inputs for the project
+ * api controlls.
  */
 
 const path = require('path');
@@ -35,27 +34,12 @@ const UserController = M.load('controllers/UserController');
 const OrgController = M.load('controllers/OrganizationController');
 
 const test = M.config.test;
-/**
- * APIProjectTest
- *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- *
- * @description This tests the API controller functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code we want to make sure everything still
- * works as it should. These API controller tests are specifically for the Project
- * API tests.
- *
- */
+let org = null;
+let user = null;
 
 /*------------------------------------
  *       Main
  *------------------------------------*/
-let org = null;
-let user = null;
-// let secondOrg= null;
-
-// runs before all tests in this block
 describe(name, function() {
 
   /*-------------------------------------

@@ -20,7 +20,8 @@
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code we want to make sure everything still
  * works as it should. These API controller tests are specifically for the Organization
- * API tests.
+ * API tests: posting, putting, getting, and deleting orgs. Some tests are 
+ * conducting with invalid inputs for the org api controlls.
  * 
  * 
  * NOTES: Tests Basic API functionality with Organizations.
