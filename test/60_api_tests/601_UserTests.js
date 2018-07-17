@@ -33,6 +33,8 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 const test = M.config.test;
 
+const user = M.config.test.username;
+
 /*------------------------------------
  *       Main
  *------------------------------------*/
@@ -55,12 +57,12 @@ describe(name, function() {
  */
 function getUser(done) {
   request({
-    url: `${test.url}/api/users/mbee`,
+    url: `${test.url}/api/users/${user}`,
     headers: getHeaders()
   },
   function(err, response, body) {
     const json = JSON.parse(body);
-    chai.expect(json.username).to.equal('mbee');
+    chai.expect(json.username).to.equal(user);
     chai.expect(response.statusCode).to.equal(200);
     done();
   });

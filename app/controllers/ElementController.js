@@ -21,6 +21,8 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.require('controllers.ProjectController');
 // Element refers to the Element.js file, not the Element model
 const Element = M.require('models.Element');
+const errors = M.load('lib/errors');
+const utils = M.load('lib/utils');
 
 
 /**
@@ -54,12 +56,11 @@ class ElementController {
    */
   static findElements(reqUser, organizationID, projectID, elemType = '') {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Ensure all incoming IDs are strings
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID, projectID], 'string');
       }
-      if (typeof projectID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      catch (error) {
+        return resolve(error);
       }
 
       const orgID = M.lib.sani.sanitize(organizationID);
@@ -73,7 +74,7 @@ class ElementController {
         // Checks to see if the type provided is either a model
         // or discriminator from Element.js. Do not confuse
         // this Element as the Element model; it's just the exported file
-        // containing the Elelment model along with Relationship, Block, etc.
+        // containing the Element model along with Relationship, Block, etc.
         const typeExists = Object.keys(Element).includes(type);
 
         // Handle Element case, where type should be null
@@ -82,7 +83,7 @@ class ElementController {
         }
 
         if (!typeExists) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid element type.' })));
+          return reject(new errors.CustomError('Invalid element type.', 400));
         }
       }
 
@@ -92,7 +93,7 @@ class ElementController {
         // Ensure user is part of the project
         const members = project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
+          return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
         // Create the list of search parameters
@@ -105,7 +106,7 @@ class ElementController {
         .populate('parent project source target contains')
         .exec((err, elements) => {
           if (err) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
+            return reject(new errors.CustomError('Find failed.'));
           }
 
           return resolve(elements);
@@ -129,19 +130,19 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The user object of the requesting user.
-   * @param  {String} The organization ID.
-   * @param  {String} The project ID.
-   * @param  {Object} Delete options.
+   * @param  {User} reqUser  The user object of the requesting user.
+   * @param  {String} organizationID  The organization ID.
+   * @param  {String} projectID  The project ID.
+   * @param  {Object} options  Delete options.
    */
   static removeElements(reqUser, organizationID, projectID, options) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Ensure all incoming IDs are strings
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID, projectID], 'string');
+        utils.checkType([options], 'object');
       }
-      if (typeof projectID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // Set the soft delete flag
@@ -151,10 +152,10 @@ class ElementController {
           softDelete = false;
         }
         else if (options.soft === false && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
+          return reject(new errors.CustomError('User does not have permission to permanently delete a project.', 401));
         }
         else if (options.soft !== false && options.soft !== true) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
+          return reject(new errors.CustomError('Invalid argument for the soft delete field.', 400));
         }
       }
 
@@ -171,7 +172,7 @@ class ElementController {
           .then((elements) => {
             // If there are no elements found, return an error
             if (elements.length === 0) {
-              return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'No elements found.' })));
+              return reject(new errors.CustomError('No elements found.', 404));
             }
 
             for (let i = 0; i < elements.length; i++) {
@@ -180,7 +181,7 @@ class ElementController {
               elements[i].save((saveErr) => { // eslint-disable-line consistent-return
                 if (saveErr) {
                   // If error occurs, return it
-                  return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+                  return reject(new errors.CustomError('Save failed.'));
                 }
               });
             }
@@ -194,7 +195,7 @@ class ElementController {
           // Hard delete the elements
           Element.Element.deleteMany({ project: project._id }, (deleteError, elementsDeleted) => {
             if (deleteError) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
+              return reject(new errors.CustomError('Delete failed.'));
             }
 
             return resolve(elementsDeleted);
@@ -219,24 +220,21 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The user object of the requesting user.
-   * @param  {String} The organization ID.
-   * @param  {String} The project ID.
-   * @param  {String} The element ID.
-   * @param  {Boolean} An optional flag that allows users to search for
+   * @param  {User} reqUser  The user object of the requesting user.
+   * @param  {String} organizationID  The organization ID.
+   * @param  {String} projectID  The project ID.
+   * @param  {String} elementID  The element ID.
+   * @param  {Boolean} softDeleted  An optional flag that allows users to search for
    *                   soft deleted projects as well.
    */
   static findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Ensure all incoming IDs are strings
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID, projectID, elementID], 'string');
+        utils.checkType([softDeleted], 'boolean');
       }
-      if (typeof projectID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
-      }
-      if (typeof elementID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element ID is not a string.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // Sanitize the parameters
@@ -254,18 +252,18 @@ class ElementController {
       .populate('parent project source target contains')
       .exec((findElementError, element) => {
         if (findElementError) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
+          return reject(new errors.CustomError('Find failed.'));
         }
 
         // Ensure only one element is returned
         if (!element) {
-          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Element not found.' })));
+          return reject(new errors.CustomError('Element not found.', 404));
         }
 
         // Ensure user is part of the project
         const members = element.project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
+          return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
         // Return resulting element
@@ -288,68 +286,29 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The user object of the requesting user.
-   * @param  {Object} The JSON object containing the element data
+   * @param  {User} reqUser  The user object of the requesting user.
+   * @param  {Object} element  The JSON object containing the element data
    */
   static createElement(reqUser, element) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Element ID and Type, Project ID and Org ID are all required
-      // Ensure element object data contains all the proper fields
-
-      // TODO: Clean up error check code.
-
-      // Element ID
-      if (!element.hasOwnProperty('id')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (id).' })));
+      try {
+        utils.checkExists(['id', 'project.id', 'project.org.id', 'type'], element);
+        utils.checkType([element.id, element.project.id, element.project.org.id, element.type], 'string');
       }
-      // Project
-      if (element.hasOwnProperty('project')) {
-        // Project ID
-        if (!element.project.hasOwnProperty('id')) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.id).' })));
-        }
-        // Project Org
-        if (element.project.hasOwnProperty('org')) {
-          // Org ID
-          if (!element.project.org.hasOwnProperty('id')) {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org.id).' })));
-          }
-        }
-        else {
-          reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj.org).' })));
-        }
-      }
-      else {
-        reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (proj).' })));
-      }
-      // Element Type
-      if (!element.hasOwnProperty('type')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element does not have attribute (type).' })));
+      catch (error) {
+        return reject(error);
       }
 
-      // Ensure all pieces of data are strings
-      if (typeof element.id !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element ID is not a string.' })));
-      }
-      if (typeof element.project.id !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
-      }
-      if (typeof element.project.org.id !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
-      }
       if (element.hasOwnProperty('name')) {
         // Element name is not required, so check first if it exists.
         if (typeof element.name !== 'string') {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element name is not a string.' })));
+          return reject(new errors.CustomError('Element name is not a string.', 400));
         }
-      }
-      if (typeof element.type !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element type is not a string.' })));
       }
       if (element.hasOwnProperty('parent')) {
         // Element parent is not required, so check first if it exists.
         if (typeof element.parent !== 'string') {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element parent is not a string.' })));
+          return reject(new errors.CustomError('Element parent is not a string.', 400));
         }
       }
 
@@ -360,6 +319,7 @@ class ElementController {
       const elementType = M.lib.sani.html(element.type);
       let elemName = null;
       let parentID = null;
+
       if (element.hasOwnProperty('name')) {
         elemName = M.lib.sani.html(element.name);
       }
@@ -369,11 +329,11 @@ class ElementController {
 
       // Error check - make sure element ID and element name are valid
       if (!RegExp(M.lib.validators.element.id).test(elemID)) {
-        return reject(new Error('Element ID is not valid.'));
+        return reject(new errors.CustomError('Element ID is not valid.', 400));
       }
       if (element.hasOwnProperty('name')) {
         if (!RegExp(M.lib.validators.element.name).test(elemName)) {
-          return reject(new Error('Element Name is not valid.'));
+          return reject(new errors.CustomError('Element Name is not valid.', 400));
         }
       }
 
@@ -384,16 +344,15 @@ class ElementController {
         const writers = proj.permissions.write.map(u => u._id.toString());
 
         if (!writers.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
+          return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
         // Error check - check if the element already exists
         ElementController.findElement(reqUser, orgID, projID, elemID)
-        .then((elem) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element already exists.' }))))
+        .then(() => reject(new errors.CustomError('Element already exists.', 400)))
         .catch((findError) => { // eslint-disable-line consistent-return
           // This is ok, we dont want the element to already exist.
-          const err = JSON.parse(findError.message);
-          if (err.description === 'Element not found.') {
+          if (findError.description === 'Element not found.') {
             // Get the element type
             let type = null;
             Object.keys(Element).forEach((k) => {
@@ -404,7 +363,7 @@ class ElementController {
 
             // If the given type is not a type we specified
             if (type === null) {
-              return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid element type.' })));
+              return reject(new errors.CustomError('Invalid element type.', 400));
             }
             if (type === 'Relationship') {
               ElementController.createRelationship(reqUser, orgID, proj,
@@ -429,7 +388,7 @@ class ElementController {
               .then((parent) => { // eslint-disable-line consistent-return
                 // Ensure parent is of type Package
                 if (!parent.type === 'Package') {
-                  return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
+                  return reject(new errors.CustomError('Parent element is not of type Package.', 400));
                 }
 
                 const newElement = new Element.Element({
@@ -443,11 +402,11 @@ class ElementController {
                   // Save the new element
                 newElement.save((saveErr, elemUpdate) => { // eslint-disable-line consistent-return
                   if (saveErr) {
-                    return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+                    return reject(new errors.CustomError('Save Failed'));
                   }
 
                   ElementController.updateParent(reqUser, orgID, projID, parentID, newElement)
-                  .then((parentUpdated) => resolve(elemUpdate))
+                  .then(() => resolve(elemUpdate))
                   .catch((parentUpdateError) => reject(parentUpdateError));
                 });
               })
@@ -465,7 +424,7 @@ class ElementController {
                 // Save the new element
               newElement.save((saveErr, elemUpdate) => {
                 if (saveErr) {
-                  return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+                  return reject(new errors.CustomError('Save Failed'));
                 }
 
                 // Return the element if succesful
@@ -496,32 +455,24 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The user object of the requesting user.
-   * @param  {String} The organization ID.
-   * @param  {Project} The project object. Needed for both the id and _id.
-   * @param  {String} The element ID.
-   * @param  {String} The element UID, created in the createProject function.
-   * @param  {String} The element name, may be null.
-   * @param  {String} The parent ID, may be null.
-   * @param  {Object} The JSON object containing the element data. Should contain
+   * @param  {User} reqUser  The user object of the requesting user.
+   * @param  {String} orgID  The organization ID.
+   * @param  {Project} proj  The project object. Needed for both the id and _id.
+   * @param  {String} elemID  The element ID.
+   * @param  {String} elemUID  The element UID, created in the createProject function.
+   * @param  {String} elemName  The element name, may be null.
+   * @param  {String} parentID  The parent ID, may be null.
+   * @param  {Object} elemInfo  The JSON object containing the element data. Should contain
    *                  a source and target field.
    */
   static createRelationship(reqUser, orgID, proj, elemID, elemUID, elemName, parentID, elemInfo) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Check if source, target exist
-      if (!elemInfo.hasOwnProperty('target')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Relationship does not have attribute (target).' })));
+      try {
+        utils.checkExists(['target', 'source'], elemInfo);
+        utils.checkType([elemInfo.target, elemInfo.source], 'string');
       }
-      if (!elemInfo.hasOwnProperty('source')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Relationship does not have attribute (source).' })));
-      }
-
-      // Check if source, target are strings
-      if (typeof elemInfo.target !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element target is not a string.' })));
-      }
-      if (typeof elemInfo.source !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project source is not a string.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // Sanitize
@@ -540,7 +491,7 @@ class ElementController {
             .then((parentElement) => { // eslint-disable-line consistent-return
               // Ensure parent is of type Package
               if (!parentElement.type === 'Package') {
-                return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
+                return reject(new errors.CustomError('Parent element is not of type Package.', 400));
               }
 
               const newElement = new Element.Relationship({
@@ -556,7 +507,7 @@ class ElementController {
               // Save the new element
               newElement.save((saveErr, elemUpdate) => { // eslint-disable-line consistent-return
                 if (saveErr) {
-                  return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+                  return reject(new errors.CustomError('Save Failed'));
                 }
 
                 // Update the parent elements 'contains' field
@@ -582,7 +533,7 @@ class ElementController {
             // Save the new element
             newElement.save((saveErr, elemUpdate) => {
               if (saveErr) {
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+                return reject(new errors.CustomError('Save Failed'));
               }
 
               // Return the element if succesful
@@ -609,13 +560,13 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The user object of the requesting user.
-   * @param  {String} The organization ID.
-   * @param  {Project} The project object. Needed for both the id and _id.
-   * @param  {String} The element ID.
-   * @param  {String} The element UID, created in the createProject function.
-   * @param  {String} The element name, may be null.
-   * @param  {String} The parent ID, may be null.
+   * @param  {User} reqUser  The user object of the requesting user.
+   * @param  {String} orgID  The organization ID.
+   * @param  {Project} project  The project object. Needed for both the id and _id.
+   * @param  {String} elemID  The element ID.
+   * @param  {String} elemUID  The element UID, created in the createProject function.
+   * @param  {String} elemName  The element name, may be null.
+   * @param  {String} parentID  The parent ID, may be null.
    */
   static createPackage(reqUser, orgID, project, elemID, elemUID, elemName, parentID) {
     return new Promise((resolve, reject) => {
@@ -625,7 +576,7 @@ class ElementController {
         .then((parentElement) => { // eslint-disable-line consistent-return
           // Ensure parent is of type Package
           if (!parentElement.type === 'Package') {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
+            return reject(new errors.CustomError('Parent element is not of type Package.', 400));
           }
 
           const newElement = new Element.Package({
@@ -639,12 +590,12 @@ class ElementController {
           // Save the new element
           newElement.save((saveErr, elementUpdated) => { // eslint-disable-line consistent-return
             if (saveErr) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+              return reject(new errors.CustomError('Save Failed'));
             }
 
             // Update the parent elements 'contains' field
             ElementController.updateParent(reqUser, orgID, project.id, parentID, newElement)
-            .then((parentUpdated) => resolve(elementUpdated))
+            .then(() => resolve(elementUpdated))
             .catch((parentUpdateError) => reject(parentUpdateError));
           });
         })
@@ -663,7 +614,7 @@ class ElementController {
         // Save the new element
         newElement.save((saveErr, elementUpdated) => {
           if (saveErr) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+            return reject(new errors.CustomError('Save Failed'));
           }
 
           // Return the element if succesful
@@ -686,13 +637,13 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The user object of the requesting user.
-   * @param  {String} The organization ID.
-   * @param  {Project} The project object. Needed for both the id and _id.
-   * @param  {String} The element ID.
-   * @param  {String} The element UID, created in the createProject function.
-   * @param  {String} The element name, may be null.
-   * @param  {String} The parent ID, may be null.
+   * @param  {User} reqUser  The user object of the requesting user.
+   * @param  {String} orgID  The organization ID.
+   * @param  {Project} project  The project object. Needed for both the id and _id.
+   * @param  {String} elemID  The element ID.
+   * @param  {String} elemUID  The element UID, created in the createProject function.
+   * @param  {String} elemName  The element name, may be null.
+   * @param  {String} parentID  The parent ID, may be null.
    */
   static createBlock(reqUser, orgID, project, elemID, elemUID, elemName, parentID) {
     return new Promise((resolve, reject) => {
@@ -702,7 +653,7 @@ class ElementController {
         .then((parentElement) => { // eslint-disable-line consistent-return
           // Ensure parent is of type Package
           if (!parentElement.type === 'Package') {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Parent element is not of type Package.' })));
+            return reject(new errors.CustomError('Parent element is not of type Package.', 400));
           }
 
           const newElement = new Element.Block({
@@ -716,12 +667,12 @@ class ElementController {
           // Save the new element
           newElement.save((saveErr, elementUpdated) => { // eslint-disable-line consistent-return
             if (saveErr) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+              return reject(new errors.CustomError('Save Failed'));
             }
 
             // Update the parent elements 'contains' field
             ElementController.updateParent(reqUser, orgID, project.id, parentID, newElement)
-            .then((parentUpdated) => resolve(elementUpdated))
+            .then(() => resolve(elementUpdated))
             .catch((parentUpdateError) => reject(parentUpdateError));
           });
         })
@@ -740,7 +691,7 @@ class ElementController {
         // Save the new element
         newElement.save((saveErr, elementUpdated) => {
           if (saveErr) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save Failed' })));
+            return reject(new errors.CustomError('Save Failed'));
           }
 
           // Return the element if succesful
@@ -763,26 +714,20 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The organization ID of the project.
-   * @param  {String} The project ID.
-   * @param  {String} The element ID.
-   * @param  {Object} The object of the updated element.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The organization ID of the project.
+   * @param  {String} projectID  The project ID.
+   * @param  {String} elementID  The element ID.
+   * @param  {Object} elementUpdated  The object of the updated element.
    */
   static updateElement(reqUser, organizationID, projectID, elementID, elementUpdated) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Ensure all IDs are strings
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID, projectID, elementID], 'string');
+        utils.checkType([elementUpdated], 'object');
       }
-      if (typeof projectID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
-      }
-      if (typeof elementID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element ID is not a string.' })));
-      }
-      if (typeof elementUpdated !== 'object') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Updated element is not an object.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // If mongoose model, convert to plain JSON
@@ -802,7 +747,7 @@ class ElementController {
         // Check Permissions
         const admins = element.project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
+          return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
         // get list of keys the user is trying to update
@@ -818,7 +763,7 @@ class ElementController {
           updateField = elemUpdateFields[i];
           // Error Check - Check if updated field also exists in the original element.
           if (!element.toJSON().hasOwnProperty(updateField)) {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Element does not contain field ${updateField}` })));
+            return reject(new errors.CustomError(`Element does not contain field ${updateField}`, 400));
           }
           // if parameter is of type object, stringify and compare
           if (typeof elementUpdated[updateField] === 'object') {
@@ -833,11 +778,11 @@ class ElementController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Users cannot update [${updateField}] of Elements.` })));
+            return reject(new errors.CustomError(`Users cannot update [${updateField}] of Elements.`, 400));
           }
           // Error Check - Check if updated field is of type string
           if (typeof elementUpdated[updateField] !== 'string') {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `The Element [${updateField}] is not of type String` })));
+            return reject(new errors.CustomError(`The Element [${updateField}] is not of type String`, 400));
           }
 
           // sanitize field
@@ -849,7 +794,7 @@ class ElementController {
         // Save updated element
         element.save((saveElemErr) => {
           if (saveElemErr) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+            return reject(new errors.CustomError('Save failed.'));
           }
 
           // Return the updated element object
@@ -873,11 +818,11 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The user object of the requesting user.
-   * @param  {String} The organization ID.
-   * @param  {String} The project ID.
-   * @param  {String} The element ID.
-   * @param  {Element} The new child element.
+   * @param  {User} reqUser  The user object of the requesting user.
+   * @param  {String} orgID  The organization ID.
+   * @param  {String} projID  The project ID.
+   * @param  {String} elemID  The element ID.
+   * @param  {Element} newElement  The new child element.
    */
   static updateParent(reqUser, orgID, projID, elemID, newElement) {
     return new Promise((resolve, reject) => {
@@ -890,7 +835,7 @@ class ElementController {
         // Save the updated parentElement
         parentElement.save((saveElemErr) => {
           if (saveElemErr) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+            return reject(new errors.CustomError('Save failed.'));
           }
 
           // Return the updated element object
@@ -915,23 +860,20 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} The user object of the requesting user.
-   * @param  {String} The organization ID.
-   * @param  {String} The project ID.
-   * @param  {String} The element ID.
-   * @param  {Object} An object with delete options.
+   * @param  {User} reqUser  The user object of the requesting user.
+   * @param  {String} organizationID  The organization ID.
+   * @param  {String} projectID  The project ID.
+   * @param  {String} elementID  The element ID.
+   * @param  {Object} options  An object with delete options.
    */
   static removeElement(reqUser, organizationID, projectID, elementID, options) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Ensure all IDs are strings
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID, projectID, elementID], 'string');
+        utils.checkType([options], 'object');
       }
-      if (typeof projectID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
-      }
-      if (typeof elementID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element ID is not a string.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // Set the soft delete flag
@@ -958,7 +900,7 @@ class ElementController {
         // Check Permissions
         const admins = element.project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
+          return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
         if (softDelete) {
@@ -967,7 +909,7 @@ class ElementController {
             element.save((saveErr) => {
               if (saveErr) {
                 // If error occurs, return it
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+                return reject(new errors.CustomError('Save failed.'));
               }
 
               // Return updated element
@@ -975,14 +917,14 @@ class ElementController {
             });
           }
           else {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Element no longer exists.' })));
+            return reject(new errors.CustomError('Element no longer exists.', 404));
           }
         }
         else {
           // Remove the Element
           Element.Element.findByIdAndRemove(element._id, (removeElemErr, elementRemoved) => {
             if (removeElemErr) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
+              return reject(new errors.CustomError('Delete failed.'));
             }
 
             return resolve(elementRemoved);

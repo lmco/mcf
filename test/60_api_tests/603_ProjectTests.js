@@ -142,13 +142,9 @@ function postProject01(done) {
     body: JSON.stringify({
       id: id,
       name: 'Youre a wizard Harry',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
+      org: {
+        id: org.id
+      }
     })
   },
   function(err, response, body) {
@@ -191,13 +187,9 @@ function postBadProject(done) {
     body: JSON.stringify({
       id: id,
       name: 'Dobby must be punished',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
+      org: {
+        id: org.id
+      }
     })
   },
   function(err, response, body) {
@@ -222,13 +214,9 @@ function postBadOrg(done) {
     body: JSON.stringify({
       id: id,
       name: 'I dont belong at howgarts',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
+      org: {
+        id: org.id
+      }
     })
   },
   function(err, response, body) {
@@ -254,13 +242,9 @@ function confusingOrg(done) {
     body: JSON.stringify({
       id: id,
       name: 'Victor Krum',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
+      org: {
+        id: org.id
+      }
     })
   },
   function(err, response, body) {
@@ -285,13 +269,9 @@ function postInvalidProject(done) {
     body: JSON.stringify({
       id: id,
       name: 'Invalid Harry Potter',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
+      org: {
+        id: org.id
+      }
     })
   },
   function(err, response, body) {
@@ -303,7 +283,7 @@ function postInvalidProject(done) {
 }
 
 /**
- * Makes an UPDATE request to api/orgs/:orgid/projects/:projectid. This should update the orgninal
+ * Makes an UPDATE request to api/orgs/:orgid/projects/:projectid. This should update the original
  * project name: "Youre a wizard Harry" that was added to the database to name: "I know".
  * This should succeed.
  */
@@ -362,13 +342,9 @@ function postProject02(done) {
     body: JSON.stringify({
       id: id,
       name: 'Red Head',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
+      org: {
+        id: org.id
+      }
     })
   },
   function(err, response, body) {
