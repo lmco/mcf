@@ -29,6 +29,8 @@ const UserController = M.load('controllers/UserController');
 const OrgController = M.load('controllers/OrganizationController');
 const ElemController = M.load('controllers/ElementController');
 const Element = M.load('models/Element');
+const AuthController = M.load('lib/auth');
+const User = M.require('models/User');
 
 let nonAuser = null;
 let allSeeingUser = null;
@@ -51,59 +53,58 @@ describe(name, () => {
     const db = M.load('lib/db');
     db.connect();
 
-    // Finding a Requesting Admin
-    const username = M.config.test.username;
-    UserController.findUser(username)
-    .then(function(searchUser) {
-      allSeeingUser = searchUser;
-      chai.expect(searchUser.username).to.equal(M.config.test.username);
-      // Creating a non admin user
-      const nonAuserData = {
-        username: 'msmith',
-        password: 'awwgeezrick',
-        fname: 'Morty',
-        lname: 'Smith',
-        admin: false
-      };
-      UserController.createUser(allSeeingUser, nonAuserData)
-      .then(function(nonAu) {
-        nonAuser = nonAu;
-        chai.expect(nonAu.username).to.equal('msmith');
-        chai.expect(nonAu.fname).to.equal('Morty');
-        chai.expect(nonAu.lname).to.equal('Smith');
-        // Creating an organization using in the tests
-        const orgData = {
-          id: 'council',
-          name: 'Council of Ricks',
-          permissions: {
-            admin: [allSeeingUser._id],
-            write: [allSeeingUser._id],
-            read: [allSeeingUser._id]
-          }
-        };
-        OrgController.createOrg(allSeeingUser, orgData)
-        .then((retOrg) => {
-          org = retOrg;
-          chai.expect(retOrg.id).to.equal('council');
-          chai.expect(retOrg.name).to.equal('Council of Ricks');
-          chai.expect(retOrg.permissions.read).to.include(allSeeingUser._id.toString());
-          chai.expect(retOrg.permissions.write).to.include(allSeeingUser._id.toString());
-          chai.expect(retOrg.permissions.admin).to.include(allSeeingUser._id.toString());
-          done();
-        })
-        .catch((error) => {
-          chai.expect(error.description).to.equal(null);
-          done();
+    // Creating a Requesting Admin
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          // Setting it equal to global variable
+          allSeeingUser = userUpdate;
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          // Creating a non admin user
+          const nonAuserData = {
+            username: 'msmith',
+            password: 'awwgeezrick',
+            fname: 'Morty',
+            lname: 'Smith',
+            admin: false
+          };
+          UserController.createUser(allSeeingUser, nonAuserData)
+          .then(function(nonAu) {
+            nonAuser = nonAu;
+            chai.expect(nonAu.username).to.equal('msmith');
+            chai.expect(nonAu.fname).to.equal('Morty');
+            chai.expect(nonAu.lname).to.equal('Smith');
+            // Creating an organization using in the tests
+            const orgData = {
+              id: 'council',
+              name: 'Council of Ricks',
+              permissions: {
+                admin: [allSeeingUser._id],
+                write: [allSeeingUser._id],
+                read: [allSeeingUser._id]
+              }
+            };
+            OrgController.createOrg(allSeeingUser, orgData)
+            .then((retOrg) => {
+              org = retOrg;
+              chai.expect(retOrg.id).to.equal('council');
+              chai.expect(retOrg.name).to.equal('Council of Ricks');
+              chai.expect(retOrg.permissions.read).to.include(allSeeingUser._id.toString());
+              chai.expect(retOrg.permissions.write).to.include(allSeeingUser._id.toString());
+              chai.expect(retOrg.permissions.admin).to.include(allSeeingUser._id.toString());
+              done();
+            })
+            .catch((error) => {
+              chai.expect(error.description).to.equal(null);
+              done();
+            });
+          });
         });
-      })
-      .catch((error) => {
-        chai.expect(error.description).to.equal(null);
-        done();
-      });
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
     });
   });
 
@@ -117,8 +118,13 @@ describe(name, () => {
       UserController.removeUser(allSeeingUser, userTwo)
       .then(function(delUser2) {
         chai.expect(delUser2).to.equal('msmith');
-        mongoose.connection.close();
-        done();
+        User.findOneAndRemove({
+          username: M.config.test.username
+        }, (err) => {
+          chai.expect(err).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       })
       .catch(function(err1) {
         const error1 = JSON.parse(err1.message);

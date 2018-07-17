@@ -50,7 +50,6 @@ describe(name, () => {
   it('should soft delete a user', softDeleteUser);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
-  it('should create LDAP user', loginLDAPUser).timeout(5000);
 });
 
 
@@ -182,21 +181,6 @@ function deleteUser(done) {
     username: 'ackbar'
   }, (err) => {
     chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-function loginLDAPUser(done) {
-  const AuthController = M.load('lib/auth');
-  const u = M.config.test.username;
-  const p = M.config.test.password;
-  AuthController.handleBasicAuth(null, null, u, p, (err, user) => {
-    chai.expect(err).to.equal(null);
-    chai.expect(user.username).to.equal(M.config.test.username);
-
-    User.findOneAndUpdate({ username: u }, { admin: true }, (updateErr, userUpdate) => {
-      chai.expect(updateErr).to.equal(null);
-    });
     done();
   });
 }
