@@ -67,7 +67,7 @@ describe(name, function() {
           OrgController.createOrg(user, orgData)
           .then((retOrg) => {
             org = retOrg;
-            return ProjController.createProject(user, {id: 'deathstar', name: 'Death Star', org: {id: org.id}});
+            return ProjController.createProject(user, { id: 'deathstar', name: 'Death Star', org: { id: org.id } });
           })
           .then((retProj) => {
             proj = retProj;
@@ -358,9 +358,7 @@ function softDeleteElement(done) {
  */
 function hardDeleteElement(done) {
   ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: false })
-  .then(() => {
-    return ElemController.findElement(user, org.id, proj.id, 'elem0', true);
-  })
+  .then(() => ElemController.findElement(user, org.id, proj.id, 'elem0', true))
   .then((retElem2) => {
     chai.expect(retElem2).to.equal(null);
     done();
@@ -377,9 +375,7 @@ function hardDeleteElement(done) {
  */
 function softDeleteAllElements(done) {
   ElemController.removeElements(user, org.id, proj.id, { soft: true })
-  .then(() => {
-    return ElemController.findElements(user, org.id, proj.id);
-  })
+  .then(() => ElemController.findElements(user, org.id, proj.id))
   .then((retElems2) => {
     chai.expect(retElems2.length).to.equal(3);
     done();
@@ -395,9 +391,7 @@ function softDeleteAllElements(done) {
  */
 function hardDeleteAllElements(done) {
   ElemController.removeElements(user, org.id, proj.id, { soft: false })
-  .then(() => {
-    return ElemController.findElements(user, org.id, proj.id);
-  })
+  .then(() => ElemController.findElements(user, org.id, proj.id))
   .then((retElems2) => {
     chai.expect(retElems2.length).to.equal(0);
     done();
