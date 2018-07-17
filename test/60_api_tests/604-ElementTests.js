@@ -80,17 +80,13 @@ describe(name, function() {
               }
             };
 
-            ProjController.createProject(user, projData)
-            .then((retProj) => {
-              proj = retProj;
-              chai.expect(retProj.id).to.equal('dthstr');
-              chai.expect(retProj.name).to.equal('Death Star');
-              done();
-            })
-            .catch((error) => {
-              chai.expect(error.message).to.equal(null);
-              done();
-            });
+            return ProjController.createProject(user, projData);
+          })
+          .then((retProj) => {
+            proj = retProj;
+            chai.expect(retProj.id).to.equal('dthstr');
+            chai.expect(retProj.name).to.equal('Death Star');
+            done();
           })
           .catch((error) => {
             chai.expect(error.message).to.equal(null);
