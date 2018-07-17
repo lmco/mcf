@@ -66,22 +66,22 @@ describe(name, () => {
           chai.expect(userUpdate).to.not.equal(null);
           // Creating a non admin user
           const nonAuserData = {
-            username: 'msmith',
-            password: 'awwgeezrick',
-            fname: 'Morty',
-            lname: 'Smith',
+            username: 'pepperpotts',
+            password: 'gfoftonystark',
+            fname: 'Pepper',
+            lname: 'Potts',
             admin: false
           };
           UserController.createUser(allSeeingUser, nonAuserData)
           .then(function(nonAu) {
             nonAuser = nonAu;
-            chai.expect(nonAu.username).to.equal('msmith');
-            chai.expect(nonAu.fname).to.equal('Morty');
-            chai.expect(nonAu.lname).to.equal('Smith');
+            chai.expect(nonAu.username).to.equal('pepperpotts');
+            chai.expect(nonAu.fname).to.equal('Pepper');
+            chai.expect(nonAu.lname).to.equal('Potts');
             // Creating an organization using in the tests
             const orgData = {
-              id: 'council',
-              name: 'Council of Ricks',
+              id: 'starkhq',
+              name: 'Stark Headquarts',
               permissions: {
                 admin: [allSeeingUser._id],
                 write: [allSeeingUser._id],
@@ -91,8 +91,8 @@ describe(name, () => {
             OrgController.createOrg(allSeeingUser, orgData)
             .then((retOrg) => {
               org = retOrg;
-              chai.expect(retOrg.id).to.equal('council');
-              chai.expect(retOrg.name).to.equal('Council of Ricks');
+              chai.expect(retOrg.id).to.equal('starkhq');
+              chai.expect(retOrg.name).to.equal('Stark Headquarts');
               chai.expect(retOrg.permissions.read).to.include(allSeeingUser._id.toString());
               chai.expect(retOrg.permissions.write).to.include(allSeeingUser._id.toString());
               chai.expect(retOrg.permissions.admin).to.include(allSeeingUser._id.toString());
@@ -113,13 +113,13 @@ describe(name, () => {
 
   after((done) => {
     // Removing the organization created
-    OrgController.removeOrg(allSeeingUser, 'council', { soft: false })
+    OrgController.removeOrg(allSeeingUser, 'starkhq', { soft: false })
     .then(() => {
       // Removing the non admin user
-      const userTwo = 'msmith';
+      const userTwo = 'pepperpotts';
       UserController.removeUser(allSeeingUser, userTwo)
       .then(function(delUser2) {
-        chai.expect(delUser2).to.equal('msmith');
+        chai.expect(delUser2).to.equal('pepperpotts');
         User.findOneAndRemove({
           username: M.config.test.username
         }, (err) => {
@@ -186,16 +186,16 @@ describe(name, () => {
  */
 function createProject(done) {
   const projData = {
-    id: 'prtlgn',
-    name: 'portal gun',
+    id: 'ironman',
+    name: 'Iron man Suite',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
   .then((proj) => {
-    chai.expect(proj.id).to.equal('prtlgn');
-    chai.expect(proj.name).to.equal('portal gun');
+    chai.expect(proj.id).to.equal('ironman');
+    chai.expect(proj.name).to.equal('Iron man Suite');
     done();
   })
   .catch((error) => {
@@ -210,11 +210,11 @@ function createProject(done) {
 function createElements(done) {
   const elem0 = {
     id: '0000',
-    name: 'Trigger',
+    name: 'smart missiles',
     project: {
-      id: 'prtlgn',
+      id: 'ironman',
       org: {
-        id: 'council'
+        id: 'starkhq'
       }
     },
     type: 'Element'
@@ -223,11 +223,11 @@ function createElements(done) {
   .then(() => {
     const elem1 = {
       id: '0001',
-      name: 'Handle',
+      name: 'JARVIS',
       project: {
-        id: 'prtlgn',
+        id: 'ironman',
         org: {
-          id: 'council'
+          id: 'starkhq'
         }
       },
       type: 'Element'
@@ -249,12 +249,12 @@ function createElements(done) {
 
 /**
  * Attempting to update a project field with an
- * invalid attempt at updating the id. This 
+ * invalid attempt at updating the id. This
  * will reject and throw an error.
  */
 
 function updateFieldError(done) {
-  ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'shouldnotchange' })
+  ProjController.updateProject(allSeeingUser, org.id, 'ironman', { id: 'shouldnotchange' })
   .then((proj) => {
     chai.expect(typeof proj).to.equal('undefined');
     done();
@@ -272,7 +272,7 @@ function updateFieldError(done) {
  */
 
 function updateTypeError(done) {
-  ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { name: [] })
+  ProjController.updateProject(allSeeingUser, org.id, 'ironman', { name: [] })
   .then((proj) => {
     chai.expect(typeof proj).to.equal('undefined');
     done();
@@ -284,13 +284,13 @@ function updateTypeError(done) {
 }
 
 /**
- * Testing updating a project with a 
+ * Testing updating a project with a
  * new name. This should pass.
  */
 function updateProject(done) {
-  ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', { id: 'prtlgn', name: 'portal gun changed' })
+  ProjController.updateProject(allSeeingUser, org.id, 'ironman', { id: 'ironman', name: 'Iron Man' })
   .then((proj) => {
-    chai.expect(proj.name).to.equal('portal gun changed');
+    chai.expect(proj.name).to.equal('Iron Man');
     done();
   })
   .catch((error) => {
@@ -300,15 +300,15 @@ function updateProject(done) {
 }
 
 /**
- * Testing updating a project with using project object. 
+ * Testing updating a project with using project object.
  */
 function updateProjectObject(done) {
-  ProjController.findProject(allSeeingUser, org.id, 'prtlgn')
+  ProjController.findProject(allSeeingUser, org.id, 'ironman')
   .then((projectFound) => {
-    projectFound.name = 'portal gun changed again';
-    ProjController.updateProject(allSeeingUser, org.id, 'prtlgn', projectFound)
+    projectFound.name = 'Iron Man Two';
+    ProjController.updateProject(allSeeingUser, org.id, 'ironman', projectFound)
     .then((projectUpdated) => {
-      chai.expect(projectUpdated.name).to.equal('portal gun changed again');
+      chai.expect(projectUpdated.name).to.equal('Iron Man Two');
       done();
     })
     .catch((error) => {
@@ -327,17 +327,17 @@ function updateProjectObject(done) {
  */
 function createProject02(done) {
   const projData = {
-    id: 'dimc137rick',
-    name: 'Mad Scientist',
+    id: 'arcreactor',
+    name: 'Arc Reactor',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
   .then((proj) => {
     project = proj;
-    chai.expect(proj.id).to.equal('dimc137rick');
-    chai.expect(proj.name).to.equal('Mad Scientist');
+    chai.expect(proj.id).to.equal('arcreactor');
+    chai.expect(proj.name).to.equal('Arc Reactor');
     done();
   })
   .catch((error) => {
@@ -355,7 +355,7 @@ function createLongId(done) {
     id: 'thisisaverylongidnamepleaseacceptmeorbreak',
     name: 'Long Id',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
@@ -377,9 +377,9 @@ function createLongId(done) {
 function createLongName(done) {
   const projData = {
     id: 'vlongname',
-    name: 'This is Leah I am writing to see if this is valid are you from here on i am adding more because it worked with what i had at you',
+    name: 'This is Tony Stark I am writing to see if this is valid are you from here on i am adding more because it worked with what i had at you',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
@@ -401,9 +401,9 @@ function createLongName(done) {
 function createLongName02(done) {
   const projData = {
     id: 'vlongnametwo',
-    name: 'This is Leah I am writing to see if this is valid are you from here on i am adding more because it worked with what i had at you i want to see you break because this is gettting really long and I want you to break please break I want to see you break',
+    name: 'This is Tony Stark I am writing to see if this is valid are you from here on i am adding more because it worked with what i had at you i want to see you break because this is gettting really long and I want you to break please break I want to see you break',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
@@ -441,14 +441,16 @@ function createPeriodName(done) {
 }
 
 /**
- * Tests attempting to create a project already existing
+ * Tests attempting to create a project already existing.
+ * This should throw an error stating the project already
+ * exists.
  */
 function recreateProject(done) {
   const projData = {
-    id: 'dimc137rick',
-    name: 'Newbie',
+    id: 'arcreactor',
+    name: 'Small Arc Reactor',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
@@ -466,14 +468,14 @@ function recreateProject(done) {
 
 /**
  * Tests creating a project that has not id input.
- * This should be rejected and give an error.
+ * This should be rejected and throw an error.
  */
 function noId(done) {
   const projData = {
     id: '',
     name: 'denyme',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
@@ -489,14 +491,14 @@ function noId(done) {
 
 /**
  * Tests creating a project that has not id input.
- * This should be rejected and give an error.
+ * This should be rejected and throw an error.
  */
 function noName(done) {
   const projData = {
     id: 'imfake',
     name: '',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
@@ -517,7 +519,7 @@ function noName(done) {
 function noOrg(done) {
   const projData = {
     id: 'imfake',
-    name: 'denyme',
+    name: 'starkhq',
     org: {
       id: ''
     }
@@ -543,7 +545,7 @@ function nonACreator(done) {
     id: 'iamnoadmin',
     name: 'dontmakeme',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(nonAuser, projData)
@@ -564,12 +566,12 @@ function nonACreator(done) {
  */
 
 function findProj(done) {
-  const orgId = 'council';
-  const projId = 'prtlgn';
+  const orgId = 'starkhq';
+  const projId = 'ironman';
   ProjController.findProject(allSeeingUser, orgId, projId)
   .then((proj) => {
-    chai.expect(proj.id).to.equal('prtlgn');
-    chai.expect(proj.name).to.equal('portal gun changed again');
+    chai.expect(proj.id).to.equal('ironman');
+    chai.expect(proj.name).to.equal('Iron Man Two');
     done();
   })
   .catch((error) => {
@@ -584,8 +586,8 @@ function findProj(done) {
  */
 
 function noProj(done) {
-  const orgId = 'council';
-  const projId = 'fakeProj';
+  const orgId = 'starkhq';
+  const projId = 'fakeproj';
   ProjController.findProject(allSeeingUser, orgId, projId)
   .then(() => {
     chai.expect(true).to.equal(false);
@@ -603,8 +605,8 @@ function noProj(done) {
  */
 
 function nonAUser(done) {
-  const orgId = 'council';
-  const projId = 'prtlgn';
+  const orgId = 'starkhq';
+  const projId = 'ironman';
   ProjController.findProject(nonAuser, orgId, projId)
   .then(() => {
     chai.assert(true === false);
@@ -622,15 +624,15 @@ function nonAUser(done) {
  */
 
 function updateProj(done) {
-  const orgId = 'council';
-  const projId = 'prtlgn';
+  const orgId = 'starkhq';
+  const projId = 'ironman';
   const updateData = {
-    name: 'freeze ray'
+    name: 'Tony Stark'
   };
   ProjController.updateProject(allSeeingUser, orgId, projId, updateData)
   .then((proj) => {
-    chai.expect(proj.id).to.equal('prtlgn');
-    chai.expect(proj.name).to.equal('freeze ray');
+    chai.expect(proj.id).to.equal('ironman');
+    chai.expect(proj.name).to.equal('Tony Stark');
     done();
   })
   .catch((error) => {
@@ -645,14 +647,14 @@ function updateProj(done) {
  */
 
 function updateID(done) {
-  const orgId = 'council';
-  const projId = 'prtlgn';
+  const orgId = 'starkhq';
+  const projId = 'ironman';
   const updateData = {
-    id: 'freezeray'
+    id: 'newironman'
   };
   ProjController.updateProject(allSeeingUser, orgId, projId, updateData)
   .then((proj) => {
-    chai.expect(proj.id).to.equal('freezeray');
+    chai.expect(proj.id).to.equal('newironman');
     done();
   })
   .catch((error) => {
@@ -667,10 +669,10 @@ function updateID(done) {
  */
 
 function updateNonA(done) {
-  const orgId = 'council';
-  const projId = 'dimc137rick';
+  const orgId = 'starkhq';
+  const projId = 'arcreactor';
   const updateData = {
-    name: 'Still Mad'
+    name: 'Baby Arc Reactor'
   };
   ProjController.updateProject(nonAuser, orgId, projId, updateData)
   .then(() => {
@@ -689,7 +691,7 @@ function updateNonA(done) {
  * Tests finding all permisions on the project.
  */
 function findPerm(done) {
-  ProjController.findPermissions(allSeeingUser, org.id, 'prtlgn', allSeeingUser)
+  ProjController.findPermissions(allSeeingUser, org.id, 'ironman', allSeeingUser)
   .then((perm) => {
     chai.expect(perm.read).to.equal(true);
     chai.expect(perm.write).to.equal(true);
@@ -708,11 +710,11 @@ function findPerm(done) {
  * permissions before setting the project permissions.
  */
 function setPerm(done) {
-  OrgController.setPermissions(allSeeingUser, 'council', nonAuser, 'write')
+  OrgController.setPermissions(allSeeingUser, 'starkhq', nonAuser, 'write')
   .then(() => {
-    ProjController.setPermissions(allSeeingUser, 'council', project.id.toString(), nonAuser, 'write')
+    ProjController.setPermissions(allSeeingUser, 'starkhq', project.id.toString(), nonAuser, 'write')
     .then(() => {
-      ProjController.findProject(allSeeingUser, 'council', project.id.toString())
+      ProjController.findProject(allSeeingUser, 'starkhq', project.id.toString())
       .then((retProj) => {
         chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
         chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
@@ -739,9 +741,9 @@ function setPerm(done) {
  * Tests soft-deleting a project
  */
 function softDeleteProject(done) {
-  ProjController.removeProject(allSeeingUser, org.id, 'prtlgn', { soft: true })
+  ProjController.removeProject(allSeeingUser, org.id, 'ironman', { soft: true })
   .then(() => {
-    ProjController.findProject(allSeeingUser, org.id, 'prtlgn')
+    ProjController.findProject(allSeeingUser, org.id, 'ironman')
     .then((proj2) => {
       chai.expect(proj2).to.equal(null);
       done();
@@ -761,9 +763,9 @@ function softDeleteProject(done) {
  * Tests deleting a project
  */
 function deleteProject(done) {
-  ProjController.removeProject(allSeeingUser, org.id, 'prtlgn', { soft: false })
+  ProjController.removeProject(allSeeingUser, org.id, 'ironman', { soft: false })
   .then(() => {
-    ProjController.findProject(allSeeingUser, org.id, 'prtlgn')
+    ProjController.findProject(allSeeingUser, org.id, 'ironman')
     .then((proj2) => {
       chai.expect(proj2).to.equal(null);
       // Check if elements still exist
@@ -789,9 +791,9 @@ function deleteProject(done) {
  * Tests deleting second project
  */
 function deleteProject02(done) {
-  ProjController.removeProject(allSeeingUser, org.id, 'dimc137rick', { soft: false })
+  ProjController.removeProject(allSeeingUser, org.id, 'arcreactor', { soft: false })
   .then(() => {
-    ProjController.findProject(allSeeingUser, org.id, 'dimc137rick')
+    ProjController.findProject(allSeeingUser, org.id, 'arcreactor')
     .then((proj2) => {
       chai.expect(proj2).to.equal(null);
       done();
