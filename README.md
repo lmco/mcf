@@ -102,7 +102,7 @@ is currently dependent on two deprecated modules known as
 [gulp-util](https://www.npmjs.com/package/gulp-util) and 
 [react-tools](https://www.npmjs.com/package/react-tools). As of now, gulp-react 
 has yet to update their module to remove these dependencies and thus, warnings
-occur. These warning have no impact on MBEE or production code as the module
+occur. These warnings have no impact on MBEE or production code as the module
 is only used to build the application. If gulp-react is updated in the future,
 the module will be updated.
 
