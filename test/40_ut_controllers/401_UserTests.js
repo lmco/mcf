@@ -15,10 +15,12 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This file defines basic tests of the User Controller.
+ * @description This tests the User controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The user controller tests create, delete,
+ * update, and find users. As well as test the controlls with invalid inputs.
  */
 
- // Required imports to run tests
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
@@ -31,7 +33,7 @@ const UserController = M.load('controllers/UserController');
 
 let reqUser = null;
 let nonAUser = null;
-// let badAUser = null;
+let badAUser = null;
 
 /*------------------------------------
  *       Main
@@ -53,6 +55,7 @@ describe(name, function() {
     .then(function(searchUser) {
       reqUser = searchUser;
       chai.expect(searchUser.username).to.equal(M.config.test.username);
+      // Creating a new admin user
       const userData2 = {
         username: 'jubbathehut',
         password: 'ilovetoeat',
@@ -85,7 +88,7 @@ describe(name, function() {
   *-------------------------------------*/
   after(function(done) {
     this.timeout(5000);
-    // Deleting the user created in the before function
+    // Deleting users used during testing
     const username = 'darthsidious';
     UserController.removeUser(reqUser, username)
     .then(function(delUser) {
@@ -94,6 +97,7 @@ describe(name, function() {
       UserController.removeUser(reqUser, user2)
       .then(function(delBadUser) {
         chai.expect(delBadUser).to.equal('jubbathehut');
+        // Closing db connection
         mongoose.connection.close();
         done();
       })
@@ -114,7 +118,6 @@ describe(name, function() {
  /*----------
   * Tests
   *----------*/
-
   it('should create a user', createNewUser).timeout(3000);
   it('should create an admin user', createAUser).timeout(3000);
   it('should create a non admin user', createNonAUser).timeout(3000);
@@ -254,10 +257,9 @@ function createUser02(done) {
 }
 
 /**
- * Creates a user using the User Controller with a non admin user
- * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
- * NOTE: As of right now the password key becomes a hash
- * need to eventually made password tests.
+ * Attempts to create a user using the User Controller with a 
+ * non admin user. An error should be thrown with this test
+ * saying the requesting user does not have permissions.
  */
 function nonACreate(done) {
   const userData = {
@@ -278,9 +280,9 @@ function nonACreate(done) {
 }
 
 /**
- * Tests a user creating a username
- * that inputted no username and should
- * return an error.
+ * Tests creating a user with invalid input into
+ * the username. An error should be thrown due to 
+ * not being able to save the username.
  */
 
 function badUser(done) {
@@ -306,12 +308,11 @@ function badUser(done) {
 /**
  * Tests a user that inputted html elements
  * into their username. This should santize the name
- * and return it successfully.
- * NOTE: Invalid username test!
+ * and reject the user, throwing an error.
  */
 function invalidUser(done) {
   const userData = {
-    username: '33leah',
+    username: '$<script>',
     password: 'iaminvalid',
     fname: 'Fake',
     lname: 'Leah'
@@ -330,9 +331,9 @@ function invalidUser(done) {
 }
 
 /**
- * Tests finding a user that inputted
- * the same username that is already
- * in the database. This should fail.
+ * Tests creating a user with username already 
+ * created. Test should throw an error saying
+ * user already exists.
  */
 
 function copyCatUser(done) {
@@ -356,7 +357,8 @@ function copyCatUser(done) {
 }
 
 /**
- * Updating the last name of the first user created
+ * Updating the last name of the first user 
+ * with the user controller.
  */
 
 function updateLName(done) {
@@ -379,9 +381,9 @@ function updateLName(done) {
 }
 
 /**
- * Updating the username of the user. Curious to see if
- * it would work. Assuming an error should occur
- * with the test.
+ * Test to update the username of the user.
+ * Tests throws an error saying the update is not
+ * allowed.
  */
 
 function updateUName(done) {
@@ -402,8 +404,10 @@ function updateUName(done) {
 }
 
 /**
- * Attempting to update second user, but should be denied
- * because non A user
+ * Tests to update second user with 
+ * requesting user non admin user. 
+ * Test should throw error about user not
+ * having permissions.
  */
 
 function updateAttempt(done) {
@@ -423,7 +427,9 @@ function updateAttempt(done) {
 }
 
 /**
- * Attempting to update a user that doesnt exist.
+ * Tests to update a user that does not
+ * exist. An error should be thrown saying user
+ * does not exist.
  */
 
 function updateNoUser(done) {
@@ -444,7 +450,7 @@ function updateNoUser(done) {
 
 
 /**
- * Finding user
+ * Tests finding the user with user controller.
  */
 function findUser(done) {
   const username = 'hsolo';
@@ -463,11 +469,9 @@ function findUser(done) {
 }
 
 /**
- * This is to attempt to find a user that does not exist.
- * This should throw an error. I would assume an internal
- * error with Find failed.
- * it returns that the delUser is null.
- * Is that what we want?
+ * Tests finding a user that does not exist.
+ * An error should be thrown saying can not find
+ * user.
  */
 function noFindUser(done) {
   const username = 'nouser';
@@ -484,8 +488,9 @@ function noFindUser(done) {
 }
 
 /*
- * Attempts deleting the user that
- * that does not exist.
+ * Tests deleting a user that does not exist.
+ * An error is thrown saying the user does not
+ * exist.
  */
 
 function fakeDelete(done) {
@@ -503,8 +508,10 @@ function fakeDelete(done) {
 }
 
 /*
- * Attempts deleting the user that
- * with a non admin user.
+ * Tests deleting a user with a 
+ * requesting user not an admin user.
+ * An error should be thrown saying the user 
+ * does not have permissions.
  */
 
 function nonADelete(done) {
@@ -521,7 +528,8 @@ function nonADelete(done) {
 }
 
 /*
- * User attempts deleting themselves.
+ * Tests a user attempting to delete themselves.
+ * An error is thrown saying they cannot delete themselves.
  */
 
 function deleteSelf(done) {
@@ -540,7 +548,7 @@ function deleteSelf(done) {
 
 
 /*
- * Deletes the user.
+ * Tests deleting a user with the user controller.
  */
 
 function deleteUser(done) {
@@ -558,7 +566,8 @@ function deleteUser(done) {
 }
 
 /*
- * Deletes the second user created.
+ * Tests deleting the second user using the user 
+ * controller.
  */
 
 function deleteUser02(done) {
@@ -576,7 +585,7 @@ function deleteUser02(done) {
 }
 
 /*
- * Deletes the admin user created.
+ * Tests deleting the user admin created.
  */
 
 function deleteAUser(done) {

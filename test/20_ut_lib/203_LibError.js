@@ -54,7 +54,7 @@ function noStatusCode(done) {
 
 
 /**
- * @description  Creates an error with no 400 code
+ * Creates an error with no 400 code
  */
 function status400(done) {
   const err = new errors.CustomError('Project id not provided.', 400);
@@ -66,7 +66,7 @@ function status400(done) {
 }
 
 /**
- * @description  Logs a critical error
+ * Logs a critical error
  */
 function critical(done) {
   const err = new errors.CustomError('I need some coffee.', 418, 'critical');
@@ -77,7 +77,7 @@ function critical(done) {
 }
 
 /**
- * @description  Returns the error in JSON format
+ * Returns the error in JSON format
  */
 function toJSON(done) {
   const err = new errors.CustomError('Where did it go...', 404, 'error');

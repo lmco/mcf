@@ -33,17 +33,26 @@ const User = M.load('models/User');
  *------------------------------------*/
 
 describe(name, () => {
-  // runs before all tests in this block
+  /*-------------------------------------
+   * Before: runs before all tests
+   *-------------------------------------*/
   before(() => {
+    // Open the database connection
     const db = M.load('lib/db');
     db.connect();
   });
 
-  // runs after all tests in this block
+  /*-------------------------------------
+   * After: runs after all tests
+   *-------------------------------------*/
   after(() => {
+    // Close database connection
     mongoose.connection.close();
   });
 
+ /*----------
+  * Tests
+  *----------*/
   it('should create a user', createUser);
   it('should get a user from the database', getUser);
   it('should update a user', updateUser);
@@ -105,7 +114,7 @@ function getUser(done) {
 
 
 /**
- * Updates a user's name.
+ * Updates a user's name using the User Model.
  */
 function updateUser(done) {
   User.findOneAndUpdate({

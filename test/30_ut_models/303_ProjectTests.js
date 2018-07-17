@@ -35,10 +35,12 @@ let org = null;
  *       Main
  *------------------------------------*/
 
-// runs before all tests in this block
-
 describe(name, function() {
+  /*-------------------------------------
+   * Before: runs before all tests
+   *-------------------------------------*/
   before(function() {
+    // Connect to database
     const db = M.load('lib/db');
     db.connect();
     return new Promise(function(resolve) {
@@ -68,7 +70,9 @@ describe(name, function() {
     });
   });
 
-  // runs after all the tests are done
+  /*-------------------------------------
+   * After: runs after all tests
+   *-------------------------------------*/
   after(function(done) {
     Org.findOneAndRemove({ id: org.id }, function(err) {
       if (err) {
@@ -80,6 +84,9 @@ describe(name, function() {
     });
   });
 
+ /*----------
+  * Tests
+  *----------*/
   it('should create a project', createProject).timeout(3000);
   it('should soft delete a project', softDeleteProject).timeout(3000);
   it('should delete a project', deleteProject).timeout(3000);

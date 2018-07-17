@@ -40,9 +40,9 @@ let project = null;
 // runs before all tests in this block
 
 describe(name, function() {
-  /**
-   * This function runs before all the tests in this test suite.
-   */
+  /*-------------------------------------
+   * Before: runs before all tests
+   *-------------------------------------*/
   before(function() {
     this.timeout(5000);
     return new Promise(function(resolve, reject) {
@@ -111,9 +111,9 @@ describe(name, function() {
     });
   });
 
-  /**
-   * This function runs after all the tests are done
-   */
+  /*-------------------------------------
+   * After: runs after all tests
+   *-------------------------------------*/
   after(function(done) {
     // Remove the project
     Project.findOneAndRemove({
@@ -146,6 +146,9 @@ describe(name, function() {
     });
   });
 
+ /*----------
+  * Tests
+  *----------*/
   it('should create a generic element', createElement);
   it('should delete the generic element', deleteElement);
   it('should create a root package', createRootPackage);

@@ -16,7 +16,11 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  This file defines basic tests of the Organization Controller.
+ * @description  This tests the Organization Controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The organization controller tests create, 
+ * update, find, soft delete, hard delte, and permissions of organzations. As well as
+ * test the controlls with invalid inputs.
  */
 
  //Required imports to run tests

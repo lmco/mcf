@@ -15,10 +15,13 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description   This file defines basic tests of the Project Controller.
+ * @description   This tests the Project Controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The project controller tests create,
+ * update, find, soft delete, hard delte, and permissions of projects. As well
+ * as test the controlls with invalid inputs.
  */
 
- //Required imports to run tests
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');

@@ -32,17 +32,26 @@ const Org = M.load('models/Organization');
  *------------------------------------*/
 
 describe(name, () => {
-  // runs before all tests in this block
+  /*-------------------------------------
+   * Before: runs before all tests
+   *-------------------------------------*/
   before(() => {
+    // Open database conection
     const db = M.load('lib/db');
     db.connect();
   });
 
-  // runs after all tests in this block
+  /*-------------------------------------
+   * After: runs after all tests
+   *-------------------------------------*/
   after(() => {
+    // Close database connection
     mongoose.connection.close();
   });
 
+ /*----------
+  * Tests
+  *----------*/
   it('should create an organization', createOrg).timeout(2500);
   it('should soft delete an organization', softDeleteOrg).timeout(2500);
   it('should delete an organization', deleteOrg).timeout(2500);
