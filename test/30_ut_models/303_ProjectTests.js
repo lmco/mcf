@@ -27,47 +27,49 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.load('models/Organization');
 const Project = M.load('models/Project');
 const User = M.load('models/User');
+const AuthController = M.load('lib/auth');
 
 // This is so the same parent org can be references across test functions
 let org = null;
+let user = null;
 
 /*------------------------------------
  *       Main
  *------------------------------------*/
 
 describe(name, function() {
-  /*-------------------------------------
-   * Before: runs before all tests
-   *-------------------------------------*/
-  before(function() {
-    this.timeout(5000);
-    // Connect to database
+  before(function(done) {
+    this.timeout(6000);
     const db = M.load('lib/db');
     db.connect();
-    return new Promise(function(resolve) {
-      User.findOne({ username: M.config.test.username }, function(errUser, user) {
-        // Check if error occured
-        if (errUser) {
-          M.log.error(errUser);
-        }
-        // Otherwise,
-        // Create a parent organization before creating any projects
-        org = new Org({
-          id: 'avengers',
-          name: 'Age of Ultron',
-          permissions: {
-            admin: [user._id],
-            write: [user._id],
-            read: [user._id]
-          }
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          user = userUpdate;
+          // Create a parent organization before creating any projects
+          org = new Org({
+            id: 'avengers',
+            name: 'Age of Ultron',
+            permissions: {
+              admin: [ldapuser._id],
+              write: [ldapuser._id],
+              read: [ldapuser._id]
+            }
+          });
+          org.save(function(error) {
+            if (error) {
+              M.log.error(error);
+              done();
+            }
+            done();
+          });
         });
-        org.save(function(err) {
-          if (err) {
-            M.log.error(err);
-          }
-          return resolve();
-        });
-      });
     });
   });
 
@@ -75,13 +77,18 @@ describe(name, function() {
    * After: runs after all tests
    *-------------------------------------*/
   after(function(done) {
-    Org.findOneAndRemove({ id: org.id }, function(err) {
-      if (err) {
-        M.log.error(err);
+    Org.findOneAndRemove({ id: org.id }, function(error) {
+      if (error) {
+        M.log.error(error);
       }
-      chai.assert(err === null);
-      mongoose.connection.close();
-      done();
+      chai.assert(error === null);
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
+        mongoose.connection.close();
+        done();
+      });
     });
   });
 
@@ -103,11 +110,6 @@ describe(name, function() {
  * Creates a user using the User model.
  */
 function createProject(done) {
-  User.findOne({ username: M.config.test.username }, function(errUser, user) {
-    // Check if error occured
-    if (errUser) {
-      M.log.error(errUser);
-    }
     // Otherwise,
     // Create a project
     const id = 'gaurdiansofgalaxy';
@@ -129,7 +131,6 @@ function createProject(done) {
       chai.expect(err).to.equal(null);
       done();
     });
-  });
 }
 
 /**

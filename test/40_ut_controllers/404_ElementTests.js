@@ -29,7 +29,8 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ElemController = M.load('controllers/ElementController');
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
-const UserController = M.load('controllers/UserController');
+const AuthController = M.load('lib/auth');
+const User = M.require('models/User');
 
 let user = null;
 let org = null;
@@ -49,35 +50,41 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    UserController.findUser(M.config.test.username)
-    .then((retUser) => {
-      user = retUser;
-
-      const orgData = {
-        id: 'empire',
-        name: 'Galactic Empire'
-      };
-      OrgController.createOrg(user, orgData)
-      .then((retOrg) => {
-        org = retOrg;
-        ProjController.createProject(user, { id: 'deathstar', name: 'Death Star', org: { id: org.id } })
-        .then((retProj) => {
-          proj = retProj;
-          done();
-        })
-        .catch((error) => {
-          chai.expect(error.message).to.equal(null);
-          done();
+    // Creating a Requesting Admin
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          // Setting it equal to global variable
+          user = userUpdate;
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          // Creating a non admin user
+          const orgData = {
+            id: 'empire',
+            name: 'Galactic Empire'
+          };
+          OrgController.createOrg(user, orgData)
+          .then((retOrg) => {
+            org = retOrg;
+            ProjController.createProject(user, { id: 'deathstar', name: 'Death Star', org: { id: org.id } })
+            .then((retProj) => {
+              proj = retProj;
+              done();
+            })
+            .catch((projError) => {
+              chai.expect(projError.message).to.equal(null);
+              done();
+            });
+          })
+          .catch((orgError) => {
+            chai.expect(orgError.message).to.equal(null);
+            done();
+          });
         });
-      })
-      .catch((error) => {
-        chai.expect(error.message).to.equal(null);
-        done();
-      });
-    })
-    .catch((error) => {
-      chai.expect(error.message).to.equal(null);
-      done();
     });
   });
 
@@ -88,9 +95,15 @@ describe(name, function() {
     // Remove the project and org together
     OrgController.removeOrg(user, org.id, { soft: false })
     .then((retOrg) => {
-      // Once db items are removed, close the db connection and finish
-      mongoose.connection.close();
-      done();
+      // Once db items are removed, remove reqUser
+      // close the db connection and finish
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
+        mongoose.connection.close();
+        done();
+      });
     })
     .catch((error) => {
       chai.expect(error.message).to.equal(null);
