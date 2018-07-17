@@ -42,7 +42,7 @@ M.require = m => {
 };
 
 // Configuration file parsing and initialization
-const parseJSON = M.require('lib.parsejson');
+const parseJSON = M.require('lib.parse_json');
 M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.json`)));
 
 // Set config secret if it's set to RANDOM
