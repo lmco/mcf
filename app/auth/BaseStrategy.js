@@ -194,7 +194,7 @@ class BaseStrategy {
           req.flash('loginError', err);
           return (req.originalUrl.startsWith('/api'))
             ? res.status(401).send('Unauthorized')
-            : res.redirect('/login');
+            : res.redirect(`/login?next=${req.originalUrl}`);
         }
 
         M.log.info(`Authenticated [${user.username}] via Form Input Auth`);

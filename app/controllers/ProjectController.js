@@ -96,9 +96,9 @@ class ProjectController {
             return reject(err);
           }
 
-          // Error Check - Ensure at least one project is found
+          // If no projects are found, return empty array
           if (projects.length < 1) {
-            return reject(new errors.CustomError('No projects found.', 404));
+            return [];
           }
 
 
