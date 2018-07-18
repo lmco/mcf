@@ -19,6 +19,8 @@
  */
 
 const mongoose = require('mongoose');
+const path = require('path');
+const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 /**
  * @class Organization
