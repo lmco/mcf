@@ -23,7 +23,7 @@ const filename = module.filename;
 const name = filename.split('/')[filename.split('/').length - 1];
 
 const M = require('../../mbee.js');
-const parseJSON = M.require('lib.parseJSON');
+const parseJSON = M.require('lib.parse_json');
 
 /*------------------------------------
  *       Main
