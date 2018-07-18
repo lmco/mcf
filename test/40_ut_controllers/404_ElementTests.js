@@ -142,14 +142,22 @@ function createElement(done) {
         id: org.id
       }
     },
-    type: 'Package'
+    type: 'Package',
+    tags: {
+      company: 'Lockheed',
+      paid: true
+    },
+    documentation: 'This is some documentation.'
   };
   ElemController.createElement(user, newElement)
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem0');
+    chai.expect(retElem.tags.paid).to.equal(true);
+    chai.expect(retElem.documentation).to.equal('This is some documentation.');
     done();
   })
   .catch((error) => {
+    console.log(error);
     chai.expect(error.description).to.equal(null);
     done();
   });
