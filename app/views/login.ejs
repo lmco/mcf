@@ -13,7 +13,7 @@
  %>
 
 <div class="container" style="max-width: 450px;" onkeypress="triggerModal(event)">
-  <% if (err) { %>
+  <% if (err.length) { %>
     <div class="alert alert-danger alert-dismissible fade show" role="alert"
          style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%);">
       <%= err %>
