@@ -381,13 +381,10 @@ class APIController {
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
-    .then((user) => {
-      OrgController.findPermissions(req.user, user, orgID)
-      .then((roles) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(roles));
-      })
-      .catch((error) => res.status(error.status).send(error));
+    .then((user) => OrgController.findPermissions(req.user, user, orgID))
+    .then((roles) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(roles));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -415,13 +412,10 @@ class APIController {
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
-    .then((user) => {
-      OrgController.setPermissions(req.user, orgID, user, req.body.role)
-      .then((org) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(org.getPublicData()));
-      })
-      .catch((error) => res.status(error.status).send(error));
+    .then((user) => OrgController.setPermissions(req.user, orgID, user, req.body.role))
+    .then((org) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(org.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -441,13 +435,10 @@ class APIController {
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
-    .then((user) => {
-      OrgController.setPermissions(req.user, orgID, user, 'REMOVE_ALL')
-      .then((org) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(org.getPublicData()));
-      })
-      .catch((error) => res.status(error.status).send(error));
+    .then((user) => OrgController.setPermissions(req.user, orgID, user, 'REMOVE_ALL'))
+    .then((org) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(org.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -709,14 +700,10 @@ class APIController {
 
     // Find User
     UserController.findUser(username)
-    .then((user) => {
-      // Find Project
-      ProjectController.findPermissions(req.user, orgID, projectID, user)
-      .then((permissions) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(permissions));
-      })
-      .catch((error) => res.status(error.status).send(error));
+    .then((user) => ProjectController.findPermissions(req.user, orgID, projectID, user))
+    .then((permissions) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(permissions));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -735,15 +722,10 @@ class APIController {
 
     // Find User to be set
     UserController.findUser(username)
-    .then((user) => {
-      // Set project permissions
-      ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
-      .then((project) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(project));
-      })
-      // Return and log error if caught
-      .catch((error) => res.status(error.status).send(error));
+    .then((user) => ProjectController.setPermissions(req.user, orgID, projectID, user, permType))
+    .then((project) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(project));
     })
     // Return and log error if caught
     .catch((error) => res.status(error.status).send(error));
@@ -763,16 +745,12 @@ class APIController {
 
     // Find User to be set
     UserController.findUser(username)
-    .then((user) => {
-      // Set project permissions
-      ProjectController.setPermissions(req.user, orgID, projectID, user, permType)
-      .then((project) => {
-        res.header('Content-Type', 'application/json');
-        return res.status(200).send(APIController.formatJSON(project));
-      })
-      // Return and log error if caught
-      .catch((error) => res.status(error.status).send(error));
+    .then((user) => ProjectController.setPermissions(req.user, orgID, projectID, user, permType))
+    .then((project) => {
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(APIController.formatJSON(project));
     })
+    // Return and log error if caught
     .catch((error) => res.status(error.status).send(error));
   }
 
