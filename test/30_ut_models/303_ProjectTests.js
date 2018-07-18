@@ -46,7 +46,11 @@ describe(name, function() {
     db.connect();
     const u = M.config.test.username;
     const p = M.config.test.password;
-    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+    const reqObject = {
+      username: u,
+      password: p
+    }
+    AuthController.athenticate(reqObject, null, (err, ldapuser) => {
       chai.expect(err).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
       User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
