@@ -277,9 +277,8 @@ class LDAPStrategy {
         });
       })
       .catch(findUserErr => { // eslint-disable-line consistent-return
-        const err = JSON.parse(findUserErr.message);
         // if the error message is anything but the user is not found, fail
-        if (err.message !== 'Not found') {
+        if (findUserErr.message !== 'Not Found') {
           return reject(findUserErr);
         }
         // if findUser failed with user not found, create the user in the local database

@@ -50,7 +50,7 @@ describe(name, () => {
   it('should soft delete a user', softDeleteUser);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
-  it('should login an LDAP user', loginLDAPUser);
+  it('should login an LDAP user', loginLDAPUser).timeout(10000);
 });
 
 
@@ -187,7 +187,7 @@ function deleteUser(done) {
 }
 
 function loginLDAPUser(done) {
-  const AuthController = M.require('auth.LDAPStrategy');
+  const AuthController = M.require('lib.auth');
   const u = M.config.test.username;
   const p = M.config.test.password;
   AuthController.handleBasicAuth(null, null, u, p)

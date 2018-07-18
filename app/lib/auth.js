@@ -243,3 +243,5 @@ function doLogin(req, res, next) {
 // Export above functions
 module.exports.authenticate = authenticate;
 module.exports.doLogin = doLogin;
+module.exports.handleBasicAuth = AuthModule.handleBasicAuth;
+module.exports.handleTokenAuth = AuthModule.handleTokenAuth;
