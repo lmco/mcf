@@ -142,20 +142,18 @@ class ProjectController {
 
       // Ensure the org exists
       OrgController.findOrg(reqUser, orgID, true)
-      .then((org) => {
-        ProjectController.findProjects(reqUser, org.id, true)
-        .then((projects) => {
-          for (let i = 0; i < projects.length; i++) {
-            ProjectController.removeProject(reqUser, orgID, projects[i].id, options)
-            .then((project) => {
-              if (i === projects.length - 1) {
-                return resolve(projects);
-              }
-            })
-            .catch((deleteProjError) => reject(deleteProjError));
-          }
-        })
-        .catch((findProjectsError) => reject(findProjectsError));
+      .then((org) => ProjectController.findProjects(reqUser, org.id, true))
+      .then((projects) => {
+        for (let i = 0; i < projects.length; i++) {
+          // Must nest promise since it uses a return
+          ProjectController.removeProject(reqUser, orgID, projects[i].id, options)
+          .then(() => {
+            if (i === projects.length - 1) {
+              return resolve(projects);
+            }
+          })
+          .catch((deleteProjError) => reject(deleteProjError));
+        }
       })
       .catch((findOrgError) => reject(findOrgError));
     });
@@ -279,6 +277,7 @@ class ProjectController {
         }
 
         // Error check - check if the project already exists
+        // Must nest promise since it uses the return from findOrg
         ProjectController.findProject(reqUser, org.id, projID)
         .then(() => reject(new errors.CustomError('Project already exists.', 400)))
         .catch((error) => {
@@ -473,11 +472,8 @@ class ProjectController {
       .then((project) => {
         // Delete any elements attached to the project first
         ElemController.removeElements(reqUser, orgID, projID, options)
-        .then(() => {
-          ProjectController.removeProjectHelper(project, softDelete)
-          .then((deletedProject) => resolve(deletedProject))
-          .catch((deleteProjectError) => reject(deleteProjectError));
-        })
+        .then(() => ProjectController.removeProjectHelper(project, softDelete))
+        .then((deletedProject) => resolve(deletedProject))
         .catch((removeElementsError) => {
           // There are simply no elements associated with this project to delete
           if (removeElementsError.description === 'No elements found.') {
@@ -726,10 +722,9 @@ class ProjectController {
                 return resolve(projectSaved);
               }
               // Update org read permissions if needed
-              OrgController.setPermissions(reqUser, orgID, setUser, 'read')
-              .then((userSetPermissions) => resolve(projectSaved))
-              .catch((setOrgPermErr) => reject(setOrgPermErr)); // Closing Set Permissions
+              return OrgController.setPermissions(reqUser, orgID, setUser, 'read');
             })
+            .then(() => resolve(projectSaved))
             .catch((findOrgPermErr) => reject(findOrgPermErr)); // Closing find org permissions
           }
         ); // Closing Project Update
