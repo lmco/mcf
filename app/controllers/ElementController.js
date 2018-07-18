@@ -299,19 +299,6 @@ class ElementController {
         return reject(error);
       }
 
-      if (element.hasOwnProperty('name')) {
-        // Element name is not required, so check first if it exists.
-        if (typeof element.name !== 'string') {
-          return reject(new errors.CustomError('Element name is not a string.', 400));
-        }
-      }
-      if (element.hasOwnProperty('parent')) {
-        // Element parent is not required, so check first if it exists.
-        if (typeof element.parent !== 'string') {
-          return reject(new errors.CustomError('Element parent is not a string.', 400));
-        }
-      }
-
       const elemID = M.lib.sani.html(element.id);
       const projID = M.lib.sani.html(element.project.id);
       const orgID = M.lib.sani.html(element.project.org.id);
@@ -319,13 +306,38 @@ class ElementController {
       const elementType = M.lib.sani.html(element.type);
       let elemName = null;
       let parentID = null;
+      let tags = null;
+      let documentation = null;
 
       if (element.hasOwnProperty('name')) {
+        // Element name is not required, so check first if it exists.
+        if (typeof element.name !== 'string') {
+          return reject(new errors.CustomError('Element name is not a string.', 400));
+        }
         elemName = M.lib.sani.html(element.name);
       }
       if (element.hasOwnProperty('parent')) {
+        // Element parent is not required, so check first if it exists.
+        if (typeof element.parent !== 'string') {
+          return reject(new errors.CustomError('Element parent is not a string.', 400));
+        }
         parentID = M.lib.sani.html(element.parent);
       }
+      if (element.hasOwnProperty('tags')) {
+        // Tags are not required, so check first if they exists
+        if (typeof element.tags !== 'object') {
+          return reject(new errors.CustomError('Element tags are not an object.', 400));
+        }
+        tags = M.lib.sani.html(element.tags);
+      }
+      if (element.hasOwnProperty('documentation')) {
+        // Element documentation is not required, so check first if it exists.
+        if (typeof element.documentation !== 'string') {
+          return reject(new errors.CustomError('Element documentation is not a string.', 400));
+        }
+        documentation = M.lib.sani.html(element.documentation);
+      }
+
 
       // Error check - make sure element ID and element name are valid
       if (!RegExp(M.lib.validators.element.id).test(elemID)) {
@@ -396,7 +408,9 @@ class ElementController {
                   name: elemName,
                   project: proj._id,
                   uid: elemUID,
-                  parent: parent._id
+                  parent: parent._id,
+                  tags: tags,
+                  documentation: documentation
                 });
 
                   // Save the new element
@@ -418,7 +432,9 @@ class ElementController {
                 name: elemName,
                 project: proj._id,
                 uid: elemUID,
-                parent: null
+                parent: null,
+                tags: tags,
+                documentation: documentation
               });
 
                 // Save the new element
