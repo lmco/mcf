@@ -19,7 +19,6 @@
  */
 
 const path = require('path');
-const crypto = require('crypto');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.load('models/User');
 const libCrypto = M.lib.crypto;

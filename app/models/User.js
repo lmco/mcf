@@ -59,17 +59,7 @@ const UserSchema = new mongoose.Schema({
      */
   password: {
     type: String,
-    required: true,
-    maxlength: [64, 'Password hash too long'],
-    minlength: [64, 'Password hash too short'],
-    set: function(pwd) {
-      const hash = crypto.createHash('sha256');
-      // eslint is catching the below line by mistake
-      // disabling underscore rule for that line only
-      hash.update(this._id.toString()); // eslint-disable-line no-underscore-dangle
-      hash.update(pwd);
-      return hash.digest().toString('hex');
-    }
+    required: true
   },
 
   /**
@@ -325,8 +315,24 @@ UserSchema.pre('save', function(next) {
   this.name = '';
   this.updatedOn = '';
   this.deleted = '';
-  next();
+  crypto.pbkdf2(this.password, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
+    if (err) throw err;
+    this.password = derivedKey.toString('hex');
+    next();
+  });
 });
+
+UserSchema.methods.verifyPassword = function(pass) {
+  return new Promise((resolve, reject) => {
+    crypto.pbkdf2(pass, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
+      if (err) reject(err);
+      if (derivedKey.toString('hex') === this.password) {
+        return resolve(true);
+      }
+      return resolve(false);
+    });
+  });
+};
 
 /**
  * An object contining what is allowed on an update to a user.
