@@ -16,6 +16,7 @@
     "express": "^4.16.3",
     "express-ejs-layouts": "^2.4.0",
     "express-session": "^1.15.6",
+	"express-flash": "^0.0.2",
     "ldapjs": "^1.0.2",
     "mongodb": "^3.1.0-beta4",
     "mongoose": "^5.1.1",
