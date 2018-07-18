@@ -29,8 +29,8 @@ body {
     font-weight: 300;
 }
 
-/* 
- * LM Light Theme (default) 
+/*
+ * LM Light Theme (default)
  * This is the default color scheme.
  */
 
@@ -46,7 +46,7 @@ body.lm-light-theme {
 
 
 /*
- * LM Dark Theme 
+ * LM Dark Theme
  * This defines the dark theme for MBEE.
  */
 
@@ -92,7 +92,7 @@ body.lm-dark-theme {
 }
 
 .navbar  {
-    /*height: 40px;*/ 
+    /*height: 40px;*/
     border-bottom: 1px solid #656565;
     /*padding: .5rem 1rem .3rem 1rem;*/
 }
@@ -104,6 +104,26 @@ body.lm-dark-theme {
 .navbar-brand img {
     position: relative;
     top: -2px;
+}
+
+.navbar-brand span {
+    font-family: 'Helvetica Neue', Helvetica, Sans Serif;
+    font-weight: 100;
+    color: #e8e8e8;
+}
+
+.navbar-brand span small {
+    opacity: 0;
+    font-family: inherit;
+    font-weight: inherit;
+    font-size: 20px;
+    color: #FFC610;
+    -webkit-transition: all 1s; /* Safari */
+    transition: all 1s;
+}
+
+.navbar-brand:hover span small {
+    opacity: 1;
 }
 
 
