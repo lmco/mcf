@@ -41,7 +41,7 @@ let badAUser = null;
  *       Main
  *------------------------------------*/
 
-describe(name, function() {
+describe(name, () => {
   /*-------------------------------------
    * Before: run before all tests
    *-------------------------------------*/
@@ -69,18 +69,18 @@ describe(name, function() {
             admin: true
           };
           UserController.createUser(searchUser, userData2)
-          .then(function(anotherUser) {
+          .then((anotherUser) => {
             badAUser = anotherUser;
             chai.expect(anotherUser.username).to.equal('blackpanther');
             chai.expect(anotherUser.fname).to.equal('Black');
             chai.expect(anotherUser.lname).to.equal('Panther');
             done();
           })
-          .catch(function(err) {
+          .catch((err) => {
             chai.expect(err).to.equal(null);
             done();
-            });
           });
+        });
     });
   });
 
@@ -95,7 +95,7 @@ describe(name, function() {
       chai.expect(delUser).to.equal('everettross');
       const user2 = 'blackpanther';
       UserController.removeUser(reqUser, user2)
-      .then(function(delBadUser) {
+      .then((delBadUser) => {
         chai.expect(delBadUser).to.equal('blackpanther');
         User.findOneAndRemove({
           username: M.config.test.username
@@ -103,7 +103,7 @@ describe(name, function() {
           chai.expect(err).to.equal(null);
           mongoose.connection.close();
           done();
-        })
+        });
       });
     })
     .catch((error) => {
@@ -158,7 +158,7 @@ function createNewUser(done) {
     lname: 'Panther'
   };
   UserController.createUser(reqUser, userData)
-  .then(function(newUser) {
+  .then((newUser) => {
     chai.expect(newUser.username).to.equal('shuri');
     chai.expect(newUser.fname).to.equal('Shuri');
     chai.expect(newUser.lname).to.equal('Panther');
@@ -184,7 +184,7 @@ function createAUser(done) {
     admin: true
   };
   UserController.createUser(reqUser, userData)
-  .then(function(newUser) {
+  .then((newUser) => {
     chai.expect(newUser.username).to.equal('erikkillmonger');
     chai.expect(newUser.fname).to.equal('Erik');
     chai.expect(newUser.lname).to.equal('Killmonger');
@@ -239,7 +239,7 @@ function createUser02(done) {
     lname: 'K Ross'
   };
   UserController.createUser(reqUser, userData)
-  .then(function(newUser) {
+  .then((newUser) => {
     chai.expect(newUser.username).to.equal('everettross');
     chai.expect(newUser.fname).to.equal('Everett');
     chai.expect(newUser.lname).to.equal('K Ross');
@@ -264,6 +264,7 @@ function nonACreate(done) {
   };
   UserController.createUser(nonAUser, userData)
   .then(() => {
+    // Should fail, throwing error
     chai.assert(true === false);
     done();
   })
@@ -361,7 +362,7 @@ function updateLName(done) {
     fname: 'Okoye'
   };
   UserController.updateUser(reqUser, username, userData)
-  .then(function(updatedUser) {
+  .then((updatedUser) => {
     chai.expect(updatedUser.username).to.equal('blackpanther');
     chai.expect(updatedUser.fname).to.equal('Okoye');
     chai.expect(updatedUser.lname).to.equal('Panther');
@@ -385,11 +386,11 @@ function updateUName(done) {
     username: 'goldpanther'
   };
   UserController.updateUser(reqUser, username, userData)
-  .then(function(updatedUser) {
+  .then((updatedUser) => {
     chai.expect(updatedUser.username).to.equal('goldpanther');
     done();
   })
-  .catch(function(error) {
+  .catch((error) => {
     chai.expect(error.description).to.equal('Update not allowed');
     done();
   });
@@ -409,6 +410,7 @@ function updateAttempt(done) {
   };
   UserController.updateUser(nonAUser, username, userData)
   .then(() => {
+    // Should fail, throwing error
     chai.assert(true === false);
     done();
   })
@@ -431,6 +433,7 @@ function updateNoUser(done) {
   };
   UserController.updateUser(reqUser, username, userData)
   .then(() => {
+    // Should fail, throwing error
     chai.assert(true === false);
     done();
   })
@@ -447,7 +450,7 @@ function updateNoUser(done) {
 function findUser(done) {
   const username = 'blackpanther';
   UserController.findUser(username)
-  .then(function(searchUser) {
+  .then((searchUser) => {
     chai.expect(searchUser.username).to.equal('blackpanther');
     chai.expect(searchUser.fname).to.equal('Okoye');
     chai.expect(searchUser.lname).to.equal('Panther');
@@ -467,13 +470,12 @@ function findUser(done) {
 function noFindUser(done) {
   const username = 'nopanther';
   UserController.findUser(username)
-  .then(function(searchUser) {
+  .then((searchUser) => {
     chai.expect(searchUser).to.equal('nopanther');
     done();
   })
-  .catch(function(err) {
-    json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal('Cannot find user');
+  .catch((err) => {
+    chai.expect(err.description).to.equal('Cannot find user');
     done();
   });
 }
@@ -487,13 +489,12 @@ function noFindUser(done) {
 function fakeDelete(done) {
   const username = 'wkabi';
   UserController.removeUser(reqUser, username)
-  .then(function(delUser) {
+  .then((delUser) => {
     chai.expect(delUser).to.equal('wkabi');
     done();
   })
-  .catch(function(err) {
-    json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal('User does not exist');
+  .catch((err) => {
+    chai.expect(err.description).to.equal('User does not exist');
     done();
   });
 }
@@ -509,6 +510,7 @@ function nonADelete(done) {
   const username = 'shuri';
   UserController.removeUser(nonAUser, username)
   .then(() => {
+    // Should fail, throwing error
     chai.assert(true === false);
     done();
   })
@@ -526,13 +528,13 @@ function nonADelete(done) {
 function deleteSelf(done) {
   const username = 'blackpanther';
   UserController.removeUser(badAUser, username)
-  .then(function() {
+  .then(() => {
+    // Should fail, throwing error
     chai.assert(true === false);
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal('User cannot delete themselves.');
+  .catch((err) => {
+    chai.expect(err.description).to.equal('User cannot delete themselves.');
     done();
   });
 }
@@ -545,7 +547,7 @@ function deleteSelf(done) {
 function deleteUser(done) {
   const username = 'shuri';
   UserController.removeUser(reqUser, username)
-  .then(function(delUser) {
+  .then((delUser) => {
     chai.expect(delUser).to.equal('shuri');
     done();
   })
@@ -563,7 +565,7 @@ function deleteUser(done) {
 function deleteUser02(done) {
   const username = 'erikkillmonger';
   UserController.removeUser(reqUser, username)
-  .then(function(delUser) {
+  .then((delUser) => {
     chai.expect(delUser).to.equal('erikkillmonger');
     done();
   })
@@ -580,7 +582,7 @@ function deleteUser02(done) {
 function deleteAUser(done) {
   const username = 'klaw';
   UserController.removeUser(reqUser, username)
-  .then(function(delUser) {
+  .then((delUser) => {
     chai.expect(delUser).to.equal('klaw');
     done();
   })

@@ -73,7 +73,7 @@ describe(name, () => {
             admin: false
           };
           UserController.createUser(allSeeingUser, nonAuserData)
-          .then(function(nonAu) {
+          .then((nonAu) => {
             nonAuser = nonAu;
             chai.expect(nonAu.username).to.equal('pepperpotts');
             chai.expect(nonAu.fname).to.equal('Pepper');
@@ -118,7 +118,7 @@ describe(name, () => {
       // Removing the non admin user
       const userTwo = 'pepperpotts';
       UserController.removeUser(allSeeingUser, userTwo)
-      .then(function(delUser2) {
+      .then((delUser2) => {
         chai.expect(delUser2).to.equal('pepperpotts');
         User.findOneAndRemove({
           username: M.config.test.username
@@ -128,7 +128,7 @@ describe(name, () => {
           done();
         });
       })
-      .catch(function(err1) {
+      .catch((err1) => {
         const error1 = JSON.parse(err1.message);
         chai.expect(error1.description).to.equal(null);
         mongoose.connection.close();
@@ -360,6 +360,7 @@ function createLongId(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then(() => {
+    // Should fail, throw error
     chai.assert(true === false);
     done();
   })
@@ -431,6 +432,7 @@ function createPeriodName(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then(() => {
+    // Should fail, throw error
     chai.assert(true === false);
     done();
   })
@@ -480,6 +482,8 @@ function noId(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then(() => {
+    // error should occur therefore not hit then
+    // failure if does
     chai.assert(true === false);
     done();
   })
@@ -503,6 +507,8 @@ function noName(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then(() => {
+    // error should occur therefore not hit then
+    // failure if does
     chai.assert(true === false);
     done();
   })
@@ -526,6 +532,8 @@ function noOrg(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then(() => {
+    // error should occur therefore not hit then
+    // failure if does
     chai.assert(true === false);
     done();
   })
@@ -550,6 +558,8 @@ function nonACreator(done) {
   };
   ProjController.createProject(nonAuser, projData)
   .then(() => {
+    // error should occur therefore not hit then
+    // failure if does
     chai.assert(true === false);
     done();
   })
@@ -590,6 +600,8 @@ function noProj(done) {
   const projId = 'fakeproj';
   ProjController.findProject(allSeeingUser, orgId, projId)
   .then(() => {
+    // error should occur therefore not hit then
+    // failure if does
     chai.expect(true).to.equal(false);
     done();
   })
@@ -609,6 +621,8 @@ function nonAUser(done) {
   const projId = 'ironman';
   ProjController.findProject(nonAuser, orgId, projId)
   .then(() => {
+    // error should occur therefore not hit then
+    // failure if does
     chai.assert(true === false);
     done();
   })

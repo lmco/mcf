@@ -46,7 +46,7 @@ let org = null;
  *       Main
  *------------------------------------*/
 
-describe(name, function() {
+describe(name, () => {
   // NOTE: Changed from arrow function to allow for use of
   // this so that a larger timeout could be set
 
@@ -77,14 +77,14 @@ describe(name, function() {
             admin: false
           };
           UserController.createUser(user, nonAuserData)
-          .then(function(nonAu) {
+          .then((nonAu) => {
             newUser = nonAu;
             chai.expect(nonAu.username).to.equal('groot');
             chai.expect(nonAu.fname).to.equal('Groot');
             chai.expect(nonAu.lname).to.equal('Tree');
             done();
           })
-          .catch(function(error) {
+          .catch((error) => {
             chai.expect(error.description).to.equal(null);
             done();
           });
@@ -95,7 +95,7 @@ describe(name, function() {
   /*-------------------------------------
    * After: run after all tests
    *-------------------------------------*/
-  after(function(done) {
+  after((done) => {
     // Removing the organization created
     OrgController.removeOrg(user, 'gaurdians', { soft: false })
     .then(() => {
