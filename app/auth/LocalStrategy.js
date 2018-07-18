@@ -19,7 +19,6 @@
  */
 
 const path = require('path');
-const crypto = require('crypto');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const BaseStrategy = M.load('auth/BaseStrategy');
 const User = M.load('models/User');
@@ -75,18 +74,19 @@ class LocalStrategy extends BaseStrategy {
       if (!user) {
         cb('Could not find user');
       }
-      // Compute the password hash on given password
-      const hash = crypto.createHash('sha256');
-      hash.update(user._id.toString());       // salt
-      hash.update(password);                  // password
-      const pwdhash = hash.digest().toString('hex');
       // Authenticate the user
-      if (user.password === pwdhash) {
-        cb(null, user);
-      }
-      else {
+      user.verifyPassword(password)
+      .then((result) => {
+        if (result) {
+          cb(null, user);
+        }
+        else {
+          cb('Invalid password');
+        }
+      })
+      .catch((error) => {
         cb('Invalid password');
-      }
+      });
     });
   }
 
