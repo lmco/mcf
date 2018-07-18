@@ -50,6 +50,7 @@ describe(name, () => {
   it('should soft delete a user', softDeleteUser);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
+  it('should login an LDAP user', loginLDAPUser);
 });
 
 
