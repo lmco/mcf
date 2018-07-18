@@ -25,6 +25,7 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
 const expressLayouts = require('express-ejs-layouts');
+const flash = require('express-flash');
 
 const M = require(`${__dirname}/../mbee.js`);
 const utils = M.require('lib.utils');
@@ -78,6 +79,9 @@ function initApp() {
     cookie: { maxAge: M.config.auth.session.expires * units },
     store: new MongoStore({ mongooseConnection: mongoose.connection })
   }));
+  
+  // Enable flash messages
+  app.use(flash());
 
   // Log IP address of all incoming requests
   app.use(middleware.logIP);
