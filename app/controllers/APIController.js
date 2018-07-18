@@ -26,8 +26,8 @@ const ElementController = mbee.load('controllers/ElementController');
 const OrgController = mbee.load('controllers/OrganizationController');
 const ProjectController = mbee.load('controllers/ProjectController');
 const UserController = mbee.load('controllers/UserController');
+const errors = M.load('lib/errors');
 const utils = M.require('lib.utils');
-
 const pluginFiles = utils.getPluginNames();
 
 
@@ -184,12 +184,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(orgsPublicData));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 
@@ -254,12 +249,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(org.getPublicData()));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 
@@ -274,27 +264,23 @@ class APIController {
   static postOrg(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Organization ID in the body does not match ID in the params.', 400);
+      return res.status(error.status).send(error);
     }
 
-    // Verify that orgID and name are strings
-    if (typeof req.params.orgid !== 'string' || typeof req.body.name !== 'string') {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+    // Make sure inputs are strings.
+    try {
+      utils.checkType([req.params.orgid, req.body.name], 'string');
+    }
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
     // Sanitize the input
@@ -310,12 +296,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(org));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 
@@ -330,27 +311,24 @@ class APIController {
   static putOrg(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
     if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Organization ID in the body does not match ID in the params.', 400);
+      return res.status(error.status).send(error);
     }
 
-    // Verify that orgID and name are strings
-    if (typeof req.params.orgid !== 'string' || typeof req.body.name !== 'string') {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+    // Check that inputs exist and are strings
+    try {
+      utils.checkExists(['name'], req.body);
+      utils.checkType([req.params.orgid, req.body.name], 'string');
+    }
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
     // Sanitize the input
@@ -362,12 +340,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(org));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 
@@ -381,10 +354,8 @@ class APIController {
   static deleteOrg(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     const orgid = M.lib.sani.sanitize(req.params.orgid);
@@ -394,12 +365,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.send(APIController.formatJSON(org.getPublicData()));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -411,10 +377,8 @@ class APIController {
   static getOrgRole(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
@@ -425,18 +389,9 @@ class APIController {
         res.header('Content-Type', 'application/json');
         return res.status(200).send(APIController.formatJSON(roles));
       })
-      .catch((error) => {
-        // If error occurs, log error and return status.
-        const err = JSON.parse(error.message);
-        M.log.error(err.description);
-        return res.status(err.status).send(err);
-      });
+      .catch((error) => res.status(error.status).send(error));
     })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -449,18 +404,15 @@ class APIController {
   static postOrgRole(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
-    // If no role in the request body
-    if (!req.body.hasOwnProperty('role')) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Request body does not contain a role field.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+    try {
+      utils.checkExists(['role'], req.body);
+    }
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
@@ -471,18 +423,9 @@ class APIController {
         res.header('Content-Type', 'application/json');
         return res.status(200).send(APIController.formatJSON(org.getPublicData()));
       })
-      .catch((error) => {
-        // If error occurs, log error and return status.
-        const err = JSON.parse(error.message);
-        M.log.error(err.description);
-        return res.status(err.status).send(err);
-      });
+      .catch((error) => res.status(error.status).send(error));
     })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -494,10 +437,8 @@ class APIController {
   static deleteOrgRole(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
@@ -508,18 +449,9 @@ class APIController {
         res.header('Content-Type', 'application/json');
         return res.status(200).send(APIController.formatJSON(org.getPublicData()));
       })
-      .catch((error) => {
-        // If error occurs, log error and return status.
-        const err = JSON.parse(error.message);
-        M.log.error(err.description);
-        return res.status(err.status).send(err);
-      });
+      .catch((error) => res.status(error.status).send(error));
     })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -531,10 +463,8 @@ class APIController {
   static getAllOrgRoles(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     const orgID = M.lib.sani.sanitize(req.params.orgid);
@@ -543,12 +473,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(members));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 
@@ -564,7 +489,13 @@ class APIController {
    * the project objects for that organization. Returns an error message if
    * organization not found or other error occurs.
    */
-  static getProjects(req, res) {
+  static getProjects(req, res) { // eslint-disable-line consistent-return
+    // If no user in the request
+    if (!req.user) {
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
     // Sanitize input
     const orgid = M.lib.sani.html(req.params.orgid);
 
@@ -575,12 +506,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(projects));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 
@@ -633,10 +559,8 @@ class APIController {
   static getProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     const orgid = M.lib.sani.html(req.params.orgid);
@@ -647,12 +571,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 
@@ -665,55 +584,21 @@ class APIController {
   static postProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
-    // If any ID was provided in the body as well as the params,
-    // and the IDs do not match, fail.
-    if (req.body.hasOwnProperty('org')) {
-      if (req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
-        const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
-        const err = JSON.parse(error.message);
-        M.log.error(err.description);
-        return res.status(err.status).send(err);
-      }
+    try {
+      utils.checkExists(['id', 'name', 'org.id'], req.body);
+      utils.checkType([req.params.orgid, req.params.projectid, req.body.name], 'string');
+    }
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
-    // If any ID was provided in the body as well as the params,
-    // and the IDs do not match, fail.
-    if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.projectid)) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID in the body does not match ID in the params.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    }
-
-    // If any ID was provided in the body as well as the params,
-    // and the IDs do not match, fail.
-    if (!req.body.hasOwnProperty('name')) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name not found in request body.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    }
-
-    // Verify that orgID is a string
-    if (typeof req.params.orgid !== 'string') {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    }
-
-    // Verify that projID and name are strings
-    if (typeof req.params.projectid !== 'string' || typeof req.body.name !== 'string') {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+    if (req.params.projectid !== req.body.id) {
+      const error = new errors.CustomError('Project ID in the body does not match ID in the params.', 400);
+      return res.status(error.status).send(error);
     }
 
     const projectId = M.lib.sani.html(req.params.projectid);
@@ -731,12 +616,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 
@@ -750,55 +630,16 @@ class APIController {
   static putProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
-    // If any ID was provided in the body as well as the params,
-    // and the IDs do not match, fail.
-    if (req.body.hasOwnProperty('org')) {
-      if (req.body.org.hasOwnProperty('id') && req.body.org.id !== req.params.orgid) {
-        const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID in the body does not match ID in the params.' }));
-        const err = JSON.parse(error.message);
-        M.log.error(err.description);
-        return res.status(err.status).send(err);
-      }
+    try {
+      utils.checkExists(['id', 'name'], req.body);
+      utils.checkType([req.params.orgid, req.params.projectid, req.body.name], 'string');
     }
-
-    // If any ID was provided in the body as well as the params,
-    // and the IDs do not match, fail.
-    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.projectid) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID in the body does not match ID in the params.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    }
-
-    // If any ID was provided in the body as well as the params,
-    // and the IDs do not match, fail.
-    if (!req.body.hasOwnProperty('name')) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name not found in request body.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    }
-
-    // Verify that orgID is a string
-    if (typeof req.params.orgid !== 'string') {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    }
-
-    // Verify that projID and name are strings
-    if (typeof req.params.projectid !== 'string' || typeof req.body.name !== 'string') {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
     const projectId = M.lib.sani.html(req.params.projectid);
@@ -809,12 +650,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 
@@ -827,10 +663,8 @@ class APIController {
   static deleteProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     const orgId = M.lib.sani.html(req.params.orgid);
@@ -841,20 +675,14 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(project));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
+
 
   static getProjectRoles(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     // Sanitize Inputs
@@ -867,20 +695,13 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(permissions));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   static getProjectRole(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     // Sanitize Inputs
@@ -897,26 +718,15 @@ class APIController {
         res.header('Content-Type', 'application/json');
         return res.status(200).send(APIController.formatJSON(permissions));
       })
-      .catch((error) => {
-        // If error occurs, log error and return status.
-        const err = JSON.parse(error.message);
-        M.log.error(err.description);
-        return res.status(err.status).send(err);
-      });
+      .catch((error) => res.status(error.status).send(error));
     })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   static postProjectRole(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     // Sanitize Inputs
@@ -935,27 +745,16 @@ class APIController {
         return res.status(200).send(APIController.formatJSON(project));
       })
       // Return and log error if caught
-      .catch((error) => {
-        // If error occurs, log error and return status.
-        const err = JSON.parse(error.message);
-        M.log.error(err.description);
-        return res.status(err.status).send(err);
-      });
+      .catch((error) => res.status(error.status).send(error));
     })
     // Return and log error if caught
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   static deleteProjectRole(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     // Sanitize Inputs
@@ -974,19 +773,9 @@ class APIController {
         return res.status(200).send(APIController.formatJSON(project));
       })
       // Return and log error if caught
-      .catch((error) => {
-        // If error occurs, log error and return status.
-        const err = JSON.parse(error.message);
-        M.log.error(err.description);
-        return res.status(err.status).send(err);
-      });
+      .catch((error) => res.status(error.status).send(error));
     })
-    // Return and log error if caught
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /****************************************************************************
@@ -1002,21 +791,16 @@ class APIController {
   static getUsers(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
+
     UserController.findUsers()
     .then((users) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(users));
     })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -1027,21 +811,16 @@ class APIController {
   static getUser(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
+
     UserController.findUser(M.lib.sani.sanitize(req.params.username))
     .then((user) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(user.getPublicData()));
     })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -1052,24 +831,20 @@ class APIController {
   static postUser(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
-    if (!req.body.hasOwnProperty('username')) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Username not found in request body.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+    try {
+      utils.checkExists(['username'], req.body);
+    }
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
     if (req.body.username !== req.params.username) {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Username in body does not match username in params.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Username in body does not match username in params.', 400, 'warn');
+      return res.status(error.status).send(error);
     }
 
     UserController.createUser(req.user, req.body)
@@ -1077,11 +852,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(user.getPublicData()));
     })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -1092,10 +863,8 @@ class APIController {
   static putUser(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     UserController.updateUser(req.user, req.params.username, req.body)
@@ -1103,11 +872,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(user.getPublicData()));
     })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -1118,10 +883,8 @@ class APIController {
   static deleteUser(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     UserController.removeUser(req.user, req.params.username)
@@ -1129,11 +892,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(user));
     })
-    .catch((error) => {
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -1144,10 +903,8 @@ class APIController {
   static whoami(req, res) {
     // Sanity check - make sure we have user with a username
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     // Otherwise return 200 and the user's public JSON
@@ -1169,10 +926,15 @@ class APIController {
   static getElements(req, res) {  // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
+    try {
+      utils.checkType([req.params.orgid, req.params.projectid], 'string');
+    }
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
     const orgid = M.lib.sani.sanitize(req.params.orgid);
@@ -1183,12 +945,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(elements));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -1200,34 +957,15 @@ class APIController {
   static getElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
-    // Verify that orgID is a string
-    if (typeof req.params.orgid !== 'string') {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+    try {
+      utils.checkType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
     }
-
-    // Verify that projectID is a string
-    if (typeof req.params.projectid !== 'string') {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    }
-
-    // Verify that elementID is a string
-    if (typeof req.params.projectid !== 'string') {
-      const error = new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Given data is not a string.' }));
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
     const orgid = M.lib.sani.sanitize(req.params.orgid);
@@ -1239,12 +977,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(element));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -1256,10 +989,8 @@ class APIController {
   static postElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
     }
 
     ElementController.createElement(req.user, req.body)
@@ -1267,12 +998,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(element));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -1284,10 +1010,15 @@ class APIController {
   static putElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
+    try {
+      utils.checkType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
+    }
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
     const orgid = M.lib.sani.sanitize(req.params.orgid);
@@ -1299,12 +1030,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(element));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
@@ -1316,10 +1042,15 @@ class APIController {
   static deleteElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
-      M.log.critical('Request does not have a user');
-      const error = new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Request Failed.' }));
-      const err = JSON.parse(error.message);
-      return res.status(err.status).send(err);
+      const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
+    try {
+      utils.checkType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
+    }
+    catch (error) {
+      return res.status(error.status).send(error);
     }
 
     const orgid = M.lib.sani.sanitize(req.params.orgid);
@@ -1331,12 +1062,7 @@ class APIController {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(element));
     })
-    .catch((error) => {
-      // If error occurs, log error and return status.
-      const err = JSON.parse(error.message);
-      M.log.error(err.description);
-      return res.status(err.status).send(err);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
 }

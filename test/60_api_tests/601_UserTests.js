@@ -21,18 +21,55 @@
 const path = require('path');
 const chai = require('chai');
 const request = require('request');
+const mongoose = require('mongoose');
 
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const AuthController = M.load('lib/auth');
+const User = M.require('models/User');
 
 const test = M.config.test;
+
+const user = M.config.test.username;
 
 /*------------------------------------
  *       Main
  *------------------------------------*/
 
 describe(name, function() {
+  before(function(done) {
+    this.timeout(5000);
+
+    const db = M.load('lib/db');
+    db.connect();
+
+    // Creating a Requesting Admin
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          // Setting it equal to global variable
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          done();
+        });
+    });
+  });
+
+  after((done) => {
+    User.findOneAndRemove({
+      username: M.config.test.username
+    }, (err) => {
+      chai.expect(err).to.equal(null);
+      mongoose.connection.close();
+      done();
+    });
+  });
+
   it('should get a username', getUser).timeout(5000);
   it('should create a user', postUser).timeout(5000);
   it('should get all users', getUsers).timeout(5000);
@@ -50,12 +87,12 @@ describe(name, function() {
  */
 function getUser(done) {
   request({
-    url: `${test.url}/api/users/mbee`,
+    url: `${test.url}/api/users/${user}`,
     headers: getHeaders()
   },
   function(err, response, body) {
     const json = JSON.parse(body);
-    chai.expect(json.username).to.equal('mbee');
+    chai.expect(json.username).to.equal(user);
     chai.expect(response.statusCode).to.equal(200);
     done();
   });

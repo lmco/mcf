@@ -26,7 +26,8 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ElemController = M.load('controllers/ElementController');
 const OrgController = M.load('controllers/OrganizationController');
 const ProjController = M.load('controllers/ProjectController');
-const UserController = M.load('controllers/UserController');
+const AuthController = M.load('lib/auth');
+const User = M.require('models/User');
 
 let user = null;
 let org = null;
@@ -46,35 +47,41 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    UserController.findUser(M.config.test.username)
-    .then((retUser) => {
-      user = retUser;
-
-      const orgData = {
-        id: 'empire',
-        name: 'Galactic Empire'
-      };
-      OrgController.createOrg(user, orgData)
-      .then((retOrg) => {
-        org = retOrg;
-        ProjController.createProject(user, { id: 'deathstar', name: 'Death Star', org: { id: org.id } })
-        .then((retProj) => {
-          proj = retProj;
-          done();
-        })
-        .catch((projError) => {
-          chai.expect(projError.message).to.equal(null);
-          done();
+    // Creating a Requesting Admin
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          // Setting it equal to global variable
+          user = userUpdate;
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          // Creating a non admin user
+          const orgData = {
+            id: 'empire',
+            name: 'Galactic Empire'
+          };
+          OrgController.createOrg(user, orgData)
+          .then((retOrg) => {
+            org = retOrg;
+            ProjController.createProject(user, { id: 'deathstar', name: 'Death Star', org: { id: org.id } })
+            .then((retProj) => {
+              proj = retProj;
+              done();
+            })
+            .catch((projError) => {
+              chai.expect(projError.message).to.equal(null);
+              done();
+            });
+          })
+          .catch((orgError) => {
+            chai.expect(orgError.message).to.equal(null);
+            done();
+          });
         });
-      })
-      .catch((orgError) => {
-        chai.expect(orgError.message).to.equal(null);
-        done();
-      });
-    })
-    .catch((userError) => {
-      chai.expect(userError.message).to.equal(null);
-      done();
     });
   });
 
@@ -85,9 +92,15 @@ describe(name, function() {
     // Remove the project and org together
     OrgController.removeOrg(user, org.id, { soft: false })
     .then((retOrg) => {
-      // Once db items are removed, close the db connection and finish
-      mongoose.connection.close();
-      done();
+      // Once db items are removed, remove reqUser
+      // close the db connection and finish
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
+        mongoose.connection.close();
+        done();
+      });
     })
     .catch((error) => {
       chai.expect(error.message).to.equal(null);
@@ -137,8 +150,7 @@ function createElement(done) {
     done();
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -169,14 +181,12 @@ function createChildElement(done) {
       done();
     })
     .catch((error) => {
-      const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal(null);
+      chai.expect(error.description).to.equal(null);
       done();
     });
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -207,14 +217,12 @@ function createBlock(done) {
       done();
     })
     .catch((error) => {
-      const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal(null);
+      chai.expect(error.description).to.equal(null);
       done();
     });
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -244,8 +252,7 @@ function createRelationship(done) {
     done();
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -260,8 +267,7 @@ function findElements(done) {
     done();
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -276,8 +282,7 @@ function findElementsSpecificType(done) {
     done();
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -292,9 +297,8 @@ function findElementsBadType(done) {
     done();
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal('Invalid element type.');
-    chai.expect(err.status).to.equal(400);
+    chai.expect(error.description).to.equal('Invalid element type.');
+    chai.expect(error.status).to.equal(400);
     done();
   });
 }
@@ -310,8 +314,7 @@ function findElement(done) {
     done();
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -327,8 +330,7 @@ function updateElement(done) {
     done();
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -346,9 +348,8 @@ function softDeleteElement(done) {
       done();
     })
     .catch((error) => {
-      const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal('Element not found.');
-      chai.expect(err.status).to.equal(404);
+      chai.expect(error.description).to.equal('Element not found.');
+      chai.expect(error.status).to.equal(404);
 
       // Search for soft deleted elements
       ElemController.findElement(user, org.id, proj.id, 'elem0', true)
@@ -357,15 +358,13 @@ function softDeleteElement(done) {
         done();
       })
       .catch((error2) => {
-        const err2 = JSON.parse(error2.message);
-        chai.expect(err2.description).to.equal(null);
+        chai.expect(error2.description).to.equal(null);
         done();
       });
     });
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -375,22 +374,20 @@ function softDeleteElement(done) {
  */
 function hardDeleteElement(done) {
   ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: false })
-  .then((retElem) => {
+  .then(() => {
     ElemController.findElement(user, org.id, proj.id, 'elem0', true)
     .then((retElem2) => {
       chai.expect(retElem2).to.equal(null);
       done();
     })
     .catch((error) => {
-      const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal('Element not found.');
-      chai.expect(err.status).to.equal(404);
+      chai.expect(error.description).to.equal('Element not found.');
+      chai.expect(error.status).to.equal(404);
       done();
     });
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -400,21 +397,19 @@ function hardDeleteElement(done) {
  */
 function softDeleteAllElements(done) {
   ElemController.removeElements(user, org.id, proj.id, { soft: true })
-  .then((retElems) => {
+  .then(() => {
     ElemController.findElements(user, org.id, proj.id)
     .then((retElems2) => {
       chai.expect(retElems2.length).to.equal(3);
       done();
     })
     .catch((error) => {
-      const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal(null);
+      chai.expect(error.description).to.equal(null);
       done();
     });
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -424,21 +419,19 @@ function softDeleteAllElements(done) {
  */
 function hardDeleteAllElements(done) {
   ElemController.removeElements(user, org.id, proj.id, { soft: false })
-  .then((retElems) => {
+  .then(() => {
     ElemController.findElements(user, org.id, proj.id)
     .then((retElems2) => {
       chai.expect(retElems2.length).to.equal(0);
       done();
     })
     .catch((error) => {
-      const err = JSON.parse(error.message);
-      chai.expect(err.description).to.equal(null);
+      chai.expect(error.description).to.equal(null);
       done();
     });
   })
   .catch((error) => {
-    const err = JSON.parse(error.message);
-    chai.expect(err.description).to.equal(null);
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }

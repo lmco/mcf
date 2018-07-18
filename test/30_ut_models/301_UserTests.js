@@ -50,7 +50,6 @@ describe(name, () => {
   it('should soft delete a user', softDeleteUser);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
-  it('should create LDAP user', loginLDAPUser).timeout(5000);
 });
 
 

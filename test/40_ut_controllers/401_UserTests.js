@@ -26,7 +26,9 @@ const filename = module.filename;
 const name = filename.split('/')[filename.split('/').length - 1];
 
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const User = M.require('models/User');
 const UserController = M.load('controllers/UserController');
+const AuthController = M.load('lib/auth');
 
 let reqUser = null;
 let nonAUser = null;
@@ -43,65 +45,68 @@ describe(name, function() {
     const db = M.load('lib/db');
     db.connect();
 
-    const username = M.config.test.username;
-    // Finding a Requesting Admin
-    UserController.findUser(username)
-    .then(function(searchUser) {
-      reqUser = searchUser;
-      chai.expect(searchUser.username).to.equal(M.config.test.username);
-      done();
-      // const userData2 = {
-      //   username: 'jubbathehut',
-      //   password: 'ilovetoeat',
-      //   fname: 'Jubba',
-      //   lname: 'The Hut',
-      //   admin: true
-      // };
-      // UserController.createUser(searchUser, userData2)
-      // .then(function(anotherUser) {
-      //   badAUser = anotherUser;
-      //   chai.expect(anotherUser.username).to.equal('jubbathehut');
-      //   chai.expect(anotherUser.fname).to.equal('Jubba');
-      //   chai.expect(anotherUser.lname).to.equal('The Hut');
-      //   done();
-      // })
-      // .catch(function(err) {
-      //   chai.expect(err).to.equal(null);
-      //   done();
-      // });
-    })
-    .catch(function(error) {
-      const json = JSON.parse(error.message);
-      chai.expect(json.description).to.equal(null);
-      done();
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          reqUser = userUpdate;
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          done();
+          // const userData2 = {
+          //   username: 'jubbathehut',
+          //   password: 'ilovetoeat',
+          //   fname: 'Jubba',
+          //   lname: 'The Hut',
+          //   admin: true
+          // };
+          // UserController.createUser(searchUser, userData2)
+          // .then(function(anotherUser) {
+          //   badAUser = anotherUser;
+          //   chai.expect(anotherUser.username).to.equal('jubbathehut');
+          //   chai.expect(anotherUser.fname).to.equal('Jubba');
+          //   chai.expect(anotherUser.lname).to.equal('The Hut');
+          //   done();
+          // })
+          // .catch(function(err) {
+          //   chai.expect(err).to.equal(null);
+          //   done();
+          // });
+        });
     });
   });
 
   // runs after all tests
   after(function(done) {
     this.timeout(5000);
-    // Deleting the user created in the before function
     const username = 'darthsidious';
     UserController.removeUser(reqUser, username)
-    .then(function(delUser) {
+    .then((delUser) => {
       chai.expect(delUser).to.equal('darthsidious');
-      mongoose.connection.close();
-      done();
-      // const user2 = 'jubbathehut';
-      // UserController.removeUser(reqUser, user2)
-      // .then(function(delBadUser) {
-      //   chai.expect(delBadUser).to.equal('jubbathehut');
-      //   mongoose.connection.close();
-      //   done();
-      // })
-      // .catch(function(error) {
-      //   chai.expect(error).to.equal(null);
-      //   mongoose.connection.close();
-      //   done();
-      // });
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
+        mongoose.connection.close();
+        done();
+        // const user2 = 'jubbathehut';
+        // UserController.removeUser(reqUser, user2)
+        // .then(function(delBadUser) {
+        //   chai.expect(delBadUser).to.equal('jubbathehut');
+        //   mongoose.connection.close();
+        //   done();
+        // })
+        // .catch(function(error) {
+        //   chai.expect(error).to.equal(null);
+        //   mongoose.connection.close();
+        //   done();
+        // });
+      });
     })
-    .catch(function(err) {
-      const error = JSON.parse(err.message);
+    .catch((error) => {
       chai.expect(error.description).to.equal(null);
       mongoose.connection.close();
       done();
@@ -153,15 +158,14 @@ function createNewUser(done) {
     lname: 'Skywalker'
   };
   UserController.createUser(reqUser, userData)
-  .then(function(newUser) {
+  .then((newUser) => {
     chai.expect(newUser.username).to.equal('lskywalker');
     chai.expect(newUser.fname).to.equal('Leigh');
     chai.expect(newUser.lname).to.equal('Skywalker');
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
   });
 }
 
@@ -180,16 +184,15 @@ function createAUser(done) {
     admin: true
   };
   UserController.createUser(reqUser, userData)
-  .then(function(newUser) {
+  .then((newUser) => {
     chai.expect(newUser.username).to.equal('darthvader');
     chai.expect(newUser.fname).to.equal('Aniken');
     chai.expect(newUser.lname).to.equal('Skywalker');
     chai.expect(newUser.admin).to.equal(true);
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -209,16 +212,15 @@ function createNonAUser(done) {
     admin: false
   };
   UserController.createUser(reqUser, userData)
-  .then(function(newUser) {
+  .then((newUser) => {
     nonAUser = newUser;
     chai.expect(newUser.username).to.equal('darthsidious');
     chai.expect(newUser.fname).to.equal('Darth');
     chai.expect(newUser.lname).to.equal('Sidious');
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -237,15 +239,14 @@ function createUser02(done) {
     lname: 'Solo'
   };
   UserController.createUser(reqUser, userData)
-  .then(function(newUser) {
+  .then((newUser) => {
     chai.expect(newUser.username).to.equal('hsolo');
     chai.expect(newUser.fname).to.equal('Han');
     chai.expect(newUser.lname).to.equal('Solo');
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
   });
 }
 
@@ -263,12 +264,12 @@ function nonACreate(done) {
     lname: 'Ren'
   };
   UserController.createUser(nonAUser, userData)
-  .then(function(newUser) {
+  .then(() => {
     chai.assert(true === false);
     done();
   })
-  .catch(function(err) {
-    chai.expect(JSON.parse(err.message).description).to.equal('User does not have permission.');
+  .catch((error) => {
+    chai.expect(error.description).to.equal('User does not have permissions.');
     done();
   });
 }
@@ -287,14 +288,14 @@ function badUser(done) {
     lname: 'Skywalker'
   };
   UserController.createUser(reqUser, userData)
-  .then(function() {
+  .then(() => {
     // then function should never hit
     // below causes failure
     chai.assert(true === false);
     done();
   })
-  .catch(function(err) {
-    chai.expect(JSON.parse(err.message).description).to.equal('Save failed.');
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Save failed.');
     done();
   });
 }
@@ -313,14 +314,14 @@ function invalidUser(done) {
     lname: 'Leah'
   };
   UserController.createUser(reqUser, userData)
-  .then(function() {
+  .then(() => {
     // then function should never be hit
     // below causes failure
     chai.assert(true === false);
     done();
   })
-  .catch(function(err) {
-    chai.expect(JSON.parse(err.message).description).to.equal('Save failed.');
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Save failed.');
     done();
   });
 }
@@ -339,14 +340,14 @@ function copyCatUser(done) {
     lname: 'Skywalker'
   };
   UserController.createUser(reqUser, userData)
-  .then(function() {
+  .then(() => {
     // then function should never be hit
     // below causes failure
     chai.assert(true === false);
     done();
   })
-  .catch(function(err) {
-    chai.expect(JSON.parse(err.message).description).to.equal('User already exists.');
+  .catch((error) => {
+    chai.expect(error.description).to.equal('User already exists.');
     done();
   });
 }
@@ -361,15 +362,14 @@ function updateLName(done) {
     lname: 'Solo'
   };
   UserController.updateUser(reqUser, username, userData)
-  .then(function(updatedUser) {
+  .then((updatedUser) => {
     chai.expect(updatedUser.username).to.equal('lskywalker');
     chai.expect(updatedUser.fname).to.equal('Leigh');
     chai.expect(updatedUser.lname).to.equal('Solo');
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -386,15 +386,12 @@ function updateLName(done) {
 //     username: 'hansolo'
 //   };
 //   UserController.updateUser(reqUser, username, userData)
-//   .then(function(updatedUser) {
+//   .then((updatedUser) => {
 //     chai.expect(updatedUser.username).to.equal('hansolo');
 //     done();
 //   })
-//   .catch(function(err) {
-//     console.log(err);
-//     json = JSON.parse(err.message);
-//     console.log(json);
-//     chai.expect(json.description).to.equal('Bad Request');
+//   .catch((error) => {
+//     chai.expect(error.description).to.equal('Bad Request');
 //     done();
 //   });
 // }
@@ -410,12 +407,12 @@ function updateAttempt(done) {
     lname: 'Faker'
   };
   UserController.updateUser(nonAUser, username, userData)
-  .then(function() {
+  .then(() => {
     chai.assert(true === false);
     done();
   })
-  .catch(function(err) {
-    chai.expect(JSON.parse(err.message).description).to.equal('User does not have permission.');
+  .catch((error) => {
+    chai.expect(error.description).to.equal('User does not have permissions.');
     done();
   });
 }
@@ -430,12 +427,12 @@ function updateNoUser(done) {
     lname: 'Leah'
   };
   UserController.updateUser(reqUser, username, userData)
-  .then(function() {
+  .then(() => {
     chai.assert(true === false);
     done();
   })
-  .catch(function(err) {
-    chai.expect(JSON.parse(err.message).description).to.equal('User does not exist.');
+  .catch((error) => {
+    chai.expect(error.description).to.equal('User does not exist.');
     done();
   });
 }
@@ -447,15 +444,14 @@ function updateNoUser(done) {
 function findUser(done) {
   const username = 'hsolo';
   UserController.findUser(username)
-  .then(function(searchUser) {
+  .then((searchUser) => {
     chai.expect(searchUser.username).to.equal('hsolo');
     chai.expect(searchUser.fname).to.equal('Han');
     chai.expect(searchUser.lname).to.equal('Solo');
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -470,14 +466,12 @@ function findUser(done) {
 // function noFindUser(done) {
 //   const username = 'nouser';
 //   UserController.findUser(username)
-//   .then(function(searchUser) {
+//   .then((searchUser) => {
 //     chai.expect(searchUser).to.equal('nouser');
 //     done();
 //   })
-//   .catch(function(err) {
-//     console.log(err);
-//     json = JSON.parse(err.message);
-//     chai.expect(json.description).to.equal(null);
+//   .catch((error) => {
+//     chai.expect(error.description).to.equal(null);
 //     done();
 //   });
 // }
@@ -490,13 +484,12 @@ function findUser(done) {
 // function fakeDelete(done) {
 //   const username = 'notreal';
 //   UserController.removeUser(reqUser, username)
-//   .then(function(delUser) {
+//   .then((delUser) => {
 //     chai.expect(delUser).to.equal('notreal');
 //     done();
 //   })
-//   .catch(function(err) {
-//     json = JSON.parse(err.message);
-//     chai.expect(json.description).to.equal('User does not exist');
+//   .catch((error) => {
+//     chai.expect(error.description).to.equal('User does not exist');
 //     done();
 //   });
 // }
@@ -509,12 +502,12 @@ function findUser(done) {
 function nonADelete(done) {
   const username = 'lskywalker';
   UserController.removeUser(nonAUser, username)
-  .then(function(delUser) {
+  .then(() => {
     chai.assert(true === false);
     done();
   })
-  .catch(function(err) {
-    chai.expect(JSON.parse(err.message).description).to.equal('User does not have permission.');
+  .catch((error) => {
+    chai.expect(error.description).to.equal('User does not have permissions.');
     done();
   });
 }
@@ -526,13 +519,12 @@ function nonADelete(done) {
 // function deleteSelf(done) {
 //   const username = 'jubbathehut';
 //   UserController.removeUser(badAUser, username)
-//   .then(function() {
+//   .then(() => {
 //     chai.assert(true === false);
 //     done();
 //   })
-//   .catch(function(err) {
-//     const json = JSON.parse(err.message);
-//     chai.expect(json.description).to.equal('User cannot delete themselves.');
+//   .catch((error) => {
+//     chai.expect(error.description).to.equal('User cannot delete themselves.');
 //     done();
 //   });
 // }
@@ -545,13 +537,12 @@ function nonADelete(done) {
 function deleteUser(done) {
   const username = 'lskywalker';
   UserController.removeUser(reqUser, username)
-  .then(function(delUser) {
+  .then((delUser) => {
     chai.expect(delUser).to.equal('lskywalker');
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -563,13 +554,12 @@ function deleteUser(done) {
 function deleteUser02(done) {
   const username = 'hsolo';
   UserController.removeUser(reqUser, username)
-  .then(function(delUser) {
+  .then((delUser) => {
     chai.expect(delUser).to.equal('hsolo');
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }
@@ -581,13 +571,12 @@ function deleteUser02(done) {
 function deleteAUser(done) {
   const username = 'darthvader';
   UserController.removeUser(reqUser, username)
-  .then(function(delUser) {
+  .then((delUser) => {
     chai.expect(delUser).to.equal('darthvader');
     done();
   })
-  .catch(function(err) {
-    const json = JSON.parse(err.message);
-    chai.expect(json.description).to.equal(null);
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
     done();
   });
 }

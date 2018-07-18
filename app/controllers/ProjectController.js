@@ -23,6 +23,8 @@ const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const OrgController = M.load('controllers/OrganizationController');
 const Project = M.load('models/Project');
+const errors = M.load('lib/errors');
+const utils = M.load('lib/utils');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -53,26 +55,28 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {Boolean} The optional flag to denote searching for deleted projects
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The organization ID for the org the project belongs to.
+   * @param  {Boolean} softDeleted  The optional flag to denote searching for deleted projects
    */
-  static findProjects(reqUser, organizationId, softDeleted = false) {
+  static findProjects(reqUser, organizationID, softDeleted = false) {
     return new Promise((resolve, reject) => {
-      // Error check - Verify id, name, and org.id are of type string for sanitization.
-      if (typeof organizationId !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID], 'string');
+      }
+      catch (error) {
+        return reject(error);
       }
 
       // Sanitize project properties
-      const orgID = M.lib.sani.html(organizationId);
+      const orgID = M.lib.sani.html(organizationID);
 
       OrgController.findOrg(reqUser, orgID, softDeleted)
       .then((org) => {
         const orgReaders = org.permissions.read.map(u => u.username);
         // Error Check - See if user has read permissions on org
         if (!orgReaders.includes(reqUser.username)) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
+          return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
         const popQuery = 'org';
@@ -94,7 +98,7 @@ class ProjectController {
 
           // Error Check - Ensure at least one project is found
           if (projects.length < 1) {
-            return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'No projects found.' })));
+            return reject(new errors.CustomError('No projects found.', 404));
           }
 
 
@@ -120,19 +124,21 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {Object} Contains a list of delete options.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The organization ID for the org the project belongs to.
+   * @param  {Object} options  Contains a list of delete options.
    */
-  static removeProjects(reqUser, organizationId, options) {
+  static removeProjects(reqUser, organizationID, options) {
     return new Promise((resolve, reject) => {
-      // Error check - Verify id is of type string for sanitization.
-      if (typeof organizationId !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID], 'string');
+      }
+      catch (error) {
+        return reject(error);
       }
 
       // Sanitize the orgid
-      const orgID = M.lib.sani.html(organizationId);
+      const orgID = M.lib.sani.html(organizationID);
 
       // Ensure the org exists
       OrgController.findOrg(reqUser, orgID, true)
@@ -169,24 +175,24 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {String} The project ID of the Project which is being searched for.
-   * @param. {Boolean} The flag to control whether or not to find softDeleted projects.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The organization ID for the org the project belongs to.
+   * @param  {String} projectID  The project ID of the Project which is being searched for.
+   * @param {Boolean} softDeleted  The flag to control whether or not to find softDeleted projects.
    */
-  static findProject(reqUser, organizationId, projectId, softDeleted = false) {
+  static findProject(reqUser, organizationID, projectID, softDeleted = false) {
     return new Promise((resolve, reject) => {
-      // Error check - Verify id, name, and org.id are of type string for sanitization.
-      if (typeof organizationId !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID, projectID], 'string');
+        utils.checkType([softDeleted], 'boolean');
       }
-      if (typeof projectId !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // Sanitize project properties
-      const orgID = M.lib.sani.html(organizationId);
-      const projID = M.lib.sani.html(projectId);
+      const orgID = M.lib.sani.html(organizationID);
+      const projID = M.lib.sani.html(projectID);
       const projUID = `${orgID}:${projID}`;
 
       let searchParams = { uid: projUID, deleted: false };
@@ -201,19 +207,19 @@ class ProjectController {
       .exec((err, projects) => {
         // Error Check - Database/Server Error
         if (err) {
-          return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Find failed.' })));
+          return reject(new errors.CustomError('Find failed.'));
         }
 
         // Error Check - Ensure only 1 project is found
         if (projects.length < 1) {
-          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Project not found.' })));
+          return reject(new errors.CustomError('Project not found.', 404));
         }
 
         // Check Permissions
         const project = projects[0];
         const members = project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
+          return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
         // Return resulting project
@@ -236,33 +242,17 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {Object} The object of the project being created.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {Object} project  The object of the project being created.
    */
   static createProject(reqUser, project) {
     return new Promise((resolve, reject) => {
-      // Error check - id, name, and org.id are in project variable.
-      if (!project.hasOwnProperty('id')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (id).' })));
+      try {
+        utils.checkExists(['id', 'name', 'org.id'], project);
+        utils.checkType([project.id, project.name, project.org.id], 'string');
       }
-      if (!project.hasOwnProperty('name')) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (name).' })));
-      }
-      if (!project.hasOwnProperty('org')) {
-        if (!project.org.hasOwnProperty('id')) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project does not have attribute (org.id).' })));
-        }
-      }
-
-      // Error check - Verify id, name, and org.id are of type string for sanitization.
-      if (typeof project.id !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
-      }
-      if (typeof project.name !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name is not a string.' })));
-      }
-      if (typeof project.org.id !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // Sanitize project properties
@@ -272,10 +262,10 @@ class ProjectController {
 
       // Error check - make sure project ID and project name are valid
       if (!RegExp(M.lib.validators.project.id).test(projID)) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not valid.' })));
+        return reject(new errors.CustomError('Project ID is not valid.', 400));
       }
       if (!RegExp(M.lib.validators.project.name).test(projName)) {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project name is not valid.' })));
+        return reject(new errors.CustomError('Project name is not valid.', 400));
       }
 
       // Error check - Make sure the org exists
@@ -285,16 +275,15 @@ class ProjectController {
         const writers = org.permissions.write.map(u => u._id.toString());
 
         if (!writers.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
+          return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
         // Error check - check if the project already exists
         ProjectController.findProject(reqUser, org.id, projID)
-        .then((proj) => reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project already exists.' }))))
+        .then(() => reject(new errors.CustomError('Project already exists.', 400)))
         .catch((error) => {
           // This is ok, we dont want the project to already exist.
-          const err = JSON.parse(error.message);
-          if (err.description === 'Project not found.') {
+          if (error.description === 'Project not found.') {
             // Create the new project and save it
             const newProject = new Project({
               id: projID,
@@ -310,14 +299,14 @@ class ProjectController {
 
             newProject.save((saveErr, projectUpdated) => {
               if (saveErr) {
-                return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+                return reject(new errors.CustomError('Save failed.'));
               }
               // Return success and the JSON object
               return resolve(projectUpdated);
             });
           }
           else {
-            // Some other error occured, return it.
+            // Some other error occurred, return it.
             return reject(error);
           }
         });
@@ -340,22 +329,19 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The organization ID of the project.
-   * @param  {String} The project ID.
-   * @param  {Object} The object of the updated project.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The organization ID of the project.
+   * @param  {String} projectID  The project ID.
+   * @param  {Object} projectUpdated  The object of the updated project.
    */
-  static updateProject(reqUser, organizationId, projectId, projectUpdated) {
+  static updateProject(reqUser, organizationID, projectID, projectUpdated) {
     return new Promise((resolve, reject) => {
-      // Error check - Verify parameters are correct type.
-      if (typeof organizationId !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID, projectID], 'string');
+        utils.checkType([projectUpdated], 'object');
       }
-      if (typeof projectId !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
-      }
-      if (typeof projectUpdated !== 'object') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Updated project is not an object.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // If mongoose model, convert to plain JSON
@@ -365,8 +351,8 @@ class ProjectController {
       }
 
       // Sanitize project properties
-      const orgID = M.lib.sani.html(organizationId);
-      const projID = M.lib.sani.html(projectId);
+      const orgID = M.lib.sani.html(organizationID);
+      const projID = M.lib.sani.html(projectID);
 
       // Error check - check if the project already exists
       ProjectController.findProject(reqUser, orgID, projID)
@@ -374,7 +360,7 @@ class ProjectController {
         // Check Permissions
         const admins = project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permissions.' })));
+          return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
         // get list of keys the user is trying to update
@@ -390,7 +376,7 @@ class ProjectController {
           updateField = projUpdateFields[i];
           // Error Check - Check if updated field also exists in the original project.
           if (!project.toJSON().hasOwnProperty(updateField)) {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Project does not contain field ${updateField}` })));
+            return reject(new errors.CustomError(`Project does not contain field ${updateField}`, 400));
           }
           // if parameter is of type object, stringify and compare
           if (typeof projectUpdated[updateField] === 'object') {
@@ -405,11 +391,11 @@ class ProjectController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `Users cannot update [${updateField}] of Projects.` })));
+            return reject(new errors.CustomError(`Users cannot update [${updateField}] of Projects.`, 400));
           }
           // Error Check - Check if updated field is of type string
           if (typeof projectUpdated[updateField] !== 'string') {
-            return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: `The Project [${updateField}] is not of type String` })));
+            return reject(new errors.CustomError(`The Project [${updateField}] is not of type String`, 400));
           }
 
           // sanitize field
@@ -421,7 +407,7 @@ class ProjectController {
         // Save updated org
         project.save((saveProjErr) => {
           if (saveProjErr) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+            return reject(new errors.CustomError('Save failed.'));
           }
 
           // Return the updated project object
@@ -434,7 +420,7 @@ class ProjectController {
 
 
   /**
-   * The function deletes a project.
+   * @description  The function deletes a project.
    *
    * @example
    * ProjectController.removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
@@ -446,23 +432,23 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {String} The project ID of the Project which is being deleted.
-   * @param  {Object} Contains the list of delete options.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The organization ID for the org the project belongs to.
+   * @param  {String} projectID  he project ID of the Project which is being deleted.
+   * @param  {Object} options  Contains the list of delete options.
    */
-  static removeProject(reqUser, organizationId, projectId, options) {
+  static removeProject(reqUser, organizationID, projectID, options) {
     // Loading controller function wide since the element controller loads
     // the project controller globally. Both files cannot load each other globally.
     const ElemController = M.load('controllers/ElementController');
 
     return new Promise((resolve, reject) => {
-      // Error check - Verify id, name, and org.id are of type string for sanitization.
-      if (typeof organizationId !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID, projectID], 'string');
+        utils.checkType([options], 'object');
       }
-      if (typeof projectId !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
+      catch (error) {
+        return reject(error);
       }
 
       let softDelete = true;
@@ -471,31 +457,30 @@ class ProjectController {
           softDelete = false;
         }
         else if (options.soft === false && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
+          return reject(new errors.CustomError('User does not have permission to permanently delete a project.', 401));
         }
         else if (options.soft !== false && options.soft !== true) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
+          return reject(new errors.CustomError('Invalid argument for the soft delete field.', 400));
         }
       }
 
       // Sanitize project properties
-      const orgID = M.lib.sani.html(organizationId);
-      const projID = M.lib.sani.html(projectId);
+      const orgID = M.lib.sani.html(organizationID);
+      const projID = M.lib.sani.html(projectID);
 
       // Make sure the project exists first, even if it has already been soft deleted
       ProjectController.findProject(reqUser, orgID, projID, true)
       .then((project) => {
         // Delete any elements attached to the project first
         ElemController.removeElements(reqUser, orgID, projID, options)
-        .then((elements) => {
+        .then(() => {
           ProjectController.removeProjectHelper(project, softDelete)
           .then((deletedProject) => resolve(deletedProject))
           .catch((deleteProjectError) => reject(deleteProjectError));
         })
         .catch((removeElementsError) => {
           // There are simply no elements associated with this project to delete
-          const error = JSON.parse(removeElementsError.message);
-          if (error.description === 'No elements found.') {
+          if (removeElementsError.description === 'No elements found.') {
             ProjectController.removeProjectHelper(project, softDelete)
             .then((deletedProject) => resolve(deletedProject))
             .catch((deleteProjectError) => reject(deleteProjectError));
@@ -511,7 +496,7 @@ class ProjectController {
   }
 
   /**
-   * The function actualy deletes the project.
+   * @description  The function actually deletes the project.
    *
    * @example
    * ProjectController.removeProjectHelper({Arc}, true)
@@ -523,8 +508,8 @@ class ProjectController {
    * });
    *
    *
-   * @param  {Project} The project object to delete
-   * @param  {Boolean} Flag denoting whether to soft delete or not.
+   * @param  {Project} project  The project object to delete
+   * @param  {Boolean} softDelete  Flag denoting whether to soft delete or not.
    */
   static removeProjectHelper(project, softDelete) {
     return new Promise((resolve, reject) => {
@@ -534,7 +519,7 @@ class ProjectController {
           project.save((saveErr) => {
             if (saveErr) {
               // If error occurs, return it
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+              return reject(new errors.CustomError('Save failed.'));
             }
 
             // Return updated project
@@ -542,14 +527,14 @@ class ProjectController {
           });
         }
         else {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project no longer exists.' })));
+          return reject(new errors.CustomError('Project no longer exists.', 404));
         }
       }
       else {
         // Remove the Project
         Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
           if (removeProjErr) {
-            return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Delete failed.' })));
+            return reject(new errors.CustomError('Delete failed.'));
           }
           return resolve(projectRemoved);
         });
@@ -558,7 +543,7 @@ class ProjectController {
   }
 
   /**
-   * The function finds a projects permissions.
+   * @description  The function finds a projects permissions.
    *
    * @example
    * ProjectController.findAllPermissions({Tony Stark}, 'stark', 'arc')
@@ -570,17 +555,17 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {String} The project ID of the Project which is being deleted.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The organization ID for the org the project belongs to.
+   * @param  {String} projectID  The project ID of the Project which is being deleted.
    */
-  static findAllPermissions(reqUser, organizationID, ProjectID) {
+  static findAllPermissions(reqUser, organizationID, projectID) {
     return new Promise((resolve, reject) => {
       const orgID = M.lib.sani.html(organizationID);
-      const projectID = M.lib.sani.html(ProjectID);
+      const projID = M.lib.sani.html(projectID);
 
       // Find Project
-      ProjectController.findProject(reqUser, orgID, projectID)
+      ProjectController.findProject(reqUser, orgID, projID)
       .then((project) => {
         const permissionLevels = project.getPermissionLevels();
         const memberList = project.permissions[permissionLevels[1]].map(u => u.username);
@@ -588,7 +573,7 @@ class ProjectController {
 
         // Check permissions
         if (!memberList.includes(reqUser.username)) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
+          return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
         const roleList = {};
@@ -597,12 +582,7 @@ class ProjectController {
           roleList[memberList[i]] = {};
           for (let j = 1; j < permissionLevels.length; j++) {
             permissionsList = project.permissions[permissionLevels[j]].map(u => u.username);
-            if (permissionsList.includes(memberList[i])) {
-              roleList[memberList[i]][permissionLevels[j]] = true;
-            }
-            else {
-              roleList[memberList[i]][permissionLevels[j]] = false;
-            }
+            roleList[memberList[i]][permissionLevels[j]] = permissionsList.includes(memberList[i]);
           }
         }
         return resolve(roleList);
@@ -613,7 +593,7 @@ class ProjectController {
 
 
   /**
-   * The function finds a projects permissions.
+   * @descriptio  The function finds a projects permissions.
    *
    * @example
    * ProjectController.findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
@@ -625,21 +605,21 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {String} The project ID of the Project which is being deleted.
-   * @param  {User} The object containing the user to be searched for.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The organization ID for the org the project belongs to.
+   * @param  {String} projectID  The project ID of the Project which is being deleted.
+   * @param  {User} user The object containing the user to be searched for.
    */
-  static findPermissions(reqUser, organizationID, ProjectID, user) {
+  static findPermissions(reqUser, organizationID, projectID, user) {
     return new Promise((resolve, reject) => {
       const orgID = M.lib.sani.html(organizationID);
-      const projectID = M.lib.sani.html(ProjectID);
+      const projID = M.lib.sani.html(projectID);
 
       // Find Project
-      ProjectController.findAllPermissions(reqUser, orgID, projectID)
+      ProjectController.findAllPermissions(reqUser, orgID, projID)
       .then((permissionList) => {
         if (!permissionList.hasOwnProperty(user.username)) {
-          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'User not found.' })));
+          return reject(new errors.CustomError('User not found.', 404));
         }
 
         return resolve(permissionList[user.username]);
@@ -650,7 +630,7 @@ class ProjectController {
 
 
   /**
-   * The function sets a user's permissions for a project.
+   * @description  The function sets a user's permissions for a project.
    *
    * @example
    * ProjectController.setPermissions({Tony}, 'stark_industries', 'arc_reactor', {Jarvis}, 'write')
@@ -662,25 +642,19 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} The object containing the requesting user.
-   * @param  {String} The organization ID for the Organization the project belongs to.
-   * @param  {String} The project ID of the Project which is being deleted.
-   * @param  {User} The object containing the user which permissions are being set for.
-   * @param  {String} The permission level or type being set for the user.
+   * @param  {User} reqUser  The object containing the requesting user.
+   * @param  {String} organizationID  The organization ID for the org the project belongs to.
+   * @param  {String} projectID  The project ID of the Project which is being deleted.
+   * @param  {User} setUser  The object containing the user which permissions are being set for.
+   * @param  {String} permissionType  The permission level or type being set for the user.
    */
   static setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
     return new Promise((resolve, reject) => {
-      // Error check - Verify perm type of type string for sanitization.
-      if (typeof organizationID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Organization ID is not a string.' })));
+      try {
+        utils.checkType([organizationID, projectID, permissionType], 'string');
       }
-      // Error check - Verify perm type of type string for sanitization.
-      if (typeof projectID !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Project ID is not a string.' })));
-      }
-      // Error check - Verify perm type of type string for sanitization.
-      if (typeof permissionType !== 'string') {
-        return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Permission type is not a string.' })));
+      catch (error) {
+        return reject(error);
       }
 
       // Sanitize input
@@ -694,7 +668,7 @@ class ProjectController {
         // Check permissions
         const admins = project.permissions.admin.map(u => u._id.toString());
         if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission.' })));
+          return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
         // Grab permissions levels from Project schema method
@@ -702,12 +676,12 @@ class ProjectController {
 
         // Error Check - Make sure that a valid permissions type was passed
         if (!permissionLevels.includes(permType)) {
-          return reject(new Error(JSON.stringify({ status: 404, message: 'Not Found', description: 'Permission type not found.' })));
+          return reject(new errors.CustomError('Permission type not found.', 404));
         }
 
         // Error Check - Do not allow admin user to downgrade their permissions
         if (reqUser.username === setUser.username && permType !== permissionLevels[-1]) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User cannot change their own permissions.' })));
+          return reject(new errors.CustomError('User cannot change their own permissions.', 401));
         }
 
         // Grab the index of the permission type
@@ -743,7 +717,7 @@ class ProjectController {
           pushPullRoles,
           (saveProjErr, projectSaved) => {
             if (saveProjErr) {
-              return reject(new Error(JSON.stringify({ status: 500, message: 'Internal Server Error', description: 'Save failed.' })));
+              return reject(new errors.CustomError('Save failed.'));
             }
             // Check if user has org read permissions
             OrgController.findPermissions(reqUser, setUser, orgID)
