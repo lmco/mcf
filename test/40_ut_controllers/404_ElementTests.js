@@ -157,7 +157,6 @@ function createElement(done) {
     done();
   })
   .catch((error) => {
-    console.log(error);
     chai.expect(error.description).to.equal(null);
     done();
   });
@@ -331,10 +330,12 @@ function findElement(done) {
  * Update an element
  */
 function updateElement(done) {
-  ElemController.updateElement(user, org.id, proj.id, 'elem0', { name: 'Death Star 2 Element' })
+  ElemController.updateElement(user, org.id, proj.id, 'elem0',
+    { name: 'Death Star 2 Element', documentation: 'This is some different documentation' })
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem0');
     chai.expect(retElem.name).to.equal('Death Star 2 Element');
+    chai.expect(retElem.documentation).to.equal('This is some different documentation');
     done();
   })
   .catch((error) => {

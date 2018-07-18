@@ -506,7 +506,8 @@ class ElementController {
         .then((sourceElement) => {
           if (elemData.parentID !== null) {
             // Find the parent element
-            ElementController.findElement(reqUser, elemData.orgID, elemData.project.id, elemData.parentID)
+            ElementController.findElement(reqUser, elemData.orgID,
+              elemData.project.id, elemData.parentID)
             .then((parentElement) => { // eslint-disable-line consistent-return
               // Ensure parent is of type Package
               if (!parentElement.type === 'Package') {
@@ -532,7 +533,8 @@ class ElementController {
                 }
 
                 // Update the parent elements 'contains' field
-                ElementController.updateParent(reqUser, elemData.orgID, elemData.project.id, elemData.parentID, newElement)
+                ElementController.updateParent(reqUser, elemData.orgID,
+                  elemData.project.id, elemData.parentID, newElement)
                 .then((parentUpdated) => resolve(elemUpdate))
                 .catch((parentUpdateError) => reject(parentUpdateError));
               });
@@ -590,7 +592,8 @@ class ElementController {
     return new Promise((resolve, reject) => {
       if (elemData.parentID !== null) {
         // Find the parent element
-        ElementController.findElement(reqUser, elemData.orgID, elemData.project.id, elemData.parentID)
+        ElementController.findElement(reqUser, elemData.orgID,
+          elemData.project.id, elemData.parentID)
         .then((parentElement) => { // eslint-disable-line consistent-return
           // Ensure parent is of type Package
           if (!parentElement.type === 'Package') {
@@ -614,7 +617,8 @@ class ElementController {
             }
 
             // Update the parent elements 'contains' field
-            ElementController.updateParent(reqUser, elemData.orgID, elemData.project.id, elemData.parentID, newElement)
+            ElementController.updateParent(reqUser, elemData.orgID,
+              elemData.project.id, elemData.parentID, newElement)
             .then(() => resolve(elementUpdated))
             .catch((parentUpdateError) => reject(parentUpdateError));
           });
@@ -666,7 +670,8 @@ class ElementController {
     return new Promise((resolve, reject) => {
       if (elemData.parentID !== null) {
         // Find the parent element
-        ElementController.findElement(reqUser, elemData.orgID, elemData.project.id, elemData.parentID)
+        ElementController.findElement(reqUser, elemData.orgID,
+          elemData.project.id, elemData.parentID)
         .then((parentElement) => { // eslint-disable-line consistent-return
           // Ensure parent is of type Package
           if (!parentElement.type === 'Package') {
@@ -690,7 +695,8 @@ class ElementController {
             }
 
             // Update the parent elements 'contains' field
-            ElementController.updateParent(reqUser, elemData.orgID, elemData.project.id, elemData.parentID, newElement)
+            ElementController.updateParent(reqUser, elemData.orgID,
+              elemData.project.id, elemData.parentID, newElement)
             .then(() => resolve(elementUpdated))
             .catch((parentUpdateError) => reject(parentUpdateError));
           });
