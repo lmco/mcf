@@ -193,7 +193,7 @@ class ProjectController {
       // Sanitize project properties
       const orgID = M.lib.sani.html(organizationID);
       const projID = M.lib.sani.html(projectID);
-      const projUID = `${orgID}:${projID}`;
+      const projUID = utils.createUID(orgID, projID);
 
       let searchParams = { uid: projUID, deleted: false };
 
@@ -294,7 +294,7 @@ class ProjectController {
                 write: [reqUser._id],
                 admin: [reqUser._id]
               },
-              uid: `${orgID}:${projID}`
+              uid: utils.createUID(orgID, projID)
             });
 
             newProject.save((saveErr, projectUpdated) => {
@@ -713,7 +713,7 @@ class ProjectController {
 
         // Update project
         Project.findOneAndUpdate(
-          { uid: `${orgID}:${projID}` },
+          { uid: utils.createUID(orgID, projID) },
           pushPullRoles,
           (saveProjErr, projectSaved) => {
             if (saveProjErr) {
