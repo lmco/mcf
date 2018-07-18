@@ -16,7 +16,7 @@
  *
  *  @description  This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code. These API controller tests are 
+ * when making changes/ updates to the code. These API controller tests are
  * specifically for the Project API tests: posting, putting, getting, and deleting
  * projects. Some tests are conducting with invalid inputs for the project
  * api controlls.
@@ -41,7 +41,7 @@ let user = null;
 /*------------------------------------
  *       Main
  *------------------------------------*/
-describe(name, function() {
+describe(name, () => {
 
   /*-------------------------------------
    * Before: run before all tests
@@ -95,7 +95,7 @@ describe(name, function() {
   /*-------------------------------------
    * After: run after all tests
    *-------------------------------------*/
-  after(function(done) {
+  after((done) => {
     // Removing the Organization created in the before
     OrgController.removeOrg(user, 'hogwarts', { soft: false })
     .then((retOrg) => {
@@ -108,7 +108,7 @@ describe(name, function() {
         done();
       });
     })
-    .catch(function(err2) {
+    .catch((err2) => {
       const error2 = JSON.parse(err2.message);
       chai.expect(error2.description).to.equal(null);
       mongoose.connection.close();
@@ -155,7 +155,7 @@ function postProject01(done) {
       }
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('harrypotter');
@@ -174,7 +174,7 @@ function getProject01(done) {
     headers: getHeaders(),
     method: 'GET'
   },
-  function(err, response, body) {
+  (err, response, body) => {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
     chai.expect(json.name).to.equal('Youre a wizard Harry');
@@ -200,7 +200,7 @@ function postBadProject(done) {
       }
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(json.description).to.equal('Project ID is not valid.');
     chai.expect(json.message).to.equal('Bad Request');
@@ -227,7 +227,7 @@ function postBadOrg(done) {
       }
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(json.description).to.equal('Org not found.');
     chai.expect(json.message).to.equal('Not Found');
@@ -255,7 +255,7 @@ function confusingOrg(done) {
       }
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
     chai.expect(json.description).to.equal('Project ID in the body does not match ID in the params.');
@@ -282,7 +282,7 @@ function postInvalidProject(done) {
       }
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
     chai.expect(response.statusCode).to.equal(400);
@@ -306,7 +306,7 @@ function putOrg01(done) {
       name: 'I know'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal(id);
@@ -329,7 +329,7 @@ function badPut(done) {
       name: 'New Harry'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(400);
     chai.expect(json.message).to.equal('Bad Request');
@@ -355,7 +355,7 @@ function postProject02(done) {
       }
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('ronweasly');
@@ -377,7 +377,7 @@ function deleteProject01(done) {
       soft: false
     })
   },
-  function(err, response) {
+  (err, response) => {
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
@@ -396,7 +396,7 @@ function deleteProject02(done) {
       soft: false
     })
   },
-  function(err, response) {
+  (err, response) => {
     chai.expect(response.statusCode).to.equal(200);
     done();
   });

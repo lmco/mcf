@@ -248,9 +248,9 @@ function createElements(done) {
 }
 
 /**
- * Attempting to update a project field with an
- * invalid attempt at updating the id. This
- * will reject and throw an error.
+ * Test update to a project field with an
+ * invalid attempt at updating the id.
+ * This will reject and throw an error.
  */
 
 function updateFieldError(done) {
@@ -266,7 +266,7 @@ function updateFieldError(done) {
 }
 
 /**
- * Attempting to update a project with an invalid
+ * Tests update to a project with an invalid
  * name for the project. This will reject and throw
  * and error.
  */
@@ -284,8 +284,8 @@ function updateTypeError(done) {
 }
 
 /**
- * Testing updating a project with a
- * new name. This should pass.
+ * Test updating a project with a
+ * new name.
  */
 function updateProject(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'ironman', { id: 'ironman', name: 'Iron Man' })
@@ -300,7 +300,7 @@ function updateProject(done) {
 }
 
 /**
- * Testing updating a project with using project object.
+ * Test updating a project with using project object.
  */
 function updateProjectObject(done) {
   ProjController.findProject(allSeeingUser, org.id, 'ironman')
@@ -371,9 +371,7 @@ function createLongId(done) {
 }
 
 /**
- * Tests to see what valid name of the project
- * can be. how long till it breaks...
- * This succeeds...
+ * Tests to see how long a name of a project can be.
  */
 function createLongName(done) {
   const projData = {
@@ -396,8 +394,7 @@ function createLongName(done) {
 
 /**
  * Tests to see what valid length of the name
- * of project can be. how long till it breaks...
- * Just kidding this works......
+ * of project can be.
  */
 function createLongName02(done) {
   const projData = {
@@ -419,15 +416,14 @@ function createLongName02(done) {
 }
 
 /**
- * Tests to see what valid name of the project
- * can be.
+ * Tests to see the validation of a name of a project.
  */
 function createPeriodName(done) {
   const projData = {
     id: 'period',
     name: 'This is just to see if a period works....',
     org: {
-      id: 'council'
+      id: 'starkhq'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
@@ -443,7 +439,7 @@ function createPeriodName(done) {
 }
 
 /**
- * Tests attempting to create a project already existing.
+ * Test creating a project already existing.
  * This should throw an error stating the project already
  * exists.
  */
@@ -469,7 +465,7 @@ function recreateProject(done) {
 }
 
 /**
- * Tests creating a project that has not id input.
+ * Tests creating a project that has no project id input.
  * This should be rejected and throw an error.
  */
 function noId(done) {
@@ -494,7 +490,7 @@ function noId(done) {
 }
 
 /**
- * Tests creating a project that has not id input.
+ * Tests creating a project that has no name input.
  * This should be rejected and throw an error.
  */
 function noName(done) {
@@ -519,8 +515,8 @@ function noName(done) {
 }
 
 /**
- * Tests creating a project that has not id input.
- * This should be rejected and give an error.
+ * Test creating a project that has no organization id.
+ * This should be rejected and throw an error.
  */
 function noOrg(done) {
   const projData = {
@@ -571,8 +567,8 @@ function nonACreator(done) {
 
 
 /**
- * Tests for finding the project that was
- * just created above. Should succeed
+ * Test for finding the project that was
+ * just created above.
  */
 
 function findProj(done) {
@@ -591,8 +587,8 @@ function findProj(done) {
 }
 
 /**
- * Tests for find a project that does not exist.
- * Should output error.
+ * Test for finding a project that does not exist.
+ * An error should be thrown.
  */
 
 function noProj(done) {
@@ -612,8 +608,8 @@ function noProj(done) {
 }
 
 /**
- * Tests for find a project using a non admin user.
- * Should output error.
+ * Test for finding a project using a non admin user.
+ * An error should be thrown.
  */
 
 function nonAUser(done) {
@@ -633,8 +629,7 @@ function nonAUser(done) {
 }
 
 /**
- * Tests for updating a project.
- * Should pass.
+ * Test for updating a project.
  */
 
 function updateProj(done) {
@@ -657,7 +652,7 @@ function updateProj(done) {
 
 /**
  * Tests for updating the projects id name.
- * This should get denied.
+ * An error should be thrown.
  */
 
 function updateID(done) {
@@ -679,7 +674,7 @@ function updateID(done) {
 
 /**
  * Tests for updating a project with a non admin user.
- * Should throw an error.
+ * An error should be thrown.
  */
 
 function updateNonA(done) {
@@ -720,8 +715,8 @@ function findPerm(done) {
 
 /**
  * Tests setting permissions on the project where you need
- * permission to acces the org so you need to set those
- * permissions before setting the project permissions.
+ * permission to the org before permissions can be set to
+ * the project.
  */
 function setPerm(done) {
   OrgController.setPermissions(allSeeingUser, 'starkhq', nonAuser, 'write')

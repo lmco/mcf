@@ -15,7 +15,10 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This file defines basic tests of the Organization Model.
+ * @description  This tests the Organization Model functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The organization model tests create,
+ * soft deletes, and hard deletes organizations.
  */
 
 const path = require('path');
@@ -49,9 +52,9 @@ describe(name, () => {
     mongoose.connection.close();
   });
 
- /*----------
-  * Tests
-  *----------*/
+  /*----------
+   * Tests
+   *----------*/
   it('should create an organization', createOrg).timeout(2500);
   it('should soft delete an organization', softDeleteOrg).timeout(2500);
   it('should delete an organization', deleteOrg).timeout(2500);

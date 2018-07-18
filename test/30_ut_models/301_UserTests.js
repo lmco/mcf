@@ -14,7 +14,10 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This file defines basic tests of the User data model.
+ * @description This tests the User Model functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The user model tests create,
+ * update, finds, soft deletes, and hard deletes users.
  */
 
 const path = require('path');
@@ -50,9 +53,9 @@ describe(name, () => {
     mongoose.connection.close();
   });
 
- /*----------
-  * Tests
-  *----------*/
+  /*----------
+   * Tests
+   *----------*/
   it('should create a user', createUser);
   it('should get a user from the database', getUser);
   it('should update a user', updateUser);

@@ -15,7 +15,10 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This file defines basic tests of the Project Model.
+ * @description  This tests the Project Model functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The project model tests create,
+ * soft delete, and hard delete projects.
  */
 
 const path = require('path');
@@ -37,7 +40,7 @@ let user = null;
  *       Main
  *------------------------------------*/
 
-describe(name, function() {
+describe(name, () => {
   before(function(done) {
     this.timeout(6000);
     const db = M.load('lib/db');
@@ -62,7 +65,7 @@ describe(name, function() {
               read: [ldapuser._id]
             }
           });
-          org.save(function(error) {
+          org.save((error) => {
             if (error) {
               M.log.error(error);
               done();
@@ -76,8 +79,8 @@ describe(name, function() {
   /*-------------------------------------
    * After: runs after all tests
    *-------------------------------------*/
-  after(function(done) {
-    Org.findOneAndRemove({ id: org.id }, function(error) {
+  after((done) => {
+    Org.findOneAndRemove({ id: org.id }, (error) => {
       if (error) {
         M.log.error(error);
       }
@@ -110,27 +113,27 @@ describe(name, function() {
  * Creates a user using the User model.
  */
 function createProject(done) {
-    // Otherwise,
-    // Create a project
-    const id = 'gaurdiansofgalaxy';
-    const newProject = new Project({
-      id: id,
-      name: 'Gaurdians of the Galaxy',
-      org: org._id,
-      permissions: {
-        admin: [user._id],
-        write: [user._id],
-        read: [user._id]
-      },
-      uid: `${id}:${org.id}`
-    });
-    newProject.save(function(err) {
-      if (err) {
-        M.log.error(err);
-      }
-      chai.expect(err).to.equal(null);
-      done();
-    });
+  // Otherwise,
+  // Create a project
+  const id = 'gaurdiansofgalaxy';
+  const newProject = new Project({
+    id: id,
+    name: 'Gaurdians of the Galaxy',
+    org: org._id,
+    permissions: {
+      admin: [user._id],
+      write: [user._id],
+      read: [user._id]
+    },
+    uid: `${id}:${org.id}`
+  });
+  newProject.save((err) => {
+    if (err) {
+      M.log.error(err);
+    }
+    chai.expect(err).to.equal(null);
+    done();
+  });
 }
 
 /**
@@ -162,7 +165,7 @@ function softDeleteProject(done) {
  * Deletes the organization.
  */
 function deleteProject(done) {
-  Project.findOneAndRemove({ id: 'gaurdiansofgalaxy' }, function(err) {
+  Project.findOneAndRemove({ id: 'gaurdiansofgalaxy' }, (err) => {
     chai.expect(err).to.equal(null);
     done();
   });

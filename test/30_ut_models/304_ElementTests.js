@@ -14,7 +14,11 @@
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This file defines basic tests of the Element Model.
+ * @description This tests the Element Model functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The element model tests create elements,
+ * root packages, blocks, and relationships. These tests also hard deletes blocks
+ * and relationships, as well as, soft and har deletes root packages.
  */
 
 const path = require('path');
@@ -47,7 +51,7 @@ describe(name, function() {
    *-------------------------------------*/
   before(function() {
     this.timeout(5000);
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       const db = M.load('lib/db');
       db.connect();
 
@@ -117,7 +121,7 @@ describe(name, function() {
   /*-------------------------------------
    * After: runs after all tests
    *-------------------------------------*/
-  after(function(done) {
+  after((done) => {
     // Remove the project
     Project.findOneAndRemove({
       uid: project.uid
@@ -184,7 +188,7 @@ function createElement(done) {
     project: project._id,
     parent: null
   });
-  newElement.save(function(err, createdElement) {
+  newElement.save((err, createdElement) => {
     if (err) {
       M.log.error(err);
     }
@@ -223,7 +227,7 @@ function createRootPackage(done) {
   });
 
   // Save the package
-  newPackage.save(function(err) {
+  newPackage.save((err) => {
     if (err) {
       M.log.error(err);
     }
