@@ -191,7 +191,7 @@ class BaseStrategy {
       this.handleBasicAuth(req, res, username, password, (err, user) => {
         if (err) {
           M.log.error(err);
-          req.flash('loginError',err);
+          req.flash('loginError', err);
           return (req.originalUrl.startsWith('/api'))
             ? res.status(401).send('Unauthorized')
             : res.redirect('/login');

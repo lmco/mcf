@@ -79,7 +79,7 @@ function initApp() {
     cookie: { maxAge: M.config.auth.session.expires * units },
     store: new MongoStore({ mongooseConnection: mongoose.connection })
   }));
-  
+
   // Enable flash messages
   app.use(flash());
 
