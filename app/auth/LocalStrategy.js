@@ -75,17 +75,14 @@ class LocalStrategy {
           return reject(new errors.CustomError('No user found', 401));
         }
         // Compute the password hash on given password
-        const hash = libCrypto.createHash('sha256');
-        hash.update(user._id.toString());       // salt
-        hash.update(password);                  // password
-        const pwdhash = hash.digest().toString('hex');
-
-        // Authenticate the user
-        if (user.password !== pwdhash) {
-          return reject(new errors.CustomError('Invalid password', 401));
-        }
-        // return user object if authentication was successful
-        return resolve(user);
+        user.verifyPassword(password)
+        .then(result => {
+          if (!result) {
+            return reject(new errors.CustomError('Invalid password', 401));
+          }
+          return resolve(user);
+        })
+        .catch(verifyErr => reject(verifyErr));
       });
     });
   }
