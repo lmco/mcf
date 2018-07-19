@@ -98,7 +98,7 @@ class ProjectController {
 
           // Error Check - Ensure at least one project is found
           if (projects.length < 1) {
-            return reject(new errors.CustomError('No projects found.', 404));
+            return resolve([]);
           }
 
 
@@ -141,13 +141,19 @@ class ProjectController {
       const orgID = M.lib.sani.html(organizationID);
 
       // Ensure the org exists
+      // TODO - Use populates rather than nested queries when possible
       OrgController.findOrg(reqUser, orgID, true)
       .then((org) => {
         ProjectController.findProjects(reqUser, org.id, true)
         .then((projects) => {
+          if (projects.length === 0) {
+            return resolve(projects);
+          }
+          // TODO - We should be able to pass a list into a query to say
+          // "remove all these" projects rather than doing a query per project
           for (let i = 0; i < projects.length; i++) {
             ProjectController.removeProject(reqUser, orgID, projects[i].id, options)
-            .then((project) => {
+            .then(() => {
               if (i === projects.length - 1) {
                 return resolve(projects);
               }
