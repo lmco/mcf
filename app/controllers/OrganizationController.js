@@ -347,11 +347,9 @@ class OrganizationController {
 
       const orgID = M.lib.sani.html(organizationID);
 
-      M.log.debug('removeOrg request valid. About to remove projects.');
       // Delete the projects first while the org still exists
       ProjController.removeProjects(user, orgID, options)
-      .then((projects) => {
-        M.log.debug('removeProjects has resolved.');
+      .then(() => {
         OrganizationController.removeOrgHelper(user, orgID, softDelete)
         .then((retOrg) => resolve(retOrg))
         .catch((err) => reject(err));

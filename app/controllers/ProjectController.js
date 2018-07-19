@@ -98,7 +98,7 @@ class ProjectController {
 
           // Return empty array if no projects are found
           if (projects.length < 1) {
-            return [];
+            return resolve([]);
           }
 
 
@@ -144,10 +144,8 @@ class ProjectController {
       // TODO - Use populates rather than nested queries when possible
       OrgController.findOrg(reqUser, orgID, true)
       .then((org) => {
-        M.log.debug(`Org ${orgID} found.`);
         ProjectController.findProjects(reqUser, org.id, true)
         .then((projects) => {
-          M.log.debug(`${projects.length} projects found.`);
           if (projects.length === 0) {
             return resolve(projects);
           }
@@ -155,7 +153,7 @@ class ProjectController {
           // "remove all these" projects rather than doing a query per project
           for (let i = 0; i < projects.length; i++) {
             ProjectController.removeProject(reqUser, orgID, projects[i].id, options)
-            .then((project) => {
+            .then(() => {
               if (i === projects.length - 1) {
                 return resolve(projects);
               }
