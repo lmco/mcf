@@ -143,7 +143,7 @@ function createElement(done) {
       }
     },
     type: 'Package',
-    tags: {
+    custom: {
       company: 'Lockheed',
       paid: true
     },
@@ -152,7 +152,7 @@ function createElement(done) {
   ElemController.createElement(user, newElement)
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem0');
-    chai.expect(retElem.tags.paid).to.equal(true);
+    chai.expect(retElem.custom.paid).to.equal(true);
     chai.expect(retElem.documentation).to.equal('This is some documentation.');
     done();
   })

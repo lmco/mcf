@@ -306,7 +306,7 @@ class ElementController {
       const elementType = M.lib.sani.html(element.type);
       let elemName = null;
       let parentID = null;
-      let tags = null;
+      let custom = null;
       let documentation = null;
 
       if (element.hasOwnProperty('name')) {
@@ -323,12 +323,12 @@ class ElementController {
         }
         parentID = M.lib.sani.html(element.parent);
       }
-      if (element.hasOwnProperty('tags')) {
+      if (element.hasOwnProperty('custom')) {
         // Tags are not required, so check first if they exists
-        if (typeof element.tags !== 'object') {
-          return reject(new errors.CustomError('Element tags are not an object.', 400));
+        if (typeof element.custom !== 'object') {
+          return reject(new errors.CustomError('Elements custom field is not an object.', 400));
         }
-        tags = M.lib.sani.html(element.tags);
+        custom = M.lib.sani.html(element.custom);
       }
       if (element.hasOwnProperty('documentation')) {
         // Element documentation is not required, so check first if it exists.
@@ -380,7 +380,7 @@ class ElementController {
               project: proj,
               elemUID: elemUID,
               parentID: parentID,
-              tags: tags,
+              custom: custom,
               documentation: documentation
             };
 
@@ -417,7 +417,7 @@ class ElementController {
                   project: proj._id,
                   uid: elemUID,
                   parent: parent._id,
-                  tags: tags,
+                  custom: custom,
                   documentation: documentation
                 });
 
@@ -441,7 +441,7 @@ class ElementController {
                 project: proj._id,
                 uid: elemUID,
                 parent: null,
-                tags: tags,
+                custom: custom,
                 documentation: documentation
               });
 
@@ -522,7 +522,7 @@ class ElementController {
                 parent: parentElement._id,
                 target: targetElement._id,
                 source: sourceElement._id,
-                tags: elemData.tags,
+                custom: elemData.custom,
                 documentation: elemData.documentation
               });
 
@@ -551,7 +551,7 @@ class ElementController {
               parent: null,
               target: targetElement._id,
               source: sourceElement._id,
-              tags: elemData.tags,
+              custom: elemData.custom,
               documentation: elemData.documentation
             });
 
@@ -606,7 +606,7 @@ class ElementController {
             project: elemData.project._id,
             uid: elemData.elemUID,
             parent: parentElement._id,
-            tags: elemData.tags,
+            custom: elemData.custom,
             documentation: elemData.documentation
           });
 
@@ -633,7 +633,7 @@ class ElementController {
           project: elemData.project._id,
           uid: elemData.elemUID,
           parent: null,
-          tags: elemData.tags,
+          custom: elemData.custom,
           documentation: elemData.documentation
         });
 
@@ -684,7 +684,7 @@ class ElementController {
             project: elemData.project._id,
             uid: elemData.elemUID,
             parent: parentElement._id,
-            tags: elemData.tags,
+            custom: elemData.custom,
             documentation: elemData.documentation
           });
 
@@ -711,7 +711,7 @@ class ElementController {
           project: elemData.project._id,
           uid: elemData.elemUID,
           parent: null,
-          tags: elemData.tags,
+          custom: elemData.custom,
           documentation: elemData.documentation
         });
 

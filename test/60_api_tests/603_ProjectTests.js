@@ -129,6 +129,7 @@ describe(name, function() {
 
   // runs after all the tests are done
   after(function(done) {
+    this.timeout(5000);
     // Removing the Organization created in the before
     OrgController.removeOrg(user, 'hogwarts', { soft: false })
     .then((retOrg) => {

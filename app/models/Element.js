@@ -147,12 +147,12 @@ const ElementSchema = new mongoose.Schema({
 
   /**
    * @memberOf Element
-   * @property {Schema.Types.Mixed} tags
+   * @property {Schema.Types.Mixed} custom
    *
-   * @description The element's tags. This contains arbitrary key-value pairs of strings
+   * @description The element's custom tags. This contains arbitrary key-value pairs of strings
    * used to represent additional model data.
    */
-  tags: {
+  custom: {
     type: mongoose.Schema.Types.Mixed
   },
 
