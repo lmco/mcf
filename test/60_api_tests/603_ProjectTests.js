@@ -244,12 +244,12 @@ function postBadOrg(done) {
 function confusingOrg(done) {
   const id = 'brucebanner';
   request({
-    url: `${test.url}/api/orgs/nohulk/projects/brucebanner`,
+    url: `${test.url}/api/orgs/nohulk/projects/actuallyhulk`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
       id: id,
-      name: 'Not Hulk',
+      name: 'Bruce Banner',
       org: {
         id: org.id
       }
