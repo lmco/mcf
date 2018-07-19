@@ -65,8 +65,8 @@ describe(name, () => {
           chai.expect(userUpdate).to.not.equal(null);
           // Creating an Organization used in the tests
           const orgData = {
-            id: 'hogwarts',
-            name: 'Gryffindor',
+            id: 'biochemistry',
+            name: 'Scientist',
             permissions: {
               admin: [user._id],
               write: [user._id],
@@ -76,8 +76,8 @@ describe(name, () => {
           OrgController.createOrg(user, orgData)
           .then((retOrg) => {
             org = retOrg;
-            chai.expect(retOrg.id).to.equal('hogwarts');
-            chai.expect(retOrg.name).to.equal('Gryffindor');
+            chai.expect(retOrg.id).to.equal('biochemistry');
+            chai.expect(retOrg.name).to.equal('Scientist');
             chai.expect(retOrg.permissions.read).to.include(user._id.toString());
             chai.expect(retOrg.permissions.write).to.include(user._id.toString());
             chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
@@ -97,9 +97,9 @@ describe(name, () => {
    *-------------------------------------*/
   after((done) => {
     // Removing the Organization created in the before
-    OrgController.removeOrg(user, 'hogwarts', { soft: false })
+    OrgController.removeOrg(user, 'biochemistry', { soft: false })
     .then((retOrg) => {
-      chai.expect(retOrg.id).to.equal('hogwarts');
+      chai.expect(retOrg.id).to.equal('biochemistry');
       User.findOneAndRemove({
         username: M.config.test.username
       }, (err) => {
@@ -142,14 +142,14 @@ describe(name, () => {
  * This should succeed.
  */
 function postProject01(done) {
-  const id = 'harrypotter';
+  const id = 'hulk';
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
+    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
       id: id,
-      name: 'Youre a wizard Harry',
+      name: 'Bruce Banner',
       org: {
         id: org.id
       }
@@ -158,8 +158,8 @@ function postProject01(done) {
   (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal('harrypotter');
-    chai.expect(json.name).to.equal('Youre a wizard Harry');
+    chai.expect(json.id).to.equal('hulk');
+    chai.expect(json.name).to.equal('Bruce Banner');
     done();
   });
 }
@@ -170,14 +170,14 @@ function postProject01(done) {
  */
 function getProject01(done) {
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
+    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
     method: 'GET'
   },
   (err, response, body) => {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('Youre a wizard Harry');
+    chai.expect(json.name).to.equal('Bruce Banner');
     done();
   });
 }
@@ -187,14 +187,14 @@ function getProject01(done) {
  * This should pass, but the result should be an error.
  */
 function postBadProject(done) {
-  const id = 'DobbyIsaBadElf';
+  const id = 'hulkgf';
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/DobbyIsaBadElf`,
+    url: `${test.url}/api/orgs/biochemistry/projects/hulkgf`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
       id: id,
-      name: 'Dobby must be punished',
+      name: 'Betty Ross',
       org: {
         id: org.id
       }
@@ -214,14 +214,14 @@ function postBadProject(done) {
  * This should pass, but the result should be an error.
  */
 function postBadOrg(done) {
-  const id = 'dudlydursley';
+  const id = 'blackwidow';
   request({
-    url: `${test.url}/api/orgs/muggle/projects/dudlydursley`,
+    url: `${test.url}/api/orgs/avenger/projects/blackwidow`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
       id: id,
-      name: 'I dont belong at howgarts',
+      name: 'Hulks new gf',
       org: {
         id: org.id
       }
@@ -242,14 +242,14 @@ function postBadOrg(done) {
  * The result should be an error.
  */
 function confusingOrg(done) {
-  const id = 'victorkrum';
+  const id = 'brucebanner';
   request({
-    url: `${test.url}/api/orgs/durmstranginstitute/projects/victorkrum3`,
+    url: `${test.url}/api/orgs/nohulk/projects/brucebanner`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
       id: id,
-      name: 'Victor Krum',
+      name: 'Not Hulk',
       org: {
         id: org.id
       }
@@ -269,14 +269,14 @@ function confusingOrg(done) {
  * This should pass, but the result should be an error.
  */
 function postInvalidProject(done) {
-  const id = '!attemptharry7';
+  const id = '!attempthulk7';
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/!attemptharry7`,
+    url: `${test.url}/api/orgs/biochemistry/projects/!attempthulk7`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
       id: id,
-      name: 'Invalid Harry Potter',
+      name: 'Invalid Hulk',
       org: {
         id: org.id
       }
@@ -296,21 +296,21 @@ function postInvalidProject(done) {
  * This should succeed.
  */
 function putOrg01(done) {
-  const id = 'harrypotter';
+  const id = 'hulk';
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
+    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
     method: 'PUT',
     body: JSON.stringify({
       id: id,
-      name: 'I know'
+      name: 'Anger'
     })
   },
   (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal(id);
-    chai.expect(json.name).to.equal('I know');
+    chai.expect(json.name).to.equal('Anger');
     done();
   });
 }
@@ -321,12 +321,12 @@ function putOrg01(done) {
  */
 function badPut(done) {
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
+    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
     method: 'PUT',
     body: JSON.stringify({
-      id: 'harrytwopointoh',
-      name: 'New Harry'
+      id: 'hulktwopointoh',
+      name: 'New Hulk'
     })
   },
   (err, response, body) => {
@@ -342,14 +342,14 @@ function badPut(done) {
  * This should succeed.
  */
 function postProject02(done) {
-  const id = 'ronweasly';
+  const id = 'bettyross';
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/ronweasly`,
+    url: `${test.url}/api/orgs/biochemistry/projects/bettyross`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
       id: id,
-      name: 'Red Head',
+      name: 'Hulks GF',
       org: {
         id: org.id
       }
@@ -358,8 +358,8 @@ function postProject02(done) {
   (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal('ronweasly');
-    chai.expect(json.name).to.equal('Red Head');
+    chai.expect(json.id).to.equal('bettyross');
+    chai.expect(json.name).to.equal('Hulks GF');
     done();
   });
 }
@@ -370,7 +370,7 @@ function postProject02(done) {
  */
 function deleteProject01(done) {
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/harrypotter`,
+    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
     method: 'DELETE',
     body: JSON.stringify({
@@ -389,7 +389,7 @@ function deleteProject01(done) {
  */
 function deleteProject02(done) {
   request({
-    url: `${test.url}/api/orgs/hogwarts/projects/ronweasly`,
+    url: `${test.url}/api/orgs/biochemistry/projects/bettyross`,
     headers: getHeaders(),
     method: 'DELETE',
     body: JSON.stringify({
