@@ -96,9 +96,9 @@ class ProjectController {
             return reject(err);
           }
 
-          // Return empty array if no projects are found
+          // Error Check - Ensure at least one project is found
           if (projects.length < 1) {
-            return [];
+            return resolve([]);
           }
 
 
@@ -141,9 +141,15 @@ class ProjectController {
       const orgID = M.lib.sani.html(organizationID);
 
       // Ensure the org exists
+      // TODO - Use populates rather than nested queries when possible
       OrgController.findOrg(reqUser, orgID, true)
       .then((org) => ProjectController.findProjects(reqUser, org.id, true))
       .then((projects) => {
+        // If we didn't find any projects
+        if (projects.length === 0) {
+          return resolve(projects);
+        }
+
         for (let i = 0; i < projects.length; i++) {
           // Must nest promise since it uses a return
           ProjectController.removeProject(reqUser, orgID, projects[i].id, options)
