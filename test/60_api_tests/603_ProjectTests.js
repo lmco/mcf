@@ -187,9 +187,9 @@ function getProject01(done) {
  * This should pass, but the result should be an error.
  */
 function postBadProject(done) {
-  const id = 'hulkgf';
+  const id = 'Hulkgf3';
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulkgf`,
+    url: `${test.url}/api/orgs/biochemistry/projects/Hulkgf3`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
