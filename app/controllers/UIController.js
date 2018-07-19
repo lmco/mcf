@@ -138,7 +138,7 @@ class UIController {
       title: 'Login | Model-Based Engineering Environment',
       pluginFiles: pluginFiles,
       next: next,
-      err: req.query.err
+      err: req.flash('loginError')
     });
   }
 

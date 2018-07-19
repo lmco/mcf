@@ -241,7 +241,7 @@ class ElementController {
       const orgID = M.lib.sani.sanitize(organizationID);
       const projID = M.lib.sani.sanitize(projectID);
       const elemID = M.lib.sani.sanitize(elementID);
-      const elemUID = `${orgID}:${projID}:${elemID}`;
+      const elemUID = utils.createUID(orgID, projID, elemID);
 
       let searchParams = { uid: elemUID, deleted: false };
       if (softDeleted && reqUser.admin) {
@@ -315,7 +315,7 @@ class ElementController {
       const elemID = M.lib.sani.html(element.id);
       const projID = M.lib.sani.html(element.project.id);
       const orgID = M.lib.sani.html(element.project.org.id);
-      const elemUID = `${orgID}:${projID}:${elemID}`;
+      const elemUID = utils.createUID(orgID, projID, elemID);
       const elementType = M.lib.sani.html(element.type);
       let elemName = null;
       let parentID = null;

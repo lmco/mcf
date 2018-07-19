@@ -191,9 +191,10 @@ class BaseStrategy {
       this.handleBasicAuth(req, res, username, password, (err, user) => {
         if (err) {
           M.log.error(err);
+          req.flash('loginError', err);
           return (req.originalUrl.startsWith('/api'))
             ? res.status(401).send('Unauthorized')
-            : res.redirect(`/login?next=${req.originalUrl}&err=${err}`);
+            : res.redirect(`/login?next=${req.originalUrl}`);
         }
 
         M.log.info(`Authenticated [${user.username}] via Form Input Auth`);

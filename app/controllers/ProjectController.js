@@ -96,9 +96,9 @@ class ProjectController {
             return reject(err);
           }
 
-          // Error Check - Ensure at least one project is found
+          // Return empty array if no projects are found
           if (projects.length < 1) {
-            return reject(new errors.CustomError('No projects found.', 404));
+            return [];
           }
 
 
@@ -191,7 +191,7 @@ class ProjectController {
       // Sanitize project properties
       const orgID = M.lib.sani.html(organizationID);
       const projID = M.lib.sani.html(projectID);
-      const projUID = `${orgID}:${projID}`;
+      const projUID = utils.createUID(orgID, projID);
 
       let searchParams = { uid: projUID, deleted: false };
 
@@ -293,7 +293,7 @@ class ProjectController {
                 write: [reqUser._id],
                 admin: [reqUser._id]
               },
-              uid: `${orgID}:${projID}`
+              uid: utils.createUID(orgID, projID)
             });
 
             newProject.save((saveErr, projectUpdated) => {
@@ -709,7 +709,7 @@ class ProjectController {
 
         // Update project
         Project.findOneAndUpdate(
-          { uid: `${orgID}:${projID}` },
+          { uid: utils.createUID(orgID, projID) },
           pushPullRoles,
           (saveProjErr, projectSaved) => {
             if (saveProjErr) {
