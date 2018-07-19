@@ -89,7 +89,7 @@ function createUser(done) {
 }
 
 /**
- * @description  Verifies that the actual password matches the stored one.
+ * Verifies that the actual password matches the stored one.
  */
 function verifyValidPassword(done) {
   User.findOne({
@@ -111,7 +111,7 @@ function verifyValidPassword(done) {
 }
 
 /**
- * @description  Verifies that an incorrect password doesn't match the stored one.
+ * Verifies that an incorrect password doesn't match the stored one.
  */
 function verifyInvalidPassword(done) {
   User.findOne({
