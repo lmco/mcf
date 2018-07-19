@@ -66,7 +66,7 @@ class LocalStrategy {
       User.findOne({
         username: username,
         deletedOn: null
-      }, (findUserErr, user) => {
+      }, (findUserErr, user) => { // eslint-disable-line consistent-return
         // Check for errors
         if (findUserErr) {
           return reject(findUserErr);
