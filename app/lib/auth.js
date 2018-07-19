@@ -206,12 +206,10 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
       M.log.info(`Authenticated [${user.username}] via Form Input`);
       // set user req object for express routes
       req.user = user;
-      console.log(req);
-      console.log(res);
-      next();
+      next(null);
     })
     .catch(err => {
-      M.log.error(err);
+      M.log.error(err.stack);
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')

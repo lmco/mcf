@@ -21,7 +21,6 @@
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const errors = M.require('lib.errors');
-const User = M.require('models.User');
 
 
 /**
@@ -33,7 +32,7 @@ const User = M.require('models.User');
  * routes in order to implement route logging or other various functionality.
  */
 
-module.exports = function getReq(params, body) {
+module.exports.getReq = function getReq(params, body) {
   // Error-Check
   if (typeof params !== 'object') {
     throw errors.CustomError('params is not of type object');
@@ -51,6 +50,6 @@ module.exports = function getReq(params, body) {
   };
 };
 
-module.exports = function getRes() {
+module.exports.getRes = function getRes() {
   return {};
 };

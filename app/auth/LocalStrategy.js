@@ -75,7 +75,7 @@ class LocalStrategy {
           return reject(new errors.CustomError('No user found', 401));
         }
         // Compute the password hash on given password
-        const hash = crypto.createHash('sha256');
+        const hash = libCrypto.createHash('sha256');
         hash.update(user._id.toString());       // salt
         hash.update(password);                  // password
         const pwdhash = hash.digest().toString('hex');
