@@ -750,16 +750,15 @@ function deleteOthers(done) {
   })
   .catch((error) => {
     chai.expect(error.description).to.equal('Project not found.');
-  });
-
-  ProjController.removeProject(allSeeingUser, org.id, 'vlongnametwo', { soft: false })
-  .then(() => ProjController.findProject(allSeeingUser, org.id, 'vlongnametwo'))
-  .then((proj2) => {
-    chai.expect(proj2).to.equal(null);
-    done();
-  })
-  .catch((error2) => {
-    chai.expect(error2.description).to.equal('Project not found.');
-    done();
+    ProjController.removeProject(allSeeingUser, org.id, 'vlongnametwo', { soft: false })
+    .then(() => ProjController.findProject(allSeeingUser, org.id, 'vlongnametwo'))
+    .then((proj2) => {
+      chai.expect(proj2).to.equal(null);
+      done();
+    })
+    .catch((error2) => {
+      chai.expect(error2.description).to.equal('Project not found.');
+      done();
+    });
   });
 }

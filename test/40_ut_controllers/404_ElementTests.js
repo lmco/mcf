@@ -87,7 +87,7 @@ describe(name, function() {
   after(function(done) {
     // Remove the project and org together
     OrgController.removeOrg(user, org.id, { soft: false })
-    .then((retOrg) => {
+    .then(() => {
       // Once db items are removed, remove reqUser
       // close the db connection and finish
       User.findOneAndRemove({
@@ -339,17 +339,16 @@ function softDeleteElement(done) {
   .catch((error) => {
     chai.expect(error.description).to.equal('Element not found.');
     chai.expect(error.status).to.equal(404);
-  });
-
-  // Search for soft deleted elements
-  ElemController.findElement(user, org.id, proj.id, 'elem0', true)
-  .then((retElem2) => {
-    chai.expect(retElem2.id).to.equal('elem0');
-    done();
-  })
-  .catch((error2) => {
-    chai.expect(error2.description).to.equal(null);
-    done();
+    // Search for soft deleted elements
+    ElemController.findElement(user, org.id, proj.id, 'elem0', true)
+    .then((retElem2) => {
+      chai.expect(retElem2.id).to.equal('elem0');
+      done();
+    })
+    .catch((error2) => {
+      chai.expect(error2.description).to.equal(null);
+      done();
+    });
   });
 }
 
