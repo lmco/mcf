@@ -93,12 +93,12 @@ function createUser(done) {
  */
 function verifyValidPassword(done) {
   User.findOne({
-    username: 'ackbar',
+    username: 'spiderman',
     deletedOn: null
   }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
-    user.verifyPassword('itsatrap')
+    user.verifyPassword('icanshootwebs')
     .then((result) => {
       chai.expect(result).to.equal(true);
       done();
@@ -115,12 +115,12 @@ function verifyValidPassword(done) {
  */
 function verifyInvalidPassword(done) {
   User.findOne({
-    username: 'ackbar',
+    username: 'spiderman',
     deletedOn: null
   }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
-    user.verifyPassword('itsnotatrap')
+    user.verifyPassword('icantshootwebs')
     .then((result) => {
       chai.expect(result).to.equal(false);
       done();

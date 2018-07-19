@@ -15,7 +15,7 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description  Tests loading the crypto library and executing the encrypt
- * and decrypt functions in the library. 
+ * and decrypt functions in the library.
  */
 
 const chai = require('chai');

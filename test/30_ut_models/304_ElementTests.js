@@ -157,9 +157,9 @@ describe(name, function() {
     });
   });
 
- /*----------
-  * Tests
-  *----------*/
+  /*----------
+   * Tests
+   *----------*/
   it('should create a generic element', createElement);
   it('should delete the generic element', deleteElement);
   it('should create a root package', createRootPackage);

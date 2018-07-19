@@ -95,9 +95,9 @@ describe(name, () => {
     });
   });
 
- /*----------
-  * Tests
-  *----------*/
+  /*----------
+   * Tests
+   *----------*/
   it('should create a project', createProject).timeout(3000);
   it('should soft delete a project', softDeleteProject).timeout(3000);
   it('should delete a project', deleteProject).timeout(3000);

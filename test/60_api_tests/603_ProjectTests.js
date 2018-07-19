@@ -42,7 +42,6 @@ let user = null;
  *       Main
  *------------------------------------*/
 describe(name, () => {
-
   /*-------------------------------------
    * Before: run before all tests
    *-------------------------------------*/
@@ -116,9 +115,9 @@ describe(name, () => {
     });
   });
 
- /*----------
-  * Tests
-  *----------*/
+  /*----------
+   * Tests
+   *----------*/
 
   it('should POST a project to the organization', postProject01);
   it('should GET the previously posted project', getProject01);

@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  test/101_ConfigTests 
+ * @module  test/101_ConfigTests
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

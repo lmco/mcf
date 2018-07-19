@@ -428,7 +428,7 @@ function postOrg04(done) {
       name: 'SHIELD'
     })
   },
-    (err, response, body) => {
+  (err, response, body) => {
     chai.expect(response.statusCode).to.equal(400);
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');

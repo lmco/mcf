@@ -68,7 +68,7 @@ describe(name, () => {
             lname: 'Panther',
             admin: true
           };
-          UserController.createUser(searchUser, userData2)
+          UserController.createUser(reqUser, userData2)
           .then((anotherUser) => {
             badAUser = anotherUser;
             chai.expect(anotherUser.username).to.equal('blackpanther');
@@ -76,8 +76,8 @@ describe(name, () => {
             chai.expect(anotherUser.lname).to.equal('Panther');
             done();
           })
-          .catch((err) => {
-            chai.expect(err).to.equal(null);
+          .catch((error) => {
+            chai.expect(error).to.equal(null);
             done();
           });
         });
