@@ -20,7 +20,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const ldap = require('ldapjs');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const BaseStrategy = M.load('auth/BaseStrategy');
@@ -103,19 +102,19 @@ class LMICloudStrategy extends BaseStrategy {
       // do local authentication
       if (users.length === 1 && users[0].provider === 'local') {
         M.log.debug('Attempting to authenticate as local user.');
-        // Compute the password hash on given password
-        const hash = crypto.createHash('sha256');
-        // salt the hash, the ._id is seen by eslint as a dangling underscore, disabling
-        hash.update(users[0]._id.toString());    // eslint-disable-line no-underscore-dangle
-        hash.update(password);                  // password
-        const pwdhash = hash.digest().toString('hex');
         // Authenticate the user
-        if (users[0].password === pwdhash) {
-          cb(null, users[0]);
-        }
-        else {
+        users[0].verifyPassword(password)
+        .then((result) => {
+          if (result) {
+            cb(null, users[0]);
+          }
+          else {
+            cb('Invalid password');
+          }
+        })
+        .catch((error) => {
           cb('Invalid password');
-        }
+        });
       }
       // User is not found locally
       // or is found and has the LMICloud provider,

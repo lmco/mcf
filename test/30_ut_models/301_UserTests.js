@@ -53,13 +53,12 @@ describe(name, () => {
     mongoose.connection.close();
   });
 
-  /*----------
-   * Tests
-   *----------*/
-  it('should create a user', createUser);
+  it('should create a user', createUser).timeout(5000);
+  it('should verify a valid password', verifyValidPassword).timeout(5000);
+  it('shouldnt verify an invalid password', verifyInvalidPassword).timeout(5000);
   it('should get a user from the database', getUser);
   it('should update a user', updateUser);
-  it('should soft delete a user', softDeleteUser);
+  it('should soft delete a user', softDeleteUser).timeout(5000);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
 });
@@ -86,6 +85,50 @@ function createUser(done) {
     }
     chai.expect(err).to.equal(null);
     done();
+  });
+}
+
+/**
+ * @description  Verifies that the actual password matches the stored one.
+ */
+function verifyValidPassword(done) {
+  User.findOne({
+    username: 'ackbar',
+    deletedOn: null
+  }, (err, user) => {
+    // Make sure there are no errors
+    chai.expect(err).to.equal(null);
+    user.verifyPassword('itsatrap')
+    .then((result) => {
+      chai.expect(result).to.equal(true);
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error).to.equal(null);
+      done();
+    });
+  });
+}
+
+/**
+ * @description  Verifies that an incorrect password doesn't match the stored one.
+ */
+function verifyInvalidPassword(done) {
+  User.findOne({
+    username: 'ackbar',
+    deletedOn: null
+  }, (err, user) => {
+    // Make sure there are no errors
+    chai.expect(err).to.equal(null);
+    user.verifyPassword('itsnotatrap')
+    .then((result) => {
+      chai.expect(result).to.equal(false);
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error).to.equal(null);
+      done();
+    });
   });
 }
 
