@@ -24,12 +24,12 @@ const errors = M.require('lib.errors');
 
 
 /**
- * MiddleWare.js
+ * mock_express.js
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description  This class Defines middleware functions which can be used by
- * routes in order to implement route logging or other various functionality.
+ * @description  This defines test functions which can be used by
+ * routes in order to implement test functions
  */
 
 module.exports.getReq = function getReq(params, body) {
