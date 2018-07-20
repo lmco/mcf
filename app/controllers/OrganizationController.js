@@ -349,7 +349,7 @@ class OrganizationController {
 
       // Delete the projects first while the org still exists
       ProjController.removeProjects(user, orgID, options)
-      .then((projects) => {
+      .then(() => {
         OrganizationController.removeOrgHelper(user, orgID, softDelete)
         .then((retOrg) => resolve(retOrg))
         .catch((err) => reject(err));

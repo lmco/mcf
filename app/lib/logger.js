@@ -28,7 +28,6 @@ const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
 
-
 /* This defines our log levels */
 const levels = {
   critical: 0,

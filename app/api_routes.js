@@ -17,7 +17,7 @@
  * This file defines the API routes.
  *
  * Note that all routes that require authentication have
- * "AuthController.authenticate.bind(AuthController)" as the first function they
+ * "AuthController.authenticate" as the first function they
  * map to. This will do authentication and if the users is authenticated, the
  * next function is called.
  *
@@ -102,13 +102,13 @@ api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
  */
 api.route('/login')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   AuthController.doLogin,
   APIController.login
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   AuthController.doLogin,
   APIController.login
@@ -132,7 +132,7 @@ api.route('/login')
  */
 api.route('/version')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.version
 );
@@ -179,22 +179,22 @@ api.route('/version')
  */
 api.route('/orgs')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getOrgs
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postOrgs
 )
 .put(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.putOrgs
 )
 .delete(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteOrgs
 );
@@ -352,22 +352,22 @@ api.route('/orgs')
  */
 api.route('/orgs/:orgid')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getOrg
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postOrg
 )
 .put(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.putOrg
 )
 .delete(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteOrg
 );
@@ -431,22 +431,22 @@ api.route('/orgs/:orgid')
  */
 api.route('/orgs/:orgid/projects')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getProjects
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postProjects
 )
 .put(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.putProjects
 )
 .delete(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteProjects
 );
@@ -630,22 +630,22 @@ api.route('/orgs/:orgid/projects')
  */
 api.route('/orgs/:orgid/projects/:projectid')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getProject
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postProject
 )
 .put(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.putProject
 )
 .delete(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteProject
 );
@@ -675,7 +675,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  */
 api.route('/orgs/:orgid/members')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getAllOrgRoles
 );
@@ -795,22 +795,22 @@ api.route('/orgs/:orgid/members')
 // NOTE: POST and PUT have the same functionality, thus they map to the same route.
 api.route('/orgs/:orgid/members/:username')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getOrgRole
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postOrgRole
 )
 .put(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postOrgRole
 )
 .delete(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteOrgRole
 );
@@ -845,7 +845,7 @@ api.route('/orgs/:orgid/members/:username')
  */
 api.route('/orgs/:orgid/projects/:projectid/members')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getProjectRoles
 );
@@ -982,22 +982,22 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:username')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getProjectRole
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postProjectRole
 )
 .put(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postProjectRole
 )
 .delete(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteProjectRole
 );
@@ -1066,22 +1066,22 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  */
 api.route('/orgs/:orgid/projects/:projectid/elements')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getElements
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.notImplemented
 )
 .put(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.notImplemented
 )
 .delete(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.notImplemented
 );
@@ -1282,22 +1282,22 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  */
 api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getElement
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postElement
 )
 .put(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.putElement
 )
 .delete(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteElement
 );
@@ -1352,7 +1352,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  */
 api.route('/users')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getUsers
 )
@@ -1514,22 +1514,22 @@ api.route('/users')
  */
 api.route('/users/:username')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getUser
 )
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.postUser
 )
 .put(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.putUser
 )
 .delete(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteUser
 );
