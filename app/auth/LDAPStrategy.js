@@ -23,7 +23,7 @@ const ldap = require('ldapjs');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const LocalStrategy = M.require('auth.LocalStrategy');
 const User = M.require('models.User');
-const UserController = M.require('controllers.userController');
+const UserController = M.require('controllers.UserController');
 const errors = M.require('lib.errors');
 
 /**
