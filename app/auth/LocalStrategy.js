@@ -20,10 +20,10 @@
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const BaseStrategy = M.load('auth/BaseStrategy');
 const User = M.load('models/User');
 const libCrypto = M.lib.crypto;
 const sani = M.lib.sani;
+const errors = M.require('lib/errors');
 
 
 /**
@@ -33,70 +33,81 @@ const sani = M.lib.sani;
  *
  * @classdesc This
  */
-class LocalStrategy extends BaseStrategy {
+class LocalStrategy {
+
+  /******************************************************************************
+   *  LOCAL Authentication Implementations                                      *
+   ******************************************************************************/
 
   /**
-   * The `LocalStrategy` constructor.
-   */
-
-  constructor() {
-    super();
-    this.name = 'local-strategy';
-    this.authenticate.bind(this);
-    this.handleBasicAuth.bind(this);
-    this.handleTokenAuth.bind(this);
-    this.doLogin.bind(this);
-  }
-
-
-  // There are reasons to have class methods even when they don't use "this" you know?
-  // For example, when an instance of a class is overwriting and abstract base class
-  // to implement an authentication function. Disabling rule in this case.
-  /* eslint-disable class-methods-use-this */
-
-  /**
-   * Handles basic-style authentication. This function gets called both for
-   * the case of a basic auth header or for login form input. Either way
-   * the username and password is provided to this function for auth.
+   * @description  This function implements handleBasicAuth called in the auth.js library file.
+   * The purpose of this function is to implement authentication via local auth using a username
+   * and password as well as the configuration set up in the config file used. Handles basic-style
+   * authentication. This function gets called both for he case of a basic auth header or for login
+   * form input. Either way the username and password is provided to this function for auth.
    *
-   * If an error is passed into the callback, authentication fails.
-   * If the callback is called with no parameters, the user is authenticated.
+   * @example
+   * AuthController.handleBasicAuth(req, res, username, password)
+   *   .then(user => {
+   *   // do something with authenticated user
+   *   })
+   *   .catch(err => {
+   *     console.log(err);
+   *   })
+   *
+   * @param req The request object from express
+   * @param res The response object from express
+   * @param username A string of the username for who is attempting to authenticate via LDAP AD
+   * @param password A string of the password for who is attempting to authenticate via LDAP AD
+   * @returns Promise The authenticated user as the User object or an error.
    */
-  handleBasicAuth(req, res, username, password, cb) {
-    User.findOne({
-      username: username,
-      deletedOn: null
-    }, (err, user) => {
-      // Check for errors
-      if (err) {
-        cb(err);
-      }
-      if (!user) {
-        cb('Could not find user');
-      }
-      // Authenticate the user
-      user.verifyPassword(password)
-      .then((result) => {
-        if (result) {
-          cb(null, user);
+  static handleBasicAuth(req, res, username, password) {
+    return new Promise((resolve, reject) => {
+      User.findOne({
+        username: username,
+        deletedOn: null
+      }, (findUserErr, user) => { // eslint-disable-line consistent-return
+        // Check for errors
+        if (findUserErr) {
+          return reject(findUserErr);
         }
-        else {
-          cb('Invalid password');
+        if (!user) {
+          return reject(new errors.CustomError('No user found', 401));
         }
-      })
-      .catch((error) => {
-        cb('Invalid password');
+        // Compute the password hash on given password
+        user.verifyPassword(password)
+        .then(result => {
+          if (!result) {
+            return reject(new errors.CustomError('Invalid password', 401));
+          }
+          return resolve(user);
+        })
+        .catch(verifyErr => reject(verifyErr));
       });
     });
   }
 
-  /* eslint-enable class-methods-use-this */
-
-  // Disabling class-methods-use-this because it doesn't need to do that here.
-  // TODO - Should we make these static methods? Is there a reason to do so or not?
-  /* eslint-disable class-methods-use-this */
-
-
+  /**
+   * @description  This function implements handleTokenAuth called in the auth.js library file.
+   * The purpose of this function is to implement authentication of a user who has passed in a
+   * session token or bearer token. This function gets called both for the case of a token auth
+   * header or a session token. Either way the token is provided to this function for auth.
+   *
+   *
+   * @example
+   * AuthController.handleTokenAuth(req, res, _token)
+   *   .then(user => {
+   *   // do something with authenticated user
+   *   })
+   *   .catch(err => {
+   *     console.log(err);
+   *   })
+   *
+   * @param req The request object from express
+   * @param res The response object from express
+   * @param _token The token the user is attempting to authenticate with.
+   * @returns Promise The local database User object or an error.
+   */
   /**
    * Handles token authentication. This function gets called both for
    * the case of a token auth header or a session token. Either way
@@ -105,57 +116,67 @@ class LocalStrategy extends BaseStrategy {
    * If an error is passed into the callback, authentication fails.
    * If the callback is called with no parameters, the user is authenticated.
    */
-  handleTokenAuth(req, res, _token, cb) {
-    // Try to decrypt the token
-    let token = null;
-    try {
-      token = libCrypto.inspectToken(_token);
-    }
-    // If it cannot be decrypted, it is not valid and the
-    // user is not authorized
-    catch (error) {
-      cb(error);
-    }
+  static handleTokenAuth(req, res, _token) {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+      // Try to decrypt the token
+      let token = null;
+      try {
+        token = libCrypto.inspectToken(_token);
+      }
+      // If it cannot be decrypted, it is not valid and the
+      // user is not authorized
+      catch (decryptErr) {
+        return reject(decryptErr);
+      }
 
-    // If this is a session token, we can authenticate the user via
-    // a valid session ID.
-    if (req.session.user) {
-      User.findOne({
-        username: sani.sanitize(req.session.user),
-        deletedOn: null
-      }, (err, user) => {
-        cb((err) || null, user);
-      });
-    }
-    // Otherwise, we must check the token (i.e. this was an API call or
-    // used a token authorization header).
-    // In this case, we make sure the token is not expired.
-    else if (Date.now() < Date.parse(token.expires)) {
-      User.findOne({
-        username: sani.sanitize(token.username),
-        deletedOn: null
-      }, (err, user) => {
-        cb((err) || null, user);
-      });
-    }
-    // If token is expired user is unauthorized
-    else {
-      cb('Token is expired or session is invalid');
-    }
+      // If this is a session token, we can authenticate the user via
+      // a valid session ID.
+      if (req.session.user) {
+        User.findOne({
+          username: sani.sanitize(req.session.user),
+          deletedOn: null
+        }, (findUserSessionErr, user) => {
+          if (findUserSessionErr) {
+            return reject(findUserSessionErr);
+          }
+          return resolve(user);
+        });
+      }
+      // Otherwise, we must check the token (i.e. this was an API call or
+      // used a token authorization header).
+      // In this case, we make sure the token is not expired.
+      else if (Date.now() < Date.parse(token.expires)) {
+        User.findOne({
+          username: sani.sanitize(token.username),
+          deletedOn: null
+        }, (findUserTokenErr, user) => {
+          if (findUserTokenErr) {
+            return reject(findUserTokenErr);
+          }
+          // return User object if authentication was successful
+          return resolve(user);
+        });
+      }
+      // If token is expired user is unauthorized
+      else {
+        return reject(new errors.CustomError('Token is expired or session is invalid', 401));
+      }
+    });
   }
-  /* eslint-enable class-methods-use-this */
-
-
-  // Disabling class-methods-use-this because it doesn't need to do that here.
-  // TODO - Should we make these static methods? Is there a reason to do so or not?
-  /* eslint-disable class-methods-use-this */
 
   /**
+   * @description  This function implements doLogin called in the auth.js library file.
+   * The purpose of this function is to preform session or token setup for the node
+   * application so that users can be authorized via token after logging in.
+   *
+   * @param req The request object from express
+   * @param res The response object from express
+   * @param next The callback to continue in the express authentication flow.
+   *
    * If login was successful, we generate and auth token and return it to the
    * user.
    */
-
-  doLogin(req, res, next) {
+  static doLogin(req, res, next) {
     M.log.info(`${req.originalUrl} requested by ${req.user.username}`);
 
     // Convenient conversions from ms
@@ -178,10 +199,9 @@ class LocalStrategy extends BaseStrategy {
     req.session.user = req.user.username;
     req.session.token = token;
     M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
+    // Callback
     next();
   }
-
-  /* eslint-enable class-methods-use-this */
 
 }
 

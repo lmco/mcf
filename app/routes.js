@@ -34,7 +34,7 @@ const router = express.Router();
 router.route('/about')
 /* This renders the about page */
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   UIController.showAboutPage
 );
@@ -48,7 +48,7 @@ router.route('/login')
 /* POST is the route that actually logs in the user.
  * It's the login form's submit action. */
 .post(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   AuthController.doLogin,
   UIController.login
@@ -62,7 +62,7 @@ router.route('/login')
 /* This renders the home page for logged in users */
 router.route('/')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   UIController.home
 );
@@ -70,7 +70,7 @@ router.route('/')
 /* This renders the home page for logged in users */
 router.route(`/:org(${M.lib.validators.org.id})/:project`)
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   UIController.mbee
 );
@@ -80,7 +80,7 @@ router.route(`/:org(${M.lib.validators.org.id})/:project`)
  */
 router.route('/logout')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   UIController.logout
 );
@@ -88,7 +88,7 @@ router.route('/logout')
 /* Renders the admin console */
 router.route('/admin/console')
 .get(
-  AuthController.authenticate.bind(AuthController),
+  AuthController.authenticate,
   Middleware.logRoute,
   UIController.admin
 );
