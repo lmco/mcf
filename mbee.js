@@ -41,11 +41,6 @@ M.require = m => {
   return require(p); // eslint-disable-line global-require
 };
 
-M.rootRequire = m => {
-  const p = path.join(__dirname, m.split('.').join(path.sep));
-  return require(p); // eslint-disable-line global-require
-};
-
 // Configuration file parsing and initialization
 const parseJSON = M.require('lib.parse_json');
 M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.json`)));
@@ -91,7 +86,7 @@ if (fs.existsSync(`${__dirname}/node_modules`) && fs.existsSync(`${__dirname}/pu
     startup: M.require('lib.startup'),
     validators: M.require('lib.validators'),
     parse_json: M.require('lib.parse_json'),
-    mock_express: M.rootRequire('test.lib.mock_express')
+    mock_express: M.require('lib.mock_express')
   };
   module.exports = M;
 }
