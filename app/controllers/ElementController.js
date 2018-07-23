@@ -57,7 +57,7 @@ class ElementController {
   static findElements(reqUser, organizationID, projectID, elemType = '') {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
-        utils.checkType([organizationID, projectID], 'string');
+        utils.assertType([organizationID, projectID], 'string');
       }
       catch (error) {
         return resolve(error);
@@ -138,8 +138,8 @@ class ElementController {
   static removeElements(reqUser, organizationID, projectID, options) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
-        utils.checkType([organizationID, projectID], 'string');
-        utils.checkType([options], 'object');
+        utils.assertType([organizationID, projectID], 'string');
+        utils.assertType([options], 'object');
       }
       catch (error) {
         return reject(error);
@@ -230,8 +230,8 @@ class ElementController {
   static findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
-        utils.checkType([organizationID, projectID, elementID], 'string');
-        utils.checkType([softDeleted], 'boolean');
+        utils.assertType([organizationID, projectID, elementID], 'string');
+        utils.assertType([softDeleted], 'boolean');
       }
       catch (error) {
         return reject(error);
@@ -292,8 +292,8 @@ class ElementController {
   static createElement(reqUser, element) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
-        utils.checkExists(['id', 'project.id', 'project.org.id', 'type'], element);
-        utils.checkType([element.id, element.project.id, element.project.org.id, element.type], 'string');
+        utils.assertExists(['id', 'project.id', 'project.org.id', 'type'], element);
+        utils.assertType([element.id, element.project.id, element.project.org.id, element.type], 'string');
       }
       catch (error) {
         return reject(error);
@@ -488,8 +488,8 @@ class ElementController {
   static createRelationship(reqUser, elemData, elemInfo) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
-        utils.checkExists(['target', 'source'], elemInfo);
-        utils.checkType([elemInfo.target, elemInfo.source], 'string');
+        utils.assertExists(['target', 'source'], elemInfo);
+        utils.assertType([elemInfo.target, elemInfo.source], 'string');
       }
       catch (error) {
         return reject(error);
@@ -751,8 +751,8 @@ class ElementController {
   static updateElement(reqUser, organizationID, projectID, elementID, elementUpdated) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
-        utils.checkType([organizationID, projectID, elementID], 'string');
-        utils.checkType([elementUpdated], 'object');
+        utils.assertType([organizationID, projectID, elementID], 'string');
+        utils.assertType([elementUpdated], 'object');
       }
       catch (error) {
         return reject(error);
@@ -897,8 +897,8 @@ class ElementController {
   static removeElement(reqUser, organizationID, projectID, elementID, options) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
-        utils.checkType([organizationID, projectID, elementID], 'string');
-        utils.checkType([options], 'object');
+        utils.assertType([organizationID, projectID, elementID], 'string');
+        utils.assertType([options], 'object');
       }
       catch (error) {
         return reject(error);
