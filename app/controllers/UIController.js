@@ -21,6 +21,7 @@ const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.load('models/User');
 const utils = M.require('lib.utils');
+const swaggerJSDoc = require('swagger-jsdoc');
 
 const pluginFiles = utils.getPluginNames();
 
@@ -81,6 +82,39 @@ class UIController {
       renderer: 'admin-renderer',
       user: req.user.getPublicData(),
       title: 'Admin | Model-Based Engineering Environment',
+      pluginFiles: pluginFiles
+    });
+  }
+
+  /**
+   * @description Generates the Swagger specification based on the Swagger JSDoc
+   * in the API routes file.
+   */
+  static swaggerSpec() {
+    return swaggerJSDoc({
+      swaggerDefinition: {
+        info: {
+          title: 'MBEE API Documentation',          // Title (required)
+          version: M.version                     // Version (required)
+        }
+      },
+      apis: [
+        path.join(M.root, 'app', 'api_routes.js') // Path to the API docs
+      ]
+    });
+  }
+
+  /**
+   * GET /api/doc
+   *
+   * @description Renders the swagger doc.
+   */
+  static swaggerDoc(req, res) {
+    return res.render('swagger', {
+      swagger: UIController.swaggerSpec(),
+      ui: M.config.server.ui,
+      user: null,
+      title: 'MBEE API Documentation',
       pluginFiles: pluginFiles
     });
   }
