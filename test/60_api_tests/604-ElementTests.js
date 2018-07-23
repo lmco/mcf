@@ -93,17 +93,13 @@ describe(name, () => {
               }
             };
 
-            ProjController.createProject(user, projData)
-            .then((retProj) => {
-              proj = retProj;
-              chai.expect(retProj.id).to.equal('rebirth');
-              chai.expect(retProj.name).to.equal('Super Soldier Serum');
-              done();
-            })
-            .catch((error) => {
-              chai.expect(error.message).to.equal(null);
-              done();
-            });
+            return ProjController.createProject(user, projData);
+          })
+          .then((retProj) => {
+            proj = retProj;
+            chai.expect(retProj.id).to.equal('rebirth');
+            chai.expect(retProj.name).to.equal('Super Soldier Serum');
+            done();
           })
           .catch((error) => {
             chai.expect(error.message).to.equal(null);

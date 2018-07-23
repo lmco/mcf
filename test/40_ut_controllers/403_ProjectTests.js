@@ -97,20 +97,20 @@ describe(name, () => {
                 read: [allSeeingUser._id]
               }
             };
-            OrgController.createOrg(allSeeingUser, orgData)
-            .then((retOrg) => {
-              org = retOrg;
-              chai.expect(retOrg.id).to.equal('starkhq');
-              chai.expect(retOrg.name).to.equal('Stark Headquarts');
-              chai.expect(retOrg.permissions.read).to.include(allSeeingUser._id.toString());
-              chai.expect(retOrg.permissions.write).to.include(allSeeingUser._id.toString());
-              chai.expect(retOrg.permissions.admin).to.include(allSeeingUser._id.toString());
-              done();
-            })
-            .catch((error) => {
-              chai.expect(error.description).to.equal(null);
-              done();
-            });
+            return OrgController.createOrg(allSeeingUser, orgData);
+          })
+          .then((retOrg) => {
+            org = retOrg;
+            chai.expect(retOrg.id).to.equal('starkhq');
+            chai.expect(retOrg.name).to.equal('Stark Headquarts');
+            chai.expect(retOrg.permissions.read).to.include(allSeeingUser._id.toString());
+            chai.expect(retOrg.permissions.write).to.include(allSeeingUser._id.toString());
+            chai.expect(retOrg.permissions.admin).to.include(allSeeingUser._id.toString());
+            done();
+          })
+          .catch((error) => {
+            chai.expect(error.description).to.equal(null);
+            done();
           });
         });
     });
@@ -125,27 +125,22 @@ describe(name, () => {
     OrgController.removeOrg(allSeeingUser, 'starkhq', { soft: false })
     .then(() => {
       // Removing the non admin user
+
       const userTwo = 'pepperpotts';
-      UserController.removeUser(allSeeingUser, userTwo)
-      .then((delUser2) => {
-        chai.expect(delUser2).to.equal('pepperpotts');
-        User.findOneAndRemove({
-          username: M.config.test.username
-        }, (err) => {
-          chai.expect(err).to.equal(null);
-          mongoose.connection.close();
-          done();
-        });
-      })
-      .catch((err1) => {
-        const error1 = JSON.parse(err1.message);
-        chai.expect(error1.description).to.equal(null);
+      return UserController.removeUser(allSeeingUser, userTwo);
+    })
+    .then((delUser2) => {
+      chai.expect(delUser2).to.equal('pepperpotts');
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
         mongoose.connection.close();
         done();
       });
     })
-    .catch((error2) => {
-      chai.expect(error2.description).to.equal(null);
+    .catch((error) => {
+      chai.expect(error.description).to.equal(null);
       mongoose.connection.close();
       done();
     });
@@ -241,14 +236,10 @@ function createElements(done) {
       },
       type: 'Element'
     };
-    ElemController.createElement(allSeeingUser, elem1)
-    .then(() => {
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+    return ElemController.createElement(allSeeingUser, elem1);
+  })
+  .then(() => {
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
@@ -315,15 +306,11 @@ function updateProjectObject(done) {
   ProjController.findProject(allSeeingUser, org.id, 'ironman')
   .then((projectFound) => {
     projectFound.name = 'Iron Man Two';
-    ProjController.updateProject(allSeeingUser, org.id, 'ironman', projectFound)
-    .then((projectUpdated) => {
-      chai.expect(projectUpdated.name).to.equal('Iron Man Two');
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+    return ProjController.updateProject(allSeeingUser, org.id, 'ironman', projectFound);
+  })
+  .then((projectUpdated) => {
+    chai.expect(projectUpdated.name).to.equal('Iron Man Two');
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
@@ -729,25 +716,13 @@ function findPerm(done) {
  */
 function setPerm(done) {
   OrgController.setPermissions(allSeeingUser, 'starkhq', nonAuser, 'write')
-  .then(() => {
-    ProjController.setPermissions(allSeeingUser, 'starkhq', project.id.toString(), nonAuser, 'write')
-    .then(() => {
-      ProjController.findProject(allSeeingUser, 'starkhq', project.id.toString())
-      .then((retProj) => {
-        chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
-        chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
-        chai.expect(retProj.permissions.admin.length).to.equal(1);
-        done();
-      })
-      .catch((error) => {
-        chai.expect(error.description).to.equal(null);
-        done();
-      });
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then(() => ProjController.setPermissions(allSeeingUser, 'starkhq', project.id.toString(), nonAuser, 'write'))
+  .then(() => ProjController.findProject(allSeeingUser, 'starkhq', project.id.toString()))
+  .then((retProj) => {
+    chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
+    chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
+    chai.expect(retProj.permissions.admin.length).to.equal(1);
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
@@ -760,19 +735,13 @@ function setPerm(done) {
  */
 function softDeleteProject(done) {
   ProjController.removeProject(allSeeingUser, org.id, 'ironman', { soft: true })
-  .then(() => {
-    ProjController.findProject(allSeeingUser, org.id, 'ironman')
-    .then((proj2) => {
-      chai.expect(proj2).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Project not found.');
-      done();
-    });
+  .then(() => ProjController.findProject(allSeeingUser, org.id, 'ironman'))
+  .then((proj2) => {
+    chai.expect(proj2).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.description).to.equal('Project not found.');
     done();
   });
 }
@@ -782,25 +751,19 @@ function softDeleteProject(done) {
  */
 function deleteProject(done) {
   ProjController.removeProject(allSeeingUser, org.id, 'ironman', { soft: false })
-  .then(() => {
-    ProjController.findProject(allSeeingUser, org.id, 'ironman')
-    .then((proj2) => {
-      chai.expect(proj2).to.equal(null);
-      // Check if elements still exist
-      Element.Element.find({ id: '0000' })
-      .populate()
-      .exec((findElementError, element) => {
-        chai.expect(element).to.equal(null);
-        done();
-      });
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Project not found.');
+  .then(() => ProjController.findProject(allSeeingUser, org.id, 'ironman'))
+  .then((proj2) => {
+    chai.expect(proj2).to.equal(null);
+    // Check if elements still exist
+    Element.Element.find({ id: '0000' })
+    .populate()
+    .exec((findElementError, element) => {
+      chai.expect(element).to.equal(null);
       done();
     });
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.description).to.equal('Project not found.');
     done();
   });
 }
@@ -810,19 +773,13 @@ function deleteProject(done) {
  */
 function deleteProject02(done) {
   ProjController.removeProject(allSeeingUser, org.id, 'arcreactor', { soft: false })
-  .then(() => {
-    ProjController.findProject(allSeeingUser, org.id, 'arcreactor')
-    .then((proj2) => {
-      chai.expect(proj2).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Project not found.');
-      done();
-    });
+  .then(() => ProjController.findProject(allSeeingUser, org.id, 'arcreactor'))
+  .then((proj2) => {
+    chai.expect(proj2).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Project not found');
+    chai.expect(error.description).to.equal('Project not found.');
     done();
   });
 }
@@ -832,30 +789,22 @@ function deleteProject02(done) {
  */
 function deleteOthers(done) {
   ProjController.removeProject(allSeeingUser, org.id, 'vlongname', { soft: false })
-  .then(() => {
-    ProjController.findProject(allSeeingUser, org.id, 'vlongname')
-    .then((proj) => {
-      chai.expect(proj).to.equal(null);
+  .then(() => ProjController.findProject(allSeeingUser, org.id, 'vlongname'))
+  .then((proj) => {
+    chai.expect(proj).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Project not found.');
+    ProjController.removeProject(allSeeingUser, org.id, 'vlongnametwo', { soft: false })
+    .then(() => ProjController.findProject(allSeeingUser, org.id, 'vlongnametwo'))
+    .then((proj2) => {
+      chai.expect(proj2).to.equal(null);
       done();
     })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Project not found.');
-      ProjController.removeProject(allSeeingUser, org.id, 'vlongnametwo', { soft: false })
-      .then(() => {
-        ProjController.findProject(allSeeingUser, org.id, 'vlongnametwo')
-        .then((proj2) => {
-          chai.expect(proj2).to.equal(null);
-          done();
-        })
-        .catch((error2) => {
-          chai.expect(error2.description).to.equal('Project not found.');
-          done();
-        });
-      })
-      .catch((error2) => {
-        chai.expect(error2.message).to.equal(null);
-        done();
-      });
+    .catch((error2) => {
+      chai.expect(error2.description).to.equal('Project not found.');
+      done();
     });
   });
 }

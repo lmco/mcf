@@ -88,8 +88,6 @@ describe(name, () => {
   it('should POST second organization', postOrg02).timeout(3000);
   it('should GET posted organization', getOrg01).timeout(3000);
   it('should PUT an update to posted organization', putOrg01).timeout(3000);
-  // Giving 500 error wondering if wanted a 400 error
-  // THE ONE UNDER THIS IS WHAT I AM TALKING ABOUT
   it('should reject a PUT with invalid name', rejectPutName).timeout(3000);
   it('should reject a PUT to the org ID', rejectPutID).timeout(3000);
   it('should get organization roles for a user', orgRole).timeout(3000);
@@ -223,8 +221,11 @@ function putOrg01(done) {
  * Attempts to make an UPDATE request to api/orgs/org2. This has
  * an invalid name for updating the org and therefore
  * will throw an error.
+<<<<<<< HEAD
+=======
  * Throws an internal service error 500 Internal Service Error
  * JIRA TASK: MBX-220 bug fixes error code
+>>>>>>> origin/master
  */
 
 function rejectPutName(done) {
@@ -238,10 +239,9 @@ function rejectPutName(done) {
     })
   },
   (err, response, body) => {
-    chai.expect(response.statusCode).to.equal(500);
+    chai.expect(response.statusCode).to.equal(400);
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Internal Server Error');
-    chai.expect(err).to.equal(null);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

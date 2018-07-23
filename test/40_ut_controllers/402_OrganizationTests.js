@@ -107,22 +107,13 @@ describe(name, () => {
   after((done) => {
     // Removing the organization created
     OrgController.removeOrg(user, 'gaurdians', { soft: false })
-    .then(() => {
-      // Removing the non admin user
-      const userTwo = 'groot';
-      UserController.removeUser(user, userTwo)
-      .then((delUser2) => {
-        chai.expect(delUser2).to.equal('groot');
-        User.findOneAndRemove({
-          username: M.config.test.username
-        }, (err) => {
-          chai.expect(err).to.equal(null);
-          mongoose.connection.close();
-          done();
-        });
-      })
-      .catch((error) => {
-        chai.expect(error.description).to.equal(null);
+    .then(() => UserController.removeUser(user, newUser.username))
+    .then((delUser2) => {
+      chai.expect(delUser2).to.equal('groot');
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
         mongoose.connection.close();
         done();
       });
@@ -314,15 +305,11 @@ function updateOrgObject(done) {
   OrgController.findOrg(user, 'boombox')
   .then((retOrg) => {
     retOrg.name = 'Back to Star Lord';
-    OrgController.updateOrg(user, 'boombox', retOrg)
-    .then((retOrgUpdate) => {
-      chai.expect(retOrgUpdate.name).to.equal('Back to Star Lord');
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+    return OrgController.updateOrg(user, 'boombox', retOrg);
+  })
+  .then((retOrgUpdate) => {
+    chai.expect(retOrgUpdate.name).to.equal('Back to Star Lord');
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
@@ -350,19 +337,13 @@ function findAllExistingOrgs(done) {
  */
 function softDeleteExistingOrg(done) {
   OrgController.removeOrg(user, 'boombox', { soft: true })
-  .then(() => {
-    OrgController.findOrg(user, 'boombox')
-    .then((orgTwo) => {
-      chai.expect(orgTwo).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Org not found.');
-      done();
-    });
+  .then(() => OrgController.findOrg(user, 'boombox'))
+  .then((orgTwo) => {
+    chai.expect(orgTwo).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.description).to.equal('Org not found.');
     done();
   });
 }
@@ -372,19 +353,13 @@ function softDeleteExistingOrg(done) {
  */
 function deleteExistingOrg(done) {
   OrgController.removeOrg(user, 'boombox', { soft: false })
-  .then(() => {
-    OrgController.findOrg(user, 'boombox')
-    .then((orgTwo) => {
-      chai.expect(orgTwo).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Org not found.');
-      done();
-    });
+  .then(() => OrgController.findOrg(user, 'boombox'))
+  .then((orgTwo) => {
+    chai.expect(orgTwo).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.description).to.equal('Org not found.');
     done();
   });
 }
@@ -394,49 +369,25 @@ function deleteExistingOrg(done) {
  */
 function softDeleteProjectAndOrg(done) {
   OrgController.createOrg(user, { id: 'boombox', name: 'Star Lord Walkman' })
-  .then(() => {
-    ProjController.createProject(user, { id: 'godslayer', name: 'God Slayer', org: { id: 'boombox' } })
-    .then(() => {
-      ElemController.createElement(user, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Element' })
-      .then(() => {
-        OrgController.removeOrg(user, 'boombox', { soft: true })
-        .then(() => {
-          OrgController.findOrg(user, 'boombox')
-          .then((retOrg3) => {
-            chai.expect(retOrg3).to.equal(null);
-            done();
-          })
-          .catch((error) => {
-            chai.expect(error.description).to.equal('Org not found.');
-          });
-          ProjController.findProject(user, 'boombox', 'godslayer')
-          .then((retProj2) => {
-            chai.expect(retProj2).to.equal(null);
-            done();
-          })
-          .catch((error) => {
-            chai.expect(error.description).to.equal('Project not found.');
-            done();
-          });
-        })
-        .catch((error) => {
-          chai.expect(error.description).to.equal(null);
-          done();
-        });
-      })
-      .catch((error) => {
-        chai.expect(error.description).to.equal(null);
-        done();
-      });
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then(() => ProjController.createProject(user, { id: 'godslayer', name: 'God Slayer', org: { id: 'boombox' } }))
+  .then(() => ElemController.createElement(user, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Element' }))
+  .then(() => OrgController.removeOrg(user, 'boombox', { soft: true }))
+  .then(() => OrgController.findOrg(user, 'boombox'))
+  .then((retOrg3) => {
+    chai.expect(retOrg3).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
-    done();
+    chai.expect(error.description).to.equal('Org not found.');
+    ProjController.findProject(user, 'boombox', 'godslayer')
+    .then((retProj2) => {
+      chai.expect(retProj2).to.equal(null);
+      done();
+    })
+    .catch((error2) => {
+      chai.expect(error2.description).to.equal('Project not found.');
+      done();
+    });
   });
 }
 
@@ -445,28 +396,22 @@ function softDeleteProjectAndOrg(done) {
  */
 function hardDeleteProjectAndOrg(done) {
   OrgController.removeOrg(user, 'boombox', { soft: false })
-  .then(() => {
-    OrgController.findOrg(user, 'boombox')
-    .then((retOrg3) => {
-      chai.expect(retOrg3).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Org not found.');
-    });
+  .then(() => OrgController.findOrg(user, 'boombox'))
+  .then((retOrg3) => {
+    chai.expect(retOrg3).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Org not found.');
     ProjController.findProject(user, 'boombox', 'godslayer', true)
     .then((retProj2) => {
       chai.expect(retProj2).to.equal(null);
       done();
     })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Project not found.');
+    .catch((error2) => {
+      chai.expect(error2.description).to.equal('Project not found.');
       done();
     });
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal(null);
-    done();
   });
 }
 
@@ -476,18 +421,12 @@ function hardDeleteProjectAndOrg(done) {
 function addUserRole(done) {
   // Increase a users role
   OrgController.setPermissions(user, org.id.toString(), newUser, 'write')
-  .then(() => {
-    OrgController.findOrg(user, org.id.toString())
-    .then((retOrg2) => {
-      chai.expect(retOrg2.permissions.write[1]._id.toString()).to.equal(newUser._id.toString());
-      chai.expect(retOrg2.permissions.read[1]._id.toString()).to.equal(newUser._id.toString());
-      chai.expect(retOrg2.permissions.admin.length).to.equal(1);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then(() => OrgController.findOrg(user, org.id.toString()))
+  .then((retOrg2) => {
+    chai.expect(retOrg2.permissions.write[1]._id.toString()).to.equal(newUser._id.toString());
+    chai.expect(retOrg2.permissions.read[1]._id.toString()).to.equal(newUser._id.toString());
+    chai.expect(retOrg2.permissions.admin.length).to.equal(1);
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
