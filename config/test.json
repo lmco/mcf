@@ -260,7 +260,7 @@
   // testing. This applies only to the application when 'node mbee test' is run.
   "test": {
     // The URL, including port number which the tests will be ran against
-    "url": "https://dev.mbee.us.lmco.com:6080",
+    "url": "https://dev.mbee.us.lmco.com:6443",
     // The username of the user to authenticate and run tests with
     "username": "mbee",
     // The password of the user to authenticate and run tests with
