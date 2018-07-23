@@ -10,10 +10,8 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module auth.lmi-cloud-strategy
- *
- * @authorized Jake Ursetta <jake.j.ursetta@lmco.com>
- *
+ * @module auth.ldap_strategy
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  * @description This file implements our authentication using LDAP Active Directory.
  */
 
@@ -28,9 +26,7 @@ const errors = M.require('lib.errors');
 
 /**
  * LDAPStrategy
- *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
- *
  * @classdesc  This class defines authentication in the LMI cloud environment.
  */
 class LDAPStrategy {
