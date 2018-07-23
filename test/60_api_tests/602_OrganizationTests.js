@@ -47,7 +47,16 @@ describe(name, function() {
     // Creating a Requesting Admin
     const u = M.config.test.username;
     const p = M.config.test.password;
-    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+    const params = {};
+    const body = {
+      username: u,
+      password: p
+    };
+
+    const reqObj = M.lib.mock_express.getReq(params, body);
+    const resObj = M.lib.mock_express.getRes();
+    AuthController.authenticate(reqObj, resObj, (err) => {
+      const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
       User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
@@ -76,8 +85,7 @@ describe(name, function() {
   it('should POST second organization', postOrg02).timeout(3000);
   it('should GET posted organization', getOrg01).timeout(3000);
   it('should PUT an update to posted organization', putOrg01).timeout(3000);
-  // Giving 500 error wondering if wanted a 400 error
-  // it('should reject a PUT with invalid name', rejectPutName).timeout(3000);
+  it('should reject a PUT with invalid name', rejectPutName).timeout(3000);
   it('should reject a PUT to the org ID', rejectPutID).timeout(3000);
   it('should get organization roles for a user', orgRole).timeout(3000);
   it('should reject a get org roles for another user', rejectRole).timeout(3000);
@@ -203,31 +211,29 @@ function putOrg01(done) {
   });
 }
 
-// /**
-//  * Attempts to make an UPDATE request to api/orgs/org2. This has
-//  * an invalid name for updating the org and therefore
-//  * will throw an error.
-//  * Throws an internal service error?
-//  * Do we want that instead of bad request?
-//  */
+/**
+ * Attempts to make an UPDATE request to api/orgs/org2. This has
+ * an invalid name for updating the org and therefore
+ * will throw an error.
+ */
 
-// function rejectPutName(done) {
-//   request({
-//     url: `${test.url}/api/orgs/org2`,
-//     headers: getHeaders(),
-//     method: 'PUT',
-//     body: JSON.stringify({
-//       id: 'org2',
-//       name: ''
-//     })
-//   },
-//   function(err, response, body) {
-//     chai.expect(response.statusCode).to.equal(400);
-//     const json = JSON.parse(body);
-//     chai.expect(json.message).to.equal('Bad Request');
-//     done();
-//   });
-// }
+function rejectPutName(done) {
+  request({
+    url: `${test.url}/api/orgs/org2`,
+    headers: getHeaders(),
+    method: 'PUT',
+    body: JSON.stringify({
+      id: 'org2',
+      name: ''
+    })
+  },
+  function(err, response, body) {
+    chai.expect(response.statusCode).to.equal(400);
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
 
 /**
  * Attempts to make an UPDATE request to api/orgs/org2. This is updating

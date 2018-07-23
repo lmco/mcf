@@ -24,6 +24,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const M = require(path.join('..', '..', 'mbee.js'));
 
+
 /**
  * @class  User
  *
