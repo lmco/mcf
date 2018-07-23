@@ -109,6 +109,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
       })
       .catch(err => {
         M.log.error(err);
+        req.flash('loginError', err.message);
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
@@ -137,7 +138,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
       })
       .catch(err => {
         M.log.error(err);
-        req.flash('loginError',err.message);
+        req.flash('loginError', err.message);
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
@@ -173,7 +174,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     })
     .catch(err => {
       M.log.error(err);
-      req.flash('loginError',err.message);
+      req.flash('loginError', err.message);
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
@@ -197,7 +198,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     // Error check - make sure username/password are not empty
     if (!username || !password || username === '' || password === '') {
       M.log.debug('Username or password not provided.');
-	  req.flash('loginError','Username or password not provided.');
+      req.flash('loginError', 'Username or password not provided.');
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
@@ -213,7 +214,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     })
     .catch(err => {
       M.log.error(err.stack);
-      req.flash('loginError',err.message);
+      req.flash('loginError', err.message);
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
