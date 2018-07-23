@@ -28,7 +28,6 @@ const ProjectController = mbee.load('controllers/ProjectController');
 const UserController = mbee.load('controllers/UserController');
 const errors = M.load('lib/errors');
 const utils = M.require('lib.utils');
-const pluginFiles = utils.getPluginNames();
 
 
 /**
@@ -87,22 +86,6 @@ class APIController {
   /****************************************************************************
    * General API Endpoints
    ****************************************************************************/
-
-  /**
-   * GET /api/doc
-   *
-   * @description Renders the swagger doc.
-   */
-  static swaggerDoc(req, res) {
-    return res.render('swagger', {
-      swagger: APIController.swaggerSpec(),
-      ui: M.config.server.ui,
-      user: null,
-      title: 'MBEE API Documentation',
-      pluginFiles: pluginFiles
-    });
-  }
-
 
   /**
    * GET /api/doc/swagger.json
