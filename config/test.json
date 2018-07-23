@@ -213,7 +213,7 @@
     // they are using does not pose any security risk the the MBEE application before importing them.
     "plugins": {
       // A boolean to indicate whether or not plugins are enabled.
-      "enabled": false,
+      "enabled": true,
       // The array of plugins which will be imported and mounted into the MBEE application
       // Parameters: name, source, key
       "plugins": [{
