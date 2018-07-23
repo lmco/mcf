@@ -25,7 +25,14 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.load('models/User');
+const User = M.require('models/User');
+const Organization = M.require('models/Organization');
+const Project = M.require('models/Project');
+const Element = M.require('models/Element');
+
+const db = M.load('lib/db');
+
+let user = null;
 
 
 /*------------------------------------
@@ -33,19 +40,38 @@ const User = M.load('models/User');
  *------------------------------------*/
 
 describe(name, () => {
-  // runs before all tests in this block
+  /*-------------------------------------
+   * Before: runs before all tests
+   *-------------------------------------*/
   before(() => {
-    const db = M.load('lib/db');
+    // Open the database connection
     db.connect();
   });
 
-  // runs after all tests in this block
+  /*-------------------------------------
+   * After: runs after all tests
+   *-------------------------------------*/
   after(() => {
+    // Close database connection
     mongoose.connection.close();
   });
 
-  it('do nothing', donothing).timeout(5000);
+
+  it('clean database', checkDB).timeout(5000);
 });
 
-function donothing(){
+function checkDB(done){
+  User.remove({}, (error) => {
+    chai.expect(error).to.equal(null);
+    Organization.remove({}, (error2) => {
+      chai.expect(error2).to.equal(null);
+      Project.remove({}, (error3) => {
+        chai.expect(error3).to.equal(null);
+        Element.remove({}, (error4) => {
+          chai.expect(error4).to.equal(null);
+          done();
+        });
+      });
+    })
+  });
 }
