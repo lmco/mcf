@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @fileOverview UserModelTests
+ * @module  test/001_CleanDB
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This class defines basic tests of the User data model.
+ * @description  Intial test to clean the database before starting
  */
 
 const path = require('path');
