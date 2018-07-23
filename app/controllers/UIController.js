@@ -41,6 +41,7 @@ class UIController {
    */
 
   static home(req, res) {
+    req.flash('originalUrl','/');
     return res.render('home', {
       ui: M.config.server.ui,
       user: req.user.getPublicData(),

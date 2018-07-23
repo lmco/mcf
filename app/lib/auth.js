@@ -211,11 +211,13 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     })
     .catch(err => {
       M.log.error(err.stack);
-	  req.flash('loginError',err);
+	  req.flash('loginError',err.message);
+      let originalUrl = req.flash('originalUrl');
+      req.flash('originalUrl',originalUrl);
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
-        : res.redirect(`/login?next=${req.originalUrl}`);
+        : res.redirect(`/login?next=${originalUrl}`);
     });
   }
   else {
