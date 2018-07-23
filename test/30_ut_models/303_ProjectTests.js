@@ -27,10 +27,11 @@ const mongoose = require('mongoose');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const Org = M.load('models/Organization');
-const Project = M.load('models/Project');
-const User = M.load('models/User');
-const AuthController = M.load('lib/auth');
+const Org = M.require('models.Organization');
+const Project = M.require('models.Project');
+const User = M.require('models.User');
+const AuthController = M.require('lib.auth');
+
 
 // This is so the same parent org can be references across test functions
 let org = null;
@@ -47,7 +48,16 @@ describe(name, () => {
     db.connect();
     const u = M.config.test.username;
     const p = M.config.test.password;
-    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+    const params = {};
+    const body = {
+      username: u,
+      password: p
+    };
+
+    const reqObj = M.lib.mock_express.getReq(params, body);
+    const resObj = M.lib.mock_express.getRes();
+    AuthController.authenticate(reqObj, resObj, (err) => {
+      const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
       User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },

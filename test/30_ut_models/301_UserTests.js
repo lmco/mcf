@@ -61,6 +61,7 @@ describe(name, () => {
   it('should soft delete a user', softDeleteUser).timeout(5000);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
+  it('should login an LDAP user', loginLDAPUser).timeout(10000);
 });
 
 
@@ -236,6 +237,24 @@ function deleteUser(done) {
   User.findOneAndRemove({
     username: 'spiderman'
   }, (err) => {
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+function loginLDAPUser(done) {
+  const AuthController = M.require('lib.auth');
+  const u = M.config.test.username;
+  const p = M.config.test.password;
+  AuthController.handleBasicAuth(null, null, u, p)
+  .then(user => {
+    chai.expect(user.username).to.equal(M.config.test.username);
+    User.findOneAndUpdate({ username: u }, { admin: true }, (updateErr, userUpdate) => {
+      chai.expect(updateErr).to.equal(null);
+      done();
+    });
+  })
+  .catch(err => {
     chai.expect(err).to.equal(null);
     done();
   });

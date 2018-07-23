@@ -53,7 +53,16 @@ describe(name, () => {
     // Creating a Requesting Admin
     const u = M.config.test.username;
     const p = M.config.test.password;
-    AuthController.handleBasicAuth(null, null, u, p, (err, ldapuser) => {
+    const params = {};
+    const body = {
+      username: u,
+      password: p
+    };
+
+    const reqObj = M.lib.mock_express.getReq(params, body);
+    const resObj = M.lib.mock_express.getRes();
+    AuthController.authenticate(reqObj, resObj, (err) => {
+      const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
       User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
