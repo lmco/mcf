@@ -299,19 +299,6 @@ class ElementController {
         return reject(error);
       }
 
-      if (element.hasOwnProperty('name')) {
-        // Element name is not required, so check first if it exists.
-        if (typeof element.name !== 'string') {
-          return reject(new errors.CustomError('Element name is not a string.', 400));
-        }
-      }
-      if (element.hasOwnProperty('parent')) {
-        // Element parent is not required, so check first if it exists.
-        if (typeof element.parent !== 'string') {
-          return reject(new errors.CustomError('Element parent is not a string.', 400));
-        }
-      }
-
       const elemID = M.lib.sani.html(element.id);
       const projID = M.lib.sani.html(element.project.id);
       const orgID = M.lib.sani.html(element.project.org.id);
@@ -319,13 +306,38 @@ class ElementController {
       const elementType = M.lib.sani.html(element.type);
       let elemName = null;
       let parentID = null;
+      let custom = null;
+      let documentation = null;
 
       if (element.hasOwnProperty('name')) {
+        // Element name is not required, so check first if it exists.
+        if (typeof element.name !== 'string') {
+          return reject(new errors.CustomError('Element name is not a string.', 400));
+        }
         elemName = M.lib.sani.html(element.name);
       }
       if (element.hasOwnProperty('parent')) {
+        // Element parent is not required, so check first if it exists.
+        if (typeof element.parent !== 'string') {
+          return reject(new errors.CustomError('Element parent is not a string.', 400));
+        }
         parentID = M.lib.sani.html(element.parent);
       }
+      if (element.hasOwnProperty('custom')) {
+        // Tags are not required, so check first if they exists
+        if (typeof element.custom !== 'object') {
+          return reject(new errors.CustomError('Elements custom field is not an object.', 400));
+        }
+        custom = M.lib.sani.html(element.custom);
+      }
+      if (element.hasOwnProperty('documentation')) {
+        // Element documentation is not required, so check first if it exists.
+        if (typeof element.documentation !== 'string') {
+          return reject(new errors.CustomError('Element documentation is not a string.', 400));
+        }
+        documentation = M.lib.sani.html(element.documentation);
+      }
+
 
       // Error check - make sure element ID and element name are valid
       if (!RegExp(M.lib.validators.element.id).test(elemID)) {
@@ -362,25 +374,33 @@ class ElementController {
               }
             });
 
+            const elemData = {
+              orgID: orgID,
+              elemID: elemID,
+              elemName: elemName,
+              project: proj,
+              elemUID: elemUID,
+              parentID: parentID,
+              custom: custom,
+              documentation: documentation
+            };
+
             // If the given type is not a type we specified
             if (type === null) {
               return reject(new errors.CustomError('Invalid element type.', 400));
             }
             if (type === 'Relationship') {
-              ElementController.createRelationship(reqUser, orgID, proj,
-                elemID, elemUID, elemName, parentID, element)
+              ElementController.createRelationship(reqUser, elemData, element)
               .then((newElement) => resolve(newElement))
               .catch((createRelationshipError) => reject(createRelationshipError));
             }
             else if (type === 'Package') {
-              ElementController.createPackage(reqUser, orgID, proj,
-                elemID, elemUID, elemName, parentID)
+              ElementController.createPackage(reqUser, elemData)
               .then((newElement) => resolve(newElement))
               .catch((createRelationshipError) => reject(createRelationshipError));
             }
             else if (type === 'Block') {
-              ElementController.createBlock(reqUser, orgID, proj,
-                elemID, elemUID, elemName, parentID)
+              ElementController.createBlock(reqUser, elemData)
               .then((newElement) => resolve(newElement))
               .catch((createRelationshipError) => reject(createRelationshipError));
             }
@@ -397,7 +417,9 @@ class ElementController {
                   name: elemName,
                   project: proj._id,
                   uid: elemUID,
-                  parent: parent._id
+                  parent: parent._id,
+                  custom: custom,
+                  documentation: documentation
                 });
 
                   // Save the new element
@@ -419,7 +441,9 @@ class ElementController {
                 name: elemName,
                 project: proj._id,
                 uid: elemUID,
-                parent: null
+                parent: null,
+                custom: custom,
+                documentation: documentation
               });
 
                 // Save the new element
@@ -457,16 +481,11 @@ class ElementController {
    *
    *
    * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {String} orgID  The organization ID.
-   * @param  {Project} proj  The project object. Needed for both the id and _id.
-   * @param  {String} elemID  The element ID.
-   * @param  {String} elemUID  The element UID, created in the createProject function.
-   * @param  {String} elemName  The element name, may be null.
-   * @param  {String} parentID  The parent ID, may be null.
+   * @param  {Object} elemData  The object containing the sanitized element data.
    * @param  {Object} elemInfo  The JSON object containing the element data. Should contain
    *                  a source and target field.
    */
-  static createRelationship(reqUser, orgID, proj, elemID, elemUID, elemName, parentID, elemInfo) {
+  static createRelationship(reqUser, elemData, elemInfo) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
         utils.checkExists(['target', 'source'], elemInfo);
@@ -481,14 +500,15 @@ class ElementController {
       const source = M.lib.sani.html(elemInfo.source);
 
       // Find the target to make sure it exists
-      ElementController.findElement(reqUser, orgID, proj.id, target)
+      ElementController.findElement(reqUser, elemData.orgID, elemData.project.id, target)
       .then((targetElement) => {
         // Find the source Element
-        ElementController.findElement(reqUser, orgID, proj.id, source)
+        ElementController.findElement(reqUser, elemData.orgID, elemData.project.id, source)
         .then((sourceElement) => {
-          if (parentID !== null) {
+          if (elemData.parentID !== null) {
             // Find the parent element
-            ElementController.findElement(reqUser, orgID, proj.id, parentID)
+            ElementController.findElement(reqUser, elemData.orgID,
+              elemData.project.id, elemData.parentID)
             .then((parentElement) => { // eslint-disable-line consistent-return
               // Ensure parent is of type Package
               if (!parentElement.type === 'Package') {
@@ -496,13 +516,15 @@ class ElementController {
               }
 
               const newElement = new Element.Relationship({
-                id: elemID,
-                name: elemName,
-                project: proj._id,
-                uid: elemUID,
+                id: elemData.elemID,
+                name: elemData.elemName,
+                project: elemData.project._id,
+                uid: elemData.elemUID,
                 parent: parentElement._id,
                 target: targetElement._id,
-                source: sourceElement._id
+                source: sourceElement._id,
+                custom: elemData.custom,
+                documentation: elemData.documentation
               });
 
               // Save the new element
@@ -512,7 +534,8 @@ class ElementController {
                 }
 
                 // Update the parent elements 'contains' field
-                ElementController.updateParent(reqUser, orgID, proj.id, parentID, newElement)
+                ElementController.updateParent(reqUser, elemData.orgID,
+                  elemData.project.id, elemData.parentID, newElement)
                 .then((parentUpdated) => resolve(elemUpdate))
                 .catch((parentUpdateError) => reject(parentUpdateError));
               });
@@ -522,13 +545,15 @@ class ElementController {
           else {
             // No parent element was provided
             const newElement = new Element.Relationship({
-              id: elemID,
-              name: elemName,
-              project: proj._id,
-              uid: elemUID,
+              id: elemData.elemID,
+              name: elemData.elemName,
+              project: elemData.project._id,
+              uid: elemData.elemUID,
               parent: null,
               target: targetElement._id,
-              source: sourceElement._id
+              source: sourceElement._id,
+              custom: elemData.custom,
+              documentation: elemData.documentation
             });
 
             // Save the new element
@@ -562,18 +587,14 @@ class ElementController {
    *
    *
    * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {String} orgID  The organization ID.
-   * @param  {Project} project  The project object. Needed for both the id and _id.
-   * @param  {String} elemID  The element ID.
-   * @param  {String} elemUID  The element UID, created in the createProject function.
-   * @param  {String} elemName  The element name, may be null.
-   * @param  {String} parentID  The parent ID, may be null.
+   * @param  {Object} elemData  The object containing the sanitized element data.
    */
-  static createPackage(reqUser, orgID, project, elemID, elemUID, elemName, parentID) {
+  static createPackage(reqUser, elemData) {
     return new Promise((resolve, reject) => {
-      if (parentID !== null) {
+      if (elemData.parentID !== null) {
         // Find the parent element
-        ElementController.findElement(reqUser, orgID, project.id, parentID)
+        ElementController.findElement(reqUser, elemData.orgID,
+          elemData.project.id, elemData.parentID)
         .then((parentElement) => { // eslint-disable-line consistent-return
           // Ensure parent is of type Package
           if (!parentElement.type === 'Package') {
@@ -581,11 +602,13 @@ class ElementController {
           }
 
           const newElement = new Element.Package({
-            id: elemID,
-            name: elemName,
-            project: project._id,
-            uid: elemUID,
-            parent: parentElement._id
+            id: elemData.elemID,
+            name: elemData.elemName,
+            project: elemData.project._id,
+            uid: elemData.elemUID,
+            parent: parentElement._id,
+            custom: elemData.custom,
+            documentation: elemData.documentation
           });
 
           // Save the new element
@@ -595,7 +618,8 @@ class ElementController {
             }
 
             // Update the parent elements 'contains' field
-            ElementController.updateParent(reqUser, orgID, project.id, parentID, newElement)
+            ElementController.updateParent(reqUser, elemData.orgID,
+              elemData.project.id, elemData.parentID, newElement)
             .then(() => resolve(elementUpdated))
             .catch((parentUpdateError) => reject(parentUpdateError));
           });
@@ -605,11 +629,13 @@ class ElementController {
       else {
         // No parent element was provided
         const newElement = new Element.Package({
-          id: elemID,
-          name: elemName,
-          project: project._id,
-          uid: elemUID,
-          parent: null
+          id: elemData.elemID,
+          name: elemData.elemName,
+          project: elemData.project._id,
+          uid: elemData.elemUID,
+          parent: null,
+          custom: elemData.custom,
+          documentation: elemData.documentation
         });
 
         // Save the new element
@@ -639,18 +665,14 @@ class ElementController {
    *
    *
    * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {String} orgID  The organization ID.
-   * @param  {Project} project  The project object. Needed for both the id and _id.
-   * @param  {String} elemID  The element ID.
-   * @param  {String} elemUID  The element UID, created in the createProject function.
-   * @param  {String} elemName  The element name, may be null.
-   * @param  {String} parentID  The parent ID, may be null.
+   * @param  {Object} elemData  The object containing the sanitized element data.
    */
-  static createBlock(reqUser, orgID, project, elemID, elemUID, elemName, parentID) {
+  static createBlock(reqUser, elemData) {
     return new Promise((resolve, reject) => {
-      if (parentID !== null) {
+      if (elemData.parentID !== null) {
         // Find the parent element
-        ElementController.findElement(reqUser, orgID, project.id, parentID)
+        ElementController.findElement(reqUser, elemData.orgID,
+          elemData.project.id, elemData.parentID)
         .then((parentElement) => { // eslint-disable-line consistent-return
           // Ensure parent is of type Package
           if (!parentElement.type === 'Package') {
@@ -658,11 +680,13 @@ class ElementController {
           }
 
           const newElement = new Element.Block({
-            id: elemID,
-            name: elemName,
-            project: project._id,
-            uid: elemUID,
-            parent: parentElement._id
+            id: elemData.elemID,
+            name: elemData.elemName,
+            project: elemData.project._id,
+            uid: elemData.elemUID,
+            parent: parentElement._id,
+            custom: elemData.custom,
+            documentation: elemData.documentation
           });
 
           // Save the new element
@@ -672,7 +696,8 @@ class ElementController {
             }
 
             // Update the parent elements 'contains' field
-            ElementController.updateParent(reqUser, orgID, project.id, parentID, newElement)
+            ElementController.updateParent(reqUser, elemData.orgID,
+              elemData.project.id, elemData.parentID, newElement)
             .then(() => resolve(elementUpdated))
             .catch((parentUpdateError) => reject(parentUpdateError));
           });
@@ -682,11 +707,13 @@ class ElementController {
       else {
         // No parent element was provided
         const newElement = new Element.Block({
-          id: elemID,
-          name: elemName,
-          project: project._id,
-          uid: elemUID,
-          parent: null
+          id: elemData.elemID,
+          name: elemData.elemName,
+          project: elemData.project._id,
+          uid: elemData.elemUID,
+          parent: null,
+          custom: elemData.custom,
+          documentation: elemData.documentation
         });
 
         // Save the new element

@@ -150,11 +150,18 @@ function createElement(done) {
         id: org.id
       }
     },
-    type: 'Package'
+    type: 'Package',
+    custom: {
+      company: 'Lockheed',
+      paid: true
+    },
+    documentation: 'This is some documentation.'
   };
   ElemController.createElement(user, newElement)
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem0');
+    chai.expect(retElem.custom.paid).to.equal(true);
+    chai.expect(retElem.documentation).to.equal('This is some documentation.');
     done();
   })
   .catch((error) => {
@@ -323,10 +330,12 @@ function findElement(done) {
  * Update an element
  */
 function updateElement(done) {
-  ElemController.updateElement(user, org.id, proj.id, 'elem0', { name: 'Thors Hammer' })
+  ElemController.updateElement(user, org.id, proj.id, 'elem0',
+    { name: 'Thors Hammer', documentation: 'This is some different documentation' })
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem0');
     chai.expect(retElem.name).to.equal('Thors Hammer');
+    chai.expect(retElem.documentation).to.equal('This is some different documentation');
     done();
   })
   .catch((error) => {
