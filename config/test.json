@@ -213,7 +213,7 @@
     // they are using does not pose any security risk the the MBEE application before importing them.
     "plugins": {
       // A boolean to indicate whether or not plugins are enabled.
-      "enabled": true,
+      "enabled": false,
       // The array of plugins which will be imported and mounted into the MBEE application
       // Parameters: name, source, key
       "plugins": [{
@@ -260,7 +260,12 @@
   // testing. This applies only to the application when 'node mbee test' is run.
   "test": {
     // The URL, including port number which the tests will be ran against
-    "url": "https://dev.mbee.us.lmco.com:6080",
+    "url": "https://dev.mbee.us.lmco.com:6443",
+    // The location of the certification file relative to the main MBEE folder
+    "ca": "./certs/LockheedMartinRootCertificationAuthority.pem",
+    // An integer which indicated whether or not to accept self signed certificates.
+    // IMPORTANT: 0 means enable self signed certificates. 1 means disabled
+    "NODE_TLS_REJECT_UNAUTHORIZED": "0",
     // The username of the user to authenticate and run tests with
     "username": "mbee",
     // The password of the user to authenticate and run tests with
