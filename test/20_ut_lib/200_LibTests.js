@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Lib Tests
+ * @module  test/200_LibTests
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
-@description  This is currently a copy of test 100.
+ * @description  Tests loading in the libraries from the library module
  */
 
 const chai = require('chai');
