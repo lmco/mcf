@@ -145,7 +145,7 @@ class LocalStrategy {
             req.user = null;
             req.session.destroy();
             // Return error
-            return reject(new errors.CustomError('User found', 404));
+            return reject(new errors.CustomError('No User found', 404));
           }
           return resolve(user);
         });
