@@ -10,12 +10,15 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Project Model Tests
+ * @module test/303_ProjectModel
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  Tests the project model
+ * @description  This tests the Project Model functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The project model tests create,
+ * soft delete, and hard delete projects.
  */
 
 const path = require('path');
@@ -38,9 +41,7 @@ let user = null;
  *       Main
  *------------------------------------*/
 
-// runs before all tests in this block
-
-describe(name, function() {
+describe(name, () => {
   before(function(done) {
     this.timeout(6000);
     const db = M.load('lib/db');
@@ -66,15 +67,15 @@ describe(name, function() {
           user = userUpdate;
           // Create a parent organization before creating any projects
           org = new Org({
-            id: 'empire',
-            name: 'Galactic Empire',
+            id: 'avengers',
+            name: 'Age of Ultron',
             permissions: {
               admin: [ldapuser._id],
               write: [ldapuser._id],
               read: [ldapuser._id]
             }
           });
-          org.save(function(error) {
+          org.save((error) => {
             if (error) {
               M.log.error(error);
               done();
@@ -85,9 +86,11 @@ describe(name, function() {
     });
   });
 
-  // runs after all the tests are done
-  after(function(done) {
-    Org.findOneAndRemove({ id: org.id }, function(error) {
+  /*-------------------------------------
+   * After: runs after all tests
+   *-------------------------------------*/
+  after((done) => {
+    Org.findOneAndRemove({ id: org.id }, (error) => {
       if (error) {
         M.log.error(error);
       }
@@ -102,6 +105,9 @@ describe(name, function() {
     });
   });
 
+  /*----------
+   * Tests
+   *----------*/
   it('should create a project', createProject).timeout(3000);
   it('should soft delete a project', softDeleteProject).timeout(3000);
   it('should delete a project', deleteProject).timeout(3000);
@@ -119,10 +125,10 @@ describe(name, function() {
 function createProject(done) {
   // Otherwise,
   // Create a project
-  const id = 'dthstr';
+  const id = 'gaurdiansofgalaxy';
   const newProject = new Project({
     id: id,
-    name: 'Death Star',
+    name: 'Gaurdians of the Galaxy',
     org: org._id,
     permissions: {
       admin: [user._id],
@@ -131,7 +137,7 @@ function createProject(done) {
     },
     uid: `${id}:${org.id}`
   });
-  newProject.save(function(err) {
+  newProject.save((err) => {
     if (err) {
       M.log.error(err);
     }
@@ -148,7 +154,7 @@ function softDeleteProject(done) {
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-  Project.findOne({ id: 'dthstr' })
+  Project.findOne({ id: 'gaurdiansofgalaxy' })
   .exec((err, proj) => {
     proj.deleted = true;
     proj.save((saveErr) => {
@@ -169,7 +175,7 @@ function softDeleteProject(done) {
  * Deletes the organization.
  */
 function deleteProject(done) {
-  Project.findOneAndRemove({ id: 'dthstr' }, function(err) {
+  Project.findOneAndRemove({ id: 'gaurdiansofgalaxy' }, (err) => {
     chai.expect(err).to.equal(null);
     done();
   });

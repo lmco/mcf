@@ -139,6 +139,14 @@ class LocalStrategy {
           if (findUserSessionErr) {
             return reject(findUserSessionErr);
           }
+          // A valid session was found in the request but the user no longer exists
+          if (!user) {
+            // Logout user
+            req.user = null;
+            req.session.destroy();
+            // Return error
+            return reject(new errors.CustomError('No User found', 404));
+          }
           return resolve(user);
         });
       }
@@ -152,6 +160,14 @@ class LocalStrategy {
         }, (findUserTokenErr, user) => {
           if (findUserTokenErr) {
             return reject(findUserTokenErr);
+          }
+          // A valid session was found in the request but the user no longer exists
+          if (!user) {
+            // Logout user
+            req.user = null;
+            req.session.destroy();
+            // Return error
+            return reject(new errors.CustomError('No user found', 404));
           }
           // return User object if authentication was successful
           return resolve(user);

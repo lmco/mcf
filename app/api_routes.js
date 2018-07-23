@@ -55,21 +55,6 @@ api.get('/test', Middleware.logRoute, APIController.test);
 
 /**
  * @swagger
- * /doc:
- *   get:
- *     tags:
- *       - general
- *     description: Renders the Swagger API documentation.
- *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: Success
- */
-api.get('/doc', Middleware.logRoute, APIController.swaggerDoc);
-
-/**
- * @swagger
  * /doc/swagger.json:
  *   get:
  *     tags:

@@ -8,11 +8,12 @@
  *                                                                           *
  * EXPORT CONTROL WARNING: This software may be subject to applicable export *
  * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
+ ****************************************************************************/
 /**
- * @module  Framework Tests
+ * @module test/100_FrameworkTests
  *
- * @description  <TEST SUITE DESCRIPTION
+ * @description The tests are the frame work for how all tests should be
+ * created and designed.
  */
 
 const chai = require('chai');

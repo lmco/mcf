@@ -39,6 +39,12 @@ router.route('/about')
   UIController.showAboutPage
 );
 
+router.route('/doc')
+/**
+ * This renders the swagger doc page for the API routes
+ */
+.get(Middleware.logRoute, UIController.swaggerDoc);
+
 router.route('/login')
 /* GET /login shows the login page. */
 .get(
