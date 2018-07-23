@@ -349,11 +349,8 @@ class OrganizationController {
 
       // Delete the projects first while the org still exists
       ProjController.removeProjects(user, orgID, options)
-      .then(() => {
-        OrganizationController.removeOrgHelper(user, orgID, softDelete)
-        .then((retOrg) => resolve(retOrg))
-        .catch((err) => reject(err));
-      })
+      .then(() => OrganizationController.removeOrgHelper(user, orgID, softDelete))
+      .then((retOrg) => resolve(retOrg))
       .catch((deleteErr) => { // eslint-disable-line consistent-return
         // There are simply no projects associated with this org to delete
         if (deleteErr.description === 'No projects found.') {

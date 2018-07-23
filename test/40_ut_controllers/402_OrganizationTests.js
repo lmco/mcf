@@ -79,14 +79,14 @@ describe(name, function() {
             admin: false
           };
           UserController.createUser(user, nonAuserData)
-          .then(function(nonAu) {
+          .then((nonAu) => {
             newUser = nonAu;
             chai.expect(nonAu.username).to.equal('msmith');
             chai.expect(nonAu.fname).to.equal('Morty');
             chai.expect(nonAu.lname).to.equal('Smith');
             done();
           })
-          .catch(function(error) {
+          .catch((error) => {
             chai.expect(error.description).to.equal(null);
             done();
           });
@@ -101,19 +101,14 @@ describe(name, function() {
     .then(() => {
       // Removing the non admin user
       const userTwo = 'msmith';
-      UserController.removeUser(user, userTwo)
-      .then((delUser2) => {
-        chai.expect(delUser2).to.equal('msmith');
-        User.findOneAndRemove({
-          username: M.config.test.username
-        }, (err) => {
-          chai.expect(err).to.equal(null);
-          mongoose.connection.close();
-          done();
-        });
-      })
-      .catch((error) => {
-        chai.expect(error.description).to.equal(null);
+      return UserController.removeUser(user, userTwo);
+    })
+    .then((delUser2) => {
+      chai.expect(delUser2).to.equal('msmith');
+      User.findOneAndRemove({
+        username: M.config.test.username
+      }, (err) => {
+        chai.expect(err).to.equal(null);
         mongoose.connection.close();
         done();
       });
@@ -289,15 +284,11 @@ function updateOrgObject(done) {
   OrgController.findOrg(user, 'tv')
   .then((retOrg) => {
     retOrg.name = 'Interdimensional Cable Changed';
-    OrgController.updateOrg(user, 'tv', retOrg)
-    .then((retOrgUpdate) => {
-      chai.expect(retOrgUpdate.name).to.equal('Interdimensional Cable Changed');
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+    return OrgController.updateOrg(user, 'tv', retOrg);
+  })
+  .then((retOrgUpdate) => {
+    chai.expect(retOrgUpdate.name).to.equal('Interdimensional Cable Changed');
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
@@ -325,19 +316,13 @@ function findAllExistingOrgs(done) {
  */
 function softDeleteExistingOrg(done) {
   OrgController.removeOrg(user, 'tv', { soft: true })
-  .then(() => {
-    OrgController.findOrg(user, 'tv')
-    .then((orgTwo) => {
-      chai.expect(orgTwo).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Org not found.');
-      done();
-    });
+  .then(() => OrgController.findOrg(user, 'tv'))
+  .then((orgTwo) => {
+    chai.expect(orgTwo).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.description).to.equal('Org not found.');
     done();
   });
 }
@@ -347,19 +332,13 @@ function softDeleteExistingOrg(done) {
  */
 function deleteExistingOrg(done) {
   OrgController.removeOrg(user, 'tv', { soft: false })
-  .then(() => {
-    OrgController.findOrg(user, 'tv')
-    .then((orgTwo) => {
-      chai.expect(orgTwo).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Org not found.');
-      done();
-    });
+  .then(() => OrgController.findOrg(user, 'tv'))
+  .then((orgTwo) => {
+    chai.expect(orgTwo).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.description).to.equal('Org not found.');
     done();
   });
 }
@@ -369,49 +348,25 @@ function deleteExistingOrg(done) {
  */
 function softDeleteProjectAndOrg(done) {
   OrgController.createOrg(user, { id: 'tv', name: 'Intergalactic' })
-  .then(() => {
-    ProjController.createProject(user, { id: 'prtlgn', name: 'portal gun', org: { id: 'tv' } })
-    .then(() => {
-      ElemController.createElement(user, { id: '0000', project: { id: 'prtlgn', org: { id: 'tv' } }, type: 'Element' })
-      .then(() => {
-        OrgController.removeOrg(user, 'tv', { soft: true })
-        .then(() => {
-          OrgController.findOrg(user, 'tv')
-          .then((retOrg3) => {
-            chai.expect(retOrg3).to.equal(null);
-            done();
-          })
-          .catch((error) => {
-            chai.expect(error.description).to.equal('Org not found.');
-          });
-          ProjController.findProject(user, 'tv', 'prtlgn')
-          .then((retProj2) => {
-            chai.expect(retProj2).to.equal(null);
-            done();
-          })
-          .catch((error) => {
-            chai.expect(error.description).to.equal('Project not found.');
-            done();
-          });
-        })
-        .catch((error) => {
-          chai.expect(error.description).to.equal(null);
-          done();
-        });
-      })
-      .catch((error) => {
-        chai.expect(error.description).to.equal(null);
-        done();
-      });
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then(() => ProjController.createProject(user, { id: 'prtlgn', name: 'portal gun', org: { id: 'tv' } }))
+  .then(() => ElemController.createElement(user, { id: '0000', project: { id: 'prtlgn', org: { id: 'tv' } }, type: 'Element' }))
+  .then(() => OrgController.removeOrg(user, 'tv', { soft: true }))
+  .then(() => OrgController.findOrg(user, 'tv'))
+  .then((retOrg3) => {
+    chai.expect(retOrg3).to.equal(null);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
-    done();
+    chai.expect(error.description).to.equal('Org not found.');
+    ProjController.findProject(user, 'tv', 'prtlgn')
+    .then((retProj2) => {
+      chai.expect(retProj2).to.equal(null);
+      done();
+    })
+    .catch((error2) => {
+      chai.expect(error2.description).to.equal('Project not found.');
+      done();
+    });
   });
 }
 
@@ -420,28 +375,22 @@ function softDeleteProjectAndOrg(done) {
  */
 function hardDeleteProjectAndOrg(done) {
   OrgController.removeOrg(user, 'tv', { soft: false })
-  .then(() => {
-    OrgController.findOrg(user, 'tv')
-    .then((retOrg3) => {
-      chai.expect(retOrg3).to.equal(null);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Org not found.');
-    });
+  .then(() => OrgController.findOrg(user, 'tv'))
+  .then((retOrg3) => {
+    chai.expect(retOrg3).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Org not found.');
     ProjController.findProject(user, 'tv', 'prtlgn', true)
     .then((retProj2) => {
       chai.expect(retProj2).to.equal(null);
       done();
     })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Project not found.');
+    .catch((error2) => {
+      chai.expect(error2.description).to.equal('Project not found.');
       done();
     });
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal(null);
-    done();
   });
 }
 
@@ -451,18 +400,12 @@ function hardDeleteProjectAndOrg(done) {
 function addUserRole(done) {
   // Increase a users role
   OrgController.setPermissions(user, org.id.toString(), newUser, 'write')
-  .then(() => {
-    OrgController.findOrg(user, org.id.toString())
-    .then((retOrg2) => {
-      chai.expect(retOrg2.permissions.write[1]._id.toString()).to.equal(newUser._id.toString());
-      chai.expect(retOrg2.permissions.read[1]._id.toString()).to.equal(newUser._id.toString());
-      chai.expect(retOrg2.permissions.admin.length).to.equal(1);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then(() => OrgController.findOrg(user, org.id.toString()))
+  .then((retOrg2) => {
+    chai.expect(retOrg2.permissions.write[1]._id.toString()).to.equal(newUser._id.toString());
+    chai.expect(retOrg2.permissions.read[1]._id.toString()).to.equal(newUser._id.toString());
+    chai.expect(retOrg2.permissions.admin.length).to.equal(1);
+    done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
