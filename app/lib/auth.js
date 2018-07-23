@@ -137,6 +137,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
       })
       .catch(err => {
         M.log.error(err);
+        req.flash('loginError',err.message);
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
@@ -172,6 +173,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     })
     .catch(err => {
       M.log.error(err);
+      req.flash('loginError',err.message);
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
@@ -211,13 +213,11 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     })
     .catch(err => {
       M.log.error(err.stack);
-	  req.flash('loginError',err.message);
-      let originalUrl = req.flash('originalUrl');
-      req.flash('originalUrl',originalUrl);
+      req.flash('loginError',err.message);
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
-        : res.redirect(`/login?next=${originalUrl}`);
+        : res.redirect('back');
     });
   }
   else {
