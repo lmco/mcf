@@ -126,8 +126,8 @@ describe(name, () => {
     .then(() => {
       // Removing the non admin user
 
-        const userTwo = 'pepperpotts';
-        return UserController.removeUser(allSeeingUser, userTwo);
+      const userTwo = 'pepperpotts';
+      return UserController.removeUser(allSeeingUser, userTwo);
     })
     .then((delUser2) => {
       chai.expect(delUser2).to.equal('pepperpotts');

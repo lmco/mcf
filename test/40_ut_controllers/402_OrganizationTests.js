@@ -107,10 +107,7 @@ describe(name, () => {
   after((done) => {
     // Removing the organization created
     OrgController.removeOrg(user, 'gaurdians', { soft: false })
-    .then(() => {
-      // Removing the non admin user
-      return UserController.removeUser(user, userTwo);
-    })
+    .then(() => UserController.removeUser(user, newUser.username))
     .then((delUser2) => {
       chai.expect(delUser2).to.equal('groot');
       User.findOneAndRemove({

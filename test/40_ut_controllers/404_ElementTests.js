@@ -79,11 +79,11 @@ describe(name, () => {
           OrgController.createOrg(user, orgData)
           .then((retOrg) => {
             org = retOrg;
-            return ProjController.createProject(user, {id: 'thor', name: 'Thor Odinson', org: {id: org.id}});
+            return ProjController.createProject(user, { id: 'thor', name: 'Thor Odinson', org: { id: org.id } });
           })
-            .then((retProj) => {
-              proj = retProj;
-              done();
+          .then((retProj) => {
+            proj = retProj;
+            done();
           })
           .catch((orgError) => {
             chai.expect(orgError.message).to.equal(null);
