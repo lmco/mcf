@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Lib Utils Tests
+ * @module  test/202_LibUtils
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- @description  This file tests the utility functions.
+ * @description  This file tests the utility functions.
  */
 
 const chai = require('chai');
@@ -62,7 +62,7 @@ describe(name, () => {
  *------------------------------------*/
 
 /**
- * @description  Checks that a string is a string.
+ * Checks that a string is a string.
  */
 function stringIsString(done) {
   try {
@@ -76,7 +76,7 @@ function stringIsString(done) {
 }
 
 /**
- * @description  Checks that a number is a string.
+ * Checks that a number is a string.
  */
 function numberIsString(done) {
   try {
@@ -91,7 +91,7 @@ function numberIsString(done) {
 }
 
 /**
- * @description  Checks that an object is an object.
+ * Checks that an object is an object.
  */
 function objectIsObject(done) {
   try {
@@ -105,7 +105,7 @@ function objectIsObject(done) {
 }
 
 /**
- * @description  Checks that the key project.id exists.
+ * Checks that the key project.id exists.
  */
 function projectIDExists(done) {
   try {
@@ -119,7 +119,7 @@ function projectIDExists(done) {
 }
 
 /**
- * @description  Checks that the key project.user exists.
+ * Checks that the key project.user exists.
  */
 function projectUserExists(done) {
   try {
@@ -134,7 +134,7 @@ function projectUserExists(done) {
 }
 
 /**
- * @description  Checks that multiple keys exist.
+ * Checks that multiple keys exist.
  */
 function multipleExist(done) {
   try {
@@ -148,7 +148,7 @@ function multipleExist(done) {
 }
 
 /**
- * @description  Check that a user is an admin and succeed.
+ * Check that a user is an admin and succeed.
  */
 function userIsAdmin(done) {
   const user = { name: 'Darth Vader', admin: true };
@@ -163,7 +163,7 @@ function userIsAdmin(done) {
 }
 
 /**
- * @description  Check that a user is an admin and fail.
+ * Check that a user is an admin and fail.
  */
 function userIsNotAdmin(done) {
   const user = { name: 'Stormtrooper 123', admin: false };
