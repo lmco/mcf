@@ -25,7 +25,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo 'Building...'
+                echo 'Building... only on new pipeline branch'
             }
         }
         stage('Test') {
