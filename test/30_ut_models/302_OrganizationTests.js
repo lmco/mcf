@@ -10,12 +10,15 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Org Model Tests
+ * @module test/302_OrganizationModel
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  Tests the org model
+ * @description  This tests the Organization Model functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The organization model tests create,
+ * soft deletes, and hard deletes organizations.
  */
 
 const path = require('path');
@@ -32,17 +35,26 @@ const Org = M.load('models/Organization');
  *------------------------------------*/
 
 describe(name, () => {
-  // runs before all tests in this block
+  /*-------------------------------------
+   * Before: runs before all tests
+   *-------------------------------------*/
   before(() => {
+    // Open database conection
     const db = M.load('lib/db');
     db.connect();
   });
 
-  // runs after all tests in this block
+  /*-------------------------------------
+   * After: runs after all tests
+   *-------------------------------------*/
   after(() => {
+    // Close database connection
     mongoose.connection.close();
   });
 
+  /*----------
+   * Tests
+   *----------*/
   it('should create an organization', createOrg).timeout(2500);
   it('should soft delete an organization', softDeleteOrg).timeout(2500);
   it('should delete an organization', deleteOrg).timeout(2500);
@@ -58,8 +70,8 @@ describe(name, () => {
  */
 function createOrg(done) {
   const org = new Org({
-    id: 'empire',
-    name: 'Galactic Empire'
+    id: 'avengers',
+    name: 'Infinity Stone'
   });
   org.save((err) => {
     if (err) {
@@ -78,7 +90,7 @@ function softDeleteOrg(done) {
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-  Org.findOne({ id: 'empire' })
+  Org.findOne({ id: 'avengers' })
   .exec((err, org) => {
     org.deleted = true;
     org.save((saveErr) => {
@@ -100,7 +112,7 @@ function softDeleteOrg(done) {
  */
 function deleteOrg(done) {
   Org.findOneAndRemove({
-    id: 'empire'
+    id: 'avengers'
   }, (err) => {
     chai.expect(err).to.equal(null);
     done();
