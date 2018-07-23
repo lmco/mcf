@@ -44,5 +44,8 @@ describe(name, () => {
     mongoose.connection.close();
   });
 
-  it('do nothing', createUser).timeout(5000);
+  it('do nothing', donothing).timeout(5000);
 });
+
+function donothing(){
+}
