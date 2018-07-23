@@ -10,9 +10,15 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************
  *
+ * @module test/304_ElementModel
+ *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @fileOverview  Tests the Element data model and schema
+ * @description This tests the Element Model functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The element model tests create elements,
+ * root packages, blocks, and relationships. These tests also hard deletes blocks
+ * and relationships, as well as, soft and har deletes root packages.
  */
 
 const path = require('path');
@@ -40,12 +46,12 @@ let user = null;
 // runs before all tests in this block
 
 describe(name, function() {
-  /**
-   * This function runs before all the tests in this test suite.
-   */
+  /*-------------------------------------
+   * Before: runs before all tests
+   *-------------------------------------*/
   before(function() {
     this.timeout(5000);
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       const db = M.load('lib/db');
       db.connect();
 
@@ -71,8 +77,8 @@ describe(name, function() {
 
             // Create the org to be used for testing
             const newOrg = new Org({
-              id: 'empire',
-              name: 'Galactic Empire',
+              id: 'avengers',
+              name: 'The Avengers',
               permissions: {
                 admin: [user._id],
                 write: [user._id],
@@ -92,15 +98,15 @@ describe(name, function() {
 
               // Create the new project
               const newProject = new Project({
-                id: 'deathstar',
-                name: 'Death Star',
+                id: 'timeloop',
+                name: 'Time Gem',
                 org: org._id,
                 permissions: {
                   admin: [user._id],
                   write: [user._id],
                   read: [user._id]
                 },
-                uid: `${org.id}:deathstar`
+                uid: `${org.id}:timeloop`
               });
 
               newProject.save((projectSaveErr, savedProject) => {
@@ -121,10 +127,10 @@ describe(name, function() {
     });
   });
 
-  /**
-   * This function runs after all the tests are done
-   */
-  after(function(done) {
+  /*-------------------------------------
+   * After: runs after all tests
+   *-------------------------------------*/
+  after((done) => {
     // Remove the project
     Project.findOneAndRemove({
       uid: project.uid
@@ -160,6 +166,9 @@ describe(name, function() {
     });
   });
 
+  /*----------
+   * Tests
+   *----------*/
   it('should create a generic element', createElement);
   it('should delete the generic element', deleteElement);
   it('should create a root package', createRootPackage);
@@ -183,17 +192,17 @@ describe(name, function() {
 function createElement(done) {
   const newElement = new Element.Element({
     id: '0000',
-    uid: 'empire:deathstar:0000',
-    name: 'Death Star Model Arbitrary Element',
+    uid: 'avengers:timeloop:0000',
+    name: 'The begining of time loop',
     project: project._id,
     parent: null
   });
-  newElement.save(function(err, createdElement) {
+  newElement.save((err, createdElement) => {
     if (err) {
       M.log.error(err);
     }
     chai.expect(err).to.equal(null);
-    chai.expect(createdElement.uid).to.equal('empire:deathstar:0000');
+    chai.expect(createdElement.uid).to.equal('avengers:timeloop:0000');
     chai.expect(createdElement.id).to.equal('0000');
     done();
   });
@@ -204,7 +213,7 @@ function createElement(done) {
  */
 function deleteElement(done) {
   Element.Element.findOneAndRemove({
-    uid: 'empire:deathstar:0000'
+    uid: 'avengers:timeloop:0000'
   })
   .exec((err) => {
     chai.expect(err).to.equal(null);
@@ -220,14 +229,14 @@ function createRootPackage(done) {
   // Create the new package
   const newPackage = new Element.Package({
     id: '0001',
-    uid: 'empire:deathstar:0001',
-    name: 'Death Star Model Root Package',
+    uid: 'avengers:timeloop:0001',
+    name: 'In time loop',
     project: project._id,
     parent: null
   });
 
   // Save the package
-  newPackage.save(function(err) {
+  newPackage.save((err) => {
     if (err) {
       M.log.error(err);
     }
@@ -235,7 +244,7 @@ function createRootPackage(done) {
 
     // Lookup the element and make sure it's there
     Element.Package.find({
-      uid: 'empire:deathstar:0001'
+      uid: 'avengers:timeloop:0001'
     })
     .exec((findErr, packages) => {
       // Error check make sure the find didn't fail
@@ -246,7 +255,7 @@ function createRootPackage(done) {
       // Make sure everything is as we expect it
       chai.expect(findErr).to.equal(null);
       chai.expect(packages.length).to.equal(1);
-      chai.expect(packages[0].uid).to.equal('empire:deathstar:0001');
+      chai.expect(packages[0].uid).to.equal('avengers:timeloop:0001');
       chai.expect(packages[0].type).to.equal('Package');
       done();
     });
@@ -259,7 +268,7 @@ function createRootPackage(done) {
 function createBlock01(done) {
   // Start by grabbing the root package
   Element.Package.findOne({
-    uid: 'empire:deathstar:0001'
+    uid: 'avengers:timeloop:0001'
   })
   .exec((findRootErr, pkg) => {
     // Make sure no errors occur in lookup
@@ -271,8 +280,8 @@ function createBlock01(done) {
     // Create the new block
     const newBlock = new Element.Block({
       id: '0002',
-      uid: 'empire:deathstar:0002',
-      name: 'Core Reactor',
+      uid: 'avengers:timeloop:0002',
+      name: 'In time loop',
       project: project._id,
       parent: pkg._id
     });
@@ -285,8 +294,8 @@ function createBlock01(done) {
       }
 
       // Make sure it created what we expect and finish
-      chai.expect(createdBlock.uid).to.equal('empire:deathstar:0002');
-      chai.expect(createdBlock.name).to.equal('Core Reactor');
+      chai.expect(createdBlock.uid).to.equal('avengers:timeloop:0002');
+      chai.expect(createdBlock.name).to.equal('In time loop');
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
       chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
 
@@ -306,7 +315,7 @@ function createBlock01(done) {
 function createBlock02(done) {
   // Start by grabbing the root package
   Element.Package.findOne({
-    uid: 'empire:deathstar:0001'
+    uid: 'avengers:timeloop:0001'
   })
   .exec((findRootErr, pkg) => {
     // Make sure no errors occur in lookup
@@ -318,8 +327,8 @@ function createBlock02(done) {
     // Create the new block
     const newBlock = new Element.Block({
       id: '0003',
-      uid: 'empire:deathstar:0003',
-      name: 'Thermal Exhaust Port',
+      uid: 'avengers:timeloop:0003',
+      name: 'Going on repeat',
       project: project._id,
       parent: pkg._id
     });
@@ -332,8 +341,8 @@ function createBlock02(done) {
       }
 
       // Make sure it created what we expect and finish
-      chai.expect(createdBlock.uid).to.equal('empire:deathstar:0003');
-      chai.expect(createdBlock.name).to.equal('Thermal Exhaust Port');
+      chai.expect(createdBlock.uid).to.equal('avengers:timeloop:0003');
+      chai.expect(createdBlock.name).to.equal('Going on repeat');
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
       chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
 
@@ -353,7 +362,7 @@ function createBlock02(done) {
 function createRelationship(done) {
   // Start by grabbing the root package
   Element.Package.findOne({
-    uid: 'empire:deathstar:0001'
+    uid: 'avengers:timeloop:0001'
   })
   .exec((findRootErr, pkg) => {
     // Make sure no errors occur in lookup
@@ -369,8 +378,8 @@ function createRelationship(done) {
     // Create the new block
     const newRelationship = new Element.Relationship({
       id: '0004',
-      uid: 'empire:deathstar:0004',
-      name: 'Dependency Link',
+      uid: 'avengers:timeloop:0004',
+      name: 'Time looping',
       project: project._id,
       parent: pkg._id,
       source: source,
@@ -385,8 +394,8 @@ function createRelationship(done) {
       }
 
       // Make sure it created what we expect and finish
-      chai.expect(createdRelationship.uid).to.equal('empire:deathstar:0004');
-      chai.expect(createdRelationship.name).to.equal('Dependency Link');
+      chai.expect(createdRelationship.uid).to.equal('avengers:timeloop:0004');
+      chai.expect(createdRelationship.name).to.equal('Time looping');
       chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
       chai.expect(createdRelationship.parent.toString()).to.equal(pkg._id.toString());
       chai.expect(createdRelationship.source.toString()).to.equal(source.toString());
@@ -409,21 +418,21 @@ function createRelationship(done) {
 function deleteBlocksAndRelationships(done) {
   // Delete the relationship
   Element.Relationship.findOneAndRemove({
-    uid: 'empire:deathstar:0004'
+    uid: 'avengers:timeloop:0004'
   })
   .exec((relDeleteError) => {
     chai.expect(relDeleteError).to.equal(null);
 
     // Delete the second block
     Element.Block.findOneAndRemove({
-      uid: 'empire:deathstar:0003'
+      uid: 'avengers:timeloop:0003'
     })
     .exec((block02DeleteError) => {
       chai.expect(block02DeleteError).to.equal(null);
 
       // Delete the first block
       Element.Block.findOneAndRemove({
-        uid: 'empire:deathstar:0002'
+        uid: 'avengers:timeloop:0002'
       })
       .exec((block01DeleteError) => {
         chai.expect(block01DeleteError).to.equal(null);
@@ -441,14 +450,14 @@ function softDeleteRootPackage(done) {
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-  Element.Package.findOne({ uid: 'empire:deathstar:0001' })
+  Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
   .exec((err, elem) => {
     elem.deleted = true;
     elem.save((saveErr) => {
       chai.expect(err).to.equal(null);
 
       Element.Package.findOne({
-        uid: 'empire:deathstar:0001'
+        uid: 'avengers:timeloop:0001'
       })
       .exec((findErr, foundElem) => {
         chai.expect(findErr).to.equal(null);
@@ -466,7 +475,7 @@ function softDeleteRootPackage(done) {
  */
 function deleteRootPackage(done) {
   Element.Package.findOneAndRemove({
-    uid: 'empire:deathstar:0001'
+    uid: 'avengers:timeloop:0001'
   })
   .exec((err) => {
     chai.expect(err).to.equal(null);

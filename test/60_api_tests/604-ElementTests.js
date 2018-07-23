@@ -10,11 +10,15 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Element API Tests
+ * @module  test/604_ElementAPI
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description Tests Basic API functionality with Elements.
+ * @description This tests the API controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. These API controller tests are
+ * specifically for the Element API tests: posting, putting, getting, and deleting
+ * elements.
  */
 
 const path = require('path');
@@ -38,7 +42,7 @@ let user = null;
  *       Main
  *------------------------------------*/
 
-describe(name, function() {
+describe(name, () => {
   before(function(done) {
     this.timeout(5000);
     const db = M.load('lib/db');
@@ -67,39 +71,35 @@ describe(name, function() {
           chai.expect(userUpdate).to.not.equal(null);
           // Creating an organization used in the tests
           const orgData = {
-            id: 'empire',
-            name: 'Galactic Empire'
+            id: 'nineteenforty',
+            name: 'World War Two'
           };
 
           OrgController.createOrg(user, orgData)
           .then((retOrg) => {
             org = retOrg;
-            chai.expect(retOrg.id).to.equal('empire');
-            chai.expect(retOrg.name).to.equal('Galactic Empire');
+            chai.expect(retOrg.id).to.equal('nineteenforty');
+            chai.expect(retOrg.name).to.equal('World War Two');
             chai.expect(retOrg.permissions.read).to.include(user._id.toString());
             chai.expect(retOrg.permissions.write).to.include(user._id.toString());
             chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
 
             // Creating a project used in the tests
             const projData = {
-              id: 'dthstr',
-              name: 'Death Star',
+              id: 'rebirth',
+              name: 'Super Soldier Serum',
               org: {
-                id: 'empire'
+                id: 'nineteenforty'
               }
             };
 
-            ProjController.createProject(user, projData)
-            .then((retProj) => {
-              proj = retProj;
-              chai.expect(retProj.id).to.equal('dthstr');
-              chai.expect(retProj.name).to.equal('Death Star');
-              done();
-            })
-            .catch((error) => {
-              chai.expect(error.message).to.equal(null);
-              done();
-            });
+            return ProjController.createProject(user, projData);
+          })
+          .then((retProj) => {
+            proj = retProj;
+            chai.expect(retProj.id).to.equal('rebirth');
+            chai.expect(retProj.name).to.equal('Super Soldier Serum');
+            done();
           })
           .catch((error) => {
             chai.expect(error.message).to.equal(null);
@@ -113,7 +113,7 @@ describe(name, function() {
   after(function(done) {
     this.timeout(5000);
     // Delete the org
-    OrgController.removeOrg(user, 'empire', { soft: false })
+    OrgController.removeOrg(user, 'nineteenforty', { soft: false })
     .then((retOrg) => {
       chai.expect(retOrg).to.not.equal(null);
       User.findOneAndRemove({
@@ -147,12 +147,12 @@ describe(name, function() {
  */
 function postElement(done) {
   request({
-    url: `${test.url}/api/orgs/empire/projects/dthstr/elements/0000`,
+    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
       id: '0000',
-      name: 'Death Star Random Element',
+      name: 'Steve Rogers',
       project: {
         id: proj.id,
         org: {
@@ -162,7 +162,7 @@ function postElement(done) {
       type: 'Element'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('0000');
@@ -175,11 +175,11 @@ function postElement(done) {
  */
 function getElement(done) {
   request({
-    url: `${test.url}/api/orgs/empire/projects/dthstr/elements/0000`,
+    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'GET'
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('0000');
@@ -192,11 +192,11 @@ function getElement(done) {
  */
 function getElements(done) {
   request({
-    url: `${test.url}/api/orgs/empire/projects/dthstr/elements`,
+    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements`,
     headers: getHeaders(),
     method: 'GET'
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.length).to.equal(1);
@@ -209,17 +209,17 @@ function getElements(done) {
  */
 function putElement(done) {
   request({
-    url: `${test.url}/api/orgs/empire/projects/dthstr/elements/0000`,
+    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'PUT',
     body: JSON.stringify({
-      name: 'Death Star Important Element'
+      name: 'Captain America'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.name).to.equal('Death Star Important Element');
+    chai.expect(json.name).to.equal('Captain America');
     done();
   });
 }
@@ -229,14 +229,14 @@ function putElement(done) {
  */
 function deleteElement(done) {
   request({
-    url: `${test.url}/api/orgs/empire/projects/dthstr/elements/0000`,
+    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'DELETE',
     body: JSON.stringify({
       soft: false
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('0000');

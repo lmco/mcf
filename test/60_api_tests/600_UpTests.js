@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Project Model Tests
+ * @module test/600_UpAPI
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  Tests the project model
+ * @description  This file defines basic tests of the API being up.
  */
 
 const fs = require('fs');
@@ -26,7 +26,9 @@ const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 
-/* ----------( Main )---------- */
+/*------------------------------------
+ *       Main
+ *------------------------------------*/
 
 
 describe(name, () => {
@@ -35,7 +37,9 @@ describe(name, () => {
 });
 
 
-/* ----------( Test Functions )---------- */
+/*------------------------------------
+ *       Test Functions
+ *------------------------------------*/
 
 
 /**

@@ -10,14 +10,18 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  TestAPIBasic.js
+ * @module  test/602_OrganizationAPI
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * Tests Basic API functionality with Organizations.
- * ASK ABOUT REJECT PUT NAME
- * ASK ABOUT TESTING WITH NO USER
+ *
+ * @description  This tests the API controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code we want to make sure everything still
+ * works as it should. These API controller tests are specifically for the Organization
+ * API tests: posting, putting, getting, and deleting orgs. Some tests are
+ * conducting with invalid inputs for the org api controlls.
  */
 
 const path = require('path');
@@ -37,7 +41,7 @@ const test = M.config.test;
  *       Main
  *------------------------------------*/
 
-describe(name, function() {
+describe(name, () => {
   before(function(done) {
     this.timeout(5000);
 
@@ -84,8 +88,7 @@ describe(name, function() {
   it('should POST second organization', postOrg02).timeout(3000);
   it('should GET posted organization', getOrg01).timeout(3000);
   it('should PUT an update to posted organization', putOrg01).timeout(3000);
-  // Giving 500 error wondering if wanted a 400 error
-  // it('should reject a PUT with invalid name', rejectPutName).timeout(3000);
+  it('should reject a PUT with invalid name', rejectPutName).timeout(3000);
   it('should reject a PUT to the org ID', rejectPutID).timeout(3000);
   it('should get organization roles for a user', orgRole).timeout(3000);
   it('should reject a get org roles for another user', rejectRole).timeout(3000);
@@ -117,10 +120,11 @@ function getOrgs(done) {
     url: `${test.url}/api/orgs`,
     headers: getHeaders()
   },
-  function(err, response, body) {
+  (err, response, body) => {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
     chai.expect(json.length).to.equal(0);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -131,17 +135,18 @@ function getOrgs(done) {
  */
 function postOrg01(done) {
   request({
-    url: `${test.url}/api/orgs/org1`,
+    url: `${test.url}/api/orgs/xmen`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
-      name: 'Organization 1'
+      name: 'X Men'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.name).to.equal('Organization 1');
+    chai.expect(json.name).to.equal('X Men');
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -152,18 +157,19 @@ function postOrg01(done) {
  */
 function postOrg02(done) {
   request({
-    url: `${test.url}/api/orgs/org2`,
+    url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
-      name: 'Organization 2'
+      name: 'SHIELD'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal('org2');
-    chai.expect(json.name).to.equal('Organization 2');
+    chai.expect(json.id).to.equal('shield');
+    chai.expect(json.name).to.equal('SHIELD');
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -171,18 +177,17 @@ function postOrg02(done) {
 /**
  * Makes a GET request to /api/org1. This should happen before any orgs
  * are added to the database. So the response should be an empty array.
- *
- * TODO (jk) - What happens if we don't want to start with an empty db?
  */
 function getOrg01(done) {
   request({
-    url: `${test.url}/api/orgs/org1`,
+    url: `${test.url}/api/orgs/xmen`,
     headers: getHeaders()
   },
-  function(err, response, body) {
+  (err, response, body) => {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('Organization 1');
+    chai.expect(json.name).to.equal('X Men');
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -194,48 +199,52 @@ function getOrg01(done) {
  */
 function putOrg01(done) {
   request({
-    url: `${test.url}/api/orgs/org1`,
+    url: `${test.url}/api/orgs/xmen`,
     headers: getHeaders(),
     method: 'PUT',
     body: JSON.stringify({
-      id: 'org1',
-      name: 'Updated Organization 1'
+      id: 'xmen',
+      name: 'Wolverine'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal('org1');
-    chai.expect(json.name).to.equal('Updated Organization 1');
+    chai.expect(json.id).to.equal('xmen');
+    chai.expect(json.name).to.equal('Wolverine');
+    chai.expect(err).to.equal(null);
     done();
   });
 }
 
-// /**
-//  * Attempts to make an UPDATE request to api/orgs/org2. This has
-//  * an invalid name for updating the org and therefore
-//  * will throw an error.
-//  * Throws an internal service error?
-//  * Do we want that instead of bad request?
-//  */
+/**
+ * Attempts to make an UPDATE request to api/orgs/org2. This has
+ * an invalid name for updating the org and therefore
+ * will throw an error.
+<<<<<<< HEAD
+=======
+ * Throws an internal service error 500 Internal Service Error
+ * JIRA TASK: MBX-220 bug fixes error code
+>>>>>>> origin/master
+ */
 
-// function rejectPutName(done) {
-//   request({
-//     url: `${test.url}/api/orgs/org2`,
-//     headers: getHeaders(),
-//     method: 'PUT',
-//     body: JSON.stringify({
-//       id: 'org2',
-//       name: ''
-//     })
-//   },
-//   function(err, response, body) {
-//     chai.expect(response.statusCode).to.equal(400);
-//     const json = JSON.parse(body);
-//     chai.expect(json.message).to.equal('Bad Request');
-//     done();
-//   });
-// }
+function rejectPutName(done) {
+  request({
+    url: `${test.url}/api/orgs/shield`,
+    headers: getHeaders(),
+    method: 'PUT',
+    body: JSON.stringify({
+      id: 'shield',
+      name: ''
+    })
+  },
+  (err, response, body) => {
+    chai.expect(response.statusCode).to.equal(400);
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
 
 /**
  * Attempts to make an UPDATE request to api/orgs/org2. This is updating
@@ -244,63 +253,66 @@ function putOrg01(done) {
 
 function rejectPutID(done) {
   request({
-    url: `${test.url}/api/orgs/org2`,
+    url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
     method: 'PUT',
     body: JSON.stringify({
-      id: 'orgTwo'
+      id: 'shield'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     chai.expect(response.statusCode).to.equal(400);
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(err).to.equal(null);
     done();
   });
 }
 
-/*
+/**
  * Makes a request to get the organization roles for
  * the user. This should passwith a 200 code.
  */
 
 function orgRole(done) {
   request({
-    url: `${test.url}/api/orgs/org1/members/${M.config.test.username}`,
+    url: `${test.url}/api/orgs/xmen/members/${M.config.test.username}`,
     headers: getHeaders()
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.write).to.equal(true);
     chai.expect(json.read).to.equal(true);
     chai.expect(json.admin).to.equal(true);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
 
-/*
+/**
  * Attempts to make a request to get the organization roles for
  * the another user then the request.
  * Not sure if it shoud throw an error or pass.
  */
 function rejectRole(done) {
   request({
-    url: `${test.url}/api/orgs/org1/members/${M.config.test.username}`,
+    url: `${test.url}/api/orgs/xmen/members/${M.config.test.username}`,
     headers: getHeaders()
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.write).to.equal(true);
     chai.expect(json.read).to.equal(true);
     chai.expect(json.admin).to.equal(true);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
 
 
-/*
+/**
  * Makes a GET request to /api/orgs. At this point we should have 2 orgs
  * in the database.
  */
@@ -309,10 +321,11 @@ function getTwoOrgs(done) {
     url: `${test.url}/api/orgs`,
     headers: getHeaders()
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.length).to.equal(2);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -325,18 +338,19 @@ function getTwoOrgs(done) {
  */
 function postOrg02Err(done) {
   request({
-    url: `${test.url}/api/orgs/org1`,
+    url: `${test.url}/api/orgs/xmen`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
-      id: 'org2',
-      name: 'Organization 2'
+      id: 'shield',
+      name: 'SHIELD'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     chai.expect(response.statusCode).to.equal(400);
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -355,8 +369,9 @@ function postInvalidOrg(done) {
       name: 'Invalid Organization'
     })
   },
-  function(err, response) {
+  (err, response) => {
     chai.expect(response.statusCode).to.not.equal(200);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -368,17 +383,18 @@ function postInvalidOrg(done) {
  */
 function postOrg03(done) {
   request({
-    url: `${test.url}/api/orgs/org3`,
+    url: `${test.url}/api/orgs/pymparticles`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
-      id: 'org3'
+      id: 'pymparticles'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     chai.expect(response.statusCode).to.equal(400);
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -397,10 +413,11 @@ function postEmptyOrg(done) {
 
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     chai.expect(response.statusCode).to.equal(400);
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -413,17 +430,18 @@ function postEmptyOrg(done) {
  */
 function postOrg04(done) {
   request({
-    url: `${test.url}/api/orgs/org2`,
+    url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
-      name: 'Organization 2'
+      name: 'SHIELD'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     chai.expect(response.statusCode).to.equal(400);
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -434,7 +452,7 @@ function postOrg04(done) {
  */
 function deleteOrg01(done) {
   request({
-    url: `${test.url}/api/orgs/org1`,
+    url: `${test.url}/api/orgs/xmen`,
     headers: getHeaders(),
     method: 'DELETE',
     body: JSON.stringify({
@@ -443,6 +461,7 @@ function deleteOrg01(done) {
   },
   function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -454,7 +473,7 @@ function deleteOrg01(done) {
  */
 function deleteOrg02(done) {
   request({
-    url: `${test.url}/api/orgs/org2`,
+    url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
     method: 'DELETE',
     body: JSON.stringify({
@@ -463,6 +482,7 @@ function deleteOrg02(done) {
   },
   function(err, response) {
     chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -479,6 +499,7 @@ function getOrgs03(done) {
   function(err, response, body) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
     chai.expect(json.length).to.equal(0);
     done();
   });
