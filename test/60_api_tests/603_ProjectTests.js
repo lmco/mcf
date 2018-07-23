@@ -103,7 +103,7 @@ describe(name, () => {
   /*-------------------------------------
    * After: run after all tests
    *-------------------------------------*/
-  after((done) => {
+  after(function(done) {
     this.timeout(5000);
     // Removing the Organization created in the before
     OrgController.removeOrg(user, 'biochemistry', { soft: false })
