@@ -35,6 +35,7 @@ describe(name, () => {
   it('should delete the key by user input', keyDelete);
   it('should sanitize html inputs by user', htmlTest);
   it('should sanitize a JSON object', sanitizeHtmlObject);
+  it('should sanitize an LDAP filter', sanitizeLDAP);
   it('should not sanitize the allowed exceptions', sanitizeAllowedCharacters);
 });
 
@@ -77,7 +78,7 @@ function htmlTest(done) {
 }
 
 /**
- * Test sanitization of a JSON Object.
+ * Test sanitation of a JSON Object.
  */
 function sanitizeHtmlObject(done) {
   const data = {
@@ -97,7 +98,18 @@ function sanitizeHtmlObject(done) {
 }
 
 /**
- * Should attempt to sanatize &amp; and other allowed exceptions.
+ * Should attempt to sanitize ldap special filter chars.
+ */
+function sanitizeLDAP(done) {
+  const s = 'test1 \\ test2 * test3 ( test4 ) test5 NUL';
+  const expected = 'test1 \\2A test2 \\28 test3 \\29 test4 \\5C test5 \\00';
+  const ldapSan = sanitization.ldapFilter(s);
+  chai.expect(ldapSan).to.equal(expected);
+  done();
+}
+
+/**
+ * Should attempt to sanitize &amp; and other allowed exceptions.
  */
 function sanitizeAllowedCharacters(done) {
   const s = 'this string has &amp; and &lt; but also &sample';
