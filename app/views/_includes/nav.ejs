@@ -15,7 +15,10 @@
 
     <a class="navbar-brand" href="/">
       <img src="/img/logo.png" height="40" alt="">
-      <span>Model-Based Engineering Environment</span>
+      <span>
+        <% /* MBEE <small>Model-Based Engineering Environment</small>*/ %>
+        Model-Based Engineering Environment
+      </span>
     </a>
 
    <button class="navbar-toggler"
@@ -50,7 +53,7 @@
                     <a class="dropdown-item" href="/plugins/developers">Developer Documentation</a>
                 </div>
             </li>
-			
+
 			<% if (typeof pluginFiles !== 'undefined' && pluginFiles) { %>
 			<li class="nav-item dropdown">
                 <a id="navbarDropdown"
@@ -63,15 +66,15 @@
                     Plugins
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-				
+
 					<% pluginFiles.forEach( (plugin) => { %>
 						<a class="dropdown-item" href=<%='plugins/' + plugin%>><%=plugin%></a>
 					<% }); %>
-				
+
 				</div>
             </li>
 			<% } %>
-			
+
             <li class="nav-item">
                 <a class="nav-link" href="/about">About</a>
             </li>
