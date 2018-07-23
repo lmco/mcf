@@ -120,8 +120,8 @@ module.exports.CustomError = class CustomError extends Error {
   /**
    * @description  Overrides the console.log output of the CustomError.
    */
-  inspect() {
-    return `${this.status} ERROR: ${this.description}`;
-  }
+  // inspect() {
+  //   return `${this.status} ERROR: ${this.description}`;
+  // }
 
 };

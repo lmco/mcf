@@ -74,7 +74,7 @@ describe(name, () => {
     });
   });
 
-  after((done) => {
+  after(function(done) {
     User.findOneAndRemove({
       username: M.config.test.username
     }, (err) => {

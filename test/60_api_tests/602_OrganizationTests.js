@@ -73,7 +73,8 @@ describe(name, () => {
     });
   });
 
-  after((done) => {
+  after(function(done) {
+    this.timeout(5000);
     User.findOneAndRemove({
       username: M.config.test.username
     }, (err) => {
