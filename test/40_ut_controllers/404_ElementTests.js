@@ -10,11 +10,14 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Element Controller Tests
+ * @module test/404_ElementController
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  Tests the element controller
+ * @description  This tests the Element Controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The element controller tests create,
+ * update, find, soft delete, and hard delete of the projects.
  */
 
 const path = require('path');
@@ -38,7 +41,7 @@ let proj = null;
  *       Main
  *------------------------------------*/
 
-describe(name, function() {
+describe(name, () => {
   /**
    * This function runs before all the tests in this test suite.
    */
@@ -70,13 +73,13 @@ describe(name, function() {
           chai.expect(userUpdate).to.not.equal(null);
           // Creating a non admin user
           const orgData = {
-            id: 'empire',
-            name: 'Galactic Empire'
+            id: 'asgard',
+            name: 'Asgard'
           };
           OrgController.createOrg(user, orgData)
           .then((retOrg) => {
             org = retOrg;
-            ProjController.createProject(user, { id: 'deathstar', name: 'Death Star', org: { id: org.id } })
+            ProjController.createProject(user, { id: 'thor', name: 'Thor Odinson', org: { id: org.id } })
             .then((retProj) => {
               proj = retProj;
               done();
@@ -144,7 +147,7 @@ describe(name, function() {
 function createElement(done) {
   const newElement = {
     id: 'elem0',
-    name: 'Death Star Arbitrary Element',
+    name: 'Mjolnir',
     project: {
       id: proj.id,
       org: {
@@ -170,7 +173,7 @@ function createElement(done) {
 function createChildElement(done) {
   const newElement = {
     id: 'elem1',
-    name: 'Death Star Important Element',
+    name: 'Heimdall the Gatekeeper',
     project: {
       id: proj.id,
       org: {
@@ -206,7 +209,7 @@ function createChildElement(done) {
 function createBlock(done) {
   const newElement = {
     id: 'elem2',
-    name: 'Death Star Important Block',
+    name: 'Loki brother of Thor',
     project: {
       id: proj.id,
       org: {
@@ -242,7 +245,7 @@ function createBlock(done) {
 function createRelationship(done) {
   const newElement = {
     id: 'rel1',
-    name: 'Death Star Relationship',
+    name: 'Hate Relationship',
     project: {
       id: proj.id,
       org: {
@@ -318,7 +321,7 @@ function findElementsBadType(done) {
 function findElement(done) {
   ElemController.findElement(user, org.id, proj.id, 'elem0')
   .then((retElem) => {
-    chai.expect(retElem.name).to.equal('Death Star Arbitrary Element');
+    chai.expect(retElem.name).to.equal('Mjolnir');
     chai.expect(retElem.id).to.equal('elem0');
     done();
   })
@@ -332,10 +335,10 @@ function findElement(done) {
  * Update an element
  */
 function updateElement(done) {
-  ElemController.updateElement(user, org.id, proj.id, 'elem0', { name: 'Death Star 2 Element' })
+  ElemController.updateElement(user, org.id, proj.id, 'elem0', { name: 'Thors Hammer' })
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem0');
-    chai.expect(retElem.name).to.equal('Death Star 2 Element');
+    chai.expect(retElem.name).to.equal('Thors Hammer');
     done();
   })
   .catch((error) => {

@@ -10,12 +10,17 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  TestAPIBasic.js
+ * @module  test/601_UserAPI
  *
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * Tests Basic API functionality with Organizations.
+ *
+ * @description This tests the API controller functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code we want to make sure everything still
+ * works as it should. These API controller tests are specifically for the User
+ * API tests: posting, putting, getting, and deleting a user.
  */
 
 const path = require('path');
@@ -37,7 +42,7 @@ const user = M.config.test.username;
  *       Main
  *------------------------------------*/
 
-describe(name, function() {
+describe(name, () => {
   before(function(done) {
     this.timeout(5000);
 
@@ -86,9 +91,9 @@ describe(name, function() {
   it('should delete a user', deleteUser).timeout(5000);
 });
 
-/**---------------------------------------------------
-   *            Test Functions
-   ----------------------------------------------------*/
+/*------------------------------------
+ *       Test Functions
+ *------------------------------------*/
 
 /**
  * Makes a GET request to /api/users/:username. This is to
@@ -99,10 +104,11 @@ function getUser(done) {
     url: `${test.url}/api/users/${user}`,
     headers: getHeaders()
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(json.username).to.equal(user);
     chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -113,21 +119,22 @@ function getUser(done) {
  */
 function postUser(done) {
   request({
-    url: `${test.url}/api/users/lskywalker`,
+    url: `${test.url}/api/users/deadpool`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
-      username: 'lskywalker',
-      password: 'iamajedi',
-      fname: 'Luke',
-      lname: 'Skywalker'
+      username: 'deadpool',
+      password: 'babyhands',
+      fname: 'Wade',
+      lname: 'Wilson'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(json.username).to.equal('lskywalker');
-    chai.expect(json.fname).to.equal('Luke');
+    chai.expect(json.username).to.equal('deadpool');
+    chai.expect(json.fname).to.equal('Wade');
     chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -141,10 +148,11 @@ function getUsers(done) {
     url: `${test.url}/api/users`,
     headers: getHeaders()
   },
-  function(err, response, body) {
-    chai.expect(body).to.include('mbee');
-    chai.expect(body).to.include('lskywalker');
+  (err, response, body) => {
+    chai.expect(body).to.include(user);
+    chai.expect(body).to.include('deadpool');
     chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -155,18 +163,19 @@ function getUsers(done) {
  */
 function putUser(done) {
   request({
-    url: `${test.url}/api/users/lskywalker`,
+    url: `${test.url}/api/users/deadpool`,
     headers: getHeaders(),
     method: 'PUT',
     body: JSON.stringify({
-      fname: 'Leia'
+      fname: 'Mr Wade'
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(json.username).to.equal('lskywalker');
-    chai.expect(json.fname).to.equal('Leia');
+    chai.expect(json.username).to.equal('deadpool');
+    chai.expect(json.fname).to.equal('Mr Wade');
     chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
     done();
   });
 }
@@ -177,17 +186,19 @@ function putUser(done) {
  */
 function deleteUser(done) {
   request({
-    url: `${test.url}/api/users/lskywalker`,
+    url: `${test.url}/api/users/deadpool`,
     headers: getHeaders(),
     method: 'DELETE',
     body: JSON.stringify({
       soft: false
     })
   },
-  function(err, response, body) {
+  (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(json).to.equal('lskywalker');
+    chai.expect(err).to.equal(null);
+    chai.expect(json).to.equal('deadpool');
     chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
     done();
   });
 }

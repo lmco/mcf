@@ -10,11 +10,14 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @fileOverview UserModelTests
+ * @module test/301_UserModel
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This class defines basic tests of the User data model.
+ * @description This tests the User Model functionality. These tests
+ * are to make sure the code is working as it should or should not be. Especially,
+ * when making changes/ updates to the code. The user model tests create,
+ * update, finds, soft deletes, and hard deletes users.
  */
 
 const path = require('path');
@@ -33,14 +36,20 @@ const User = M.load('models/User');
  *------------------------------------*/
 
 describe(name, () => {
-  // runs before all tests in this block
+  /*-------------------------------------
+   * Before: runs before all tests
+   *-------------------------------------*/
   before(() => {
+    // Open the database connection
     const db = M.load('lib/db');
     db.connect();
   });
 
-  // runs after all tests in this block
+  /*-------------------------------------
+   * After: runs after all tests
+   *-------------------------------------*/
   after(() => {
+    // Close database connection
     mongoose.connection.close();
   });
 
@@ -66,10 +75,10 @@ describe(name, () => {
  */
 function createUser(done) {
   const user = new User({
-    username: 'ackbar',
-    password: 'itsatrap',
-    fname: 'Admiral',
-    lname: 'Ackbar'
+    username: 'spiderman',
+    password: 'icanshootwebs',
+    fname: 'Spider',
+    lname: 'Man'
   });
   user.save((err) => {
     if (err) {
@@ -81,16 +90,16 @@ function createUser(done) {
 }
 
 /**
- * @description  Verifies that the actual password matches the stored one.
+ * Verifies that the actual password matches the stored one.
  */
 function verifyValidPassword(done) {
   User.findOne({
-    username: 'ackbar',
+    username: 'spiderman',
     deletedOn: null
   }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
-    user.verifyPassword('itsatrap')
+    user.verifyPassword('icanshootwebs')
     .then((result) => {
       chai.expect(result).to.equal(true);
       done();
@@ -103,16 +112,16 @@ function verifyValidPassword(done) {
 }
 
 /**
- * @description  Verifies that an incorrect password doesn't match the stored one.
+ * Verifies that an incorrect password doesn't match the stored one.
  */
 function verifyInvalidPassword(done) {
   User.findOne({
-    username: 'ackbar',
+    username: 'spiderman',
     deletedOn: null
   }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
-    user.verifyPassword('itsnotatrap')
+    user.verifyPassword('icantshootwebs')
     .then((result) => {
       chai.expect(result).to.equal(false);
       done();
@@ -131,19 +140,19 @@ function verifyInvalidPassword(done) {
  */
 function getUser(done) {
   User.findOne({
-    username: 'ackbar',
+    username: 'spiderman',
     deletedOn: null
   }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
 
     // Check first and last name
-    chai.expect(user.fname).to.equal('Admiral');
-    chai.expect(user.lname).to.equal('Ackbar');
+    chai.expect(user.fname).to.equal('Spider');
+    chai.expect(user.lname).to.equal('Man');
 
     // Check the full name
-    chai.expect(user.getFullName()).to.equal('Admiral Ackbar');
-    chai.expect(user.name).to.equal('Admiral Ackbar');
+    chai.expect(user.getFullName()).to.equal('Spider Man');
+    chai.expect(user.name).to.equal('Spider Man');
 
     done();
   });
@@ -151,13 +160,14 @@ function getUser(done) {
 
 
 /**
- * Updates a user's name.
+ * Updates a user's name using the User Model.
  */
 function updateUser(done) {
   User.findOneAndUpdate({
-    username: 'ackbar'
+    username: 'spiderman'
   }, {
-    fname: 'Mr.'
+    fname: 'Mr.',
+    lname: 'Spiderman'
   }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
@@ -168,11 +178,11 @@ function updateUser(done) {
     }, (err2, user2) => {
       chai.expect(err2).to.equal(null);
       // Check basic user data
-      chai.expect(user2.username).to.equal('ackbar');
+      chai.expect(user2.username).to.equal('spiderman');
       chai.expect(user2.fname).to.equal('Mr.');
-      chai.expect(user2.lname).to.equal('Ackbar');
-      chai.expect(user2.getFullName()).to.equal('Mr. Ackbar');
-      chai.expect(user2.name).to.equal('Mr. Ackbar');
+      chai.expect(user2.lname).to.equal('Spiderman');
+      chai.expect(user2.getFullName()).to.equal('Mr. Spiderman');
+      chai.expect(user2.name).to.equal('Mr. Spiderman');
       done();
     });
   });
@@ -187,7 +197,7 @@ function softDeleteUser(done) {
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-  User.findOne({ username: 'ackbar' })
+  User.findOne({ username: 'spiderman' })
   .exec((err, user) => {
     user.deleted = true;
     user.save((saveErr) => {
@@ -211,11 +221,11 @@ function softDeleteUser(done) {
  */
 function getSoftDeletedUser(done) {
   User.findOne({
-    username: 'ackbar'
+    username: 'spiderman'
   }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
-    chai.expect(user.username).to.equal('ackbar');
+    chai.expect(user.username).to.equal('spiderman');
     done();
   });
 }
@@ -225,7 +235,7 @@ function getSoftDeletedUser(done) {
  */
 function deleteUser(done) {
   User.findOneAndRemove({
-    username: 'ackbar'
+    username: 'spiderman'
   }, (err) => {
     chai.expect(err).to.equal(null);
     done();
