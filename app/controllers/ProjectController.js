@@ -62,7 +62,7 @@ class ProjectController {
   static findProjects(reqUser, organizationID, softDeleted = false) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID], 'string');
+        utils.assertType([organizationID], 'string');
       }
       catch (error) {
         return reject(error);
@@ -131,7 +131,7 @@ class ProjectController {
   static removeProjects(reqUser, organizationID, options) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID], 'string');
+        utils.assertType([organizationID], 'string');
       }
       catch (error) {
         return reject(error);
@@ -187,8 +187,8 @@ class ProjectController {
   static findProject(reqUser, organizationID, projectID, softDeleted = false) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID, projectID], 'string');
-        utils.checkType([softDeleted], 'boolean');
+        utils.assertType([organizationID, projectID], 'string');
+        utils.assertType([softDeleted], 'boolean');
       }
       catch (error) {
         return reject(error);
@@ -252,8 +252,8 @@ class ProjectController {
   static createProject(reqUser, project) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkExists(['id', 'name', 'org.id'], project);
-        utils.checkType([project.id, project.name, project.org.id], 'string');
+        utils.assertExists(['id', 'name', 'org.id'], project);
+        utils.assertType([project.id, project.name, project.org.id], 'string');
       }
       catch (error) {
         return reject(error);
@@ -342,8 +342,8 @@ class ProjectController {
   static updateProject(reqUser, organizationID, projectID, projectUpdated) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID, projectID], 'string');
-        utils.checkType([projectUpdated], 'object');
+        utils.assertType([organizationID, projectID], 'string');
+        utils.assertType([projectUpdated], 'object');
       }
       catch (error) {
         return reject(error);
@@ -449,8 +449,8 @@ class ProjectController {
 
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID, projectID], 'string');
-        utils.checkType([options], 'object');
+        utils.assertType([organizationID, projectID], 'string');
+        utils.assertType([options], 'object');
       }
       catch (error) {
         return reject(error);
@@ -653,7 +653,7 @@ class ProjectController {
   static setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID, projectID, permissionType], 'string');
+        utils.assertType([organizationID, projectID, permissionType], 'string');
       }
       catch (error) {
         return reject(error);
