@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Lib Error Tests
+ * @module  test/203_LibError
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- @description  This file tests basic CustomError functionality.
+ * @description  This file tests basic CustomError functionality.
  */
 
 const chai = require('chai');
@@ -54,7 +54,7 @@ function noStatusCode(done) {
 
 
 /**
- * @description  Creates an error with no 400 code
+ * Creates an error with no 400 code
  */
 function status400(done) {
   const err = new errors.CustomError('Project id not provided.', 400);
@@ -66,7 +66,7 @@ function status400(done) {
 }
 
 /**
- * @description  Logs a critical error
+ * Logs a critical error
  */
 function critical(done) {
   const err = new errors.CustomError('I need some coffee.', 418, 'critical');
@@ -77,7 +77,7 @@ function critical(done) {
 }
 
 /**
- * @description  Returns the error in JSON format
+ * Returns the error in JSON format
  */
 function toJSON(done) {
   const err = new errors.CustomError('Where did it go...', 404, 'error');
