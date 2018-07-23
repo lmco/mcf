@@ -287,6 +287,13 @@ class OrganizationController {
             return reject(new errors.CustomError(`The Organization [${updateField}] is not of type String`, 400));
           }
 
+          // Handle case where the org name is updated, and is invalid
+          if (updateField === 'name') {
+            if (!RegExp(M.lib.validators.org.name).test(orgUpdate[updateField])) {
+              return reject(new errors.CustomError('The updated organization name is not valid.', 400));
+            }
+          }
+
           // sanitize field
           updateVal = M.lib.sani.sanitize(orgUpdate[updateField]);
           // Update field in org object
@@ -349,11 +356,8 @@ class OrganizationController {
 
       // Delete the projects first while the org still exists
       ProjController.removeProjects(user, orgID, options)
-      .then(() => {
-        OrganizationController.removeOrgHelper(user, orgID, softDelete)
-        .then((retOrg) => resolve(retOrg))
-        .catch((err) => reject(err));
-      })
+      .then(() => OrganizationController.removeOrgHelper(user, orgID, softDelete))
+      .then((retOrg) => resolve(retOrg))
       .catch((deleteErr) => { // eslint-disable-line consistent-return
         // There are simply no projects associated with this org to delete
         if (deleteErr.description === 'No projects found.') {
