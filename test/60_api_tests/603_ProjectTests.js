@@ -105,7 +105,7 @@ describe(name, () => {
    *-------------------------------------*/
   after(function(done) {
     this.timeout(5000);
-    // Removing the Organization created in the before
+    // Removing the Organization
     OrgController.removeOrg(user, 'biochemistry', { soft: false })
     .then((retOrg) => {
       chai.expect(retOrg.id).to.equal('biochemistry');
