@@ -89,7 +89,7 @@ class OrganizationController {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Error check - Make sure orgID is a string. Otherwise, reject.
       try {
-        utils.checkType([organizationID], 'string');
+        utils.assertType([organizationID], 'string');
       }
       catch (error) {
         return reject(error);
@@ -149,9 +149,9 @@ class OrganizationController {
   static createOrg(user, orgInfo) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
-        utils.checkAdmin(user);
-        utils.checkExists(['id', 'name'], orgInfo);
-        utils.checkType([orgInfo.id, orgInfo.name], 'string');
+        utils.assertAdmin(user);
+        utils.assertExists(['id', 'name'], orgInfo);
+        utils.assertType([orgInfo.id, orgInfo.name], 'string');
       }
       catch (error) {
         return reject(error);
@@ -228,8 +228,8 @@ class OrganizationController {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Error check - Verify parameters are correct type.
       try {
-        utils.checkType([organizationID], 'string');
-        utils.checkType([orgUpdate], 'object');
+        utils.assertType([organizationID], 'string');
+        utils.assertType([orgUpdate], 'object');
       }
       catch (error) {
         return reject(error);
@@ -341,9 +341,9 @@ class OrganizationController {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       let softDelete = true;
       try {
-        utils.checkAdmin(user);
-        utils.checkType([organizationID], 'string');
-        utils.checkExists(['soft'], options);
+        utils.assertAdmin(user);
+        utils.assertType([organizationID], 'string');
+        utils.assertExists(['soft'], options);
         if (options.soft === false) {
           softDelete = false;
         }
@@ -478,7 +478,7 @@ class OrganizationController {
       }
 
       try {
-        utils.checkType([organizationID], 'string');
+        utils.assertType([organizationID], 'string');
       }
       catch (error) {
         return reject(error);
@@ -560,8 +560,8 @@ class OrganizationController {
   static findAllPermissions(user, organizationID) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
-        utils.checkAdmin(user);
-        utils.checkType([organizationID], 'string');
+        utils.assertAdmin(user);
+        utils.assertType([organizationID], 'string');
       }
       catch (error) {
         return reject(error);
