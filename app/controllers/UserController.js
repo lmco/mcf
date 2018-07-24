@@ -18,9 +18,9 @@
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.load('models/User');
-const errors = M.load('lib/errors');
-const utils = M.load('lib/utils');
+const User = M.require('models/User');
+const errors = M.require('lib/errors');
+const utils = M.require('lib/utils');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and

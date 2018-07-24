@@ -29,11 +29,11 @@ const mongoose = require('mongoose');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const ElemController = M.load('controllers/ElementController');
-const OrgController = M.load('controllers/OrganizationController');
-const ProjController = M.load('controllers/ProjectController');
-const UserController = M.load('controllers/UserController');
-const AuthController = M.load('lib/auth');
+const ElemController = M.require('controllers/ElementController');
+const OrgController = M.require('controllers/OrganizationController');
+const ProjController = M.require('controllers/ProjectController');
+const UserController = M.require('controllers/UserController');
+const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
 
@@ -55,7 +55,7 @@ describe(name, () => {
    *-------------------------------------*/
   before(function(done) {
     this.timeout(6000);
-    const db = M.load('lib/db');
+    const db = M.require('lib/db');
     db.connect();
     const u = M.config.test.username;
     const p = M.config.test.password;

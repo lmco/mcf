@@ -32,7 +32,7 @@ const User = M.require('models/User');
 const Org = M.require('models/Organization');
 const Project = M.require('models/Project');
 const Element = M.require('models/Element');
-const AuthController = M.load('lib/auth');
+const AuthController = M.require('lib/auth');
 
 // This is so the same org and project can be referenced across test functions
 let org = null;
@@ -52,7 +52,7 @@ describe(name, function() {
   before(function() {
     this.timeout(5000);
     return new Promise((resolve, reject) => {
-      const db = M.load('lib/db');
+      const db = M.require('lib/db');
       db.connect();
 
       const u = M.config.test.username;
