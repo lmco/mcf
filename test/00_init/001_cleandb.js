@@ -32,9 +32,6 @@ const Elem = M.require('models/Element');
 
 const db = M.load('lib/db');
 
-let user = null;
-
-
 /*------------------------------------
  *       Main
  *------------------------------------*/
@@ -62,7 +59,7 @@ describe(name, () => {
 
 // ELEMENT REMOVE ISNT WORKING WHY YOU HATE MEEEEEE
 
-function checkDB(done){
+function checkDB(done) {
   User.remove({}, (error) => {
     chai.expect(error).to.equal(null);
     Organization.remove({}, (error2) => {
