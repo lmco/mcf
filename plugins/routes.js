@@ -165,7 +165,6 @@ M.config.server.plugins.plugins.forEach((plugin) => {
 });
 
 files.forEach((f) => {
-
   // Delete the directory in no a protected file or not in the config
   if (!protectedFileNames.includes(f) && !pluginName.includes(f)) {
     M.log.info(`Removing plugin '${f}' ...`);
