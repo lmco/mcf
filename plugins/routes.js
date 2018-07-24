@@ -24,6 +24,8 @@ const M = require(path.join(__dirname, '..', 'mbee.js'));
 const express = require('express');
 const pluginRouter = express.Router();
 
+const protectedFileNames = ['routes.js'];
+
 /**
  * Clones the plugin from a Git repository and places in the appropriate
  * location in the plugins directory.
@@ -155,7 +157,22 @@ for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
 
 // Load plugin routes
 const files = fs.readdirSync(__dirname);
+
+// Get a list of plugin names in the config
+const pluginName = [];
+M.config.server.plugins.plugins.forEach((plugin) => {
+  pluginName.push(plugin.name);
+});
+
 files.forEach((f) => {
+
+  // Delete the directory in no a protected file or not in the config
+  if (!protectedFileNames.includes(f) && !pluginName.includes(f)) {
+    M.log.info(`Removing plugin '${f}' ...`);
+    const c = `rm -rf ${__dirname}/${f}`;
+    const stdout = execSync(c);
+    M.log.verbose(stdout.toString());
+  }
   // If package.json doesn't exist, skip it
   const pluginPath = path.join(__dirname, f);
   if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
