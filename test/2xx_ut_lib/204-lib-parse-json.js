@@ -10,11 +10,11 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  Lib Tests
+ * @module  test/204-lib-parse-json
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- @description  This is currently a test to see if encrypt returns a hex.
+ * @description  This is currently a test to see if encrypt returns a hex.
  */
 
 const chai = require('chai');
@@ -23,39 +23,31 @@ const filename = module.filename;
 const name = filename.split('/')[filename.split('/').length - 1];
 
 const M = require('../../mbee.js');
-const parseJSON = M.require('lib.parse_json');
+const parseJSON = M.require('lib.parse-json');
 
-/*------------------------------------
- *       Main
- *------------------------------------
- */
+/******************************************************************************
+ *  Main                                                                      *
+ ******************************************************************************/
 
 describe(name, () => {
   it('Should parse the configuration file', parseTest);
 });
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/******************************************************************************
+ *  Test Function                                                             *
+ ******************************************************************************/
 
 /**
- * Checks to make sure the file is being properly parsed
+ * @description Checks to make sure the file is being properly parsed
  */
 function parseTest(done) {
   const parseString = parseJSON.removeComments('test/testParse.config');
-  const checkString = '{\n'
-      + '    key1: null\n'
-      + '    key2: 1234567890\n'
-      + '    key3: \'string1\'\n'
-      + '    key4:\n'
-      + '    {\n'
-      + '        nestedKey1: null\n'
-      + '        nestedKey3: \'string2\'\n'
-      + '    }\n'
-      + '    key1: [\'val1\', \'val2\', \'val3\']\n'
-      + '}'
-      + '\n';
-
-  chai.expect(parseString).to.equal(checkString);
+  try {
+    const checkString = JSON.parse(parseString);
+    chai.expect(typeof checkString).to.equal('object');
+  }
+  catch (err) {
+    chai.expect(true).to.equal(false);
+  }
   done();
 }

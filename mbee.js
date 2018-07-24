@@ -42,7 +42,7 @@ M.require = m => {
 };
 
 // Configuration file parsing and initialization
-const parseJSON = M.require('lib.parse_json');
+const parseJSON = M.require('lib.parse-json');
 M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.json`)));
 
 // Set config secret if it's set to RANDOM
@@ -80,13 +80,13 @@ const opts = process.argv.slice(3);
 if (fs.existsSync(`${__dirname}/node_modules`) && fs.existsSync(`${__dirname}/public`)) {
   M.log = M.require('lib.logger');
   M.lib = {
-    crypto: M.require('lib.crypto'),
     db: M.require('lib.db'),
+    crypto: M.require('lib.crypto'),
     sani: M.require('lib.sanitization'),
     startup: M.require('lib.startup'),
     validators: M.require('lib.validators'),
-    parse_json: M.require('lib.parse_json'),
-    mock_express: M.require('lib.mock_express')
+    parse_json: M.require('lib.parse-json'),
+    mock_express: M.require('lib.mock-express')
   };
   module.exports = M;
 }

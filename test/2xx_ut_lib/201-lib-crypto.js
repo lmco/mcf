@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  test/201_LibCrypto
+ * @module  test/201-lib-crypto
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -24,40 +24,42 @@ const name = fname.split('/')[fname.split('/').length - 1];
 
 const M = require('../../mbee.js');
 
-/*------------------------------------
- *       Main
- *------------------------------------
- */
+/******************************************************************************
+ *  Main                                                                      *
+ ******************************************************************************/
 
 describe(name, () => {
-  it('should have encrypt and decypt functions', defCrypts);
+  it('should have encrypt and decrypt functions', checkCryptoFunctions);
   it('should encrypt and decrypt a message', encryptTest);
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
-
+/******************************************************************************
+ *  Test Functions                                                            *
+ ******************************************************************************/
 
 /**
- * Loads the crypto library.
+ * @description Requires the crypto library and checks that it has encrypt and
+ * decrypt functions
  */
-function defCrypts(done) {
+function checkCryptoFunctions(done) {
   const crypto = M.require('lib/crypto');
-  chai.expect(crypto.encrypt).to.not.equal(undefined);
-  chai.expect(crypto.decrypt).to.not.equal(undefined);
+  chai.expect(crypto.hasOwnProperty('encrypt')).to.equal(true);
+  chai.expect(crypto.hasOwnProperty('decrypt')).to.equal(true);
+  chai.expect(typeof crypto.encrypt).to.equal('function');
+  chai.expect(typeof crypto.decrypt).to.equal('function');
   done();
 }
 
 /**
- * Encrypts and decrypts a message.
- * Expected to pass by returning the decrypted message.
+ * @description Encrypts and decrypts a string message. Expected to pass by
+ * returning 'HULK SMASH' after encrypting and decrypting.
  */
 function encryptTest(done) {
   const crypto = M.require('lib/crypto');
-  const message = crypto.encrypt('infinity stone');
-  const decrypMess = crypto.decrypt(message);
-  chai.expect(decrypMess).to.equal('infinity stone');
+  const encrypted = crypto.encrypt('HULK SMASH');
+  const decrypted = crypto.decrypt(encrypted);
+  chai.expect(encrypted).to.not.equal('HULK SMASH');
+  chai.expect(decrypted).to.equal('HULK SMASH');
   done();
 }
