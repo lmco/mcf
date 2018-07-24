@@ -124,7 +124,7 @@ module.exports.assertExists = function(params, obj, parent = null) {
  */
 module.exports.checkExists = function(params, obj, parent = null) {
   try {
-    this.assertExists(params, obj, parent)
+    this.assertExists(params, obj, parent);
     return true;
   }
   catch (error) {
