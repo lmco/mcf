@@ -18,9 +18,9 @@
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const Organization = M.load('models/Organization');
-const errors = M.load('lib/errors');
-const utils = M.load('lib/utils');
+const Organization = M.require('models/Organization');
+const errors = M.require('lib/errors');
+const utils = M.require('lib/utils');
 
 
 /**
@@ -336,7 +336,7 @@ class OrganizationController {
   static removeOrg(user, organizationID, options) {
     // Loading controller function wide since the project controller loads
     // the org controller globally. Both files cannot load each other globally.
-    const ProjController = M.load('controllers/ProjectController');
+    const ProjController = M.require('controllers/ProjectController');
 
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       let softDelete = true;

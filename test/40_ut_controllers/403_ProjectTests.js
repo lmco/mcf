@@ -28,12 +28,12 @@ const mongoose = require('mongoose');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const ProjController = M.load('controllers/ProjectController');
-const UserController = M.load('controllers/UserController');
-const OrgController = M.load('controllers/OrganizationController');
-const ElemController = M.load('controllers/ElementController');
-const Element = M.load('models/Element');
-const AuthController = M.load('lib/auth');
+const ProjController = M.require('controllers/ProjectController');
+const UserController = M.require('controllers/UserController');
+const OrgController = M.require('controllers/OrganizationController');
+const ElemController = M.require('controllers/ElementController');
+const Element = M.require('models/Element');
+const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
 let nonAuser = null;
@@ -49,7 +49,7 @@ describe(name, () => {
   before(function(done) {
     this.timeout(5000);
 
-    const db = M.load('lib/db');
+    const db = M.require('lib/db');
     db.connect();
 
     // Creating a Requesting Admin

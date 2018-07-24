@@ -21,8 +21,8 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.require('controllers.ProjectController');
 // Element refers to the Element.js file, not the Element model
 const Element = M.require('models.Element');
-const errors = M.load('lib/errors');
-const utils = M.load('lib/utils');
+const errors = M.require('lib/errors');
+const utils = M.require('lib/utils');
 
 
 /**

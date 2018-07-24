@@ -22,7 +22,7 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
 const M = require('../../mbee.js');
-const sanitization = M.load('lib/sanitization');
+const sanitization = M.require('lib/sanitization');
 
 /*------------------------------------
  *       Main
