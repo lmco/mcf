@@ -22,7 +22,7 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
 const M = require('../../mbee.js');
-const errors = M.load('lib/errors');
+const errors = M.require('lib/errors');
 
 /*------------------------------------
  *       Main

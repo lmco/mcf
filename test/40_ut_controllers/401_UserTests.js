@@ -30,8 +30,8 @@ const name = filename.split('/')[filename.split('/').length - 1];
 
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.require('models/User');
-const UserController = M.load('controllers/UserController');
-const AuthController = M.load('lib/auth');
+const UserController = M.require('controllers/UserController');
+const AuthController = M.require('lib/auth');
 
 let reqUser = null;
 let nonAUser = null;
@@ -47,7 +47,7 @@ describe(name, () => {
    *-------------------------------------*/
   before(function(done) {
     this.timeout(6000);
-    const db = M.load('lib/db');
+    const db = M.require('lib/db');
     db.connect();
 
     const u = M.config.test.username;

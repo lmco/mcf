@@ -22,7 +22,7 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
 const M = require('../../mbee.js');
-const utils = M.load('lib/utils');
+const utils = M.require('lib/utils');
 
 const samepleObj = {
   project: {
