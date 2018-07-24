@@ -18,7 +18,7 @@
  */
 
 const M = require('../../mbee.js');
-const logger = M.load('lib/logger');
+const logger = M.require('lib/logger');
 
 module.exports.CustomError = class CustomError extends Error {
 

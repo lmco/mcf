@@ -42,13 +42,13 @@ describe(name, () => {
  * Loads a library
  */
 function loadLib(done) {
-  const crypto = M.load('lib/crypto');
-  // var auth = M.load('lib/auth');
-  // var db = M.load('lib/db');
-  const logger = M.load('lib/logger');
-  const sanitization = M.load('lib/sanitization');
-  const startup = M.load('lib/startup');
-  const validators = M.load('lib/validators');
+  const crypto = M.require('lib/crypto');
+  // var auth = M.require('lib/auth');
+  // var db = M.require('lib/db');
+  const logger = M.require('lib/logger');
+  const sanitization = M.require('lib/sanitization');
+  const startup = M.require('lib/startup');
+  const validators = M.require('lib/validators');
   chai.expect(crypto).to.not.equal(undefined);
   // chai.expect(auth).to.not.equal(undefined);
   // chai.expect(db).to.not.equal(undefined);

@@ -22,11 +22,11 @@ const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
 
-const ElementController = mbee.load('controllers/ElementController');
-const OrgController = mbee.load('controllers/OrganizationController');
-const ProjectController = mbee.load('controllers/ProjectController');
-const UserController = mbee.load('controllers/UserController');
-const errors = M.load('lib/errors');
+const ElementController = mbee.require('controllers/ElementController');
+const OrgController = mbee.require('controllers/OrganizationController');
+const ProjectController = mbee.require('controllers/ProjectController');
+const UserController = mbee.require('controllers/UserController');
+const errors = M.require('lib/errors');
 const utils = M.require('lib.utils');
 
 

@@ -44,7 +44,7 @@ let user = null;
 describe(name, () => {
   before(function(done) {
     this.timeout(6000);
-    const db = M.load('lib/db');
+    const db = M.require('lib/db');
     db.connect();
     const u = M.config.test.username;
     const p = M.config.test.password;

@@ -21,10 +21,10 @@ const path = require('path');
 
 /* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const OrgController = M.load('controllers/OrganizationController');
-const Project = M.load('models/Project');
-const errors = M.load('lib/errors');
-const utils = M.load('lib/utils');
+const OrgController = M.require('controllers/OrganizationController');
+const Project = M.require('models/Project');
+const errors = M.require('lib/errors');
+const utils = M.require('lib/utils');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -445,7 +445,7 @@ class ProjectController {
   static removeProject(reqUser, organizationID, projectID, options) {
     // Loading controller function wide since the element controller loads
     // the project controller globally. Both files cannot load each other globally.
-    const ElemController = M.load('controllers/ElementController');
+    const ElemController = M.require('controllers/ElementController');
 
     return new Promise((resolve, reject) => {
       try {

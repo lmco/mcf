@@ -44,7 +44,7 @@ describe(name, () => {
  * Loads the crypto library.
  */
 function defCrypts(done) {
-  const crypto = M.load('lib/crypto');
+  const crypto = M.require('lib/crypto');
   chai.expect(crypto.encrypt).to.not.equal(undefined);
   chai.expect(crypto.decrypt).to.not.equal(undefined);
   done();
@@ -55,7 +55,7 @@ function defCrypts(done) {
  * Expected to pass by returning the decrypted message.
  */
 function encryptTest(done) {
-  const crypto = M.load('lib/crypto');
+  const crypto = M.require('lib/crypto');
   const message = crypto.encrypt('infinity stone');
   const decrypMess = crypto.decrypt(message);
   chai.expect(decrypMess).to.equal('infinity stone');
