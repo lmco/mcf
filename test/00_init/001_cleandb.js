@@ -14,7 +14,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  Intial test to clean the database before starting
+ * @description  Intial test to clean the database before other tests
  */
 
 const path = require('path');
@@ -28,7 +28,7 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.require('models/User');
 const Organization = M.require('models/Organization');
 const Project = M.require('models/Project');
-const Element = M.require('models/Element');
+const Elem = M.require('models/Element');
 
 const db = M.load('lib/db');
 
@@ -69,7 +69,7 @@ function checkDB(done){
       chai.expect(error2).to.equal(null);
       Project.remove({}, (error3) => {
         chai.expect(error3).to.equal(null);
-        Element.remove({}, (error4) => {
+        Elem.Element.remove({}, (error4) => {
           chai.expect(error4).to.equal(null);
           done();
         });
