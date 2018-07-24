@@ -23,7 +23,6 @@ pipeline {
     options {
         timeout(time: 20, unit: 'MINUTES')
     }
-    }
     stages {
         /**
          * Runs a few sanity-check and cleanup commands.
