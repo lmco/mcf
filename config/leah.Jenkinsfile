@@ -19,7 +19,6 @@
  */
 
 pipeline {
-    agent { dockerfile true }
     options {
         timeout(time: 20, unit: 'MINUTES')
     }
