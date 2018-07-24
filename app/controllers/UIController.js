@@ -13,7 +13,7 @@
  * @module  controllers.ui_controller
  *
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
- * 
+ *
  * @description  This implements the behavior and logic for the user interface.
  * All UI routes map to this controller which in turn uses other controllers to
  * handle other object behaviors.

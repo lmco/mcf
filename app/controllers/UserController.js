@@ -13,7 +13,7 @@
  * @module  controllers.user_controller
  *
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
- * 
+ *
  * @description  This implements the behavior and logic for a user and
  * provides functions for interacting with users.
  */

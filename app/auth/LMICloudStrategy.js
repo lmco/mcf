@@ -11,9 +11,9 @@
  *****************************************************************************/
 /**
  * @module auth.lmi_cloud_strategy
- * 
+ *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * 
+ *
  * @description This file implements our authentication strategy for cloud-based
  * deployments on the LMI.
  */
