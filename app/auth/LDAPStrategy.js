@@ -284,7 +284,7 @@ class LDAPStrategy {
         // if findUser failed with user not found, create the user in the local database
         const initData = {
           username: user[M.config.auth.ldap.attributes.username],
-          password: 'NO_PASSWORD',
+          password: (Math.random() + 1).toString(36).substring(7),
           fname: user[M.config.auth.ldap.attributes.firstName],
           lname: user[M.config.auth.ldap.attributes.lastName],
           email: user[M.config.auth.ldap.attributes.eMail],
