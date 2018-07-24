@@ -57,8 +57,6 @@ describe(name, () => {
   it('clean database', checkDB).timeout(5000);
 });
 
-// ELEMENT REMOVE ISNT WORKING WHY YOU HATE MEEEEEE
-
 function checkDB(done) {
   User.remove({}, (error) => {
     chai.expect(error).to.equal(null);

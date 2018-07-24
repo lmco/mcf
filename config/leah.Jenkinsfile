@@ -20,7 +20,10 @@
 
 pipeline {
     agent any
-
+    options {
+        timeout:(time: 20, unit: 'MINUTES')
+    }
+    }
     stages {
         /**
          * Runs a few sanity-check and cleanup commands.
@@ -41,14 +44,14 @@ pipeline {
         stage('Build') {
             steps {
                 // Build
-                sh 'NODE_ENV=production_dev node mbee build'
+                sh 'NODE_ENV=production node mbee build'
                 sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
                 // Verify build
                 sh 'ls -l'
 
                 // Build the docker image
-                sh 'NODE_ENV=production_dev node mbee docker --build'
+                sh 'NODE_ENV=production node mbee docker --build'
             }
         }
 
@@ -93,10 +96,10 @@ pipeline {
                 sh 'NODE_ENV=stage node mbee docker --clean'
 
                 // Removes any existing production running containers
-                sh 'NODE_ENV=production_dev node mbee docker --clean'
+                sh 'NODE_ENV=production node mbee docker --clean'
 
                 // Runs the production container in the background
-                sh 'NODE_ENV=production_dev node mbee docker --run'
+                sh 'NODE_ENV=production node mbee docker --run'
             }
         }
 
@@ -131,6 +134,30 @@ pipeline {
                 replyTo: "mbee-service.fc-ssc@lmco.com",
                 from: "mbee-service.fc-ssc@lmco.com",
                 attachLog: true
+        }
+        unstable{
+            emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE: \
+                            <br/><br/>Check console output at ${env.BUILD_URL} to view the results.\
+                            <br/><br/>View the Git commit on <a \
+                            href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
+                            GitLab</a>.",
+                            mimeType: 'text/html',
+                            subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE",
+                            to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+                            replyTo: "mbee-service.fc-ssc@lmco.com",
+                            from: "mbee-service.fc-ssc@lmco.com",
+                            attachLog: true
+        }
+        aborted{
+            emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ABORTED: \
+                            <br/><br/>View the Git commit on <a \
+                            href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
+                            GitLab</a>.",
+                            mimeType: 'text/html',
+                            subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ABORTED",
+                            to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+                            replyTo: "mbee-service.fc-ssc@lmco.com",
+                            from: "mbee-service.fc-ssc@lmco.com",
         }
     }
 }
