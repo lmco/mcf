@@ -157,7 +157,7 @@ pipeline {
                             subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ABORTED",
                             to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
                             replyTo: "mbee-service.fc-ssc@lmco.com",
-                            from: "mbee-service.fc-ssc@lmco.com",
+                            from: "mbee-service.fc-ssc@lmco.com"
         }
     }
 }
