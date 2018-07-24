@@ -21,7 +21,7 @@
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.load('models/User');
+const User = M.require('models/User');
 const utils = M.require('lib.utils');
 const swaggerJSDoc = require('swagger-jsdoc');
 

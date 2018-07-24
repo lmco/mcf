@@ -174,9 +174,10 @@ class LDAPStrategy {
     M.log.debug('Attempting to search for LDAP user.');
     // define promise for function
     return new Promise((resolve, reject) => {
+      const usernameSani = M.lib.sani.ldapFilter(username);
       // set filter for query based on username attribute and the configuration filter
       const filter = '(&'
-                   + `(${M.config.auth.ldap.attributes.username}=${username})`
+                   + `(${M.config.auth.ldap.attributes.username}=${usernameSani})`
                    + `${M.config.auth.ldap.filter.replace('\\', '\\\\')})`; // avoids '\\\\' in JSON
 
       // log base and filter used for query
@@ -282,7 +283,7 @@ class LDAPStrategy {
         // if findUser failed with user not found, create the user in the local database
         const initData = {
           username: user[M.config.auth.ldap.attributes.username],
-          password: 'NO_PASSWORD',
+          password: (Math.random() + 1).toString(36).substring(7),
           fname: user[M.config.auth.ldap.attributes.firstName],
           lname: user[M.config.auth.ldap.attributes.lastName],
           email: user[M.config.auth.ldap.attributes.eMail],

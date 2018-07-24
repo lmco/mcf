@@ -22,7 +22,7 @@ const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
 const M = require('../../mbee.js');
-const utils = M.load('lib/utils');
+const utils = M.require('lib/utils');
 
 const samepleObj = {
   project: {
@@ -66,7 +66,7 @@ describe(name, () => {
  */
 function stringIsString(done) {
   try {
-    utils.checkType(['hello', 'goodbye'], 'string');
+    utils.assertType(['hello', 'goodbye'], 'string');
     done();
   }
   catch (error) {
@@ -80,7 +80,7 @@ function stringIsString(done) {
  */
 function numberIsString(done) {
   try {
-    utils.checkType([1, 2], 'string');
+    utils.assertType([1, 2], 'string');
     chai.expect(true).to.equal(false);
     done();
   }
@@ -95,7 +95,7 @@ function numberIsString(done) {
  */
 function objectIsObject(done) {
   try {
-    utils.checkType([{ hello: 'string' }], 'object');
+    utils.assertType([{ hello: 'string' }], 'object');
     done();
   }
   catch (error) {
@@ -109,7 +109,7 @@ function objectIsObject(done) {
  */
 function projectIDExists(done) {
   try {
-    utils.checkExists(['project.id'], samepleObj);
+    utils.assertExists(['project.id'], samepleObj);
     done();
   }
   catch (error) {
@@ -123,7 +123,7 @@ function projectIDExists(done) {
  */
 function projectUserExists(done) {
   try {
-    utils.checkExists(['project.user'], samepleObj);
+    utils.assertExists(['project.user'], samepleObj);
     chai.expect(true).to.equal(false);
     done();
   }
@@ -138,7 +138,7 @@ function projectUserExists(done) {
  */
 function multipleExist(done) {
   try {
-    utils.checkExists(['project.id', 'project.name', 'project.org.id', 'type'], samepleObj);
+    utils.assertExists(['project.id', 'project.name', 'project.org.id', 'type'], samepleObj);
     done();
   }
   catch (error) {
@@ -153,7 +153,7 @@ function multipleExist(done) {
 function userIsAdmin(done) {
   const user = { name: 'Darth Vader', admin: true };
   try {
-    utils.checkAdmin(user);
+    utils.assertAdmin(user);
     done();
   }
   catch (error) {
@@ -168,7 +168,7 @@ function userIsAdmin(done) {
 function userIsNotAdmin(done) {
   const user = { name: 'Stormtrooper 123', admin: false };
   try {
-    utils.checkAdmin(user);
+    utils.assertAdmin(user);
     chai.expect(true).to.equal(false);
     done();
   }

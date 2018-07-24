@@ -18,7 +18,7 @@
  */
 
 const M = require('../../mbee.js');
-const errors = M.load('lib/errors');
+const errors = M.require('lib/errors');
 const path = require('path');
 const fs = require('fs');
 let pluginFiles = null;
@@ -54,7 +54,7 @@ module.exports.getPluginNames = function getPluginNames() {
  * @param  {Object} params  A list of values to check.
  * @param  {String} type  The type to check.
  */
-module.exports.checkType = function(params, type) {
+module.exports.assertType = function(params, type) {
   Object.keys(params).forEach((param) => {
     if (typeof params[param] !== type) { // eslint-disable-line valid-typeof
       throw new errors.CustomError(`Value is not a ${type}.`, 400);
@@ -70,7 +70,7 @@ module.exports.checkType = function(params, type) {
  * @param  {Object} obj  The object being searched.
  * @param  {String} parent  The parent key, defaults to null.
  */
-module.exports.checkExists = function(params, obj, parent = null) {
+module.exports.assertExists = function(params, obj, parent = null) {
   try {
     Object.keys(params).forEach((param) => {
       if (!(params[param] in obj)) {
@@ -84,7 +84,7 @@ module.exports.checkExists = function(params, obj, parent = null) {
           if (!obj[splitString]) {
             throw new errors.CustomError(`There is no attribute [${params[param]}] in the ${parentString} body.`, 400);
           }
-          this.checkExists([leftoverString], obj[splitString], splitString);
+          this.assertExists([leftoverString], obj[splitString], splitString);
         }
         else {
           throw new errors.CustomError(`There is no attribute [${params[param]}] in the ${parentString} body.`, 400);
@@ -102,7 +102,7 @@ module.exports.checkExists = function(params, obj, parent = null) {
  *
  * @param  {User} user  The user object being checked.
  */
-module.exports.checkAdmin = function(user) {
+module.exports.assertAdmin = function(user) {
   if (!user.admin) {
     throw new errors.CustomError('User does not have permissions.', 401);
   }
@@ -116,7 +116,7 @@ module.exports.checkAdmin = function(user) {
 module.exports.createUID = function(...args) {
   try {
     // Ensure all components are strings
-    this.checkType(args, 'string');
+    this.assertType(args, 'string');
 
     let returnString = '';
     for (let i = 0; i < args.length; i++) {

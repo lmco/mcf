@@ -20,7 +20,7 @@
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.load('models/User');
+const User = M.require('models/User');
 const libCrypto = M.lib.crypto;
 const sani = M.lib.sani;
 const errors = M.require('lib/errors');

@@ -20,9 +20,9 @@
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.load('models/User');
-const errors = M.load('lib/errors');
-const utils = M.load('lib/utils');
+const User = M.require('models/User');
+const errors = M.require('lib/errors');
+const utils = M.require('lib/utils');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -129,9 +129,9 @@ class UserController {
   static createUser(requestingUser, newUser) { // eslint-disable-line consistent-return
     return new Promise(((resolve, reject) => {
       try {
-        utils.checkAdmin(requestingUser);
-        utils.checkExists(['username'], newUser);
-        utils.checkType([newUser.username], 'string');
+        utils.assertAdmin(requestingUser);
+        utils.assertExists(['username'], newUser);
+        utils.assertType([newUser.username], 'string');
       }
       catch (error) {
         return reject(error);
@@ -184,9 +184,9 @@ class UserController {
   static updateUser(requestingUser, usernameToUpdate, newUserData) {
     return new Promise(((resolve, reject) => {
       try {
-        utils.checkAdmin(requestingUser);
-        utils.checkType([usernameToUpdate], 'string');
-        utils.checkType([newUserData], 'object');
+        utils.assertAdmin(requestingUser);
+        utils.assertType([usernameToUpdate], 'string');
+        utils.assertType([newUserData], 'object');
       }
       catch (error) {
         return reject(error);
@@ -255,7 +255,7 @@ class UserController {
   static removeUser(requestingUser, usernameToDelete) {
     return new Promise(((resolve, reject) => {
       try {
-        utils.checkAdmin(requestingUser);
+        utils.assertAdmin(requestingUser);
       }
       catch (error) {
         return reject(error);

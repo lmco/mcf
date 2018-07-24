@@ -23,10 +23,10 @@ const path = require('path');
 
 /* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const OrgController = M.load('controllers/OrganizationController');
-const Project = M.load('models/Project');
-const errors = M.load('lib/errors');
-const utils = M.load('lib/utils');
+const OrgController = M.require('controllers/OrganizationController');
+const Project = M.require('models/Project');
+const errors = M.require('lib/errors');
+const utils = M.require('lib/utils');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -64,7 +64,7 @@ class ProjectController {
   static findProjects(reqUser, organizationID, softDeleted = false) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID], 'string');
+        utils.assertType([organizationID], 'string');
       }
       catch (error) {
         return reject(error);
@@ -133,7 +133,7 @@ class ProjectController {
   static removeProjects(reqUser, organizationID, options) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID], 'string');
+        utils.assertType([organizationID], 'string');
       }
       catch (error) {
         return reject(error);
@@ -189,8 +189,8 @@ class ProjectController {
   static findProject(reqUser, organizationID, projectID, softDeleted = false) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID, projectID], 'string');
-        utils.checkType([softDeleted], 'boolean');
+        utils.assertType([organizationID, projectID], 'string');
+        utils.assertType([softDeleted], 'boolean');
       }
       catch (error) {
         return reject(error);
@@ -254,8 +254,8 @@ class ProjectController {
   static createProject(reqUser, project) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkExists(['id', 'name', 'org.id'], project);
-        utils.checkType([project.id, project.name, project.org.id], 'string');
+        utils.assertExists(['id', 'name', 'org.id'], project);
+        utils.assertType([project.id, project.name, project.org.id], 'string');
       }
       catch (error) {
         return reject(error);
@@ -344,8 +344,8 @@ class ProjectController {
   static updateProject(reqUser, organizationID, projectID, projectUpdated) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID, projectID], 'string');
-        utils.checkType([projectUpdated], 'object');
+        utils.assertType([organizationID, projectID], 'string');
+        utils.assertType([projectUpdated], 'object');
       }
       catch (error) {
         return reject(error);
@@ -447,12 +447,12 @@ class ProjectController {
   static removeProject(reqUser, organizationID, projectID, options) {
     // Loading controller function wide since the element controller loads
     // the project controller globally. Both files cannot load each other globally.
-    const ElemController = M.load('controllers/ElementController');
+    const ElemController = M.require('controllers/ElementController');
 
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID, projectID], 'string');
-        utils.checkType([options], 'object');
+        utils.assertType([organizationID, projectID], 'string');
+        utils.assertType([options], 'object');
       }
       catch (error) {
         return reject(error);
@@ -655,7 +655,7 @@ class ProjectController {
   static setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
     return new Promise((resolve, reject) => {
       try {
-        utils.checkType([organizationID, projectID, permissionType], 'string');
+        utils.assertType([organizationID, projectID, permissionType], 'string');
       }
       catch (error) {
         return reject(error);

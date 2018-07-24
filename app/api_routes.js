@@ -1337,13 +1337,23 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  */
 api.route('/users')
 .get(
+  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.getUsers
 )
-.post(APIController.notImplemented)
-.put(APIController.notImplemented)
-.delete(APIController.notImplemented);
+.post(
+  Middleware.disableUserAPI,
+  APIController.notImplemented
+)
+.put(
+  Middleware.disableUserAPI,
+  APIController.notImplemented
+)
+.delete(
+  Middleware.disableUserAPI,
+  APIController.notImplemented
+);
 
 /**
  * @swagger
@@ -1499,21 +1509,25 @@ api.route('/users')
  */
 api.route('/users/:username')
 .get(
+  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.getUser
 )
 .post(
+  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postUser
 )
 .put(
+  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.putUser
 )
 .delete(
+  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteUser

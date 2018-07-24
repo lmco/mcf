@@ -20,6 +20,7 @@
 
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const errors = M.require('lib/errors');
 
 
 /**
@@ -41,8 +42,25 @@ class Middleware {
     next();
   }
 
+  /**
+   * Log ip of the request
+   */
   static logIP(req, res, next) {
     M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${req.ip}`);
+    next();
+  }
+
+  /**
+   * Disable the user api endpoint based on the configuration file.
+   */
+  static disableUserAPI(req, res, next) { // eslint-disable-line consistent-return
+    // If the method is disabled, send back the error
+    if (!M.config.server.api.userAPI[req.method.toLowerCase()]) {
+      const message = `${req.method} ${req.originalUrl} is disabled`;
+      const error = new errors.CustomError(message, 403);
+      M.log.error(error);
+      return res.status(403).send(error);
+    }
     next();
   }
 

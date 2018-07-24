@@ -24,11 +24,11 @@ const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
 
-const ElementController = mbee.load('controllers/ElementController');
-const OrgController = mbee.load('controllers/OrganizationController');
-const ProjectController = mbee.load('controllers/ProjectController');
-const UserController = mbee.load('controllers/UserController');
-const errors = M.load('lib/errors');
+const ElementController = mbee.require('controllers/ElementController');
+const OrgController = mbee.require('controllers/OrganizationController');
+const ProjectController = mbee.require('controllers/ProjectController');
+const UserController = mbee.require('controllers/UserController');
+const errors = M.require('lib/errors');
 const utils = M.require('lib.utils');
 
 
@@ -262,7 +262,7 @@ class APIController {
 
     // Make sure inputs are strings.
     try {
-      utils.checkType([req.params.orgid, req.body.name], 'string');
+      utils.assertType([req.params.orgid, req.body.name], 'string');
     }
     catch (error) {
       return res.status(error.status).send(error);
@@ -309,8 +309,8 @@ class APIController {
 
     // Check that inputs exist and are strings
     try {
-      utils.checkExists(['name'], req.body);
-      utils.checkType([req.params.orgid, req.body.name], 'string');
+      utils.assertExists(['name'], req.body);
+      utils.assertType([req.params.orgid, req.body.name], 'string');
     }
     catch (error) {
       return res.status(error.status).send(error);
@@ -391,7 +391,7 @@ class APIController {
     }
 
     try {
-      utils.checkExists(['role'], req.body);
+      utils.assertExists(['role'], req.body);
     }
     catch (error) {
       return res.status(error.status).send(error);
@@ -565,8 +565,8 @@ class APIController {
     }
 
     try {
-      utils.checkExists(['id', 'name', 'org.id'], req.body);
-      utils.checkType([req.params.orgid, req.params.projectid, req.body.name], 'string');
+      utils.assertExists(['id', 'name', 'org.id'], req.body);
+      utils.assertType([req.params.orgid, req.params.projectid, req.body.name], 'string');
     }
     catch (error) {
       return res.status(error.status).send(error);
@@ -611,8 +611,8 @@ class APIController {
     }
 
     try {
-      utils.checkExists(['id', 'name'], req.body);
-      utils.checkType([req.params.orgid, req.params.projectid, req.body.name], 'string');
+      utils.assertExists(['id', 'name'], req.body);
+      utils.assertType([req.params.orgid, req.params.projectid, req.body.name], 'string');
     }
     catch (error) {
       return res.status(error.status).send(error);
@@ -799,7 +799,7 @@ class APIController {
     }
 
     try {
-      utils.checkExists(['username'], req.body);
+      utils.assertExists(['username'], req.body);
     }
     catch (error) {
       return res.status(error.status).send(error);
@@ -894,7 +894,7 @@ class APIController {
     }
 
     try {
-      utils.checkType([req.params.orgid, req.params.projectid], 'string');
+      utils.assertType([req.params.orgid, req.params.projectid], 'string');
     }
     catch (error) {
       return res.status(error.status).send(error);
@@ -925,7 +925,7 @@ class APIController {
     }
 
     try {
-      utils.checkType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
+      utils.assertType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
     }
     catch (error) {
       return res.status(error.status).send(error);
@@ -978,7 +978,7 @@ class APIController {
     }
 
     try {
-      utils.checkType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
+      utils.assertType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
     }
     catch (error) {
       return res.status(error.status).send(error);
@@ -1010,7 +1010,7 @@ class APIController {
     }
 
     try {
-      utils.checkType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
+      utils.assertType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
     }
     catch (error) {
       return res.status(error.status).send(error);
