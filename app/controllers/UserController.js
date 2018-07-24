@@ -127,9 +127,9 @@ class UserController {
   static createUser(requestingUser, newUser) { // eslint-disable-line consistent-return
     return new Promise(((resolve, reject) => {
       try {
-        utils.checkAdmin(requestingUser);
-        utils.checkExists(['username'], newUser);
-        utils.checkType([newUser.username], 'string');
+        utils.assertAdmin(requestingUser);
+        utils.assertExists(['username'], newUser);
+        utils.assertType([newUser.username], 'string');
       }
       catch (error) {
         return reject(error);
@@ -182,9 +182,9 @@ class UserController {
   static updateUser(requestingUser, usernameToUpdate, newUserData) {
     return new Promise(((resolve, reject) => {
       try {
-        utils.checkAdmin(requestingUser);
-        utils.checkType([usernameToUpdate], 'string');
-        utils.checkType([newUserData], 'object');
+        utils.assertAdmin(requestingUser);
+        utils.assertType([usernameToUpdate], 'string');
+        utils.assertType([newUserData], 'object');
       }
       catch (error) {
         return reject(error);
@@ -253,7 +253,7 @@ class UserController {
   static removeUser(requestingUser, usernameToDelete) {
     return new Promise(((resolve, reject) => {
       try {
-        utils.checkAdmin(requestingUser);
+        utils.assertAdmin(requestingUser);
       }
       catch (error) {
         return reject(error);
