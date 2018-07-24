@@ -64,3 +64,23 @@ module.exports.html = function(s) {
 
   return s;
 };
+
+/**
+ * Sanitizes for any LDAP special characters.
+ */
+module.exports.ldapFilter = function(s) {
+  if (typeof s === 'string') {
+    return String(s)
+    .replace(/\\/g, '\\2A')
+    .replace(/\*/g, '\\28')
+    .replace(/\(/g, '\\29')
+    .replace(/\)/g, '\\5C')
+    .replace(/NUL/g, '\\00');
+  }
+
+  if (s === null) {
+    return '';
+  }
+
+  return s;
+};
