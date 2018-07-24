@@ -147,7 +147,7 @@ class ElementController {
 
       // Set the soft delete flag
       let softDelete = true;
-      if (options.hasOwnProperty('soft')) {
+      if (utils.checkExists(['soft'], options)) {
         if (options.soft === false && reqUser.admin) {
           softDelete = false;
         }
@@ -291,9 +291,32 @@ class ElementController {
    */
   static createElement(reqUser, element) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+      // Define variables first, set in the try/catch
+      let elemName = null;
+      let parentID = null;
+      let custom = null;
+      let documentation = null;
+
+      // Error checking, setting optional variables
       try {
         utils.assertExists(['id', 'project.id', 'project.org.id', 'type'], element);
         utils.assertType([element.id, element.project.id, element.project.org.id, element.type], 'string');
+        if (utils.checkExists(['name'], element)) {
+          utils.assertType([element.name], 'string');
+          elemName = M.lib.sani.html(element.name);
+        }
+        if (utils.checkExists(['parent'], element)) {
+          utils.assertType([element.parent], 'string');
+          parentID = M.lib.sani.html(element.parent);
+        }
+        if (utils.checkExists(['custom'], element)) {
+          utils.assertType([element.custom], 'object');
+          custom = M.lib.sani.html(element.custom);
+        }
+        if (utils.checkExists(['documentation'], element)) {
+          utils.assertType([element.documentation], 'string');
+          documentation = M.lib.sani.html(element.documentation);
+        }
       }
       catch (error) {
         return reject(error);
@@ -304,40 +327,6 @@ class ElementController {
       const orgID = M.lib.sani.html(element.project.org.id);
       const elemUID = utils.createUID(orgID, projID, elemID);
       const elementType = M.lib.sani.html(element.type);
-      let elemName = null;
-      let parentID = null;
-      let custom = null;
-      let documentation = null;
-
-      if (element.hasOwnProperty('name')) {
-        // Element name is not required, so check first if it exists.
-        if (typeof element.name !== 'string') {
-          return reject(new errors.CustomError('Element name is not a string.', 400));
-        }
-        elemName = M.lib.sani.html(element.name);
-      }
-      if (element.hasOwnProperty('parent')) {
-        // Element parent is not required, so check first if it exists.
-        if (typeof element.parent !== 'string') {
-          return reject(new errors.CustomError('Element parent is not a string.', 400));
-        }
-        parentID = M.lib.sani.html(element.parent);
-      }
-      if (element.hasOwnProperty('custom')) {
-        // Tags are not required, so check first if they exists
-        if (typeof element.custom !== 'object') {
-          return reject(new errors.CustomError('Elements custom field is not an object.', 400));
-        }
-        custom = M.lib.sani.html(element.custom);
-      }
-      if (element.hasOwnProperty('documentation')) {
-        // Element documentation is not required, so check first if it exists.
-        if (typeof element.documentation !== 'string') {
-          return reject(new errors.CustomError('Element documentation is not a string.', 400));
-        }
-        documentation = M.lib.sani.html(element.documentation);
-      }
-
 
       // Error check - make sure element ID and element name are valid
       if (!RegExp(M.lib.validators.element.id).test(elemID)) {
@@ -794,7 +783,7 @@ class ElementController {
             return reject(new errors.CustomError(`Element does not contain field ${updateField}`, 400));
           }
           // if parameter is of type object, stringify and compare
-          if (typeof elementUpdated[updateField] === 'object') {
+          if (utils.checkType([elementUpdated[updateField]], 'object')) {
             if (JSON.stringify(element[updateField])
               === JSON.stringify(elementUpdated[updateField])) {
               continue;
@@ -809,7 +798,7 @@ class ElementController {
             return reject(new errors.CustomError(`Users cannot update [${updateField}] of Elements.`, 400));
           }
           // Error Check - Check if updated field is of type string
-          if (typeof elementUpdated[updateField] !== 'string') {
+          if (!utils.checkType([elementUpdated[updateField]], 'string')) {
             return reject(new errors.CustomError(`The Element [${updateField}] is not of type String`, 400));
           }
 
@@ -906,7 +895,7 @@ class ElementController {
 
       // Set the soft delete flag
       let softDelete = true;
-      if (options.hasOwnProperty('soft')) {
+      if (utils.checkExists(['soft'], options)) {
         if (options.soft === false && reqUser.admin) {
           softDelete = false;
         }
