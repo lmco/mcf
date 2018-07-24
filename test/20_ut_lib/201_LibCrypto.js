@@ -58,6 +58,6 @@ function encryptTest(done) {
   const crypto = M.load('lib/crypto');
   const message = crypto.encrypt('infinity stone');
   const decrypMess = crypto.decrypt(message);
-  chai.expect(decrypMess).to.equal('infinity stone');
+  chai.expect(decrypMess).to.equal('testing for fail');
   done();
 }
