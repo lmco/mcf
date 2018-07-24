@@ -11,7 +11,9 @@
  *****************************************************************************/
 /**
  * @module auth.local_strategy
+ * 
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * 
  * @description This implements an authentication strategy for local
  * authentication. This should be the default authentication strategy for MBEE.
  */

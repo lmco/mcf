@@ -11,7 +11,9 @@
  *****************************************************************************/
 /**
  * @module auth.ldap_strategy
+ * 
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * 
  * @description This file implements our authentication using LDAP Active Directory.
  */
 

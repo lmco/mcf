@@ -12,6 +12,8 @@
 /**
  * @module  controllers.element_controller
  *
+ * @author Austin J Bieber <austin.j.bieber@lmco.com>
+ * 
  * @description  This implements the behavior and logic for elements.
  * It also provides function for interacting with elements.
  */

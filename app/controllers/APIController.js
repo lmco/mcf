@@ -11,7 +11,9 @@
  *****************************************************************************/
 /**
  * @module  controllers.api_controller
- *
+ * 
+ * @author Austin J Bieber <austin.j.bieber@lmco.com>
+ * 
  * @description  This implement all of the API functionality. All API routes
  * map to function in this controller which in turn uses other controllers that
  * define behaviors for specific objects.
