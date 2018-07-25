@@ -44,9 +44,6 @@ pipeline {
             failFast true
             parallel {
                 stage('Build MBEE') {
-                    agent{
-                        label "for-build-mbee"
-                    }
                     steps{
                         // Build
                         sh 'NODE_ENV=production node mbee build'
@@ -57,9 +54,6 @@ pipeline {
                     }
                 }
                 stage('Build MBEE Docker') {
-                    agent {
-                        label "for-mbee-docker-build"
-                    }
                     steps {
                         sh 'NODE_ENV=production node mbee docker --build'
                     }
