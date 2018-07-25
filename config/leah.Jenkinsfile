@@ -57,33 +57,15 @@ pipeline {
                         dockerfile {
                             filename 'Dockerfile'
                             dir 'config'
-                            additionalBuildArgs '-e NODE_ENV=production'
+                            additionalBuildArgs '-t prod-docker --build-arg NODE_ENV=production'
                         }
                     }
                     steps {
-                        sh "echo 'Docker running in background'"
-
+                        sh "echo 'built docker"'
                     }
                 }
             }
         }
-
-        /**
-         * First, stops and removes current container.
-         * Then runs the newly built docker container.
-         */
-        stage('Run') {
-            steps {
-
-                // Removes any existing production running containers
-                sh 'NODE_ENV=production node mbee docker --clean'
-
-                // Runs the production container in the background
-                sh 'NODE_ENV=production node mbee docker --run'
-            }
-        }
-
-    }
 
     /**
      * This gets run at the end of the pipeline.
