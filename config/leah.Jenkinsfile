@@ -53,17 +53,10 @@ pipeline {
                     }
                 }
                 stage('Build MBEE Docker') {
-                    agent {
-                        dockerfile {
-                            filename 'Dockerfile'
-                            dir 'config'
-                            label 'production-docker'
-                            additionalBuildArgs '-d -e NODE_ENV=production'
-                        }
-                    }
-                    steps {
-                        sh "echo 'Docker running in background'"
-
+                    node {
+                        checkout scm
+                        def productionImage = docker.build("production-image", "-d -e NODE_ENV=production ./config")
+                        sh "echo 'building docker mbee docker container'"
                     }
                 }
             }
