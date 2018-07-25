@@ -59,8 +59,6 @@ pipeline {
          */
         stage('Stage') {
             steps {
-                //Trying to see what docker containers are running with what names
-                sh 'node mbee docker ps -a'
                 //Removes any existing running or stopped stage containers.
                 sh 'NODE_ENV=stage node mbee docker --clean'
                 /* Runs the container in the background. */
