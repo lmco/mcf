@@ -444,7 +444,7 @@ function rejectDelete(done) {
     })
   },
   (err, response, body) => {
-    const json = JSON.parse(body);
+    // const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     // chai.expect(json.message).to.equal('Not Found');
     // chai.expect(json.description).to.equal('User does not exist.');
