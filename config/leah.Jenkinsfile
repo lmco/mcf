@@ -41,9 +41,13 @@ pipeline {
          * Builds the production docker image based on the Dockerfile.
          */
         stage('Build') {
-            stages {
+            failFast true
+            parallel {
                 stage('Build MBEE') {
-                    steps {
+                    agent{
+                        label "for-build-mbee"
+                    }
+                    steps{
                         // Build
                         sh 'NODE_ENV=production node mbee build'
                         sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
@@ -54,22 +58,23 @@ pipeline {
                 }
                 stage('Build MBEE Docker') {
                     agent {
-                        dockerfile true
+                        label "for-mbee-docker-build"
                     }
                     steps {
-                        sh 'node --version'
+                        sh 'NODE_ENV=production node mbee docker --build'
                     }
                 }
             }
         }
-     }
+    }
+
     /**
      * This gets run at the end of the pipeline.
      */
     post {
         always {
             // Always ensure staged container is removed
-            sh 'NODE_ENV=stage node mbee docker --clean'
+            sh 'NODE_ENV=production node mbee docker --clean'
         }
         success {
             emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
