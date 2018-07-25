@@ -41,45 +41,30 @@ pipeline {
          * Builds the production docker image based on the Dockerfile.
          */
         stage('Build') {
-            steps {
-                // Build
-                sh 'NODE_ENV=production node mbee build'
-                sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
+            stages {
+                agent any
+                stage('Build MBEE') {
+                    steps {
+                        // Build
+                        sh 'NODE_ENV=production node mbee build'
+                        sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
-                // Verify build
-                sh 'ls -l'
+                        // Verify build
+                        sh 'ls -l'
+                    }
+                }
+                stage('Build MBEE Docker') {
+                    agent {
+                        dockerfile {
+                            filename 'Dockerfile'
+                            dir 'config'
+                            label 'production-docker'
+                            additionalBuildArgs '-d -e NODE_ENV=production'
+                        }
+                    }
+                    steps {
+                        sh "echo 'Docker running in background'"
 
-                // Build the docker image
-                sh 'NODE_ENV=production node mbee docker --build'
-            }
-        }
-
-        /**
-         * Runs the staging docker container from the production image
-         */
-        stage('Stage') {
-            steps {
-                //Removes any existing running or stopped stage containers.
-                sh 'NODE_ENV=stage node mbee docker --clean'
-                /* Runs the container in the background. */
-                sh 'NODE_ENV=stage node mbee docker --run'
-            }
-        }
-
-        /**
-         * Executes functional tests against the staged server.
-         */
-        stage('Test') {
-            steps {
-                // Wait to be sure server is up
-                sh 'sleep 15'
-
-                // The tests will retry up to 3 times
-                // The test process will timeout after 10 minutes (total, not per retry)
-                // This timing may need to be updated as the test suite grows
-                timeout(time: 10, unit: 'MINUTES') {
-                    retry(3) {
-                        sh 'NODE_ENV=stage node mbee test --grep "^[0-6]"'
                     }
                 }
             }
@@ -91,8 +76,6 @@ pipeline {
          */
         stage('Run') {
             steps {
-                // Removes the staged container
-                sh 'NODE_ENV=stage node mbee docker --clean'
 
                 // Removes any existing production running containers
                 sh 'NODE_ENV=production node mbee docker --clean'
