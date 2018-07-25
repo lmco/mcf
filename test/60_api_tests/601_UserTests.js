@@ -88,6 +88,7 @@ describe(name, () => {
   it('should create a user', postUser).timeout(3000);
   // Does not create an admin user
   it('should create an admin user', postAUser).timeout(3000);
+  //it('confused by whoami', whoamIapi).timeout(3000);
   // STATUS CODE 500 Internal Sever Error -- wanted?
   it('should reject creating a user with invalid username', rejectUPost).timeout(3000);
   it('should reject creating a user with two different usernames', rejectUsernames).timeout(3000);
@@ -95,6 +96,8 @@ describe(name, () => {
   // it('should reject creating a user with invalid first name', rejectNamePut).timeout(3000);
   it('should reject a username that already exists', rejectExistingUname).timeout(3000);
   it('should get all users', getUsers).timeout(3000);
+  // Error when trying to get a user that doesnt exist?? confused
+  //it('should reject getting a user that does not exsit', rejectGetNoU).timeout(3000);
   it('should update a user', putUser).timeout(3000);
   it('should reject an update a user that does not exist', rejectPut).timeout(3000);
   it('should reject updating the username', rejectUPut).timeout(3000);
@@ -175,6 +178,24 @@ function postAUser(done) {
     chai.expect(json.username).to.equal('vanessacarlysle');
     chai.expect(json.fname).to.equal('Vanessa');
     // chai.expect(json.admin).to.equal(true);
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Makes a POST request to /api/users/:username. This is to create an admin
+ * user. Response should succeed with a user object returned.
+ * **ERROR does not create the user as an admin user**
+ */
+function whoamIapi(done) {
+  request({
+    url: `${test.url}/api/users/whoami`,
+    headers: getHeaders()
+  },
+  (err, response, body) => {
+    chai.expect(body).to.include('vanessacarlysle');
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(err).to.equal(null);
     done();
@@ -295,8 +316,26 @@ function getUsers(done) {
   (err, response, body) => {
     chai.expect(body).to.include(user);
     chai.expect(body).to.include('deadpool');
+    chai.expect(body).to.include('vanessacarlysle');
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Makes a GET request to /api/users/. This is to
+ * get all users. So the response should succeed with a username.
+ */
+function rejectGetNoU(done) {
+  request({
+    url: `${test.url}/api/user/pool`,
+    headers: getHeaders()
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(404);
+    chai.expect(json.message).to.equal('Not Found');
     done();
   });
 }
