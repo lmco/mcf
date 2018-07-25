@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  test/202_LibUtils
+ * @module  test/205-lib-utils
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -18,29 +18,21 @@
  */
 
 const chai = require('chai');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
 
 const M = require('../../mbee.js');
 const utils = M.require('lib/utils');
 
-const samepleObj = {
-  project: {
-    id: 'myID',
-    name: 'The Name',
-    org: {
-      id: 'myOrgID'
-    }
-  },
-  type: 'Element'
-};
+
+/* --------------------( Main )-------------------- */
 
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
-
-describe(name, () => {
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
+describe(M.getModuleName(module.filename), () => {
   it('should check that a string is a string and succeed', stringIsString);
   it('should check that a number is a string and fail', numberIsString);
   it('should check that an object is an object and succeed', objectIsObject);
@@ -57,12 +49,25 @@ describe(name, () => {
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Test Data )-------------------- */
+
+const samepleObj = {
+  project: {
+    id: 'myID',
+    name: 'The Name',
+    org: {
+      id: 'myOrgID'
+    }
+  },
+  type: 'Element'
+};
+
+
+/* --------------------( Tests )-------------------- */
+
 
 /**
- * Checks that a string is a string.
+ * @description Checks that a string is a string.
  */
 function stringIsString(done) {
   try {
@@ -75,8 +80,9 @@ function stringIsString(done) {
   }
 }
 
+
 /**
- * Checks that a number is a string.
+ * @description Checks that a number is a string.
  */
 function numberIsString(done) {
   try {
@@ -90,8 +96,9 @@ function numberIsString(done) {
   }
 }
 
+
 /**
- * Checks that an object is an object.
+ * @description Checks that an object is an object.
  */
 function objectIsObject(done) {
   try {
@@ -104,8 +111,9 @@ function objectIsObject(done) {
   }
 }
 
+
 /**
- * Checks that the key project.id exists.
+ * @description Checks that the key project.id exists.
  */
 function projectIDExists(done) {
   try {
@@ -118,8 +126,9 @@ function projectIDExists(done) {
   }
 }
 
+
 /**
- * Checks that the key project.user exists.
+ * @description Checks that the key project.user exists.
  */
 function projectUserExists(done) {
   try {
@@ -133,8 +142,9 @@ function projectUserExists(done) {
   }
 }
 
+
 /**
- * Checks that multiple keys exist.
+ * @description Checks that multiple keys exist.
  */
 function multipleExist(done) {
   try {
@@ -147,8 +157,9 @@ function multipleExist(done) {
   }
 }
 
+
 /**
- * Check that a user is an admin and succeed.
+ * @description Check that a user is an admin and succeed.
  */
 function userIsAdmin(done) {
   const user = { name: 'Darth Vader', admin: true };
@@ -162,8 +173,9 @@ function userIsAdmin(done) {
   }
 }
 
+
 /**
- * Check that a user is an admin and fail.
+ * @description Check that a user is an admin and fail.
  */
 function userIsNotAdmin(done) {
   const user = { name: 'Stormtrooper 123', admin: false };
@@ -177,6 +189,7 @@ function userIsNotAdmin(done) {
     done();
   }
 }
+
 
 /**
  * @description  Creates a uid from valid parameters
@@ -193,6 +206,7 @@ function validUID(done) {
   }
 }
 
+
 /**
  * @description  Creates a uid from invalid parameters
  */
@@ -207,6 +221,7 @@ function invalidUID(done) {
     done();
   }
 }
+
 
 /**
  * @description  Should parse a valid uid.
@@ -225,6 +240,7 @@ function parseValidUID(done) {
   }
 }
 
+
 /**
  * @description  Should parse an invalid uid.
  */
@@ -240,6 +256,7 @@ function parseInvalidUID(done) {
     done();
   }
 }
+
 
 /**
  * @description  Should parse a valid uid and get the 2nd element.

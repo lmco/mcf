@@ -19,30 +19,32 @@
  */
 
 const chai = require('chai');
-const filename = module.filename;
-const testName = filename.split('/')[filename.split('/').length - 1];
-
 const M = require('../../mbee.js');
 
-/******************************************************************************
- *  Main                                                                      *
- ******************************************************************************/
 
-describe(testName, () => {
+/* --------------------( Main )-------------------- */
+
+
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
+describe(M.getModuleName(module.filename), () => {
   it('should load libraries', loadLib);
 });
 
 
-/******************************************************************************
- *  Test Functions                                                            *
- ******************************************************************************/
+/* --------------------( Tests )-------------------- */
+
 
 /**
  * @description Checks that all libraries are available.
  */
 function loadLib(done) {
   // Confirm auth has the authenticate function
-  const auth = M.require('lib/auth');
+  const auth = M.require('lib.auth');
   chai.expect(auth.hasOwnProperty('authenticate')).to.equal(true);
 
   // Check that the following libraries have been loaded.

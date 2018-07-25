@@ -41,6 +41,12 @@ M.require = m => {
   return require(p); // eslint-disable-line global-require
 };
 
+// Given a file-name (typically passed in as module.filename), return the
+// module name
+M.getModuleName = fname => {
+  return fname.split('/')[fname.split('/').length - 1];
+};
+
 // Configuration file parsing and initialization
 const parseJSON = M.require('lib.parse-json');
 M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.json`)));
