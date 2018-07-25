@@ -797,15 +797,25 @@ class ElementController {
           if (!validUpdateFields.includes(updateField)) {
             return reject(new errors.CustomError(`Users cannot update [${updateField}] of Elements.`, 400));
           }
+
           // Error Check - Check if updated field is of type string
-          if (!utils.checkType([elementUpdated[updateField]], 'string')) {
+          if (!utils.checkType([elementUpdated[updateField]], 'string') && (updateField !== 'custom')) {
             return reject(new errors.CustomError(`The Element [${updateField}] is not of type String`, 400));
           }
 
-          // sanitize field
-          updateVal = M.lib.sani.sanitize(elementUpdated[updateField]);
-          // Update field in element object
-          element[updateField] = updateVal;
+          // Updates each individual tag that was provided.
+          if (updateField === 'custom') {
+            // eslint-disable-next-line no-loop-func
+            Object.keys(elementUpdated[updateField]).forEach((key) => {
+              element.custom[key] = M.lib.sani.sanitize(elementUpdated[updateField][key]);
+            });
+          }
+          else {
+            // sanitize field
+            updateVal = M.lib.sani.sanitize(elementUpdated[updateField]);
+            // Update field in element object
+            element[updateField] = updateVal;
+          }
         }
 
         // Save updated element
