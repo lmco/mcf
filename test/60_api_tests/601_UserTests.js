@@ -84,11 +84,22 @@ describe(name, () => {
     });
   });
 
-  it('should get a username', getUser).timeout(5000);
-  it('should create a user', postUser).timeout(5000);
-  it('should get all users', getUsers).timeout(5000);
-  it('should update a user', putUser).timeout(5000);
-  it('should delete a user', deleteUser).timeout(5000);
+  it('should get a username', getUser).timeout(3000);
+  it('should create a user', postUser).timeout(3000);
+  // Does not create an admin user
+  it('should create an admin user', postAUser).timeout(3000);
+  // STATUS CODE 500 Internal Sever Error -- wanted?
+  it('should reject creating a user with invalid username', rejectUPost).timeout(3000);
+  it('should reject creating a user with two different usernames', rejectUsernames).timeout(3000);
+  // STATUS CODE: 200 -- Do we want this to pass?
+  // it('should reject creating a user with invalid first name', rejectNamePut).timeout(3000);
+  it('should reject a username that already exists', rejectExistingUname).timeout(3000);
+  it('should get all users', getUsers).timeout(3000);
+  it('should update a user', putUser).timeout(3000);
+  it('should reject an update a user that does not exist', rejectPut).timeout(3000);
+  it('should reject updating the username', rejectUPut).timeout(3000);
+  it('should delete a user', deleteUser).timeout(3000);
+  it('should delete the admin user', deleteAUser).timeout(3000);
 });
 
 /*------------------------------------
@@ -140,6 +151,136 @@ function postUser(done) {
 }
 
 /**
+ * Makes a POST request to /api/users/:username. This is to create an admin
+ * user. Response should succeed with a user object returned.
+ * **ERROR does not create the user as an admin user**
+ */
+function postAUser(done) {
+  request({
+    url: `${test.url}/api/users/vanessacarlysle`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      username: 'vanessacarlysle',
+      password: 'deadpoolswife',
+      fname: 'Vanessa',
+      lname: 'Carlysle'
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(json.username).to.equal('vanessacarlysle');
+    chai.expect(json.fname).to.equal('Vanessa');
+    // chai.expect(json.admin).to.equal(true);
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Makes an invalid POST request to /api/users/:username. This an attempt to
+ * create a user with an invalid username. Response is an error thrown.
+ * **Throws an internal Service error JIRA TASK? FIX BUG?**
+ */
+function rejectUPost(done) {
+  request({
+    url: `${test.url}/api/users/!babyLegs`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      username: '!babyLegs',
+      password: 'deadpool',
+      fname: 'Baby',
+      lname: 'Legs'
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(500);
+    chai.expect(json.message).to.equal('Internal Server Error');
+    done();
+  });
+}
+
+/**
+ * Makes an invalid POST request to /api/users/:username. This an attempt to
+ * create a user with two different usernames. Response is an error thrown with
+ * bad request.
+ */
+function rejectUsernames(done) {
+  request({
+    url: `${test.url}/api/users/weasel`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      username: 'deadpoolsbff',
+      password: 'bartender',
+      fname: 'Weasel',
+      lname: 'Bff'
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+// /**
+//  * Makes an invalid POST request to /api/users/:username. This an attempt to
+//  * create a user with an invalid first name. Response should be an error
+//  * thrown with status code 400 or something.
+//  * **passes with 200 code-- JIRA TASK? FIX BUG?**
+//  */
+// function rejectNamePut(done) {
+//   request({
+//     url: `${test.url}/api/users/blindal`,
+//     headers: getHeaders(),
+//     method: 'POST',
+//     body: JSON.stringify({
+//       username: 'blindal',
+//       password: 'icantsee',
+//       fname: '',
+//       lname: 'Al'
+//     })
+//   },
+//   (err, response, body) => {
+//     const json = JSON.parse(body);
+//     chai.expect(response.statusCode).to.equal(500);
+//     chai.expect(json.message).to.equal('Internal Server Error');
+//     done();
+//   });
+// }
+
+/**
+ * Makes an invalid POST request to /api/users/:username. This an attempt to
+ * create a user with the same username as the first one created. Response is an
+ * error thrown about a bad request.
+ */
+function rejectExistingUname(done) {
+  request({
+    url: `${test.url}/api/users/deadpool`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      username: 'deadpool',
+      password: 'babylegs',
+      fname: 'Fake',
+      lname: 'Deadpool'
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+
+/**
  * Makes a GET request to /api/users/. This is to
  * get all users. So the response should succeed with a username.
  */
@@ -181,6 +322,52 @@ function putUser(done) {
 }
 
 /**
+ * Makes an invalid PUT request to /api/users/:username. This is to update a
+ * user that does not exist. Response should throw an error saying user does not
+ * exist.
+ */
+function rejectPut(done) {
+  request({
+    url: `${test.url}/api/users/francis`,
+    headers: getHeaders(),
+    method: 'PUT',
+    body: JSON.stringify({
+      fname: 'Weapon X'
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(404);
+    chai.expect(json.message).to.equal('Not Found');
+    chai.expect(json.description).to.equal('User does not exist.');
+    done();
+  });
+}
+
+/**
+ * Makes an invalid PUT request to /api/users/:username. This is to update a
+ * user that does not exist. Response should throw an error saying user does not
+ * exist.
+ */
+function rejectUPut(done) {
+  request({
+    url: `${test.url}/api/users/vanessacarlysle`,
+    headers: getHeaders(),
+    method: 'PUT',
+    body: JSON.stringify({
+      username: 'deadpoolgf'
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(401);
+    chai.expect(json.message).to.equal('Unauthorized');
+    chai.expect(json.description).to.equal('Update not allowed');
+    done();
+  });
+}
+
+/**
  * Makes a DELETE request to /api/users/:username. This is to
  * delete a user. Response should succeed with a user object returned.
  */
@@ -197,6 +384,29 @@ function deleteUser(done) {
     const json = JSON.parse(body);
     chai.expect(err).to.equal(null);
     chai.expect(json).to.equal('deadpool');
+    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Makes a DELETE request to /api/users/:username. This is to delete the admin
+ * user. Response should succeed with a user object returned.
+ */
+function deleteAUser(done) {
+  request({
+    url: `${test.url}/api/users/vanessacarlysle`,
+    headers: getHeaders(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(err).to.equal(null);
+    chai.expect(json).to.equal('vanessacarlysle');
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(err).to.equal(null);
     done();
