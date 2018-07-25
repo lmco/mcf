@@ -49,7 +49,7 @@ module.exports.getPluginNames = function getPluginNames() {
 
 /**
  * @description  Checks an array of arguments to see if
- *   they are of a specified type.
+ *   they are of a specified type and throws an error.
  *
  * @param  {Object} params  A list of values to check.
  * @param  {String} type  The type to check.
@@ -63,8 +63,25 @@ module.exports.assertType = function(params, type) {
 };
 
 /**
+ * @description  Checks an array of arguments to see if
+ *   they are of a specified type and returns a boolean.
+ *
+ * @param  {Object} params  A list of values to check.
+ * @param  {String} type  The type to check.
+ */
+module.exports.checkType = function(params, type) {
+  try {
+    this.assertType(params, type);
+    return true;
+  }
+  catch (error) {
+    return false;
+  }
+};
+
+/**
  * @description  Checks an array of strings to make
- *  sure that they are keys within a given object.
+ *  sure that they are keys within a given object and throws an error.
  *
  * @param  {Object} params  A list of strings denoting keys.
  * @param  {Object} obj  The object being searched.
@@ -98,7 +115,25 @@ module.exports.assertExists = function(params, obj, parent = null) {
 };
 
 /**
- * @description  Checks whether the user is an admin or not.
+ * @description  Checks an array of strings to make
+ *  sure that they are keys within a given object and returns a boolean.
+ *
+ * @param  {Object} params  A list of strings denoting keys.
+ * @param  {Object} obj  The object being searched.
+ * @param  {String} parent  The parent key, defaults to null.
+ */
+module.exports.checkExists = function(params, obj, parent = null) {
+  try {
+    this.assertExists(params, obj, parent);
+    return true;
+  }
+  catch (error) {
+    return false;
+  }
+};
+
+/**
+ * @description  Checks whether the user is an admin or not. Throws an error
  *
  * @param  {User} user  The user object being checked.
  */
@@ -106,6 +141,15 @@ module.exports.assertAdmin = function(user) {
   if (!user.admin) {
     throw new errors.CustomError('User does not have permissions.', 401);
   }
+};
+
+/**
+ * @description  Checks whether the user is an admin or not and returns a boolean
+ *
+ * @param  {User} user  The user object being checked.
+ */
+module.exports.checkAdmin = function(user) {
+  return user.admin;
 };
 
 /**
