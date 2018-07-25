@@ -42,7 +42,6 @@ pipeline {
          */
         stage('Build') {
             stages {
-                agent any
                 stage('Build MBEE') {
                     steps {
                         // Build
