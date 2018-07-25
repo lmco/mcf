@@ -870,7 +870,7 @@ class APIController {
 
     // Otherwise return 200 and the user's public JSON
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(APIController.formatJSON(req.user.getPublicData()));
+    return res.status(200).send(APIController.formatJSON(req.user));
   }
 
 
