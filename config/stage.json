@@ -200,6 +200,14 @@
       // if enabled, the api will return json with the following indent size in spaces.
       "json": {
         "indent": 4
+      },
+      // The following will enable to disable the user API route methods. These are useful when using authentication
+      // strategies where users should not be managed using the user API route.
+      "userAPI": {
+        "get": true,
+        "post": true,
+        "put": true,
+        "delete": true
       }
     },
     // The base url which the api routes weill be appended onto

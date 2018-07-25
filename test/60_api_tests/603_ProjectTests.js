@@ -30,8 +30,8 @@ const request = require('request');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const OrgController = M.load('controllers/OrganizationController');
-const AuthController = M.load('lib/auth');
+const OrgController = M.require('controllers/OrganizationController');
+const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
 const test = M.config.test;
@@ -47,7 +47,7 @@ describe(name, () => {
    *-------------------------------------*/
   before(function(done) {
     this.timeout(5000);
-    const db = M.load('lib/db');
+    const db = M.require('lib/db');
     db.connect();
 
     // Creating a Requesting Admin
