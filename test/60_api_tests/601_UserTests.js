@@ -98,6 +98,9 @@ describe(name, () => {
   it('should update a user', putUser).timeout(3000);
   it('should reject an update a user that does not exist', rejectPut).timeout(3000);
   it('should reject updating the username', rejectUPut).timeout(3000);
+  it('should reject updating with an invalid name', rejectName).timeout(3000);
+  // Deletes a user that doesnt exist -- wanted?
+  // it('should reject deleting a user that doesnt exist', rejectDelete).timeout(3000);
   it('should delete a user', deleteUser).timeout(3000);
   it('should delete the admin user', deleteAUser).timeout(3000);
 });
@@ -363,6 +366,51 @@ function rejectUPut(done) {
     chai.expect(response.statusCode).to.equal(401);
     chai.expect(json.message).to.equal('Unauthorized');
     chai.expect(json.description).to.equal('Update not allowed');
+    done();
+  });
+}
+
+/**
+ * Makes an invalid PUT request to /api/users/:username. This is to update a
+ * user that does not exist. Response should throw an error saying user does not
+ * exist.
+ */
+function rejectName(done) {
+  request({
+    url: `${test.url}/api/users/vanessacarlysle`,
+    headers: getHeaders(),
+    method: 'PUT',
+    body: JSON.stringify({
+      name: ''
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(401);
+    chai.expect(json.message).to.equal('Unauthorized');
+    chai.expect(json.description).to.equal('Update not allowed');
+    done();
+  });
+}
+
+/**
+ * Makes a DELETE request to /api/users/:username. This is to
+ * delete a user. Response should succeed with a user object returned.
+ */
+function rejectDelete(done) {
+  request({
+    url: `${test.url}/api/users/francis`,
+    headers: getHeaders(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
+  },
+  (err, response, body) => {
+    console.log(body);
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(500);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
