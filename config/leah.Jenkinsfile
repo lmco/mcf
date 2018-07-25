@@ -57,11 +57,10 @@ pipeline {
                         dockerfile {
                             filename 'Dockerfile'
                             dir 'config'
-                            additionalBuildArgs '-t prod-docker --build-arg NODE_ENV=production'
+                            additionalBuildArgs '--build-arg NODE_ENV=production'
                         }
                     }
                     steps {
-                        sh "echo 'built docker'"
                     }
                 }
             }
