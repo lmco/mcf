@@ -61,7 +61,7 @@ pipeline {
                         }
                     }
                     steps {
-                        sh "echo 'built docker"'
+                        sh "echo 'built docker'"
                     }
                 }
             }
