@@ -57,7 +57,7 @@ pipeline {
                         dockerfile {
                             filename 'Dockerfile'
                             dir 'config'
-                            additionalBuildArgs '-d -e NODE_ENV=production'
+                            additionalBuildArgs '-e NODE_ENV=production'
                         }
                     }
                     steps {
