@@ -54,11 +54,7 @@ pipeline {
                 }
                 stage('Build MBEE Docker') {
                     agent {
-                        dockerfile {
-                            filename 'Dockerfile'
-                            dir 'config'
-                            additionalBuildArgs '--build-arg NODE_ENV=production'
-                        }
+                        dockerfile true
                     }
                     steps {
                         sh 'node --version'
