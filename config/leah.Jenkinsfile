@@ -43,14 +43,14 @@ pipeline {
         stage('Build') {
             steps{
                 // Build
-                sh 'NODE_ENV=dev node mbee build'
+                sh 'NODE_ENV=production node mbee build'
                 sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
                 // Verify build
                 sh 'ls -l'
 
                 //Build
-                sh 'NODE_ENV=dev node mbee docker --build'
+                sh 'NODE_ENV=production node mbee docker --build'
             }
         }
         /**
@@ -59,9 +59,9 @@ pipeline {
          stage('Deploy') {
             steps {
                 // Removes any existing running or stopped stage containers.
-                sh 'NODE_ENV=dev node mbee docker --clean'
+                sh 'NODE_ENV=production node mbee docker --clean'
                 /* Runs the container in the background. */
-                sh 'NODE_ENV=dev node mbee docker --run'
+                sh 'NODE_ENV=production node mbee docker --run'
             }
          }
 
@@ -73,10 +73,10 @@ pipeline {
                 // Wait to be sure server is up
                 sh 'sleep 20'
                 // Runs the basic test suite against the running stage container
-                sh 'NODE_ENV=dev node mbee lint'
+                sh 'NODE_ENV=production node mbee lint'
                 // Runs the basic test suite against the running stage container
                 timeout(time: 10, unit: 'MINUTES') {
-                    sh 'NODE_ENV=dev node mbee test --grep "^[0-6]"'
+                    sh 'NODE_ENV=production node mbee test --grep "^[0-6]"'
                 }
              }
           }
@@ -88,9 +88,9 @@ pipeline {
     post {
         always {
             // Gets the logs and prints them to the console
-            //sh 'NODE_ENV=dev node mbee docker --get-logs'
+            //sh 'NODE_ENV=production node mbee docker --get-logs'
             // Removes any test containers
-            sh 'NODE_ENV=dev node mbee docker --clean'
+            sh 'NODE_ENV=production node mbee docker --clean'
                 }
 
         success {
