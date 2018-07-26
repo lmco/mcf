@@ -52,11 +52,7 @@ pipeline {
 
                 // Verify build
                 sh 'ls -l'
-            }
-        }
-
-        stage('Build MBEE'){
-            steps {
+   
                 script {
                     docker.build("mbee", "./config")
                 }
