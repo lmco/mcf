@@ -42,10 +42,18 @@ function clonePluginFromGitRepo(data) {
     execSync(`chmod 400 ${data.deployKey}`);
   }
 
+  let version = '';
+  // Clone a specific version
+  if (data.hasOwnProperty('version')) {
+    // Disables a warning about detachedHead
+    execSync('git config --global advice.detachedHead false');
+    version = `--branch ${data.version} `;
+  }
+
   // Create the git clone command
   const cmd = [
     `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no"`,
-    `git clone ${data.source} ${path.join('plugins', data.name)}`
+    `git clone ${version}${data.source} ${path.join('plugins', data.name)}`
   ].join(' ');
 
   // Clone the repo
