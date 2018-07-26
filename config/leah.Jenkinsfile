@@ -56,7 +56,7 @@ pipeline {
         }
 
         stage('Build MBEE'){
-            node {
+            steps {
                 docker.build("mbee", "./config")
             }
         }
