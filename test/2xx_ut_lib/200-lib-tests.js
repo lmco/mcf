@@ -47,14 +47,16 @@ function loadLib(done) {
   const auth = M.require('lib.auth');
   chai.expect(auth.hasOwnProperty('authenticate')).to.equal(true);
 
+  // Check for logger
+  chai.expect(M.hasOwnProperty('log')).to.equal(true);
+
   // Check that the following libraries have been loaded.
   chai.expect(M.lib.hasOwnProperty('db')).to.equal(true);
   chai.expect(M.lib.hasOwnProperty('crypto')).to.equal(true);
-  chai.expect(M.lib.hasOwnProperty('logger')).to.equal(true);
   chai.expect(M.lib.hasOwnProperty('sani')).to.equal(true);
   chai.expect(M.lib.hasOwnProperty('startup')).to.equal(true);
   chai.expect(M.lib.hasOwnProperty('validators')).to.equal(true);
-  chai.expect(M.lib.hasOwnProperty('parse-json')).to.equal(true);
-  chai.expect(M.lib.hasOwnProperty('mock-express')).to.equal(true);
+  chai.expect(M.lib.hasOwnProperty('parse_json')).to.equal(true);
+  chai.expect(M.lib.hasOwnProperty('mock_express')).to.equal(true);
   done();
 }

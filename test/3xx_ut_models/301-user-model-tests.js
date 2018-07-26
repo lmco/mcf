@@ -1,58 +1,57 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
+/******************************************************************************
+ * Classification: UNCLASSIFIED                                               *
+ *                                                                            *
+ * Copyright (C) 2018, Lockheed Martin Corporation                            *
+ *                                                                            *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
+ * It is not approved for public release or redistribution.                   *
+ *                                                                            *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
+ * control laws. Contact legal and export compliance prior to distribution.   *
+ ******************************************************************************/
 /**
- * @module test/301_UserModel
+ * @module test/301-user-model-tests
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This tests the User Model functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code. The user model tests create,
- * update, finds, soft deletes, and hard deletes users.
+ * are to make sure the code is working as it should or should not be.
+ * Especially, when making changes/ updates to the code. The user model tests
+ * create, update, finds, soft deletes, and hard deletes users.
  */
 
-const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
-
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
-
+const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.require('models/User');
+const User = M.require('models.User');
 
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
+/* --------------------( Main )-------------------- */
 
-describe(name, () => {
-  /*-------------------------------------
-   * Before: runs before all tests
-   *-------------------------------------*/
+
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
+describe(M.getModuleName(module.filename), () => {
+  /**
+   * Before: runs before all tests. Open the database connection.
+   */
   before(() => {
-    // Open the database connection
-    const db = M.require('lib/db');
-    db.connect();
+    M.lib.db.connect();
   });
 
-  /*-------------------------------------
-   * After: runs after all tests
-   *-------------------------------------*/
+  /**
+   * After: runs after all tests. Close database connection.
+   */
   after(() => {
-    // Close database connection
     mongoose.connection.close();
   });
 
+  /* Execute the tests */
   it('should create a user', createUser).timeout(5000);
   it('should verify a valid password', verifyValidPassword).timeout(5000);
   it('shouldnt verify an invalid password', verifyInvalidPassword).timeout(5000);
@@ -65,40 +64,39 @@ describe(name, () => {
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Tests )-------------------- */
 
 
 /**
- * Creates a user using the User model.
+ * @description Creates a user using the User model.
  */
 function createUser(done) {
   const user = new User({
     username: 'spiderman',
     password: 'icanshootwebs',
-    fname: 'Spider',
-    lname: 'Man'
+    fname: 'Peter',
+    lname: 'Parker'
   });
   user.save((err) => {
-    if (err) {
-      console.log(err); // eslint-disable-line no-console
-    }
     chai.expect(err).to.equal(null);
     done();
   });
 }
 
+
 /**
- * Verifies that the actual password matches the stored one.
+ * @description Verifies that the actual password matches the stored one.
  */
 function verifyValidPassword(done) {
   User.findOne({
     username: 'spiderman',
     deletedOn: null
-  }, (err, user) => {
+  })
+  .exec((err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
+
+    // Verify the user's password
     user.verifyPassword('icanshootwebs')
     .then((result) => {
       chai.expect(result).to.equal(true);
@@ -111,8 +109,9 @@ function verifyValidPassword(done) {
   });
 }
 
+
 /**
- * Verifies that an incorrect password doesn't match the stored one.
+ * @desc Verifies that an incorrect password doesn't match the stored one.
  */
 function verifyInvalidPassword(done) {
   User.findOne({
@@ -121,6 +120,8 @@ function verifyInvalidPassword(done) {
   }, (err, user) => {
     // Make sure there are no errors
     chai.expect(err).to.equal(null);
+
+    // Attempt to verify the user's incorrect password
     user.verifyPassword('icantshootwebs')
     .then((result) => {
       chai.expect(result).to.equal(false);
@@ -135,8 +136,8 @@ function verifyInvalidPassword(done) {
 
 
 /**
- * Gets a user by username and checks the properties. This should explicitly
- * query for a user who has not been soft deleted.
+ * @description Gets a user by username and checks the properties. This should
+ * explicitly query for a user who has not been soft deleted.
  */
 function getUser(done) {
   User.findOne({
@@ -147,12 +148,12 @@ function getUser(done) {
     chai.expect(err).to.equal(null);
 
     // Check first and last name
-    chai.expect(user.fname).to.equal('Spider');
-    chai.expect(user.lname).to.equal('Man');
+    chai.expect(user.fname).to.equal('Peter');
+    chai.expect(user.lname).to.equal('Parker');
 
     // Check the full name
-    chai.expect(user.getFullName()).to.equal('Spider Man');
-    chai.expect(user.name).to.equal('Spider Man');
+    chai.expect(user.getFullName()).to.equal('Peter Parker');
+    chai.expect(user.name).to.equal('Peter Parker');
 
     done();
   });
@@ -160,7 +161,7 @@ function getUser(done) {
 
 
 /**
- * Updates a user's name using the User Model.
+ * @description Updates a user's name using the User Model.
  */
 function updateUser(done) {
   User.findOneAndUpdate({
@@ -190,7 +191,7 @@ function updateUser(done) {
 
 
 /**
- * Soft-deletes the user.
+ * @description Soft-deletes the user.
  */
 function softDeleteUser(done) {
   // LM: Changed from findOneAndUpdate to a find and then update
@@ -217,7 +218,7 @@ function softDeleteUser(done) {
 
 
 /**
- * Gets a soft-deleted user.
+ * @description Gets a soft-deleted user.
  */
 function getSoftDeletedUser(done) {
   User.findOne({
@@ -230,8 +231,9 @@ function getSoftDeletedUser(done) {
   });
 }
 
+
 /**
- * Deletes the user.
+ * @description Deletes the user.
  */
 function deleteUser(done) {
   User.findOneAndRemove({
@@ -242,6 +244,12 @@ function deleteUser(done) {
   });
 }
 
+
+/**
+ * TODO -  Remove, replace, or rename this test as needed.
+ *
+ * @desc INSERT DESCRIPTION
+ */
 function loginLDAPUser(done) {
   const AuthController = M.require('lib.auth');
   const u = M.config.test.username;

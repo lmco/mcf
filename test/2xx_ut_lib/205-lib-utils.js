@@ -1,14 +1,14 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
+/******************************************************************************
+ * Classification: UNCLASSIFIED                                               *
+ *                                                                            *
+ * Copyright (C) 2018, Lockheed Martin Corporation                            *
+ *                                                                            *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
+ * It is not approved for public release or redistribution.                   *
+ *                                                                            *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
+ * control laws. Contact legal and export compliance prior to distribution.   *
+ ******************************************************************************/
 /**
  * @module  test/205-lib-utils
  *
@@ -68,6 +68,10 @@ const samepleObj = {
 
 /**
  * @description Checks that a string is a string.
+ *
+ * TODO - Does the test really check that a string is a string or are we testing
+ * that the assertType function works using string input? Cleanup descriptions
+ * on this and other tests.
  */
 function stringIsString(done) {
   try {
@@ -87,6 +91,7 @@ function stringIsString(done) {
 function numberIsString(done) {
   try {
     utils.assertType([1, 2], 'string');
+    // TODO - add comment explaining the line below
     chai.expect(true).to.equal(false);
     done();
   }
@@ -129,6 +134,9 @@ function projectIDExists(done) {
 
 /**
  * @description Checks that the key project.user exists.
+ *
+ * TODO - consider explaining that the assert function is expected to throw
+ * an error that should be caught in the catch block.
  */
 function projectUserExists(done) {
   try {

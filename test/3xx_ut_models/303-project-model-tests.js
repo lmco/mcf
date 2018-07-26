@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module test/303_ProjectModel
+ * @module test/303-project-model-tests
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
@@ -24,8 +24,6 @@
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.require('models.Organization');
 const Project = M.require('models.Project');
@@ -33,15 +31,24 @@ const User = M.require('models.User');
 const AuthController = M.require('lib.auth');
 
 
+/* --------------------( Test Data )-------------------- */
+
 // This is so the same parent org can be references across test functions
 let org = null;
 let user = null;
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
 
-describe(name, () => {
+/* --------------------( Main )-------------------- */
+
+describe(M.getModuleName(module.filename), () => {
+  /**
+   * Before: runs before all tests.
+   *
+   * TODO - Say what this function is doing.
+   *
+   * TODO - consider abstracting some of the test data out to the 'Test Data'
+   * section above.
+   */
   before(function(done) {
     this.timeout(6000);
     const db = M.require('lib/db');
@@ -60,6 +67,8 @@ describe(name, () => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
+
+      // TODO - consider using an .exec rather than callback to make this cleaner
       User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
           chai.expect(updateErr).to.equal(null);
@@ -86,9 +95,10 @@ describe(name, () => {
     });
   });
 
-  /*-------------------------------------
+
+  /**
    * After: runs after all tests
-   *-------------------------------------*/
+   */
   after((done) => {
     Org.findOneAndRemove({ id: org.id }, (error) => {
       if (error) {
@@ -105,22 +115,18 @@ describe(name, () => {
     });
   });
 
-  /*----------
-   * Tests
-   *----------*/
+  /* Execute the tests */
   it('should create a project', createProject).timeout(3000);
   it('should soft delete a project', softDeleteProject).timeout(3000);
   it('should delete a project', deleteProject).timeout(3000);
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Tests )-------------------- */
 
 
 /**
- * Creates a user using the User model.
+ * @description Creates a user using the User model.
  */
 function createProject(done) {
   // Otherwise,
@@ -128,7 +134,7 @@ function createProject(done) {
   const id = 'gaurdiansofgalaxy';
   const newProject = new Project({
     id: id,
-    name: 'Gaurdians of the Galaxy',
+    name: 'Gaurdians of the Galaxy', // TODO - spelling
     org: org._id,
     permissions: {
       admin: [user._id],
@@ -146,8 +152,9 @@ function createProject(done) {
   });
 }
 
+
 /**
- * Soft deletes a project.
+ * @description Soft deletes a project.
  */
 function softDeleteProject(done) {
   // LM: Changed from findOneAndUpdate to a find and then update
@@ -172,7 +179,7 @@ function softDeleteProject(done) {
 
 
 /**
- * Deletes the organization.
+ * @description Deletes the organization.
  */
 function deleteProject(done) {
   Project.findOneAndRemove({ id: 'gaurdiansofgalaxy' }, (err) => {
