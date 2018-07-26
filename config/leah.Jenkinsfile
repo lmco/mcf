@@ -55,36 +55,36 @@ pipeline {
 
                 //Build
                 //Does not build with specific environment need to figure out
-                sh "docker.build('mbee', './config')"
+                sh "docker.build('mbee:latest', './config')"
             }
         }
-        /**
-         * Runs the staging docker container from the production image
-         */
-         stage('Deploy') {
-            steps {
-                // Removes any existing running or stopped stage containers.
-                sh 'NODE_ENV=production node mbee docker --clean'
-                /* Runs the container in the background. */
-                sh 'NODE_ENV=production node mbee docker --run'
-            }
-         }
+        ///**
+        // * Runs the staging docker container from the production image
+        // */
+        // stage('Deploy') {
+        //    steps {
+        //        // Removes any existing running or stopped stage containers.
+        //        sh 'NODE_ENV=production node mbee docker --clean'
+        //        /* Runs the container in the background. */
+        //        sh 'NODE_ENV=production node mbee docker --run'
+        //    }
+        // }
 
-         /**
-          * Executes functional tests against the staged server.
-          */
-          stage('Test') {
-             steps {
-                // Wait to be sure server is up
-                sh 'sleep 20'
-                // Runs the basic test suite against the running stage container
-                sh 'NODE_ENV=production node mbee lint'
-                // Runs the basic test suite against the running stage container
-                timeout(time: 10, unit: 'MINUTES') {
-                    sh 'NODE_ENV=production node mbee test --grep "^[0-6]"'
-                }
-             }
-          }
+         ///**
+         // * Executes functional tests against the staged server.
+         // */
+         // stage('Test') {
+         //    steps {
+         //       // Wait to be sure server is up
+         //       sh 'sleep 20'
+         //      // Runs the basic test suite against the running stage container
+         //       sh 'NODE_ENV=production node mbee lint'
+         //       // Runs the basic test suite against the running stage container
+         //       timeout(time: 10, unit: 'MINUTES') {
+         //           sh 'NODE_ENV=production node mbee test --grep "^[0-6]"'
+         //       }
+         //    }
+         // }
     }
 
     /**
