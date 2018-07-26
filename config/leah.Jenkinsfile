@@ -34,7 +34,6 @@ pipeline {
                 sh 'rm -rf public'
                 sh 'rm -rf logs/*'
                 sh 'rm -rf *.log'
-                sh 'NODE_ENV=production node mbee docker --clean'
             }
         }
 
@@ -62,7 +61,7 @@ pipeline {
     post {
         always {
             // Gets the logs and prints them to the console
-            sh 'NODE_ENV=production node mbee docker --get-logs'
+            //sh 'NODE_ENV=production node mbee docker --get-logs'
             // Removes any test containers
             sh 'NODE_ENV=production node mbee docker --clean'
                 }
