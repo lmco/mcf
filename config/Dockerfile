@@ -28,7 +28,7 @@ RUN mkdir -p app \
     && mkdir -p public \
     && mkdir -p scripts
 
-COPY init.groovy ./app  app
+COPY ./app  app
 COPY ./certs certs
 COPY ./config/production.json config/
 COPY ./config/*.json config/
