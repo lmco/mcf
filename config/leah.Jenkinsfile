@@ -55,10 +55,10 @@ pipeline {
             }
         }
 
-        stage('Build MBEE')
-        node {
-            docker.build("mbee", "./config")
-
+        stage('Build MBEE'){
+            node {
+                docker.build("mbee", "./config")
+            }
         }
         ///**
         // * Runs the staging docker container from the production image
