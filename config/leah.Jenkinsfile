@@ -49,7 +49,7 @@ pipeline {
 
                     // Build
                     NODE_ENV=production node mbee build
-                    sed -i "s/NO_BUILD_NUMBER/$BUILD_NUMBER/g" package.json
+                    sed -i {"s/NO_BUILD_NUMBER/$BUILD_NUMBER/g" package.json}
 
                     // Verify build
                     ls -l
