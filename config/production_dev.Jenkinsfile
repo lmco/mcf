@@ -75,6 +75,7 @@ pipeline {
     post {
         always {
             // Things to always do post-build
+            sh 'echo "Build and Deploy Complete"'
         }
         success {
             emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
