@@ -42,20 +42,22 @@ pipeline {
          */
         stage('Build') {
             steps{
+                script{
                     //checking out the code
                     //not sure needed but rather safe than sorry
                     //checkout scm
 
                     // Build
-                    sh 'NODE_ENV=production node mbee build'
-                    sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
+                    NODE_ENV=production node mbee build
+                    sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json
 
                     // Verify build
-                    sh 'ls -l'
+                    ls -l
 
                     //Build
                     //Does not build with specific environment need to figure out
-                    sh 'docker.build("mbee", "./config")'
+                    docker.build("mbee", "./config")
+                }
             }
         }
         /**
