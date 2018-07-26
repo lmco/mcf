@@ -42,20 +42,22 @@ pipeline {
          */
         stage('Build') {
             steps{
-                //checking out the code
-                //not sure needed but rather safe than sorry
-                //checkout scm
+                script{
+                    //checking out the code
+                    //not sure needed but rather safe than sorry
+                    //checkout scm
 
-                // Build
-                sh 'NODE_ENV=production node mbee build'
-                sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
+                    // Build
+                    NODE_ENV=production node mbee build
+                    //sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
-                // Verify build
-                sh 'ls -l'
+                    // Verify build
+                    ls -l
 
-                //Build
-                //Does not build with specific environment need to figure out
-                sh "docker.build('mbee:latest', './config .')"
+                    //Build
+                    //Does not build with specific environment need to figure out
+                    docker.build("mbee", "./config .")
+                }
             }
         }
         ///**
