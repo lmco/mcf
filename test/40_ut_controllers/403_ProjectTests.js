@@ -198,7 +198,7 @@ function createProject(done) {
   };
   ProjController.createProject(allSeeingUser, projData)
   .then((proj) => {
-    chai.expect(proj.id).to.equal('ironman');
+    chai.expect(proj.id).to.equal('man');
     chai.expect(proj.name).to.equal('Iron man Suite');
     done();
   })
