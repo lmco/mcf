@@ -55,7 +55,7 @@ pipeline {
 
                 //Build
                 //Does not build with specific environment need to figure out
-                sh "docker.build('mbee:latest', './config')"
+                sh "docker.build('mbee:latest', './config .')"
             }
         }
         ///**
