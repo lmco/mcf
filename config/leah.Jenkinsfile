@@ -48,7 +48,7 @@ pipeline {
 
                     // Build
                     sh 'NODE_ENV=production node mbee build'
-                    sh 'sed -i {'s/NO_BUILD_NUMBER/$BUILD_NUMBER/g'} package.json'
+                    sh 'sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json'
 
                     // Verify build
                     sh 'ls -l'
