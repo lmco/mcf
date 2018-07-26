@@ -74,8 +74,7 @@ pipeline {
      */
     post {
         always {
-            // Always ensure production container is removed
-            sh 'NODE_ENV=production node mbee docker --clean'
+            // Things to always do post-build
         }
         success {
             emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
