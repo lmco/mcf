@@ -12,6 +12,8 @@
 /**
  * @module  controllers.organization_controller
  *
+ * @author Austin J Bieber <austin.j.bieber@lmco.com>
+ *
  * @description  This implements the behavior and logic for an organization and
  * provides functions for interacting with organizations.
  */
