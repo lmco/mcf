@@ -1,56 +1,58 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module  test/601_UserAPI
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/601-user-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
- *
  *
  * @description This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code we want to make sure everything still
  * works as it should. These API controller tests are specifically for the User
  * API tests: posting, putting, getting, and deleting a user.
+ * TODO - description
  */
 
 const path = require('path');
 const chai = require('chai');
 const request = require('request');
-const mongoose = require('mongoose');
-
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
+const mongoose = require('mongoose'); // TODO - remove the need for mongoose
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
-const test = M.config.test;
+/* --------------------( Test Data )-------------------- */
 
+const test = M.config.test;
 const user = M.config.test.username;
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
 
-describe(name, () => {
+/* --------------------( Main )-------------------- */
+
+
+describe(M.getModuleName(module.filename), () => {
+  /**
+   * TODO - Add desc
+   */
   before(function(done) {
     this.timeout(5000);
 
-    const db = M.require('lib/db');
+    const db = M.require('lib/db'); // TODO - use M.lib.db
     db.connect();
 
     // Creating a Requesting Admin
-    const u = M.config.test.username;
+    const u = M.config.test.username; // FIXME - This is defined as user above
     const p = M.config.test.password;
     const params = {};
     const body = {
@@ -74,6 +76,9 @@ describe(name, () => {
     });
   });
 
+  /**
+   * TODO - Add detailed description
+   */
   after(function(done) {
     User.findOneAndRemove({
       username: M.config.test.username
@@ -84,6 +89,7 @@ describe(name, () => {
     });
   });
 
+  /* Execute tests */
   it('should get a username', getUser).timeout(5000);
   it('should create a user', postUser).timeout(5000);
   it('should get all users', getUsers).timeout(5000);
@@ -91,9 +97,10 @@ describe(name, () => {
   it('should delete a user', deleteUser).timeout(5000);
 });
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+
+/* --------------------( Tests )-------------------- */
+// TODO - add descriptions to all functions and fix spacing between functions
+
 
 /**
  * Makes a GET request to /api/users/:username. This is to

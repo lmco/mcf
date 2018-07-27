@@ -1,20 +1,20 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module  test/602_OrganizationAPI
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/602-org-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- *
  *
  * @description  This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
@@ -22,30 +22,35 @@
  * works as it should. These API controller tests are specifically for the Organization
  * API tests: posting, putting, getting, and deleting orgs. Some tests are
  * conducting with invalid inputs for the org api controlls.
+ *
+ * TODO - fix description
  */
 
 const path = require('path');
 const chai = require('chai');
 const request = require('request');
-const mongoose = require('mongoose');
-
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
+const mongoose = require('mongoose'); // TODO - remove dep on mongoose
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
+
+/* --------------------( Test Data )-------------------- */
+
 const test = M.config.test;
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
 
-describe(name, () => {
+/* --------------------( Main )-------------------- */
+
+
+describe(M.getModuleName(module.filename), () => {
+  /**
+   * TODO - describe this function
+   */
   before(function(done) {
     this.timeout(5000);
 
-    const db = M.require('lib/db');
+    const db = M.require('lib/db'); // TODO M.lib.db
     db.connect();
 
     // Creating a Requesting Admin
@@ -73,6 +78,9 @@ describe(name, () => {
     });
   });
 
+  /**
+   * TODO - add description
+   */
   after(function(done) {
     this.timeout(5000);
     User.findOneAndRemove({
@@ -84,6 +92,7 @@ describe(name, () => {
     });
   });
 
+  /* Execute the tests */
   it('should GET an empty organization', getOrgs).timeout(3000);
   it('should POST an organization', postOrg01).timeout(3000);
   it('should POST second organization', postOrg02).timeout(3000);
@@ -104,16 +113,16 @@ describe(name, () => {
   it('should GET 0 organizations', getOrgs03).timeout(3000);
 });
 
-/**---------------------------------------------------
-   *            Test Functions
-   ----------------------------------------------------*/
+/* --------------------( Tests )-------------------- */
+// TODO - add descriptions to all functions and fix spacing between functions
 
 
 /** TEST?! Need to ask Josh about testing before any orgs are added to the database.
  * Makes a GET request to /api/org1. This should happen before any orgs
  * are added to the database. So the response should be an empty array.
+ * TODO - let's talk about the above, should we expect the DB to be empty?
  *
- * TODO (jk) - What happens if we don't want to start with an empty db?
+ * TODO - What happens if we don't want to start with an empty db?
  */
 
 function getOrgs(done) {
@@ -129,6 +138,7 @@ function getOrgs(done) {
     done();
   });
 }
+
 
 /**
  * Makes a POST request to /api/orgs/:orgid to create an org.
@@ -152,6 +162,7 @@ function postOrg01(done) {
   });
 }
 
+
 /**
  * Makes a POST request to /api/orgs/:orgid to create an org.
  * This should succeed.
@@ -174,6 +185,7 @@ function postOrg02(done) {
     done();
   });
 }
+
 
 /**
  * Makes a GET request to /api/org1. This should happen before any orgs
