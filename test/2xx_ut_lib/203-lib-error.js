@@ -1,16 +1,17 @@
-/******************************************************************************
- * Classification: UNCLASSIFIED                                               *
- *                                                                            *
- * Copyright (C) 2018, Lockheed Martin Corporation                            *
- *                                                                            *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
- * It is not approved for public release or redistribution.                   *
- *                                                                            *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
- * control laws. Contact legal and export compliance prior to distribution.   *
- ******************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module  test/203-lib-error
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -25,12 +26,6 @@ const errors = M.require('lib/errors');
 /* --------------------( Main )-------------------- */
 
 
-/**
- * The "describe" function is provided by Mocha and provides a way of wrapping
- * or grouping several "it" tests into a single group. In this case, the name of
- * that group (the first parameter passed into describe) is derived from the
- * name of the current file.
- */
 describe(M.getModuleName(module.filename), () => {
   it('should create an error with no status code', noStatusCode);
   it('should create a error with a 400 status code', status400);

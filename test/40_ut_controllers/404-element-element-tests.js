@@ -1,16 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module test/404_ElementController
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/404-element-controller-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -22,9 +23,7 @@
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
+const mongoose = require('mongoose'); // TODO - remove the need for mongoose
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ElemController = M.require('controllers/ElementController');
 const OrgController = M.require('controllers/OrganizationController');
@@ -32,22 +31,25 @@ const ProjController = M.require('controllers/ProjectController');
 const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
+
+/* --------------------( Test Data )-------------------- */
+
 let user = null;
 let org = null;
 let proj = null;
 
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
+/* --------------------( Main )-------------------- */
 
-describe(name, () => {
+
+describe(M.getModuleName(module.filename), () => {
   /**
    * This function runs before all the tests in this test suite.
+   * TODO - What does this function do?
    */
   before(function(done) {
     this.timeout(10000);
-    const db = M.require('lib/db');
+    const db = M.require('lib/db'); // TODO - use M.lib.db?
     db.connect();
 
     // Creating a Requesting Admin
@@ -116,6 +118,7 @@ describe(name, () => {
     });
   });
 
+  /* Execute the tests */
   it('should create an element', createElement);
   it('should create a child element', createChildElement);
   it('should create a block element', createBlock);
@@ -132,9 +135,7 @@ describe(name, () => {
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Tests )-------------------- */
 
 
 /**
@@ -170,6 +171,7 @@ function createElement(done) {
   });
 }
 
+
 /**
  * Creates a child element
  */
@@ -202,6 +204,7 @@ function createChildElement(done) {
   });
 }
 
+
 /**
  * Creates a block
  */
@@ -233,6 +236,7 @@ function createBlock(done) {
     done();
   });
 }
+
 
 /**
  * Creates a relationship

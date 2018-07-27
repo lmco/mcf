@@ -1,16 +1,17 @@
-/******************************************************************************
- * Classification: UNCLASSIFIED                                               *
- *                                                                            *
- * Copyright (C) 2018, Lockheed Martin Corporation                            *
- *                                                                            *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
- * It is not approved for public release or redistribution.                   *
- *                                                                            *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
- * control laws. Contact legal and export compliance prior to distribution.   *
- ******************************************************************************/
 /**
- * @module test/301-user-model-tests
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/301-user-model-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -18,6 +19,7 @@
  * are to make sure the code is working as it should or should not be.
  * Especially, when making changes/ updates to the code. The user model tests
  * create, update, finds, soft deletes, and hard deletes users.
+ * TODO - Description
  */
 
 const chai = require('chai');

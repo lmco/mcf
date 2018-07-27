@@ -1,16 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module test/403_ProjectController
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/403-project-controller-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
@@ -20,13 +21,12 @@
  * when making changes/ updates to the code. The project controller tests create,
  * update, find, soft delete, hard delte, and permissions of projects. As well
  * as test the controlls with invalid inputs.
+ * TODO - cleanup desc
  */
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
+const mongoose = require('mongoose'); // TODO - remove need for mongoose
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.require('controllers/ProjectController');
 const UserController = M.require('controllers/UserController');
@@ -36,16 +36,22 @@ const Element = M.require('models/Element');
 const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
+
+/* --------------------( Test Data )-------------------- */
+
 let nonAuser = null;
 let allSeeingUser = null;
 let org = null;
 let project = null;
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
 
-describe(name, () => {
+/* --------------------( Main )-------------------- */
+
+
+describe(M.getModuleName(module.filename), () => {
+  /**
+   * TODO - add description
+   */
   before(function(done) {
     this.timeout(5000);
 
@@ -116,10 +122,11 @@ describe(name, () => {
     });
   });
 
-  /*-------------------------------------
-   * After: run after all tests
-   *-------------------------------------*/
 
+  /**
+   * After: run after all tests.
+   * TODO - add description
+   */
   after((done) => {
     // Removing the organization created
     OrgController.removeOrg(allSeeingUser, 'starkhq', { soft: false })
@@ -146,10 +153,7 @@ describe(name, () => {
     });
   });
 
-  /*----------
-   * Tests
-   *----------*/
-
+  /* Execute the tests */
   it('should create a new project', createProject).timeout(2500);
   it('should create elements for the project', createElements).timeout(2500);
   it('should throw an error saying the field cannot be updated', updateFieldError).timeout(2500);
@@ -181,9 +185,8 @@ describe(name, () => {
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Tests )-------------------- */
+
 
 /**
  * Tests creating a project
@@ -207,6 +210,7 @@ function createProject(done) {
     done();
   });
 }
+
 
 /**
  * Creates elements for the main project
@@ -247,12 +251,12 @@ function createElements(done) {
   });
 }
 
+
 /**
  * Test update to a project field with an
  * invalid attempt at updating the id.
  * This will reject and throw an error.
  */
-
 function updateFieldError(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'ironman', { id: 'shouldnotchange' })
   .then((proj) => {
@@ -265,12 +269,12 @@ function updateFieldError(done) {
   });
 }
 
+
 /**
  * Tests update to a project with an invalid
  * name for the project. This will reject and throw
  * and error.
  */
-
 function updateTypeError(done) {
   ProjController.updateProject(allSeeingUser, org.id, 'ironman', { name: [] })
   .then((proj) => {
@@ -282,6 +286,7 @@ function updateTypeError(done) {
     done();
   });
 }
+
 
 /**
  * Test updating a project with a
@@ -298,6 +303,7 @@ function updateProject(done) {
     done();
   });
 }
+
 
 /**
  * Test updating a project with using project object.
@@ -317,6 +323,7 @@ function updateProjectObject(done) {
     done();
   });
 }
+
 
 /**
  * Tests creating a second project
@@ -342,6 +349,7 @@ function createProject02(done) {
   });
 }
 
+
 /**
  * Tests to see what valid name of the id
  * can be of a project. how long till it breaks...
@@ -365,6 +373,7 @@ function createLongId(done) {
     done();
   });
 }
+
 
 /**
  * Tests to see how long a name of a project can be.

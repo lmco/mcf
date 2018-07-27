@@ -1,16 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module  test/201-lib-crypto
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -19,24 +20,20 @@
  */
 
 const chai = require('chai');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
-
 const M = require('../../mbee.js');
 
-/******************************************************************************
- *  Main                                                                      *
- ******************************************************************************/
 
-describe(name, () => {
+/* --------------------( Main )-------------------- */
+
+
+describe(M.getModuleName(module.filename), () => {
   it('should have encrypt and decrypt functions', checkCryptoFunctions);
   it('should encrypt and decrypt a message', encryptTest);
 });
 
 
-/******************************************************************************
- *  Test Functions                                                            *
- ******************************************************************************/
+/* --------------------( Tests )-------------------- */
+
 
 /**
  * @description Requires the crypto library and checks that it has encrypt and

@@ -1,17 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- * NOTE: Commented out test waiting for a bug to be fixed                    *
- *****************************************************************************/
 /**
- * @module  test/402_OrganizationController
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/402-org-controller-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
@@ -21,13 +21,13 @@
  * when making changes/ updates to the code. The organization controller tests create,
  * update, find, soft delete, hard delte, and permissions of organzations. As well as
  * test the controlls with invalid inputs.
+ *
+ * TODO - Fix module description
  */
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
+const mongoose = require('mongoose'); // TODO - remove the need for Mongo
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ElemController = M.require('controllers/ElementController');
 const OrgController = M.require('controllers/OrganizationController');
@@ -37,22 +37,25 @@ const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
 
+/* --------------------( Test Data )-------------------- */
+
 let user = null;
 let newUser = null;
 let org = null;
 
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
+/* --------------------( Main )-------------------- */
 
-describe(name, () => {
+
+describe(M.getModuleName(module.filename), () => {
   // NOTE: Changed from arrow function to allow for use of
   // this so that a larger timeout could be set
+  // TODO -  use "TODO" not "NOTE"
 
-  /*-------------------------------------
+  /**
    * Before: run before all tests
-   *-------------------------------------*/
+   * TODO - describe what the before function is doing.
+   */
   before(function(done) {
     this.timeout(6000);
     const db = M.require('lib/db');
@@ -101,9 +104,10 @@ describe(name, () => {
     });
   });
 
-  /*-------------------------------------
-   * After: run after all tests
-   *-------------------------------------*/
+  /**
+   * After: run after all tests.
+   * TODO - describe what this function is doing.
+   */
   after((done) => {
     // Removing the organization created
     OrgController.removeOrg(user, 'gaurdians', { soft: false })
@@ -125,10 +129,7 @@ describe(name, () => {
     });
   });
 
-  /*----------
-   * Tests
-   *----------*/
-
+  /* Execute the tests */
   it('should create a new org', addNewOrg).timeout(2500);
   it('should create a second org', addSecondOrg).timeout(2500);
   it('should find an existing org', findExistingOrg).timeout(2500);
@@ -156,9 +157,8 @@ describe(name, () => {
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Tests )-------------------- */
+
 
 /**
  * Tests creating an org

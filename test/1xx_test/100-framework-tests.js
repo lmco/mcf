@@ -1,20 +1,21 @@
-/******************************************************************************
- * Classification: UNCLASSIFIED                                               *
- *                                                                            *
- * Copyright (C) 2018, Lockheed Martin Corporation                            *
- *                                                                            *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
- * It is not approved for public release or redistribution.                   *
- *                                                                            *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
- * control laws. Contact legal and export compliance prior to distribution.   *
- ******************************************************************************/
 /**
- * @module test/100-framework-tests
+ * Classification: UNCLASSIFIED
  *
- * @author Josh Kaplan
+ * @module  test/100-framework-tests
  *
- * @description These tests are used to ensure that the Mocha test framework and
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * @desc These tests are used to ensure that the Mocha test framework and
  * chai assertions library exist and are working as expected. If this test suite
  * fails, any subsequent failures are likely a result of problems with the mocha
  * or chai modules.

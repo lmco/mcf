@@ -1,20 +1,21 @@
-/******************************************************************************
- * Classification: UNCLASSIFIED                                               *
- *                                                                            *
- * Copyright (C) 2018, Lockheed Martin Corporation                            *
- *                                                                            *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
- * It is not approved for public release or redistribution.                   *
- *                                                                            *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
- * control laws. Contact legal and export compliance prior to distribution.   *
- ******************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module  test/101-config-tests
  *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @description Executes tests of the test framework itself.
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * @desc This file tests some the configuration to ensure versions are correct.
  */
 
 const path = require('path');

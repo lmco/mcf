@@ -1,16 +1,17 @@
-/******************************************************************************
- * Classification: UNCLASSIFIED                                               *
- *                                                                            *
- * Copyright (C) 2018, Lockheed Martin Corporation                            *
- *                                                                            *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
- * It is not approved for public release or redistribution.                   *
- *                                                                            *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
- * control laws. Contact legal and export compliance prior to distribution.   *
- ******************************************************************************/
 /**
- * @module test/302-org-model-tests
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/302-org-model-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
@@ -23,7 +24,7 @@
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // TODO - remove the need for mongoose
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.require('models/Organization');
 

@@ -1,18 +1,20 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************
+/**
+ * Classification: UNCLASSIFIED
  *
- * @module test/304-element-model-tests
+ * @module  test/304-element-model-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests the Element Model functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
@@ -24,8 +26,6 @@
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 const User = M.require('models/User');
