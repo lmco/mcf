@@ -19,12 +19,16 @@
  */
 
 const chai = require('chai');
+
 const M = require('../../mbee.js');
 const utils = M.require('lib/utils'); // TODO - can we do M.lib.utils?
 
 
 /* --------------------( Main )-------------------- */
 
+/*------------------------------------
+ *       Main
+ *------------------------------------*/
 
 describe(M.getModuleName(module.filename), () => {
   it('should check that a string is a string and succeed', stringIsString);
@@ -70,12 +74,13 @@ const samepleObj = {
 function stringIsString(done) {
   try {
     utils.assertType(['hello', 'goodbye'], 'string');
-    done();
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
     done();
   }
+  chai.expect(utils.checkType(['hello', 'goodbye'], 'string')).to.equal(true);
+  done();
 }
 
 
@@ -91,8 +96,9 @@ function numberIsString(done) {
   }
   catch (error) {
     chai.expect(error.status).to.equal(400);
-    done();
   }
+  chai.expect(utils.checkType([1, 2], 'string')).to.equal(false);
+  done();
 }
 
 
@@ -102,12 +108,13 @@ function numberIsString(done) {
 function objectIsObject(done) {
   try {
     utils.assertType([{ hello: 'string' }], 'object');
-    done();
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
     done();
   }
+  chai.expect(utils.checkType([{ hello: 'string' }], 'object')).to.equal(true);
+  done();
 }
 
 
@@ -116,13 +123,14 @@ function objectIsObject(done) {
  */
 function projectIDExists(done) {
   try {
-    utils.assertExists(['project.id'], samepleObj);
-    done();
+    utils.assertExists(['project.id'], sampleObj);
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
     done();
   }
+  chai.expect(utils.checkExists(['project.id'], sampleObj)).to.equal(true);
+  done();
 }
 
 
@@ -134,7 +142,7 @@ function projectIDExists(done) {
  */
 function projectUserExists(done) {
   try {
-    utils.assertExists(['project.user'], samepleObj);
+    utils.assertExists(['project.user'], sampleObj);
     chai.expect(true).to.equal(false);
     done();
   }
@@ -142,6 +150,8 @@ function projectUserExists(done) {
     chai.expect(error.status).to.equal(400);
     done();
   }
+  chai.expect(utils.checkExists(['project.user'], sampleObj)).to.equal(false);
+  done();
 }
 
 
@@ -150,13 +160,14 @@ function projectUserExists(done) {
  */
 function multipleExist(done) {
   try {
-    utils.assertExists(['project.id', 'project.name', 'project.org.id', 'type'], samepleObj);
-    done();
+    utils.assertExists(['project.id', 'project.name', 'project.org.id', 'type'], sampleObj);
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
     done();
   }
+  chai.expect(utils.checkExists(['project.name', 'project.org.id'], sampleObj)).to.equal(true);
+  done();
 }
 
 
@@ -167,12 +178,13 @@ function userIsAdmin(done) {
   const user = { name: 'Darth Vader', admin: true };
   try {
     utils.assertAdmin(user);
-    done();
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
     done();
   }
+  chai.expect(utils.checkAdmin(user)).to.equal(true);
+  done();
 }
 
 
@@ -190,6 +202,8 @@ function userIsNotAdmin(done) {
     chai.expect(error.status).to.equal(401);
     done();
   }
+  chai.expect(utils.checkAdmin(user)).to.equal(false);
+  done();
 }
 
 

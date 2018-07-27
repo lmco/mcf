@@ -149,12 +149,14 @@
     // The level of log info which will be displayed on the console and written to teh log file.
     // Options: critical, error, warn, info, verbose, debug
     "level": "info",
+    // The directory which will does/will contain the log files
+    "dir": "logs",
     // The file location relative to the main MBEE directory which will write the above log level data.
-    "file": "logs/mbee.log",
+    "file": "mbee.log",
     // The file location relative to the main MBEE directory which will write error level log date.
-    "error_file": "logs/mbee-error.log",
+    "error_file": "mbee-error.log",
     // The file location relative to the main MBEE directory which will write debug level log date.
-    "debug_file": "logs/mbee-debug.log",
+    "debug_file": "mbee-debug.log",
     // A boolean which indicates whether or not to color the output of the log data to both the console
     // and the log files.
     "colorize": false

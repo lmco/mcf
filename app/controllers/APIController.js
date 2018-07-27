@@ -12,6 +12,8 @@
 /**
  * @module  controllers.api_controller
  *
+ * @author Austin J Bieber <austin.j.bieber@lmco.com>
+ *
  * @description  This implement all of the API functionality. All API routes
  * map to function in this controller which in turn uses other controllers that
  * define behaviors for specific objects.
@@ -253,7 +255,7 @@ class APIController {
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
-    if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
+    if (utils.checkExists(['id'], req.body) && (req.body.id !== req.params.orgid)) {
       const error = new errors.CustomError('Organization ID in the body does not match ID in the params.', 400);
       return res.status(error.status).send(error);
     }
@@ -300,7 +302,7 @@ class APIController {
 
     // If any ID was provided in the body as well as the params,
     // and the IDs do not match, fail.
-    if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
+    if (utils.checkExists(['id'], req.body) && req.body.id !== req.params.orgid) {
       const error = new errors.CustomError('Organization ID in the body does not match ID in the params.', 400);
       return res.status(error.status).send(error);
     }

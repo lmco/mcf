@@ -12,6 +12,8 @@
 /**
  * @module  controllers.project_controller
  *
+ * @author Austin J Bieber <austin.j.bieber@lmco.com>
+ *
  * @description  This implements the behavior and logic for a project and
  * provides functions for interacting with projects.
  */
@@ -384,7 +386,7 @@ class ProjectController {
             return reject(new errors.CustomError(`Project does not contain field ${updateField}`, 400));
           }
           // if parameter is of type object, stringify and compare
-          if (typeof projectUpdated[updateField] === 'object') {
+          if (utils.checkType([projectUpdated[updateField]], 'object')) {
             if (JSON.stringify(project[updateField])
               === JSON.stringify(projectUpdated[updateField])) {
               continue;
@@ -399,7 +401,7 @@ class ProjectController {
             return reject(new errors.CustomError(`Users cannot update [${updateField}] of Projects.`, 400));
           }
           // Error Check - Check if updated field is of type string
-          if (typeof projectUpdated[updateField] !== 'string') {
+          if (!utils.checkType([projectUpdated[updateField]], 'string')) {
             return reject(new errors.CustomError(`The Project [${updateField}] is not of type String`, 400));
           }
 
@@ -457,7 +459,7 @@ class ProjectController {
       }
 
       let softDelete = true;
-      if (options.hasOwnProperty('soft')) {
+      if (utils.checkExists(['soft'], options)) {
         if (options.soft === false && reqUser.admin) {
           softDelete = false;
         }

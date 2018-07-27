@@ -12,6 +12,8 @@
 /**
  * @module  controllers.organization_controller
  *
+ * @author Austin J Bieber <austin.j.bieber@lmco.com>
+ *
  * @description  This implements the behavior and logic for an organization and
  * provides functions for interacting with organizations.
  */
@@ -269,7 +271,7 @@ class OrganizationController {
             return reject(new errors.CustomError(`Organization does not contain field ${updateField}`, 400));
           }
           // if parameter is of type object, stringify and compare
-          if (typeof orgUpdate[updateField] === 'object') {
+          if (utils.checkType([orgUpdate[updateField]], 'object')) {
             if (JSON.stringify(org[updateField]) === JSON.stringify(orgUpdate[updateField])) {
               continue;
             }
@@ -283,7 +285,7 @@ class OrganizationController {
             return reject(new errors.CustomError(`Users cannot update [${updateField}] of organizations.`, 400));
           }
           // Error Check - Check if updated field is of type string
-          if (typeof orgUpdate[updateField] !== 'string') {
+          if (!utils.checkType([orgUpdate[updateField]], 'string')) {
             return reject(new errors.CustomError(`The Organization [${updateField}] is not of type String`, 400));
           }
 
