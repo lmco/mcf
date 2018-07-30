@@ -395,57 +395,34 @@ class ElementController {
               .then((newElement) => resolve(newElement))
               .catch((createRelationshipError) => reject(createRelationshipError));
             }
-            else if (parentID !== null) {
-              ElementController.findElement(reqUser, orgID, projID, parentID)
-              .then((parent) => { // eslint-disable-line consistent-return
-                // Ensure parent is of type Package
-                if (!parent.type === 'Package') {
-                  return reject(new errors.CustomError('Parent element is not of type Package.', 400));
-                }
-
-                const newElement = new Element.Element({
-                  id: elemID,
-                  name: elemName,
-                  project: proj._id,
-                  uid: elemUID,
-                  parent: parent._id,
-                  custom: custom,
-                  documentation: documentation
-                });
-
-                  // Save the new element
-                newElement.save((saveErr, elemUpdate) => { // eslint-disable-line consistent-return
-                  if (saveErr) {
-                    return reject(new errors.CustomError('Save Failed'));
-                  }
-
-                  ElementController.updateParent(reqUser, orgID, projID, parentID, newElement)
-                  .then(() => resolve(elemUpdate))
-                  .catch((parentUpdateError) => reject(parentUpdateError));
-                });
-              })
-              .catch((findParentError) => reject(findParentError));
-            }
             else {
+              // Create new element
               const newElement = new Element.Element({
                 id: elemID,
                 name: elemName,
                 project: proj._id,
                 uid: elemUID,
-                parent: null,
                 custom: custom,
                 documentation: documentation
               });
 
-                // Save the new element
-              newElement.save((saveErr, elemUpdate) => {
-                if (saveErr) {
-                  return reject(new errors.CustomError('Save Failed'));
-                }
+              // Update the parent element if one was provided
+              ElementController.updateParent(reqUser, elemData.orgID,
+                elemData.project.id, parentID, newElement)
+              .then((parentElementID) => {
+                newElement.parent = parentElementID;
 
-                // Return the element if succesful
-                return resolve(elemUpdate);
-              });
+                // Save the new element
+                newElement.save((saveErr, elemUpdate) => {
+                  if (saveErr) {
+                    return reject(new errors.CustomError('Save Failed'));
+                  }
+
+                  // Return the element if succesful
+                  return resolve(elemUpdate);
+                });
+              })
+              .catch((updateParentError) => reject(updateParentError));
             }
           }
           else {
@@ -501,56 +478,21 @@ class ElementController {
         // Find the source Element
         ElementController.findElement(reqUser, elemData.orgID, elemData.project.id, source)
         .then((sourceElement) => {
-          if (elemData.parentID !== null) {
-            // Find the parent element
-            ElementController.findElement(reqUser, elemData.orgID,
-              elemData.project.id, elemData.parentID)
-            .then((parentElement) => { // eslint-disable-line consistent-return
-              // Ensure parent is of type Package
-              if (!parentElement.type === 'Package') {
-                return reject(new errors.CustomError('Parent element is not of type Package.', 400));
-              }
+          const newElement = new Element.Relationship({
+            id: elemData.elemID,
+            name: elemData.elemName,
+            project: elemData.project._id,
+            uid: elemData.elemUID,
+            target: targetElement._id,
+            source: sourceElement._id,
+            custom: elemData.custom,
+            documentation: elemData.documentation
+          });
 
-              const newElement = new Element.Relationship({
-                id: elemData.elemID,
-                name: elemData.elemName,
-                project: elemData.project._id,
-                uid: elemData.elemUID,
-                parent: parentElement._id,
-                target: targetElement._id,
-                source: sourceElement._id,
-                custom: elemData.custom,
-                documentation: elemData.documentation
-              });
-
-              // Save the new element
-              newElement.save((saveErr, elemUpdate) => { // eslint-disable-line consistent-return
-                if (saveErr) {
-                  return reject(new errors.CustomError('Save Failed'));
-                }
-
-                // Update the parent elements 'contains' field
-                ElementController.updateParent(reqUser, elemData.orgID,
-                  elemData.project.id, elemData.parentID, newElement)
-                .then((parentUpdated) => resolve(elemUpdate))
-                .catch((parentUpdateError) => reject(parentUpdateError));
-              });
-            })
-            .catch((findParentError) => reject(findParentError));
-          }
-          else {
-            // No parent element was provided
-            const newElement = new Element.Relationship({
-              id: elemData.elemID,
-              name: elemData.elemName,
-              project: elemData.project._id,
-              uid: elemData.elemUID,
-              parent: null,
-              target: targetElement._id,
-              source: sourceElement._id,
-              custom: elemData.custom,
-              documentation: elemData.documentation
-            });
+          ElementController.updateParent(reqUser, elemData.orgID,
+            elemData.project.id, elemData.parentID, newElement)
+          .then((parentElementID) => {
+            newElement.parent = parentElementID;
 
             // Save the new element
             newElement.save((saveErr, elemUpdate) => {
@@ -561,7 +503,8 @@ class ElementController {
               // Return the element if succesful
               return resolve(elemUpdate);
             });
-          }
+          })
+          .catch((updateParentError) => reject(updateParentError));
         })
         .catch((findSourceError) => reject(findSourceError));
       })
@@ -587,63 +530,31 @@ class ElementController {
    */
   static createPackage(reqUser, elemData) {
     return new Promise((resolve, reject) => {
-      if (elemData.parentID !== null) {
-        // Find the parent element
-        ElementController.findElement(reqUser, elemData.orgID,
-          elemData.project.id, elemData.parentID)
-        .then((parentElement) => { // eslint-disable-line consistent-return
-          // Ensure parent is of type Package
-          if (!parentElement.type === 'Package') {
-            return reject(new errors.CustomError('Parent element is not of type Package.', 400));
-          }
+      const newElement = new Element.Package({
+        id: elemData.elemID,
+        name: elemData.elemName,
+        project: elemData.project._id,
+        uid: elemData.elemUID,
+        custom: elemData.custom,
+        documentation: elemData.documentation
+      });
 
-          const newElement = new Element.Package({
-            id: elemData.elemID,
-            name: elemData.elemName,
-            project: elemData.project._id,
-            uid: elemData.elemUID,
-            parent: parentElement._id,
-            custom: elemData.custom,
-            documentation: elemData.documentation
-          });
-
-          // Save the new element
-          newElement.save((saveErr, elementUpdated) => { // eslint-disable-line consistent-return
-            if (saveErr) {
-              return reject(new errors.CustomError('Save Failed'));
-            }
-
-            // Update the parent elements 'contains' field
-            ElementController.updateParent(reqUser, elemData.orgID,
-              elemData.project.id, elemData.parentID, newElement)
-            .then(() => resolve(elementUpdated))
-            .catch((parentUpdateError) => reject(parentUpdateError));
-          });
-        })
-        .catch((findParentError) => reject(findParentError));
-      }
-      else {
-        // No parent element was provided
-        const newElement = new Element.Package({
-          id: elemData.elemID,
-          name: elemData.elemName,
-          project: elemData.project._id,
-          uid: elemData.elemUID,
-          parent: null,
-          custom: elemData.custom,
-          documentation: elemData.documentation
-        });
+      ElementController.updateParent(reqUser, elemData.orgID,
+        elemData.project.id, elemData.parentID, newElement)
+      .then((parentElementID) => {
+        newElement.parent = parentElementID;
 
         // Save the new element
-        newElement.save((saveErr, elementUpdated) => {
+        newElement.save((saveErr, elemUpdate) => {
           if (saveErr) {
             return reject(new errors.CustomError('Save Failed'));
           }
 
           // Return the element if succesful
-          return resolve(elementUpdated);
+          return resolve(elemUpdate);
         });
-      }
+      })
+      .catch((updateParentError) => reject(updateParentError));
     });
   }
 
@@ -665,63 +576,31 @@ class ElementController {
    */
   static createBlock(reqUser, elemData) {
     return new Promise((resolve, reject) => {
-      if (elemData.parentID !== null) {
-        // Find the parent element
-        ElementController.findElement(reqUser, elemData.orgID,
-          elemData.project.id, elemData.parentID)
-        .then((parentElement) => { // eslint-disable-line consistent-return
-          // Ensure parent is of type Package
-          if (!parentElement.type === 'Package') {
-            return reject(new errors.CustomError('Parent element is not of type Package.', 400));
-          }
+      const newElement = new Element.Block({
+        id: elemData.elemID,
+        name: elemData.elemName,
+        project: elemData.project._id,
+        uid: elemData.elemUID,
+        custom: elemData.custom,
+        documentation: elemData.documentation
+      });
 
-          const newElement = new Element.Block({
-            id: elemData.elemID,
-            name: elemData.elemName,
-            project: elemData.project._id,
-            uid: elemData.elemUID,
-            parent: parentElement._id,
-            custom: elemData.custom,
-            documentation: elemData.documentation
-          });
-
-          // Save the new element
-          newElement.save((saveErr, elementUpdated) => { // eslint-disable-line consistent-return
-            if (saveErr) {
-              return reject(new errors.CustomError('Save Failed'));
-            }
-
-            // Update the parent elements 'contains' field
-            ElementController.updateParent(reqUser, elemData.orgID,
-              elemData.project.id, elemData.parentID, newElement)
-            .then(() => resolve(elementUpdated))
-            .catch((parentUpdateError) => reject(parentUpdateError));
-          });
-        })
-        .catch((findParentError) => reject(findParentError));
-      }
-      else {
-        // No parent element was provided
-        const newElement = new Element.Block({
-          id: elemData.elemID,
-          name: elemData.elemName,
-          project: elemData.project._id,
-          uid: elemData.elemUID,
-          parent: null,
-          custom: elemData.custom,
-          documentation: elemData.documentation
-        });
+      ElementController.updateParent(reqUser, elemData.orgID,
+        elemData.project.id, elemData.parentID, newElement)
+      .then((parentElementID) => {
+        newElement.parent = parentElementID;
 
         // Save the new element
-        newElement.save((saveErr, elementUpdated) => {
+        newElement.save((saveErr, elemUpdate) => {
           if (saveErr) {
             return reject(new errors.CustomError('Save Failed'));
           }
 
           // Return the element if succesful
-          return resolve(elementUpdated);
+          return resolve(elemUpdate);
         });
-      }
+      })
+      .catch((updateParentError) => reject(updateParentError));
     });
   }
 
@@ -859,10 +738,19 @@ class ElementController {
    * @param  {Element} newElement  The new child element.
    */
   static updateParent(reqUser, orgID, projID, elemID, newElement) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+      // Handle case where there is no parent element provided
+      if (elemID === null) {
+        return resolve(null);
+      }
       // Find the parent element
       ElementController.findElement(reqUser, orgID, projID, elemID)
-      .then((parentElement) => {
+      .then((parentElement) => { // eslint-disable-line consistent-return
+        // To be a parent element, element type must be a package
+        if (parentElement.type !== 'Package') {
+          return reject(new errors.CustomError('Parent element is not of type Package.', 400));
+        }
+
         // Add _id to the array
         parentElement.contains.push(newElement._id);
 
@@ -872,8 +760,8 @@ class ElementController {
             return reject(new errors.CustomError('Save failed.'));
           }
 
-          // Return the updated element object
-          return resolve(parentElement);
+          // Return the updated element object _id
+          return resolve(parentElement._id);
         });
       })
       .catch((findParentError) => reject(findParentError));
