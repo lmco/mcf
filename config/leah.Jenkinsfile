@@ -52,8 +52,9 @@ pipeline {
 
                 // Verify build
                 sh 'ls -l'
-
-                sh 'docker.build("mbee", "./config")'
+                script {
+                    docker.build("mbee", "./config")
+                 }
             }
         }
         ///**
