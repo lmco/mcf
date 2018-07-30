@@ -45,7 +45,7 @@ pipeline {
                 stage('Build MBEE'){
                     steps {
                         // Build
-                        sh 'NODE_ENV=production node mbee build'
+                        sh 'NODE_ENV=stage node mbee build'
 
                         sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
@@ -55,7 +55,7 @@ pipeline {
                 }
                 stage('Build Docker MBEE'){
                     steps {
-                        sh 'NODE_ENV=production node mbee docker --build'
+                        sh 'NODE_ENV=stage node mbee docker --build'
                     }
                 }
             }
@@ -72,9 +72,9 @@ pipeline {
         */
         always {
             // Gets the logs and prints them to the console
-            //sh 'NODE_ENV=production node mbee docker --get-logs'
+            //sh 'NODE_ENV=stage node mbee docker --get-logs'
             // Removes any test containers
-            sh 'NODE_ENV=production node mbee docker --clean'
+            sh 'NODE_ENV=stage node mbee docker --clean'
         }
 
        /**
@@ -204,72 +204,6 @@ pipeline {
                 }
             }
         }
-
-       /**
-        *This will run only when a request is unstable
-        */
-        unstable{
-            script {
-                echo 'unstable'
-
-                // if merge request from the master branch the source branch and target branch
-                // will return as null characters
-                // checking for null characters so email does not show null
-                if (env.gitlabSourceBranch == null){
-                    emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} UNSTABLE:\
-                        <br/><br/>\
-                        Merge Request: No Merge Request Title<br/> \
-                        Source Branch: master<br/> \
-                        Target Branch: master<br/> \
-                        User: ${env.gitlabUserEmail}\
-                        <br/><br/>View the Git commit on <a \
-                        href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
-                        GitLab</a>.",
-                        mimeType: 'text/html',
-                        subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE",
-                        to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
-                        replyTo: "mbee-service.fc-ssc@lmco.com",
-                        from: "mbee-service.fc-ssc@lmco.com"
-                }
-                // if merge request title is not there, it will return null
-                // this will make sure the merge request title is never null
-                else if (env.gitlabMergeRequestTitle == null) {
-                    emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE: \
-                        <br/><br/>\
-                        Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
-                        Source Branch: ${env.gitlabSourceBranch}<br/> \
-                        Target Branch: ${env.gitlabTargetBranch}<br/> \
-                        User: ${env.gitlabUserEmail}\
-                        <br/><br/>View the Git commit on <a \
-                        href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
-                        GitLab</a>.",
-                        mimeType: 'text/html',
-                        subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE",
-                        to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
-                        replyTo: "mbee-service.fc-ssc@lmco.com",
-                        from: "mbee-service.fc-ssc@lmco.com",
-                        attachLog: true
-                }
-                else {
-                    emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE: \
-                        <br/><br/>\
-                        Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
-                        Source Branch: ${env.gitlabSourceBranch}<br/> \
-                        Target Branch: ${env.gitlabTargetBranch}<br/> \
-                        User: ${env.gitlabUserEmail}\
-                        <br/><br/>View the Git commit on <a \
-                        href=\"https://gitlab.lmms.lmco.com/mbee/mbee/commit/${env.GIT_COMMIT}\">\
-                        GitLab</a>.",
-                        mimeType: 'text/html',
-                        subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE",
-                        to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
-                        replyTo: "mbee-service.fc-ssc@lmco.com",
-                        from: "mbee-service.fc-ssc@lmco.com",
-                        attachLog: true
-                }
-            }
-        }
-
 
        /**
         *This will run only when a request was aborted

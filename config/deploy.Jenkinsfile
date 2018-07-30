@@ -12,11 +12,10 @@
 /**
  * production_dev.Jenkinsfile
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Phill Lee <phills.email@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This is a Jenkinsfile
- * This file defines the build pipeline for Jenkins.
+ * This file defines the running instance of a docker to check the code.
  */
 
 pipeline {
@@ -31,10 +30,10 @@ pipeline {
         stage('Run') {
             steps {
                 // Removes any existing production running containers
-                sh 'NODE_ENV=production node mbee docker --clean'
+                sh 'NODE_ENV=stage node mbee docker --clean'
 
                 // Runs the production container in the background
-                sh 'NODE_ENV=production node mbee docker --run'
+                sh 'NODE_ENV=stage node mbee docker --run'
             }
         }
 
@@ -53,14 +52,14 @@ pipeline {
                 stage('Linter') {
                     steps {
                         // Runs the basic test suite against the running stage container
-                        sh 'NODE_ENV=production node mbee lint'
+                        sh 'NODE_ENV=stage node mbee lint'
                     }
                 }
                 stage('Run tests') {
                     steps {
                         // Runs the basic test suite against the running stage container
                         timeout(time: 10, unit: 'MINUTES') {
-                            sh 'NODE_ENV=production node mbee test --grep "^[0-6]"'
+                            sh 'NODE_ENV=stage node mbee test --grep "^[0-6]"'
                         }
                     }
                 }
@@ -77,9 +76,9 @@ pipeline {
             sh 'echo "Build and Deploy Complete"'
 
             // Gets the logs and prints them to the console
-            //sh 'NODE_ENV=production node mbee docker --get-logs'
+            //sh 'NODE_ENV=stage node mbee docker --get-logs'
             // Removes any test containers
-            sh 'NODE_ENV=production node mbee docker --clean'
+            sh 'NODE_ENV=stage node mbee docker --clean'
         }
 
        /**
