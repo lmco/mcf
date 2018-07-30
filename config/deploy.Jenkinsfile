@@ -51,13 +51,17 @@ pipeline {
         stage('Test') {
             parallel {
                 stage('Linter') {
-                    // Runs the basic test suite against the running stage container
-                    sh 'NODE_ENV=test node mbee lint'
+                    steps {
+                        // Runs the basic test suite against the running stage container
+                        sh 'NODE_ENV=production node mbee lint'
+                    }
                 }
                 stage('Run tests') {
-                    // Runs the basic test suite against the running stage container
-                    timeout(time: 10, unit: 'MINUTES') {
-                        sh 'NODE_ENV=test node mbee test --grep "^[0-6]"'
+                    steps {
+                        // Runs the basic test suite against the running stage container
+                        timeout(time: 10, unit: 'MINUTES') {
+                            sh 'NODE_ENV=production node mbee test --grep "^[0-6]"'
+                        }
                     }
                 }
             }
