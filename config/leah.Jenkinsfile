@@ -52,11 +52,7 @@ pipeline {
 
                 // Verify build
                 sh 'ls -l'
-                script {
-                    echo 'Before Build'
-                    docker.build("mbee -f ./config/Dockerfile")
-                    echo 'After Build'
-                 }
+                sh 'NODE_ENV=production node mbee docker --build'
             }
         }
 
