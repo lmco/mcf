@@ -50,7 +50,7 @@ pipeline {
                         sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
                         // Verify build
-                        steps{sh 'ls -l'
+                        sh 'ls -l'
                     }
                 }
                 stage('Build Docker MBEE'){
