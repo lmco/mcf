@@ -190,6 +190,6 @@ To generate the documentation, a Gulp build task was written. You can run it
 with `gulp jsdoc` or with Yarn by running `yarn run jsdoc-gen`. Additionally,
 a server was written to statically serve the documentation which can be found
 in the `bin directory`.
-
+ 
 Generate the documentation and serve it all at once with `yarn run jsdoc`.
 
