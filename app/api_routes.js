@@ -331,7 +331,7 @@ api.route('/orgs')
  */
 api.route('/orgs/:orgid')
 .get(
-  //AuthController.authenticate,
+  AuthController.authenticate,
   Middleware.logRoute,
   APIController.getOrg
 )
