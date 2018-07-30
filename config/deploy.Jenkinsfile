@@ -81,6 +81,7 @@ pipeline {
             // Removes any test containers
             sh 'NODE_ENV=production node mbee docker --clean'
         }
+
        /**
         *This will run only when a request succeeds
         */
@@ -92,6 +93,7 @@ pipeline {
                 // will return as null characters
                 // checking for null characters so email does not show null
                 if (env.gitlabSourceBranch == null){
+                    echo 'master branch'
                     emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
                         <br/><br/>\
                         Merge Request: No Merge Request Title<br/> \
@@ -108,6 +110,7 @@ pipeline {
                 // if merge request title is not there, it will return null
                 // this will make sure the merge request title is never null
                 else if (env.gitlabMergeRequestTitle == null){
+                    echo 'no merge request title'
                     emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
                         <br/><br/>\
                         Merge Request: No Merge Request Title<br/> \
@@ -122,6 +125,7 @@ pipeline {
                         from: "mbee-service.fc-ssc@lmco.com"
                 }
                 else {
+                    echo 'normal'
                     emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
                         <br/><br/>\
                         Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
