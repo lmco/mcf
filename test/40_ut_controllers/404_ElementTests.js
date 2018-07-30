@@ -330,8 +330,11 @@ function findElement(done) {
  * Update an element
  */
 function updateElement(done) {
-  ElemController.updateElement(user, org.id, proj.id, 'elem0',
-    { name: 'Thors Hammer', documentation: 'This is some different documentation', custom: { real: false, marvel: false } })
+  ElemController.updateElement(user, org.id, proj.id, 'elem0', { name: 'Thors Hammer',
+    documentation:
+      'This is some different documentation',
+    custom: { real: false, marvel: false } })
+  .then(() => ElemController.findElement(user, org.id, proj.id, 'elem0'))
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem0');
     chai.expect(retElem.name).to.equal('Thors Hammer');
