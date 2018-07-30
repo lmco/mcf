@@ -50,11 +50,10 @@ pipeline {
                 sh 'NODE_ENV=production node mbee build'
                 sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
-                sh 'find . -name package.json'
                 // Verify build
                 sh 'ls -l'
                 script {
-                    docker.build("mbee", "./config")
+                    docker.build("mbee -f ./config/Dockerfile")
                  }
             }
         }
