@@ -46,13 +46,11 @@ pipeline {
                     steps {
                         // Build
                         sh 'NODE_ENV=production node mbee build'
-                    }
-                }
-                stage('Check Build'){
-                    parallel{
-                        stage('P1'){steps{sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"}}
-                        stage('P2'){steps{sh 'ls -l'}}
+
+                        sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
+
                         // Verify build
+                        steps{sh 'ls -l'
                     }
                 }
                 stage('Build Docker MBEE'){
