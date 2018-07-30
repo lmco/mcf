@@ -60,35 +60,6 @@ pipeline {
                 }
             }
         }
-
-        /**
-         * Runs the staging docker container from the production image
-         */
-         stage('Deploy') {
-            steps {
-                sh "echo 'running in the deploy'"
-                // Removes any existing running or stopped stage containers.
-                sh 'NODE_ENV=production node mbee docker --clean'
-                /* Runs the container in the background. */
-                sh 'NODE_ENV=production node mbee docker --run'
-            }
-         }
-
-         ///**
-         // * Executes functional tests against the staged server.
-         // */
-         // stage('Test') {
-         //    steps {
-         //       // Wait to be sure server is up
-         //       sh 'sleep 20'
-         //      // Runs the basic test suite against the running stage container
-         //       sh 'NODE_ENV=production node mbee lint'
-         //       // Runs the basic test suite against the running stage container
-         //       timeout(time: 10, unit: 'MINUTES') {
-         //           sh 'NODE_ENV=production node mbee test --grep "^[0-6]"'
-         //       }
-         //    }
-         // }
     }
 
     /**
@@ -105,7 +76,7 @@ pipeline {
         success {
             script {
                 echo 'success'
-                if (${env.gitlabSourceBranch} == 'new-pipeline'){
+                if (env.gitlabSourceBranch == 'new-pipeline'){
                     emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
                         <br/><br/>\
                         Merge Request: No Merge Request<br/> \
@@ -138,7 +109,7 @@ pipeline {
         failure {
             script {
                 echo 'failed'
-                if (${env.gitlabSourceBranch} == 'new-pipeline'){
+                if (env.gitlabSourceBranch == 'new-pipeline'){
                     emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} FAILED: \
                         <br/><br/>\
                         Merge Request: No Merge Request<br/> \
@@ -200,7 +171,7 @@ pipeline {
         aborted{
             script {
             echo 'aborted'
-            if (${env.gitlabSourceBranch} == 'new-pipeline'){
+            if (env.gitlabSourceBranch == 'new-pipeline'){
                 emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ABORTED: \
                     <br/><br/>\
                     Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
