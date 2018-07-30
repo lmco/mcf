@@ -19,16 +19,11 @@
  */
 
 const chai = require('chai');
-
 const M = require('../../mbee.js');
 const utils = M.require('lib/utils'); // TODO - can we do M.lib.utils?
 
 
 /* --------------------( Main )-------------------- */
-
-/*------------------------------------
- *       Main
- *------------------------------------*/
 
 describe(M.getModuleName(module.filename), () => {
   it('should check that a string is a string and succeed', stringIsString);
@@ -49,7 +44,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Test Data )-------------------- */
 
-const samepleObj = {
+const sampleObj = {
   project: {
     id: 'myID',
     name: 'The Name',
