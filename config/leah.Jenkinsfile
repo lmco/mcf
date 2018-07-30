@@ -41,18 +41,26 @@ pipeline {
          * Builds the production docker image based on the Dockerfile.
          */
         stage('Build') {
-            steps{
-                //checking out the code
-                //not sure needed but rather safe than sorry
-                //checkout scm
+            stages {
+                stage('Build MBEE'){
+                    steps {
+                        // Build
+                        sh 'NODE_ENV=production node mbee build'
+                    }
+                }
+                stage('Check Build'){
+                    parallel{
+                        sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
-                // Build
-                sh 'NODE_ENV=production node mbee build'
-                sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
-
-                // Verify build
-                sh 'ls -l'
-                sh 'NODE_ENV=production node mbee docker --build'
+                        // Verify build
+                        sh 'ls -l'
+                    }
+                }
+                stage('Build Docker MBEE'){
+                    steps {
+                        sh 'NODE_ENV=production node mbee docker --build'
+                    }
+                }
             }
         }
 
