@@ -63,15 +63,15 @@ pipeline {
         /**
          * Runs the staging docker container from the production image
          */
-         //stage('Deploy') {
-         //   steps {
-          //      sh "echo 'running in the deploy'"
+         stage('Deploy') {
+            steps {
+                sh "echo 'running in the deploy'"
                 // Removes any existing running or stopped stage containers.
-           //     sh 'NODE_ENV=production node mbee docker --clean'
+                sh 'NODE_ENV=production node mbee docker --clean'
                 /* Runs the container in the background. */
-            //    sh 'NODE_ENV=production node mbee docker --run'
-          //  }
-       //  }
+                sh 'NODE_ENV=production node mbee docker --run'
+            }
+         }
 
          ///**
          // * Executes functional tests against the staged server.
