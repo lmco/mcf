@@ -50,10 +50,9 @@ pipeline {
                 }
                 stage('Check Build'){
                     parallel{
-                        sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
-
+                        stage('P1'){steps{sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"}}
+                        stage('P2'){steps{sh 'ls -l'}}
                         // Verify build
-                        sh 'ls -l'
                     }
                 }
                 stage('Build Docker MBEE'){
