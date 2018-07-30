@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module  lib.parseJSON
+ * @module  lib.parse_json
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *

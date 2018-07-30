@@ -10,9 +10,9 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /**
- * @module auth.local-strategy
+ * @module auth.local_strategy
  *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This implements an authentication strategy for local
  * authentication. This should be the default authentication strategy for MBEE.
