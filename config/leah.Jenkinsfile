@@ -103,34 +103,36 @@ pipeline {
                 }
 
         success {
-            echo 'success'
-            if (${env.gitlabSourceBranch} == 'new-pipeline'){
-                emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
-                    <br/><br/>\
-                    Merge Request: No Merge Request<br/> \
-                    Source Branch: ${env.gitlabSourceBranch}<br/> \
-                    Target Branch: ${env.gitlabTargetBranch}<br/> \
-                    <br/><br/>\
-                    Merge request passed automated tests. No further action is required.",
-                    mimeType: 'text/html',
-                    subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - SUCCESS",
-                    to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
-                    replyTo: "mbee-service.fc-ssc@lmco.com",
-                    from: "mbee-service.fc-ssc@lmco.com"
-            }
-            else {
-                emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
-                    <br/><br/>\
-                    Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
-                    Source Branch: ${env.gitlabSourceBranch}<br/> \
-                    Target Branch: ${env.gitlabTargetBranch}<br/> \
-                    <br/><br/>\
-                    Merge request passed automated tests. No further action is required.",
-                    mimeType: 'text/html',
-                    subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - SUCCESS",
-                    to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
-                    replyTo: "mbee-service.fc-ssc@lmco.com",
-                    from: "mbee-service.fc-ssc@lmco.com"
+            steps{
+                echo 'success'
+                if (${env.gitlabSourceBranch} == 'new-pipeline'){
+                    emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
+                        <br/><br/>\
+                        Merge Request: No Merge Request<br/> \
+                        Source Branch: ${env.gitlabSourceBranch}<br/> \
+                        Target Branch: ${env.gitlabTargetBranch}<br/> \
+                        <br/><br/>\
+                        Merge request passed automated tests. No further action is required.",
+                        mimeType: 'text/html',
+                        subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - SUCCESS",
+                        to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+                        replyTo: "mbee-service.fc-ssc@lmco.com",
+                        from: "mbee-service.fc-ssc@lmco.com"
+                }
+                else {
+                    emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
+                        <br/><br/>\
+                        Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
+                        Source Branch: ${env.gitlabSourceBranch}<br/> \
+                        Target Branch: ${env.gitlabTargetBranch}<br/> \
+                        <br/><br/>\
+                        Merge request passed automated tests. No further action is required.",
+                        mimeType: 'text/html',
+                        subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - SUCCESS",
+                        to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+                        replyTo: "mbee-service.fc-ssc@lmco.com",
+                        from: "mbee-service.fc-ssc@lmco.com"
+                }
             }
           }
         failure {
