@@ -136,25 +136,48 @@ pipeline {
             }
           }
         failure {
-            echo 'failed'
-            emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} FAILED: \
-                <br/><br/>\
-                Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
-                Source Branch: ${env.gitlabSourceBranch}<br/> \
-                Target Branch: ${env.gitlabTargetBranch}<br/> \
-                User: ${env.gitlabUserEmail}\
-                <br/><br/>\
-                Merge request of ${env.gitlabSourceBranch} failed. Check console output at \
-                ${env.BUILD_URL} or see the attached build log to view the results.\
-                <br/><br/>\
-                View the source branch on <a href=\"${env.gitlabSourceRepoHttpUrl}\">GitLab</a>.",
-                mimeType: 'text/html',
-                subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - FAILURE",
-                to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
-                replyTo: "mbee-service.fc-ssc@lmco.com",
-                from: "mbee-service.fc-ssc@lmco.com",
-                attachLog: true
+            script {
+                echo 'failed'
+                if (${env.gitlabSourceBranch} == 'new-pipeline'){
+                    emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} FAILED: \
+                        <br/><br/>\
+                        Merge Request: No Merge Request<br/> \
+                        Source Branch: ${env.gitlabSourceBranch}<br/> \
+                        Target Branch: ${env.gitlabTargetBranch}<br/> \
+                        User: ${env.gitlabUserEmail}\
+                        <br/><br/>\
+                        Merge request of ${env.gitlabSourceBranch} failed. Check console output at \
+                        ${env.BUILD_URL} or see the attached build log to view the results.\
+                        <br/><br/>\
+                        View the source branch on <a href=\"${env.gitlabSourceRepoHttpUrl}\">GitLab</a>.",
+                        mimeType: 'text/html',
+                        subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - FAILURE",
+                        to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+                        replyTo: "mbee-service.fc-ssc@lmco.com",
+                        from: "mbee-service.fc-ssc@lmco.com",
+                        attachLog: true
+                    }
+                else {
+                    emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} FAILED: \
+                        <br/><br/>\
+                        Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
+                        Source Branch: ${env.gitlabSourceBranch}<br/> \
+                        Target Branch: ${env.gitlabTargetBranch}<br/> \
+                        User: ${env.gitlabUserEmail}\
+                        <br/><br/>\
+                        Merge request of ${env.gitlabSourceBranch} failed. Check console output at \
+                        ${env.BUILD_URL} or see the attached build log to view the results.\
+                        <br/><br/>\
+                        View the source branch on <a href=\"${env.gitlabSourceRepoHttpUrl}\">GitLab</a>.",
+                        mimeType: 'text/html',
+                        subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - FAILURE",
+                        to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+                        replyTo: "mbee-service.fc-ssc@lmco.com",
+                        from: "mbee-service.fc-ssc@lmco.com",
+                        attachLog: true
                 }
+               }
+             }
         unstable{
             echo 'unstable'
             emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE: \
@@ -173,25 +196,49 @@ pipeline {
                 from: "mbee-service.fc-ssc@lmco.com",
                 attachLog: true
                }
+
         aborted{
+            script {
             echo 'aborted'
-            emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ABORTED: \
-                <br/><br/>\
-                Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
-                Source Branch: ${env.gitlabSourceBranch}<br/> \
-                Target Branch: ${env.gitlabTargetBranch}<br/> \
-                User: ${env.gitlabUserEmail}\
-                <br/><br/>\
-                Merge request of ${env.gitlabSourceBranch} is unstable. Check console output at \
-                ${env.BUILD_URL} or see the attached build log to view the results.\
-                <br/><br/>\
-                View the source branch on <a href=\"${env.gitlabSourceRepoHttpUrl}\">GitLab</a>.",
-                mimeType: 'text/html',
-                subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE",
-                to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
-                replyTo: "mbee-service.fc-ssc@lmco.com",
-                from: "mbee-service.fc-ssc@lmco.com",
-                attachLog: true
+            if (${env.gitlabSourceBranch} == 'new-pipeline'){
+                emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ABORTED: \
+                    <br/><br/>\
+                    Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
+                    Source Branch: ${env.gitlabSourceBranch}<br/> \
+                    Target Branch: ${env.gitlabTargetBranch}<br/> \
+                    User: ${env.gitlabUserEmail}\
+                    <br/><br/>\
+                    Merge request of ${env.gitlabSourceBranch} is unstable. Check console output at \
+                    ${env.BUILD_URL} or see the attached build log to view the results.\
+                    <br/><br/>\
+                    View the source branch on <a href=\"${env.gitlabSourceRepoHttpUrl}\">GitLab</a>.",
+                    mimeType: 'text/html',
+                    subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE",
+                    to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+                    replyTo: "mbee-service.fc-ssc@lmco.com",
+                    from: "mbee-service.fc-ssc@lmco.com",
+                    attachLog: true
+              }
+            else {
+                emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ABORTED: \
+                     <br/><br/>\
+                     Merge Request: ${env.gitlabMergeRequestTitle}<br/> \
+                     Source Branch: ${env.gitlabSourceBranch}<br/> \
+                     Target Branch: ${env.gitlabTargetBranch}<br/> \
+                     User: ${env.gitlabUserEmail}\
+                     <br/><br/>\
+                     Merge request of ${env.gitlabSourceBranch} is unstable. Check console output at \
+                     ${env.BUILD_URL} or see the attached build log to view the results.\
+                     <br/><br/>\
+                     View the source branch on <a href=\"${env.gitlabSourceRepoHttpUrl}\">GitLab</a>.",
+                     mimeType: 'text/html',
+                     subject: "[jenkins] ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - UNSTABLE",
+                     to: "mbee-developers.dl-ssc@exch.ems.lmco.com",
+                     replyTo: "mbee-service.fc-ssc@lmco.com",
+                     from: "mbee-service.fc-ssc@lmco.com",
+                     attachLog: true
+            }
+           }
         }
     }
 }
