@@ -103,7 +103,7 @@ pipeline {
                 }
 
         success {
-            steps{
+            scripts {
                 echo 'success'
                 if (${env.gitlabSourceBranch} == 'new-pipeline'){
                     emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\
