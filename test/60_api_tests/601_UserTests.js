@@ -87,7 +87,7 @@ describe(name, () => {
   it('should get a username', getUser).timeout(3000);
   it('should create a user', postUser).timeout(3000);
   it('should create an admin user', postAUser).timeout(3000);
-  it('confused by whoami', whoamIapi).timeout(3000);
+  it('should find out the user with the /whoami api tag', whoamIapi).timeout(3000);
   it('should reject creating a user with invalid username', rejectUPost).timeout(3000);
   it('should reject creating a user with two different usernames', rejectUsernames).timeout(3000);
   // JIRA-BUG: MBX-283 UNCOMMENT WHEN FIXED
