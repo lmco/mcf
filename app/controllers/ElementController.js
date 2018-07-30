@@ -801,12 +801,13 @@ class ElementController {
           }
 
           // Error Check - Check if updated field is of type string
-          if (!utils.checkType([elementUpdated[updateField]], 'string') && (updateField !== 'custom')) {
+          if (!utils.checkType([elementUpdated[updateField]], 'string')
+            && (Element.Element.schema.obj[updateField].type.schemaName !== 'Mixed')) {
             return reject(new errors.CustomError(`The Element [${updateField}] is not of type String`, 400));
           }
 
           // Updates each individual tag that was provided.
-          if (updateField === 'custom') {
+          if (Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
             Object.keys(elementUpdated[updateField]).forEach((key) => {
               element.custom[key] = M.lib.sani.sanitize(elementUpdated[updateField][key]);
@@ -814,7 +815,7 @@ class ElementController {
 
             // Special thing for mixed fields in Mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
-            element.markModified('custom');
+            element.markModified(updateField);
           }
           else {
             // sanitize field
