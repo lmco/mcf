@@ -27,6 +27,7 @@ const path = require('path');
 const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
+const { execSync } = require('child_process');
 
 /* This defines our log levels */
 const levels = {
@@ -128,6 +129,10 @@ const formatter = printf((msg) => {
   return `${ts} [${level}] ${f}:${line} -> ${msg.message}`;
 });
 
+
+// Creates the log directory if it doesn't already exist
+const cmd = `mkdir -p ${mbee.config.log.dir}`;
+execSync(cmd);
 
 /**
  * This creates the logger. It defines the log level, as specified in the
