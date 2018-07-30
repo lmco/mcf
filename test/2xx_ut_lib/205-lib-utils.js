@@ -115,6 +115,7 @@ function objectIsObject(done) {
 
 /**
  * @description Checks that the key project.id exists.
+ * TODO - This test got messy after a merge, let's fix it.
  */
 function projectIDExists(done) {
   try {
@@ -122,7 +123,6 @@ function projectIDExists(done) {
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
-    done();
   }
   chai.expect(utils.checkExists(['project.id'], sampleObj)).to.equal(true);
   done();
@@ -134,16 +134,16 @@ function projectIDExists(done) {
  *
  * TODO - consider explaining that the assert function is expected to throw
  * an error that should be caught in the catch block.
+ *
+ * TODO - This test got messy after a merge, let's fix it.
  */
 function projectUserExists(done) {
   try {
     utils.assertExists(['project.user'], sampleObj);
     chai.expect(true).to.equal(false);
-    done();
   }
   catch (error) {
     chai.expect(error.status).to.equal(400);
-    done();
   }
   chai.expect(utils.checkExists(['project.user'], sampleObj)).to.equal(false);
   done();
@@ -159,7 +159,6 @@ function multipleExist(done) {
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
-    done();
   }
   chai.expect(utils.checkExists(['project.name', 'project.org.id'], sampleObj)).to.equal(true);
   done();
@@ -176,7 +175,6 @@ function userIsAdmin(done) {
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
-    done();
   }
   chai.expect(utils.checkAdmin(user)).to.equal(true);
   done();
@@ -191,11 +189,9 @@ function userIsNotAdmin(done) {
   try {
     utils.assertAdmin(user);
     chai.expect(true).to.equal(false);
-    done();
   }
   catch (error) {
     chai.expect(error.status).to.equal(401);
-    done();
   }
   chai.expect(utils.checkAdmin(user)).to.equal(false);
   done();
