@@ -120,6 +120,7 @@ describe(name, () => {
   it('should create a child element', createChildElement);
   it('should create a block element', createBlock);
   it('should create a relationship', createRelationship);
+  it('should fail creating a relationship between same elements', createRelationshipSameElement);
   it('should find all elements for a project', findElements);
   it('should find all elements of a specific type', findElementsSpecificType);
   it('should throw an error for tryng to find an invalid element type', findElementsBadType);
@@ -260,6 +261,35 @@ function createRelationship(done) {
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Creates a relationship between the same elements and should fail.
+ */
+function createRelationshipSameElement(done) {
+  const badRelationship = {
+    id: 'rel2',
+    name: 'Narcissistic Relationship',
+    project: {
+      id: proj.id,
+      org: {
+        id: org.id
+      }
+    },
+    type: 'Relationship',
+    source: 'elem1',
+    target: 'elem1'
+  };
+  ElemController.createElement(user, badRelationship)
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.status).to.equal(400);
+    chai.expect(error.description).to.equal('Target and source cannot be the same element');
     done();
   });
 }
