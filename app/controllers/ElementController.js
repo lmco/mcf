@@ -811,6 +811,10 @@ class ElementController {
             Object.keys(elementUpdated[updateField]).forEach((key) => {
               element.custom[key] = M.lib.sani.sanitize(elementUpdated[updateField][key]);
             });
+
+            // Special thing for mixed fields in Mongoose
+            // http://mongoosejs.com/docs/schematypes.html#mixed
+            element.markModified('custom');
           }
           else {
             // sanitize field
@@ -819,7 +823,6 @@ class ElementController {
             element[updateField] = updateVal;
           }
         }
-
         // Save updated element
         element.save((saveElemErr) => {
           if (saveElemErr) {
