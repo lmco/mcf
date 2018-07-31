@@ -120,7 +120,8 @@ describe(name, () => {
    * After: run after all tests
    *-------------------------------------*/
 
-  after((done) => {
+  after(function(done) {
+    this.timeout(5000);
     // Removing the organization created
     OrgController.removeOrg(allSeeingUser, 'starkhq', { soft: false })
     .then(() => {
