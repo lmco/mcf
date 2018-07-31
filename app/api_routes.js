@@ -1353,7 +1353,31 @@ api.route('/users')
 
 /**
  * @swagger
- * /api/users/:username:
+ * /users/whoami:
+ *   get:
+ *     tags:
+ *       - users
+ *     description: Returns the currently logged in user information
+ *     responses:
+ *       200:
+ *         description: Success - The JSON-encoded user information is returned.
+ *       400:
+ *         description: Bad Request - Usually an authentication issue.
+ *       401:
+ *         description: Unauthorized - Failed to authenticate user.
+ *       500:
+ *         description: Internal Server Error
+ */
+api.route('/users/whoami')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.whoami
+);
+
+/**
+ * @swagger
+ * /users/:username:
  *   get:
  *     tags:
  *       - users
@@ -1606,27 +1630,6 @@ api.route('/users/:username/groups')
 .post(APIController.notImplemented)
 .put(APIController.notImplemented)
 .delete(APIController.notImplemented);
-
-
-/**
- * @swagger
- * /api/users/whoami:
- *   get:
- *     tags:
- *       - users
- *     description: Returns the currently logged in user information
- *     responses:
- *       200:
- *         description: Success - The JSON-encoded user information is returned.
- *       400:
- *         description: Bad Request - Usually an authentication issue.
- *       401:
- *         description: Unauthorized - Failed to authenticate user.
- *       500:
- *         description: Internal Server Error
- */
-api.route('/users/whoami')
-.get(APIController.notImplemented);
 
 
 // Export the API router
