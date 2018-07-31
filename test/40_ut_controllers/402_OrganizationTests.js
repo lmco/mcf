@@ -439,7 +439,6 @@ function addUserRole(done) {
  * Test to see if the newUser can actually write to the
  * organization now that new permissions have been set.
  * This means they can create a project.
- * NOTE: Bug fix in JIRA, waiting for update.
  */
 
 function projWritePerm(done) {
