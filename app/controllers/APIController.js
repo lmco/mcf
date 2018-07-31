@@ -128,7 +128,7 @@ class APIController {
   /**
    * GET /api/version
    *
-   * @description Returns the version number as JSON.
+   * @description Returns the version number as a JSON.
    */
   static version(req, res) {
     mbee.log.info(`GET "/api/version" requested by ${req.user.username}`);
@@ -149,7 +149,7 @@ class APIController {
   /**
    * GET /api/orgs
    *
-   * @description Gets a list of all organizations that a user has access to.
+   * @description Gets an array of all organizations that a user has access to.
    * Returns a Promise resolved with an array of organizations.
    * If the user had no access to organizations, the promise resolves
    * an empty array.
@@ -158,7 +158,7 @@ class APIController {
     // Query all organizations from the database
     OrgController.findOrgs(req.user)
     .then((orgs) => {
-      // If successful, return 200 status with list of orgs
+      // If successful, return 200 status with an array of orgs
       // Make sure we only return the orgs public data
       const orgsPublicData = [];
       for (let i = 0; i < orgs.length; i++) {
@@ -176,7 +176,7 @@ class APIController {
   /**
    * POST /api/orgs
    *
-   * @description  Accepts a list of JSON objects containing organization data.
+   * @description  Accepts an array of JSON objects containing organization data.
    * Attempts to create each of the organizations. If any of the organizations
    * fail, the entire request fails and none of the organizations are created.
    *
@@ -192,7 +192,7 @@ class APIController {
   /**
    * PUT /api/orgs
    *
-   * @description Accepts a list of JSON objects containing organization data.
+   * @description Accepts an array of JSON objects containing organization data.
    * This function expects each of the organizations to already exist (this
    * should be updating them). If any of the organization updates fail, the
    * entire request fails.
@@ -201,7 +201,7 @@ class APIController {
    */
   static putOrgs(req, res) {
     // TODO - Discuss the possibility of batch updates to orgs by passing
-    // a list of existing orgs. Must define behavior for this.
+    // an array of existing orgs. Must define behavior for this.
     res.status(501).send('Not Implemented.');
   }
 
@@ -357,7 +357,7 @@ class APIController {
    * GET /api/orgs/:orgid/members/:username
    *
    * @description  Takes an orgid and username in the URI and returns
-   * a list of roles which the user has within the organization
+   * an array of roles which the user has within the organization
    */
   static getOrgRole(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
@@ -410,8 +410,8 @@ class APIController {
   /**
    * DELETE /api/orgs/:orgid/members/:username
    *
-   * @description  Takes an orgid and username in the URI and removes the
-   * given user from all permissions within the organization.
+   * @description Removes user's permission based on orgid and username in the URL.
+   *
    */
   static deleteOrgRole(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
@@ -433,8 +433,8 @@ class APIController {
   /**
    * GET /orgs/:orgid/members/
    *
-   * @description  Takes an orgid and return a list of members
-   * and the permissions they have
+   * @description  Returns an array of members and their permission based on orgid
+   *
    */
   static getAllOrgRoles(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
@@ -461,7 +461,7 @@ class APIController {
   /**
    * GET /api/org/:orgid/projects
    *
-   * @description  Takes an orgid in the request params and returns a list of
+   * @description  Takes an orgid in the request params and returns an array of
    * the project objects for that organization. Returns an error message if
    * organization not found or other error occurs.
    */
@@ -530,7 +530,7 @@ class APIController {
   /**
    * GET /api/org/:orgid/projects/:projectid
    *
-   * @description  Gets and returns a list of all projects.
+   * @description  Returns an array of all projects based on orgid and projectid.
    */
   static getProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
@@ -554,8 +554,8 @@ class APIController {
   /**
    * POST /api/orgs/:orgid/projects/:projectid
    *
-   * @description Takes a project object in the request body and creates the
-   * project.
+   * @description Creates a project based on project object in the request body
+   *
    */
   static postProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
@@ -599,7 +599,7 @@ class APIController {
   /**
    * PUT /api/orgs/:orgid/projects/:projectid
    *
-   * @description  Takes an organization ID and project ID in the URI and JSON
+   * @description  Takes an organization ID and project ID via URI and JSON
    * encoded project data in the body. Updates the project corresponding to the
    * URI with the data passed in the body.
    */
@@ -633,7 +633,7 @@ class APIController {
   /**
    * DELETE /api/orgs/:orgid/projects:projectid
    *
-   * Takes an organization ID and project ID in the URI and deletes the
+   * Takes an organization ID and project ID via URI and deletes the
    * corresponding project.
    */
   static deleteProject(req, res) { // eslint-disable-line consistent-return
@@ -769,7 +769,7 @@ class APIController {
   /**
    * GET /api/users/:username
    *
-   * @description Gets and returns the user.
+   * @description Gets user based on username and returns its public data.
    */
   static getUser(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
@@ -914,7 +914,7 @@ class APIController {
   /**
    * GET /api/orgs/:orgid/projects/:projectid/elements/:elementid
    *
-   * @description Gets the element whose ID is 'elementid' and returns the
+   * @description Gets element based on ID 'elementid' and returns the
    * element's public data as JSON.
    */
   static getElement(req, res) { // eslint-disable-line consistent-return
@@ -946,8 +946,8 @@ class APIController {
   /**
    * POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
    *
-   * @description Creates the element whose ID is 'elementid' and returns the
-   * element's public data as JSON.
+   * @description Creates an element with 'elementid' and returns the
+   * element's public data as a JSON.
    */
   static postElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
@@ -967,7 +967,7 @@ class APIController {
   /**
    * PUT /api/orgs/:orgid/projects/:projectid/elements/:elementid
    *
-   * @description Updates the element whose ID is 'elementid' and returns the
+   * @description Updates an element with 'elementid' and returns the
    * element's public data as JSON.
    */
   static putElement(req, res) { // eslint-disable-line consistent-return
@@ -999,7 +999,7 @@ class APIController {
   /**
    * DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
    *
-   * @description Deletes the element whose ID is 'elementid' and returns the
+   * @description Deletes an element with 'elementid' and returns the
    * element's public data as JSON.
    */
   static deleteElement(req, res) { // eslint-disable-line consistent-return
