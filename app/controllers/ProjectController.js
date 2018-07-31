@@ -477,25 +477,31 @@ class ProjectController {
 
       // Make sure the project exists first, even if it has already been soft deleted
       ProjectController.findProject(reqUser, orgID, projID, true)
-      .then((project) => {
-        // Delete any elements attached to the project first
-        ElemController.removeElements(reqUser, orgID, projID, options)
-        .then(() => ProjectController.removeProjectHelper(project, softDelete))
-        .then((deletedProject) => resolve(deletedProject))
-        .catch((removeElementsError) => {
-          // There are simply no elements associated with this project to delete
-          if (removeElementsError.description === 'No elements found.') {
-            ProjectController.removeProjectHelper(project, softDelete)
-            .then((deletedProject) => resolve(deletedProject))
-            .catch((deleteProjectError) => reject(deleteProjectError));
-          }
-          else {
-            // Some other error when deleting the elements
-            return reject(removeElementsError);
-          }
-        });
-      })
-      .catch((findProjectError) => reject(findProjectError));
+      .then((project) => new Promise((res, rej) => { // eslint-disable-line consistent-return
+        if (!softDelete && !project.deleted) {
+          ProjectController.removeProject(reqUser, orgID, projID, { soft: true })
+          .then((retProj) => res(retProj))
+          .catch((softDeleteError) => rej(softDeleteError));
+        }
+        else {
+          return res('');
+        }
+      }))
+      .then(() => ElemController.removeElements(reqUser, orgID, projID, options))
+      .then(() => ProjectController.removeProjectHelper(reqUser, orgID, projID, softDelete))
+      .then((deletedProject) => resolve(deletedProject))
+      .catch((removeElementsError) => {
+        // There are simply no elements associated with this project to delete
+        if (removeElementsError.description === 'No elements found.') {
+          ProjectController.removeProjectHelper(reqUser, orgID, projID, softDelete)
+          .then((deletedProject) => resolve(deletedProject))
+          .catch((deleteProjectError) => reject(deleteProjectError));
+        }
+        else {
+          // Some other error when deleting the elements
+          return reject(removeElementsError);
+        }
+      });
     });
   }
 
@@ -515,28 +521,33 @@ class ProjectController {
    * @param  {Project} project  The project object to delete
    * @param  {Boolean} softDelete  Flag denoting whether to soft delete or not.
    */
-  static removeProjectHelper(project, softDelete) {
+  static removeProjectHelper(reqUser, orgID, projID, softDelete) {
     return new Promise((resolve, reject) => {
       if (softDelete) {
-        if (!project.deleted) {
-          project.deleted = true;
-          project.save((saveErr) => {
-            if (saveErr) {
-              // If error occurs, return it
-              return reject(new errors.CustomError('Save failed.'));
-            }
+        ProjectController.findProject(reqUser, orgID, projID, true)
+        .then((project) => {
+          if (!project.deleted) {
+            project.deleted = true;
+            project.save((saveErr) => {
+              if (saveErr) {
+                // If error occurs, return it
+                return reject(new errors.CustomError('Save failed.'));
+              }
 
-            // Return updated project
-            return resolve(project);
-          });
-        }
-        else {
-          return reject(new errors.CustomError('Project no longer exists.', 404));
-        }
+              // Return updated project
+              return resolve(project);
+            });
+          }
+          else {
+            return reject(new errors.CustomError('Project no longer exists.', 404));
+          }
+        })
+        .catch((findProjError) => reject(findProjError));
       }
       else {
         // Remove the Project
-        Project.findByIdAndRemove(project._id, (removeProjErr, projectRemoved) => {
+        Project.findOneAndRemove({ uid: utils.createUID(orgID, projID) })
+        .exec((removeProjErr, projectRemoved) => {
           if (removeProjErr) {
             return reject(new errors.CustomError('Delete failed.'));
           }

@@ -97,6 +97,7 @@ describe(name, () => {
    * This function runs after all the tests are done
    */
   after(function(done) {
+    this.timeout(5000);
     // Remove the project and org together
     OrgController.removeOrg(user, org.id, { soft: false })
     .then(() => {
