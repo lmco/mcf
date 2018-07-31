@@ -193,7 +193,7 @@ class OrganizationController {
             if (saveOrgErr) {
               return reject(new errors.CustomError('Save failed.'));
             }
-            resolve(newOrg);
+            return resolve(newOrg);
           });
         }
         else {
@@ -356,8 +356,18 @@ class OrganizationController {
 
       const orgID = M.lib.sani.html(organizationID);
 
-      // Delete the projects first while the org still exists
-      ProjController.removeProjects(user, orgID, options)
+      OrganizationController.findOrg(user, orgID, true)
+      .then((foundOrg) => new Promise((res, rej) => { // eslint-disable-line consistent-return
+        if (!softDelete && !foundOrg.deleted) {
+          OrganizationController.removeOrg(user, orgID, { soft: true })
+          .then((retOrg) => res(retOrg))
+          .catch((softDeleteError) => rej(softDeleteError));
+        }
+        else {
+          return res('');
+        }
+      }))
+      .then(() => ProjController.removeProjects(user, orgID, options))
       .then(() => OrganizationController.removeOrgHelper(user, orgID, softDelete))
       .then((retOrg) => resolve(retOrg))
       .catch((deleteErr) => { // eslint-disable-line consistent-return
