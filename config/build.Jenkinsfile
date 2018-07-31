@@ -82,7 +82,7 @@ pipeline {
         */
         success {
             script {
-                echo 'success pls happen'
+                echo 'success'
 
                 // if merge request from the master branch the source branch and target branch
                 // will return as null characters
