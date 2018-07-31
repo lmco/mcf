@@ -58,8 +58,9 @@ pipeline {
                 stage('Run tests') {
                     steps {
                         // Runs the basic test suite against the running stage container
+                        // The bail command will stop running tests after one test fails
                         timeout(time: 10, unit: 'MINUTES') {
-                            sh 'NODE_ENV=stage node mbee test --grep "^[0-6]"'
+                            sh 'NODE_ENV=stage node mbee test --bail --grep "^[0-6]"'
                         }
                     }
                 }
