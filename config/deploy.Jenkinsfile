@@ -78,7 +78,7 @@ pipeline {
 
             step(xunit(
                 thresholds: [skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
-                tools: [BoostTest(pattern: './*.xml') ])
+                tools: [BoostTest(pattern: '*.xml') ])
             )
             echo 'junit doing something...'
 
