@@ -170,7 +170,7 @@ function addNewOrg(done) {
   };
   OrgController.createOrg(user, orgData)
   .then((retOrg) => {
-    chai.expect(retOrg.id).to.equal('boombox');
+    chai.expect(retOrg.id).to.equal('fake');
     chai.expect(retOrg.name).to.equal('Star Lords Boombox');
     chai.expect(retOrg.permissions.read).to.include(user._id.toString());
     chai.expect(retOrg.permissions.write).to.include(user._id.toString());
