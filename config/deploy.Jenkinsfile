@@ -62,6 +62,8 @@ pipeline {
                         timeout(time: 10, unit: 'MINUTES') {
                             sh 'NODE_ENV=stage node mbee test --reporter=xunit --reporter-options output=summary.xml --bail --grep "^[0-4]"'
                         }
+                        // checking to see if the .xml file was created
+                        sh 'ls -l'
                     }
                 }
             }
