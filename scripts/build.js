@@ -39,11 +39,7 @@ else {
  */
 
 function build(_args) {
-  console.log('+ Building MBEE ...');
-
-  // Install development dependencies
-  install(['--dev']);
-
+  console.log('Building MBEE ...');
   // This will throw an error with our current ESLint configuration.
   // However, if these are global, then installs will fail. We can either accept this
   // error as is, alter the ESLint configuration, or move install to a separate script.
@@ -52,6 +48,7 @@ function build(_args) {
   const concat = require('gulp-concat');  // eslint-disable-line global-require
   const sass = require('gulp-sass');      // eslint-disable-line global-require
   const react = require('gulp-react');    // eslint-disable-line global-require
+  const clean = require('gulp-clean');    // eslint-disable-line global-require
 
   // Allow the function to be called with no parameters
   // Set the default behavior to build all
@@ -59,81 +56,82 @@ function build(_args) {
 
   // This executes the default build process with Gulp.
   if (args.includes('--all') || args.includes('--copy-deps')) {
-    console.log('Copying dependencies ...'); // eslint-disable-line no-console
+    console.log('  + Copying dependencies ...'); // eslint-disable-line no-console
 
     // Copy images
     gulp.src('./app/ui/img/**/*')
-    .pipe(gulp.dest('public/img'));
+    .pipe(gulp.dest('build/public/img'));
     // Copy React
     gulp.src('./node_modules/react/umd/react.production.min.js')
     .pipe(react())
     .pipe(concat('react.min.js'))
-    .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('build/public/js'));
     // Copy ReactDOM
     gulp.src('./node_modules/react-dom/umd/react-dom.production.min.js')
     .pipe(react())
     .pipe(concat('react-dom.min.js'))
-    .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('build/public/js'));
     // Copy Swagger CSS
     gulp.src('./node_modules/swagger-ui-express/static/*.css')
-    .pipe(gulp.dest('public/css'));
+    .pipe(gulp.dest('build/public/css'));
     // Copy Swagger JS
     gulp.src('./node_modules/swagger-ui-express/static/*.js')
-    .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('build/public/js'));
     // Copy Bootstrap CSS
     gulp.src('./node_modules/bootstrap/dist/css/bootstrap.min.css')
-    .pipe(gulp.dest('public/css'));
+    .pipe(gulp.dest('build/public/css'));
     // Copy Bootstrap JS
     gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
-    .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('build/public/js'));
     // Copy Jquery JS
     gulp.src('./node_modules/jquery/dist/jquery.min.js')
-    .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('build/public/js'));
     // Copy Popper JS
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
-    .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('build/public/js'));
   }
 
   // Build Sass into CSS
   if (args.includes('--all') || args.includes('--sass')) {
-    console.log('Building sass ...');
+    console.log('  + Building sass ...');
     gulp.src('./app/ui/sass/**/*.scss')
     .pipe(sass({ outputStyle: 'compressed' })
     .on('error', sass.logError))
-    .pipe(gulp.dest('./public/css'));
+    .pipe(gulp.dest('build/public/css'));
   }
 
   // Builds the React libraries into client-side JS
   if (args.includes('--all') || args.includes('--react')) {
-    console.log('Building react ...'); // eslint-disable-line no-console
+    console.log('  + Building react ...'); // eslint-disable-line no-console
     // Build React
     gulp.src('./app/ui/react-components/**/*.jsx')
     .pipe(react())
     .pipe(concat('mbee.js'))
-    .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('build/public/js'));
     // Build ReactDOM
     gulp.src('./app/ui/react-renderers/**/*.jsx')
     .pipe(react())
-    .pipe(gulp.dest('public/js'));
+    .pipe(gulp.dest('build/public/js'));
   }
 
   // Build JSDoc
-  if (args.includes('--jsdoc')) {
-    console.log('Building jsdoc ...');
-    const jsdoc = 'node_modules/jsdoc/jsdoc.js';
-    const src = 'out';
-    const dst = 'docs';
-    const tmpl = '-t plugins/developers'; // '-t node_modules/ub-jsdoc/';
-    const files = ['app/**/*.js', 'README.md'].join(' ');
-    const cmd = [
-      `node ${jsdoc} ${tmpl} ${files}`,
-      `rm -rf ${dst}/*`,
-      `mv ${src} ${dst}`
-    ].join(' && ');
-    execSync(cmd);
+  if (args.includes('--all') || args.includes('--jsdoc')) {
+    console.log('  + Building jsdoc ...');
+    const jsdoc = `${process.argv[0]} node_modules/jsdoc/jsdoc.js`;
+    const tutorials = '-u doc';
+    const templates = '-t node_modules/ub-jsdoc/'
+    const files = ['app/**/*.js', 'README.md', 'test/**/*.js'];
+    let cmd = `${jsdoc} ${templates} ${tutorials} ${files.join(' ')}`;
+
+    // Execute the JSDoc build command
+    let stdout = execSync(cmd);
+
+    // Copy to build dir and clean src
+    gulp.src('./out').pipe(gulp.dest('./build/doc'));
+    gulp.src('out', {read: false, force: true}).pipe(clean())
   }
 
-  console.log('+ Build Complete.');
+  console.log('Build Complete.');
 }
 
 
@@ -144,44 +142,25 @@ function build(_args) {
  */
 
 function install(_args) {
-  console.log('+ Installing dependencies ...');
-  configure(); // Make sure Yarn is installed and configured
+  console.log('Installing dependencies ...');
+  const buildTool = configure(); // Make sure Yarn is installed and configured
 
   // Safely allow install to be called with no args
   const args = (_args === undefined) ? [] : _args;
 
-  // Here, we temporarily swap our environment to dev to install development
-  // dependencies. This MUST happen after configure() is called because
-  // configure relies on the config.json and we don't want to have unexpected
-  // behavior there. Also, we must swap back to the original environment after
-  // the 'yarn install' command.
-  let ENV = null; // this needs to be scoped to the function
-  if (args.includes('--dev')) {
-    ENV = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'dev';
-    console.log(`++ Temporarily swapping from '${ENV}' to 'dev' to install dependencies`);
-  }
-
-  const cmd = spawnSync('yarn', ['install'].concat(args), { stdio: 'inherit' });
+  const cmd = spawnSync(buildTool, ['install'].concat(args), {stdio: 'inherit'});
   if (cmd.stdout) {
-    console.log('+++', cmd.stdout.toString());
+    // console.log('  ++', cmd.stdout.toString());
   }
   if (cmd.stderr && cmd.stderr.toString().trim() !== '') {
-    console.error('+++', cmd.stderr.toString());
+    // console.error('  ++', cmd.stderr.toString());
   }
   if (cmd.status !== 0) {
     process.exit(cmd.status || -1);
   }
 
-  // Swap back to the original environment
-  if (args.includes('--dev')) {
-    console.log(`++ Swapping back from 'dev' environment to '${ENV}' ...`);
-    process.env.NODE_ENV = ENV;
-    console.log(`++ Now running in '${process.env.NODE_ENV}' environment.`);
-  }
-
   // Init the MBEE helper object and return.
-  console.log('+ Dependencies installed succesfully.');
+  console.log('Dependencies installed successfully.');
 }
 
 
@@ -193,21 +172,22 @@ function install(_args) {
  */
 
 function configure() {
-  console.log('+ Configuring build system ...');
+  console.log('Configuring build system ...');
 
   // Make sure Yarn is installed
   const yarnPath = execSync('which yarn').toString().replace('\n', '');
   if (!fs.existsSync(yarnPath)) {
-    console.log('++ Instaling yarn ...');
-    const cmd = spawnSync('npm', ['install', '-g', 'yarn'], { stdio: 'inherit' });
+    console.log('Installing yarn ...');
+    const cmd = spawnSync('npm', ['install', '-g', 'yarn']);
     if (cmd.stdout) {
-      console.log(cmd.stdout.toString());
+      // console.log(cmd.stdout.toString());
     }
     if (cmd.stderr && cmd.stderr.toString().trim() !== '') {
-      console.error(cmd.stderr.toString());
+      // console.error(cmd.stderr.toString());
     }
     if (cmd.status !== 0) {
-      process.exit(cmd.status || -1);
+      console.log('Warning: Yarn install failed. Using NPM.')
+      return 'npm';
     }
   }
 
@@ -217,36 +197,29 @@ function configure() {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const val = M.config.yarn[key];
-
       // Check if config is already set, if so. Don't mess with it.
-      let cmd = spawnSync('yarn', ['config', 'get', `${key}`], { stdio: 'inherit' });
+      let cmd = spawnSync('yarn', ['config', 'get', `${key}`]);
       if (cmd.stdout) {
         if (cmd.stdout.toString().replace('\n', '').trim() === val) {
           continue;
         }
-      }
-      if (cmd.stderr && cmd.stderr.toString().trim() !== '') {
-        console.log('+++', cmd.stderr.toString());
       }
       if (cmd.status !== 0) {
         process.exit(cmd.status || -1);
       }
 
       // Execute the 'yarn config' command
-      cmd = spawnSync('yarn', ['config', 'set', `${key}`, val], { stdio: 'inherit' });
-      if (cmd.stdout) {
-        console.log(cmd.stdout.toString());
-      }
-      if (cmd.stderr && cmd.stderr.toString().trim() !== '') {
-        console.log(cmd.stderr.toString());
-      }
+      // console.log(`  + Setting ${key} to ${val}`)
+      cmd = spawnSync('yarn', ['config', 'set', `${key}`, val]);
       if (cmd.status !== 0) {
         process.exit(cmd.status || -1);
       }
     }
   }
   else {
-    console.log('++ No yarn section provided in config file. Skipping ...');
+    console.log('  + Warning: No yarn section in config. Using NPM.');
+    return 'npm';
   }
-  console.log('+ Configuration complete.');
+  console.log('Configuration complete');
+  return 'yarn';
 }

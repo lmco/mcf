@@ -1,20 +1,15 @@
-/******************************************************************************
- * Classification: UNCLASSIFIED                                               *
- *                                                                            *
- * Copyright (C) 2018, Lockheed Martin Corporation                            *
- *                                                                            *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
- * It is not approved for public release or redistribution.                   *
- *                                                                            *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
- * control laws. Contact legal and export compliance prior to distribution.   *
- ******************************************************************************/
-/*
+/**
+ * Classification: UNLASSIFIED
+ *
  * @module plugin.routes
+ *
+ * @copyright  Copyright (c) 2018, Lockheed Martin Corporation
+ *
+ * @license  LMPI - Lockheed Martin Proprietary Information
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This file defines the the plugin router.
+ * @description  This file implements the plugin loading and routing logic.
  */
 
 const fs = require('fs');
@@ -25,6 +20,81 @@ const express = require('express');
 const pluginRouter = express.Router();
 
 const protectedFileNames = ['routes.js'];
+
+// Load the plugins
+loadPlugins();
+
+
+/**
+ * Actually loads the plugins by copying them from their source location into
+ * the plugins directory, then loops over those plugins to "require" them and
+ * use them as part of the plugins routes.
+ */
+function loadPlugins() {
+  // Clone or copy plugins from their source into the plugins directory
+  for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
+    const data = M.config.server.plugins.plugins[i];
+    // Git repos
+    if (data.source.endsWith('.git')) {
+      clonePluginFromGitRepo(data);
+    }
+    // Local plugins
+    else if (data.source.startsWith('/') || data.source.startsWith('.')) {
+      copyPluginFromLocalDir(data);
+    }
+    else {
+      M.log.warn('Plugin type unknown');
+    }
+  }
+
+  // List the contents of the plugins directory
+  const files = fs.readdirSync(__dirname);
+
+  // Get a list of plugin names in the config
+  const pluginName = M.config.server.plugins.plugins.map(plugin => plugin.name);
+
+  files.forEach((f) => {
+    // Delete the directory in no a protected file or not in the config
+    if (!protectedFileNames.includes(f) && !pluginName.includes(f)) {
+      M.log.info(`Removing plugin '${f}' ...`);
+      const c = `rm -rf ${__dirname}/${f}`;
+      const stdout = execSync(c);
+      M.log.verbose(stdout.toString());
+    }
+    // If package.json doesn't exist, skip it
+    const pluginPath = path.join(__dirname, f);
+    if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
+      return;
+    }
+
+    // Load plugin metadata
+    const pkg = require(path.join(pluginPath, 'package.json')); // eslint-disable-line global-require
+    const entrypoint = path.join(pluginPath, pkg.main);
+    const namespace = f.toLowerCase();
+    M.log.info(`Loading plugin '${namespace}' ...`);
+
+    // Install the dependencies
+    const commands = [
+      `cd ${pluginPath}`,
+      `yarn install --modules-folder ${path.join('..', '..', 'node_modules')}`,
+      `echo ${(process.platform === 'win32') ? '%errorlevel%' : '$?'}`
+    ];
+    const stdout = execSync(commands.join('; '));
+    M.log.verbose(stdout.toString());
+
+    // Install the plugin
+    try { // Handle error in plugin
+      pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
+    }
+    catch (err) {
+      M.log.error(`Could not install plugin ${namespace}, error:`);
+      M.log.error(err);
+      return;
+    }
+    M.log.info(`Plugin ${namespace} installed.`);
+  });
+
+}
 
 /**
  * Clones the plugin from a Git repository and places in the appropriate
@@ -145,72 +215,5 @@ function copyPluginFromLocalDir(data) {
 //   // TODO
 // }
 
-
-// Clone plugins
-for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
-  const data = M.config.server.plugins.plugins[i];
-
-  // Handle Git repos
-  if (data.source.endsWith('.git')) {
-    clonePluginFromGitRepo(data);
-  }
-  // Handle local plugins
-  else if (data.source.startsWith('/') || data.source.startsWith('.')) {
-    copyPluginFromLocalDir(data);
-  }
-  else {
-    M.log.warn('Plugin type unknown');
-  }
-}
-
-// Load plugin routes
-const files = fs.readdirSync(__dirname);
-
-// Get a list of plugin names in the config
-const pluginName = [];
-M.config.server.plugins.plugins.forEach((plugin) => {
-  pluginName.push(plugin.name);
-});
-
-files.forEach((f) => {
-  // Delete the directory in no a protected file or not in the config
-  if (!protectedFileNames.includes(f) && !pluginName.includes(f)) {
-    M.log.info(`Removing plugin '${f}' ...`);
-    const c = `rm -rf ${__dirname}/${f}`;
-    const stdout = execSync(c);
-    M.log.verbose(stdout.toString());
-  }
-  // If package.json doesn't exist, skip it
-  const pluginPath = path.join(__dirname, f);
-  if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
-    return;
-  }
-
-  // Load plugin metadata
-  const pkg = require(path.join(pluginPath, 'package.json')); // eslint-disable-line global-require
-  const entrypoint = path.join(pluginPath, pkg.main);
-  const namespace = f.toLowerCase();
-  M.log.info(`Loading plugin '${namespace}' ...`);
-
-  // Install the dependencies
-  const commands = [
-    `cd ${pluginPath}`,
-    `yarn install --modules-folder ${path.join('..', '..', 'node_modules')}`,
-    `echo ${(process.platform === 'win32') ? '%errorlevel%' : '$?'}`
-  ];
-  const stdout = execSync(commands.join('; '));
-  M.log.verbose(stdout.toString());
-
-  // Install the plugin
-  try { // Handle error in plugin
-    pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
-  }
-  catch (err) {
-    M.log.error(`Could not install plugin ${namespace}, error:`);
-    M.log.error(err);
-    return;
-  }
-  M.log.info(`Plugin ${namespace} installed.`);
-});
 
 module.exports = pluginRouter;

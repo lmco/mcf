@@ -155,6 +155,15 @@ class UIController {
 
 
   /**
+   * Renders the developer documentation.
+   */
+  static renderJSDoc(req, res) {
+    //const libJSDoc = M.require('lib.jsdoc-helpers');
+    res.send('TEST')
+  }
+
+
+  /**
    * This page renders the login screen. If a get query parameter called
    * "next" is passed in the URL, the next url rendered as a hidden input
    * to tell the login process where to redirect the user after a successful

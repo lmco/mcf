@@ -77,7 +77,7 @@ const opts = process.argv.slice(3);
  *  Load Library Modules                                                      *
  ******************************************************************************/
 // If dependencies have been installed, initialize the MBEE helper functions
-if (fs.existsSync(`${__dirname}/node_modules`) && fs.existsSync(`${__dirname}/public`)) {
+if (fs.existsSync(`${__dirname}/node_modules`) && fs.existsSync(`${__dirname}/build`)) {
   M.log = M.require('lib.logger');
   M.lib = {
     crypto: M.require('lib.crypto'),
