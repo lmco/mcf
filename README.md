@@ -55,7 +55,7 @@ section of the config. For example:
 }
 ```
 
-For more information on please see the detailed comments in the provided
+For more information please see the detailed comments in the provided
 [example.cfg](config/example.cfg).
 
 ### Building MBEE
