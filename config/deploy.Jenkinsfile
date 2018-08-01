@@ -73,6 +73,10 @@ pipeline {
      */
     post {
         always {
+
+            echo 'junit doing something...'
+            junit './*.xml'
+
             // Things to always do post-build
             sh 'echo "Build and Deploy Complete"'
 
@@ -88,7 +92,6 @@ pipeline {
         success {
             script {
                 echo 'success'
-                echo 'chillen like a villian'
 
                 // if merge request from the master branch the source branch and target branch
                 // will return as null characters
