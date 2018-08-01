@@ -39,7 +39,7 @@ const api = express.Router();
 
 /**
  * @swagger
- * /test:
+ * /api/test:
  *   get:
  *     tags:
  *       - general
@@ -55,7 +55,7 @@ api.get('/test', Middleware.logRoute, APIController.test);
 
 /**
  * @swagger
- * /doc/swagger.json:
+ * /api/doc/swagger.json:
  *   get:
  *     tags:
  *       - general
@@ -70,7 +70,7 @@ api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
 
 /**
  * @swagger
- * /login:
+ * /api/login:
  *   post:
  *     tags:
  *       - general
@@ -86,12 +86,6 @@ api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
  *         description: Internal Server Error
  */
 api.route('/login')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  AuthController.doLogin,
-  APIController.login
-)
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -102,7 +96,7 @@ api.route('/login')
 
 /**
  * @swagger
- * /version:
+ * /api/version:
  *   get:
  *     tags:
  *       - general
@@ -125,11 +119,11 @@ api.route('/version')
 
 /**
  * @swagger
- * /orgs:
+ * /api/orgs:
  *   get:
  *     tags:
  *       - organizations
- *     description: Logs the user into the application.
+ *     description: Returns an array of organizations user is part of. Empty array if none.
  *     produces:
  *       - application/json
  *     responses:
@@ -187,7 +181,7 @@ api.route('/orgs')
 
 /**
  * @swagger
- * /orgs/:orgid:
+ * /api/orgs/{orgid}:
  *   get:
  *     tags:
  *       - organizations
@@ -197,7 +191,7 @@ api.route('/orgs')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization to get
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -225,7 +219,7 @@ api.route('/orgs')
  *         description: The ID of the organization to create. A valid orgid must
  *                      only contain lowercase letters, numbers, and dashes
  *                      ("-") and must begin with a letter.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: id
@@ -272,7 +266,7 @@ api.route('/orgs')
  *         description: The ID of the organization to update. A valid orgid must
  *                      only contain lowercase letters, numbers, and dashes
  *                      ("-") and must begin with a letter.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: id
@@ -317,7 +311,7 @@ api.route('/orgs')
  *         description: The ID of the organization to delete. A valid orgid must
  *                      only contain lowercase letters, numbers, and dashes
  *                      ("-") and must begin with a letter.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -360,7 +354,7 @@ api.route('/orgs/:orgid')
 
 /**
  * @swagger
- * /orgs/:orgid/projects:
+ * /api/orgs/:orgid/projects:
  *   get:
  *     tags:
  *       - projects
@@ -373,7 +367,7 @@ api.route('/orgs/:orgid')
  *                      A valid orgid can only contain lowercase letters,
  *                      numbers, and dashes (e.g. "-") and must begin with a
  *                      letter.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -438,21 +432,21 @@ api.route('/orgs/:orgid/projects')
 
 /**
  * @swagger
- * /orgs/:orgid/projects/:projectid:
+ * /api/orgs/:orgid/projects/:projectid:
  *   get:
  *     tags:
  *       - projects
- *     description: Gets a project by ID
+ *     description: Gets a project by organization ID.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization the project is in.
+ *         description: The organization ID the project is in.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project is to get.
+ *         description: The ID of the project to get.
  *         in: URI
  *         required: true
  *         type: string
@@ -637,11 +631,11 @@ api.route('/orgs/:orgid/projects/:projectid')
 
 /**
  * @swagger
- * /orgs/:orgid/members:
+ * /api/orgs/:orgid/members:
  *   get:
  *     tags:
  *       - organizations
- *     description: Gets the users on an organization and their permissions.
+ *     description: Get the users/users' permissions in an organization.
  *     produces:
  *       - application/json
  *     parameters:
@@ -654,20 +648,20 @@ api.route('/orgs/:orgid/projects/:projectid')
  *       200:
  *         description: Success - The members of an org and thier permissions
  *                      were succesfully retrieved and returned as JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/members')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getAllOrgRoles
+  APIController.getAllOrgRoles // TODO: Consider renaming to getAllOrgMemRoles
 );
 
 /**
  * @swagger
- * /orgs/:orgid/members/:username:
+ * /api/orgs/:orgid/members/:username:
  *   get:
  *     tags:
  *       - organizations
@@ -688,10 +682,10 @@ api.route('/orgs/:orgid/members')
  *     responses:
  *       200:
  *         description: Success - The member of the org and thier permissions
- *            were succesfully retrieved and returned as JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *                      were succesfully retrieved and returned as JSON.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  *   post:
  *     tags:
  *       - organizations
@@ -717,10 +711,10 @@ api.route('/orgs/:orgid/members')
  *     responses:
  *       200:
  *         description: Success - The members permissions were set or updated,
- *            and the organization is returned in JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *                      and the organization is returned in JSON.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  *   put:
  *     tags:
  *       - organizations
@@ -746,10 +740,10 @@ api.route('/orgs/:orgid/members')
  *     responses:
  *       200:
  *         description: Success - The members permissions were set or updated,
- *            and the organization is returned in JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *                      and the organization is returned in JSON.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  *   delete:
  *     tags:
  *       - organizations
@@ -770,14 +764,17 @@ api.route('/orgs/:orgid/members')
  *     responses:
  *       200:
  *         description: Success - The members permissions were deleted,
- *              and the organization is returned in JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *                      and the organization is returned in JSON.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  */
 
 // 6/20/18
 // NOTE: POST and PUT have the same functionality, thus they map to the same route.
+// TODO: Update 7/26/2018- POST/PUT are used in different situations
+// TODO: POST/PUT: PUT is idempotent, POST only used to modify and update resources
+// TODO: POST/PUT: https://stackoverflow.com/questions/630453/put-vs-post-in-rest
 api.route('/orgs/:orgid/members/:username')
 .get(
   AuthController.authenticate,
@@ -802,11 +799,11 @@ api.route('/orgs/:orgid/members/:username')
 
 /**
  * @swagger
- * /orgs/:orgid/projects/:projectid/members:
+ * /api/orgs/:orgid/projects/:projectid/members:
  *   get:
  *     tags:
  *       - projects
- *     description: Retrieves the list of members and thier pemissions for a project.
+ *     description: Retrieves a list of members and thier pemissions for a project.
  *     produces:
  *       - application/json
  *     parameters:
@@ -823,21 +820,21 @@ api.route('/orgs/:orgid/members/:username')
  *     responses:
  *       200:
  *         description: Success - The members of a project and thier permissions
- *            were succesfully retrieved and returned as JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *                      were succesfully retrieved and returned as JSON.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjectRoles
+  APIController.getProjectRoles // TODO: Rename to getProjMemRoles
 );
 
 /**
  * @swagger
- * /orgs/:orgid/projects/:projectid/members/:username:
+ * /api/orgs/:orgid/projects/:projectid/members/:username:
  *   get:
  *     tags:
  *       - organizations
@@ -847,26 +844,26 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the searched user.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
  *       200:
  *         description: Success - The member of the project and thier permissions
- *            were succesfully retrieved and returned as JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *                      were succesfully retrieved and returned as JSON.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  *   post:
  *     tags:
  *       - organizations
@@ -876,31 +873,31 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the searched user.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: role
  *         description: The role the user will have in the org.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
  *       200:
  *         description: Success - The members permissions were set or updated,
- *            and the project is returned in JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *                      and the project is returned in JSON.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  *   put:
  *     tags:
  *       - organizations
@@ -910,17 +907,17 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the searched user.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: role
@@ -931,10 +928,10 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     responses:
  *       200:
  *         description: Success - The members permissions were set or updated,
- *            and the project is returned in JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *                      and the project is returned in JSON.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  *   delete:
  *     tags:
  *       - organizations
@@ -960,16 +957,16 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     responses:
  *       200:
  *         description: Success - The members permissions were deleted,
- *              and the project is returned in JSON.
- *     500:
- *       description: Internal Server Error - Something went wront on the
- *                    server side. Details may exist in the application logs.
+ *                      and the project is returned in JSON.
+ *       500:
+ *         description: Internal Server Error - Something went wront on the
+ *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:username')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjectRole
+  APIController.getProjectRole // TODO: Consider renaming to getProjMemRole
 )
 .post(
   AuthController.authenticate,
@@ -990,22 +987,22 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
 
 /**
  * @swagger
- * /orgs/:orgid/projects/:projectid/elements:
+ * /api/orgs/:orgid/projects/:projectid/elements:
  *   get:
  *     tags:
  *       - elements
- *     description: Gets a list of all elements the user has access to on a project.
+ *     description: Gets an array of all elements the user has access to on a project.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization whose projects to get.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -1073,30 +1070,29 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
 
 /**
  * @swagger
- * /orgs/:orgid/projects/:projectid/elements/:elementid:
+ * /api/orgs/:orgid/projects/:projectid/elements/:elementid:
  *   get:
  *     tags:
  *       - model management
  *     summary: Gets an element by ID
- *     description: >
- *       Retrieves a single element. An element is uniquely identified by its
- *       organization, project, and element IDs.
+ *     description: Retrieves a single element based on its organization, project,
+ *                  and element IDs.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization the project is in.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
  *         description: The ID of the element to get.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -1123,19 +1119,19 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project. A valid project ID must consist
  *                      of only lowercase letters, numbers, and dashes (e.g.
  *                      "-") and must begin with a letter.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
  *         description: The ID of the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: id
@@ -1181,19 +1177,19 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project to create/replace. A valid project
  *                      ID must consist of only lowercase letters, numbers, and
  *                      dashes (e.g. "-") and must begin with a letter.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
  *         description: The ID of the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: id
@@ -1236,17 +1232,17 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
  *         description: The ID of the element to delete.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -1290,7 +1286,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
 
 /**
  * @swagger
- * /users:
+ * /api/users:
  *   get:
  *     tags:
  *       - users
@@ -1357,6 +1353,30 @@ api.route('/users')
 
 /**
  * @swagger
+ * /users/whoami:
+ *   get:
+ *     tags:
+ *       - users
+ *     description: Returns the currently logged in user information
+ *     responses:
+ *       200:
+ *         description: Success - The JSON-encoded user information is returned.
+ *       400:
+ *         description: Bad Request - Usually an authentication issue.
+ *       401:
+ *         description: Unauthorized - Failed to authenticate user.
+ *       500:
+ *         description: Internal Server Error
+ */
+api.route('/users/whoami')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.whoami
+);
+
+/**
+ * @swagger
  * /users/:username:
  *   get:
  *     tags:
@@ -1371,6 +1391,7 @@ api.route('/users')
  *                      allowed to change and should not be considered static.
  *         required: true
  *         type: string
+ *         in: path
  *     responses:
  *       200:
  *         description: Success - The user was retieved and the public user
@@ -1396,7 +1417,7 @@ api.route('/users')
  *         description: The username of the user to create.
  *         required: true
  *         type: string
- *         in: URI
+ *         in: path
  *       - name: username
  *         description: The username of the user to create. If provided, this
  *                      must match the username provided in the URI.
@@ -1445,7 +1466,7 @@ api.route('/users')
  *         description: The username of the user to create.
  *         required: true
  *         type: string
- *         in: URI
+ *         in: path
  *       - name: username
  *         description: The username of the user to create. If provided, this
  *                      must match the username provided in the URI.
@@ -1492,7 +1513,7 @@ api.route('/users')
  *         description: The username of the user to delete.
  *         required: true
  *         type: string
- *         in: URI
+ *         in: path
  *     responses:
  *       200:
  *         description: Success - The user was deleted.
@@ -1535,7 +1556,7 @@ api.route('/users/:username')
 
 /**
  * @swagger
- * /users/:id/roles:
+ * /api/users/:id/roles:
  *   get:
  *     tags:
  *       - users
@@ -1574,7 +1595,7 @@ api.route('/users/:username/roles')
 
 /**
  * @swagger
- * /users/:id/groups:
+ * /api/users/:id/groups:
  *   get:
  *     tags:
  *       - users
@@ -1609,27 +1630,6 @@ api.route('/users/:username/groups')
 .post(APIController.notImplemented)
 .put(APIController.notImplemented)
 .delete(APIController.notImplemented);
-
-
-/**
- * @swagger
- * /users/whoami:
- *   get:
- *     tags:
- *       - users
- *     description: Returns the currently logged in user information
- *     responses:
- *       200:
- *         description: Success - The JSON-encoded user information is returned.
- *       400:
- *         description: Bad Request - Usually an authentication issue.
- *       401:
- *         description: Unauthorized - Failed to authenticate user.
- *       500:
- *         description: Internal Server Error
- */
-api.route('/users/whoami')
-.get(APIController.notImplemented);
 
 
 // Export the API router

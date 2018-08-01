@@ -1,17 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
- *
- * @module  test/403-project-controller-tests
- *
- * @copyright Copyright (C) 2018, Lockheed Martin Corporation
- *
- * @license LMPI
- * <br/>
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.<br/>
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @module test/403-project-controller
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
@@ -21,7 +9,6 @@
  * when making changes/ updates to the code. The project controller tests create,
  * update, find, soft delete, hard delte, and permissions of projects. As well
  * as test the controlls with invalid inputs.
- * TODO - cleanup desc
  */
 
 const path = require('path');
@@ -43,6 +30,7 @@ let nonAuser = null;
 let allSeeingUser = null;
 let org = null;
 let project = null;
+
 
 
 /* --------------------( Main )-------------------- */
@@ -128,6 +116,7 @@ describe(M.getModuleName(module.filename), () => {
    * TODO - add description
    */
   after((done) => {
+    this.timeout(5000);
     // Removing the organization created
     OrgController.removeOrg(allSeeingUser, 'starkhq', { soft: false })
     .then(() => {
