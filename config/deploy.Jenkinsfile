@@ -61,7 +61,7 @@ pipeline {
                         // The bail command will stop running tests after one test fails
                         timeout(time: 10, unit: 'MINUTES') {
                             // creating a junit xml file.... pls work
-                            sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --bail --grep "^[0-4]"'
+                            sh 'NODE_ENV=stage node mbee test --reporter=mochawesome --bail --grep "^[0-4]"'
                         }
                         // checking to see if the .xml file was created
                         sh 'ls -l'
@@ -76,8 +76,8 @@ pipeline {
      */
     post {
         always {
-            echo 'junit doing something maybe...'
-            junit '*.xml'
+            echo 'junit doing nothing rn...'
+            //junit '*.xml'
 
 
             // Things to always do post-build
