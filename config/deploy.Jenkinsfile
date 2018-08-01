@@ -60,7 +60,7 @@ pipeline {
                         // Runs the basic test suite against the running stage container
                         // The bail command will stop running tests after one test fails
                         timeout(time: 10, unit: 'MINUTES') {
-                            sh 'NODE_ENV=stage node mbee test --reporter=xunit --reporter-options=summary.xml --bail --grep "^[0-4]"'
+                            sh 'NODE_ENV=stage node mbee test --reporter=xunit --reporter-options output=summary.xml --bail --grep "^[0-4]"'
                         }
                     }
                 }
@@ -74,8 +74,11 @@ pipeline {
     post {
         always {
 
+            step(xunit(
+                thresholds: [skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
+                tools: [BoostTest(pattern: './*.xml'
             echo 'junit doing something...'
-            junit './*.xml'
+
 
             // Things to always do post-build
             sh 'echo "Build and Deploy Complete"'
