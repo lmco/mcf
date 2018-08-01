@@ -19,9 +19,12 @@
  * handle other object behaviors.
  */
 
+const fs = require('fs');
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
 const User = M.require('models/User');
+const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const swaggerJSDoc = require('swagger-jsdoc');
 
@@ -158,8 +161,16 @@ class UIController {
    * Renders the developer documentation.
    */
   static renderJSDoc(req, res) {
-    //const libJSDoc = M.require('lib.jsdoc-helpers');
-    res.send('TEST')
+    if (!req.params.hasOwnProperty('page')) {
+      return res.redirect('developers/index.html')
+    }
+    const page = sani.html(req.params.page);
+    return res.render('jsdoc', {
+        ui: M.config.server.ui,
+        user: (req.user) ? req.user : '',
+        content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
+        pluginFiles: pluginFiles
+    });
   }
 
 

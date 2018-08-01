@@ -22,12 +22,13 @@
 const fs = require('fs');
 const path = require('path');
 
-
 // Global MBEE helper object
 const M = { env: process.env.NODE_ENV || 'dev' };
 M.version = require(`${__dirname}/package.json`).version;
 M.build = require(`${__dirname}/package.json`).buildNumber;
-M.version4 = (M.build !== 'NO_BUILD_NUMBER') ? `${M.version}.${M.build}` : `${M.version}.0`;
+M.version4 = (M.build !== 'NO_BUILD_NUMBER')
+  ? `${M.version}.${M.build}`
+  : `${M.version}.0`;
 
 /**
  * This function provides a useful utility for requiring other MBEE modules in the app directory.
@@ -53,11 +54,6 @@ if (M.config.server.secret === 'RANDOM') {
 
 // Set root and other path variables
 M.root = __dirname;
-M.path = {
-  lib: s => path.join(__dirname, 'app', 'lib', s),
-  controllers: s => path.join(__dirname, 'app', 'controllers', s),
-  models: s => path.join(__dirname, 'app', 'models', s)
-};
 
 
 // This exports the basic MBEE version and config data so that modules may
@@ -77,7 +73,8 @@ const opts = process.argv.slice(3);
  *  Load Library Modules                                                      *
  ******************************************************************************/
 // If dependencies have been installed, initialize the MBEE helper functions
-if (fs.existsSync(`${__dirname}/node_modules`) && fs.existsSync(`${__dirname}/build`)) {
+if (fs.existsSync(`${__dirname}/node_modules`) &&
+    fs.existsSync(`${__dirname}/build`)) {
   M.log = M.require('lib.logger');
   M.lib = {
     crypto: M.require('lib.crypto'),

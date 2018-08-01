@@ -49,6 +49,7 @@ function build(_args) {
   const sass = require('gulp-sass');      // eslint-disable-line global-require
   const react = require('gulp-react');    // eslint-disable-line global-require
   const clean = require('gulp-clean');    // eslint-disable-line global-require
+  const del = require('del');             // eslint-disable-line global-require
 
   // Allow the function to be called with no parameters
   // Set the default behavior to build all
@@ -89,6 +90,9 @@ function build(_args) {
     // Copy Popper JS
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
     .pipe(gulp.dest('build/public/js'));
+    // Copy JSDoc JS
+    gulp.src('./app/ui/js/jsdoc.js')
+    .pipe(gulp.dest('build/public/js'));
   }
 
   // Build Sass into CSS
@@ -118,17 +122,18 @@ function build(_args) {
   if (args.includes('--all') || args.includes('--jsdoc')) {
     console.log('  + Building jsdoc ...');
     const jsdoc = `${process.argv[0]} node_modules/jsdoc/jsdoc.js`;
-    const tutorials = '-u doc';
-    const templates = '-t node_modules/ub-jsdoc/'
-    const files = ['app/**/*.js', 'README.md', 'test/**/*.js'];
-    let cmd = `${jsdoc} ${templates} ${tutorials} ${files.join(' ')}`;
+    //const tutorials = '-u doc';
+    //const templates = '-t node_modules/ub-jsdoc/'
+    //const files = ['app/**/*.js', 'README.md', 'test/**/*.js'];
+    let cmd = `${jsdoc} -c ./config/jsdoc.json`;
 
     // Execute the JSDoc build command
     let stdout = execSync(cmd);
 
     // Copy to build dir and clean src
-    gulp.src('./out').pipe(gulp.dest('./build/doc'));
-    gulp.src('out', {read: false, force: true}).pipe(clean())
+    gulp.src('./out/*')
+    .pipe(clean())
+    .pipe(gulp.dest('./build/doc'));
   }
 
   console.log('Build Complete.');

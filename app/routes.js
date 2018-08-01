@@ -46,7 +46,14 @@ router.route('/about')
 router.route('/doc/api')
 .get(Middleware.logRoute, UIController.swaggerDoc);
 
-router.route('/doc/dev')
+
+/**
+ * Both routes map to the same controller. The controller method handles
+ * the logic of checking for the page parameter.
+ */
+router.route('/doc/developers')
+.get(Middleware.logRoute, UIController.renderJSDoc);
+router.route('/doc/developers/:page')
 .get(Middleware.logRoute, UIController.renderJSDoc);
 
 
