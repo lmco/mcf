@@ -43,7 +43,7 @@ pipeline {
         stage('Wait for Server') {
             steps {
                 // Wait to be sure server is up
-                sh 'sleep 20'
+                sh 'sleep 30'
             }
         }
 
@@ -61,7 +61,7 @@ pipeline {
                         // The bail command will stop running tests after one test fails
                         timeout(time: 10, unit: 'MINUTES') {
                             // creating a junit xml file.... pls work
-                            sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --bail --grep "^[0-4]"'
+                            sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --bail --grep "^[0-6]"'
                         }
                         // checking to see if the .xml file was created
                         sh 'ls -l'
