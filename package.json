@@ -1,6 +1,6 @@
 {
   "name": "mbee",
-  "version": "0.3",
+  "version": "0.4.0",
   "buildNumber": "NO_BUILD_NUMBER",
   "description": "Model-Based Engineering Environment",
   "main": "mbee.js",
