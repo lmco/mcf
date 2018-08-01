@@ -488,16 +488,22 @@ class ProjectController {
       // Make sure the project exists first, even if it has already been soft deleted
       ProjectController.findProject(reqUser, orgID, projID, true)
       .then((project) => new Promise((res, rej) => { // eslint-disable-line consistent-return
+        // Check if we want to hard delete the project and if so,
+        // ensure that the project has been soft deleted first.
         if (!softDelete && !project.deleted) {
+          // Call the remove project function to soft delete it first
           ProjectController.removeProject(reqUser, orgID, projID, { soft: true })
           .then((retProj) => res(retProj))
           .catch((softDeleteError) => rej(softDeleteError));
         }
         else {
-          return res('');
+          // Either the project was already soft deleted or we only want it soft deleted.
+          return res();
         }
       }))
+      // Remove the elements first
       .then(() => ElemController.removeElements(reqUser, orgID, projID, options))
+      // Actually remove the project
       .then(() => ProjectController.removeProjectHelper(reqUser, orgID, projID, softDelete))
       .then((deletedProject) => resolve(deletedProject))
       .catch((removeElementsError) => {
