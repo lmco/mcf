@@ -91,7 +91,8 @@ function build(_args) {
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
     .pipe(gulp.dest('build/public/js'));
     // Copy JSDoc JS
-    gulp.src('./app/ui/js/jsdoc.js')
+    gulp.src('./app/ui/js/**/*')
+    .pipe(concat('mbee.js'))
     .pipe(gulp.dest('build/public/js'));
   }
 
@@ -110,7 +111,7 @@ function build(_args) {
     // Build React
     gulp.src('./app/ui/react-components/**/*.jsx')
     .pipe(react())
-    .pipe(concat('mbee.js'))
+    .pipe(concat('mbee-react.js'))
     .pipe(gulp.dest('build/public/js'));
     // Build ReactDOM
     gulp.src('./app/ui/react-renderers/**/*.jsx')
