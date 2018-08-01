@@ -94,6 +94,18 @@ For a list of MBEE security related updates, a web page will be created at
 Upon public release of MBEE a security update policy will be defined for the
 open source version of MBEE. This might be as simple as a security mailing list.
 
+## Known Gaps and Issues
+
+#### Gulp-React Warnings
+One Dev-Dependencies, [gulp-react](https://www.npmjs.com/package/gulp-react),
+is currently dependent on two deprecated modules known as
+[gulp-util](https://www.npmjs.com/package/gulp-util) and
+[react-tools](https://www.npmjs.com/package/react-tools). As of now, gulp-react
+has yet to update their module to remove these dependencies and thus, warnings
+occur. These warnings have no impact on MBEE or production code as the module
+is only used to build the application. If gulp-react is updated in the future,
+the module will be updated.
+
 ## Security Related Configuration
 
 ### Plugins and Integrations
