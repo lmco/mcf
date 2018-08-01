@@ -88,7 +88,7 @@ pipeline {
         success {
             script {
                 echo 'success'
-                echo 'chillen'
+                echo 'chillen like a villian'
 
                 // if merge request from the master branch the source branch and target branch
                 // will return as null characters
