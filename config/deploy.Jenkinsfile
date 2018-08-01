@@ -64,7 +64,7 @@ pipeline {
                         }
                         // checking to see if the .xml file was created
                         sh 'ls -l'
-                        sh "sed -i 's/\(<\(TestSuite\|TestCase\) name='[^']*'\)\([^>]*\)>/\1>/g' summary.xml"
+                        sh "sed -i 's/(<\(TestSuite\|TestCase\) name='[^']*'\)\f([^>]*\)>/\1>/g' summary.xml"
                     }d
                 }
             }
