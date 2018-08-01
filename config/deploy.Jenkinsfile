@@ -76,7 +76,7 @@ pipeline {
      */
     post {
         always {
-            echo 'no junit rn...'
+            echo 'still no junit yet.....'
             //junit '*.xml'
 
 
