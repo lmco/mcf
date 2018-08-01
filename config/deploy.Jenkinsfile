@@ -60,7 +60,7 @@ pipeline {
                         // Runs the basic test suite against the running stage container
                         // The bail command will stop running tests after one test fails
                         timeout(time: 10, unit: 'MINUTES') {
-                            sh 'NODE_ENV=stage node mbee test --reporter=xunit --reporter-options=summary.xml --bail --grep "^[0-6]"'
+                            sh 'NODE_ENV=stage node mbee test --reporter=xunit --reporter-options=summary.xml --bail --grep "^[0-4]"'
                         }
                     }
                 }
