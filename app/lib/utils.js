@@ -21,7 +21,6 @@ const M = require('../../mbee.js');
 const errors = M.require('lib/errors');
 const path = require('path');
 const fs = require('fs');
-const UIController = M.require('controllers/UIController');
 let pluginFiles = null;
 
 module.exports.timeConversions = {
@@ -57,45 +56,45 @@ function getPluginNames() {
  * @param  {Object} res  Response object
  * @param  {Object} params A list of parameters to render
  */
- module.exports.render = function(req,res,params) {
-  // If you would like something to be rendered by default, 
+module.exports.render = function(req, res, params) {
+  // If you would like something to be rendered by default,
   // replace the undefined return value with your desired
   // default value
-  pluginNames = getPluginNames();
+  let pluginNames = getPluginNames();
   return res.render(params.name, {
-    swagger: params.swagger !== undefined ?
-      params.swagger :
-      undefined,
-    ui: (params.ui !== undefined ) ?
-      params.ui :
-	  M.config.server.ui,
-    renderer: params.name === 'admin' || 'mbee' ?
-      `${params.name}-renderer` :
-      undefined,
-    user: params.user !== undefined ?
-      params.user :
-      req.user.getPublicData(),
-    info: params.info!== undefined ?
-      params.info :
-      undefined,
-    org: params.org !== undefined ?
-      params.org :
-      undefined,
-    project: params.project !== undefined ?
-      params.project :
-      undefined,
-    title: params.title !== undefined ?
-      params.title :
-      'Model-Based Engineering Environment',
+    swagger: params.swagger !== undefined
+      ? params.swagger
+      : undefined,
+    ui: (params.ui !== undefined )
+      ? params.ui
+	  : M.config.server.ui,
+    renderer: params.name === 'admin' || 'mbee'
+      ? `${params.name}-renderer`
+      : undefined,
+    user: params.user !== undefined
+      ? params.user
+      : req.user.getPublicData(),
+    info: params.info !== undefined
+      ? params.info
+      : undefined,
+    org: params.org !== undefined
+      ? params.org
+      : undefined,
+    project: params.project !== undefined
+      ? params.project
+      : undefined,
+    title: params.title !== undefined
+      ? params.title
+      : 'Model-Based Engineering Environment',
     pluginNames: pluginNames,
-    next: params.next !== undefined ?
-      params.next :
-      undefined,
-    err: params.err !== undefined ?
-      params.err :
-      undefined
-    });
- }
+    next: params.next !== undefined
+      ? params.next
+      : undefined,
+    err: params.err !== undefined
+      ? params.err
+      : undefined
+  });
+}
 
 /**
  * @description  Checks an array of arguments to see if

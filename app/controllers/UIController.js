@@ -42,10 +42,10 @@ class UIController {
    */
 
   static home(req, res) {
-	return utils.render(req,res,{
+    return utils.render(req, res, {
       name: 'home',
       title: 'MBEE | Model-Based Engineering Environment'
-	})
+    });
   }
 
 
@@ -56,12 +56,12 @@ class UIController {
    */
 
   static mbee(req, res) {
-	return utils.render(req,res,{
+    return utils.render(req, res, {
       name: 'mbee',
       org: M.lib.sani.sanitize(req.params.org),
       project: M.lib.sani.sanitize(req.params.project),
       title: 'MBEE | Model-Based Engineering Environment'
-    })
+    });
   }
 
 
@@ -72,10 +72,10 @@ class UIController {
    */
 
   static admin(req, res) {
-    return utils.render(req,res,{
+    return utils.render(req, res, {
       name: 'admin',
       title: 'Admin | Model-Based Engineering Environment'
-	})
+    });
   }
 
   /**
@@ -102,12 +102,12 @@ class UIController {
    * @description Renders the swagger doc.
    */
   static swaggerDoc(req, res) {
-    return utils.render(req,res,{
+    return utils.render(req, res, {
       name: 'swagger',
       swagger: UIController.swaggerSpec(),
       user: null,
       title: 'MBEE API Documentation'
-	})
+    });
   }
 
 
@@ -130,7 +130,7 @@ class UIController {
         req.user = user;
       }
       // Disables because database document is being directly used
-      return utils.render(req,res,{
+      return utils.render(req, res, {
         name: 'about',
         user: req.user,
         info: {
@@ -156,13 +156,13 @@ class UIController {
     }
 
     // render the login page
-	return utils.render(req,res,{
+    return utils.render(req, res, {
       name: 'login',
       user: '',
       title: 'Login | Model-Based Engineering Environment',
       next: next,
       err: req.flash('loginError')
-	})
+    });
   }
 
 
