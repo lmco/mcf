@@ -63,24 +63,22 @@ pipeline {
             }
         }
 
-        /**
-         * Executes functional tests against the staged server.
-         */
         stage('Test') {
             steps {
-                // Wait to be sure server is up
-                sh 'sleep 10'
                 // Runs the basic test suite against the running stage container
                 sh 'NODE_ENV=test node mbee lint'
-                // Runs the basic test suite against the running stage container
-                timeout(time: 10, unit: 'MINUTES') {
-                    retry(10) {
-                        sh 'NODE_ENV=test node mbee test --grep "^[0-6]"'
-                    }
-                }
-            }
-        }
+                // Wait to be sure server is up
+                sh 'sleep 30'
 
+                // Runs the basic test suite against the running stage container
+                // The bail command will stop running tests after one test fails
+                timeout(time: 10, unit: 'MINUTES') {
+                    // creating a junit xml file
+                    sh "echo 'running test'"
+                    sh 'NODE_ENV=test node mbee test --bail --reporter=mocha-junit-reporter --grep "^[0-6]"'
+                }
+             }
+        }
     }
 
     /**
@@ -96,9 +94,17 @@ pipeline {
             sh 'echo "Build and Deploy Complete"'
 
             // Gets the logs and prints them to the console
+<<<<<<< HEAD
             //sh 'NODE_ENV=production node mbee docker --get-logs'
             // Removes any test containers
             sh 'NODE_ENV=production node mbee docker --clean'
+=======
+            //sh 'NODE_ENV=test node mbee docker --get-logs'
+            // Removes any test containers
+            sh 'NODE_ENV=test node mbee docker --clean'
+
+            junit 'test-results.xml'
+>>>>>>> master
         }
 
        /**

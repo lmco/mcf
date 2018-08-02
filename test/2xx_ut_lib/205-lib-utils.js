@@ -1,16 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module  test/202_LibUtils
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/205-lib-utils
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -18,29 +19,13 @@
  */
 
 const chai = require('chai');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
-
 const M = require('../../mbee.js');
-const utils = M.require('lib/utils');
-
-const sampleObj = {
-  project: {
-    id: 'myID',
-    name: 'The Name',
-    org: {
-      id: 'myOrgID'
-    }
-  },
-  type: 'Element'
-};
+const utils = M.require('lib/utils'); // TODO - can we do M.lib.utils?
 
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
+/* --------------------( Main )-------------------- */
 
-describe(name, () => {
+describe(M.getModuleName(module.filename), () => {
   it('should check that a string is a string and succeed', stringIsString);
   it('should check that a number is a string and fail', numberIsString);
   it('should check that an object is an object and succeed', objectIsObject);
@@ -57,12 +42,29 @@ describe(name, () => {
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Test Data )-------------------- */
+
+const sampleObj = {
+  project: {
+    id: 'myID',
+    name: 'The Name',
+    org: {
+      id: 'myOrgID'
+    }
+  },
+  type: 'Element'
+};
+
+
+/* --------------------( Tests )-------------------- */
+
 
 /**
- * Checks that a string is a string.
+ * @description Checks that a string is a string.
+ *
+ * TODO - Does the test really check that a string is a string or are we testing
+ * that the assertType function works using string input? Cleanup descriptions
+ * on this and other tests.
  */
 function stringIsString(done) {
   try {
@@ -76,12 +78,14 @@ function stringIsString(done) {
   done();
 }
 
+
 /**
- * Checks that a number is a string.
+ * @description Checks that a number is a string.
  */
 function numberIsString(done) {
   try {
     utils.assertType([1, 2], 'string');
+    // TODO - add comment explaining the line below
     chai.expect(true).to.equal(false);
     done();
   }
@@ -92,8 +96,9 @@ function numberIsString(done) {
   done();
 }
 
+
 /**
- * Checks that an object is an object.
+ * @description Checks that an object is an object.
  */
 function objectIsObject(done) {
   try {
@@ -107,8 +112,10 @@ function objectIsObject(done) {
   done();
 }
 
+
 /**
- * Checks that the key project.id exists.
+ * @description Checks that the key project.id exists.
+ * TODO - This test got messy after a merge, let's fix it.
  */
 function projectIDExists(done) {
   try {
@@ -116,20 +123,24 @@ function projectIDExists(done) {
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
-    done();
   }
   chai.expect(utils.checkExists(['project.id'], sampleObj)).to.equal(true);
   done();
 }
 
+
 /**
- * Checks that the key project.user exists.
+ * @description Checks that the key project.user exists.
+ *
+ * TODO - consider explaining that the assert function is expected to throw
+ * an error that should be caught in the catch block.
+ *
+ * TODO - This test got messy after a merge, let's fix it.
  */
 function projectUserExists(done) {
   try {
     utils.assertExists(['project.user'], sampleObj);
     chai.expect(true).to.equal(false);
-    done();
   }
   catch (error) {
     chai.expect(error.status).to.equal(400);
@@ -138,8 +149,9 @@ function projectUserExists(done) {
   done();
 }
 
+
 /**
- * Checks that multiple keys exist.
+ * @description Checks that multiple keys exist.
  */
 function multipleExist(done) {
   try {
@@ -147,14 +159,14 @@ function multipleExist(done) {
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
-    done();
   }
   chai.expect(utils.checkExists(['project.name', 'project.org.id'], sampleObj)).to.equal(true);
   done();
 }
 
+
 /**
- * Check that a user is an admin and succeed.
+ * @description Check that a user is an admin and succeed.
  */
 function userIsAdmin(done) {
   const user = { name: 'Darth Vader', admin: true };
@@ -163,21 +175,20 @@ function userIsAdmin(done) {
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
-    done();
   }
   chai.expect(utils.checkAdmin(user)).to.equal(true);
   done();
 }
 
+
 /**
- * Check that a user is an admin and fail.
+ * @description Check that a user is an admin and fail.
  */
 function userIsNotAdmin(done) {
   const user = { name: 'Stormtrooper 123', admin: false };
   try {
     utils.assertAdmin(user);
     chai.expect(true).to.equal(false);
-    done();
   }
   catch (error) {
     chai.expect(error.status).to.equal(401);
@@ -185,6 +196,7 @@ function userIsNotAdmin(done) {
   chai.expect(utils.checkAdmin(user)).to.equal(false);
   done();
 }
+
 
 /**
  * @description  Creates a uid from valid parameters
@@ -201,6 +213,7 @@ function validUID(done) {
   }
 }
 
+
 /**
  * @description  Creates a uid from invalid parameters
  */
@@ -215,6 +228,7 @@ function invalidUID(done) {
     done();
   }
 }
+
 
 /**
  * @description  Should parse a valid uid.
@@ -233,6 +247,7 @@ function parseValidUID(done) {
   }
 }
 
+
 /**
  * @description  Should parse an invalid uid.
  */
@@ -248,6 +263,7 @@ function parseInvalidUID(done) {
     done();
   }
 }
+
 
 /**
  * @description  Should parse a valid uid and get the 2nd element.

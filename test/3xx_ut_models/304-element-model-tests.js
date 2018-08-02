@@ -1,18 +1,20 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************
+/**
+ * Classification: UNCLASSIFIED
  *
- * @module test/304_ElementModel
+ * @module  test/304-element-model-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests the Element Model functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
@@ -24,8 +26,6 @@
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
 const User = M.require('models/User');
@@ -34,21 +34,23 @@ const Project = M.require('models/Project');
 const Element = M.require('models/Element');
 const AuthController = M.require('lib/auth');
 
+
+/* --------------------( Test Data )-------------------- */
+
+
 // This is so the same org and project can be referenced across test functions
 let org = null;
 let project = null;
 let user = null;
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
 
-// runs before all tests in this block
+/* --------------------( Main )-------------------- */
 
-describe(name, function() {
-  /*-------------------------------------
+
+describe(M.getModuleName(module.filename), function() {
+  /**
    * Before: runs before all tests
-   *-------------------------------------*/
+   */
   before(function() {
     this.timeout(5000);
     return new Promise((resolve, reject) => {
@@ -127,9 +129,10 @@ describe(name, function() {
     });
   });
 
-  /*-------------------------------------
+
+  /**
    * After: runs after all tests
-   *-------------------------------------*/
+   */
   after((done) => {
     // Remove the project
     Project.findOneAndRemove({
@@ -147,7 +150,7 @@ describe(name, function() {
       Org.findOneAndRemove({
         id: org.id
       })
-      .exec((orgRemoveErr) => {
+      .exec((orgRemoveErr) => { // TODO - use promises where possible
         // Error check
         if (orgRemoveErr) {
           M.log.error(orgRemoveErr);
@@ -166,9 +169,7 @@ describe(name, function() {
     });
   });
 
-  /*----------
-   * Tests
-   *----------*/
+  /* Execute the tests */
   it('should create a generic element', createElement);
   it('should delete the generic element', deleteElement);
   it('should create a root package', createRootPackage);
@@ -187,7 +188,7 @@ describe(name, function() {
 
 
 /**
- * Creates a generic element
+ * @description Creates a generic element
  */
 function createElement(done) {
   const newElement = new Element.Element({
@@ -209,7 +210,7 @@ function createElement(done) {
 }
 
 /**
- * Deletes the previously created generic element
+ * @description Deletes the previously created generic element
  */
 function deleteElement(done) {
   Element.Element.findOneAndRemove({
@@ -223,7 +224,7 @@ function deleteElement(done) {
 
 
 /**
- * Creates a project's root Package element
+ * @description Creates a project's root Package element
  */
 function createRootPackage(done) {
   // Create the new package
@@ -263,7 +264,7 @@ function createRootPackage(done) {
 }
 
 /**
- * Creates a block in the project's root Package element
+ * @description Creates a block in the project's root Package element
  */
 function createBlock01(done) {
   // Start by grabbing the root package
@@ -309,8 +310,9 @@ function createBlock01(done) {
   });
 }
 
+
 /**
- * Creates a a block in the project's root Package element
+ * @description Creates a a block in the project's root Package element
  */
 function createBlock02(done) {
   // Start by grabbing the root package
@@ -356,8 +358,9 @@ function createBlock02(done) {
   });
 }
 
+
 /**
- * Creates a relationship between the blocks in the project's root Package
+ * @description Creates a relationship between the blocks in the project's root Package
  */
 function createRelationship(done) {
   // Start by grabbing the root package
@@ -413,7 +416,7 @@ function createRelationship(done) {
 
 
 /**
- * Deletes the previosly created blocks and relationships
+ * @description Deletes the previosly created blocks and relationships
  */
 function deleteBlocksAndRelationships(done) {
   // Delete the relationship
@@ -443,7 +446,7 @@ function deleteBlocksAndRelationships(done) {
 }
 
 /**
- * Soft deletes the previously created root package
+ * @description Soft deletes the previously created root package
  */
 function softDeleteRootPackage(done) {
   // LM: Changed from findOneAndUpdate to a find and then update
@@ -471,7 +474,7 @@ function softDeleteRootPackage(done) {
 
 
 /**
- * Deletes the previously created root package
+ * @description Deletes the previously created root package
  */
 function deleteRootPackage(done) {
   Element.Package.findOneAndRemove({
