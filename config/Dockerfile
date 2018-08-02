@@ -62,4 +62,4 @@ RUN apk upgrade && \
 
 # RUN node mbee.js install
 # Run server
-CMD ["lm/mbee/docker/entrypoint.sh"]
+CMD ["./docker/entrypoint.sh"]
