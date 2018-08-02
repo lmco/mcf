@@ -33,7 +33,7 @@ pipeline {
                 sh 'NODE_ENV=stage node mbee docker --clean'
 
                 // Runs the production container in the background
-                //sh 'NODE_ENV=stage node mbee docker --run'
+                sh 'NODE_ENV=stage node mbee docker --run'
             }
         }
 
@@ -76,7 +76,7 @@ pipeline {
      */
     post {
         always {
-            junit 'test-results.xml'
+            //junit 'test-results.xml'
 
 
             // Things to always do post-build
