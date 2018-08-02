@@ -58,7 +58,7 @@ RUN apk upgrade && \
     chmod 400 certs/* && \
     mkdir logs && \
     chmod +x ./docker/entrypoint.sh
-    
+
 # RUN node mbee.js install
 # Run server
 CMD ["lm/mbee/docker/entrypoint.sh"]

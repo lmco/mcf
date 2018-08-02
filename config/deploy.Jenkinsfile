@@ -33,7 +33,7 @@ pipeline {
                 sh 'NODE_ENV=stage node mbee docker --clean'
 
                 // Runs the production container in the background
-                sh 'NODE_ENV=stage node mbee docker --run'
+                //sh 'NODE_ENV=stage node mbee docker --run'
             }
         }
 
@@ -47,28 +47,28 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            parallel {
-                stage('Linter') {
-                    steps {
-                        // Runs the basic test suite against the running stage container
-                        sh 'NODE_ENV=stage node mbee lint'
-                    }
-                }
-                stage('Run tests') {
-                    steps {
-                        // Runs the basic test suite against the running stage container
-                        // The bail command will stop running tests after one test fails
-                        timeout(time: 10, unit: 'MINUTES') {
-                            // creating a junit xml file.... pls work
-                            sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-6]"'
-                        }
-                        // checking to see if the .xml file was created
-                        sh 'ls -l'
-                    }
-                }
-            }
-        }
+        //stage('Test') {
+        //    parallel {
+        //        stage('Linter') {
+        //            steps {
+        //                // Runs the basic test suite against the running stage container
+        //                sh 'NODE_ENV=stage node mbee lint'
+        //            }
+        //        }
+        //        stage('Run tests') {
+        //            steps {
+        //                // Runs the basic test suite against the running stage container
+        //                // The bail command will stop running tests after one test fails
+        //                timeout(time: 10, unit: 'MINUTES') {
+        //                    // creating a junit xml file.... pls work
+        //                    sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-6]"'
+        //                }
+        //                // checking to see if the .xml file was created
+        //                sh 'ls -l'
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     /**
