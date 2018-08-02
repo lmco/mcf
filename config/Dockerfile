@@ -57,7 +57,8 @@ RUN apk upgrade && \
     apk add openssh-client && \
     chmod 400 certs/* && \
     mkdir logs && \
-    chmod +x ./docker/entrypoint.sh
+    chmod 700 ./docker/entrypoint.sh && \
+    ls -l
 
 # RUN node mbee.js install
 # Run server
