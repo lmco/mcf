@@ -1,4 +1,7 @@
-
+/**
+ * This file is derived from the default JSDoc template.
+ * The license for JSDoc can be found in the ./LICENSE.md file.
+ */
 
 const doop = require('jsdoc/util/doop');
 const env = require('jsdoc/env');
@@ -220,20 +223,18 @@ function getPathFromDoclet(doclet) {
     : doclet.meta.filename;
 }
 
-function generate(title, docs, filename, resolveLinks) {
-  let docData;
+function generate(title, docs, filename, _resolveLinks) {
   let html;
-  let outpath;
 
-  resolveLinks = resolveLinks !== false;
+  const resolveLinks = _resolveLinks !== false;
 
-  docData = {
+  const docData = {
     env: env,
     title: title,
     docs: docs
   };
 
-  outpath = path.join(outdir, filename);
+  const outpath = path.join(outdir, filename);
   html = view.render('container.tmpl', docData);
 
   if (resolveLinks) {
@@ -243,8 +244,8 @@ function generate(title, docs, filename, resolveLinks) {
   fs.writeFileSync(outpath, html, 'utf8');
 }
 
-function generateSourceFiles(sourceFiles, encoding) {
-  encoding = encoding || 'utf8';
+function generateSourceFiles(sourceFiles, _encoding) {
+  const encoding = _encoding || 'utf8';
   Object.keys(sourceFiles).forEach(function(file) {
     let source;
     // links are keyed to the shortened path in each doclet's `meta.shortpath` property
@@ -295,8 +296,8 @@ function attachModuleSymbols(doclets, modules) {
       .filter(function(symbol) {
         return symbol.description || symbol.kind === 'class';
       })
-      .map(function(symbol) {
-        symbol = doop(symbol);
+      .map(function(_symbol) {
+        const symbol = doop(_symbol);
 
         if (symbol.kind === 'class' || symbol.kind === 'function') {
           symbol.name = `${symbol.name.replace('module:', '(require("')}"))`;
@@ -352,9 +353,9 @@ function linktoTutorial(longName, name) {
   return tutoriallink(name);
 }
 
-function linktoExternal(longName, name) {
-  return linkto(longName, name.replace(/(^"|"$)/g, ''));
-}
+// function linktoExternal(longName, name) {
+//   return linkto(longName, name.replace(/(^"|"$)/g, ''));
+// }
 
 /**
  * Create the navigation sidebar.
@@ -371,10 +372,10 @@ function linktoExternal(longName, name) {
  * @return {string} The HTML for the navigation sidebar.
  */
 function buildNav(members) {
-  let globalNav;
+  // let globalNav;
   // var nav = '<h2><a href="index.html">Documentation</a></h2>';
   let nav = '<h2>Flight Manual</h2>';
-  const seen = {};
+  // const seen = {};
   const seenTutorials = {};
 
   const fmLink = '<a id="fm-link" href="/doc/flight-manual">Flight Manual</a>';
@@ -421,43 +422,28 @@ function buildNav(members) {
     @param {Tutorial} tutorials
  */
 exports.publish = function(taffyData, opts, tutorials) {
-  let classes;
-  let conf;
-  let externals;
-  let files;
-  let fromDir;
-  let globalUrl;
-  let indexUrl;
-  let interfaces;
-  let members;
-  let mixins;
-  let modules;
-  let namespaces;
-  let outputSourceFiles;
-  let packageInfo;
-  let packages;
+  // let fromDir;
   const sourceFilePaths = [];
   let sourceFiles = {};
-  let staticFileFilter;
-  let staticFilePaths;
-  let staticFiles;
-  let staticFileScanner;
-  let templatePath;
+  // let staticFileFilter;
+  // let staticFilePaths;
+  // let staticFiles;
+  // let staticFileScanner;
 
   data = taffyData;
 
-  conf = env.conf.templates || {};
+  const conf = env.conf.templates || {};
   conf.default = conf.default || {};
 
-  templatePath = path.normalize(opts.template);
+  const templatePath = path.normalize(opts.template);
   view = new template.Template(path.join(templatePath, 'tmpl'));
 
   // claim some special filenames in advance, so the All-Powerful Overseer of Filename Uniqueness
   // doesn't try to hand them out later
-  indexUrl = helper.getUniqueFilename('index');
+  const indexUrl = helper.getUniqueFilename('index');
   // don't call registerLink() on this one! 'index' is also a valid longname
 
-  globalUrl = helper.getUniqueFilename('global');
+  const globalUrl = helper.getUniqueFilename('global');
   helper.registerLink('global', globalUrl);
 
   // set up templating
@@ -514,7 +500,7 @@ exports.publish = function(taffyData, opts, tutorials) {
   });
 
   // update outdir if necessary, then create outdir
-  packageInfo = (find({ kind: 'package' }) || [])[0];
+  const packageInfo = (find({ kind: 'package' }) || [])[0];
   if (packageInfo && packageInfo.name) {
     outdir = path.join(outdir, packageInfo.name, (packageInfo.version || ''));
   }
@@ -572,11 +558,11 @@ exports.publish = function(taffyData, opts, tutorials) {
     }
   });
 
-  members = helper.getMembers(data);
+  const members = helper.getMembers(data);
   members.tutorials = tutorials.children;
 
   // output pretty-printed source files by default
-  outputSourceFiles = conf.default && conf.default.outputSourceFiles !== false;
+  const outputSourceFiles = conf.default && conf.default.outputSourceFiles !== false;
 
   // add template helpers
   view.find = find;
@@ -598,8 +584,8 @@ exports.publish = function(taffyData, opts, tutorials) {
   if (members.globals.length) { generate('Global', [{ kind: 'globalobj' }], globalUrl); }
 
   // index page displays information from package.json and lists files
-  files = find({ kind: 'file' });
-  packages = find({ kind: 'package' });
+  const files = find({ kind: 'file' });
+  const packages = find({ kind: 'package' });
 
   generate('Home',
     packages.concat(
@@ -611,12 +597,12 @@ exports.publish = function(taffyData, opts, tutorials) {
     ).concat(files), indexUrl);
 
   // set up the lists that we'll use to generate pages
-  classes = taffy(members.classes);
-  modules = taffy(members.modules);
-  namespaces = taffy(members.namespaces);
-  mixins = taffy(members.mixins);
-  externals = taffy(members.externals);
-  interfaces = taffy(members.interfaces);
+  const classes = taffy(members.classes);
+  const modules = taffy(members.modules);
+  const namespaces = taffy(members.namespaces);
+  const mixins = taffy(members.mixins);
+  const externals = taffy(members.externals);
+  const interfaces = taffy(members.interfaces);
 
   Object.keys(helper.longnameToUrl).forEach(function(longname) {
     const myClasses = helper.find(classes, { longname: longname });
