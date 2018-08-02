@@ -96,7 +96,7 @@ pipeline {
         //            sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-4]"'
         //        }
         //    }
-        }
+        //}
     }
 
     /**
