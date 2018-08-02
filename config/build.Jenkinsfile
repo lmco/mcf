@@ -55,7 +55,7 @@ pipeline {
                 }
                 stage('Build Docker MBEE'){
                     steps {
-                        sh 'NODE_ENV=stage node mbee docker --build'
+                        sh 'NODE_ENV=stage node mbee docker --build '
                     }
                 }
             }
