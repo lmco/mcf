@@ -1,16 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module test/302_OrganizationModel
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/302-org-model-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
@@ -23,67 +24,61 @@
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
+const mongoose = require('mongoose'); // TODO - remove the need for mongoose
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const Org = M.require('models/Organization');
 
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
+/* --------------------( Main )-------------------- */
 
-describe(name, () => {
-  /*-------------------------------------
-   * Before: runs before all tests
-   *-------------------------------------*/
+
+describe(M.getModuleName(module.filename), () => {
+  /**
+   * Before: runs before all tests. Open database connection.
+   */
   before(() => {
-    // Open database conection
     const db = M.require('lib/db');
     db.connect();
   });
 
-  /*-------------------------------------
-   * After: runs after all tests
-   *-------------------------------------*/
+  /**
+   * After: runs after all tests. Close database connection.
+   */
   after(() => {
-    // Close database connection
+    // TODO - we should write close function in the db.js module so tests don't
+    // need to require mongoose
     mongoose.connection.close();
   });
 
-  /*----------
-   * Tests
-   *----------*/
+  /* Execute the tests */
   it('should create an organization', createOrg).timeout(2500);
   it('should soft delete an organization', softDeleteOrg).timeout(2500);
   it('should delete an organization', deleteOrg).timeout(2500);
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Tests )-------------------- */
+
 
 /**
- * Creates a user using the User model.
+ * @description Creates a user using the User model.
  */
 function createOrg(done) {
   const org = new Org({
     id: 'avengers',
-    name: 'Infinity Stone'
+    name: 'Avengers Initiative'
   });
   org.save((err) => {
-    if (err) {
-      M.log.error(err);
-    }
     chai.expect(err).to.equal(null);
     done();
   });
 }
 
+
 /**
- * Soft-deletes the org.
+ * @description Soft-deletes the org.
+ *
+ * TODO - add to description
  */
 function softDeleteOrg(done) {
   // LM: Changed from findOneAndUpdate to a find and then update
@@ -107,8 +102,9 @@ function softDeleteOrg(done) {
   });
 }
 
+
 /**
- * Deletes the organization.
+ * @description Deletes the organization.
  */
 function deleteOrg(done) {
   Org.findOneAndRemove({

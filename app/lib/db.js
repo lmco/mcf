@@ -64,3 +64,10 @@ module.exports.connect = function() {
     });
   });
 };
+
+/**
+ * Closes the connection to the database.
+ */
+module.exports.disconnect = function() {
+  mongoose.connection.close();
+};

@@ -1,53 +1,57 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module  test/603_ProjectAPI
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/603-project-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- *  @description  This tests the API controller functionality. These tests
+ * @description  This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. These API controller tests are
  * specifically for the Project API tests: posting, putting, getting, and deleting
  * projects. Some tests are conducting with invalid inputs for the project
  * api controlls.
+ *
+ * TODO - fix the description
  */
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // TODO - remove dependency on mongoose
 const request = require('request');
-
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const OrgController = M.require('controllers/OrganizationController');
 const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
+/* --------------------( Test Data )-------------------- */
+
 const test = M.config.test;
 let org = null;
 let user = null;
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
-describe(name, () => {
-  /*-------------------------------------
+
+/* --------------------( Main )-------------------- */
+
+
+describe(M.getModuleName(module.filename), () => {
+  /**
    * Before: run before all tests
-   *-------------------------------------*/
+   * TODO - describe
+   */
   before(function(done) {
     this.timeout(5000);
-    const db = M.require('lib/db');
+    const db = M.require('lib/db'); // TODO - M.lib.db
     db.connect();
 
     // Creating a Requesting Admin
@@ -100,9 +104,10 @@ describe(name, () => {
     });
   });
 
-  /*-------------------------------------
+  /**
    * After: run after all tests
-   *-------------------------------------*/
+   * TODO - describe
+   */
   after(function(done) {
     this.timeout(5000);
     // Removing the Organization
@@ -125,10 +130,7 @@ describe(name, () => {
     });
   });
 
-  /*----------
-   * Tests
-   *----------*/
-
+  /* Execute tests */
   it('should POST a project to the organization', postProject01);
   it('should GET the previously posted project', getProject01);
   it('should reject a POST of invalid name to organization', postBadProject);
@@ -142,9 +144,10 @@ describe(name, () => {
   it('should DELETE the second project to the organization', deleteProject02);
 });
 
-/**---------------------------------------------------
- *            Test Functions
-  ----------------------------------------------------*/
+
+/* --------------------( Tests )-------------------- */
+// TODO - add descriptions to all functions and fix spacing between functions
+
 
 /**
  * Makes a POST request to /api/orgs/:orgid/projects/:projectid to create a project.

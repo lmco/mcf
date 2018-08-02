@@ -707,7 +707,7 @@
     }],
 
     // Require or disallow padding lines between statements
-    // "https"://eslint.org/docs/rules/padding-line-between-statements
+    // https://eslint.org/docs/rules/padding-line-between-statements
     "padding-line-between-statements": "off",
 
     // require quotes around object literal property names
