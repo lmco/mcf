@@ -121,6 +121,38 @@ function docker(args) {
     console.log('Docker Container Running in Background.');
   }
 
+  // Run the Docker container
+  else if (args.includes('--volume-create')) {
+    console.log('Creating docker volume ...');
+
+    // Build the "docker run" command
+    let rargs = [
+      'volume',
+      'create',
+      `NODE_ENV=${M.env}`
+    ];
+    if (M.config.server.http.enabled && M.config.docker.http.enabled) {
+      rargs = rargs.concat(['-p', `${M.config.docker.http.port}:${M.config.server.http.port}`]);
+    }
+    if (M.config.server.https.enabled && M.config.docker.https.enabled) {
+      rargs = rargs.concat(['-p', `${M.config.docker.https.port}:${M.config.server.https.port}`]);
+    }
+    rargs = rargs.concat(['--name', M.config.docker.container.name]);
+    rargs = rargs.concat([M.config.docker.image.name]);
+    console.log(rargs);
+
+    // Run the Docker container
+    const cmd = spawn('docker', rargs, { stdio: 'inherit' });
+    cmd.on('data', (data) => { console.log(data.toString()); });
+    cmd.on('exit', (code) => {
+      if (code !== 0) {
+        console.log('Docker run failed');
+        process.exit(code);
+      }
+    });
+    console.log('Docker Container Running in Background.');
+  }
+
   // Get the Docker logs
   else if (args.includes('--get-logs')) {
     console.log('Getting docker logs ...');

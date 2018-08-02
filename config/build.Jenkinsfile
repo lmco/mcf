@@ -57,6 +57,7 @@ pipeline {
                     steps {
                         sh "echo 'building'"
                         sh 'NODE_ENV=stage node mbee docker --build '
+                        sh ''
                     }
                 }
             }
@@ -72,7 +73,7 @@ pipeline {
 
                 // Runs the production container in the background
                 sh "echo 'run'"
-                sh 'NODE_ENV=stage node mbee docker --run'
+                sh 'NODE_ENV=stage node mbee docker --run -v ./config:/lm/mbee/config/'
             }
         }
 
