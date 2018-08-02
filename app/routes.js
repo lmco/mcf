@@ -47,7 +47,6 @@ router.route('/doc/api')
 .get(Middleware.logRoute, UIController.swaggerDoc);
 
 
-
 /**
  * Both routes map to the same controller. The controller method handles
  * the logic of checking for the page parameter.

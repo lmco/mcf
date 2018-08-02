@@ -125,16 +125,16 @@ function build(_args) {
   if (args.includes('--all') || args.includes('--jsdoc')) {
     console.log('  + Building jsdoc ...');
     const jsdoc = `${process.argv[0]} node_modules/jsdoc/jsdoc.js`;
-    //const tutorials = '-u doc';
-    //const templates = '-t node_modules/ub-jsdoc/'
-    //const files = ['app/**/*.js', 'README.md', 'test/**/*.js'];
-    let cmd = `${jsdoc} -c ./config/jsdoc.json`;
+    // const tutorials = '-u doc';
+    // const templates = '-t node_modules/ub-jsdoc/'
+    // const files = ['app/**/*.js', 'README.md', 'test/**/*.js'];
+    const cmd = `${jsdoc} -c ./config/jsdoc.json`;
 
     // Execute the JSDoc build command
-    let stdout = execSync(cmd);
+    execSync(cmd);
 
     // Copy JSDoc static dependencies
-    //gulp.src('./out/*').pipe(gulp.dest('./build/doc'));
+    // gulp.src('./out/*').pipe(gulp.dest('./build/doc'));
   }
 
   console.log('Build Complete.');
@@ -154,7 +154,7 @@ function install(_args) {
   // Safely allow install to be called with no args
   const args = (_args === undefined) ? [] : _args;
 
-  const cmd = spawnSync(buildTool, ['install'].concat(args), {stdio: 'inherit'});
+  const cmd = spawnSync(buildTool, ['install'].concat(args), { stdio: 'inherit' });
   if (cmd.stdout) {
     // console.log('  ++', cmd.stdout.toString());
   }
@@ -192,7 +192,7 @@ function configure() {
       // console.error(cmd.stderr.toString());
     }
     if (cmd.status !== 0) {
-      console.log('Warning: Yarn install failed. Using NPM.')
+      console.log('Warning: Yarn install failed. Using NPM.');
       return 'npm';
     }
   }

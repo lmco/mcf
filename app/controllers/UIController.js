@@ -162,14 +162,14 @@ class UIController {
    */
   static renderFlightManual(req, res) {
     if (!req.params.hasOwnProperty('page')) {
-      return res.redirect('flight-manual/index.html')
+      return res.redirect('flight-manual/index.html');
     }
     const page = sani.html(req.params.page);
     return res.render('fm', {
-        ui: M.config.server.ui,
-        user: (req.user) ? req.user : '',
-        content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
-        pluginFiles: pluginFiles
+      ui: M.config.server.ui,
+      user: (req.user) ? req.user : '',
+      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
+      pluginFiles: pluginFiles
     });
   }
 
@@ -179,14 +179,14 @@ class UIController {
    */
   static renderJSDoc(req, res) {
     if (!req.params.hasOwnProperty('page')) {
-      return res.redirect('developers/index.html')
+      return res.redirect('developers/index.html');
     }
     const page = sani.html(req.params.page);
     return res.render('jsdoc', {
-        ui: M.config.server.ui,
-        user: (req.user) ? req.user : '',
-        content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
-        pluginFiles: pluginFiles
+      ui: M.config.server.ui,
+      user: (req.user) ? req.user : '',
+      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
+      pluginFiles: pluginFiles
     });
   }
 
