@@ -41,6 +41,7 @@ pipeline {
         stage('Build') {
             steps {
                 // Build
+                sh 'NODE_ENV=test node mbee install --dev'
                 sh 'NODE_ENV=test node mbee build'
 
                 // Verify build
