@@ -1,0 +1,148 @@
+{
+  "auth": {
+    "strategy": "LMICloudStrategy",
+    "ldap": {
+
+      // The URL which is hosting the lDAP service.
+      "url": "ldaps://usadc43.us.lmco.com",
+
+      // The port which the LDAP server is listening on.
+      "port": "3269",
+
+      // The file location of any Certificate files which are required to authenticate
+      // with the LDAP server. Single and multiple files should be listed as an array.
+      "ca": [
+        "./certs/LockheedMartinRootCertificationAuthority.pem",
+        "./certs/LockheedMartinRootCertificationAuthority2.pem",
+        "./certs/LockheedMartinRootCertificationAuthority3.pem"
+      ],
+
+      // The user credentials required for authentication.
+      "bind_dn": "mbee-query@us.lmco.com",
+
+      // The password credentials required for authentication.
+      "bind_dn_pass": "SuaIZh4oIPCRD9g",
+
+      // The base of the LDAP directory.
+      "base": "DC=us,DC=lmco,DC=com",
+
+      // The filter used for the LDAP query.
+      // NOTE: The filter is imported as additional query parameters inside of an "AND" LDAP query. For example, the
+      // following is how the filter will end up querying the server.
+      // (&(preDefinedParams)<filterFromConfigurationFile>)
+      // In order to build a proper query, the additional queries must be surrounded by parentheses individually.
+      // EX: "(objectClass=user)(memberOf=CN=list\\, devs,OU=group,DC=company,DC=com)"
+      // NOTE: Any characters which require a back slash as an escape character must be prefaced with two
+      // backslashes.
+      "filter": "(objectClass=person)(memberOf=CN=dl-SSC\\, MBEE-Developers,OU=DistributionLists,OU=LMXpress,OU=EntOpr,DC=us,DC=lmco,DC=com)",
+
+      // The attribute for username, first name, last name, and email within the LDAP server.
+      "attributes": {
+        "username": "sAMAccountName",
+        "firstName": "givenName",
+        "lastName": "sn",
+        "eMail": "mail"
+      }
+    },
+
+    "token": {
+      "expires": 10,
+      "units": "MINUTES"
+    },
+    "session": {
+      "expires": 30,
+      "units": "MINUTES"
+    }
+  },
+  "db": {
+    "name": "dev",
+    "url": "dev.mbee.us.lmco.com",
+    "port": "27017",
+    "username": "mbee",
+    "password": "relativeUniverse141",
+    "ssl": true,
+    "ca": "./LockheedMartinRootCertificationAuthority.pem"
+  },
+  "docker": {
+    "image": {
+      "name": "mbee"
+    },
+    "container": {
+      "name": "mbee"
+    },
+    "http": {
+      "enabled": true,
+      "port": 9080
+    },
+    "https": {
+      "enabled": true,
+      "port": 9443
+    },
+    "Dockerfile": "./config/Dockerfile"
+  },
+  "log": {
+    "level": "info",
+    "file": "logs/mbee.log",
+    "error_file": "logs/mbee-error.log",
+    "debug_file": "logs/mbee-debug.log",
+    "colorize": true
+  },
+  "server": {
+    "http": {
+      "enabled": true,
+      "port": 9080
+    },
+    "https": {
+      "enabled": false,
+      "port": 9443,
+      "sslCertName": "dev.mbee.us.lmco.com"
+    },
+    "api": {
+      "enabled": true,
+      "json": {
+        "indent": 4
+      },
+      "userAPI": {
+        "get": true,
+        "post": true,
+        "put": true,
+        "delete": true
+      }
+    },
+    "plugins": {
+      "enabled": false,
+      "plugins": [{
+        "name": "developers",
+        "source": "git@gitlab.lmms.lmco.com:mbee/mbee-integrations/plugin-developers.git",
+        "deployKey": "./certs/gitlab-plugins-developers.key",
+        "build": []
+      }]
+    },
+    "ui": {
+      "enabled": true,
+      "banner": {
+        "on": false,
+        "message": "Lockheed Martin Proprietary Information",
+        "color": "#FFF",
+        "background": "rgb(0, 52, 120)",
+        "bold": true,
+        "border": "1px solid #656565"
+      },
+      "apiUrl": "/"
+    },
+    "secret": "CHANGE_ME"
+  },
+  "test": {
+    "url": "http://localhost:9080",
+    "ca": "./certs/LockheedMartinRootCertificationAuthority.pem",
+    "NODE_TLS_REJECT_UNAUTHORIZED": "0",
+    "username": "mbee",
+    "password": "t1QAx&hICyQSg)|"
+  },
+  "yarn": {
+    "http-proxy":  "http://proxy-lmi.global.lmco.com",
+    "https-proxy": "http://proxy-lmi.global.lmco.com",
+    "cafile":      "./certs/LockheedMartinRootCertificationAuthority.pem",
+    "strict-ssl":  "false"
+  }
+}
