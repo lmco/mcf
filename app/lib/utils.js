@@ -60,14 +60,14 @@ module.exports.render = function(req, res, params) {
   // If you would like something to be rendered by default,
   // replace the undefined return value with your desired
   // default value
-  let pluginNames = getPluginNames();
+  const pluginNames = getPluginNames();
   return res.render(params.name, {
     swagger: params.swagger !== undefined
       ? params.swagger
       : undefined,
-    ui: (params.ui !== undefined )
+    ui: params.ui !== undefined
       ? params.ui
-	  : M.config.server.ui,
+      : M.config.server.ui,
     renderer: params.name === 'admin' || 'mbee'
       ? `${params.name}-renderer`
       : undefined,
@@ -94,7 +94,7 @@ module.exports.render = function(req, res, params) {
       ? params.err
       : undefined
   });
-}
+};
 
 /**
  * @description  Checks an array of arguments to see if
