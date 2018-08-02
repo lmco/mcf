@@ -29,7 +29,6 @@
     "del": "^3.0.0",
     "eslint": "^4.19.1",
     "gulp": "^4.0.0",
-    "gulp-clean": "^0.4.0",
     "gulp-concat": "^2.6.1",
     "gulp-jsdoc3": "^2.0.0",
     "gulp-react": "^3.1.0",
@@ -41,8 +40,7 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "request": "^2.86.0",
-    "swagger-ui-express": "^2.0.15",
-    "ub-jsdoc": "^1.6.0"
+    "swagger-ui-express": "^2.0.15"
   },
   "scripts": {
     "build": "node scripts/build.js",

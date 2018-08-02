@@ -48,8 +48,6 @@ function build(_args) {
   const concat = require('gulp-concat');  // eslint-disable-line global-require
   const sass = require('gulp-sass');      // eslint-disable-line global-require
   const react = require('gulp-react');    // eslint-disable-line global-require
-  const clean = require('gulp-clean');    // eslint-disable-line global-require
-  const del = require('del');             // eslint-disable-line global-require
 
   // Allow the function to be called with no parameters
   // Set the default behavior to build all
@@ -90,9 +88,13 @@ function build(_args) {
     // Copy Popper JS
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
     .pipe(gulp.dest('build/public/js'));
-    // Copy JSDoc JS
-    gulp.src('./app/ui/js/**/*')
+    // Copy MBEE JS
+    gulp.src('./app/ui/js/**/*.js')
     .pipe(concat('mbee.js'))
+    .pipe(gulp.dest('build/public/js'));
+    // Copy MBEE JS
+    gulp.src('./app/ui/jsdoc-template/static/**/*.js')
+    .pipe(concat('jsdoc.js'))
     .pipe(gulp.dest('build/public/js'));
   }
 
@@ -131,10 +133,8 @@ function build(_args) {
     // Execute the JSDoc build command
     let stdout = execSync(cmd);
 
-    // Copy to build dir and clean src
-    gulp.src('./out/*')
-    .pipe(clean())
-    .pipe(gulp.dest('./build/doc'));
+    // Copy JSDoc static dependencies
+    //gulp.src('./out/*').pipe(gulp.dest('./build/doc'));
   }
 
   console.log('Build Complete.');

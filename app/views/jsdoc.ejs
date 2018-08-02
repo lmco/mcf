@@ -12,12 +12,11 @@
  *****************************************************************************/
  %>
 
-<link type="text/css" rel="stylesheet" href="/css/jsdoc.css">
-
 <%- content %>
 
-<!-- UB-JSDoc dependencies -->
+<%- contentFor('styles') %>
+<link type="text/css" rel="stylesheet" href="/css/jsdoc.css">
+
+<%- contentFor('scripts') %>
 <script type="text/javascript" src="/js/jsdoc.js"></script>
-<!--<script type="text/javascript" src="scripts/partialNavigation.js"></script>-->
-<script>prettyPrint(); window.exports.gotoLine()</script>
 

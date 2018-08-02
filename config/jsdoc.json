@@ -1,6 +1,6 @@
 {
   "opts": {
-      "template": "templates/default",
+      "template": "app/ui/jsdoc-template",
       "encoding": "utf8",
       "destination": "./build/doc",
       "recurse": true,
