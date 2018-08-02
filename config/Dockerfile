@@ -28,6 +28,8 @@ RUN mkdir -p app \
     && mkdir -p public \
     && mkdir -p scripts
 
+VOLUME ./config
+
 COPY ./app  app
 COPY ./certs certs
 COPY ./plugins plugins
