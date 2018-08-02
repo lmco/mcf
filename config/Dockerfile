@@ -58,6 +58,7 @@ RUN apk upgrade && \
     chmod 400 certs/* && \
     mkdir logs && \
     chmod 700 entrypoint.sh && \
+    cat entrypoint.sh && \
     ls -l
 
 # RUN node mbee.js install
