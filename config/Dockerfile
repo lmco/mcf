@@ -30,7 +30,7 @@ RUN mkdir -p app \
 
 VOLUME ./config
 
-COPY ./docker docker
+COPY ./docker/entrypoint.sh entrypoint.sh
 COPY ./app  app
 COPY ./certs certs
 COPY ./plugins plugins
