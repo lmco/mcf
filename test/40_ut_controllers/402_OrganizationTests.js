@@ -104,7 +104,8 @@ describe(name, () => {
   /*-------------------------------------
    * After: run after all tests
    *-------------------------------------*/
-  after((done) => {
+  after(function(done) {
+    this.timeout(5000);
     // Removing the organization created
     OrgController.removeOrg(user, 'gaurdians', { soft: false })
     .then(() => UserController.removeUser(user, newUser.username))
@@ -143,7 +144,7 @@ describe(name, () => {
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg).timeout(5000);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(5000);
   it('should add a user to an org', addUserRole).timeout(2500);
-  // it('should let the non-admin user write a project', projWritePerm).timeout(2500);
+  it('should let the non-admin user write a project', projWritePerm).timeout(2500);
   it('should reject user changing their permissions', rejectUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
   it('should get all members with permissions in an org', getMembers).timeout(2500);
@@ -434,32 +435,35 @@ function addUserRole(done) {
   });
 }
 
-// /**
-//  * Test to see if the newUser can actually write to the
-//  * organization now that new permissions have been set.
-//  * This means they can create a project.
-//  * NOTE: Bug fix in JIRA, waiting for update.
-//  */
-//
-// function projWritePerm(done) {
-//   const projData = {
-//     id: 'jerryboree',
-//     name: 'Jerry Smith',
-//     org: {
-//       id: 'gaurdians'
-//     }
-//   };
-//   ProjController.createProject(newUser, projData)
-//   .then((proj) => {
-//     chai.expect(proj.id).to.equal('jerryboree');
-//     chai.expect(proj.name).to.equal('Jerry Smith');
-//     done();
-//   })
-//   .catch((error) => {
-//     chai.expect(error.description).to.equal(null);
-//     done();
-//   });
-// }
+/**
+ * Test to see if the newUser can actually write to the
+ * organization now that new permissions have been set.
+ * This means they can create a project.
+ */
+
+function projWritePerm(done) {
+  const projData = {
+    id: 'godslayer',
+    name: 'God Slayer',
+    org: {
+      id: 'gaurdians'
+    }
+  };
+  ProjController.createProject(newUser, projData)
+  .then((proj) => {
+    chai.expect(proj.id).to.equal('godslayer');
+    chai.expect(proj.name).to.equal('God Slayer');
+    return ElemController.createElement(newUser, { id: '0000', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Element' });
+  })
+  .then(() => {
+    ElemController.createElement(newUser, { id: '0001', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Element' });
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
 
 /**
  * Test is to set the permissions of the owner
