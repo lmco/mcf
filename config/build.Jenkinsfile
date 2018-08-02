@@ -61,6 +61,20 @@ pipeline {
                 }
             }
         }
+        /**
+         * First, stops and removes current container.
+         * Then runs the newly built docker container.
+         */
+        stage('Run') {
+            steps {
+                // Removes any existing production running containers
+                sh 'NODE_ENV=stage node mbee docker --clean'
+
+                // Runs the production container in the background
+                sh "echo 'running'"
+                sh 'NODE_ENV=stage node mbee docker --run'
+            }
+        }
     }
 
     /**

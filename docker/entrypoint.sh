@@ -1,2 +1,3 @@
 #!bin/bash
-node mbee install
+node mbee.js install
+node mbee.js start
