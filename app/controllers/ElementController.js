@@ -90,7 +90,7 @@ class ElementController {
       }
 
       // Find the project
-      ProjController.findProject(reqUser, orgID, projID)
+      ProjController.findProject(reqUser, orgID, projID, true)
       .then((project) => { // eslint-disable-line consistent-return
         // Ensure user is part of the project
         const members = project.permissions.read.map(u => u._id.toString());
@@ -164,45 +164,54 @@ class ElementController {
       // Sanitize the parameters
       const orgID = M.lib.sani.sanitize(organizationID);
       const projID = M.lib.sani.sanitize(projectID);
+      let _projID = null;
 
       // Ensure the project still exists
       ProjController.findProject(reqUser, orgID, projID, true)
       .then((project) => {
+        _projID = project._id;
+        return ElementController.findElements(reqUser, orgID, projID);
+      })
+      .then((elements) => { // eslint-disable-line consistent-return
+        // If there are no elements found, return an error
+        if (elements.length === 0) {
+          return reject(new errors.CustomError('No elements found.', 404));
+        }
+
+        // Ensure user has permission to delete all elements
+        Object.keys(elements).forEach((element) => { // eslint-disable-line consistent-return
+          const admins = elements[element].project.permissions.admin.map(u => u._id.toString());
+          if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+            return reject(new errors.CustomError(
+              `User does not have permission to delete element ${elements[element].id}.`, 401
+            ));
+          }
+        });
+
         if (softDelete) {
-          // Find the elements
-          ElementController.findElements(reqUser, orgID, projID)
-          .then((elements) => {
-            // If there are no elements found, return an error
-            if (elements.length === 0) {
-              return reject(new errors.CustomError('No elements found.', 404));
-            }
+          for (let i = 0; i < elements.length; i++) {
+            // Update the elements deleted fields
+            elements[i].deleted = true;
+            elements[i].save((saveErr) => { // eslint-disable-line consistent-return
+              if (saveErr) {
+                // If error occurs, return it
+                return reject(new errors.CustomError('Save failed.'));
+              }
+            });
+          }
 
-            for (let i = 0; i < elements.length; i++) {
-              // Update the elements deleted fields
-              elements[i].deleted = true;
-              elements[i].save((saveErr) => { // eslint-disable-line consistent-return
-                if (saveErr) {
-                  // If error occurs, return it
-                  return reject(new errors.CustomError('Save failed.'));
-                }
-              });
-            }
-
-            // Return the updated elements
-            return resolve(elements);
-          })
-          .catch((findElementsError) => reject(findElementsError));
+          // Return the updated elements
+          return resolve(elements);
         }
-        else {
-          // Hard delete the elements
-          Element.Element.deleteMany({ project: project._id }, (deleteError, elementsDeleted) => {
-            if (deleteError) {
-              return reject(new errors.CustomError('Delete failed.'));
-            }
 
-            return resolve(elementsDeleted);
-          });
-        }
+        // Hard delete the elements
+        Element.Element.deleteMany({ project: _projID }, (deleteError, elementsDeleted) => {
+          if (deleteError) {
+            return reject(new errors.CustomError('Delete failed.'));
+          }
+
+          return resolve(elementsDeleted);
+        });
       })
       .catch((findProjectError) => reject(findProjectError));
     });
