@@ -158,6 +158,23 @@ class UIController {
 
 
   /**
+   * Renders the documentation.
+   */
+  static renderFlightManual(req, res) {
+    if (!req.params.hasOwnProperty('page')) {
+      return res.redirect('flight-manual/index.html')
+    }
+    const page = sani.html(req.params.page);
+    return res.render('fm', {
+        ui: M.config.server.ui,
+        user: (req.user) ? req.user : '',
+        content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
+        pluginFiles: pluginFiles
+    });
+  }
+
+
+  /**
    * Renders the developer documentation.
    */
   static renderJSDoc(req, res) {

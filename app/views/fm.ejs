@@ -20,10 +20,11 @@
 <%- contentFor('scripts') %>
 <script type="text/javascript">
   $(function() {
-    $('#fm-link').removeClass('active');
-    $('#mod-doc-link').addClass('active');
-    $( "#flight-manual-menu" ).css('display', 'none');
-    $( "#modules-menu" ).css('display', 'block');
+    $('#fm-link').addClass('active');
+    $('#mod-doc-link').removeClass('active');
+    $( "#flight-manual-menu" ).css('display', 'block');
+    $( "#modules-menu" ).css('display', 'none');
   });
+  const flight = () => console.log('Go');
 </script>
 

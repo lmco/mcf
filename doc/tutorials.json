@@ -17,15 +17,15 @@
   "6.0-core-framework": {
     "title": "6.0 Hacking the Core Framework",
     "children": {
-        "6.1-models": {
-          "title": "6.1 Models"
-        },
-        "6.2-controllers": {
-          "title": "6.2 Controllers"
-        },
-        "6.3-errors": {
-          "title": "6.3 Errors"
-        }
+      "6.1-models": {
+        "title": "6.1 Models"
+      },
+      "6.2-controllers": {
+        "title": "6.2 Controllers"
+      },
+      "6.3-errors": {
+        "title": "6.3 Errors"
       }
-    },
- }
+    }
+  }
+}
