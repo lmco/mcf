@@ -171,6 +171,9 @@ class UIController {
       return utils.render(req,res,{
         name: 'about',
         user: req.user,
+        info: {
+          version: M.version4
+        },
         title: 'About | Model-Based Engineering Environment'
       });
     });

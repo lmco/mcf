@@ -65,18 +65,18 @@ function getPluginNames() {
     swagger: params.swagger !== undefined ?
       params.swagger :
       undefined,
-    ui: (params.ui === undefined ) ?
-      M.config.server.ui :
-	  params.ui,
+    ui: (params.ui !== undefined ) ?
+      params.ui :
+	  M.config.server.ui,
     renderer: params.name === 'admin' || 'mbee' ?
       `${params.name}-renderer` :
-        undefined,
+      undefined,
     user: params.user !== undefined ?
       params.user :
       req.user.getPublicData(),
-    info: params.name === 'about' ?
-        {version: M.version4} :
-        undefined,
+    info: params.info!== undefined ?
+      params.info :
+      undefined,
     org: params.org !== undefined ?
       params.org :
       undefined,
