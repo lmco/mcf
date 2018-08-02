@@ -25,8 +25,6 @@ const User = M.require('models/User');
 const utils = M.require('lib.utils');
 const swaggerJSDoc = require('swagger-jsdoc');
 
-const pluginFiles = utils.getPluginNames();
-
 
 /**
  * UIController.js
@@ -44,12 +42,16 @@ class UIController {
    */
 
   static home(req, res) {
-    return res.render('home', {
+/*     return res.render('home', {
       ui: M.config.server.ui,
       user: req.user.getPublicData(),
       title: 'MBEE | Model-Based Engineering Environment',
       pluginFiles: pluginFiles
-    });
+    }); */
+	return utils.render(req,res,{
+      name: 'home',
+      title: 'MBEE | Model-Based Engineering Environment'
+	})
   }
 
 
@@ -60,7 +62,7 @@ class UIController {
    */
 
   static mbee(req, res) {
-    return res.render('mbee', {
+/*     return res.render('mbee', {
       ui: M.config.server.ui,
       renderer: 'mbee-renderer',
       user: req.user.getPublicData(),
@@ -68,7 +70,13 @@ class UIController {
       project: M.lib.sani.sanitize(req.params.project),
       title: 'MBEE | Model-Based Engineering Environment',
       pluginFiles: pluginFiles
-    });
+    }); */
+	return utils.render(req,res,{
+      name: 'mbee',
+      org: M.lib.sani.sanitize(req.params.org),
+      project: M.lib.sani.sanitize(req.params.project),
+      title: 'MBEE | Model-Based Engineering Environment'
+    })
   }
 
 
@@ -79,13 +87,17 @@ class UIController {
    */
 
   static admin(req, res) {
-    return res.render('home', {
+/*     return res.render('home', {
       ui: M.config.server.ui,
       renderer: 'admin-renderer',
       user: req.user.getPublicData(),
       title: 'Admin | Model-Based Engineering Environment',
       pluginFiles: pluginFiles
-    });
+    }); */
+    return utils.render(req,res,{
+      name: 'admin',
+      title: 'Admin | Model-Based Engineering Environment'
+	})
   }
 
   /**
@@ -112,13 +124,19 @@ class UIController {
    * @description Renders the swagger doc.
    */
   static swaggerDoc(req, res) {
-    return res.render('swagger', {
+/*     return res.render('swagger', {
       swagger: UIController.swaggerSpec(),
       ui: M.config.server.ui,
       user: null,
       title: 'MBEE API Documentation',
       pluginFiles: pluginFiles
-    });
+    }); */
+    return utils.render(req,res,{
+      name: 'swagger',
+      swagger: UIController.swaggerSpec(),
+      user: null,
+      title: 'MBEE API Documentation'
+	})
   }
 
 
@@ -141,14 +159,19 @@ class UIController {
         req.user = user;
       }
       // Disables because database document is being directly used
-      return res.render('about', {
+/*       return res.render('about', {
         ui: M.config.server.ui,
         user: req.user,
         info: {
           version: M.version4
         },
         title: 'About | Model-Based Engineering Environment',
-        pluginFiles: pluginFiles
+        pluginFiles: pluginFiles 
+		})*/
+      return utils.render(req,res,{
+        name: 'about',
+        user: req.user,
+        title: 'About | Model-Based Engineering Environment'
       });
     });
   }
@@ -168,14 +191,21 @@ class UIController {
     }
 
     // render the login page
-    return res.render('login', {
+/*     return res.render('login', {
       ui: M.config.server.ui,
       user: '',
       title: 'Login | Model-Based Engineering Environment',
       pluginFiles: pluginFiles,
       next: next,
       err: req.flash('loginError')
-    });
+    }); */
+	return utils.render(req,res,{
+      name: 'login',
+      user: '',
+      title: 'Login | Model-Based Engineering Environment',
+      next: next,
+      err: req.flash('loginError')
+	})
   }
 
 
