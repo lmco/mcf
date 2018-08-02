@@ -1,17 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- * COMMENTED OUT CODE IS IN PROCESS OF GETTING FIXED.                        *
- *****************************************************************************/
 /**
- * @module test/401_UserController
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/401-user-controller-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -19,32 +19,35 @@
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The user controller tests create, delete,
  * update, and find users. As well as test the controlls with invalid inputs.
+ *
+ * TODO - Fix module description
  */
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
-
-const filename = module.filename;
-const name = filename.split('/')[filename.split('/').length - 1];
+const mongoose = require('mongoose'); // TODO - remove need for mongoose
 
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.require('models/User');
 const UserController = M.require('controllers/UserController');
 const AuthController = M.require('lib/auth');
 
+
+/* --------------------( Test Data )-------------------- */
+
 let reqUser = null;
 let nonAUser = null;
 let badAUser = null;
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
 
-describe(name, () => {
-  /*-------------------------------------
-   * Before: run before all tests
-   *-------------------------------------*/
+/* --------------------( Main )-------------------- */
+
+
+describe(M.getModuleName(module.filename), () => {
+  /**
+   * Before: run before all tests.
+   * TODO - Describe what is being done
+   */
   before(function(done) {
     this.timeout(6000);
     const db = M.require('lib/db');
@@ -93,9 +96,10 @@ describe(name, () => {
     });
   });
 
-  /*-------------------------------------
-   * After: run after all tests
-   *-------------------------------------*/
+  /**
+   * After: run after all tests.
+   * TODO - Describe what is being done
+   */
   after(function(done) {
     this.timeout(5000);
     const username = 'everettross';
@@ -117,14 +121,12 @@ describe(name, () => {
     })
     .catch((error) => {
       chai.expect(error.description).to.equal(null);
-      mongoose.connection.close();
+      mongoose.connection.close(); // TODO - Remove the need for mongoose
       done();
     });
   });
 
-  /*----------
-   * Tests
-   *----------*/
+  /* Execute the tests */
   it('should create a user', createNewUser).timeout(3000);
   it('should create an admin user', createAUser).timeout(3000);
   it('should create a non admin user', createNonAUser).timeout(3000);
@@ -148,17 +150,16 @@ describe(name, () => {
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Tests )-------------------- */
 
 
 /**
- * Creates a user using the User Controller.
+ * @description Creates a user using the User Controller.
  * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
  * NOTE: As of right now the password key becomes a hash
  * need to eventually made password tests.
  */
+// TODO - clean up description
 function createNewUser(done) {
   const userData = {
     username: 'shuri',
@@ -178,12 +179,14 @@ function createNewUser(done) {
   });
 }
 
+
 /**
  * Creates a user using the User Controller.
  * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
  * NOTE: As of right now the password key becomes a hash
  * need to eventually made password tests.
  */
+// TODO - clean up description
 function createAUser(done) {
   const userData = {
     username: 'erikkillmonger',

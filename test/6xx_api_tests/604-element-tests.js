@@ -1,16 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module  test/604_ElementAPI
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/604-element-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -19,14 +20,13 @@
  * when making changes/ updates to the code. These API controller tests are
  * specifically for the Element API tests: posting, putting, getting, and deleting
  * elements.
+ * TODO - fix description
  */
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // TODO - remove need for mongoose
 const request = require('request');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ProjController = M.require('controllers/ProjectController');
 const OrgController = M.require('controllers/OrganizationController');
@@ -34,18 +34,24 @@ const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 const test = M.config.test;
 
+
+/* --------------------( Test Data )-------------------- */
+
 let org = null;
 let proj = null;
 let user = null;
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
 
-describe(name, () => {
+/* --------------------( Main )-------------------- */
+
+
+describe(M.getModuleName(module.filename), () => {
+  /**
+   * TODO - add description
+   */
   before(function(done) {
     this.timeout(5000);
-    const db = M.require('lib/db');
+    const db = M.require('lib/db'); // TODO - M.lib.db
     db.connect();
 
     // Creating a Requesting Admin
@@ -109,7 +115,9 @@ describe(name, () => {
     });
   });
 
-  // runs after all the tests are done
+  /**
+   * TODO - Add detailed description
+   */
   after(function(done) {
     this.timeout(5000);
     // Delete the org
@@ -131,6 +139,7 @@ describe(name, () => {
     });
   });
 
+  /* Execute the tests */
   it('should create an element', postElement);
   it('should get an element', getElement);
   it('should get all elements for a project', getElements);
@@ -138,9 +147,10 @@ describe(name, () => {
   it('should delete an element', deleteElement);
 });
 
-/**---------------------------------------------------
- *            Test Functions
-  ----------------------------------------------------*/
+
+/* --------------------( Tests )-------------------- */
+// TODO - add detailed descriptions to all tests and fix spacing
+
 
 /**
  * Makes a POST request to /api/orgs/:orgid/projects/:projectid/elements/:elementid

@@ -1,17 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- * NOTE: Commented out test waiting for a bug to be fixed                    *
- *****************************************************************************/
 /**
- * @module  test/402_OrganizationController
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/402-org-controller-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
@@ -21,13 +21,13 @@
  * when making changes/ updates to the code. The organization controller tests create,
  * update, find, soft delete, hard delte, and permissions of organzations. As well as
  * test the controlls with invalid inputs.
+ *
+ * TODO - Fix module description
  */
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
+const mongoose = require('mongoose'); // TODO - remove the need for Mongo
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ElemController = M.require('controllers/ElementController');
 const OrgController = M.require('controllers/OrganizationController');
@@ -37,22 +37,25 @@ const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
 
+/* --------------------( Test Data )-------------------- */
+
 let user = null;
 let newUser = null;
 let org = null;
 
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
+/* --------------------( Main )-------------------- */
 
-describe(name, () => {
+
+describe(M.getModuleName(module.filename), () => {
   // NOTE: Changed from arrow function to allow for use of
   // this so that a larger timeout could be set
+  // TODO -  use "TODO" not "NOTE"
 
-  /*-------------------------------------
+  /**
    * Before: run before all tests
-   *-------------------------------------*/
+   * TODO - describe what the before function is doing.
+   */
   before(function(done) {
     this.timeout(6000);
     const db = M.require('lib/db');
@@ -101,9 +104,10 @@ describe(name, () => {
     });
   });
 
-  /*-------------------------------------
-   * After: run after all tests
-   *-------------------------------------*/
+  /**
+   * After: run after all tests.
+   * TODO - describe what this function is doing.
+   */
   after((done) => {
     // Removing the organization created
     OrgController.removeOrg(user, 'gaurdians', { soft: false })
@@ -125,10 +129,7 @@ describe(name, () => {
     });
   });
 
-  /*----------
-   * Tests
-   *----------*/
-
+  /* Execute the tests */
   it('should create a new org', addNewOrg).timeout(2500);
   it('should create a second org', addSecondOrg).timeout(2500);
   it('should find an existing org', findExistingOrg).timeout(2500);
@@ -143,7 +144,7 @@ describe(name, () => {
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg).timeout(5000);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(5000);
   it('should add a user to an org', addUserRole).timeout(2500);
-  // it('should let the non-admin user write a project', projWritePerm).timeout(2500);
+  it('should let the non-admin user write a project', projWritePerm).timeout(2500);
   it('should reject user changing their permissions', rejectUserRole).timeout(2500);
   it('should get a users roles within an org', getUserRoles).timeout(2500);
   it('should get all members with permissions in an org', getMembers).timeout(2500);
@@ -156,9 +157,8 @@ describe(name, () => {
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Tests )-------------------- */
+
 
 /**
  * Tests creating an org
@@ -434,32 +434,35 @@ function addUserRole(done) {
   });
 }
 
-// /**
-//  * Test to see if the newUser can actually write to the
-//  * organization now that new permissions have been set.
-//  * This means they can create a project.
-//  * NOTE: Bug fix in JIRA, waiting for update.
-//  */
-//
-// function projWritePerm(done) {
-//   const projData = {
-//     id: 'jerryboree',
-//     name: 'Jerry Smith',
-//     org: {
-//       id: 'gaurdians'
-//     }
-//   };
-//   ProjController.createProject(newUser, projData)
-//   .then((proj) => {
-//     chai.expect(proj.id).to.equal('jerryboree');
-//     chai.expect(proj.name).to.equal('Jerry Smith');
-//     done();
-//   })
-//   .catch((error) => {
-//     chai.expect(error.description).to.equal(null);
-//     done();
-//   });
-// }
+/**
+ * Test to see if the newUser can actually write to the
+ * organization now that new permissions have been set.
+ * This means they can create a project.
+ */
+
+function projWritePerm(done) {
+  const projData = {
+    id: 'godslayer',
+    name: 'God Slayer',
+    org: {
+      id: 'gaurdians'
+    }
+  };
+  ProjController.createProject(newUser, projData)
+  .then((proj) => {
+    chai.expect(proj.id).to.equal('godslayer');
+    chai.expect(proj.name).to.equal('God Slayer');
+    return ElemController.createElement(newUser, { id: '0000', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Element' });
+  })
+  .then(() => {
+    ElemController.createElement(newUser, { id: '0001', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Element' });
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
 
 /**
  * Test is to set the permissions of the owner

@@ -51,7 +51,7 @@
                 </div>
             </li>
 
-			<% if (typeof pluginFiles !== 'undefined' && pluginFiles) { %>
+			<% if (typeof pluginNames !== 'undefined' && pluginNames) { %>
 			<li class="nav-item dropdown">
                 <a id="navbarDropdown"
                    class="nav-link dropdown-toggle"
@@ -64,7 +64,7 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
 
-					<% pluginFiles.forEach( (plugin) => { %>
+					<% pluginNames.forEach( (plugin) => { %>
 						<a class="dropdown-item" href=<%='plugins/' + plugin%>><%=plugin%></a>
 					<% }); %>
 

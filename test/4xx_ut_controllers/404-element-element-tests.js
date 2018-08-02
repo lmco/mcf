@@ -1,16 +1,17 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module test/404_ElementController
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test/404-element-controller-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -22,9 +23,7 @@
 
 const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
-const fname = module.filename;
-const name = fname.split('/')[fname.split('/').length - 1];
+const mongoose = require('mongoose'); // TODO - remove the need for mongoose
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const ElemController = M.require('controllers/ElementController');
 const OrgController = M.require('controllers/OrganizationController');
@@ -32,22 +31,25 @@ const ProjController = M.require('controllers/ProjectController');
 const AuthController = M.require('lib/auth');
 const User = M.require('models/User');
 
+
+/* --------------------( Test Data )-------------------- */
+
 let user = null;
 let org = null;
 let proj = null;
 
 
-/*------------------------------------
- *       Main
- *------------------------------------*/
+/* --------------------( Main )-------------------- */
 
-describe(name, () => {
+
+describe(M.getModuleName(module.filename), () => {
   /**
    * This function runs before all the tests in this test suite.
+   * TODO - What does this function do?
    */
   before(function(done) {
     this.timeout(10000);
-    const db = M.require('lib/db');
+    const db = M.require('lib/db'); // TODO - use M.lib.db?
     db.connect();
 
     // Creating a Requesting Admin
@@ -117,15 +119,20 @@ describe(name, () => {
     });
   });
 
+  /* Execute the tests */
   it('should create an element', createElement);
   it('should create a child element', createChildElement);
+  it('should fail creating an element with a '
+    + 'non-package parent', createElementNonPackageParent);
   it('should create a block element', createBlock);
   it('should create a relationship', createRelationship);
+  it('should fail creating a relationship between same elements', createRelationshipSameElement);
   it('should find all elements for a project', findElements);
   it('should find all elements of a specific type', findElementsSpecificType);
   it('should throw an error for tryng to find an invalid element type', findElementsBadType);
   it('should find an element', findElement);
   it('should update an element', updateElement);
+  it('should fail updating an elements parent field', updateElementParent);
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
   it('should soft delete all elements', softDeleteAllElements).timeout(3000);
@@ -133,9 +140,7 @@ describe(name, () => {
 });
 
 
-/*------------------------------------
- *       Test Functions
- *------------------------------------*/
+/* --------------------( Tests )-------------------- */
 
 
 /**
@@ -171,6 +176,7 @@ function createElement(done) {
   });
 }
 
+
 /**
  * Creates a child element
  */
@@ -199,6 +205,35 @@ function createChildElement(done) {
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+
+/**
+ * Create an element with non-package parent and fail
+ */
+function createElementNonPackageParent(done) {
+  const newElement = {
+    id: 'elem2',
+    name: 'Frigg wife of Odin',
+    project: {
+      id: proj.id,
+      org: {
+        id: org.id
+      }
+    },
+    type: 'Element',
+    parent: 'elem1'
+  };
+  ElemController.createElement(user, newElement)
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.status).to.equal(400);
+    chai.expect(error.description).to.equal('Parent element is not of type Package.');
     done();
   });
 }
@@ -235,6 +270,7 @@ function createBlock(done) {
   });
 }
 
+
 /**
  * Creates a relationship
  */
@@ -261,6 +297,35 @@ function createRelationship(done) {
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Creates a relationship between the same elements and should fail.
+ */
+function createRelationshipSameElement(done) {
+  const badRelationship = {
+    id: 'rel2',
+    name: 'Narcissistic Relationship',
+    project: {
+      id: proj.id,
+      org: {
+        id: org.id
+      }
+    },
+    type: 'Relationship',
+    source: 'elem1',
+    target: 'elem1'
+  };
+  ElemController.createElement(user, badRelationship)
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.status).to.equal(400);
+    chai.expect(error.description).to.equal('Target and source cannot be the same element');
     done();
   });
 }
@@ -347,6 +412,22 @@ function updateElement(done) {
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Update an elements parent and fail
+ */
+function updateElementParent(done) {
+  ElemController.updateElement(user, org.id, proj.id, 'elem1', { parent: 'elem0' })
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.status).to.equal(400);
+    chai.expect(error.description).to.equal('Users cannot update [parent] of Elements.');
     done();
   });
 }
