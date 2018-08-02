@@ -193,7 +193,7 @@ class OrganizationController {
             if (saveOrgErr) {
               return reject(new errors.CustomError('Save failed.'));
             }
-            resolve(newOrg);
+            return resolve(newOrg);
           });
         }
         else {
@@ -356,8 +356,24 @@ class OrganizationController {
 
       const orgID = M.lib.sani.html(organizationID);
 
-      // Delete the projects first while the org still exists
-      ProjController.removeProjects(user, orgID, options)
+      OrganizationController.findOrg(user, orgID, true)
+      .then((foundOrg) => new Promise((res, rej) => { // eslint-disable-line consistent-return
+        // Check if we want to hard delete the org and if so,
+        // ensure that the org has been soft deleted first.
+        if (!softDelete && !foundOrg.deleted) {
+          // Call the remove org function to soft delete it first
+          OrganizationController.removeOrg(user, orgID, { soft: true })
+          .then((retOrg) => res(retOrg))
+          .catch((softDeleteError) => rej(softDeleteError));
+        }
+        else {
+          // Either the org was already soft deleted or we only want it soft deleted.
+          return res();
+        }
+      }))
+      // Remove the project and elements first
+      .then(() => ProjController.removeProjects(user, orgID, options))
+      // Actually remove the org
       .then(() => OrganizationController.removeOrgHelper(user, orgID, softDelete))
       .then((retOrg) => resolve(retOrg))
       .catch((deleteErr) => { // eslint-disable-line consistent-return

@@ -97,6 +97,7 @@ describe(name, () => {
    * This function runs after all the tests are done
    */
   after(function(done) {
+    this.timeout(5000);
     // Remove the project and org together
     OrgController.removeOrg(user, org.id, { soft: false })
     .then(() => {
@@ -118,13 +119,17 @@ describe(name, () => {
 
   it('should create an element', createElement);
   it('should create a child element', createChildElement);
+  it('should fail creating an element with a '
+    + 'non-package parent', createElementNonPackageParent);
   it('should create a block element', createBlock);
   it('should create a relationship', createRelationship);
+  it('should fail creating a relationship between same elements', createRelationshipSameElement);
   it('should find all elements for a project', findElements);
   it('should find all elements of a specific type', findElementsSpecificType);
   it('should throw an error for tryng to find an invalid element type', findElementsBadType);
   it('should find an element', findElement);
   it('should update an element', updateElement);
+  it('should fail updating an elements parent field', updateElementParent);
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
   it('should soft delete all elements', softDeleteAllElements).timeout(3000);
@@ -203,6 +208,34 @@ function createChildElement(done) {
 }
 
 /**
+ * Create an element with non-package parent and fail
+ */
+function createElementNonPackageParent(done) {
+  const newElement = {
+    id: 'elem2',
+    name: 'Frigg wife of Odin',
+    project: {
+      id: proj.id,
+      org: {
+        id: org.id
+      }
+    },
+    type: 'Element',
+    parent: 'elem1'
+  };
+  ElemController.createElement(user, newElement)
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.status).to.equal(400);
+    chai.expect(error.description).to.equal('Parent element is not of type Package.');
+    done();
+  });
+}
+
+/**
  * Creates a block
  */
 function createBlock(done) {
@@ -260,6 +293,35 @@ function createRelationship(done) {
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Creates a relationship between the same elements and should fail.
+ */
+function createRelationshipSameElement(done) {
+  const badRelationship = {
+    id: 'rel2',
+    name: 'Narcissistic Relationship',
+    project: {
+      id: proj.id,
+      org: {
+        id: org.id
+      }
+    },
+    type: 'Relationship',
+    source: 'elem1',
+    target: 'elem1'
+  };
+  ElemController.createElement(user, badRelationship)
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.status).to.equal(400);
+    chai.expect(error.description).to.equal('Target and source cannot be the same element');
     done();
   });
 }
@@ -346,6 +408,22 @@ function updateElement(done) {
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Update an elements parent and fail
+ */
+function updateElementParent(done) {
+  ElemController.updateElement(user, org.id, proj.id, 'elem1', { parent: 'elem0' })
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.status).to.equal(400);
+    chai.expect(error.description).to.equal('Users cannot update [parent] of Elements.');
     done();
   });
 }
