@@ -76,6 +76,16 @@ pipeline {
             }
         }
 
+        /**
+         * Executes functional tests against the staged server.
+         */
+        stage('Wait for Server') {
+            steps {
+                // Wait to be sure server is up
+                sh 'sleep 30'
+            }
+        }
+
         stage('Run tests') {
             steps {
                 // Runs the basic test suite against the running stage container
