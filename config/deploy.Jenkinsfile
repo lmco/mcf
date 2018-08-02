@@ -76,7 +76,6 @@ pipeline {
      */
     post {
         always {
-            echo 'still no junit yet.....'
             junit 'test-results.xml'
 
 
