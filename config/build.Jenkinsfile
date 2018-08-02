@@ -95,8 +95,6 @@ pipeline {
                     // creating a junit xml file.... pls work
                     sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-4]"'
                 }
-                // checking to see if the .xml file was created
-                sh 'ls -l'
             }
         }
     }
