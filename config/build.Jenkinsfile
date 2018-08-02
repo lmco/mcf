@@ -75,6 +75,19 @@ pipeline {
                 sh 'NODE_ENV=stage node mbee docker --run'
             }
         }
+
+        stage('Run tests') {
+            steps {
+                // Runs the basic test suite against the running stage container
+                // The bail command will stop running tests after one test fails
+                timeout(time: 10, unit: 'MINUTES') {
+                    // creating a junit xml file.... pls work
+                    sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-6]"'
+                }
+                // checking to see if the .xml file was created
+                sh 'ls -l'
+            }
+        }
     }
 
     /**
@@ -86,6 +99,7 @@ pipeline {
         *This will always run after the pipeline is finished
         */
         always {
+            junit 'test-results.xml'
             // Gets the logs and prints them to the console
             //sh 'NODE_ENV=stage node mbee docker --get-logs'
             // Removes any test containers
