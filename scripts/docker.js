@@ -130,7 +130,7 @@ function docker(args) {
       'exec',
       '-d',
       M.config.docker.image.name,
-      "'node mbee.js run'",
+      'node mbee.js run',
       '-e', `NODE_ENV=${M.env}`
     ];
     const cmd = spawn('docker', execArgs, { stdio: 'inherit' });     // Run the build process
