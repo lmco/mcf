@@ -48,8 +48,6 @@ function build(_args) {
   const concat = require('gulp-concat');  // eslint-disable-line global-require
   const sass = require('gulp-sass');      // eslint-disable-line global-require
   const react = require('gulp-react');    // eslint-disable-line global-require
-  const clean = require('gulp-clean');    // eslint-disable-line global-require
-  const del = require('del');             // eslint-disable-line global-require
 
   // Allow the function to be called with no parameters
   // Set the default behavior to build all
@@ -90,9 +88,13 @@ function build(_args) {
     // Copy Popper JS
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
     .pipe(gulp.dest('build/public/js'));
-    // Copy JSDoc JS
-    gulp.src('./app/ui/js/**/*')
+    // Copy MBEE JS
+    gulp.src('./app/ui/js/**/*.js')
     .pipe(concat('mbee.js'))
+    .pipe(gulp.dest('build/public/js'));
+    // Copy MBEE JS
+    gulp.src('./app/ui/jsdoc-template/static/**/*.js')
+    .pipe(concat('jsdoc.js'))
     .pipe(gulp.dest('build/public/js'));
   }
 
@@ -123,18 +125,16 @@ function build(_args) {
   if (args.includes('--all') || args.includes('--jsdoc')) {
     console.log('  + Building jsdoc ...');
     const jsdoc = `${process.argv[0]} node_modules/jsdoc/jsdoc.js`;
-    //const tutorials = '-u doc';
-    //const templates = '-t node_modules/ub-jsdoc/'
-    //const files = ['app/**/*.js', 'README.md', 'test/**/*.js'];
-    let cmd = `${jsdoc} -c ./config/jsdoc.json`;
+    // const tutorials = '-u doc';
+    // const templates = '-t node_modules/ub-jsdoc/'
+    // const files = ['app/**/*.js', 'README.md', 'test/**/*.js'];
+    const cmd = `${jsdoc} -c ./config/jsdoc.json`;
 
     // Execute the JSDoc build command
-    let stdout = execSync(cmd);
+    execSync(cmd);
 
-    // Copy to build dir and clean src
-    gulp.src('./out/*')
-    .pipe(clean())
-    .pipe(gulp.dest('./build/doc'));
+    // Copy JSDoc static dependencies
+    // gulp.src('./out/*').pipe(gulp.dest('./build/doc'));
   }
 
   console.log('Build Complete.');
@@ -154,7 +154,7 @@ function install(_args) {
   // Safely allow install to be called with no args
   const args = (_args === undefined) ? [] : _args;
 
-  const cmd = spawnSync(buildTool, ['install'].concat(args), {stdio: 'inherit'});
+  const cmd = spawnSync(buildTool, ['install'].concat(args), { stdio: 'inherit' });
   if (cmd.stdout) {
     // console.log('  ++', cmd.stdout.toString());
   }
@@ -192,7 +192,7 @@ function configure() {
       // console.error(cmd.stderr.toString());
     }
     if (cmd.status !== 0) {
-      console.log('Warning: Yarn install failed. Using NPM.')
+      console.log('Warning: Yarn install failed. Using NPM.');
       return 'npm';
     }
   }

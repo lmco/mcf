@@ -28,8 +28,6 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const swaggerJSDoc = require('swagger-jsdoc');
 
-const pluginFiles = utils.getPluginNames();
-
 
 /**
  * UIController.js
@@ -47,11 +45,9 @@ class UIController {
    */
 
   static home(req, res) {
-    return res.render('home', {
-      ui: M.config.server.ui,
-      user: req.user.getPublicData(),
-      title: 'MBEE | Model-Based Engineering Environment',
-      pluginFiles: pluginFiles
+    return utils.render(req, res, {
+      name: 'home',
+      title: 'MBEE | Model-Based Engineering Environment'
     });
   }
 
@@ -63,14 +59,11 @@ class UIController {
    */
 
   static mbee(req, res) {
-    return res.render('mbee', {
-      ui: M.config.server.ui,
-      renderer: 'mbee-renderer',
-      user: req.user.getPublicData(),
+    return utils.render(req, res, {
+      name: 'mbee',
       org: M.lib.sani.sanitize(req.params.org),
       project: M.lib.sani.sanitize(req.params.project),
-      title: 'MBEE | Model-Based Engineering Environment',
-      pluginFiles: pluginFiles
+      title: 'MBEE | Model-Based Engineering Environment'
     });
   }
 
@@ -82,12 +75,9 @@ class UIController {
    */
 
   static admin(req, res) {
-    return res.render('home', {
-      ui: M.config.server.ui,
-      renderer: 'admin-renderer',
-      user: req.user.getPublicData(),
-      title: 'Admin | Model-Based Engineering Environment',
-      pluginFiles: pluginFiles
+    return utils.render(req, res, {
+      name: 'admin',
+      title: 'Admin | Model-Based Engineering Environment'
     });
   }
 
@@ -115,12 +105,11 @@ class UIController {
    * @description Renders the swagger doc.
    */
   static swaggerDoc(req, res) {
-    return res.render('swagger', {
+    return utils.render(req, res, {
+      name: 'swagger',
       swagger: UIController.swaggerSpec(),
-      ui: M.config.server.ui,
       user: null,
-      title: 'MBEE API Documentation',
-      pluginFiles: pluginFiles
+      title: 'MBEE API Documentation'
     });
   }
 
@@ -144,15 +133,31 @@ class UIController {
         req.user = user;
       }
       // Disables because database document is being directly used
-      return res.render('about', {
-        ui: M.config.server.ui,
+      return utils.render(req, res, {
+        name: 'about',
         user: req.user,
         info: {
           version: M.version4
         },
-        title: 'About | Model-Based Engineering Environment',
-        pluginFiles: pluginFiles
+        title: 'About | Model-Based Engineering Environment'
       });
+    });
+  }
+
+
+  /**
+   * Renders the documentation.
+   */
+  static renderFlightManual(req, res) {
+    if (!req.params.hasOwnProperty('page')) {
+      return res.redirect('flight-manual/index.html');
+    }
+    const page = sani.html(req.params.page);
+    return res.render('fm', {
+      ui: M.config.server.ui,
+      user: (req.user) ? req.user : '',
+      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
+      pluginFiles: pluginFiles
     });
   }
 
@@ -162,14 +167,14 @@ class UIController {
    */
   static renderJSDoc(req, res) {
     if (!req.params.hasOwnProperty('page')) {
-      return res.redirect('developers/index.html')
+      return res.redirect('developers/index.html');
     }
     const page = sani.html(req.params.page);
     return res.render('jsdoc', {
-        ui: M.config.server.ui,
-        user: (req.user) ? req.user : '',
-        content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
-        pluginFiles: pluginFiles
+      ui: M.config.server.ui,
+      user: (req.user) ? req.user : '',
+      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
+      pluginFiles: pluginFiles
     });
   }
 
@@ -188,11 +193,10 @@ class UIController {
     }
 
     // render the login page
-    return res.render('login', {
-      ui: M.config.server.ui,
+    return utils.render(req, res, {
+      name: 'login',
       user: '',
       title: 'Login | Model-Based Engineering Environment',
-      pluginFiles: pluginFiles,
       next: next,
       err: req.flash('loginError')
     });

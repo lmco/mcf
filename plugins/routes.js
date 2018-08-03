@@ -93,7 +93,6 @@ function loadPlugins() {
     }
     M.log.info(`Plugin ${namespace} installed.`);
   });
-
 }
 
 /**

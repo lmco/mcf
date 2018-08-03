@@ -1,16 +1,18 @@
 # Model-Based Engineering Environment
 
-The Model-Based Engineering Environment or MBEE is a platform that allows
-system models to be leveraged in a web-based user interface (UI) for increased
-access and ease of use across disciplines and skill sets within an organization.
-MBEE provides a web-based UI for people to interact with system model data
-without needing to be a systems modeler themselves.
+The Model-Based Engineering Environment or MBEE is modeling collaboration tool
+that integrates system models with multidisciplinary engineering data to enable
+the system model to be a single-source of truth project data. It makes model
+data more accessible via a web-based user interface (UI) for ease of use across
+disciplines and skill sets within an organization. MBEE provides a web-based UI
+for team members to interact with system model data without needing to be a
+systems modeler themselves.
 
 The goal of MBEE is to better communicate data across engineering organizations
 by implementing the core goals of model-based systems engineering through
 software tools. MBEE decreases ambiguity by making a single-source of truth for
 data more achievable through its RESTful API, extensible plugins, and
-distributed microservices.
+distributed services.
 
 ## Quick Start
 
@@ -27,11 +29,6 @@ Finally, you need to clone the MBEE code by running:
 `git clone https://gitlab.lmms.lmco.com/mbee/mbee.git `. And enter the directory
 with `cd mbee`.
 
-#### Lockheed Martin Specific Setup
-> This section is LOCKHEED MARTIN PROPRIETARY INFORMATION
-> Remove this section before public release.
-
-TODO - describe LMI setup
 
 ### Configuring MBEE
 MBEE stores all it's configuration information in the `config` directory. By
@@ -60,8 +57,8 @@ section of the config. For example:
 }
 ```
 
-For more information on configuration, see the
-[configuration section](#configuration) below.
+For more information please see the detailed comments in the provided
+[example.cfg](config/example.cfg).
 
 ### Building MBEE
 
@@ -85,26 +82,16 @@ than NPM with little to no additional effort.
 The `package.json` file defines scripts that NPM or Yarn can run. These mostly
 map to either files in the `scripts` directory or to the `mbee.js` script.
 
-The `mbee.js` script support a number of subcommands that typically map to the
+The `mbee.js` script supports a number of subcommands that typically map to the
 scripts found in the `scripts` directory. The subcommands are designed to align
 with the script commands in the `package.json` file.
 
 The intention behind this approach is to give you more than one way to
-accomplish the same thing, regardless of your preferred toolset without seeing
+accomplish the same thing, regardless of your preferred toolset, without seeing
 different behavior between approaches.
 
 In short, you can also build MBEE with `npm run build`, `yarn build`, or
 `node scripts/build.js`. They'll all do the same thing.
-
-#### Gulp-React Warnings
-One Dev-Dependencies, [gulp-react](https://www.npmjs.com/package/gulp-react), 
-is currently dependent on two deprecated modules known as 
-[gulp-util](https://www.npmjs.com/package/gulp-util) and 
-[react-tools](https://www.npmjs.com/package/react-tools). As of now, gulp-react 
-has yet to update their module to remove these dependencies and thus, warnings
-occur. These warnings have no impact on MBEE or production code as the module
-is only used to build the application. If gulp-react is updated in the future,
-the module will be updated.
 
 ### Running MBEE
 
@@ -119,12 +106,9 @@ default). To run with a different configuration (`production` for example), run
 
 ## Setting Up MongoDB
 
-TODO - Talk more about MongoDB set up.
-
-
-## Configuration
-
-TODO - Talk more about configuration
+Please see the [MongoDB Installation Tutorial](https://docs.mongodb.com/manual/installation/#tutorial-installation)
+and the [MongoDB Getting Started Guide](https://docs.mongodb.com/manual/tutorial/getting-started/)
+for up-to-date documentation on MongoDB.
 
 
 ## Test
@@ -137,20 +121,35 @@ the middle, the following naming conventions are used to number tests:
 All tests will begin with a three digit number. The first two digits denote its
 category
 
-- **00X:** Reserved for future use of initialization tasks. These should not be
-  used, but may be used later to perform pre-testing tasks.
-- **10X:** Tests of the test framework and basic infrastructure itself. These
+- **0xx:** Reserved for initialization tasks. These should be used for any
+  database initialization or other tasks to be done before all tests.
+- **1xx:** Tests of the test framework and basic infrastructure itself. These
   should be used to identify basic configuration issues such as problems
-  with test tools like Mocha, Chai, or similar.
-- **20X:** These should be used for unit tests of libraries and helpers.
-- **30X:** These should be used for unit tests of data layer models.
-- **40X:** The should be used for controller tests.
-- **50X:** These should be used to unit test views.
-- **60X:** These should be used for API tests.
-- **70X:** These should be used for UI tests.
-- **80X:** These should be used for integration and system level tests.
-- **90X:** Reserved for future use of wrap-up tasks to be used in conjunction
-  with *00* initialization tasks.
+  with test tools like Mocha or Chai or to identify simple errors such as
+  missing files or other errors.
+- **2xx:** These should be used for unit tests of libraries and helpers. It can
+  also be used for other basic tests that have few or no dependencies on other
+  modules.
+- **3xx:** These should be used for unit tests of data models.
+- **4xx:** The should be used for controller tests.
+- **5xx:** These should be used to unit test the API via mock requests.
+- **6xx:** These should be used for API tests of a running server.
+- **7xx:** These should be used for UI tests of a running server.
+- **8xx:** These should be used for integration and system level tests.
+- **9xx:** Reserved for wrap-up tasks to be used in conjunction
+  with *0xx* initialization tasks.
+
+All each test module begins with a three digit number. The full name of the test
+as it is seen by Mocha should correspond to the name of the file.
+
+> **How it works:** Mocha tests are a collection of `it` functions wrapped in
+> a `describe` function. The first parameter passed to the describe function is
+> the test name. We dynamically grab the file name of the current file and pass
+> that into the describe function. This ensures that the test name as seen by
+> Mocha corresponds to the file name containing the test.
+
+These test numbers are used both to uniquely identify the tests and to define
+their order of execution.
 
 ## Code Conventions and ESLint
 While this isn't strictly a testing topic, it is a good practice that relates to
@@ -165,10 +164,48 @@ We also recommend using EditorConfig. The `.editorconfig` file in the project's
 root directory will help enforce some of those style conventions.
 
 ### Running Tests
-TODO - Describe how to run tests
+
+Tests can be run by running the `node mbee test` command. Alternatively, this
+can be done by running `node scripts/test`, `yarn run test`, or `npm test`.
+Ultimately, this maps to a shell command that runs `mocha` and passes any
+command line arguments to Mocha.
+
+To run specific tests, you can pass in a regular expression via Mocha's `--grep`
+flag. This regex will run only tests starting with that name. For example:
+
+```
+node mbee test --grep "^[0-4]"   # Runs tests 000 - 499
+node mbee test --grep "^301"     # Runs test 301
+node mbee test --grep "^6[0-2]"  # Runs tests 600-629
+```
+
+Any other Mocha arguments are valid to pass to the test command.
 
 ### Writing Tests
-Tests are written in the form of a *test suite*.
+Tests are written in the form of a *test module* which contains a collection
+of tests. The test module must contain a single top-level `describe` function
+(see [Mocha's Documentation](https://mochajs.org/#getting-started) for more
+detail).
+
+Each test module name should begin with a three-digit number which uniquely
+identifies the test and determines the order in which it runs. That module
+should be stored in the appropriately numbered directory within the test
+directory.
+
+Here are some guidelines for writing unit tests:
+
+1. **Start with expected behavior.** Does the code do what it's supposed to do
+when given valid input? Include a few test cases. For example: for a *User*
+model. Make sure to add a user, delete a user, modify users, etc.
+2. **Hit corner cases.** If there is unusual or unexpected input, make sure to
+test it. For example: What if a user has a really long user name or email?
+3. **Test invalid input.** Make sure it properly handles invalid input as you
+would expect it to. For example: What if you try to add a user with an invalid
+name or email? Or, what if you try to add a user that already exists?
+4. **Leave the system in the state it started in.** Make sure the test suite
+leaves the system in the same state it started in. For example if you added a
+project, delete it. This allows unit tests to be written without knowledge of
+other test suites or the order of test execution.
 
 
 ## Documentation
@@ -179,17 +216,23 @@ The API routes, which are defined in [app/api_routes.js](app/api_routes.js),
 are documented via Swagger-JSDoc block comments. All API documentation and
 API definition occurs in that file.
 
+You can view the rendered Swagger documentation at the `/doc` route on a
+running MBEE server.
+
 ### Developer Documentation
 Developer documentation created using [JSDoc](http://usejsdoc.org/). When
 writing code, you are expected to document what you're doing to help other
-developers understand what you are doing (both internally and externally),
-support code reviews, and make it easier for people to understand and work with
-the project.
+developers and maintainers understand what you are doing, support code reviews,
+and make it easier for people to understand and work with the project.
 
-To generate the documentation, a Gulp build task was written. You can run it
-with `gulp jsdoc` or with Yarn by running `yarn run jsdoc-gen`. Additionally,
-a server was written to statically serve the documentation which can be found
-in the `bin directory`.
+The developer documentation is generated and rendered by the
+[MBEE developers plugin](https://gitlab.lmms.lmco.com/mbee/mbee-integrations/plugin-developers.git).
+Simple ensure this plugin is added to your configuration and you can view the
+rendered developer documentation within that plugin.
 
-Generate the documentation and serve it all at once with `yarn run jsdoc`.
+Alternatively, you can run
 
+```bash
+node node_modules/jsdoc/jsdoc.js \
+     -u doc app/**/*.js test/**/*.js README.md
+```

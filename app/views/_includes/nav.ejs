@@ -44,16 +44,14 @@
                     Documentation
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Getting Started</a>
-                    <a class="dropdown-item" href="#">Tutorials</a>
+                    <a class="dropdown-item" href="/doc/flight-manual">Flight Manual</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="/doc">API Documentation</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="/plugins/developers">Developer Documentation</a>
+                    <a class="dropdown-item" href="/doc/developers">JSDoc Documentation</a>
+                    <a class="dropdown-item" href="/doc/api">API Documentation</a>
                 </div>
             </li>
 
-			<% if (typeof pluginFiles !== 'undefined' && pluginFiles) { %>
+			<% if (typeof pluginNames !== 'undefined' && pluginNames) { %>
 			<li class="nav-item dropdown">
                 <a id="navbarDropdown"
                    class="nav-link dropdown-toggle"
@@ -66,7 +64,7 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
 
-					<% pluginFiles.forEach( (plugin) => { %>
+					<% pluginNames.forEach( (plugin) => { %>
 						<a class="dropdown-item" href=<%='plugins/' + plugin%>><%=plugin%></a>
 					<% }); %>
 

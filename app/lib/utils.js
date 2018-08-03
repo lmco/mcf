@@ -31,7 +31,7 @@ module.exports.timeConversions = {
   DAYS: 24 * 60 * 60 * 1000
 };
 
-module.exports.getPluginNames = function getPluginNames() {
+function getPluginNames() {
   if (M.config.server.plugins.enabled) {
     // Create a list of available plugins
     const pluginPath = path.join(__dirname, '..', '..', 'plugins');
@@ -45,6 +45,55 @@ module.exports.getPluginNames = function getPluginNames() {
     }
   }
   return pluginFiles;
+}
+
+
+/**
+ * @description Defines a one size fits all render function
+ *   with built-in defaults
+ *
+ * @param  {Object} req  Request object
+ * @param  {Object} res  Response object
+ * @param  {Object} params A list of parameters to render
+ */
+module.exports.render = function(req, res, params) {
+  // If you would like something to be rendered by default,
+  // replace the undefined return value with your desired
+  // default value
+  const pluginNames = getPluginNames();
+  return res.render(params.name, {
+    swagger: params.swagger !== undefined
+      ? params.swagger
+      : undefined,
+    ui: params.ui !== undefined
+      ? params.ui
+      : M.config.server.ui,
+    renderer: params.name === 'admin' || 'mbee'
+      ? `${params.name}-renderer`
+      : undefined,
+    user: params.user !== undefined
+      ? params.user
+      : req.user.getPublicData(),
+    info: params.info !== undefined
+      ? params.info
+      : undefined,
+    org: params.org !== undefined
+      ? params.org
+      : undefined,
+    project: params.project !== undefined
+      ? params.project
+      : undefined,
+    title: params.title !== undefined
+      ? params.title
+      : 'Model-Based Engineering Environment',
+    pluginNames: pluginNames,
+    next: params.next !== undefined
+      ? params.next
+      : undefined,
+    err: params.err !== undefined
+      ? params.err
+      : undefined
+  });
 };
 
 /**

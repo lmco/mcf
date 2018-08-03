@@ -51,7 +51,7 @@ function clean(_args) {
     del.sync([
       `${M.root}/build`,
       `${M.root}/logs/*`,
-      `${M.root}/out`,
+      `${M.root}/out`
     ]);
   }
 

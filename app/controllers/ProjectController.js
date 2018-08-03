@@ -83,10 +83,10 @@ class ProjectController {
 
         const popQuery = 'org';
 
-        let searchParams = { org: org._id, 'permissions.read': reqUser._id, deleted: false };
+        let searchParams = { org: org._id, deleted: false };
 
         if (softDeleted && reqUser.admin) {
-          searchParams = { org: org._id, 'permissions.read': reqUser._id };
+          searchParams = { org: org._id };
         }
 
         // Search for project
@@ -151,6 +151,16 @@ class ProjectController {
         if (projects.length === 0) {
           return resolve(projects);
         }
+
+        // Ensure user has permission to delete all projects
+        Object.keys(projects).forEach((project) => {
+          const admins = projects[project].permissions.admin.map(u => u._id.toString());
+          if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+            return reject(new errors.CustomError(
+              `User does not have permission to delete project ${projects[project].id}.`, 401
+            ));
+          }
+        });
 
         for (let i = 0; i < projects.length; i++) {
           // Must nest promise since it uses a return

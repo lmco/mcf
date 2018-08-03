@@ -226,15 +226,7 @@
       "enabled": true,
       // The array of plugins which will be imported and mounted into the MBEE application
       // Parameters: name, source, key
-      "plugins": [{
-        // The name of the plugin. This will set up the folder name for the plugin inside the
-        // plugins directory and will define its routes on the application.
-        "name": "developers",
-        // The source, either form a git repository or locally
-        "source": "git@gitlab.lmms.lmco.com:mbee/mbee-integrations/plugin-developers.git",
-        // If from a git repository, the key used for download via SSH.
-        "deployKey": "./certs/gitlab-plugins-developers.key"
-      }]
+      "plugins": []
     },
 
     // The UI routes can be enabled or disable based on the desired configuration.
@@ -262,7 +254,6 @@
     },
     "secret": "RANDOM"
   },
-
 
 // ************************* Test Parameters *************************
 //

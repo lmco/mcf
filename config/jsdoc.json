@@ -1,6 +1,6 @@
 {
   "opts": {
-      "template": "templates/default",
+      "template": "app/ui/jsdoc-template",
       "encoding": "utf8",
       "destination": "./build/doc",
       "recurse": true,
@@ -10,7 +10,7 @@
       "include": ["app", "README.md", "test"],
       "exclude": ["app/views", "app/ui"],
       "includePattern": "",
-      "excludePattern": ".+\\.(ejs|json)$"
+      "excludePattern": ".+\\.(ejs|json|config|cfg)$"
   },
   "templates": {
     "default": {

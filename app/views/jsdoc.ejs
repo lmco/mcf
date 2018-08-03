@@ -12,12 +12,18 @@
  *****************************************************************************/
  %>
 
-<link type="text/css" rel="stylesheet" href="/css/jsdoc.css">
-
 <%- content %>
 
-<!-- UB-JSDoc dependencies -->
-<script type="text/javascript" src="/js/jsdoc.js"></script>
-<!--<script type="text/javascript" src="scripts/partialNavigation.js"></script>-->
-<script>prettyPrint(); window.exports.gotoLine()</script>
+<%- contentFor('styles') %>
+<link type="text/css" rel="stylesheet" href="/css/jsdoc.css">
+
+<%- contentFor('scripts') %>
+<script type="text/javascript">
+  $(function() {
+    $('#fm-link').removeClass('active');
+    $('#mod-doc-link').addClass('active');
+    $( "#flight-manual-menu" ).css('display', 'none');
+    $( "#modules-menu" ).css('display', 'block');
+  });
+</script>
 
