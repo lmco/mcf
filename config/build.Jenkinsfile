@@ -92,6 +92,7 @@ pipeline {
             steps {
                 // Wait to be sure server is up
                 sh 'sleep 30'
+
             }
         }
 

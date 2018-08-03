@@ -128,10 +128,10 @@ function docker(args) {
     // Build the "docker run" command
     let execArgs = [
       'exec',
+      '-e', `NODE_ENV=${M.env}`,
       '-d',
       M.config.docker.image.name,
-      "sh -c 'ls -l'",
-      '-e', `NODE_ENV=${M.env}`
+      "/bin/bash -c 'ls -l'"
     ];
     const cmd = spawn('docker', execArgs, { stdio: 'inherit' });     // Run the build process
     cmd.on('data', (data) => {
