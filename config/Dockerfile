@@ -62,5 +62,5 @@ RUN apk upgrade && \
 
 # RUN node mbee.js install
 # Run server
-#CMD ["node", "mbee.js", "install"]
-CMD ["./entrypoint.sh"]
+CMD ["node", "mbee.js", "install"]
+#CMD ["./entrypoint.sh"]
