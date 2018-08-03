@@ -36,7 +36,8 @@ pipeline {
                 sh 'rm -rf *.log'
 
                 // checking to see if there are orphan volumes
-                sh 'docker volume ls'
+                // potentially need to delete all of the volumes
+                // sh 'docker volume ls'
             }
         }
 
@@ -54,7 +55,6 @@ pipeline {
 
                         // Verify build
                         sh 'ls -l'
-                        sh 'readlink -f dev.json'
                     }
                 }
                 stage('Build Docker MBEE'){
@@ -76,7 +76,9 @@ pipeline {
 
                 // Runs the production container in the background
                 sh "echo 'run'"
-                sh 'NODE_ENV=stage node mbee docker --run -v /mbee/config:/lm/mbee'
+                sh 'pwd'
+                sh 'ls config'
+                sh "NODE_ENV=stage node mbee docker --run -v '($pwd)'/config:/lm/mbee"
 
                 sh "echo 'running stuff mbee in docker'"
                 sh "node mbee docker --exec mbee-dev 'node mbee.js run'"
