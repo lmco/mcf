@@ -80,23 +80,23 @@ pipeline {
         /**
          * Executes functional tests against the staged server.
          */
-        //stage('Wait for Server') {
-        //    steps {
-        //        // Wait to be sure server is up
-        //        sh 'sleep 30'
-        //    }
-        //}
+        stage('Wait for Server') {
+            steps {
+                // Wait to be sure server is up
+                sh 'sleep 30'
+            }
+        }
 
-        //stage('Run tests') {
-        //    steps {
-        //        // Runs the basic test suite against the running stage container
-        //        // The bail command will stop running tests after one test fails
-        //        timeout(time: 10, unit: 'MINUTES') {
-        //            // creating a junit xml file.... pls work
-        //            sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-4]"'
-        //        }
-        //    }
-        //}
+        stage('Run tests') {
+            steps {
+                // Runs the basic test suite against the running stage container
+                // The bail command will stop running tests after one test fails
+                timeout(time: 10, unit: 'MINUTES') {
+                    // creating a junit xml file.... pls work
+                    sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-4]"'
+                }
+            }
+        }
     }
 
     /**
