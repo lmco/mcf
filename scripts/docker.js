@@ -121,6 +121,31 @@ function docker(args) {
     console.log('Docker Container Running in Background.');
   }
 
+  // Run the Docker container
+  else if (args.includes('--exec')) {
+    console.log('Executing command ...');
+
+    // Build the "docker run" command
+    let execArgs = [
+      'exec',
+      '-d',
+      '-it'
+    ];
+    const cmd = spawn('docker', execArgs, { stdio: 'inherit' });     // Run the build process
+    cmd.on('data', (data) => {
+      console.log(data.toString());
+    });
+    cmd.on('exit', (code) => {
+      if (code !== 0) {                                                // Fail if exit code != 0
+        console.log('Docker execution failed'); // eslint-disable-line no-console
+        process.exit(code);
+      }
+      else {                                                          // Log successful build
+        console.log('Docker Executed.');
+      }
+    });
+  }
+
   // Get the Docker logs
   else if (args.includes('--get-logs')) {
     console.log('Getting docker logs ...');

@@ -74,6 +74,9 @@ pipeline {
                 // Runs the production container in the background
                 sh "echo 'run'"
                 sh 'NODE_ENV=stage node mbee docker --run -v /config:/lm/mbee/config'
+
+                sh "echo 'running stuff mbee in docker'"
+                sh "node mbee docker --exec mbee-dev 'node mbee.js run'"
             }
         }
 
