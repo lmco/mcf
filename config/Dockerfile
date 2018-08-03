@@ -55,7 +55,7 @@ RUN apk upgrade && \
     apk add git && \
     apk add openssh-client && \
     chmod 400 certs/* && \
-    mkdir logs
+    mkdir logs && \
     chmod 700 entrypoint.sh && \
     cat entrypoint.sh && \
     ls -l
