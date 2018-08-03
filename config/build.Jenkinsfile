@@ -117,6 +117,7 @@ pipeline {
         *This will always run after the pipeline is finished
         */
         always {
+            // addings
             // not sure what happened but need to run again
             //junit 'test-results.xml'
             // Gets the logs and prints them to the console
