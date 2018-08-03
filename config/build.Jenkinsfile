@@ -116,6 +116,7 @@ pipeline {
         *This will always run after the pipeline is finished
         */
         always {
+            // not sure what happened but need to run again
             //junit 'test-results.xml'
             // Gets the logs and prints them to the console
             //sh 'NODE_ENV=stage node mbee docker --get-logs'
