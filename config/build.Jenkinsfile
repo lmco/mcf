@@ -81,7 +81,7 @@ pipeline {
                 sh "NODE_ENV=stage node mbee docker --run -v '($pwd)'/config:/lm/mbee"
 
                 sh "echo 'running stuff mbee in docker'"
-                sh "NODE_ENV=stage node mbee docker --exec mbee-dev 'node mbee.js run'"
+                sh "NODE_ENV=stage node mbee docker --exec"
             }
         }
 
