@@ -34,6 +34,9 @@ pipeline {
                 sh 'rm -rf public'
                 sh 'rm -rf logs/*'
                 sh 'rm -rf *.log'
+
+                // checking to see if there are orphan volumes
+                sh 'docker volume ls'
             }
         }
 
@@ -73,7 +76,7 @@ pipeline {
 
                 // Runs the production container in the background
                 sh "echo 'run'"
-                sh 'NODE_ENV=stage node mbee docker --run -v /mbee/config:/lm/mbee node'
+                sh 'NODE_ENV=stage node mbee docker --run -v /mbee/config:/lm/mbee'
 
                 sh "echo 'running stuff mbee in docker'"
                 sh "node mbee docker --exec mbee-dev 'node mbee.js run'"

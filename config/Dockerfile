@@ -26,9 +26,8 @@ RUN mkdir -p app \
     && mkdir -p config \
     && mkdir -p plugins \
     && mkdir -p public \
-    && mkdir -p scripts
-
-VOLUME ./config
+    && mkdir -p scripts \
+    && mkdir -p config
 
 #COPY ./docker/entrypoint.sh entrypoint.sh
 COPY ./app  app
