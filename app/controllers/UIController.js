@@ -153,11 +153,11 @@ class UIController {
       return res.redirect('flight-manual/index.html');
     }
     const page = sani.html(req.params.page);
-    return res.render('fm', {
-      ui: M.config.server.ui,
+    // renter the page
+    return utils.render(req, res, {
+      name: 'fm',
       user: (req.user) ? req.user : '',
-      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
-      pluginFiles: pluginFiles
+      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8')
     });
   }
 
@@ -170,11 +170,11 @@ class UIController {
       return res.redirect('developers/index.html');
     }
     const page = sani.html(req.params.page);
-    return res.render('jsdoc', {
-      ui: M.config.server.ui,
+    // renter the page
+    return utils.render(req, res, {
+      name: 'jsdoc',
       user: (req.user) ? req.user : '',
-      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8'),
-      pluginFiles: pluginFiles
+      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8')
     });
   }
 
