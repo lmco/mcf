@@ -30,7 +30,7 @@ RUN mkdir -p app \
 
 COPY ./app  app
 COPY ./certs certs
-COPY ./config/*.json config/
+COPY ./config/*.cfg config/
 COPY ./plugins plugins
 COPY ./build build
 COPY ./scripts scripts
