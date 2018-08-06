@@ -90,6 +90,20 @@ const UserSchema = new mongoose.Schema({
   },
 
   /**
+   * @memberOf  User
+   * @property  preferredName
+   * @type  {String}
+   *
+   * @description  The `preferredName` property is the user's preferred name
+   * which may differ from their first name.
+   */
+  preferredName: {
+    type: String,
+    default: '',
+    maxlength: [36, 'Too many characters in first name']
+  },
+
+  /**
      * @memberOf  User
      * @property  lname
      * @type  {String}
@@ -216,6 +230,18 @@ const UserSchema = new mongoose.Schema({
       }
       return v;
     }
+  },
+
+  /**
+   * @memberOf  User
+   * @property  custom
+   * @type  {Schema.Types.Mixed}
+   *
+   * @description The user's custom tags. This contains arbitrary key-value pairs of strings
+   * used to represent additional model data.
+   */
+  custom: {
+    type: mongoose.Schema.Types.Mixed
   }
 
 });
@@ -342,6 +368,7 @@ UserSchema.methods.isUpdateAllowed = function(field) {
   const allowedMap = {
     username: false,
     fname: true,
+    preferredName: true,
     lname: true,
     email: true,
     name: false,
@@ -350,7 +377,8 @@ UserSchema.methods.isUpdateAllowed = function(field) {
     deleted: false,
     updatedOn: false,
     isLDAPUser: false,
-    admin: false
+    admin: false,
+    custom: true
   };
   return allowedMap[field];
 };
@@ -371,6 +399,7 @@ UserSchema.methods.getPublicData = function() {
     username: this.username,
     name: this.name,
     fname: this.fname,
+    preferredName: this.preferredName,
     lname: this.lname,
     email: this.email,
     createdOn: this.createdOn,
