@@ -25,6 +25,7 @@
 
 const path = require('path');
 const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
+const M = mbee;
 const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
 const { execSync } = require('child_process');
@@ -131,7 +132,8 @@ const formatter = printf((msg) => {
 
 
 // Creates the log directory if it doesn't already exist
-const cmd = `mkdir -p ${mbee.config.log.dir}`;
+const logDir = (M.config.log.dir === undefined) ? 'logs' : M.config.log.dir;
+const cmd = `mkdir -p ${logDir}`;
 execSync(cmd);
 
 /**
