@@ -198,7 +198,7 @@ function whoamIapi(done) {
     headers: getHeaders()
   },
   (err, response, body) => {
-    // TODO 
+    // TODO
     // chai.expect(body).to.include(u);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(err).to.equal(null);

@@ -32,9 +32,12 @@ RUN mkdir -p app \
 COPY ./docker/entrypoint.sh entrypoint.sh
 COPY ./app  app
 COPY ./certs certs
+<<<<<<< HEAD
+=======
+COPY ./config/*.json config/
+>>>>>>> master
 COPY ./plugins plugins
-COPY ./doc doc
-COPY ./public public
+COPY ./build build
 COPY ./scripts scripts
 COPY ./package.json package.json
 COPY ./mbee.js mbee.js
@@ -55,10 +58,16 @@ RUN apk upgrade && \
     apk add git && \
     apk add openssh-client && \
     chmod 400 certs/* && \
+<<<<<<< HEAD
     mkdir logs && \
     chmod 700 entrypoint.sh && \
     cat entrypoint.sh && \
     ls -l
+=======
+    mkdir logs
+RUN node mbee install
+
+>>>>>>> master
 
 # RUN node mbee.js install
 # Run server

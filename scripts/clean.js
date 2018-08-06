@@ -18,7 +18,7 @@
  */
 
 const path = require('path');
-const mbee = require(path.join(__dirname, '..', 'mbee.js'));
+const M = require(path.join(__dirname, '..', 'mbee.js'));
 
 if (module.parent == null) {
   clean(process.argv.slice(2));
@@ -47,22 +47,17 @@ function clean(_args) {
   const args = (_args === undefined) ? [] : _args;
 
   // Clean logs
-  if (args.length === 0 || args.includes('--all') || args.includes('--logs')) {
-    del.sync([`${mbee.root}/*.log`, `${mbee.root}/logs/*.log`]);
+  if (args.length === 0 || args.includes('--all')) {
+    del.sync([
+      `${M.root}/build`,
+      `${M.root}/logs/*`,
+      `${M.root}/out`
+    ]);
   }
 
-  // Clean docs
-  if (args.length === 0 || args.includes('--all') || args.includes('--docs')) {
-    del.sync([`${mbee.root}/docs`]);
-  }
-
-  // Clean public
-  if (args.length === 0 || args.includes('--all') || args.includes('--public')) {
-    del.sync([`${mbee.root}/public`]);
-  }
 
   // Clean node_modules
   if (args.includes('--all') || args.includes('--node-modules')) {
-    del.sync([`${mbee.root}/node_modules`]);
+    del.sync([`${M.root}/node_modules`]);
   }
 }

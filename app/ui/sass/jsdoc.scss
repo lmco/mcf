@@ -1,0 +1,23 @@
+
+#doc-tabs {
+  font-size: 18px;
+}
+
+#doc-tabs > a {
+  display: inline;
+  padding: 0;
+  color: #656565;
+}
+
+#doc-tabs > a.active {
+  border-bottom: 2px solid #656565;
+}
+
+#doc-tabs > a:hover {
+  color: #9a9a9a;
+  text-decoration: none;
+}
+
+#jsdoc-nav > ul {
+  display: none;
+}

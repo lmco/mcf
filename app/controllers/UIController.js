@@ -19,9 +19,12 @@
  * handle other object behaviors.
  */
 
+const fs = require('fs');
 const path = require('path');
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
 const User = M.require('models/User');
+const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const swaggerJSDoc = require('swagger-jsdoc');
 
@@ -138,6 +141,40 @@ class UIController {
         },
         title: 'About | Model-Based Engineering Environment'
       });
+    });
+  }
+
+
+  /**
+   * Renders the documentation.
+   */
+  static renderFlightManual(req, res) {
+    if (!req.params.hasOwnProperty('page')) {
+      return res.redirect('flight-manual/index.html');
+    }
+    const page = sani.html(req.params.page);
+    // renter the page
+    return utils.render(req, res, {
+      name: 'fm',
+      user: (req.user) ? req.user : '',
+      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8')
+    });
+  }
+
+
+  /**
+   * Renders the developer documentation.
+   */
+  static renderJSDoc(req, res) {
+    if (!req.params.hasOwnProperty('page')) {
+      return res.redirect('developers/index.html');
+    }
+    const page = sani.html(req.params.page);
+    // renter the page
+    return utils.render(req, res, {
+      name: 'jsdoc',
+      user: (req.user) ? req.user : '',
+      content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8')
     });
   }
 
