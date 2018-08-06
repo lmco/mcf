@@ -58,7 +58,6 @@ pipeline {
 
                         // Verify build
                         sh 'ls -l'
-                        sh 'ls -l app/'
                     }
                 }
                 stage('Build Docker MBEE'){
@@ -90,8 +89,7 @@ pipeline {
         stage('Wait for Server') {
             steps {
                 // Wait to be sure server is up
-                sh 'sleep 50'
-                sh 'NODE_ENV=stage node mbee docker --get-logs'
+                sh 'sleep 20'
 
             }
         }
