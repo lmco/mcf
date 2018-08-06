@@ -53,7 +53,8 @@ RUN apk upgrade && \
     apk add openssh-client && \
     chmod 400 certs/* && \
     mkdir logs
-RUN npm --version
+# Updating npm to later version
+RUN npm install npm@6.1.0
 # Configuring yarn
 RUN npm install -g yarn
 RUN yarn install
