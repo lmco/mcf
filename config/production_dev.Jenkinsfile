@@ -42,6 +42,7 @@ pipeline {
         stage('Build') {
             steps {
                 // Build
+                sh 'yarn install --dev'
                 sh 'NODE_ENV=production node mbee build'
                 sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
