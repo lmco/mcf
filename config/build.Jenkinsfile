@@ -115,11 +115,10 @@ pipeline {
         *This will always run after the pipeline is finished
         */
         always {
-            // addings
-            // not sure what happened but need to run again
-            //junit 'test-results.xml'
+            // running test analysis
+            junit 'test-results.xml'
             // Gets the logs and prints them to the console
-            //sh 'NODE_ENV=stage node mbee docker --get-logs'
+            sh 'NODE_ENV=stage node mbee docker --get-logs'
             // Removes any test containers
             sh 'NODE_ENV=stage node mbee docker --clean'
         }
