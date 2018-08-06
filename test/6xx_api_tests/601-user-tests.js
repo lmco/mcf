@@ -80,12 +80,15 @@ describe(M.getModuleName(module.filename), () => {
    * TODO - Add detailed description
    */
   after(function(done) {
-    User.findOneAndRemove({
+    User.findOne({
       username: M.config.test.username
-    }, (err) => {
+    }, (err, foundUser) => {
       chai.expect(err).to.equal(null);
-      mongoose.connection.close();
-      done();
+      foundUser.remove((err2) => {
+        chai.expect(err2).to.equal(null);
+        mongoose.connection.close();
+        done();
+      });
     });
   });
 

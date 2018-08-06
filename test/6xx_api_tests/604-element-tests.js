@@ -124,12 +124,15 @@ describe(M.getModuleName(module.filename), () => {
     OrgController.removeOrg(user, 'nineteenforty', { soft: false })
     .then((retOrg) => {
       chai.expect(retOrg).to.not.equal(null);
-      User.findOneAndRemove({
+      User.findOne({
         username: M.config.test.username
-      }, (err) => {
+      }, (err, foundUser) => {
         chai.expect(err).to.equal(null);
-        mongoose.connection.close();
-        done();
+        foundUser.remove((err2) => {
+          chai.expect(err2).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       });
     })
     .catch((error) => {

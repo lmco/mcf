@@ -114,12 +114,15 @@ describe(M.getModuleName(module.filename), () => {
     .then(() => UserController.removeUser(user, newUser.username))
     .then((delUser2) => {
       chai.expect(delUser2).to.equal('groot');
-      User.findOneAndRemove({
+      User.findOne({
         username: M.config.test.username
-      }, (err) => {
+      }, (err, foundUser) => {
         chai.expect(err).to.equal(null);
-        mongoose.connection.close();
-        done();
+        foundUser.remove((err2) => {
+          chai.expect(err2).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       });
     })
     .catch((error) => {

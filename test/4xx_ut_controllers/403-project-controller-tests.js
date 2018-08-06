@@ -126,12 +126,15 @@ describe(M.getModuleName(module.filename), () => {
     })
     .then((delUser2) => {
       chai.expect(delUser2).to.equal('pepperpotts');
-      User.findOneAndRemove({
+      User.findOne({
         username: M.config.test.username
-      }, (err) => {
+      }, (err, user) => {
         chai.expect(err).to.equal(null);
-        mongoose.connection.close();
-        done();
+        user.remove((err2) => {
+          chai.expect(err2).to.equal(null);
+          mongoose.connection.close();
+          done();
+        })
       });
     })
     .catch((error) => {

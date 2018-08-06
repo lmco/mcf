@@ -372,10 +372,31 @@ UserSchema.pre('save', function(next) {
  * Run our pre-defined setters before delete.
  */
 UserSchema.pre('remove', function(next) {
-  console.log("Entered");
   // Remove the user from them default org
   // Using org model since we don't have a requesting user.
   Organization.findOne({ name: 'default' })
+  .exec((err, org) => {
+    org.permissions.read.splice(org.permissions.read.indexOf(this._id.toString()), 1);
+    org.save((saveErr) => {
+      if (saveErr) {
+        // If error occurs, return it
+        throw new errors.CustomError('Failed to remove user from the default org.');
+      }
+      next();
+    });
+  });
+});
+
+/**
+ * @memberOf  User
+ * Run our pre-defined setters before delete.
+ */
+UserSchema.post('findOneAndRemove', function(next) {
+  console.log("Entered");
+  console.log(this);
+  // Remove the user from them default org
+  // Using org model since we don't have a requesting user.
+  Organization.findOne({name: 'default'})
   .exec((err, org) => {
     org.permissions.read.splice(org.permissions.read.indexOf(this._id.toString()), 1);
     org.save((saveErr) => {
