@@ -26,7 +26,7 @@ RUN mkdir -p app \
     && mkdir -p config \
     && mkdir -p plugins \
     && mkdir -p public \
-    && mkdir -p scripts \
+    && mkdir -p scripts
 
 COPY ./app app
 COPY ./certs certs
