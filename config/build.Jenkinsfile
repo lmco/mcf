@@ -63,7 +63,7 @@ pipeline {
                 stage('Build Docker MBEE'){
                     steps {
                         sh "echo 'building'"
-                        sh "NODE_ENV=stage node mbee docker --build -v '${M.root}/config:/lm/mbee/config'"
+                        sh "NODE_ENV=stage node mbee docker --build -v '~/config:/lm/mbee/config'"
                     }
                 }
             }
