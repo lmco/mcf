@@ -97,9 +97,8 @@ function docker(args) {
       '-d',
       '-it',
       '--restart=always',
-      '-e', `NODE_ENV=${M.env}`,
-      '-v', `${M.root}/config:/lm/mbee/config`
-    ];
+      '-e', `NODE_ENV=${M.env}`
+    ].concat(args);
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
       rargs = rargs.concat(['-p', `${M.config.docker.http.port}:${M.config.server.http.port}`]);
     }
