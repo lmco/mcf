@@ -219,10 +219,11 @@ const UserSchema = new mongoose.Schema({
   },
 
   /**
-   * @memberOf Element
-   * @property {Schema.Types.Mixed} custom
+   * @memberOf  User
+   * @property  custom
+   * @type  {Schema.Types.Mixed}
    *
-   * @description The element's custom tags. This contains arbitrary key-value pairs of strings
+   * @description The user's custom tags. This contains arbitrary key-value pairs of strings
    * used to represent additional model data.
    */
   custom: {
