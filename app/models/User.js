@@ -337,7 +337,8 @@ UserSchema.pre('save', function(next) {
     // Using org model since we don't have a requesting user.
     Organization.findOne({ name: 'default' })
     .exec((err, org) => {
-      if (!org.permissions.read.includes(this._id.toString())) {
+      const members = org.permissions.read.map(u => u._id.toString());
+      if (!members.includes(this._id.toString())) {
         org.permissions.read.push(this._id.toString());
       }
       org.save((saveErr) => {
