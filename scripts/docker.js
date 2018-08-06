@@ -44,7 +44,7 @@ else {
  * is run.
  */
 
-function docker(args) {
+function docker(args, _flags) {
   // Removes the previous docker build.
   if (args.includes('--clean')) {
     let cmd = null;
@@ -98,7 +98,7 @@ function docker(args) {
       '-it',
       '--restart=always',
       '-e', `NODE_ENV=${M.env}`
-    ].concat(args);
+    ].concat(_flags);
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
       rargs = rargs.concat(['-p', `${M.config.docker.http.port}:${M.config.server.http.port}`]);
     }
