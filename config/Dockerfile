@@ -53,8 +53,7 @@ RUN apk upgrade && \
     apk add openssh-client && \
     chmod 400 certs/* && \
     mkdir logs
-RUN yarn install --dev
-RUN cat yarn-error.log
+RUN yarn install
 
 #Install the configuration and run the server
-CMD ["sh", "-c", "node mbee install && node mbee start"]
+CMD ["node", "mbee.js", "start"]
