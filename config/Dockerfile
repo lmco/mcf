@@ -54,7 +54,7 @@ RUN apk upgrade && \
     chmod 400 certs/* && \
     mkdir logs
 # Updating npm to later version
-RUN npm install npm@6.1.0
+RUN npm install npm@latest -g
 # Configuring yarn
 RUN npm install -g yarn
 RUN yarn install
