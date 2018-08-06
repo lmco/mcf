@@ -72,7 +72,7 @@ pipeline {
          * First, stops and removes current container.
          * Then runs the newly built docker container.
          */
-        /*stage('Run') {
+        stage('Run') {
             steps {
                 // Removes any existing production running containers
                 sh 'NODE_ENV=stage node mbee docker --clean'
@@ -102,7 +102,7 @@ pipeline {
                     sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-6]"'
                 }
             }
-        }*/
+        }
     }
 
     /**
