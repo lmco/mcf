@@ -487,7 +487,7 @@ function noFindUser(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err.description).to.equal('Cannot find user');
+    chai.expect(err.description).to.equal('Cannot find user.');
     done();
   });
 }
@@ -506,7 +506,7 @@ function fakeDelete(done) {
     done();
   })
   .catch((err) => {
-    chai.expect(err.description).to.equal('User does not exist');
+    chai.expect(err.description).to.equal('Cannot find user.');
     done();
   });
 }

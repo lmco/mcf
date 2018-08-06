@@ -114,7 +114,7 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests.
    * TODO - add description
    */
-  after((done) => {
+  after(function(done) {
     this.timeout(5000);
     // Removing the organization created
     OrgController.removeOrg(allSeeingUser, 'starkhq', { soft: false })
