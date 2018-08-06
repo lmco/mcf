@@ -89,7 +89,7 @@ pipeline {
         stage('Wait for Server') {
             steps {
                 // Wait to be sure server is up
-                sh 'sleep 60'
+                sh 'sleep 200'
 
             }
         }
