@@ -54,7 +54,10 @@ RUN apk upgrade && \
     chmod 400 certs/* && \
     mkdir logs
 # Updating npm to later version
-RUN npm install
+RUN yarn config set "http-proxy"  "http://proxy-lmi.global.lmco.com" && \
+    yarn config set "https-proxy" "http://proxy-lmi.global.lmco.com" && \
+    yarn config set "cafile" "./certs/LockheedMartinRootCertificationAuthority.pem" && \
+    yarn config set "strict-ssl" "false"
 # Configuring yarn
 RUN yarn install
 
