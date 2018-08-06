@@ -221,7 +221,22 @@ class UserController {
           if (!user.isUpdateAllowed(props[i])) {
             return reject(new errors.CustomError('Update not allowed', 401));
           }
-          user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
+
+          // Updates each individual tag that was provided.
+          if (User.schema.obj[props[i]].type.schemaName === 'Mixed') {
+            // eslint-disable-next-line no-loop-func
+            Object.keys(newUserData[props[i]]).forEach((key) => {
+              user.custom[key] = M.lib.sani.sanitize(newUserData[props[i]][key]);
+            });
+
+            // Special thing for mixed fields in Mongoose
+            // http://mongoosejs.com/docs/schematypes.html#mixed
+            user.markModified(props[i]);
+          }
+          else {
+            // sanitize field
+            user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
+          }
         }
 
         // Save the user

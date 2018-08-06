@@ -216,6 +216,17 @@ const UserSchema = new mongoose.Schema({
       }
       return v;
     }
+  },
+
+  /**
+   * @memberOf Element
+   * @property {Schema.Types.Mixed} custom
+   *
+   * @description The element's custom tags. This contains arbitrary key-value pairs of strings
+   * used to represent additional model data.
+   */
+  custom: {
+    type: mongoose.Schema.Types.Mixed
   }
 
 });
@@ -350,7 +361,8 @@ UserSchema.methods.isUpdateAllowed = function(field) {
     deleted: false,
     updatedOn: false,
     isLDAPUser: false,
-    admin: false
+    admin: false,
+    custom: true
   };
   return allowedMap[field];
 };

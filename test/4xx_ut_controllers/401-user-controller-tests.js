@@ -136,6 +136,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject username with invalid input', invalidUser).timeout(3000);
   it('should reject username already in database', copyCatUser).timeout(3000);
   it('should update the users last name', updateLName).timeout(3000);
+  it('should update the users custom tags', updateCustom).timeout(3000);
   it('should reject updating the users username', updateUName).timeout(3000);
   it('should reject updating a user that does not exist', updateNoUser).timeout(3000);
   it('should reject update from non A user', updateAttempt).timeout(3000);
@@ -165,13 +166,18 @@ function createNewUser(done) {
     username: 'shuri',
     password: 'iamaprincess',
     fname: 'Shuri',
-    lname: 'Panther'
+    lname: 'Panther',
+    custom: {
+      location: 'Wakanda'
+    }
   };
   UserController.createUser(reqUser, userData)
-  .then((newUser) => {
-    chai.expect(newUser.username).to.equal('shuri');
-    chai.expect(newUser.fname).to.equal('Shuri');
-    chai.expect(newUser.lname).to.equal('Panther');
+  .then((newUser) => UserController.findUser(newUser.username))
+  .then((foundUser) => {
+    chai.expect(foundUser.username).to.equal('shuri');
+    chai.expect(foundUser.fname).to.equal('Shuri');
+    chai.expect(foundUser.lname).to.equal('Panther');
+    chai.expect(foundUser.custom.location).to.equal('Wakanda');
     done();
   })
   .catch((error) => {
@@ -378,6 +384,30 @@ function updateLName(done) {
     chai.expect(updatedUser.username).to.equal('blackpanther');
     chai.expect(updatedUser.fname).to.equal('Okoye');
     chai.expect(updatedUser.lname).to.equal('Panther');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Tests to update custom field on the user.
+ */
+function updateCustom(done) {
+  const username = 'shuri';
+  const userData = {
+    custom: {
+      location: 'Oakland',
+      gender: 'Female'
+    }
+  };
+  UserController.updateUser(reqUser, username, userData)
+  .then((updatedUser) => UserController.findUser(updatedUser.username))
+  .then((retUser) => {
+    chai.expect(retUser.custom.location).to.equal('Oakland');
+    chai.expect(retUser.custom.gender).to.equal('Female');
     done();
   })
   .catch((error) => {
