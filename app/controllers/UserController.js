@@ -99,7 +99,7 @@ class UserController {
 
         // Check if user exists
         if (user === null) {
-          return reject(new errors.CustomError('Cannot find user', 404));
+          return reject(new errors.CustomError('Cannot find user.', 404));
         }
 
         // Otherwise return 200 and the user's public JSON
@@ -266,15 +266,22 @@ class UserController {
         return reject(new errors.CustomError('User cannot delete themselves.', 401));
       }
 
-      // Do the deletion
-      User.findOneAndRemove({ username: M.lib.sani.sanitize(usernameToDelete) })
-      .populate()
-      .exec((err) => {
-        if (err) {
-          return reject(new errors.CustomError('Find and delete failed.'));
-        }
-        return resolve(usernameToDelete);
-      });
+      const username = M.lib.sani.sanitize(usernameToDelete);
+
+      // Find the user first to ensure their existence
+      UserController.findUser(username)
+      .then(() => {
+        // Do the deletion
+        User.findOneAndRemove({ username: username })
+        .populate()
+        .exec((err) => {
+          if (err) {
+            return reject(new errors.CustomError('Find and delete failed.'));
+          }
+          return resolve(usernameToDelete);
+        });
+      })
+      .catch((error) => reject(error));
     }));
   }
 
