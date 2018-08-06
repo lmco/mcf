@@ -41,7 +41,6 @@ pipeline {
         stage('Build') {
             steps {
                 // Build
-                sh 'NODE_ENV=test node mbee install --dev'
                 sh 'NODE_ENV=test node mbee build'
 
                 // Verify build
@@ -95,17 +94,11 @@ pipeline {
             sh 'echo "Build and Deploy Complete"'
 
             // Gets the logs and prints them to the console
-<<<<<<< HEAD
-            //sh 'NODE_ENV=production node mbee docker --get-logs'
-            // Removes any test containers
-            sh 'NODE_ENV=production node mbee docker --clean'
-=======
             //sh 'NODE_ENV=test node mbee docker --get-logs'
             // Removes any test containers
             sh 'NODE_ENV=test node mbee docker --clean'
 
             junit 'test-results.xml'
->>>>>>> master
         }
 
        /**
