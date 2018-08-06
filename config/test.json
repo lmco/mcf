@@ -208,7 +208,7 @@
       "userAPI": {
         "get": true,
         "post": true,
-        "put": true,
+        "patch": true,
         "delete": true
       }
     },
