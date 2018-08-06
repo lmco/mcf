@@ -30,11 +30,9 @@ RUN mkdir -p app \
 
 COPY ./app  app
 COPY ./certs certs
-COPY ./config/production.json config/
 COPY ./config/*.json config/
 COPY ./plugins plugins
-COPY ./doc doc
-COPY ./public public
+COPY ./build build
 COPY ./scripts scripts
 COPY ./package.json package.json
 COPY ./mbee.js mbee.js
@@ -56,7 +54,7 @@ RUN apk upgrade && \
     apk add openssh-client && \
     chmod 400 certs/* && \
     mkdir logs
-RUN node mbee.js install
+RUN node mbee install
 
 
 # Run server
