@@ -54,5 +54,6 @@ RUN apk upgrade && \
     chmod 400 certs/* && \
     mkdir logs
 
+
 #Install the configuration and run the server
 CMD ["sh", "-c", "node mbee install && node mbee start"]
