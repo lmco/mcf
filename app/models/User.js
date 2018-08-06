@@ -90,6 +90,20 @@ const UserSchema = new mongoose.Schema({
   },
 
   /**
+   * @memberOf  User
+   * @property  preferredName
+   * @type  {String}
+   *
+   * @description  The `preferredName` property is the user's preferred name
+   * which may differ from their first name.
+   */
+  preferredName: {
+    type: String,
+    default: '',
+    maxlength: [36, 'Too many characters in first name']
+  },
+
+  /**
      * @memberOf  User
      * @property  lname
      * @type  {String}
