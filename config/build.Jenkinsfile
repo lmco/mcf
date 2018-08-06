@@ -58,6 +58,7 @@ pipeline {
 
                         // Verify build
                         sh 'ls -l'
+                        sh 'ls -l app/'
                     }
                 }
                 stage('Build Docker MBEE'){
