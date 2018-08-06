@@ -58,6 +58,7 @@ RUN yarn config set "http-proxy"  "http://proxy-lmi.global.lmco.com" && \
     yarn config set "https-proxy" "http://proxy-lmi.global.lmco.com" && \
     yarn config set "cafile" "./certs/LockheedMartinRootCertificationAuthority.pem" && \
     yarn config set "strict-ssl" "false"
+RUN ls -l
 RUN ls /app
 # installing dependencies
 RUN yarn install
