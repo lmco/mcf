@@ -192,6 +192,7 @@ class LDAPStrategy {
         attributes: [
           M.config.auth.ldap.attributes.username,
           M.config.auth.ldap.attributes.firstName,
+          M.config.auth.ldap.attributes.preferredName,
           M.config.auth.ldap.attributes.lastName,
           M.config.auth.ldap.attributes.eMail
         ]
@@ -265,6 +266,7 @@ class LDAPStrategy {
         const userSave = foundUser;
         // Update user properties
         userSave.fname = user[M.config.auth.ldap.attributes.firstName];
+        userSave.preferredName = user[M.config.auth.ldap.attributes.preferredName];
         userSave.lname = user[M.config.auth.ldap.attributes.lastName];
         userSave.email = user[M.config.auth.ldap.attributes.eMail];
         // Save updated user in database
@@ -285,6 +287,7 @@ class LDAPStrategy {
           username: user[M.config.auth.ldap.attributes.username],
           password: (Math.random() + 1).toString(36).substring(7),
           fname: user[M.config.auth.ldap.attributes.firstName],
+          preferredName: user[M.config.auth.ldap.attributes.preferredName],
           lname: user[M.config.auth.ldap.attributes.lastName],
           email: user[M.config.auth.ldap.attributes.eMail],
           provider: 'ldap'

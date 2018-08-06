@@ -92,6 +92,20 @@ const UserSchema = new mongoose.Schema({
   },
 
   /**
+   * @memberOf  User
+   * @property  preferredName
+   * @type  {String}
+   *
+   * @description  The `preferredName` property is the user's preferred name
+   * which may differ from their first name.
+   */
+  preferredName: {
+    type: String,
+    default: '',
+    maxlength: [36, 'Too many characters in first name']
+  },
+
+  /**
      * @memberOf  User
      * @property  lname
      * @type  {String}
@@ -393,6 +407,7 @@ UserSchema.methods.isUpdateAllowed = function(field) {
   const allowedMap = {
     username: false,
     fname: true,
+    preferredName: true,
     lname: true,
     email: true,
     name: false,
@@ -423,6 +438,7 @@ UserSchema.methods.getPublicData = function() {
     username: this.username,
     name: this.name,
     fname: this.fname,
+    preferredName: this.preferredName,
     lname: this.lname,
     email: this.email,
     createdOn: this.createdOn,
