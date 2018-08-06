@@ -27,9 +27,7 @@ RUN mkdir -p app \
     && mkdir -p plugins \
     && mkdir -p public \
     && mkdir -p scripts \
-    && mkdir -p config
 
-COPY ./docker/entrypoint.sh entrypoint.sh
 COPY ./app  app
 COPY ./certs certs
 COPY ./plugins plugins
@@ -54,12 +52,7 @@ RUN apk upgrade && \
     apk add git && \
     apk add openssh-client && \
     chmod 400 certs/* && \
-    mkdir logs && \
-    chmod 700 entrypoint.sh && \
-    cat entrypoint.sh && \
-    ls -l
+    mkdir logs
 
-# RUN node mbee.js install
-# Run server
-CMD ["node", "mbee.js", "install"]
-#CMD ["./entrypoint.sh"]
+#Install the configuration and run the server
+CMD ["sh", "-c", "node mbee install && node mbee start"]

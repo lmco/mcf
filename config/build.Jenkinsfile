@@ -76,12 +76,7 @@ pipeline {
 
                 // Runs the production container in the background
                 sh "echo 'run'"
-                sh 'pwd'
-                sh 'ls config'
                 sh "NODE_ENV=stage node mbee docker --run"
-
-                //sh "echo 'running stuff mbee in docker'"
-               // sh "NODE_ENV=stage node mbee docker --exec"
             }
         }
 
@@ -91,7 +86,7 @@ pipeline {
         stage('Wait for Server') {
             steps {
                 // Wait to be sure server is up
-                sh 'sleep 30'
+                sh 'sleep 60'
 
             }
         }
