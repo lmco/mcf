@@ -144,7 +144,7 @@ class UserController {
           return reject(findErr);
         }
 
-        // Make sure user doesg'n't already exist
+        // Make sure user doesn't already exist
         if (users.length >= 1) {
           return reject(new errors.CustomError('User already exists.', 400));
         }

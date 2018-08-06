@@ -96,8 +96,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should find out the user with the /whoami api tag', whoamIapi).timeout(3000);
   it('should reject creating a user with invalid username', rejectUPost).timeout(3000);
   it('should reject creating a user with two different usernames', rejectUsernames).timeout(3000);
-  // JIRA-BUG: MBX-283 UNCOMMENT WHEN FIXED
-  // it('should reject creating a user with invalid first name', rejectNamePut).timeout(3000);
+  it('should reject creating a user with invalid first name', rejectNamePut).timeout(3000);
   it('should reject a username that already exists', rejectExistingUname).timeout(3000);
   it('should get all users', getUsers).timeout(3000);
   it('should reject getting a user that does not exist', rejectGetNoU).timeout(3000);
@@ -256,31 +255,30 @@ function rejectUsernames(done) {
   });
 }
 
-// /**
-//  * Makes an invalid POST request to /api/users/:username. This an attempt to
-//  * create a user with an invalid first name. Response should be an error
-//  * thrown with status code 400 or something.
-//  * JIRA-BUG: MBX-283 Uncomment test when implemented
-//  */
-// function rejectNamePut(done) {
-//   request({
-//     url: `${test.url}/api/users/blindal`,
-//     headers: getHeaders(),
-//     method: 'POST',
-//     body: JSON.stringify({
-//       username: 'blindal',
-//       password: 'icantsee',
-//       fname: '',
-//       lname: 'Al'
-//     })
-//   },
-//   (err, response, body) => {
-//     const json = JSON.parse(body);
-//     chai.expect(response.statusCode).to.equal(500);
-//     chai.expect(json.message).to.equal('Internal Server Error');
-//     done();
-//   });
-// }
+/**
+ * Makes an invalid POST request to /api/users/:username. This an attempt to
+ * create a user with an invalid first name. Response should be an error
+ * thrown with status code 400 or something.
+ */
+function rejectNamePut(done) {
+  request({
+    url: `${test.url}/api/users/blindal`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      username: 'blindal',
+      password: 'icantsee',
+      fname: '',
+      lname: 'Al'
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(500);
+    chai.expect(json.message).to.equal('Internal Server Error');
+    done();
+  });
+}
 
 /**
  * Makes an invalid POST request to /api/users/:username. This an attempt to
