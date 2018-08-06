@@ -54,7 +54,7 @@ RUN apk upgrade && \
     chmod 400 certs/* && \
     mkdir logs
 # Configuring yarn
-RUN npm install -g yarn
+RUN node mbee.js configure
 RUN yarn install
 
 #Install the configuration and run the server
