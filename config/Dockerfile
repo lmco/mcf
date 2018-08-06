@@ -52,7 +52,8 @@ RUN apk upgrade && \
     apk add git && \
     apk add openssh-client && \
     chmod 400 certs/* && \
-    mkdir logs
+    mkdir logs && \
+    yarn install --dev
 
 
 #Install the configuration and run the server
