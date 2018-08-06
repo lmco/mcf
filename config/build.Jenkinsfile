@@ -79,7 +79,7 @@ pipeline {
 
                 // Runs the production container in the background
                 sh "echo 'run'"
-                sh "NODE_ENV=stage node mbee docker --run"
+                sh " -v"
             }
         }
 
