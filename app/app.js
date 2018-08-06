@@ -27,12 +27,16 @@ const MongoStore = require('connect-mongo')(session);
 const expressLayouts = require('express-ejs-layouts');
 const flash = require('express-flash');
 
-const M = require(`${__dirname}/../mbee.js`);
+//const M = require(`${__dirname}/../mbee.js`);
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
 
 // Instantiates our application
 const app = express();
+
+console.log(M);
+M.version = 'BLAH';
+process.exit();
 
 // Connect to database, then initialize application
 M.lib.db

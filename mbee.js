@@ -23,20 +23,22 @@ const fs = require('fs');
 const path = require('path');
 
 // Global MBEE helper object
-const M = { env: process.env.NODE_ENV || 'dev' };
+global.M = { env: process.env.NODE_ENV || 'dev' };
+
+
 M.version = require(`${__dirname}/package.json`).version;
 M.build = require(`${__dirname}/package.json`).buildNumber;
 M.version4 = (M.build !== 'NO_BUILD_NUMBER')
   ? `${M.version}.${M.build}`
   : `${M.version}.0`;
 
+console.log(M);
+
 /**
  * This function provides a useful utility for requiring other MBEE modules in the app directory.
  * This should allow the path to the modules to be a bit simpler.
  * The global-require is explicitly disabled here due to the nature of this function.
  */
-M.load = m => require(path.join(__dirname, 'app', m)); // eslint-disable-line global-require
-// Similar to M.load, this is the future
 M.require = m => {
   const p = path.join(__dirname, 'app', m.replace('.', path.sep));
   return require(p); // eslint-disable-line global-require
@@ -48,7 +50,9 @@ M.getModuleName = fname => fname.split('/')[fname.split('/').length - 1];
 
 // Configuration file parsing and initialization
 const parseJSON = M.require('lib.parse-json');
-M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.json`)));
+const configPath = path.join('config', `${M.env}.json`);
+const stripComments = parseJSON.removeComments('')
+M.config = JSON.parse();
 
 // Set config secret if it's set to RANDOM
 if (M.config.server.secret === 'RANDOM') {
