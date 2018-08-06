@@ -225,7 +225,6 @@ class LDAPStrategy {
         // On callback, return an error if the user was not found or return the ldap entry.
         result.on('end', (status) => {
           M.log.debug(status);
-          console.log(person.object);
           if (!person) {
             ldapClient.destroy(); // Disconnect from ldap server on failure
             return reject(new errors.CustomError('Error: Invalid username or password.', 401));
