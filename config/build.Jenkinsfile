@@ -89,7 +89,7 @@ pipeline {
         stage('Wait for Server') {
             steps {
                 // Wait to be sure server is up
-                sh 'sleep 200'
+                sh 'sleep 50'
                 sh 'NODE_ENV=stage node mbee docker --get-logs'
 
             }
