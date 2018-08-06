@@ -23,7 +23,7 @@ const path = require('path');
 
 /* Local Modules */
 const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const OrgController = M.require('controllers/OrganizationController');
+const OrgController = M.require('controllers.OrganizationController');
 const Project = M.require('models/Project');
 const errors = M.require('lib/errors');
 const utils = M.require('lib/utils');

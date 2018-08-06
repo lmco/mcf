@@ -323,7 +323,7 @@ function updateOrgObject(done) {
 function findAllExistingOrgs(done) {
   OrgController.findOrgs(user)
   .then((orgs) => {
-    chai.expect(orgs.length).to.equal(2);
+    chai.expect(orgs.length).to.equal(3);
     done();
   })
   .catch((error) => {

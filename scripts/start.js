@@ -20,6 +20,7 @@ const http = require('http');
 const https = require('https');
 
 const M = require(path.join(__dirname, '..', 'mbee.js'));
+const Organization = M.require('models.Organization');
 
 /**
  * Runs the MBEE server based on the configuration provided in the environment
@@ -71,6 +72,27 @@ function start(args) {
       M.log.info(`MBEE server listening on port ${port}!`);
     });
   }
+
+  // Create default org if it doesn't exist
+  Organization.findOne({ name: 'default' })
+  .exec((err, org) => {
+    if (err) {
+      throw err;
+    }
+
+    // If the default org does not exist
+    if (org === null) {
+      const defaultOrg = new Organization({
+        id: 'default',
+        name: 'default'
+      });
+      defaultOrg.save((saveOrgErr) => {
+        if (saveOrgErr) {
+          throw saveOrgErr;
+        }
+      });
+    }
+  })
 }
 
 module.exports = start;

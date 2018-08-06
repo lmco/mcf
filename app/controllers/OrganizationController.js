@@ -356,6 +356,11 @@ class OrganizationController {
 
       const orgID = M.lib.sani.html(organizationID);
 
+      // Stop attempted deletion of default org
+      if (orgID === 'default') {
+        return reject(new errors.CustomError('Cannot delete the default org.', 403));
+      }
+
       OrganizationController.findOrg(user, orgID, true)
       .then((foundOrg) => new Promise((res, rej) => { // eslint-disable-line consistent-return
         // Check if we want to hard delete the org and if so,

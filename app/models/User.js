@@ -23,6 +23,8 @@ const path = require('path');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const M = require(path.join('..', '..', 'mbee.js'));
+const errors = M.load('lib/errors');
+const Organization = M.require('models.Organization');
 
 
 /**
@@ -331,7 +333,43 @@ UserSchema.pre('save', function(next) {
   crypto.pbkdf2(this.password, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
     if (err) throw err;
     this.password = derivedKey.toString('hex');
-    next();
+    // Add the user to default org
+    // Using org model since we don't have a requesting user.
+    Organization.findOne({ name: 'default' })
+    .exec((err, org) => {
+      if (!org.permissions.read.includes(this._id.toString())) {
+        org.permissions.read.push(this._id.toString());
+      }
+      org.save((saveErr) => {
+        if (saveErr) {
+          console.log("Oh crap");
+          // If error occurs, return it
+          throw new errors.CustomError('Failed to add user to the default org.');
+        }
+        next();
+      });
+    });
+  });
+});
+
+/**
+ * @memberOf  User
+ * Run our pre-defined setters before delete.
+ */
+UserSchema.pre('remove', function(next) {
+  console.log("Entered");
+  // Remove the user from them default org
+  // Using org model since we don't have a requesting user.
+  Organization.findOne({ name: 'default' })
+  .exec((err, org) => {
+    org.permissions.read.splice(org.permissions.read.indexOf(this._id.toString()), 1);
+    org.save((saveErr) => {
+      if (saveErr) {
+        // If error occurs, return it
+        throw new errors.CustomError('Failed to remove user from the default org.');
+      }
+      next();
+    });
   });
 });
 

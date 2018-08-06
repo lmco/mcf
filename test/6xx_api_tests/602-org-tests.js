@@ -102,7 +102,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PUT to the org ID', rejectPutID).timeout(3000);
   it('should get organization roles for a user', orgRole).timeout(3000);
   it('should reject a get org roles for another user', rejectRole).timeout(3000);
-  it('should GET 2 organizations', getTwoOrgs).timeout(3000);
+  it('should GET 3 organizations', getThreeOrgs).timeout(3000);
   it('should reject a POST with ID mismatch', postOrg02Err).timeout(3000);
   it('should reject a POST with invalid org id', postInvalidOrg).timeout(5000);
   it('should reject a POST with missing org name', postOrg03).timeout(3000);
@@ -133,7 +133,7 @@ function getOrgs(done) {
   (err, response, body) => {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(0);
+    chai.expect(json.length).to.equal(1);
     chai.expect(err).to.equal(null);
     done();
   });
@@ -326,10 +326,10 @@ function rejectRole(done) {
 
 
 /**
- * Makes a GET request to /api/orgs. At this point we should have 2 orgs
+ * Makes a GET request to /api/orgs. At this point we should have 3 orgs
  * in the database.
  */
-function getTwoOrgs(done) {
+function getThreeOrgs(done) {
   request({
     url: `${test.url}/api/orgs`,
     headers: getHeaders()
@@ -337,7 +337,7 @@ function getTwoOrgs(done) {
   (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(3);
     chai.expect(err).to.equal(null);
     done();
   });
@@ -502,7 +502,7 @@ function deleteOrg02(done) {
 
 /**
  * Makes a GET request to /api/orgs. At this point our created orgs
- * should be deleted.
+ * should be deleted except for the default org.
  */
 function getOrgs03(done) {
   request({
@@ -513,7 +513,7 @@ function getOrgs03(done) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(err).to.equal(null);
-    chai.expect(json.length).to.equal(0);
+    chai.expect(json.length).to.equal(1);
     done();
   });
 }
