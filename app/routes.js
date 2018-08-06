@@ -31,28 +31,51 @@ const router = express.Router();
  **********************************************/
 
 
-router.route('/about')
 /* This renders the about page */
+router.route('/about')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
   UIController.showAboutPage
 );
 
-router.route('/doc')
+
 /**
  * This renders the swagger doc page for the API routes
  */
+router.route('/doc/api')
 .get(Middleware.logRoute, UIController.swaggerDoc);
 
+
+/**
+ * Both routes map to the same controller. The controller method handles
+ * the logic of checking for the page parameter.
+ */
+router.route('/doc/flight-manual')
+.get(Middleware.logRoute, UIController.renderFlightManual);
+router.route('/doc/flight-manual/:page')
+.get(Middleware.logRoute, UIController.renderFlightManual);
+
+/**
+ * Both routes map to the same controller. The controller method handles
+ * the logic of checking for the page parameter.
+ */
+router.route('/doc/developers')
+.get(Middleware.logRoute, UIController.renderJSDoc);
+router.route('/doc/developers/:page')
+.get(Middleware.logRoute, UIController.renderJSDoc);
+
+
+/**
+ * GET shows the login page.
+ * POST is the route that actually logs in the user.
+ * It's the login form's submit action.
+ */
 router.route('/login')
-/* GET /login shows the login page. */
 .get(
   Middleware.logRoute,
   UIController.showLoginPage
 )
-/* POST is the route that actually logs in the user.
- * It's the login form's submit action. */
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
