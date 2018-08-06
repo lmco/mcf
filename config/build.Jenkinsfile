@@ -48,6 +48,9 @@ pipeline {
             stages {
                 stage('Build MBEE'){
                     steps {
+                        // Install dev dependencies
+                        sh 'yarn install --dev'
+
                         // Build
                         sh 'NODE_ENV=stage node mbee build'
 
