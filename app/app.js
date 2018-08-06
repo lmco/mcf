@@ -52,7 +52,7 @@ module.exports = app;
  */
 function initApp() {
   // Configure the static/public directory
-  const staticDir = path.join(__dirname, '..', 'public');
+  const staticDir = path.join(__dirname, '..', 'build/public');
   app.use(express.static(staticDir));
 
   // Allows receiving JSON in the request body
