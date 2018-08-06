@@ -368,6 +368,7 @@ UserSchema.methods.isUpdateAllowed = function(field) {
   const allowedMap = {
     username: false,
     fname: true,
+    preferredName: true,
     lname: true,
     email: true,
     name: false,
@@ -398,6 +399,7 @@ UserSchema.methods.getPublicData = function() {
     username: this.username,
     name: this.name,
     fname: this.fname,
+    preferredName: this.preferredName,
     lname: this.lname,
     email: this.email,
     createdOn: this.createdOn,
