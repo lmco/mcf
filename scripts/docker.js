@@ -128,7 +128,7 @@ function docker(args) {
 
     // Build the "docker run" command
     const rargs = [
-      'logs',
+      'logs', '-f',
       M.config.docker.container.name
     ];
 

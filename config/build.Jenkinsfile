@@ -90,6 +90,7 @@ pipeline {
             steps {
                 // Wait to be sure server is up
                 sh 'sleep 200'
+                sh 'NODE_ENV=stage node mbee docker --get-logs'
 
             }
         }
@@ -99,7 +100,6 @@ pipeline {
                 // Runs the basic test suite against the running stage container
                 // The bail command will stop running tests after one test fails
                 timeout(time: 10, unit: 'MINUTES') {
-                    // creating a junit xml file.... pls work
                     sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-6]"'
                 }
             }
