@@ -66,7 +66,7 @@ describe(M.getModuleName(module.filename), () => {
 function cleanDB(done) {
   User.remove({}).exec()  // Remove users
   // Remove all orgs except for the 'default' org.
-  .then(() => Organization.remove({ name: { $ne: 'default' }}).exec())  // Remove orgs
+  .then(() => Organization.remove({ name: { $ne: 'default' } }).exec())  // Remove orgs
   .then(() => Project.remove({}).exec())  // Remove projects
   .then(() => Element.Element.remove({}).exec())  // Remove elements
   .then(() => done())

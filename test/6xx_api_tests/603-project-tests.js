@@ -143,8 +143,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should PUT an update to posted project', putOrg01);
   it('should reject a PUT to update with invalid name', badPut);
   it('should POST second project', postProject02);
-  it('should DELETE the first project to the organization', deleteProject01);
-  it('should DELETE the second project to the organization', deleteProject02);
+  it('should DELETE the first project to the organization', deleteProject01).timeout(5000);
+  it('should DELETE the second project to the organization', deleteProject02).timeout(5000);
 });
 
 

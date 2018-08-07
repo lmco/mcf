@@ -21,6 +21,7 @@ const https = require('https');
 
 const M = require(path.join(__dirname, '..', 'mbee.js'));
 const Organization = M.require('models.Organization');
+const UserController = M.require('controllers.UserController');
 
 /**
  * Runs the MBEE server based on the configuration provided in the environment
@@ -74,7 +75,7 @@ function start(args) {
   }
 
   // Create default org if it doesn't exist
-  Organization.findOne({ name: 'default' })
+  Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     if (err) {
       throw err;
@@ -92,7 +93,18 @@ function start(args) {
         }
       });
     }
-  })
+    // else {
+    //   // Prune current users to ensure no deleted
+    //   // users are still part of the org
+    //   UserController.findUsers()
+    //   .then((users) => {
+    //     console.log(users);
+    //   })
+    //   .catch((err) => {
+    //     throw err;
+    //   });
+    // }
+  });
 }
 
 module.exports = start;

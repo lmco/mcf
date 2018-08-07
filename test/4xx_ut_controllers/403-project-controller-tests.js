@@ -134,7 +134,7 @@ describe(M.getModuleName(module.filename), () => {
           chai.expect(err2).to.equal(null);
           mongoose.connection.close();
           done();
-        })
+        });
       });
     })
     .catch((error) => {

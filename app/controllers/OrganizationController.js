@@ -224,7 +224,7 @@ class OrganizationController {
    *
    * @param  {User} user  The object containing the  requesting user.
    * @param  {String} organizationID  The organization ID.
-   * @param  {String} orgUpdate  The JSON of the updated org elements.
+   * @param  {Object} orgUpdate  The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -245,6 +245,11 @@ class OrganizationController {
 
       // Sanitize input argument
       const orgID = M.lib.sani.html(organizationID);
+
+      // Ensure user cannot update the default org
+      if (orgID === 'default') {
+        return reject(new errors.CustomError('Cannot update the default org.', 403));
+      }
 
       // Check if org exists
       OrganizationController.findOrg(user, orgID)

@@ -349,15 +349,15 @@ UserSchema.pre('save', function(next) {
     this.password = derivedKey.toString('hex');
     // Add the user to default org
     // Using org model since we don't have a requesting user.
-    Organization.findOne({ name: 'default' })
-    .exec((err, org) => {
+    Organization.findOne({ id: 'default' })
+    .exec((err2, org) => {
+      if (err2) throw err2;
       const members = org.permissions.read.map(u => u._id.toString());
       if (!members.includes(this._id.toString())) {
         org.permissions.read.push(this._id.toString());
       }
       org.save((saveErr) => {
         if (saveErr) {
-          console.log("Oh crap");
           // If error occurs, return it
           throw new errors.CustomError('Failed to add user to the default org.');
         }
@@ -374,29 +374,7 @@ UserSchema.pre('save', function(next) {
 UserSchema.pre('remove', function(next) {
   // Remove the user from them default org
   // Using org model since we don't have a requesting user.
-  Organization.findOne({ name: 'default' })
-  .exec((err, org) => {
-    org.permissions.read.splice(org.permissions.read.indexOf(this._id.toString()), 1);
-    org.save((saveErr) => {
-      if (saveErr) {
-        // If error occurs, return it
-        throw new errors.CustomError('Failed to remove user from the default org.');
-      }
-      next();
-    });
-  });
-});
-
-/**
- * @memberOf  User
- * Run our pre-defined setters before delete.
- */
-UserSchema.post('findOneAndRemove', function(next) {
-  console.log("Entered");
-  console.log(this);
-  // Remove the user from them default org
-  // Using org model since we don't have a requesting user.
-  Organization.findOne({name: 'default'})
+  Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     org.permissions.read.splice(org.permissions.read.indexOf(this._id.toString()), 1);
     org.save((saveErr) => {
