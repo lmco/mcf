@@ -95,7 +95,7 @@ Object.defineProperty(M, 'require', {
  */
 Object.defineProperty(M, 'getModuleName', {
   value: fname => fname.split('/')[fname.split('/').length - 1],
-  writeable: false,
+  writable: false,
   enumerable: true
 });
 
@@ -103,7 +103,7 @@ Object.defineProperty(M, 'getModuleName', {
 // Set root and other path variables
 Object.defineProperty(M, 'root', {
   value: __dirname,
-  writeable: false,
+  writable: false,
   enumerable: true
 });
 
