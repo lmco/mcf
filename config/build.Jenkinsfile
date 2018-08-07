@@ -76,8 +76,8 @@ pipeline {
             steps {
                 // Removes any existing production running containers
                 sh 'NODE_ENV=stage node mbee docker --clean'
-                sh 'dir = $(pwd)'
-                sh "echo 'dir'"
+                sh "dir = '$(pwd)'"
+                sh "echo $dir"
 
                 // Runs the production container in the background
                 sh "echo 'run the network sucks'"
