@@ -51,9 +51,9 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create an organization', createOrg).timeout(2500);
-  it('should soft delete an organization', softDeleteOrg).timeout(2500);
-  it('should delete an organization', deleteOrg).timeout(2500);
+  it('should create an organization', createOrg);
+  it('should soft delete an organization', softDeleteOrg);
+  it('should delete an organization', deleteOrg);
 });
 
 

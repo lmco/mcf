@@ -45,9 +45,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - Add desc
    */
-  before(function(done) {
-    this.timeout(5000);
-
+  before((done) => {
     const db = M.require('lib/db');
     db.connect();
 
@@ -79,7 +77,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - Add detailed description
    */
-  after(function(done) {
+  after((done) => {
     User.findOneAndRemove({
       username: M.config.test.username
     }, (err) => {
@@ -90,24 +88,24 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should get a username', getUser).timeout(3000);
-  it('should create a user', postUser).timeout(3000);
-  it('should create an admin user', postAUser).timeout(3000);
-  it('should find out the user with the /whoami api tag', whoamIapi).timeout(3000);
-  it('should reject creating a user with invalid username', rejectUPost).timeout(3000);
-  it('should reject creating a user with two different usernames', rejectUsernames).timeout(3000);
+  it('should get a username', getUser);
+  it('should create a user', postUser);
+  it('should create an admin user', postAUser);
+  it('should find out the user with the /whoami api tag', whoamIapi);
+  it('should reject creating a user with invalid username', rejectUPost);
+  it('should reject creating a user with two different usernames', rejectUsernames);
   // JIRA-BUG: MBX-283 UNCOMMENT WHEN FIXED
-  // it('should reject creating a user with invalid first name', rejectNamePut).timeout(3000);
-  it('should reject a username that already exists', rejectExistingUname).timeout(3000);
-  it('should get all users', getUsers).timeout(3000);
-  it('should reject getting a user that does not exist', rejectGetNoU).timeout(3000);
-  it('should update a user', putUser).timeout(3000);
-  it('should reject an update a user that does not exist', rejectPut).timeout(3000);
-  it('should reject updating the username', rejectUPut).timeout(3000);
-  it('should reject updating with an invalid name', rejectName).timeout(3000);
-  it('should reject deleting a user that doesnt exist', rejectDelete).timeout(3000);
-  it('should delete a user', deleteUser).timeout(3000);
-  it('should delete the admin user', deleteAUser).timeout(3000);
+  // it('should reject creating a user with invalid first name', rejectNamePut);
+  it('should reject a username that already exists', rejectExistingUname);
+  it('should get all users', getUsers);
+  it('should reject getting a user that does not exist', rejectGetNoU);
+  it('should update a user', putUser);
+  it('should reject an update a user that does not exist', rejectPut);
+  it('should reject updating the username', rejectUPut);
+  it('should reject updating with an invalid name', rejectName);
+  it('should reject deleting a user that doesnt exist', rejectDelete);
+  it('should delete a user', deleteUser);
+  it('should delete the admin user', deleteAUser);
 });
 
 
