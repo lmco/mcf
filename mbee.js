@@ -24,27 +24,48 @@
 const fs = require('fs');
 const path = require('path');
 
+const pkg = require(`${__dirname}/package.json`);
+
 // Global MBEE helper object
 global.M = {};
 
+/**
+ * Defines the environment based on the MBEE_ENV environment variable.
+ * If the MBEE_ENV environment variable is not set, the default environment
+ * is set to 'default'.
+ */
 Object.defineProperty(M, 'env', {
-  value: process.env.MBEE_ENV || 'dev',
+  value: process.env.MBEE_ENV || 'default',
   writable: false,
   enumerable: true
 });
 
+
+/**
+ * Defines the MBEE version by pulling the version field from the package.json.
+ */
 Object.defineProperty(M, 'version', {
-  value: require(`${__dirname}/package.json`).version,
+  value: pkg.version,
   writable: false,
   enumerable: true
 });
 
+/**
+ * Defines the build number by pulling the 'build' field from the package.json.
+ * The default value if the build field does not exist is 'NO_BUILD_NUMBER'.
+ */
 Object.defineProperty(M, 'build', {
-  value: require(`${__dirname}/package.json`).buildNumber,
+  value: (pkg.hasOwnProperty('build')) ? pkg.build : 'NO_BUILD_NUMBER',
   writable: false,
   enumerable: true
 });
 
+
+/**
+ * Defines the 4-digit version number by combining the 3-digit version number
+ * and appending the build number. If the build number does not exist, zero
+ * is used.
+ */
 Object.defineProperty(M, 'version4', {
   value: RegExp('[0-9]+').test(M.build) ? `${M.version}.${M.build}` : `${M.version}.0`,
   writable: false,
@@ -53,9 +74,9 @@ Object.defineProperty(M, 'version4', {
 
 
 /**
- * This function provides a useful utility for requiring other MBEE modules in the app directory.
- * This should allow the path to the modules to be a bit simpler.
- * The global-require is explicitly disabled here due to the nature of this function.
+ * This function provides a utility fun tion for requiring other MBEE modules in
+ * the app directory. The global-require is explicitly disabled here due to the
+ * nature of this function.
  */
 Object.defineProperty(M, 'require', {
   value: m => {
@@ -124,38 +145,35 @@ const opts = process.argv.slice(3);
 /******************************************************************************
  *  Load Library Modules                                                      *
  ******************************************************************************/
+
+const installComplete = fs.existsSync(`${M.root}/node_modules`);
+const buildComplete = fs.existsSync(`${M.root}/build`);
+
+
 // If dependencies have been installed, initialize the MBEE helper functions
-if (fs.existsSync(`${__dirname}/node_modules`)
-    && fs.existsSync(`${__dirname}/build`)) {
+if (installComplete) {
   M.log = M.require('lib.logger');
-  M.lib = {
-    db: M.require('lib.db'),
-    crypto: M.require('lib.crypto'),
-    sani: M.require('lib.sanitization'),
-    startup: M.require('lib.startup'),
-    validators: M.require('lib.validators'),
-    parse_json: M.require('lib.parse-json'),
-    mock_express: M.require('lib.mock-express')
-  };
-  module.exports = M;
 }
-else if (subcommand === 'start') {
+
+if (subcommand === 'start' && !buildComplete) {
 // eslint-disable-next-line no-console
-  console.log('\nERROR: Please run the build script before attempting other commands\n\n'
-    + '     node mbee build\n');
+  console.log('\nERROR: You must run the build command before running start.\n');
   process.exit(0);
 }
 
-const build = require(`${__dirname}/scripts/build`);
-const clean = require(`${__dirname}/scripts/clean`);
-const docker = require(`${__dirname}/scripts/docker`);
-const lint = require(`${__dirname}/scripts/linter`);
-const start = require(`${__dirname}/scripts/start`);
-const test = require(`${__dirname}/scripts/test`);
+const build = require(`${M.root}/scripts/build`);
+const clean = require(`${M.root}/scripts/clean`);
+const docker = require(`${M.root}/scripts/docker`);
+const lint = require(`${M.root}/scripts/linter`);
+const start = require(`${M.root}/scripts/start`);
+const test = require(`${M.root}/scripts/test`);
 
 // Call main
-if (module.parent == null) {
+if (module.parent === null) {
   main();
+}
+else {
+  module.exports = M;
 }
 
 /******************************************************************************
@@ -166,7 +184,6 @@ function main() {
     build: build.build,
     clean: clean,
     docker: docker,
-    install: build.install,
     lint: lint,
     start: start,
     test: test
