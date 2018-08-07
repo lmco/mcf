@@ -80,7 +80,7 @@ pipeline {
 
                 // Runs the production container in the background
                 sh "echo 'run the network sucks'"
-                sh "NODE_ENV=stage node mbee docker --run -v /config:/lm/mbee/config"
+                sh "NODE_ENV=stage node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
             }
         }
 
