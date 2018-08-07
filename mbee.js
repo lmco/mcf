@@ -18,51 +18,95 @@
  * This file defines and implements the MBEE server functionality.
  */
 
+
+
 // Node.js Built-in Modules
 const fs = require('fs');
 const path = require('path');
 
 // Global MBEE helper object
-global.M = { env: process.env.NODE_ENV || 'dev' };
+global.M = {};
 
+Object.defineProperty(M, 'env', {
+  value: process.env.MBEE_ENV || 'dev',
+  writable: false,
+  enumerable: true
+});
 
-M.version = require(`${__dirname}/package.json`).version;
-M.build = require(`${__dirname}/package.json`).buildNumber;
-M.version4 = (M.build !== 'NO_BUILD_NUMBER')
-  ? `${M.version}.${M.build}`
-  : `${M.version}.0`;
+Object.defineProperty(M, 'version', {
+  value: require(`${__dirname}/package.json`).version,
+  writable: false,
+  enumerable: true
+});
 
-console.log(M);
+Object.defineProperty(M, 'build', {
+  value: require(`${__dirname}/package.json`).buildNumber,
+  writable: false,
+  enumerable: true
+});
+
+Object.defineProperty(M, 'version4', {
+  value: RegExp('[0-9]+').test(M.build) ? `${M.version}.${M.build}` : `${M.version}.0`,
+  writable: false,
+  enumerable: true
+});
+
 
 /**
  * This function provides a useful utility for requiring other MBEE modules in the app directory.
  * This should allow the path to the modules to be a bit simpler.
  * The global-require is explicitly disabled here due to the nature of this function.
  */
-M.require = m => {
-  const p = path.join(__dirname, 'app', m.replace('.', path.sep));
-  return require(p); // eslint-disable-line global-require
-};
+Object.defineProperty(M, 'require', {
+  value: m => {
+    const p = path.join(__dirname, 'app', m.replace('.', path.sep));
+    return require(p); // eslint-disable-line global-require
+  },
+  writable: false,
+  enumerable: true
+});
 
-// Given a file-name (typically passed in as module.filename), return the
-// module name
-M.getModuleName = fname => fname.split('/')[fname.split('/').length - 1];
+
+/**
+ * Given a file-name (typically passed in as module.filename),
+ * return the module name.
+ */
+Object.defineProperty(M, 'getModuleName', {
+  value: fname => fname.split('/')[fname.split('/').length - 1],
+  writeable: false,
+  enumerable: true
+});
+
+
+// Set root and other path variables
+Object.defineProperty(M, 'root', {
+  value: __dirname,
+  writeable: false,
+  enumerable: true
+});
+
 
 // Configuration file parsing and initialization
 const parseJSON = M.require('lib.parse-json');
 const configPath = path.join('config', `${M.env}.json`);
-const stripComments = parseJSON.removeComments('')
-M.config = JSON.parse();
+const stripComments = parseJSON.removeComments(configPath);
+const config = JSON.parse(stripComments);
 
 // Set config secret if it's set to RANDOM
-if (M.config.server.secret === 'RANDOM') {
-  M.config.server.secret = Math.random().toString(36).substring(2, 15)
-    + Math.random().toString(36).substring(2, 15);
+if (config.server.secret === 'RANDOM') {
+  const random1 = Math.random().toString(36).substring(2, 15);
+  const random2 = Math.random().toString(36).substring(2, 15);
+  config.server.secret = random1 + random2;
 }
 
-// Set root and other path variables
-M.root = __dirname;
-
+/**
+ * Define the MBEE configuration
+ */
+Object.defineProperty(M, 'config', {
+  value: config,
+  writeable: false,
+  enumerable: true
+});
 
 // This exports the basic MBEE version and config data so that modules may
 // have access to that data when they are loaded.
