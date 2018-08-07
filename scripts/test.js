@@ -34,7 +34,7 @@ else {
  * with Mocha. This function calls the Mocha test framework. The following
  * command line arguments may be useful:
  *
- * --slow N       Defines the number of milliseconds for a test to be considered
+ * --slow N       Defin es the number of milliseconds for a test to be considered
  *                slow. Half that number will warn that the test is nearly slow.
  * --grep <REGEX> Only runs the test whose name matches REGEX.
  */
