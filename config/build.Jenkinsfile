@@ -76,11 +76,11 @@ pipeline {
             steps {
                 // Removes any existing production running containers
                 sh 'NODE_ENV=stage node mbee docker --clean'
-                sh 'echo $(pwd)'
+                sh 'echo ${pwd}'
 
                 // Runs the production container in the background
                 sh "echo 'run the network sucks'"
-                sh "NODE_ENV=stage node mbee docker --run -v $(pwd)/config:/lm/mbee/config"
+                sh "NODE_ENV=stage node mbee docker --run -v ${pwd}/config:/lm/mbee/config"
             }
         }
 
