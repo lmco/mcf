@@ -99,22 +99,16 @@ class ElementController {
         }
 
         // Create the list of search parameters
-        const searchParams = { project: project._id };
+        const searchParams = {project: project._id};
         if (type !== '') {
           searchParams.type = type;
         }
 
-        Element.Element.find(searchParams)
-        .populate('parent project source target contains')
-        .exec((err, elements) => {
-          if (err) {
-            return reject(new errors.CustomError('Find failed.'));
-          }
-
-          return resolve(elements);
-        });
+        return ElementController.findElementQuery(searchParams);
       })
+      .then((elements) => resolve(elements))
       .catch((error) => reject(error));
+
     });
   }
 
@@ -259,26 +253,61 @@ class ElementController {
         searchParams = { uid: elemUID };
       }
 
-      Element.Element.findOne(searchParams)
-      .populate('parent project source target contains')
-      .exec((findElementError, element) => {
-        if (findElementError) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
-
+      ElementController.findElementQuery(searchParams)
+      .then((elements) => {
         // Ensure only one element is returned
-        if (!element) {
+        if (elements.length === 0) {
           return reject(new errors.CustomError('Element not found.', 404));
         }
 
-        // Ensure user is part of the project
+        // Ensure more than one element was not returned.
+        if (elements.length > 1) {
+          return reject(new errors.CustomError('More than one element found.', 400));
+        }
+
+        const element = elements[0];
+
         const members = element.project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
-        // Return resulting element
         return resolve(element);
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
+  /**
+   * @description  This function takes a query and find the element.
+   *
+   * @example
+   * ElementController.findElementQuery({ uid: 'org:project:id' })
+   * .then(function(element) {
+   *   // do something with the element
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {Object} elementQuery  The query to be used to find the element.
+   */
+  static findElementQuery(elementQuery) {
+    return new Promise((resolve, reject) => {
+
+      // TODO: Figure out case where elementType = null and sani changes to ''
+      const query = M.lib.sani.sanitize(elementQuery);
+
+      Element.Element.find(query)
+      .populate('parent project source target contains')
+      .exec((findElementError, elements) => {
+        if (findElementError) {
+          return reject(new errors.CustomError('Find failed.'));
+        }
+
+        // Return resulting element
+        return resolve(elements);
       });
     });
   }

@@ -202,6 +202,7 @@ function createChildElement(done) {
     done();
   })
   .catch((error) => {
+    console.log(error);
     chai.expect(error.description).to.equal(null);
     done();
   });

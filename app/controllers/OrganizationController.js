@@ -53,17 +53,12 @@ class OrganizationController {
    */
   static findOrgs(user) {
     return new Promise((resolve, reject) => {
+
       const userID = M.lib.sani.sanitize(user._id);
-      Organization.find({ 'permissions.read': userID, deleted: false })
-      .populate('projects read permissions.write permissions.admin')
-      .exec((err, orgs) => {
-        // If error occurs, return it
-        if (err) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
-        // Resolve the list of orgs
-        return resolve(orgs);
-      });
+
+      OrganizationController.findOrgsQuery({ 'permissions.read': userID, deleted: false })
+      .then((orgs) => resolve(orgs))
+      .catch((error) => reject(error));
     });
   }
 
@@ -104,18 +99,19 @@ class OrganizationController {
         searchParams = { id: orgID };
       }
 
-      Organization.findOne(searchParams)
-      .populate('projects permissions.read permissions.write permissions.admin')
-      .exec((err, org) => {
-        // If error occurs, return it
-        if (err) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
-
+      OrganizationController.findOrgsQuery(searchParams)
+      .then((orgs) => {
         // If no org is found, reject
-        if (!org) {
+        if (orgs.length === 0) {
           return reject(new errors.CustomError('Org not found.', 404));
         }
+
+        // Ensure only one org found
+        if (orgs.length > 1) {
+          return reject(new errors.CustomError('More than one org found.', 400));
+        }
+
+        const org = orgs[0];
 
         // If user is not a member
         // TODO - Is there a way we can include this as part of the query?
@@ -126,6 +122,25 @@ class OrganizationController {
 
         // If we find one org (which we should if it exists)
         return resolve(org);
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
+  static findOrgsQuery(orgQuery) {
+    return new Promise((resolve, reject) => {
+
+      const query = M.lib.sani.sanitize(orgQuery);
+
+      Organization.find(query)
+      .populate('projects permissions.read permissions.write permissions.admin')
+      .exec((err, orgs) => {
+        // If error occurs, return it
+        if (err) {
+          return reject(new errors.CustomError('Find failed.'));
+        }
+        // Resolve the list of orgs
+        return resolve(orgs);
       });
     });
   }
