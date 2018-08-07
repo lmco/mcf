@@ -88,7 +88,7 @@ Object.defineProperty(M, 'root', {
 
 // Configuration file parsing and initialization
 const parseJSON = M.require('lib.parse-json');
-const configPath = path.join('config', `${M.env}.json`);
+const configPath = path.join('config', `${M.env}.cfg`);
 const stripComments = parseJSON.removeComments(configPath);
 const config = JSON.parse(stripComments);
 

@@ -77,6 +77,7 @@ function createUser(done) {
     username: 'spiderman',
     password: 'icanshootwebs',
     fname: 'Peter',
+    preferredName: 'Spidy',
     lname: 'Parker'
   });
   user.save((err) => {
@@ -152,6 +153,7 @@ function getUser(done) {
     // Check first and last name
     chai.expect(user.fname).to.equal('Peter');
     chai.expect(user.lname).to.equal('Parker');
+    chai.expect(user.preferredName).to.equal('Spidy');
 
     // Check the full name
     chai.expect(user.getFullName()).to.equal('Peter Parker');

@@ -439,7 +439,6 @@ function rejectName(done) {
 /**
  * Makes a invalid DELETE request to /api/users/:username. This is to delete non
  * existing user. Response should throw an error saying user does not exist.
- * JIRA-BUG: MBX-282 Fix test when api errors are updated.
  *
  */
 function rejectDelete(done) {
@@ -452,10 +451,10 @@ function rejectDelete(done) {
     })
   },
   (err, response, body) => {
-    // const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    // chai.expect(json.message).to.equal('Not Found');
-    // chai.expect(json.description).to.equal('User does not exist.');
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(404);
+    chai.expect(json.message).to.equal('Not Found');
+    chai.expect(json.description).to.equal('Cannot find user.');
     done();
   });
 }
