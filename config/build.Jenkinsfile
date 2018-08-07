@@ -78,7 +78,7 @@ pipeline {
                 sh 'NODE_ENV=stage node mbee docker --clean'
 
                 // Runs the production container in the background
-                sh "echo 'run'"
+                sh "echo 'run nothing changed'"
                 sh "NODE_ENV=stage node mbee docker --run -v ./config:/lm/mbee/config"
             }
         }
