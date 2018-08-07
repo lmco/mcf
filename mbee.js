@@ -80,7 +80,8 @@ Object.defineProperty(M, 'version4', {
  */
 Object.defineProperty(M, 'require', {
   value: m => {
-    const p = path.join(__dirname, 'app', m.replace('.', path.sep));
+    const mod = m.split('.').join('/');
+    const p = path.join(__dirname, 'app', mod);
     return require(p); // eslint-disable-line global-require
   },
   writable: false,
