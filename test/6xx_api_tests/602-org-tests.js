@@ -47,9 +47,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - describe this function
    */
-  before(function(done) {
-    this.timeout(5000);
-
+  before((done) => {
     const db = M.require('lib/db'); // TODO M.lib.db
     db.connect();
 
@@ -81,8 +79,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - add description
    */
-  after(function(done) {
-    this.timeout(5000);
+  after((done) => {
     User.findOneAndRemove({
       username: M.config.test.username
     }, (err) => {
@@ -93,24 +90,24 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should GET an empty organization', getOrgs).timeout(3000);
-  it('should POST an organization', postOrg01).timeout(3000);
-  it('should POST second organization', postOrg02).timeout(3000);
-  it('should GET posted organization', getOrg01).timeout(3000);
-  it('should PUT an update to posted organization', putOrg01).timeout(3000);
-  it('should reject a PUT with invalid name', rejectPutName).timeout(3000);
-  it('should reject a PUT to the org ID', rejectPutID).timeout(3000);
-  it('should get organization roles for a user', orgRole).timeout(3000);
-  it('should reject a get org roles for another user', rejectRole).timeout(3000);
-  it('should GET 2 organizations', getTwoOrgs).timeout(3000);
-  it('should reject a POST with ID mismatch', postOrg02Err).timeout(3000);
+  it('should GET an empty organization', getOrgs);
+  it('should POST an organization', postOrg01);
+  it('should POST second organization', postOrg02);
+  it('should GET posted organization', getOrg01);
+  it('should PUT an update to posted organization', putOrg01);
+  it('should reject a PUT with invalid name', rejectPutName);
+  it('should reject a PUT to the org ID', rejectPutID);
+  it('should get organization roles for a user', orgRole);
+  it('should reject a get org roles for another user', rejectRole);
+  it('should GET 2 organizations', getTwoOrgs);
+  it('should reject a POST with ID mismatch', postOrg02Err);
   it('should reject a POST with invalid org id', postInvalidOrg).timeout(5000);
-  it('should reject a POST with missing org name', postOrg03).timeout(3000);
-  it('should reject a POST with an empty name', postEmptyOrg).timeout(3000);
+  it('should reject a POST with missing org name', postOrg03);
+  it('should reject a POST with an empty name', postEmptyOrg);
   it('should reject a POST of a repeat org', postOrg04).timeout(5000);
-  it('should DELETE organization', deleteOrg01).timeout(3000);
-  it('should DELETE second organization', deleteOrg02).timeout(3000);
-  it('should GET 0 organizations', getOrgs03).timeout(3000);
+  it('should DELETE organization', deleteOrg01);
+  it('should DELETE second organization', deleteOrg02);
+  it('should GET 0 organizations', getOrgs03);
 });
 
 /* --------------------( Tests )-------------------- */

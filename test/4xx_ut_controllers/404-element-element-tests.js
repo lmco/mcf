@@ -47,8 +47,7 @@ describe(M.getModuleName(module.filename), () => {
    * This function runs before all the tests in this test suite.
    * TODO - What does this function do?
    */
-  before(function(done) {
-    this.timeout(10000);
+  before((done) => {
     const db = M.require('lib/db'); // TODO - use M.lib.db?
     db.connect();
 
@@ -98,8 +97,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * This function runs after all the tests are done
    */
-  after(function(done) {
-    this.timeout(5000);
+  after((done) => {
     // Remove the project and org together
     OrgController.removeOrg(user, org.id, { soft: false })
     .then(() => {
@@ -135,7 +133,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should fail updating an elements parent field', updateElementParent);
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
-  it('should soft delete all elements', softDeleteAllElements).timeout(3000);
+  it('should soft delete all elements', softDeleteAllElements);
   it('should hard delete all elements', hardDeleteAllElements);
 });
 
@@ -190,7 +188,7 @@ function createChildElement(done) {
         id: org.id
       }
     },
-    type: 'Element',
+    type: 'Block',
     parent: 'elem0'
   };
   ElemController.createElement(user, newElement)
@@ -223,7 +221,7 @@ function createElementNonPackageParent(done) {
         id: org.id
       }
     },
-    type: 'Element',
+    type: 'Block',
     parent: 'elem1'
   };
   ElemController.createElement(user, newElement)
@@ -349,9 +347,9 @@ function findElements(done) {
  * Finds all elements of type Element for a project
  */
 function findElementsSpecificType(done) {
-  ElemController.findElements(user, org.id, proj.id, 'Element')
+  ElemController.findElements(user, org.id, proj.id, 'Block')
   .then((retElems) => {
-    chai.expect(retElems.length).to.equal(1);
+    chai.expect(retElems.length).to.equal(2);
     done();
   })
   .catch((error) => {

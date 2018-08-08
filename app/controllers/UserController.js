@@ -45,7 +45,7 @@ class UserController {
    *
    * @example
    * UserController.findUsers()
-   * .then(function(org) {
+   * .then(function(users) {
    *   // do something with the found users
    * })
    * .catch(function(error) {
@@ -54,18 +54,15 @@ class UserController {
    */
   static findUsers() {
     return new Promise(((resolve, reject) => {
-      User.find({ deletedOn: null })
-      .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
-      .exec((err, users) => {
-        // Check if error occured
-        if (err) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
+      UserController.findUsersQuery({ deletedOn: null })
+      .then((users) => {
         // Convert to public user data
         const publicUsers = users.map(u => u.getPublicData());
-        // Otherwise return 200 and the users' public JSON
+
+        // Return the users' public JSON
         return resolve(publicUsers);
-      });
+      })
+      .catch((error) => reject(error));
     }));
   }
 
@@ -74,8 +71,8 @@ class UserController {
    * @description  This function takes a username and finds a user
    *
    * @example
-   * UserController.findUser('austin')
-   * .then(function(org) {
+   * UserController.findUser('tstark')
+   * .then(function(user) {
    *   // do something with the found user
    * })
    * .catch(function(error) {
@@ -86,26 +83,63 @@ class UserController {
    * @param  {String} searchedUsername  The username of the searched user.
    */
   static findUser(searchedUsername) {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const username = M.lib.sani.sanitize(searchedUsername);
 
-      User.findOne({ username: username, deletedOn: null })
+      const query = { username: username, deletedOn: null };
+
+      UserController.findUsersQuery(query)
+      .then((users) => {
+        // Ensure a user was found
+        if (users.length < 1) {
+          return reject(new errors.CustomError('Cannot find user.', 404));
+        }
+
+        // Ensure only one user was found
+        if (users.length > 1) {
+          return reject(new errors.CustomError('More than one user found.', 400));
+        }
+
+        const user = users[0];
+        // Return the user
+        return resolve(user);
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
+
+  /**
+   * @description  Finds users by a database query.
+   *
+   * @example
+   * UserController.findUsersQuery({ fname: 'Tony' })
+   * .then(function(users) {
+   *   // do something with the found users
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {Object} usersQuery  The query to be made to the database.
+   */
+  static findUsersQuery(usersQuery) {
+    return new Promise((resolve, reject) => {
+      const query = M.lib.sani.sanitize(usersQuery);
+
+      User.find(query)
       .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
-      .exec((err, user) => {
-        // Check if error occured
+      .exec((err, users) => {
+        // Check if error occurred
         if (err) {
           return reject(new errors.CustomError('Find failed.'));
         }
 
-        // Check if user exists
-        if (user === null) {
-          return reject(new errors.CustomError('Cannot find user.', 404));
-        }
-
-        // Otherwise return 200 and the user's public JSON
-        return resolve(user);
+        // Return the found users
+        return resolve(users);
       });
-    }));
+    });
   }
 
 
@@ -114,8 +148,8 @@ class UserController {
    * and creates a new user.
    *
    * @example
-   * UserController.createUser({Josh}, {username: 'abieber', fname: 'Austin', lname: 'Bieber'})
-   * .then(function(org) {
+   * UserController.createUser({Tony}, {username: 'ppotts', fname: 'Pepper', lname: 'Potts'})
+   * .then(function(user) {
    *   // do something with the newly created user
    * })
    * .catch(function(error) {
@@ -168,8 +202,8 @@ class UserController {
    * JSON data and updates a users.
    *
    * @example
-   * UserController.updateUser({Josh}, 'austin', {fname: 'Austin'})
-   * .then(function(org) {
+   * UserController.updateUser({Tony}, 'ppotts', {fname: 'Pep'})
+   * .then(function(user) {
    *   // do something with the newly update user
    * })
    * .catch(function(error) {
@@ -255,9 +289,9 @@ class UserController {
    * @description  This function takes a user object and username and deletes a user.
    *
    * @example
-   * UserController.removeUser({Josh}, 'austin')
-   * .then(function(org) {
-   *   // do something with the newly deleted users username
+   * UserController.removeUser({Tony}, 'ppotts')
+   * .then(function(user) {
+   *   // do something with the deleted users username
    * })
    * .catch(function(error) {
    *   M.log.error(error);

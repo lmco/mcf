@@ -49,8 +49,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - add description
    */
-  before(function(done) {
-    this.timeout(5000);
+  before((done) => {
     const db = M.require('lib/db'); // TODO - M.lib.db
     db.connect();
 
@@ -118,8 +117,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - Add detailed description
    */
-  after(function(done) {
-    this.timeout(5000);
+  after((done) => {
     // Delete the org
     OrgController.removeOrg(user, 'nineteenforty', { soft: false })
     .then((retOrg) => {
@@ -169,7 +167,7 @@ function postElement(done) {
           id: org.id
         }
       },
-      type: 'Element'
+      type: 'Block'
     })
   },
   (err, response, body) => {
