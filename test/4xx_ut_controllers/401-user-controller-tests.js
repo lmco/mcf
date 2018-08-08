@@ -313,7 +313,7 @@ function badUser(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Save failed.');
+    chai.expect(error.description).to.equal('Username is not valid.');
     done();
   });
 }
@@ -338,7 +338,7 @@ function invalidUser(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Save failed.');
+    chai.expect(error.description).to.equal('Username is not valid.');
     done();
   });
 }
