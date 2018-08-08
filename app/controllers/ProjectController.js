@@ -83,32 +83,24 @@ class ProjectController {
 
         const popQuery = 'org';
 
-        let searchParams = { org: org._id, deleted: false };
+        let searchParams = {org: org._id, deleted: false};
 
         if (softDeleted && reqUser.admin) {
-          searchParams = { org: org._id };
+          searchParams = {org: org._id};
         }
 
         // Search for project
-        Project.find(searchParams)
-        .populate(popQuery)
-        .exec((err, projects) => {
-          // Error Check - Database/Server Error
-          if (err) {
-            return reject(err);
-          }
-
-          // Error Check - Ensure at least one project is found
-          if (projects.length < 1) {
-            return resolve([]);
-          }
-
-
-          // Return resulting project
-          return resolve(projects);
-        });
+        return ProjectController.findProjectsQuery(searchParams);
       })
+      .then((projects) => {
+        // Error Check - Ensure at least one project is found
+        if (projects.length < 1) {
+          return resolve([]);
+        }
 
+        // Return resulting project
+        return resolve(projects);
+      })
       .catch((orgFindErr) => reject(orgFindErr));
     });
   }
@@ -217,18 +209,16 @@ class ProjectController {
         searchParams = { uid: projUID };
       }
 
-      // Search for project
-      Project.find(searchParams)
-      .populate('org permissions.read permissions.write permissions.admin')
-      .exec((err, projects) => {
-        // Error Check - Database/Server Error
-        if (err) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
-
+      ProjectController.findProjectsQuery(searchParams)
+      .then((projects) => {
         // Error Check - Ensure only 1 project is found
         if (projects.length < 1) {
           return reject(new errors.CustomError('Project not found.', 404));
+        }
+
+        // Ensure only one project was found
+        if (projects.length > 1) {
+          return reject(new errors.CustomError('More than one project found.', 400));
         }
 
         // Check Permissions
@@ -240,6 +230,41 @@ class ProjectController {
 
         // Return resulting project
         return resolve(project);
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
+  /**
+   * @description  This function takes a query and finds the project.
+   *
+   * @example
+   * ProjectController.findProjectsQuery({ uid: 'org:proj' })
+   * .then(function(org) {
+   *   // do something with the found projects.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {Object} projectQuery  The query to be made to the database
+   */
+  static findProjectsQuery(projectQuery) {
+    return new Promise((resolve, reject) => {
+
+      const query = M.lib.sani.sanitize(projectQuery);
+
+      Project.find(query)
+      .populate('org permissions.read permissions.write permissions.admin')
+      .exec((err, projects) => {
+        // Error Check - Database/Server Error
+        if (err) {
+          return reject(err);
+        }
+
+        // Return resulting project
+        return resolve(projects);
       });
     });
   }

@@ -104,7 +104,7 @@ class ElementController {
           searchParams.type = type;
         }
 
-        return ElementController.findElementQuery(searchParams);
+        return ElementController.findElementsQuery(searchParams);
       })
       .then((elements) => resolve(elements))
       .catch((error) => reject(error));
@@ -253,7 +253,7 @@ class ElementController {
         searchParams = { uid: elemUID };
       }
 
-      ElementController.findElementQuery(searchParams)
+      ElementController.findElementsQuery(searchParams)
       .then((elements) => {
         // Ensure only one element is returned
         if (elements.length === 0) {
@@ -279,7 +279,7 @@ class ElementController {
   }
 
   /**
-   * @description  This function takes a query and find the element.
+   * @description  This function takes a query and finds the element.
    *
    * @example
    * ElementController.findElementQuery({ uid: 'org:project:id' })
@@ -293,7 +293,7 @@ class ElementController {
    *
    * @param  {Object} elementQuery  The query to be used to find the element.
    */
-  static findElementQuery(elementQuery) {
+  static findElementsQuery(elementQuery) {
     return new Promise((resolve, reject) => {
 
       // TODO: Figure out case where elementType = null and sani changes to ''
