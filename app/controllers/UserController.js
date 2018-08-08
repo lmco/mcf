@@ -129,6 +129,7 @@ class UserController {
    */
   static createUser(requestingUser, newUser) { // eslint-disable-line consistent-return
     return new Promise(((resolve, reject) => {
+
       try {
         utils.assertAdmin(requestingUser);
         utils.assertExists(['username'], newUser);
@@ -141,6 +142,21 @@ class UserController {
       // Ensure the username is properly formatted
       if (!RegExp(valid.user.username).test(newUser.username)) {
         return reject(new errors.CustomError('Username is not valid.', 400));
+      }
+      if (utils.checkExists(['fname'], newUser)) {
+        if (!RegExp(valid.user.name).test(newUser.fname)) {
+          return reject(new errors.CustomError('First name is not valid.', 400));
+        }
+      }
+      if (utils.checkExists(['lname'], newUser)) {
+        if (!RegExp(valid.user.name).test(newUser.lname)) {
+          return reject(new errors.CustomError('Last name is not valid.', 400));
+        }
+      }
+      if (utils.checkExists(['email'], newUser)) {
+        if (!RegExp(valid.user.email).test(newUser.email)) {
+          return reject(new errors.CustomError('Email is not valid.', 400));
+        }
       }
 
       User.find({ username: M.lib.sani.sanitize(newUser.username) })

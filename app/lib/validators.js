@@ -64,7 +64,8 @@ module.exports.user = {
       return false;
     }
   },
-  email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$'
+  email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
+  name: '^([a-zA-Z])+([A-Za-z ])*$'
 };
 
 module.exports.url = {

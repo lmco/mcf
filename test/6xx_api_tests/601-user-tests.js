@@ -271,8 +271,8 @@ function rejectNamePut(done) {
   },
   (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(500);
-    chai.expect(json.message).to.equal('Internal Server Error');
+    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.description).to.equal('First name is not valid.');
     done();
   });
 }
