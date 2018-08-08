@@ -48,7 +48,7 @@ M.getModuleName = fname => fname.split('/')[fname.split('/').length - 1];
 
 // Configuration file parsing and initialization
 const parseJSON = M.require('lib.parse-json');
-M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.json`)));
+M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.cfg`)));
 
 // Set config secret if it's set to RANDOM
 if (M.config.server.secret === 'RANDOM') {

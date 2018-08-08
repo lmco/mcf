@@ -263,9 +263,16 @@ class ProjectController {
    */
   static createProject(reqUser, project) {
     return new Promise((resolve, reject) => {
+      // Optional fields
+      let custom = null;
+
       try {
         utils.assertExists(['id', 'name', 'org.id'], project);
         utils.assertType([project.id, project.name, project.org.id], 'string');
+        if (utils.checkExists(['custom'], project)) {
+          utils.assertType([project.custom], 'object');
+          custom = M.lib.sani.html(project.custom);
+        }
       }
       catch (error) {
         return reject(error);
@@ -283,7 +290,6 @@ class ProjectController {
       if (!RegExp(M.lib.validators.project.name).test(projName)) {
         return reject(new errors.CustomError('Project name is not valid.', 400));
       }
-
       // Error check - Make sure the org exists
       OrgController.findOrg(reqUser, orgID)
       .then((org) => {
@@ -311,7 +317,8 @@ class ProjectController {
                 write: [reqUser._id],
                 admin: [reqUser._id]
               },
-              uid: utils.createUID(orgID, projID)
+              uid: utils.createUID(orgID, projID),
+              custom: custom
             });
 
             newProject.save((saveErr, projectUpdated) => {
@@ -411,14 +418,28 @@ class ProjectController {
             return reject(new errors.CustomError(`Users cannot update [${updateField}] of Projects.`, 400));
           }
           // Error Check - Check if updated field is of type string
-          if (!utils.checkType([projectUpdated[updateField]], 'string')) {
+          if (!utils.checkType([projectUpdated[updateField]], 'string')
+            && (Project.schema.obj[updateField].type.schemaName !== 'Mixed')) {
             return reject(new errors.CustomError(`The Project [${updateField}] is not of type String`, 400));
           }
 
-          // sanitize field
-          updateVal = M.lib.sani.sanitize(projectUpdated[updateField]);
-          // Update field in project object
-          project[updateField] = updateVal;
+          // Updates each individual tag that was provided.
+          if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
+            // eslint-disable-next-line no-loop-func
+            Object.keys(projectUpdated[updateField]).forEach((key) => {
+              project.custom[key] = M.lib.sani.sanitize(projectUpdated[updateField][key]);
+            });
+
+            // Special thing for mixed fields in Mongoose
+            // http://mongoosejs.com/docs/schematypes.html#mixed
+            project.markModified(updateField);
+          }
+          else {
+            // sanitize field
+            updateVal = M.lib.sani.sanitize(projectUpdated[updateField]);
+            // Update field in project object
+            project[updateField] = updateVal;
+          }
         }
 
         // Save updated org

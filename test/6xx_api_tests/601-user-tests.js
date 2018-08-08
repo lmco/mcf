@@ -208,7 +208,6 @@ function whoamIapi(done) {
 /**
  * Makes an invalid POST request to /api/users/:username. This an attempt to
  * create a user with an invalid username. Response is an error thrown.
- * JIRA-BUG: MBX-281, fix test when api errors are implemented.
  */
 function rejectUPost(done) {
   request({
@@ -224,8 +223,8 @@ function rejectUPost(done) {
   },
   (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(500);
-    chai.expect(json.message).to.equal('Internal Server Error');
+    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.description).to.equal('Username is not valid.');
     done();
   });
 }
@@ -437,7 +436,6 @@ function rejectName(done) {
 /**
  * Makes a invalid DELETE request to /api/users/:username. This is to delete non
  * existing user. Response should throw an error saying user does not exist.
- * JIRA-BUG: MBX-282 Fix test when api errors are updated.
  *
  */
 function rejectDelete(done) {
@@ -450,10 +448,10 @@ function rejectDelete(done) {
     })
   },
   (err, response, body) => {
-    // const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    // chai.expect(json.message).to.equal('Not Found');
-    // chai.expect(json.description).to.equal('User does not exist.');
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(404);
+    chai.expect(json.message).to.equal('Not Found');
+    chai.expect(json.description).to.equal('Cannot find user.');
     done();
   });
 }

@@ -23,6 +23,7 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.require('models/User');
 const errors = M.require('lib/errors');
 const utils = M.require('lib/utils');
+const valid = M.require('lib/validators');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -99,7 +100,7 @@ class UserController {
 
         // Check if user exists
         if (user === null) {
-          return reject(new errors.CustomError('Cannot find user', 404));
+          return reject(new errors.CustomError('Cannot find user.', 404));
         }
 
         // Otherwise return 200 and the user's public JSON
@@ -135,6 +136,11 @@ class UserController {
       }
       catch (error) {
         return reject(error);
+      }
+
+      // Ensure the username is properly formatted
+      if (!RegExp(valid.user.username).test(newUser.username)) {
+        return reject(new errors.CustomError('Username is not valid.', 400));
       }
 
       User.find({ username: M.lib.sani.sanitize(newUser.username) })
@@ -221,7 +227,22 @@ class UserController {
           if (!user.isUpdateAllowed(props[i])) {
             return reject(new errors.CustomError('Update not allowed', 401));
           }
-          user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
+
+          // Updates each individual tag that was provided.
+          if (User.schema.obj[props[i]].type.schemaName === 'Mixed') {
+            // eslint-disable-next-line no-loop-func
+            Object.keys(newUserData[props[i]]).forEach((key) => {
+              user.custom[key] = M.lib.sani.sanitize(newUserData[props[i]][key]);
+            });
+
+            // Special thing for mixed fields in Mongoose
+            // http://mongoosejs.com/docs/schematypes.html#mixed
+            user.markModified(props[i]);
+          }
+          else {
+            // sanitize field
+            user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
+          }
         }
 
         // Save the user
@@ -266,15 +287,22 @@ class UserController {
         return reject(new errors.CustomError('User cannot delete themselves.', 401));
       }
 
-      // Do the deletion
-      User.findOneAndRemove({ username: M.lib.sani.sanitize(usernameToDelete) })
-      .populate()
-      .exec((err) => {
-        if (err) {
-          return reject(new errors.CustomError('Find and delete failed.'));
-        }
-        return resolve(usernameToDelete);
-      });
+      const username = M.lib.sani.sanitize(usernameToDelete);
+
+      // Find the user first to ensure their existence
+      UserController.findUser(username)
+      .then(() => {
+        // Do the deletion
+        User.findOneAndRemove({ username: username })
+        .populate()
+        .exec((err) => {
+          if (err) {
+            return reject(new errors.CustomError('Find and delete failed.'));
+          }
+          return resolve(usernameToDelete);
+        });
+      })
+      .catch((error) => reject(error));
     }));
   }
 

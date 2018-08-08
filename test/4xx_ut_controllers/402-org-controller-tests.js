@@ -166,15 +166,20 @@ describe(M.getModuleName(module.filename), () => {
 function addNewOrg(done) {
   const orgData = {
     id: 'boombox',
-    name: 'Star Lords Boombox'
+    name: 'Star Lords Boombox',
+    custom: {
+      leader: 'Star Lord'
+    }
   };
   OrgController.createOrg(user, orgData)
+  .then(() => OrgController.findOrg(user, 'boombox'))
   .then((retOrg) => {
     chai.expect(retOrg.id).to.equal('boombox');
     chai.expect(retOrg.name).to.equal('Star Lords Boombox');
-    chai.expect(retOrg.permissions.read).to.include(user._id.toString());
-    chai.expect(retOrg.permissions.write).to.include(user._id.toString());
-    chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
+    chai.expect(retOrg.permissions.read[0].id).to.equal(user._id.toString());
+    chai.expect(retOrg.permissions.write[0].id).to.equal(user._id.toString());
+    chai.expect(retOrg.permissions.admin[0].id).to.equal(user._id.toString());
+    chai.expect(retOrg.custom.leader).to.equal('Star Lord');
     done();
   })
   .catch((error) => {
@@ -287,9 +292,20 @@ function nonAUpdate(done) {
  * Tests updating an org
  */
 function updateOrg(done) {
-  OrgController.updateOrg(user, 'boombox', { id: 'boombox', name: 'Stolen boombox' })
+  const orgData = {
+    id: 'boombox',
+    name: 'Stolen boombox',
+    custom: {
+      leader: 'Groot',
+      musicType: 'I am Groot'
+    }
+  };
+  OrgController.updateOrg(user, 'boombox', orgData)
+  .then(() => OrgController.findOrg(user, 'boombox'))
   .then((retOrg) => {
     chai.expect(retOrg.name).to.equal('Stolen boombox');
+    chai.expect(retOrg.custom.leader).to.equal('Groot');
+    chai.expect(retOrg.custom.musicType).to.equal('I am Groot');
     done();
   })
   .catch((error) => {
