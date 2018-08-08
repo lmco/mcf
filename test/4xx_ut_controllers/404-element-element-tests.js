@@ -188,7 +188,7 @@ function createChildElement(done) {
         id: org.id
       }
     },
-    type: 'Element',
+    type: 'Block',
     parent: 'elem0'
   };
   ElemController.createElement(user, newElement)
@@ -202,7 +202,6 @@ function createChildElement(done) {
     done();
   })
   .catch((error) => {
-    console.log(error);
     chai.expect(error.description).to.equal(null);
     done();
   });
@@ -222,7 +221,7 @@ function createElementNonPackageParent(done) {
         id: org.id
       }
     },
-    type: 'Element',
+    type: 'Block',
     parent: 'elem1'
   };
   ElemController.createElement(user, newElement)
@@ -348,9 +347,9 @@ function findElements(done) {
  * Finds all elements of type Element for a project
  */
 function findElementsSpecificType(done) {
-  ElemController.findElements(user, org.id, proj.id, 'Element')
+  ElemController.findElements(user, org.id, proj.id, 'Block')
   .then((retElems) => {
-    chai.expect(retElems.length).to.equal(1);
+    chai.expect(retElems.length).to.equal(2);
     done();
   })
   .catch((error) => {

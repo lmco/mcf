@@ -188,7 +188,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates a generic element
  */
 function createElement(done) {
-  const newElement = new Element.Element({
+  const newElement = new Element.Block({
     id: '0000',
     uid: 'avengers:timeloop:0000',
     name: 'The begining of time loop',

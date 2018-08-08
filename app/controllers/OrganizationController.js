@@ -53,7 +53,6 @@ class OrganizationController {
    */
   static findOrgs(user) {
     return new Promise((resolve, reject) => {
-
       const userID = M.lib.sani.sanitize(user._id);
 
       OrganizationController.findOrgsQuery({ 'permissions.read': userID, deleted: false })
@@ -144,7 +143,6 @@ class OrganizationController {
    */
   static findOrgsQuery(orgQuery) {
     return new Promise((resolve, reject) => {
-
       const query = M.lib.sani.sanitize(orgQuery);
 
       Organization.find(query)

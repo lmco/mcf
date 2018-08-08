@@ -77,11 +77,11 @@ class ElementController {
         // or discriminator from Element.js. Do not confuse
         // this Element as the Element model; it's just the exported file
         // containing the Element model along with Relationship, Block, etc.
-        const typeExists = Object.keys(Element).includes(type);
+        let typeExists = Object.keys(Element).includes(type);
 
-        // Handle Element case, where type should be null
+        // Ensure type is not 'Element'
         if (type === 'Element') {
-          type = null;
+          typeExists = false;
         }
 
         if (!typeExists) {
@@ -99,7 +99,7 @@ class ElementController {
         }
 
         // Create the list of search parameters
-        const searchParams = {project: project._id};
+        const searchParams = { project: project._id };
         if (type !== '') {
           searchParams.type = type;
         }
@@ -108,7 +108,6 @@ class ElementController {
       })
       .then((elements) => resolve(elements))
       .catch((error) => reject(error));
-
     });
   }
 
@@ -295,7 +294,6 @@ class ElementController {
    */
   static findElementsQuery(elementQuery) {
     return new Promise((resolve, reject) => {
-
       // TODO: Figure out case where elementType = null and sani changes to ''
       const query = M.lib.sani.sanitize(elementQuery);
 
@@ -398,7 +396,7 @@ class ElementController {
             // Get the element type
             let type = null;
             Object.keys(Element).forEach((k) => {
-              if (elementType === Element[k].modelName) {
+              if ((elementType === Element[k].modelName) && (elementType !== 'Element')) {
                 type = k;
               }
             });
@@ -428,39 +426,10 @@ class ElementController {
               .then((newElement) => resolve(newElement))
               .catch((createRelationshipError) => reject(createRelationshipError));
             }
-            else if (type === 'Block') {
+            else {
               ElementController.createBlock(reqUser, elemData)
               .then((newElement) => resolve(newElement))
               .catch((createRelationshipError) => reject(createRelationshipError));
-            }
-            else {
-              // Create new element
-              const newElement = new Element.Element({
-                id: elemID,
-                name: elemName,
-                project: proj._id,
-                uid: elemUID,
-                custom: custom,
-                documentation: documentation
-              });
-
-              // Update the parent element if one was provided
-              ElementController.updateParent(reqUser, elemData.orgID,
-                elemData.project.id, parentID, newElement)
-              .then((parentElementID) => {
-                newElement.parent = parentElementID;
-
-                // Save the new element
-                newElement.save((saveErr, elemUpdate) => {
-                  if (saveErr) {
-                    return reject(new errors.CustomError('Save Failed'));
-                  }
-
-                  // Return the element if succesful
-                  return resolve(elemUpdate);
-                });
-              })
-              .catch((updateParentError) => reject(updateParentError));
             }
           }
           else {

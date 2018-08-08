@@ -81,12 +81,10 @@ class ProjectController {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
-        const popQuery = 'org';
-
-        let searchParams = {org: org._id, deleted: false};
+        let searchParams = { org: org._id, deleted: false };
 
         if (softDeleted && reqUser.admin) {
-          searchParams = {org: org._id};
+          searchParams = { org: org._id };
         }
 
         // Search for project
@@ -252,7 +250,6 @@ class ProjectController {
    */
   static findProjectsQuery(projectQuery) {
     return new Promise((resolve, reject) => {
-
       const query = M.lib.sani.sanitize(projectQuery);
 
       Project.find(query)

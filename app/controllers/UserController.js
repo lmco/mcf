@@ -88,23 +88,23 @@ class UserController {
 
       const query = { username: username, deletedOn: null };
 
-     UserController.findUsersQuery(query)
-     .then((users) => {
-       // Ensure a user was found
-       if (users.length < 1) {
-         return reject(new errors.CustomError('Cannot find user.', 404));
-       }
+      UserController.findUsersQuery(query)
+      .then((users) => {
+        // Ensure a user was found
+        if (users.length < 1) {
+          return reject(new errors.CustomError('Cannot find user.', 404));
+        }
 
-       // Ensure only one user was found
-       if (users.length > 1) {
-         return reject(new errors.CustomError('More than one user found.', 400));
-       }
+        // Ensure only one user was found
+        if (users.length > 1) {
+          return reject(new errors.CustomError('More than one user found.', 400));
+        }
 
-       const user = users[0];
-       // Return the user
-       return resolve(user);
-     })
-     .catch((error) => reject(error));
+        const user = users[0];
+        // Return the user
+        return resolve(user);
+      })
+      .catch((error) => reject(error));
     });
   }
 
@@ -126,7 +126,6 @@ class UserController {
    */
   static findUsersQuery(usersQuery) {
     return new Promise((resolve, reject) => {
-
       const query = M.lib.sani.sanitize(usersQuery);
 
       User.find(query)
