@@ -127,6 +127,21 @@ class OrganizationController {
     });
   }
 
+  /**
+   * @description  This function takes a query and finds the org.
+   *
+   * @example
+   * OrganizationController.findOrgsQuery({ id: 'org' })
+   * .then(function(org) {
+   *   // do something with the found orgs.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {Object} orgQuery  The query to be made to the database
+   */
   static findOrgsQuery(orgQuery) {
     return new Promise((resolve, reject) => {
 
