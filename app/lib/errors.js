@@ -17,9 +17,7 @@
  * @description  Defines the custom error class.
  */
 
-const M = require('../../mbee.js');
-const logger = M.require('lib/logger');
-
+const logger = M.log;
 module.exports.CustomError = class CustomError extends Error {
 
   /**

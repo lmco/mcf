@@ -28,8 +28,6 @@
 
 const path = require('path');
 const express = require('express');
-const M = require(path.join(__dirname, '..', 'mbee.js'));
-
 const Middleware = M.require('lib.middleware');
 const APIController = M.require('controllers.APIController');
 const AuthController = M.require('lib.auth');

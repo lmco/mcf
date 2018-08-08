@@ -20,7 +20,7 @@
 
 const chai = require('chai');
 const M = require('../../mbee.js');
-const sanitization = M.require('lib/sanitization'); // TODO - use M.lib.sani?
+const sanitization = M.require('lib/sanitization'); // TODO - use sani?
 
 
 /* --------------------( Main )-------------------- */

@@ -20,12 +20,11 @@
 const fs = require('fs');
 const path = require('path');
 const ldap = require('ldapjs');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const LocalStrategy = M.require('auth.LocalStrategy');
 const User = M.require('models.User');
 const UserController = M.require('controllers.UserController');
 const errors = M.require('lib.errors');
-
+const sani = M.require('lib.sanitization');
 const ldapConfig = M.config.auth.ldap;
 
 /**
@@ -176,7 +175,7 @@ class LDAPStrategy {
     M.log.debug('Attempting to search for LDAP user.');
     // define promise for function
     return new Promise((resolve, reject) => {
-      const usernameSani = M.lib.sani.ldapFilter(username);
+      const usernameSani = sani.ldapFilter(username);
       // set filter for query based on username attribute and the configuration filter
       const filter = '(&'
                    + `(${ldapConfig.attributes.username}=${usernameSani})`

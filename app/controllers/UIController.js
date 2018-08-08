@@ -21,13 +21,12 @@
 
 const fs = require('fs');
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
-const User = M.require('models/User');
+const User = M.require('models.User');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 const swaggerJSDoc = require('swagger-jsdoc');
-
+const crypto = M.require('lib.crypto');
 
 /**
  * UIController.js
@@ -61,8 +60,8 @@ class UIController {
   static mbee(req, res) {
     return utils.render(req, res, {
       name: 'mbee',
-      org: M.lib.sani.sanitize(req.params.org),
-      project: M.lib.sani.sanitize(req.params.project),
+      org: sani.sanitize(req.params.org),
+      project: sani.sanitize(req.params.project),
       title: 'MBEE | Model-Based Engineering Environment'
     });
   }
@@ -121,9 +120,9 @@ class UIController {
    */
 
   static showAboutPage(req, res) {
-    const token = M.lib.crypto.inspectToken(req.session.token);
+    const token = crypto.inspectToken(req.session.token);
     User.findOne({
-      username: M.lib.sani.sanitize(token.username)
+      username: sani.sanitize(token.username)
     })
     .exec((err, user) => {
       if (err) {
@@ -188,7 +187,7 @@ class UIController {
   static showLoginPage(req, res) {
     let next = '';
     // make sure the passed in "next" parameter is valid
-    if (RegExp(M.lib.validators.url.next).test(req.query.next)) {
+    if (RegExp(validators.url.next).test(req.query.next)) {
       next = req.query.next;
     }
 
@@ -212,7 +211,7 @@ class UIController {
   static login(req, res) {
     // make sure the passed in "next" parameter is valid
     let next = null;
-    if (RegExp(M.lib.validators.url.next).test(req.body.next)) {
+    if (RegExp(validators.url.next).test(req.body.next)) {
       next = req.body.next;
     }
     else {

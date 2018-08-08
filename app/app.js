@@ -30,17 +30,16 @@ const flash = require('express-flash');
 //const M = require(`${__dirname}/../mbee.js`);
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
-
+const db = M.require('lib.db');
 // Instantiates our application
 const app = express();
 
-console.log(M);
-M.version = 'BLAH';
-process.exit();
+//console.log(M);
+//M.version = 'BLAH';
+//process.exit();
 
 // Connect to database, then initialize application
-M.lib.db
-.connect()
+db.connect()
 .then(conn => {
   initApp();
 })

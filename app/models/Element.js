@@ -37,7 +37,7 @@
 
 const path = require('path');
 const mongoose = require('mongoose');
-const M = require(path.join('..', '..', 'mbee.js'));
+const validators = M.require("lib.validators")
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };
@@ -65,7 +65,7 @@ const ElementSchema = new mongoose.Schema({
     required: true,
     index: true,
     unique: true,
-    match: RegExp(M.lib.validators.element.uid),
+    match: RegExp(validators.element.uid),
     maxlength: [128, 'Element UID is too long'],
     minlength: [2, 'Element UID is too short']
   },
@@ -80,7 +80,7 @@ const ElementSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    match: RegExp(M.lib.validators.element.id),
+    match: RegExp(validators.element.id),
     maxlength: [36, 'Element ID is too long'],
     minlength: [2, 'Element ID is too short']
     // default: function() {
@@ -104,7 +104,7 @@ const ElementSchema = new mongoose.Schema({
   name: {
     type: String,
     required: false,
-    match: RegExp(M.lib.validators.element.name),
+    match: RegExp(validators.element.name),
     maxlength: [64, 'Element name is too long'],
     minlength: [2, 'Element name is too short']
   },

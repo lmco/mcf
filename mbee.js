@@ -11,22 +11,19 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /*
- * mbee.js
+ * @module mbee.js
  *
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This file defines and implements the MBEE server functionality.
+ * @description This file defines and implements the MBEE server functionality.
  */
 
-
-
 // Node.js Built-in Modules
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs');                         // Access the filesystem
+const path = require('path');                     // Find directory paths
+const pkg = require(`${__dirname}/package.json`); // Metadata{version, build #, name, etc.]
 
-const pkg = require(`${__dirname}/package.json`);
-
-// Global MBEE helper object
+// The global MBEE helper object
 global.M = {};
 
 /**
@@ -39,7 +36,6 @@ Object.defineProperty(M, 'env', {
   writable: false,
   enumerable: true
 });
-
 
 /**
  * Defines the MBEE version by pulling the version field from the package.json.
@@ -60,7 +56,6 @@ Object.defineProperty(M, 'build', {
   enumerable: true
 });
 
-
 /**
  * Defines the 4-digit version number by combining the 3-digit version number
  * and appending the build number. If the build number does not exist, zero
@@ -72,22 +67,20 @@ Object.defineProperty(M, 'version4', {
   enumerable: true
 });
 
-
 /**
- * This function provides a utility fun tion for requiring other MBEE modules in
+ * This function provides a utility funtion for requiring other MBEE modules in
  * the app directory. The global-require is explicitly disabled here due to the
  * nature of this function.
  */
 Object.defineProperty(M, 'require', {
   value: m => {
-    const mod = m.split('.').join('/');
+    const mod = m.split('.').join(path.sep);
     const p = path.join(__dirname, 'app', mod);
     return require(p); // eslint-disable-line global-require
   },
   writable: false,
   enumerable: true
 });
-
 
 /**
  * Given a file-name (typically passed in as module.filename),
@@ -99,7 +92,6 @@ Object.defineProperty(M, 'getModuleName', {
   enumerable: true
 });
 
-
 // Set root and other path variables
 Object.defineProperty(M, 'root', {
   value: __dirname,
@@ -107,15 +99,15 @@ Object.defineProperty(M, 'root', {
   enumerable: true
 });
 
-
-// Configuration file parsing and initialization
+// Extract configuration json file and initiate the config object
 const parseJSON = M.require('lib.parse-json');
 const configPath = path.join('config', `${M.env}.cfg`);
 const stripComments = parseJSON.removeComments(configPath);
 const config = JSON.parse(stripComments);
 
-// Set config secret if it's set to RANDOM
+// Check if config secret is set to RANDOM
 if (config.server.secret === 'RANDOM') {
+  // Config state is RANDOM, generate and set config secret
   const random1 = Math.random().toString(36).substring(2, 15);
   const random2 = Math.random().toString(36).substring(2, 15);
   config.server.secret = random1 + random2;
@@ -130,38 +122,36 @@ Object.defineProperty(M, 'config', {
   enumerable: true
 });
 
-// This exports the basic MBEE version and config data so that modules may
-// have access to that data when they are loaded.
-// Other MBEE modules like lib and controllers are loaded after this.
-// That means that modules should not try to call other modules when they are
-// loaded. They can, however, call other modules later because the 'mbee' object
-// is re-exported after the modules loading is complete (see below)
-module.exports = M;
-
-
-// Set argument commands for use in configuration lib and main function
-const subcommand = process.argv.slice(2, 3)[0];
-const opts = process.argv.slice(3);
-
 /******************************************************************************
  *  Load Library Modules                                                      *
  ******************************************************************************/
-
+// Check if the module/build folder exist
 const installComplete = fs.existsSync(`${M.root}/node_modules`);
 const buildComplete = fs.existsSync(`${M.root}/build`);
 
-
-// If dependencies have been installed, initialize the MBEE helper functions
+// Check if dependencies are installed
 if (installComplete) {
-  M.log = M.require('lib.logger');
+  // Initialize the MBEE logger/helper functions
+  Object.defineProperty(M, 'log', {
+    value: M.require('lib.logger'),
+    writable: false,
+    enumerable: true
+  });
+
 }
 
+// Set argument commands for use in configuration lib and main function
+// Example: node mbee.js <subcommand> <opts>
+const subcommand = process.argv.slice(2, 3)[0];
+const opts = process.argv.slice(3);
+
+// Check for start command and build NOT completed
 if (subcommand === 'start' && !buildComplete) {
-// eslint-disable-next-line no-console
-  console.log('\nERROR: You must run the build command before running start.\n');
+  M.log.error('Must run build command before running start: "node mbee.js build"');
   process.exit(0);
 }
 
+// Define helper scripts
 const build = require(`${M.root}/scripts/build`);
 const clean = require(`${M.root}/scripts/clean`);
 const docker = require(`${M.root}/scripts/docker`);
@@ -169,13 +159,8 @@ const lint = require(`${M.root}/scripts/linter`);
 const start = require(`${M.root}/scripts/start`);
 const test = require(`${M.root}/scripts/test`);
 
-// Call main
-if (module.parent === null) {
-  main();
-}
-else {
-  module.exports = M;
-}
+// Invoke main
+main();
 
 /******************************************************************************
  *  Main Function                                                             *
@@ -194,6 +179,6 @@ function main() {
     tasks[subcommand](opts);
   }
   else {
-    console.log('Unknown command.'); // eslint-disable-line no-console
+    M.log.error('Unknown command');
   }
 }

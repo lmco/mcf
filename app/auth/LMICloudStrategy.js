@@ -19,10 +19,9 @@
  */
 
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const LocalStrategy = M.require('auth.LocalStrategy');
 const LDAPStrategy = M.require('auth.LDAPStrategy');
-const User = M.require('models/User');
+const User = M.require('models.User');
 const errors = M.require('lib.errors');
 
 /**

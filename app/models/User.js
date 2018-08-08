@@ -22,8 +22,7 @@
 const path = require('path');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
-const M = require(path.join('..', '..', 'mbee.js'));
-
+const validators = M.require('lib.validators');
 
 /**
  * @class  User
@@ -48,7 +47,7 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    match: RegExp(M.lib.validators.user.username)
+    match: RegExp(validators.user.username)
   },
 
   /**
@@ -73,7 +72,7 @@ const UserSchema = new mongoose.Schema({
      */
   email: {
     type: String,
-    match: RegExp(M.lib.validators.user.email)
+    match: RegExp(validators.user.email)
   },
 
   /**

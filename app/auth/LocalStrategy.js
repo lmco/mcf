@@ -19,12 +19,11 @@
  */
 
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.require('models/User');
-const libCrypto = M.lib.crypto;
-const sani = M.lib.sani;
-const errors = M.require('lib/errors');
-
+const libCrypto = M.require('lib.crypto');
+const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
+const crypto = M.require('lib.crypto');
 
 /**
  * LocalStrategy
@@ -206,7 +205,7 @@ class LocalStrategy {
     const dT = M.config.auth.token.expires * conversions[M.config.auth.token.units];
 
     // Generate the token and set the session token
-    const token = M.lib.crypto.generateToken({
+    const token = crypto.generateToken({
       type: 'user',
       username: req.user.username,
       created: (new Date(Date.now())).toUTCString(),

@@ -19,7 +19,7 @@
 
 const path = require('path');
 const { spawn } = require('child_process');
-const M = require(path.join(__dirname, '..', 'mbee.js'));
+
 
 if (module.parent == null) {
   test(process.argv.slice(2));

@@ -19,10 +19,11 @@
  */
 
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.require('models/User');
-const errors = M.require('lib/errors');
-const utils = M.require('lib/utils');
+const validators = M.require('lib.validators');
+const User = M.require('models.User');
+const errors = M.require('lib.errors');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -87,7 +88,7 @@ class UserController {
    */
   static findUser(searchedUsername) {
     return new Promise(((resolve, reject) => {
-      const username = M.lib.sani.sanitize(searchedUsername);
+      const username = sani.sanitize(searchedUsername);
 
       User.findOne({ username: username, deletedOn: null })
       .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
@@ -137,7 +138,7 @@ class UserController {
         return reject(error);
       }
 
-      User.find({ username: M.lib.sani.sanitize(newUser.username) })
+      User.find({ username: sani.sanitize(newUser.username) })
       .populate()
       .exec((findErr, users) => { // eslint-disable-line consistent-return
         if (findErr) {
@@ -151,7 +152,7 @@ class UserController {
         // Create the new user
         // We should just need to sanitize the input, the model should handle
         // data validation
-        const user = new User(M.lib.sani.sanitize(newUser));
+        const user = new User(sani.sanitize(newUser));
         user.save((saveErr) => {
           if (saveErr) {
             return reject(new errors.CustomError('Save failed.'));
@@ -193,7 +194,7 @@ class UserController {
       }
 
       // Check if user exists
-      User.find({ username: M.lib.sani.sanitize(usernameToUpdate), deletedOn: null })
+      User.find({ username: sani.sanitize(usernameToUpdate), deletedOn: null })
       .populate()
       .exec((findErr, users) => {
         // Error check
@@ -226,7 +227,7 @@ class UserController {
           if (User.schema.obj[props[i]].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
             Object.keys(newUserData[props[i]]).forEach((key) => {
-              user.custom[key] = M.lib.sani.sanitize(newUserData[props[i]][key]);
+              user.custom[key] = sani.sanitize(newUserData[props[i]][key]);
             });
 
             // Special thing for mixed fields in Mongoose
@@ -235,7 +236,7 @@ class UserController {
           }
           else {
             // sanitize field
-            user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
+            user[props[i]] = sani.sanitize(newUserData[props[i]]);
           }
         }
 
@@ -281,7 +282,7 @@ class UserController {
         return reject(new errors.CustomError('User cannot delete themselves.', 401));
       }
 
-      const username = M.lib.sani.sanitize(usernameToDelete);
+      const username = sani.sanitize(usernameToDelete);
 
       // Find the user first to ensure their existence
       UserController.findUser(username)

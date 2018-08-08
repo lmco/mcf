@@ -19,8 +19,7 @@
  */
 
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const sani = M.lib.sani;
+const sani = M.require('lib.sanitization');
 const AuthModule = require(path.join(__dirname, '..', 'auth', M.config.auth.strategy));
 
 // Error Check - Verify the AuthModule that has been imported implements the proper functions

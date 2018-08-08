@@ -23,7 +23,7 @@
 const path = require('path');
 const { spawn, spawnSync } = require('child_process');
 
-const M = require(path.join(__dirname, '..', 'mbee.js'));
+
 
 if (module.parent == null) {
   docker(process.argv.slice(2));

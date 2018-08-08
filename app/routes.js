@@ -17,11 +17,9 @@
 
 const path = require('path');
 const express = require('express');
-const M = require(path.join(__dirname, '..', 'mbee.js'));
-
-const UIController = M.require('controllers/UIController');
-const AuthController = M.require('lib/auth');
-const Middleware = M.require('lib/middleware');
+const UIController = M.require('controllers.UIController');
+const AuthController = M.require('lib.auth');
+const Middleware = M.require('lib.middleware');
 
 const router = express.Router();
 
@@ -97,7 +95,7 @@ router.route('/')
 );
 
 /* This renders the home page for logged in users */
-router.route(`/:org(${M.lib.validators.org.id})/:project`)
+router.route(`/:org/:project`)
 .get(
   AuthController.authenticate,
   Middleware.logRoute,

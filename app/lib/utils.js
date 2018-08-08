@@ -17,7 +17,6 @@
  * @description  Defines miscellaneous helper functions.
  */
 
-const M = require('../../mbee.js');
 const errors = M.require('lib/errors');
 const path = require('path');
 const fs = require('fs');

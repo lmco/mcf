@@ -20,15 +20,13 @@
  */
 
 const path = require('path');
-const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const M = mbee;
 const swaggerJSDoc = require('swagger-jsdoc');
-
-const ElementController = mbee.require('controllers/ElementController');
-const OrgController = mbee.require('controllers/OrganizationController');
-const ProjectController = mbee.require('controllers/ProjectController');
-const UserController = mbee.require('controllers/UserController');
-const errors = M.require('lib/errors');
+const sani = M.require('lib.sanitization');
+const ElementController = M.require('controllers.ElementController');
+const OrgController = M.require('controllers.OrganizationController');
+const ProjectController = M.require('controllers.ProjectController');
+const UserController = M.require('controllers.UserController');
+const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 
 
@@ -131,7 +129,7 @@ class APIController {
    * @description Returns the version number as a JSON.
    */
   static version(req, res) {
-    mbee.log.info(`GET "/api/version" requested by ${req.user.username}`);
+    M.log.info(`GET "/api/version" requested by ${req.user.username}`);
     const obj = {
       version: mbee.version,
       version4: mbee.version4,
@@ -227,7 +225,7 @@ class APIController {
    * organization's public data as JSON.
    */
   static getOrg(req, res) {
-    const orgid = M.lib.sani.sanitize(req.params.orgid);
+    const orgid = sani.sanitize(req.params.orgid);
 
     OrgController.findOrg(req.user, orgid)
     .then((org) => {
@@ -269,8 +267,8 @@ class APIController {
     }
 
     // Sanitize the input
-    const organizationID = M.lib.sani.sanitize(req.params.orgid);
-    const organizationName = M.lib.sani.sanitize(req.body.name);
+    const organizationID = sani.sanitize(req.params.orgid);
+    const organizationName = sani.sanitize(req.body.name);
 
     OrgController.createOrg(req.user, {
       id: organizationID,
@@ -317,7 +315,7 @@ class APIController {
     }
 
     // Sanitize the input
-    const organizationID = M.lib.sani.sanitize(req.params.orgid);
+    const organizationID = sani.sanitize(req.params.orgid);
 
     OrgController.updateOrg(req.user, organizationID, req.body)
     .then((org) => {
@@ -343,7 +341,7 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgid = M.lib.sani.sanitize(req.params.orgid);
+    const orgid = sani.sanitize(req.params.orgid);
 
     OrgController.removeOrg(req.user, orgid, req.body)
     .then((org) => {
@@ -366,8 +364,8 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgID = M.lib.sani.sanitize(req.params.orgid);
-    UserController.findUser(M.lib.sani.sanitize(req.params.username))
+    const orgID = sani.sanitize(req.params.orgid);
+    UserController.findUser(sani.sanitize(req.params.username))
     .then((user) => OrgController.findPermissions(req.user, user, orgID))
     .then((roles) => {
       res.header('Content-Type', 'application/json');
@@ -397,8 +395,8 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgID = M.lib.sani.sanitize(req.params.orgid);
-    UserController.findUser(M.lib.sani.sanitize(req.params.username))
+    const orgID = sani.sanitize(req.params.orgid);
+    UserController.findUser(sani.sanitize(req.params.username))
     .then((user) => OrgController.setPermissions(req.user, orgID, user, req.body.role))
     .then((org) => {
       res.header('Content-Type', 'application/json');
@@ -420,8 +418,8 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgID = M.lib.sani.sanitize(req.params.orgid);
-    UserController.findUser(M.lib.sani.sanitize(req.params.username))
+    const orgID = sani.sanitize(req.params.orgid);
+    UserController.findUser(sani.sanitize(req.params.username))
     .then((user) => OrgController.setPermissions(req.user, orgID, user, 'REMOVE_ALL'))
     .then((org) => {
       res.header('Content-Type', 'application/json');
@@ -443,7 +441,7 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgID = M.lib.sani.sanitize(req.params.orgid);
+    const orgID = sani.sanitize(req.params.orgid);
     OrgController.findAllPermissions(req.user, orgID)
     .then((members) => {
       res.header('Content-Type', 'application/json');
@@ -473,7 +471,7 @@ class APIController {
     }
 
     // Sanitize input
-    const orgid = M.lib.sani.html(req.params.orgid);
+    const orgid = sani.html(req.params.orgid);
 
     // Call project find with user and organization ID
     ProjectController.findProjects(req.user, orgid)
@@ -539,8 +537,8 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgid = M.lib.sani.html(req.params.orgid);
-    const projectid = M.lib.sani.html(req.params.projectid);
+    const orgid = sani.html(req.params.orgid);
+    const projectid = sani.html(req.params.projectid);
 
     ProjectController.findProject(req.user, orgid, projectid, true)
     .then((project) => {
@@ -577,9 +575,9 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const projectId = M.lib.sani.html(req.params.projectid);
-    const projectName = M.lib.sani.html(req.body.name);
-    const orgId = M.lib.sani.html(req.params.orgid);
+    const projectId = sani.html(req.params.projectid);
+    const projectName = sani.html(req.body.name);
+    const orgId = sani.html(req.params.orgid);
 
     ProjectController.createProject(req.user, {
       id: projectId,
@@ -618,8 +616,8 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const projectId = M.lib.sani.html(req.params.projectid);
-    const orgId = M.lib.sani.html(req.params.orgid);
+    const projectId = sani.html(req.params.projectid);
+    const orgId = sani.html(req.params.orgid);
 
     ProjectController.updateProject(req.user, orgId, projectId, req.body)
     .then((project) => {
@@ -643,8 +641,8 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgId = M.lib.sani.html(req.params.orgid);
-    const projectId = M.lib.sani.html(req.params.projectid);
+    const orgId = sani.html(req.params.orgid);
+    const projectId = sani.html(req.params.projectid);
 
     ProjectController.removeProject(req.user, orgId, projectId, req.body)
     .then((project) => {
@@ -662,8 +660,8 @@ class APIController {
     }
 
     // Sanitize Inputs
-    const orgID = M.lib.sani.html(req.params.orgid);
-    const projectID = M.lib.sani.html(req.params.projectid);
+    const orgID = sani.html(req.params.orgid);
+    const projectID = sani.html(req.params.projectid);
 
     // Find Project
     ProjectController.findAllPermissions(req.user, orgID, projectID)
@@ -681,9 +679,9 @@ class APIController {
     }
 
     // Sanitize Inputs
-    const orgID = M.lib.sani.html(req.params.orgid);
-    const projectID = M.lib.sani.html(req.params.projectid);
-    const username = M.lib.sani.html(req.params.username);
+    const orgID = sani.html(req.params.orgid);
+    const projectID = sani.html(req.params.projectid);
+    const username = sani.html(req.params.username);
 
     // Find User
     UserController.findUser(username)
@@ -702,10 +700,10 @@ class APIController {
     }
 
     // Sanitize Inputs
-    const orgID = M.lib.sani.html(req.params.orgid);
-    const projectID = M.lib.sani.html(req.params.projectid);
-    const username = M.lib.sani.html(req.params.username);
-    const permType = M.lib.sani.html(req.body.role);
+    const orgID = sani.html(req.params.orgid);
+    const projectID = sani.html(req.params.projectid);
+    const username = sani.html(req.params.username);
+    const permType = sani.html(req.body.role);
 
     // Find User to be set
     UserController.findUser(username)
@@ -725,9 +723,9 @@ class APIController {
     }
 
     // Sanitize Inputs
-    const orgID = M.lib.sani.html(req.params.orgid);
-    const projectID = M.lib.sani.html(req.params.projectid);
-    const username = M.lib.sani.html(req.params.username);
+    const orgID = sani.html(req.params.orgid);
+    const projectID = sani.html(req.params.projectid);
+    const username = sani.html(req.params.username);
     const permType = 'REMOVE_ALL';
 
     // Find User to be set
@@ -778,7 +776,7 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    UserController.findUser(M.lib.sani.sanitize(req.params.username))
+    UserController.findUser(sani.sanitize(req.params.username))
     .then((user) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(APIController.formatJSON(user.getPublicData()));
@@ -900,8 +898,8 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgid = M.lib.sani.sanitize(req.params.orgid);
-    const projid = M.lib.sani.sanitize(req.params.projectid);
+    const orgid = sani.sanitize(req.params.orgid);
+    const projid = sani.sanitize(req.params.projectid);
 
     ElementController.findElements(req.user, orgid, projid)
     .then((elements) => {
@@ -931,9 +929,9 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgid = M.lib.sani.sanitize(req.params.orgid);
-    const projid = M.lib.sani.sanitize(req.params.projectid);
-    const elemid = M.lib.sani.sanitize(req.params.elementid);
+    const orgid = sani.sanitize(req.params.orgid);
+    const projid = sani.sanitize(req.params.projectid);
+    const elemid = sani.sanitize(req.params.elementid);
 
     ElementController.findElement(req.user, orgid, projid, elemid)
     .then((element) => {
@@ -984,9 +982,9 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgid = M.lib.sani.sanitize(req.params.orgid);
-    const projid = M.lib.sani.sanitize(req.params.projectid);
-    const elemid = M.lib.sani.sanitize(req.params.elementid);
+    const orgid = sani.sanitize(req.params.orgid);
+    const projid = sani.sanitize(req.params.projectid);
+    const elemid = sani.sanitize(req.params.elementid);
 
     ElementController.updateElement(req.user, orgid, projid, elemid, req.body)
     .then((element) => {
@@ -1016,9 +1014,9 @@ class APIController {
       return res.status(error.status).send(error);
     }
 
-    const orgid = M.lib.sani.sanitize(req.params.orgid);
-    const projid = M.lib.sani.sanitize(req.params.projectid);
-    const elemid = M.lib.sani.sanitize(req.params.elementid);
+    const orgid = sani.sanitize(req.params.orgid);
+    const projid = sani.sanitize(req.params.projectid);
+    const elemid = sani.sanitize(req.params.elementid);
 
     ElementController.removeElement(req.user, orgid, projid, elemid, req.body)
     .then((element) => {

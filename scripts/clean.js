@@ -18,7 +18,7 @@
  */
 
 const path = require('path');
-const M = require(path.join(__dirname, '..', 'mbee.js'));
+
 
 if (module.parent == null) {
   clean(process.argv.slice(2));

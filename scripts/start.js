@@ -18,23 +18,21 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
-
-const M = require(path.join(__dirname, '..', 'mbee.js'));
-
+const startup = M.require('lib.startup');
 /**
  * Runs the MBEE server based on the configuration provided in the environment
  * config file.
  */
 
 function start(args) {
+  console.trace();
   M.log.debug(`${`+ mbee.js executed as ${process.argv.join(' ')} `
   + `with env=${M.env} and configuration: `}${JSON.stringify(M.config)}`);
 
-  M.lib.startup();                                 // Print startup banner
+  startup();                // Print startup banner
 
   // Import the app, disable the global-import rule for this
   const app = M.require('app');   // eslint-disable-line global-require
-
 
   /* eslint-disable no-var, vars-on-top, block-scoped-var */
 

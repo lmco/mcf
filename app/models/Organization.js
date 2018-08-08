@@ -20,8 +20,7 @@
 
 const mongoose = require('mongoose');
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
+const validators = M.require('lib.validators');
 /**
  * @class Organization
  *
@@ -40,7 +39,7 @@ const OrganizationSchema = new mongoose.Schema({
     required: true,
     index: true,
     unique: true,
-    match: RegExp(M.lib.validators.org.id),
+    match: RegExp(validators.org.id),
     maxlength: [36, 'Too many characters in username']
   },
 
@@ -56,7 +55,7 @@ const OrganizationSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    match: RegExp(M.lib.validators.org.name)
+    match: RegExp(validators.org.name)
   },
 
   /**

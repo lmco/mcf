@@ -22,9 +22,6 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
-
 /**
  * Created the connection to the database.
  */

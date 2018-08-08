@@ -19,9 +19,7 @@
  */
 
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const errors = M.require('lib/errors');
-
+const errors = M.require('lib.errors');
 
 /**
  * MiddleWare.js
