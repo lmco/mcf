@@ -45,7 +45,7 @@ class UserController {
    *
    * @example
    * UserController.findUsers()
-   * .then(function(org) {
+   * .then(function(users) {
    *   // do something with the found users
    * })
    * .catch(function(error) {
@@ -71,8 +71,8 @@ class UserController {
    * @description  This function takes a username and finds a user
    *
    * @example
-   * UserController.findUser('austin')
-   * .then(function(org) {
+   * UserController.findUser('tstark')
+   * .then(function(user) {
    *   // do something with the found user
    * })
    * .catch(function(error) {
@@ -149,8 +149,8 @@ class UserController {
    * and creates a new user.
    *
    * @example
-   * UserController.createUser({Josh}, {username: 'abieber', fname: 'Austin', lname: 'Bieber'})
-   * .then(function(org) {
+   * UserController.createUser({Tony}, {username: 'ppotts', fname: 'Pepper', lname: 'Potts'})
+   * .then(function(user) {
    *   // do something with the newly created user
    * })
    * .catch(function(error) {
@@ -203,8 +203,8 @@ class UserController {
    * JSON data and updates a users.
    *
    * @example
-   * UserController.updateUser({Josh}, 'austin', {fname: 'Austin'})
-   * .then(function(org) {
+   * UserController.updateUser({Tony}, 'ppotts', {fname: 'Pep'})
+   * .then(function(user) {
    *   // do something with the newly update user
    * })
    * .catch(function(error) {
@@ -290,9 +290,9 @@ class UserController {
    * @description  This function takes a user object and username and deletes a user.
    *
    * @example
-   * UserController.removeUser({Josh}, 'austin')
-   * .then(function(org) {
-   *   // do something with the newly deleted users username
+   * UserController.removeUser({Tony}, 'ppotts')
+   * .then(function(user) {
+   *   // do something with the deleted users username
    * })
    * .catch(function(error) {
    *   M.log.error(error);
