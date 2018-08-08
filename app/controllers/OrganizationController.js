@@ -149,10 +149,17 @@ class OrganizationController {
    */
   static createOrg(user, orgInfo) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+      // Optional fields
+      let custom = null;
+
       try {
         utils.assertAdmin(user);
         utils.assertExists(['id', 'name'], orgInfo);
         utils.assertType([orgInfo.id, orgInfo.name], 'string');
+        if (utils.checkExists(['custom'], orgInfo)) {
+          utils.assertType([orgInfo.custom], 'object');
+          custom = M.lib.sani.html(orgInfo.custom);
+        }
       }
       catch (error) {
         return reject(error);
@@ -185,7 +192,8 @@ class OrganizationController {
               admin: [user._id],
               write: [user._id],
               read: [user._id]
-            }
+            },
+            custom: custom
           });
           // Save and resolve the new error
           newOrg.save((saveOrgErr) => { // eslint-disable-line consistent-return
@@ -284,7 +292,8 @@ class OrganizationController {
             return reject(new errors.CustomError(`Users cannot update [${updateField}] of organizations.`, 400));
           }
           // Error Check - Check if updated field is of type string
-          if (!utils.checkType([orgUpdate[updateField]], 'string')) {
+          if (!utils.checkType([orgUpdate[updateField]], 'string')
+            && (Organization.schema.obj[updateField].type.schemaName !== 'Mixed')) {
             return reject(new errors.CustomError(`The Organization [${updateField}] is not of type String`, 400));
           }
 
@@ -295,10 +304,22 @@ class OrganizationController {
             }
           }
 
-          // sanitize field
-          updateVal = sani.sanitize(orgUpdate[updateField]);
-          // Update field in org object
-          org[updateField] = updateVal;
+          // Updates each individual tag that was provided.
+          if (Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
+            // eslint-disable-next-line no-loop-func
+            Object.keys(orgUpdate[updateField]).forEach((key) => {
+              org.custom[key] = sani.sanitize(orgUpdate[updateField][key]);
+            });
+            // Special thing for mixed fields in Mongoose
+            // http://mongoosejs.com/docs/schematypes.html#mixed
+            org.markModified(updateField);
+          }
+          else {
+            // sanitize field
+            updateVal = sani.sanitize(orgUpdate[updateField]);
+            // Update field in org object
+            org[updateField] = updateVal;
+          }
         }
 
         // Save updated org

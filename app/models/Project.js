@@ -149,6 +149,18 @@ const ProjectSchema = new mongoose.Schema({
       }
       return v;
     }
+  },
+
+  /**
+   * @memberOf  Project
+   * @property  custom
+   * @type {Schema.Types.Mixed}
+   *
+   * @description The projects's custom tags. This contains arbitrary key-value pairs of strings
+   * used to represent additional model data.
+   */
+  custom: {
+    type: mongoose.Schema.Types.Mixed
   }
 });
 
@@ -163,7 +175,7 @@ ProjectSchema.methods.getPermissionLevels = function() {
   * Returns the fields which users are allowed to update on a project.
   */
 ProjectSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'delete', 'deletedOn'];
+  return ['name', 'delete', 'deletedOn', 'custom'];
 };
 
 

@@ -124,6 +124,18 @@ const OrganizationSchema = new mongoose.Schema({
       }
       return v;
     }
+  },
+
+  /**
+   * @memberOf Organization
+   * @property custom
+   * @type {Schema.Types.Mixed}
+   *
+   * @description The org's custom tags. This contains arbitrary key-value pairs of strings
+   * used to represent additional model data.
+   */
+  custom: {
+    type: mongoose.Schema.Types.Mixed
   }
 });
 
@@ -165,7 +177,7 @@ OrganizationSchema.methods.getPermissionLevels = function() {
   * Returns the fields which users are allowed to update on an organization.
   */
 OrganizationSchema.methods.getValidUpdateFields = function() {
-  return ['name'];
+  return ['name', 'custom'];
 };
 
 // Required for virtual getters
