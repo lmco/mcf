@@ -49,8 +49,7 @@ describe(M.getModuleName(module.filename), () => {
    * Before: run before all tests
    * TODO - describe
    */
-  before(function(done) {
-    this.timeout(5000);
+  before((done) => {
     const db = M.require('lib/db'); // TODO - M.lib.db
     db.connect();
 
@@ -108,8 +107,7 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests
    * TODO - describe
    */
-  after(function(done) {
-    this.timeout(5000);
+  after((done) => {
     // Removing the Organization
     OrgController.removeOrg(user, 'biochemistry', { soft: false })
     .then((retOrg) => {

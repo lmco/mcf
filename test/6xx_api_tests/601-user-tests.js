@@ -45,9 +45,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - Add desc
    */
-  before(function(done) {
-    this.timeout(5000);
-
+  before((done) => {
     const db = M.require('lib/db');
     db.connect();
 
@@ -79,7 +77,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - Add detailed description
    */
-  after(function(done) {
+  after((done) => {
     User.findOneAndRemove({
       username: M.config.test.username
     }, (err) => {
