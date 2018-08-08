@@ -185,12 +185,17 @@ function createProject(done) {
     name: 'Iron man Suite',
     org: {
       id: 'starkhq'
+    },
+    custom: {
+      builtFor: 'Tony'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
+  .then((retProj) => ProjController.findProject(allSeeingUser, 'starkhq', retProj.id))
   .then((proj) => {
     chai.expect(proj.id).to.equal('ironman');
     chai.expect(proj.name).to.equal('Iron man Suite');
+    chai.expect(proj.custom.builtFor).to.equal('Tony');
     done();
   })
   .catch((error) => {
@@ -629,12 +634,19 @@ function updateProj(done) {
   const orgId = 'starkhq';
   const projId = 'ironman';
   const updateData = {
-    name: 'Tony Stark'
+    name: 'Tony Stark',
+    custom: {
+      builtFor: 'Rhodey',
+      version: 2.0
+    }
   };
   ProjController.updateProject(allSeeingUser, orgId, projId, updateData)
+  .then(() => ProjController.findProject(allSeeingUser, orgId, projId))
   .then((proj) => {
     chai.expect(proj.id).to.equal('ironman');
     chai.expect(proj.name).to.equal('Tony Stark');
+    chai.expect(proj.custom.builtFor).to.equal('Rhodey');
+    chai.expect(proj.custom.version).to.equal(2.0);
     done();
   })
   .catch((error) => {
