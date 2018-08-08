@@ -95,8 +95,12 @@ const ElementSchema = new mongoose.Schema({
   uuid: {
     type: String,
     required: false,
+    unique: true,
     set: function(v) {
       return uuidv4();
+    },
+    get: function(v) {
+      return this.uuid;
     }
   },
 

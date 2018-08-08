@@ -263,7 +263,39 @@ class ElementController {
 
         return resolve(element);
       })
-      .catch((error) => reject(error));
+      .catch((error) => {
+        if (error.description === 'No elements found.') {
+          console.log("Didn't find the first one...");
+
+          searchParams = { uuid: elemID, deleted: false };
+          if (softDeleted && reqUser.admin) {
+            searchParams = { uuid: elemID };
+          }
+          console.log(searchParams);
+
+          ElementController.findElementsQuery(searchParams)
+          .then((elements2) => {
+            console.log("Anything found...?")
+            // Ensure more than one element was not returned.
+            if (elements2.length > 1) {
+              return reject(new errors.CustomError('More than one element found.', 400));
+            }
+
+            const element2 = elements2[0];
+
+            const members = element2.project.permissions.read.map(u => u._id.toString());
+            if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
+              return reject(new errors.CustomError('User does not have permissions.', 401));
+            }
+
+            return resolve(element2);
+          })
+          .catch((error2) => reject(error2));
+        }
+        else {
+          return reject(error);
+        }
+      });
     });
   }
 
@@ -287,10 +319,13 @@ class ElementController {
 
       const query = M.lib.sani.sanitize(elementQuery);
 
+      console.log(query);
+
       Element.Element.find(query)
       .populate('parent project source target contains')
       .exec((findElementError, elements) => {
         if (findElementError) {
+          console.log(findElementError);
           return reject(new errors.CustomError('Find failed.'));
         }
 
