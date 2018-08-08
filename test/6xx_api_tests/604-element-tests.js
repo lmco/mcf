@@ -31,6 +31,7 @@ const request = require('request');
 const ProjController = M.require('controllers.ProjectController');
 const OrgController = M.require('controllers.OrganizationController');
 const AuthController = M.require('lib.auth');
+const mock_express = M.require('lib.mock-express');
 const User = M.require('models.User');
 const test = M.config.test;
 
