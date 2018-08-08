@@ -23,6 +23,7 @@ const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.require('models/User');
 const errors = M.require('lib/errors');
 const utils = M.require('lib/utils');
+const valid = M.require('lib/validators');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -169,6 +170,11 @@ class UserController {
       }
       catch (error) {
         return reject(error);
+      }
+
+      // Ensure the username is properly formatted
+      if (!RegExp(valid.user.username).test(newUser.username)) {
+        return reject(new errors.CustomError('Username is not valid.', 400));
       }
 
       User.find({ username: M.lib.sani.sanitize(newUser.username) })
