@@ -27,11 +27,11 @@ const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove need for mongoose
 const request = require('request');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const ProjController = M.require('controllers/ProjectController');
-const OrgController = M.require('controllers/OrganizationController');
-const AuthController = M.require('lib/auth');
-const User = M.require('models/User');
+
+const ProjController = M.require('controllers.ProjectController');
+const OrgController = M.require('controllers.OrganizationController');
+const AuthController = M.require('lib.auth');
+const User = M.require('models.User');
 const test = M.config.test;
 
 
@@ -51,7 +51,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(function(done) {
     this.timeout(5000);
-    const db = M.require('lib/db'); // TODO - M.lib.db
+    const db = M.require('lib.db'); // TODO - db
     db.connect();
 
     // Creating a Requesting Admin
@@ -63,8 +63,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mock_express.getReq(params, body);
+    const resObj = mock_express.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);

@@ -25,8 +25,8 @@
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove the need for mongoose
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const Org = M.require('models/Organization');
+
+const Org = M.require('models.Organization');
 
 
 /* --------------------( Main )-------------------- */
@@ -37,7 +37,7 @@ describe(M.getModuleName(module.filename), () => {
    * Before: runs before all tests. Open database connection.
    */
   before(() => {
-    const db = M.require('lib/db');
+    const db = M.require('lib.db');
     db.connect();
   });
 

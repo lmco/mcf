@@ -27,11 +27,11 @@ const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove need for mongoose
 
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.require('models/User');
-const UserController = M.require('controllers/UserController');
-const AuthController = M.require('lib/auth');
 
+const User = M.require('models.User');
+const UserController = M.require('controllers.UserController');
+const AuthController = M.require('lib.auth');
+const mock_express = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -50,7 +50,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(function(done) {
     this.timeout(6000);
-    const db = M.require('lib/db');
+    const db = M.require('lib.db');
     db.connect();
 
     const u = M.config.test.username;
@@ -61,8 +61,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mock_express.getReq(params, body);
+    const resObj = mock_express.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);

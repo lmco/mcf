@@ -28,14 +28,14 @@
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove the need for Mongo
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const ElemController = M.require('controllers/ElementController');
-const OrgController = M.require('controllers/OrganizationController');
-const ProjController = M.require('controllers/ProjectController');
-const UserController = M.require('controllers/UserController');
-const AuthController = M.require('lib/auth');
-const User = M.require('models/User');
 
+const ElemController = M.require('controllers.ElementController');
+const OrgController = M.require('controllers.OrganizationController');
+const ProjController = M.require('controllers.ProjectController');
+const UserController = M.require('controllers.UserController');
+const AuthController = M.require('lib.auth');
+const User = M.require('models.User');
+const mock_express = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -58,7 +58,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(function(done) {
     this.timeout(6000);
-    const db = M.require('lib/db');
+    const db = M.require('lib.db');
     db.connect();
     const u = M.config.test.username;
     const p = M.config.test.password;
@@ -68,8 +68,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mock_express.getReq(params, body);
+    const resObj = mock_express.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -108,7 +108,8 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests.
    * TODO - describe what this function is doing.
    */
-  after((done) => {
+  after(function(done) {
+    this.timeout(5000);
     // Removing the organization created
     OrgController.removeOrg(user, 'gaurdians', { soft: false })
     .then(() => UserController.removeUser(user, newUser.username))

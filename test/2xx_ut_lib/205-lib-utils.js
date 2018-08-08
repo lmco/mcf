@@ -19,8 +19,8 @@
  */
 
 const chai = require('chai');
-const M = require('../../mbee.js');
-const utils = M.require('lib/utils'); // TODO - can we do M.lib.utils?
+
+const utils = M.require('lib.utils'); // TODO - can we do M.lib.utils?
 
 
 /* --------------------( Main )-------------------- */

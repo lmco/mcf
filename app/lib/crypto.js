@@ -39,7 +39,7 @@ function decrypt(data) {
     return '{}';
   }
   try {
-    const secret = mbee.config.server.secret;
+    const secret = M.config.server.secret;
     const decipher = crypto.createDecipher('aes-256-cbc', secret);
     const hexData = Buffer.from(data, 'base64').toString('hex');
     let decrypted = decipher.update(hexData, 'hex', 'utf8');

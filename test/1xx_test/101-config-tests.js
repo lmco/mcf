@@ -20,7 +20,7 @@
 
 const path = require('path');
 const chai = require('chai');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
 const version = require(path.join(M.root, 'package.json')).version;
 
 

@@ -47,7 +47,7 @@ class APIController {
    * @param {object} obj An object to convert to a JSON-formatted string.
    */
   static formatJSON(obj) {
-    return JSON.stringify(obj, null, mbee.config.server.api.json.indent);
+    return JSON.stringify(obj, null, M.config.server.api.json.indent);
   }
 
 
@@ -73,7 +73,7 @@ class APIController {
       swaggerDefinition: {
         info: {
           title: 'MBEE API Documentation',          // Title (required)
-          version: mbee.version                     // Version (required)
+          version: M.version                        // Version (required)
         }
       },
       apis: [

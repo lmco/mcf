@@ -19,8 +19,8 @@
  */
 
 const chai = require('chai');
-const M = require('../../mbee.js');
-const errors = M.require('lib/errors');
+
+const errors = M.require('lib.errors');
 
 
 /* --------------------( Main )-------------------- */

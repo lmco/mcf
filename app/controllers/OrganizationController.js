@@ -23,6 +23,7 @@ const Organization = M.require('models.Organization');
 const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
+const validators = M.require('lib.validators');
 
 /**
  * OrganizationController
@@ -158,7 +159,7 @@ class OrganizationController {
         utils.assertType([orgInfo.id, orgInfo.name], 'string');
         if (utils.checkExists(['custom'], orgInfo)) {
           utils.assertType([orgInfo.custom], 'object');
-          custom = M.lib.sani.html(orgInfo.custom);
+          custom = sani.html(orgInfo.custom);
         }
       }
       catch (error) {
@@ -358,7 +359,7 @@ class OrganizationController {
   static removeOrg(user, organizationID, options) {
     // Loading controller function wide since the project controller loads
     // the org controller globally. Both files cannot load each other globally.
-    const ProjController = M.require('controllers/ProjectController');
+    const ProjController = M.require('controllers.ProjectController');
 
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       let softDelete = true;

@@ -22,7 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const chai = require('chai');
 const request = require('request');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
 
 
 /* --------------------( Main )-------------------- */

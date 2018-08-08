@@ -29,10 +29,11 @@ const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove dependency on mongoose
 const request = require('request');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const OrgController = M.require('controllers/OrganizationController');
-const AuthController = M.require('lib/auth');
-const User = M.require('models/User');
+
+const OrgController = M.require('controllers.OrganizationController');
+const AuthController = M.require('lib.auth');
+const User = M.require('models.User');
+const mock_express = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -51,7 +52,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(function(done) {
     this.timeout(5000);
-    const db = M.require('lib/db'); // TODO - M.lib.db
+    const db = M.require('lib.db'); // TODO - db
     db.connect();
 
     // Creating a Requesting Admin
@@ -63,8 +64,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mock_express.getReq(params, body);
+    const resObj = mock_express.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -117,12 +118,14 @@ describe(M.getModuleName(module.filename), () => {
       User.findOneAndRemove({
         username: M.config.test.username
       }, (err) => {
+        console.log(err.stack);
         chai.expect(err).to.equal(null);
         mongoose.connection.close();
         done();
       });
     })
     .catch((err2) => {
+      console.log(err2.stack);
       const error2 = JSON.parse(err2.message);
       chai.expect(error2.description).to.equal(null);
       mongoose.connection.close();

@@ -26,7 +26,7 @@ const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO remove need for mongoose
 
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
 
 const User = M.require('models.User');
 const Organization = M.require('models.Organization');

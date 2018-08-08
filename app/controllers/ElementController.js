@@ -25,6 +25,7 @@ const Element = M.require('models.Element');
 const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
+const validators = M.require('lib.validators');
 
 /**
  * @class  APIController

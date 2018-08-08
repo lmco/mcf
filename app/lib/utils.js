@@ -17,7 +17,7 @@
  * @description  Defines miscellaneous helper functions.
  */
 
-const errors = M.require('lib/errors');
+const errors = M.require('lib.errors');
 const path = require('path');
 const fs = require('fs');
 let pluginFiles = null;

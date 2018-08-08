@@ -22,11 +22,12 @@
 const path = require('path');
 
 /* Local Modules */
-const OrgController = M.require('controllers/OrganizationController');
-const Project = M.require('models/Project');
+const OrgController = M.require('controllers.OrganizationController');
+const Project = M.require('models.Project');
 const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
+const validators = M.require('lib.validators');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -271,7 +272,7 @@ class ProjectController {
         utils.assertType([project.id, project.name, project.org.id], 'string');
         if (utils.checkExists(['custom'], project)) {
           utils.assertType([project.custom], 'object');
-          custom = M.lib.sani.html(project.custom);
+          custom = sani.html(project.custom);
         }
       }
       catch (error) {
@@ -477,7 +478,7 @@ class ProjectController {
   static removeProject(reqUser, organizationID, projectID, options) {
     // Loading controller function wide since the element controller loads
     // the project controller globally. Both files cannot load each other globally.
-    const ElemController = M.require('controllers/ElementController');
+    const ElemController = M.require('controllers.ElementController');
 
     return new Promise((resolve, reject) => {
       try {

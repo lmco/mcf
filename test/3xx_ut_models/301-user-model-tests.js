@@ -25,9 +25,8 @@
 const chai = require('chai');
 const mongoose = require('mongoose');
 const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.require('models.User');
-
+const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
 
@@ -43,7 +42,7 @@ describe(M.getModuleName(module.filename), () => {
    * Before: runs before all tests. Open the database connection.
    */
   before(() => {
-    M.lib.db.connect();
+    db.connect();
   });
 
   /**

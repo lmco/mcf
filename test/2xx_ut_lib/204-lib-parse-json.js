@@ -20,7 +20,7 @@
  */
 
 const chai = require('chai');
-const M = require('../../mbee.js');
+
 const parseJSON = M.require('lib.parse-json');
 
 

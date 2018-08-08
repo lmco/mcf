@@ -19,7 +19,7 @@
  */
 
 const path = require('path');
-const User = M.require('models/User');
+const User = M.require('models.User');
 const libCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');

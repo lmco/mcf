@@ -26,14 +26,14 @@
 const path = require('path');
 const chai = require('chai');
 const mongoose = require('mongoose');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-const User = M.require('models/User');
-const Org = M.require('models/Organization');
-const Project = M.require('models/Project');
-const Element = M.require('models/Element');
-const AuthController = M.require('lib/auth');
 
+const User = M.require('models.User');
+const Org = M.require('models.Organization');
+const Project = M.require('models.Project');
+const Element = M.require('models.Element');
+const AuthController = M.require('lib.auth');
+const mock_express = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -54,7 +54,7 @@ describe(M.getModuleName(module.filename), function() {
   before(function() {
     this.timeout(5000);
     return new Promise((resolve, reject) => {
-      const db = M.require('lib/db');
+      const db = M.require('lib.db');
       db.connect();
 
       const u = M.config.test.username;
@@ -65,8 +65,8 @@ describe(M.getModuleName(module.filename), function() {
         password: p
       };
 
-      const reqObj = M.lib.mock_express.getReq(params, body);
-      const resObj = M.lib.mock_express.getRes();
+      const reqObj = mock_express.getReq(params, body);
+      const resObj = mock_express.getRes();
       AuthController.authenticate(reqObj, resObj, (err) => {
         const ldapuser = reqObj.user;
         chai.expect(err).to.equal(null);
