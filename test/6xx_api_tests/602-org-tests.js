@@ -20,7 +20,7 @@
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code we want to make sure everything still
  * works as it should. These API controller tests are specifically for the Organization
- * API tests: posting, putting, getting, and deleting orgs. Some tests are
+ * API tests: posting, patching, getting, and deleting orgs. Some tests are
  * conducting with invalid inputs for the org api controlls.
  *
  * TODO - fix description
@@ -90,6 +90,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+<<<<<<< HEAD
   it('should GET an empty organization', getOrgs);
   it('should POST an organization', postOrg01);
   it('should POST second organization', postOrg02);
@@ -101,6 +102,19 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a get org roles for another user', rejectRole);
   it('should GET 2 organizations', getTwoOrgs);
   it('should reject a POST with ID mismatch', postOrg02Err);
+=======
+  it('should GET an empty organization', getOrgs).timeout(3000);
+  it('should POST an organization', postOrg01).timeout(3000);
+  it('should POST second organization', postOrg02).timeout(3000);
+  it('should GET posted organization', getOrg01).timeout(3000);
+  it('should PATCH an update to posted organization', patchOrg01).timeout(3000);
+  it('should reject a PATCH with invalid name', rejectPatchName).timeout(3000);
+  it('should reject a PATCH to the org ID', rejectPatchID).timeout(3000);
+  it('should get organization roles for a user', orgRole).timeout(3000);
+  it('should reject a get org roles for another user', rejectRole).timeout(3000);
+  it('should GET 2 organizations', getTwoOrgs).timeout(3000);
+  it('should reject a POST with ID mismatch', postOrg02Err).timeout(3000);
+>>>>>>> master
   it('should reject a POST with invalid org id', postInvalidOrg).timeout(5000);
   it('should reject a POST with missing org name', postOrg03);
   it('should reject a POST with an empty name', postEmptyOrg);
@@ -207,11 +221,11 @@ function getOrg01(done) {
  * org1 name: "Organization 1" that was added to the database to name" "
  * Updated Organization 1". This should succeed.
  */
-function putOrg01(done) {
+function patchOrg01(done) {
   request({
     url: `${test.url}/api/orgs/xmen`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       id: 'xmen',
       name: 'Wolverine'
@@ -238,11 +252,11 @@ function putOrg01(done) {
 >>>>>>> origin/master
  */
 
-function rejectPutName(done) {
+function rejectPatchName(done) {
   request({
     url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       id: 'shield',
       name: ''
@@ -261,11 +275,11 @@ function rejectPutName(done) {
  * the org ID and therefore should throw an error.
  */
 
-function rejectPutID(done) {
+function rejectPatchID(done) {
   request({
     url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       id: 'shield'
     })
