@@ -90,35 +90,21 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-<<<<<<< HEAD
   it('should GET an empty organization', getOrgs);
   it('should POST an organization', postOrg01);
   it('should POST second organization', postOrg02);
   it('should GET posted organization', getOrg01);
-  it('should PUT an update to posted organization', putOrg01);
-  it('should reject a PUT with invalid name', rejectPutName);
-  it('should reject a PUT to the org ID', rejectPutID);
+  it('should PATCH an update to posted organization', patchOrg01);
+  it('should reject a PATCH with invalid name', rejectPatchName);
+  it('should reject a PATCH to the org ID', rejectPatchID);
   it('should get organization roles for a user', orgRole);
   it('should reject a get org roles for another user', rejectRole);
   it('should GET 2 organizations', getTwoOrgs);
   it('should reject a POST with ID mismatch', postOrg02Err);
-=======
-  it('should GET an empty organization', getOrgs).timeout(3000);
-  it('should POST an organization', postOrg01).timeout(3000);
-  it('should POST second organization', postOrg02).timeout(3000);
-  it('should GET posted organization', getOrg01).timeout(3000);
-  it('should PATCH an update to posted organization', patchOrg01).timeout(3000);
-  it('should reject a PATCH with invalid name', rejectPatchName).timeout(3000);
-  it('should reject a PATCH to the org ID', rejectPatchID).timeout(3000);
-  it('should get organization roles for a user', orgRole).timeout(3000);
-  it('should reject a get org roles for another user', rejectRole).timeout(3000);
-  it('should GET 2 organizations', getTwoOrgs).timeout(3000);
-  it('should reject a POST with ID mismatch', postOrg02Err).timeout(3000);
->>>>>>> master
-  it('should reject a POST with invalid org id', postInvalidOrg).timeout(5000);
+  it('should reject a POST with invalid org id', postInvalidOrg);
   it('should reject a POST with missing org name', postOrg03);
   it('should reject a POST with an empty name', postEmptyOrg);
-  it('should reject a POST of a repeat org', postOrg04).timeout(5000);
+  it('should reject a POST of a repeat org', postOrg04);
   it('should DELETE organization', deleteOrg01);
   it('should DELETE second organization', deleteOrg02);
   it('should GET 0 organizations', getOrgs03);

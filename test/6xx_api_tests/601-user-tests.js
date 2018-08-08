@@ -95,31 +95,17 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creating a user with invalid username', rejectUPost);
   it('should reject creating a user with two different usernames', rejectUsernames);
   // JIRA-BUG: MBX-283 UNCOMMENT WHEN FIXED
-<<<<<<< HEAD
-  // it('should reject creating a user with invalid first name', rejectNamePut);
+  // it('should reject creating a user with invalid first name', rejectNamePatch);
   it('should reject a username that already exists', rejectExistingUname);
   it('should get all users', getUsers);
   it('should reject getting a user that does not exist', rejectGetNoU);
-  it('should update a user', putUser);
-  it('should reject an update a user that does not exist', rejectPut);
-  it('should reject updating the username', rejectUPut);
+  it('should update a user', patchUser);
+  it('should reject an update a user that does not exist', rejectPatch);
+  it('should reject updating the username', rejectUPatch);
   it('should reject updating with an invalid name', rejectName);
   it('should reject deleting a user that doesnt exist', rejectDelete);
   it('should delete a user', deleteUser);
   it('should delete the admin user', deleteAUser);
-=======
-  // it('should reject creating a user with invalid first name', rejectNamePatch).timeout(3000);
-  it('should reject a username that already exists', rejectExistingUname).timeout(3000);
-  it('should get all users', getUsers).timeout(3000);
-  it('should reject getting a user that does not exist', rejectGetNoU).timeout(3000);
-  it('should update a user', patchUser).timeout(3000);
-  it('should reject an update a user that does not exist', rejectPatch).timeout(3000);
-  it('should reject updating the username', rejectUPatch).timeout(3000);
-  it('should reject updating with an invalid name', rejectName).timeout(3000);
-  it('should reject deleting a user that doesnt exist', rejectDelete).timeout(3000);
-  it('should delete a user', deleteUser).timeout(3000);
-  it('should delete the admin user', deleteAUser).timeout(3000);
->>>>>>> master
 });
 
 
