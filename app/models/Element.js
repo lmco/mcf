@@ -97,10 +97,7 @@ const ElementSchema = new mongoose.Schema({
     required: false,
     unique: true,
     set: function(v) {
-      return uuidv4();
-    },
-    get: function(v) {
-      return this.uuid;
+      return v;
     }
   },
 
@@ -238,10 +235,11 @@ ElementSchema.index({ name: 'text', documentation: 'text' });
 ElementSchema.pre('save', function(next) {
   // Run our defined setters
   this.updatedOn = '';
+  // TODO: Set deleted to a boolean in the pre-save
   this.deleted = '';
   // Only set uuid if it hasn't already been set
   if (this.uuid === undefined) {
-    this.uuid = '';
+    this.uuid = uuidv4();
   }
   next();
 });
