@@ -166,11 +166,6 @@ class ElementController {
         return ElementController.findElements(reqUser, orgID, projID);
       })
       .then((elements) => { // eslint-disable-line consistent-return
-        // If there are no elements found, return an error
-        if (elements.length === 0) {
-          return reject(new errors.CustomError('No elements found.', 404));
-        }
-
         // Ensure user has permission to delete all elements
         Object.keys(elements).forEach((element) => { // eslint-disable-line consistent-return
           const admins = elements[element].project.permissions.admin.map(u => u._id.toString());
@@ -254,11 +249,6 @@ class ElementController {
 
       ElementController.findElementsQuery(searchParams)
       .then((elements) => {
-        // Ensure only one element is returned
-        if (elements.length === 0) {
-          return reject(new errors.CustomError('Element not found.', 404));
-        }
-
         // Ensure more than one element was not returned.
         if (elements.length > 1) {
           return reject(new errors.CustomError('More than one element found.', 400));
@@ -294,7 +284,7 @@ class ElementController {
    */
   static findElementsQuery(elementQuery) {
     return new Promise((resolve, reject) => {
-      // TODO: Figure out case where elementType = null and sani changes to ''
+
       const query = M.lib.sani.sanitize(elementQuery);
 
       Element.Element.find(query)
@@ -302,6 +292,11 @@ class ElementController {
       .exec((findElementError, elements) => {
         if (findElementError) {
           return reject(new errors.CustomError('Find failed.'));
+        }
+
+        // No elements found
+        if (elements.length === 0) {
+          return reject(new errors.CustomError('No elements found.', 404));
         }
 
         // Return resulting element
@@ -392,7 +387,7 @@ class ElementController {
         .then(() => reject(new errors.CustomError('Element already exists.', 400)))
         .catch((findError) => { // eslint-disable-line consistent-return
           // This is ok, we dont want the element to already exist.
-          if (findError.description === 'Element not found.') {
+          if (findError.description === 'No elements found.') {
             // Get the element type
             let type = null;
             Object.keys(Element).forEach((k) => {
