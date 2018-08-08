@@ -122,6 +122,9 @@ Object.defineProperty(M, 'config', {
   enumerable: true
 });
 
+// Make the M object read only and its properties cannot be changed or removed.
+Object.freeze(M);
+
 /******************************************************************************
  *  Load Library Modules                                                      *
  ******************************************************************************/
