@@ -18,7 +18,7 @@
  * @description  This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. These API controller tests are
- * specifically for the Project API tests: posting, putting, getting, and deleting
+ * specifically for the Project API tests: posting, patching, getting, and deleting
  * projects. Some tests are conducting with invalid inputs for the project
  * api controlls.
  *
@@ -137,8 +137,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a POST to an organization that doesnt exist', postBadOrg);
   it('should reject a POST of a name with special characters', postInvalidProject);
   it('should reject a POST with two different orgs', confusingOrg);
-  it('should PUT an update to posted project', putOrg01);
-  it('should reject a PUT to update with invalid name', badPut);
+  it('should PATCH an update to posted project', patchOrg01);
+  it('should reject a PATCH to update with invalid name', badPatch);
   it('should POST second project', postProject02);
   it('should DELETE the first project to the organization', deleteProject01);
   it('should DELETE the second project to the organization', deleteProject02);
@@ -307,12 +307,12 @@ function postInvalidProject(done) {
  * project name: "Youre a wizard Harry" that was added to the database to name: "I know".
  * This should succeed.
  */
-function putOrg01(done) {
+function patchOrg01(done) {
   const id = 'hulk';
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       id: id,
       name: 'Anger'
@@ -331,11 +331,11 @@ function putOrg01(done) {
  * Makes an UPDATE request to api/orgs/:orgid/projects/:projectid. This will reject an
  * update to project name.
  */
-function badPut(done) {
+function badPatch(done) {
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       id: 'hulktwopointoh',
       name: 'New Hulk'
