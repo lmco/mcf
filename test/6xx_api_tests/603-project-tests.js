@@ -110,7 +110,7 @@ describe(M.getModuleName(module.filename), () => {
    * TODO - describe
    */
   after(function(done) {
-    this.timeout(5000);
+    this.timeout(10000);
     // Removing the Organization
     OrgController.removeOrg(user, 'biochemistry', { soft: false })
     .then((retOrg) => {
@@ -118,14 +118,12 @@ describe(M.getModuleName(module.filename), () => {
       User.findOneAndRemove({
         username: M.config.test.username
       }, (err) => {
-        console.log(err.stack);
         chai.expect(err).to.equal(null);
         mongoose.connection.close();
         done();
       });
     })
     .catch((err2) => {
-      console.log(err2.stack);
       const error2 = JSON.parse(err2.message);
       chai.expect(error2.description).to.equal(null);
       mongoose.connection.close();
@@ -143,8 +141,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should PUT an update to posted project', putOrg01);
   it('should reject a PUT to update with invalid name', badPut);
   it('should POST second project', postProject02);
-  it('should DELETE the first project to the organization', deleteProject01);
-  it('should DELETE the second project to the organization', deleteProject02);
+  it('should DELETE the first project to the organization', deleteProject01).timeout(5000);
+  it('should DELETE the second project to the organization', deleteProject02).timeout(5000);;
 });
 
 
