@@ -41,9 +41,10 @@ pipeline {
         stage('Build') {
             steps {
                 // Build
-                sh 'yarn install --dev'
+                sh 'yarn install'
                 sh 'MBEE_ENV=test node mbee build'
-
+                // Remove dev dependencies
+                sh 'yarn install --production'
                 // Verify build
                 sh 'ls -l'
 
