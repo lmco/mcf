@@ -19,8 +19,8 @@ const { execSync } = require('child_process');
 // If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
   // eslint-disable-next-line no-console
-  console.log('\nError: please use mbee to run this scrip by using the'
-    + 'following command... \n\nnode mbee build\n');
+  console.log('\nError: please use mbee to run this script by using the '
+    + 'following command. \n\nnode mbee build\n');
   process.exit(-1);
 }
 
