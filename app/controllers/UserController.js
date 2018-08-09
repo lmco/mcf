@@ -129,7 +129,6 @@ class UserController {
    */
   static createUser(requestingUser, newUser) { // eslint-disable-line consistent-return
     return new Promise(((resolve, reject) => {
-
       try {
         utils.assertAdmin(requestingUser);
         utils.assertExists(['username'], newUser);
