@@ -26,7 +26,8 @@ RUN mkdir -p app \
     && mkdir -p config \
     && mkdir -p plugins \
     && mkdir -p public \
-    && mkdir -p scripts
+    && mkdir -p scripts \
+    && mkdir -p node_modules
 
 COPY ./app  app
 COPY ./certs certs
@@ -37,6 +38,7 @@ COPY ./build build
 COPY ./scripts scripts
 COPY ./package.json package.json
 COPY ./mbee.js mbee.js
+COPY ./node_modules node_modules
 COPY ./README.md README.md
 
 # Set proxy environment variables
@@ -45,6 +47,7 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     http_proxy="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost,*.lmco.com \
+    MBEE_ENV=production \
     NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Install dependencies
@@ -54,8 +57,6 @@ RUN apk upgrade && \
     apk add openssh-client && \
     chmod 400 certs/* && \
     mkdir logs
-RUN node mbee install
-
 
 # Run server
 CMD ["node", "mbee.js", "start"]
