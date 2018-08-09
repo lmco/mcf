@@ -76,7 +76,7 @@ pipeline {
                 timeout(time: 10, unit: 'MINUTES') {
                     // creating a junit xml file
                     sh "echo 'running test'"
-                    sh 'MBEE_ENV=test node mbee test --bail --reporter=mocha-junit-reporter --grep "^[0-6]"'
+                    sh 'MBEE_ENV=test node mbee test --bail true --reporter mocha-junit-reporter --grep "^[0-6]"'
                 }
              }
         }
