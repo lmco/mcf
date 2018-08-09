@@ -47,85 +47,82 @@ let user = null;
 /* --------------------( Main )-------------------- */
 
 
-describe(M.getModuleName(module.filename), function() {
+describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests
    */
-  before(function() {
-    this.timeout(5000);
-    return new Promise((resolve, reject) => {
-      const db = M.require('lib.db');
-      db.connect();
+  before((done) => {
+    const db = M.require('lib/db');
+    db.connect();
 
-      const u = M.config.test.username;
-      const p = M.config.test.password;
-      const params = {};
-      const body = {
-        username: u,
-        password: p
-      };
+    const u = M.config.test.username;
+    const p = M.config.test.password;
+    const params = {};
+    const body = {
+      username: u,
+      password: p
+    };
 
-      const reqObj = mockExpress.getReq(params, body);
-      const resObj = mockExpress.getRes();
-      AuthController.authenticate(reqObj, resObj, (err) => {
-        const ldapuser = reqObj.user;
-        chai.expect(err).to.equal(null);
-        chai.expect(ldapuser.username).to.equal(M.config.test.username);
-        User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
-          (updateErr, userUpdate) => {
-            chai.expect(updateErr).to.equal(null);
-            chai.expect(userUpdate).to.not.equal(null);
-            user = userUpdate;
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
+    AuthController.authenticate(reqObj, resObj, (err) => {
+      const ldapuser = reqObj.user;
+      chai.expect(err).to.equal(null);
+      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+        (updateErr, userUpdate) => {
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+          user = userUpdate;
 
-            // Create the org to be used for testing
-            const newOrg = new Org({
-              id: 'avengers',
-              name: 'The Avengers',
+          // Create the org to be used for testing
+          const newOrg = new Org({
+            id: 'avengers',
+            name: 'The Avengers',
+            permissions: {
+              admin: [user._id],
+              write: [user._id],
+              read: [user._id]
+            }
+          });
+
+          // Save the org
+          newOrg.save((orgSaveErr, savedOrg) => {
+            // Error check - make sure there is no error on org save
+            if (orgSaveErr) {
+              M.log.error(orgSaveErr);
+              chai.expect(orgSaveErr).to.equal(null);
+            }
+
+            org = savedOrg;
+
+            // Create the new project
+            const newProject = new Project({
+              id: 'timeloop',
+              name: 'Time Gem',
+              org: org._id,
               permissions: {
                 admin: [user._id],
                 write: [user._id],
                 read: [user._id]
-              }
+              },
+              uid: `${org.id}:timeloop`
             });
 
-            // Save the org
-            newOrg.save((orgSaveErr, savedOrg) => {
-              // Error check - make sure there is no error on org save
-              if (orgSaveErr) {
-                M.log.error(orgSaveErr);
-                chai.expect(orgSaveErr).to.equal(null);
+            newProject.save((projectSaveErr, savedProject) => {
+              // Error check - make sure there is no error
+              if (projectSaveErr) {
+                M.log.error(projectSaveErr);
+                chai.expect(projectSaveErr).to.equal(null);
               }
 
-              org = savedOrg;
+              project = savedProject;
 
-              // Create the new project
-              const newProject = new Project({
-                id: 'timeloop',
-                name: 'Time Gem',
-                org: org._id,
-                permissions: {
-                  admin: [user._id],
-                  write: [user._id],
-                  read: [user._id]
-                },
-                uid: `${org.id}:timeloop`
-              });
-
-              newProject.save((projectSaveErr, savedProject) => {
-                // Error check - make sure there is no error
-                if (projectSaveErr) {
-                  M.log.error(projectSaveErr);
-                  chai.expect(projectSaveErr).to.equal(null);
-                }
-
-                project = savedProject;
-
-                // Resolve the promise
-                return resolve();
-              });
+              // Resolve the promise
+              done();
             });
           });
-      });
+        });
     });
   });
 

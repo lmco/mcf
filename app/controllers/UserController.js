@@ -23,6 +23,8 @@ const User = M.require('models.User');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
+const validators = M.require('lib/validators');
+
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -137,7 +139,12 @@ class UserController {
         return reject(error);
       }
 
-      User.find({ username: sani.sanitize(newUser.username) })
+      // Ensure the username is properly formatted
+      if (!RegExp(validators.user.username).test(newUser.username)) {
+        return reject(new errors.CustomError('Username is not valid.', 400));
+      }
+
+      User.find({ username: M.lib.sani.sanitize(newUser.username) })
       .populate()
       .exec((findErr, users) => { // eslint-disable-line consistent-return
         if (findErr) {

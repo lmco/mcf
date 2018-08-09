@@ -51,7 +51,7 @@ describe(M.getModuleName(module.filename), () => {
   after(() => mongoose.connection.close());
 
   /* Execute the tests */
-  it('clean database', cleanDB).timeout(5000);
+  it('clean database', cleanDB);
 });
 
 

@@ -190,7 +190,7 @@ class APIController {
 
 
   /**
-   * PUT /api/orgs
+   * PATCH /api/orgs
    *
    * @description Accepts an array of JSON objects containing organization data.
    * This function expects each of the organizations to already exist (this
@@ -199,7 +199,7 @@ class APIController {
    *
    * This method is not yet implemented.
    */
-  static putOrgs(req, res) {
+  static patchOrgs(req, res) {
     // TODO - Discuss the possibility of batch updates to orgs by passing
     // an array of existing orgs. Must define behavior for this.
     res.status(501).send('Not Implemented.');
@@ -286,14 +286,14 @@ class APIController {
 
 
   /**
-   * PUT /api/orgs/:orgid
+   * PATCH /api/orgs/:orgid
    *
    * @description  Takes an orgid in the URI and JSON encoded data in the body.
    * Updates the org specified by the URI with the data provided in the body.
    * The organization ID cannot be updated and should not be provided in the
    * body.
    */
-  static putOrg(req, res) { // eslint-disable-line consistent-return
+  static patchOrg(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -378,7 +378,7 @@ class APIController {
 
   /**
    * POST /api/orgs/:orgid/members/:username
-   * PUT /api/orgs/:orgid/members/:username
+   * PATCH /api/orgs/:orgid/members/:username
    *
    * @description  Takes an orgid and username in the URI and updates a given
    * members role within the organization. Requires a role in the body
@@ -499,7 +499,7 @@ class APIController {
 
 
   /**
-   * PUT /api/org/:orgid/projects
+   * PATCH /api/org/:orgid/projects
    *
    * @description  This function is not intented to be implemented. It is
    * defined here so that calls to the corresponding route can be caught and
@@ -508,7 +508,7 @@ class APIController {
    * TODO (jk) - Figure out how we want to handle a change to an orgid.
    * For now, this assumes orgid won't change and stuff will break if it does
    */
-  static putProjects(req, res) {
+  static patchProjects(req, res) {
     return res.status(501).send('Not Implemented.');
   }
 
@@ -597,13 +597,13 @@ class APIController {
 
 
   /**
-   * PUT /api/orgs/:orgid/projects/:projectid
+   * PATCH /api/orgs/:orgid/projects/:projectid
    *
    * @description  Takes an organization ID and project ID via URI and JSON
    * encoded project data in the body. Updates the project corresponding to the
    * URI with the data passed in the body.
    */
-  static putProject(req, res) { // eslint-disable-line consistent-return
+  static patchProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -819,11 +819,11 @@ class APIController {
   }
 
   /**
-   * PUT /api/users/:username
+   * PATCH /api/users/:username
    *
    * @description Updates a user.
    */
-  static putUser(req, res) { // eslint-disable-line consistent-return
+  static patchUser(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -965,12 +965,12 @@ class APIController {
   }
 
   /**
-   * PUT /api/orgs/:orgid/projects/:projectid/elements/:elementid
+   * PATCH /api/orgs/:orgid/projects/:projectid/elements/:elementid
    *
    * @description Updates an element with 'elementid' and returns the
    * element's public data as JSON.
    */
-  static putElement(req, res) { // eslint-disable-line consistent-return
+  static patchElement(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');

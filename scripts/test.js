@@ -44,23 +44,32 @@ module.exports = test;
 function test(_args) {
   printHeader();
 
-  // Concat arguments into an array for later use
-  const args = ['--slow', '19'].concat(_args);
+  // LM: Default timeout changed to 5000
+  // Add default timeout if not provided
+  if (!_args.includes('--timeout')) {
+    _args.push('--timeout');
+    _args.push('5000');
+  }
+  // Add default slow speed if not provided
+  if (!_args.includes('--slow')) {
+    _args.push('--slow');
+    _args.push('19');
+  }
 
   // allocate options variable for mocha
   const opts = {};
 
-  // Loop through args array and load the opts object
-  for (let i = 0; i < args.length; i += 2) {
+  // Loop through _args array and load the opts object
+  for (let i = 0; i < _args.length; i += 2) {
     // Check the arg starts with '--'
-    if (RegExp(/^(--)/).test(args[i])) {
+    if (RegExp(/^(--)/).test(_args[i])) {
       // The arg started with '--', remove '--' and load the arg in to the opts
       // object as a key with the following arg as the value
-      opts[args[i].replace('--', '')] = args[i + 1];
+      opts[_args[i].replace('--', '')] = _args[i + 1];
     }
     else {
       // The arg did NOT start with '--', log the error and exit the process
-      M.log.error(`invalid argument (${args[i]})`);
+      M.log.error(`invalid argument (${_args[i]})`);
       process.exit(-1);
     }
   }

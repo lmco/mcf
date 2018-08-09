@@ -52,9 +52,8 @@ describe(M.getModuleName(module.filename), () => {
    * TODO - consider abstracting some of the test data out to the 'Test Data'
    * section above.
    */
-  before(function(done) {
-    this.timeout(6000);
-    const db = M.require('lib.db');
+  before((done) => {
+    const db = M.require('lib/db');
     db.connect();
     const u = M.config.test.username;
     const p = M.config.test.password;
@@ -64,8 +63,14 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
+<<<<<<< HEAD
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
+=======
+    const reqObj = M.lib.mock_express.getReq(params, body);
+    const resObj = M.lib.mock_express.getRes();
+
+>>>>>>> master
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -87,6 +92,7 @@ describe(M.getModuleName(module.filename), () => {
               read: [ldapuser._id]
             }
           });
+
           org.save((error) => {
             if (error) {
               M.log.error(error);
@@ -119,9 +125,9 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a project', createProject).timeout(3000);
-  it('should soft delete a project', softDeleteProject).timeout(3000);
-  it('should delete a project', deleteProject).timeout(3000);
+  it('should create a project', createProject);
+  it('should soft delete a project', softDeleteProject);
+  it('should delete a project', deleteProject);
 });
 
 

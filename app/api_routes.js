@@ -139,7 +139,7 @@ api.route('/version')
  *     responses:
  *       501:
  *         description: Not Implemented
- *   put:
+ *   patch:
  *     tags:
  *       - organizations
  *     description: Not implemented, reserved for future use.
@@ -166,10 +166,10 @@ api.route('/orgs')
   Middleware.logRoute,
   APIController.postOrgs
 )
-.put(
+.patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putOrgs
+  APIController.patchOrgs
 )
 .delete(
   AuthController.authenticate,
@@ -251,7 +251,7 @@ api.route('/orgs')
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
- *   put:
+ *   patch:
  *     tags:
  *       - organizations
  *     description: Creates or updates an organization. If the organization does
@@ -339,10 +339,10 @@ api.route('/orgs/:orgid')
   Middleware.logRoute,
   APIController.postOrg
 )
-.put(
+.patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putOrg
+  APIController.patchOrg
 )
 .delete(
   AuthController.authenticate,
@@ -391,7 +391,7 @@ api.route('/orgs/:orgid')
  *     responses:
  *       501:
  *         description: Not Implemented
- *   put:
+ *   patch:
  *     tags:
  *       - projects
  *     description: Not implemented, reserved for future use.
@@ -418,10 +418,10 @@ api.route('/orgs/:orgid/projects')
   Middleware.logRoute,
   APIController.postProjects
 )
-.put(
+.patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putProjects
+  APIController.patchProjects
 )
 .delete(
   AuthController.authenticate,
@@ -521,7 +521,7 @@ api.route('/orgs/:orgid/projects')
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
- *   put:
+ *   patch:
  *     tags:
  *       - projects
  *     description: Creates or replaces a project. If the project does not yet exist, it will be
@@ -617,10 +617,10 @@ api.route('/orgs/:orgid/projects/:projectid')
   Middleware.logRoute,
   APIController.postProject
 )
-.put(
+.patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putProject
+  APIController.patchProject
 )
 .delete(
   AuthController.authenticate,
@@ -714,7 +714,7 @@ api.route('/orgs/:orgid/members')
  *       500:
  *         description: Internal Server Error - Something went wront on the
  *                      server side. Details may exist in the application logs.
- *   put:
+ *   patch:
  *     tags:
  *       - organizations
  *     description: Sets an/or updates a users permissions within an org.
@@ -770,10 +770,8 @@ api.route('/orgs/:orgid/members')
  */
 
 // 6/20/18
-// NOTE: POST and PUT have the same functionality, thus they map to the same route.
-// TODO: Update 7/26/2018- POST/PUT are used in different situations
-// TODO: POST/PUT: PUT is idempotent, POST only used to modify and update resources
-// TODO: POST/PUT: https://stackoverflow.com/questions/630453/put-vs-post-in-rest
+// NOTE: POST and PATCH have the same functionality in this case,
+// thus they map to the same route.
 api.route('/orgs/:orgid/members/:username')
 .get(
   AuthController.authenticate,
@@ -785,7 +783,7 @@ api.route('/orgs/:orgid/members/:username')
   Middleware.logRoute,
   APIController.postOrgRole
 )
-.put(
+.patch(
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postOrgRole
@@ -897,7 +895,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *       500:
  *         description: Internal Server Error - Something went wront on the
  *                      server side. Details may exist in the application logs.
- *   put:
+ *   patch:
  *     tags:
  *       - organizations
  *     description: Sets an/or updates a users permissions within an org.
@@ -972,7 +970,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
   Middleware.logRoute,
   APIController.postProjectRole
 )
-.put(
+.patch(
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postProjectRole
@@ -1029,7 +1027,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *     responses:
  *       501:
  *         description: Not Implemented
- *   put:
+ *   patch:
  *     tags:
  *       - elements
  *     description: Not implemented, reserved for future use.
@@ -1056,7 +1054,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
   Middleware.logRoute,
   APIController.notImplemented
 )
-.put(
+.patch(
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.notImplemented
@@ -1164,7 +1162,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
- *   put:
+ *   patch:
  *     tags:
  *       - model management
  *     description: Creates or replaces an element. If the element does not yet
@@ -1271,10 +1269,10 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
   Middleware.logRoute,
   APIController.postElement
 )
-.put(
+.patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putElement
+  APIController.patchElement
 )
 .delete(
   AuthController.authenticate,
@@ -1315,7 +1313,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *     responses:
  *       501:
  *         description: Not Implemented
- *   put:
+ *   patch:
  *     tags:
  *       - users
  *     description: Not implemented, reserved for future use.
@@ -1341,7 +1339,7 @@ api.route('/users')
   Middleware.disableUserAPI,
   APIController.notImplemented
 )
-.put(
+.patch(
   Middleware.disableUserAPI,
   APIController.notImplemented
 )
@@ -1452,7 +1450,7 @@ api.route('/users/whoami')
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
- *   put:
+ *   patch:
  *     tags:
  *       - users
  *     description: Creates or updates user. If the user already exists it will be updated. In this
@@ -1540,11 +1538,11 @@ api.route('/users/:username')
   Middleware.logRoute,
   APIController.postUser
 )
-.put(
+.patch(
   Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putUser
+  APIController.patchUser
 )
 .delete(
   Middleware.disableUserAPI,
@@ -1570,7 +1568,7 @@ api.route('/users/:username')
  *     responses:
  *       501:
  *         description: Not Implemented
- *   put:
+ *   patch:
  *     tags:
  *       - users
  *     description: Not implemented, reserved for future use.
@@ -1588,7 +1586,7 @@ api.route('/users/:username')
 api.route('/users/:username/roles')
 .get(APIController.notImplemented)
 .post(APIController.notImplemented)
-.put(APIController.notImplemented)
+.patch(APIController.notImplemented)
 .delete(APIController.notImplemented);
 
 
@@ -1609,7 +1607,7 @@ api.route('/users/:username/roles')
  *     responses:
  *       501:
  *         description: Not Implemented
- *   put:
+ *   patch:
  *     tags:
  *       - users
  *     description: Not implemented, reserved for future use.
@@ -1627,7 +1625,7 @@ api.route('/users/:username/roles')
 api.route('/users/:username/groups')
 .get(APIController.notImplemented)
 .post(APIController.notImplemented)
-.put(APIController.notImplemented)
+.patch(APIController.notImplemented)
 .delete(APIController.notImplemented);
 
 

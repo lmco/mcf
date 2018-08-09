@@ -57,9 +57,8 @@ describe(M.getModuleName(module.filename), () => {
    * Before: run before all tests
    * TODO - describe what the before function is doing.
    */
-  before(function(done) {
-    this.timeout(6000);
-    const db = M.require('lib.db');
+  before((done) => {
+    const db = M.require('lib/db');
     db.connect();
     const u = M.config.test.username;
     const p = M.config.test.password;
@@ -132,30 +131,30 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a new org', addNewOrg).timeout(2500);
-  it('should create a second org', addSecondOrg).timeout(2500);
-  it('should find an existing org', findExistingOrg).timeout(2500);
-  it('should throw an error saying the field cannot be updated', updateOrgFieldErr).timeout(2500);
-  it('should throw an error saying the name field is not a string', updateOrgTypeErr).timeout(2500);
-  it('should reject update from non admin user', nonAUpdate).timeout(2500);
-  it('should update an orgs name', updateOrg).timeout(2500);
-  it('should update an orgs name using model object', updateOrgObject).timeout(2500);
-  it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
-  it('should soft delete an existing org', softDeleteExistingOrg).timeout(2500);
-  it('should delete an existing org', deleteExistingOrg).timeout(2500);
-  it('should soft-delete an existing org and its project', softDeleteProjectAndOrg).timeout(5000);
-  it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(5000);
-  it('should add a user to an org', addUserRole).timeout(2500);
-  it('should let the non-admin user write a project', projWritePerm).timeout(2500);
-  it('should reject user changing their permissions', rejectUserRole).timeout(2500);
-  it('should get a users roles within an org', getUserRoles).timeout(2500);
-  it('should get all members with permissions in an org', getMembers).timeout(2500);
-  it('should throw an error saying the user is not an admin', nonAdminChangeRole).timeout(2500);
-  it('should remove a users role within an org', removeUserRole).timeout(2500);
-  it('should throw an error saying the user is not in the org', getOldUserRoles).timeout(2500);
-  it('should throw an error saying the user cannot change their own role', changeOwnRole).timeout(2500);
-  it('should throw an error the permission is not valid', invalidPermission).timeout(2500);
-  it('should throw an error saying the user is not an admin', nonAdminGetPermissions).timeout(2500);
+  it('should create a new org', addNewOrg);
+  it('should create a second org', addSecondOrg);
+  it('should find an existing org', findExistingOrg);
+  it('should throw an error saying the field cannot be updated', updateOrgFieldErr);
+  it('should throw an error saying the name field is not a string', updateOrgTypeErr);
+  it('should reject update from non admin user', nonAUpdate);
+  it('should update an orgs name', updateOrg);
+  it('should update an orgs name using model object', updateOrgObject);
+  it('should find all orgs a user has access to', findAllExistingOrgs);
+  it('should soft delete an existing org', softDeleteExistingOrg);
+  it('should delete an existing org', deleteExistingOrg);
+  it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
+  it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
+  it('should add a user to an org', addUserRole);
+  it('should let the non-admin user write a project', projWritePerm);
+  it('should reject user changing their permissions', rejectUserRole);
+  it('should get a users roles within an org', getUserRoles);
+  it('should get all members with permissions in an org', getMembers);
+  it('should throw an error saying the user is not an admin', nonAdminChangeRole);
+  it('should remove a users role within an org', removeUserRole);
+  it('should throw an error saying the user is not in the org', getOldUserRoles);
+  it('should throw an error saying the user cannot change their own role', changeOwnRole);
+  it('should throw an error the permission is not valid', invalidPermission);
+  it('should throw an error saying the user is not an admin', nonAdminGetPermissions);
 });
 
 
@@ -240,7 +239,6 @@ function findExistingOrg(done) {
  * Test should throw an error
  */
 function updateOrgFieldErr(done) {
-  this.timeout(5000);
   OrgController.updateOrg(user, 'boombox', { permissions: 'shouldNotChange' })
   .then((retOrg) => {
     chai.expect(typeof retOrg).to.equal('undefined');
@@ -257,7 +255,6 @@ function updateOrgFieldErr(done) {
  * Test should throw an error
  */
 function updateOrgTypeErr(done) {
-  this.timeout(5000);
   OrgController.updateOrg(user, 'boombox', { name: [] })
   .then((retOrg) => {
     chai.expect(typeof retOrg).to.equal('undefined');
