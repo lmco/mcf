@@ -264,18 +264,18 @@ class ElementController {
         return resolve(element);
       })
       .catch((error) => {
+        // Check and see if the id passed was a uuid
         if (error.description === 'No elements found.') {
-          console.log("Didn't find the first one...");
 
+          // Set up the query
           searchParams = { uuid: elemID, deleted: false };
           if (softDeleted && reqUser.admin) {
-            searchParams = { uuid: elemID };
+            searchParams = {uuid: elemID};
           }
-          console.log(searchParams);
 
+          // Search for the element by uuid
           ElementController.findElementsQuery(searchParams)
           .then((elements2) => {
-            console.log("Anything found...?")
             // Ensure more than one element was not returned.
             if (elements2.length > 1) {
               return reject(new errors.CustomError('More than one element found.', 400));
@@ -319,13 +319,10 @@ class ElementController {
 
       const query = M.lib.sani.sanitize(elementQuery);
 
-      console.log(query);
-
       Element.Element.find(query)
       .populate('parent project source target contains')
       .exec((findElementError, elements) => {
         if (findElementError) {
-          console.log(findElementError);
           return reject(new errors.CustomError('Find failed.'));
         }
 
