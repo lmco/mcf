@@ -38,7 +38,6 @@ const startup = M.require('lib.startup');
  */
 
 function start(args) {
-  console.trace();
   M.log.debug(`${`+ mbee.js executed as ${process.argv.join(' ')} `
   + `with env=${M.env} and configuration: `}${JSON.stringify(M.config)}`);
 

@@ -144,7 +144,7 @@ class UserController {
         return reject(new errors.CustomError('Username is not valid.', 400));
       }
 
-      User.find({ username: M.lib.sani.sanitize(newUser.username) })
+      User.find({ username: sani.sanitize(newUser.username) })
       .populate()
       .exec((findErr, users) => { // eslint-disable-line consistent-return
         if (findErr) {
