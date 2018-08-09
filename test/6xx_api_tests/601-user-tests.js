@@ -20,7 +20,7 @@
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code we want to make sure everything still
  * works as it should. These API controller tests are specifically for the User
- * API tests: posting, putting, getting, and deleting a user.
+ * API tests: posting, patching, getting, and deleting a user.
  * TODO - description
  */
 
@@ -88,23 +88,23 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should get a username', getUser).timeout(3000);
-  it('should create a user', postUser).timeout(3000);
-  it('should create an admin user', postAUser).timeout(3000);
-  it('should find out the user with the /whoami api tag', whoamIapi).timeout(3000);
-  it('should reject creating a user with invalid username', rejectUPost).timeout(3000);
-  it('should reject creating a user with two different usernames', rejectUsernames).timeout(3000);
-  it('should reject creating a user with invalid first name', rejectNamePut).timeout(3000);
-  it('should reject a username that already exists', rejectExistingUname).timeout(3000);
-  it('should get all users', getUsers).timeout(3000);
-  it('should reject getting a user that does not exist', rejectGetNoU).timeout(3000);
-  it('should update a user', putUser).timeout(3000);
-  it('should reject an update a user that does not exist', rejectPut).timeout(3000);
-  it('should reject updating the username', rejectUPut).timeout(3000);
-  it('should reject updating with an invalid name', rejectName).timeout(3000);
-  it('should reject deleting a user that doesnt exist', rejectDelete).timeout(3000);
-  it('should delete a user', deleteUser).timeout(3000);
-  it('should delete the admin user', deleteAUser).timeout(3000);
+  it('should get a username', getUser);
+  it('should create a user', postUser);
+  it('should create an admin user', postAUser);
+  it('should find out the user with the /whoami api tag', whoamIapi);
+  it('should reject creating a user with invalid username', rejectUPost);
+  it('should reject creating a user with two different usernames', rejectUsernames);
+  it('should reject creating a user with invalid first name', rejectNamePost);
+  it('should reject a username that already exists', rejectExistingUname);
+  it('should get all users', getUsers);
+  it('should reject getting a user that does not exist', rejectGetNoU);
+  it('should update a user', patchUser);
+  it('should reject an update a user that does not exist', rejectPatch);
+  it('should reject updating the username', rejectUPatch);
+  it('should reject updating with an invalid name', rejectName);
+  it('should reject deleting a user that doesnt exist', rejectDelete);
+  it('should delete a user', deleteUser);
+  it('should delete the admin user', deleteAUser);
 });
 
 
@@ -257,7 +257,7 @@ function rejectUsernames(done) {
  * create a user with an invalid first name. Response should be an error
  * thrown with status code 400 or something.
  */
-function rejectNamePut(done) {
+function rejectNamePost(done) {
   request({
     url: `${test.url}/api/users/blindal`,
     headers: getHeaders(),
@@ -340,14 +340,14 @@ function rejectGetNoU(done) {
 }
 
 /**
- * Makes a PUT request to /api/users/:username. This is to
+ * Makes a PATCH request to /api/users/:username. This is to
  * update a user. Response should succeed with a user object returned.
  */
-function putUser(done) {
+function patchUser(done) {
   request({
     url: `${test.url}/api/users/deadpool`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       fname: 'Mr Wade'
     })
@@ -363,15 +363,15 @@ function putUser(done) {
 }
 
 /**
- * Makes an invalid PUT request to /api/users/:username. This is to update a
+ * Makes an invalid PATCH request to /api/users/:username. This is to update a
  * user that does not exist. Response should throw an error saying user does not
  * exist.
  */
-function rejectPut(done) {
+function rejectPatch(done) {
   request({
     url: `${test.url}/api/users/francis`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       fname: 'Weapon X'
     })
@@ -386,15 +386,15 @@ function rejectPut(done) {
 }
 
 /**
- * Makes an invalid PUT request to /api/users/:username. This is to update a
+ * Makes an invalid PATCH request to /api/users/:username. This is to update a
  * user that does not exist. Response should throw an error saying user does not
  * exist.
  */
-function rejectUPut(done) {
+function rejectUPatch(done) {
   request({
     url: `${test.url}/api/users/vanessacarlysle`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       username: 'deadpoolgf'
     })
@@ -409,7 +409,7 @@ function rejectUPut(done) {
 }
 
 /**
- * Makes an invalid PUT request to /api/users/:username. This is to update a
+ * Makes an invalid PATCH request to /api/users/:username. This is to update a
  * user that does not exist. Response should throw an error saying user does not
  * exist.
  */
@@ -417,7 +417,7 @@ function rejectName(done) {
   request({
     url: `${test.url}/api/users/vanessacarlysle`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       name: ''
     })
