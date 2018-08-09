@@ -43,14 +43,14 @@ pipeline {
             steps {
                 // Build
                 sh 'yarn install --dev'
-                sh 'NODE_ENV=production node mbee build'
+                sh 'MBEE_ENV=production node mbee build'
                 sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
                 // Verify build
                 sh 'ls -l'
 
                 // Build the docker image
-                sh 'NODE_ENV=production node mbee docker --build'
+                sh 'MBEE_ENV=production node mbee docker --build'
             }
         }
 
@@ -61,10 +61,10 @@ pipeline {
         stage('Run') {
             steps {
                 // Removes any existing production running containers
-                sh 'NODE_ENV=production node mbee docker --clean'
+                sh 'MBEE_ENV=production node mbee docker --clean'
 
                 // Runs the production container in the background
-                sh 'NODE_ENV=production node mbee docker --run'
+                sh 'MBEE_ENV=production node mbee docker --run'
             }
         }
 
