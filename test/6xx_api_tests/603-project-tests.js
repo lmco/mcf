@@ -109,12 +109,8 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests
    * TODO - describe
    */
-<<<<<<< HEAD
-  after(function(done) {
-    this.timeout(10000);
-=======
+
   after((done) => {
->>>>>>> master
     // Removing the Organization
     OrgController.removeOrg(user, 'biochemistry', { soft: false })
     .then((retOrg) => {

@@ -63,14 +63,9 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-<<<<<<< HEAD
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
-=======
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
 
->>>>>>> master
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
