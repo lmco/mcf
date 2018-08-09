@@ -21,42 +21,48 @@ FROM node:6.14.1-alpine
 MAINTAINER Josh Kaplan <joshua.d.kaplan@lmco.com>
 WORKDIR /lm/mbee
 
-RUN mkdir -p app \
-    && mkdir -p certs \
-    && mkdir -p config \
-    && mkdir -p plugins \
-    && mkdir -p public \
-    && mkdir -p scripts \
-    && yarn install --production
-
-COPY ./package.json package.json
-COPY ./certs certs
-COPY ./config/*.cfg config/
-COPY ./config/*.json config/
-COPY ./README.md README.md
-COPY ./scripts scripts
-COPY ./mbee.js mbee.js
-COPY ./plugins plugins
-COPY ./build build
-COPY ./app  app
-
-
 # Set proxy environment variables
 ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     HTTPS_PROXY="http://proxy-lmi.global.lmco.com:80" \
     http_proxy="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost,*.lmco.com \
-    MBEE_ENV=production \
     NODE_TLS_REJECT_UNAUTHORIZED=0
 
+
 # Install dependencies
-RUN apk upgrade && \
-    apk update && \
-    apk add git && \
-    apk add openssh-client && \
-    chmod 400 certs/* && \
-    mkdir logs
+RUN apk upgrade \
+    && apk update \
+    && apk add git \
+    && apk add openssh-client
+
+# Install certs
+RUN mkdir -p certs
+COPY ./certs certs
+RUN chmod 400 certs/*
+
+# Install Yarn Modules
+COPY ./package.json package.json
+RUN yarn install --production
+
+# Create Project Directory Structure
+RUN mkdir logs \
+    && mkdir -p config \
+    && mkdir -p scripts \
+    && mkdir -p plugins \
+    && mkdir -p build \
+    && mkdir -p public \
+    && mkdir -p app \
+
+# Copy Project
+COPY ./config/*.cfg config/
+COPY ./config/*.json config/
+COPY ./scripts scripts
+COPY ./mbee.js mbee.js
+COPY ./plugins plugins
+COPY ./build build
+COPY ./app  app
+COPY ./README.md README.md
 
 # Run server
 CMD ["node", "mbee.js", "start"]
