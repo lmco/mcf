@@ -170,10 +170,10 @@ main();
  *  Main Function                                                             *
  ******************************************************************************/
 function main() {
-  /* eslint-disable global-require */
-  const tasks = ['build', 'clean', 'docker', 'lint', 'start', 'test'];
+  const tasks = ['clean', 'build', 'lint', 'docker', 'start', 'test'];
 
   if (tasks.includes(subcommand)) {
+    // eslint-disable-next-line global-require
     const task = require(path.join(M.root, 'scripts', subcommand));
     task(opts);
   }

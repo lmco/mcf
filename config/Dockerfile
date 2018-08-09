@@ -27,19 +27,20 @@ RUN mkdir -p app \
     && mkdir -p plugins \
     && mkdir -p public \
     && mkdir -p scripts \
-    && mkdir -p node_modules
+    && yarn install --production
 
-COPY ./app  app
+COPY ./package.json package.json
+COPY ./node_modules node_modules
 COPY ./certs certs
 COPY ./config/*.cfg config/
 COPY ./config/*.json config/
+COPY ./README.md README.md
+COPY ./scripts scripts
+COPY ./mbee.js mbee.js
 COPY ./plugins plugins
 COPY ./build build
-COPY ./scripts scripts
-COPY ./package.json package.json
-COPY ./mbee.js mbee.js
-COPY ./node_modules node_modules
-COPY ./README.md README.md
+COPY ./app  app
+
 
 # Set proxy environment variables
 ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
