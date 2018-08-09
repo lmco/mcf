@@ -238,7 +238,7 @@ ElementSchema.pre('save', function(next) {
   // TODO: Set deleted to a boolean in the pre-save
   this.deleted = '';
   // Only set uuid if it hasn't already been set
-  if (this.uuid === undefined) {
+  if (this.uuid === undefined || this.uuid === '') {
     this.uuid = uuidv4();
   }
   next();
