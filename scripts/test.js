@@ -30,8 +30,6 @@ if (module.parent == null) {
   process.exit(-1);
 }
 
-module.exports = test;
-
 /**
  * Runs the collection of test suites by running the "test/runner.js" script
  * with Mocha. This function calls the Mocha test framework. The following
@@ -137,3 +135,5 @@ function printHeader() {
   console.log('_'.repeat(65)); // eslint-disable-line no-console
   console.log(''); // eslint-disable-line no-console
 }
+
+module.exports = test;

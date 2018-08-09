@@ -171,24 +171,11 @@ main();
  ******************************************************************************/
 function main() {
   /* eslint-disable global-require */
-  const build = require(`${M.root}/scripts/build`);
-  const clean = require(`${M.root}/scripts/clean`);
-  const docker = require(`${M.root}/scripts/docker`);
-  const lint = require(`${M.root}/scripts/linter`);
-  const start = require(`${M.root}/scripts/start`);
-  const test = require(`${M.root}/scripts/test`);
+  const tasks = ['build', 'clean', 'docker', 'lint', 'start', 'test'];
 
-  const tasks = {
-    build: build.build,
-    clean: clean,
-    docker: docker,
-    lint: lint,
-    start: start,
-    test: test
-  };
-
-  if (tasks.hasOwnProperty(subcommand)) {
-    tasks[subcommand](opts);
+  if (tasks.includes(subcommand)) {
+    const task = require(path.join(M.root, 'scripts', subcommand));
+    task(opts);
   }
   else {
     console.log('Unknown command'); // eslint-disable-line no-console

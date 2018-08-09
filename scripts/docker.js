@@ -31,8 +31,6 @@ if (module.parent == null) {
   process.exit(-1);
 }
 
-module.exports = docker;
-
 /**
  * The Docker command can be used to build a Docker image or run a Docker
  * container. It supports the command line arguments `--clean`, `--build`, and
@@ -146,3 +144,5 @@ function docker(args) {
     console.log('Invalid arguments');
   }
 }
+
+module.exports = docker;

@@ -27,8 +27,6 @@ if (module.parent == null) {
   process.exit(-1);
 }
 
-module.exports = start;
-
 // Load mbee modules
 const startup = M.require('lib.startup');
 
@@ -82,3 +80,5 @@ function start(args) {
     });
   }
 }
+
+module.exports = start;

@@ -30,8 +30,6 @@ if (module.parent == null) {
   process.exit(-1);
 }
 
-module.exports = lint;
-
 /**
  * Runs ESLint against the primary Javascript directories.
  */
@@ -54,3 +52,5 @@ function lint(_args) {
     }
   });
 }
+
+module.exports = lint;

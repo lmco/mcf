@@ -24,8 +24,6 @@ if (module.parent == null) {
   process.exit(-1);
 }
 
-module.exports.build = build;
-
 /**
  * Builds the project by copy dependencies to their final location, compiling
  * Sass into CSS, building Javascript libraries into client-side code, and
@@ -136,3 +134,5 @@ function build(_args) {
 
   console.log('Build Complete.');
 }
+
+module.exports = build;

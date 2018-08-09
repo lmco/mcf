@@ -38,8 +38,6 @@ if (module.parent == null) {
   process.exit(-1);
 }
 
-module.exports = clean;
-
 function clean(_args) {
   const del = require('del');  // eslint-disable-line global-require
 
@@ -62,3 +60,5 @@ function clean(_args) {
     del.sync([`${M.root}/node_modules`]);
   }
 }
+
+module.exports = clean;
