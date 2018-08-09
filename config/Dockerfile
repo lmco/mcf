@@ -30,7 +30,6 @@ RUN mkdir -p app \
     && yarn install --production
 
 COPY ./package.json package.json
-COPY ./node_modules node_modules
 COPY ./certs certs
 COPY ./config/*.cfg config/
 COPY ./config/*.json config/
