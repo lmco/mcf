@@ -18,12 +18,12 @@
  * provides functions for interacting with organizations.
  */
 
-const path = require('path');
+// Load mbee modules
 const Organization = M.require('models.Organization');
-const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
+const errors = M.require('lib.errors');
 
 /**
  * OrganizationController

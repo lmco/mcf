@@ -22,12 +22,11 @@
  * improve CI testing.
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO remove need for mongoose
 
-
-
+// Load mbee modules
 const User = M.require('models.User');
 const Organization = M.require('models.Organization');
 const Project = M.require('models.Project');

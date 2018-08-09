@@ -19,8 +19,9 @@
  * and all expected libraries exist.
  */
 
-const chai = require('chai');
 
+// Load node modules
+const chai = require('chai');
 
 
 /* --------------------( Main )-------------------- */

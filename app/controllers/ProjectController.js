@@ -18,16 +18,13 @@
  * provides functions for interacting with projects.
  */
 
-/* Node.js Modules */
-const path = require('path');
-
-/* Local Modules */
+// Load mbee modules
 const OrgController = M.require('controllers.OrganizationController');
 const Project = M.require('models.Project');
-const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
+const errors = M.require('lib.errors');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and

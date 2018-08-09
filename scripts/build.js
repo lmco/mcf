@@ -13,16 +13,18 @@
 
 /* eslint-disable no-console */
 
-// Node.js Built-in Modules
+// Load node modules
 const { execSync } = require('child_process');
 
+// If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
-  build(process.argv.slice(2));
-}
-else {
-  module.exports.build = build;
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this scrip by using the'
+    + 'following command... \n\nnode mbee build\n');
+  process.exit(-1);
 }
 
+module.exports.build = build;
 
 /**
  * Builds the project by copy dependencies to their final location, compiling

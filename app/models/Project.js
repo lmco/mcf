@@ -15,14 +15,20 @@
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
  * @description
- * The ProjectModel.js file creates a mongoose model to interact with the MongoDB
- * Database in order to find, save, update, and delete projects.
+ * The ProjectModel.js file creates a mongoose model to interact with the
+ * MongoDB Database in order to find, save, update, and delete projects.
  */
 
-// Requirements
+// Load node modules
 const mongoose = require('mongoose');
-const path = require('path');
+
+// Load mbee modules
 const validators = M.require('lib.validators');
+
+/******************************************************************************
+ * Project Model
+ ******************************************************************************/
+
 /**
  * @class Project
  *

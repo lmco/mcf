@@ -18,6 +18,7 @@
  * connect function which when called connects to the database.
  */
 
+// Load node modules
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -27,7 +28,7 @@ const mongoose = require('mongoose');
  */
 module.exports.connect = function() {
   return new Promise((resolve, reject) => {
-    // Declare varaibels for mongoose connection
+    // Declare variables for mongoose connection
     const dbName = M.config.db.name;
     const url = M.config.db.url;
     const dbPort = M.config.db.port;
@@ -48,7 +49,7 @@ module.exports.connect = function() {
     // and the 'sslCAFile' must be provided and reference a file located in /certs.
     if (M.config.db.ssl) {
       connectURL += '?ssl=true';
-      const caPath = path.join(__dirname, '..', '..', 'certs', M.config.db.ca);
+      const caPath = path.join(M.root, 'certs', M.config.db.ca);
       const caFile = fs.readFileSync(caPath, 'utf8');
       options.sslCA = caFile;
     }

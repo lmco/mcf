@@ -18,7 +18,7 @@
  * deployments on the LMI.
  */
 
-const path = require('path');
+// Load mbee modules
 const LocalStrategy = M.require('auth.LocalStrategy');
 const LDAPStrategy = M.require('auth.LDAPStrategy');
 const User = M.require('models.User');

@@ -18,7 +18,7 @@
  * routes in order to implement route logging or other various functionality.
  */
 
-const path = require('path');
+// load mbee modules
 const errors = M.require('lib.errors');
 
 /**

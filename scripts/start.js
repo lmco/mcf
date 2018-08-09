@@ -13,12 +13,25 @@
 
 /* eslint-disable no-console */
 
-// Node.js Built-in Modules
+// Load node modules
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
+
+// If the application is run directly from node, notify the user and fail
+if (module.parent == null) {
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this scrip by using the'
+    + 'following command... \n\nnode mbee start\n');
+  process.exit(-1);
+}
+
+module.exports = start;
+
+// Load mbee modules
 const startup = M.require('lib.startup');
+
 /**
  * Runs the MBEE server based on the configuration provided in the environment
  * config file.
@@ -29,10 +42,10 @@ function start(args) {
   M.log.debug(`${`+ mbee.js executed as ${process.argv.join(' ')} `
   + `with env=${M.env} and configuration: `}${JSON.stringify(M.config)}`);
 
-  startup();                // Print startup banner
+  startup(); // Print startup banner
 
   // Import the app, disable the global-import rule for this
-  const app = M.require('app');   // eslint-disable-line global-require
+  const app = M.require('app'); // eslint-disable-line global-require
 
   /* eslint-disable no-var, vars-on-top, block-scoped-var */
 
@@ -70,5 +83,3 @@ function start(args) {
     });
   }
 }
-
-module.exports = start;

@@ -18,6 +18,7 @@
  * @desc This file tests some the configuration to ensure versions are correct.
  */
 
+// load node modules
 const path = require('path');
 const chai = require('chai');
 

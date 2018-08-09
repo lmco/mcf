@@ -18,14 +18,14 @@
  * It also provides function for interacting with elements.
  */
 
-const path = require('path');
+// Load mbee modules
 const ProjController = M.require('controllers.ProjectController');
-// Element refers to the Element.js file, not the Element model
 const Element = M.require('models.Element');
-const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
+const errors = M.require('lib.errors');
+
 
 /**
  * @class  APIController

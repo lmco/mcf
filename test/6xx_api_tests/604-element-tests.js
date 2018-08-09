@@ -23,17 +23,17 @@
  * TODO - fix description
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove need for mongoose
 const request = require('request');
 
-const ProjController = M.require('controllers.ProjectController');
+// Load mbee modules
 const OrgController = M.require('controllers.OrganizationController');
-const AuthController = M.require('lib.auth');
-const mock_express = M.require('lib.mock-express');
+const ProjController = M.require('controllers.ProjectController');
 const User = M.require('models.User');
-const test = M.config.test;
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 
 
 /* --------------------( Test Data )-------------------- */
@@ -64,8 +64,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = mock_express.getReq(params, body);
-    const resObj = mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -158,7 +158,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postElement(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
@@ -186,7 +186,7 @@ function postElement(done) {
  */
 function getElement(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'GET'
   },
@@ -203,7 +203,7 @@ function getElement(done) {
  */
 function getElements(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements`,
     headers: getHeaders(),
     method: 'GET'
   },
@@ -220,7 +220,7 @@ function getElements(done) {
  */
 function putElement(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'PUT',
     body: JSON.stringify({
@@ -240,7 +240,7 @@ function putElement(done) {
  */
 function deleteElement(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'DELETE',
     body: JSON.stringify({

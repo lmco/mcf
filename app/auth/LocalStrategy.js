@@ -18,12 +18,11 @@
  * authentication. This should be the default authentication strategy for MBEE.
  */
 
-const path = require('path');
+// Load mbee modules
 const User = M.require('models.User');
-const libCrypto = M.require('lib.crypto');
+const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
-const crypto = M.require('lib.crypto');
 
 /**
  * LocalStrategy
@@ -120,7 +119,7 @@ class LocalStrategy {
       // Try to decrypt the token
       let token = null;
       try {
-        token = libCrypto.inspectToken(_token);
+        token = mbeeCrypto.inspectToken(_token);
       }
       // If it cannot be decrypted, it is not valid and the
       // user is not authorized
@@ -205,7 +204,7 @@ class LocalStrategy {
     const dT = M.config.auth.token.expires * conversions[M.config.auth.token.units];
 
     // Generate the token and set the session token
-    const token = crypto.generateToken({
+    const token = mbeeCrypto.generateToken({
       type: 'user',
       username: req.user.username,
       created: (new Date(Date.now())).toUTCString(),

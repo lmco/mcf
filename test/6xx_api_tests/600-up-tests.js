@@ -18,12 +18,10 @@
  * @description  This file defines basic tests of the API being up. TODO
  */
 
+// Load node modules
 const fs = require('fs');
-const path = require('path');
 const chai = require('chai');
 const request = require('request');
-
-
 
 /* --------------------( Main )-------------------- */
 

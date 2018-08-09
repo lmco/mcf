@@ -23,7 +23,7 @@
  *   - `log.error('An error has occured')`
  */
 
-const path = require('path');
+// Load node modules
 const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
 const { execSync } = require('child_process');
@@ -131,6 +131,7 @@ const formatter = printf((msg) => {
 
 // Creates the log directory if it doesn't already exist
 const logDir = (M.config.log.dir === undefined) ? 'logs' : M.config.log.dir;
+// TODO: make OS Specific
 const cmd = `mkdir -p ${logDir}`;
 execSync(cmd);
 

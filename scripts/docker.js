@@ -20,18 +20,18 @@
 
 /* eslint-disable no-console */
 
-const path = require('path');
+// Load node modules
 const { spawn, spawnSync } = require('child_process');
 
-
-
+// If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
-  docker(process.argv.slice(2));
-}
-else {
-  module.exports = docker;
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this scrip by using the'
+    + 'following command... \n\nnode mbee docker\n');
+  process.exit(-1);
 }
 
+module.exports = docker;
 
 /**
  * The Docker command can be used to build a Docker image or run a Docker

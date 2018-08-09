@@ -122,8 +122,6 @@ Object.defineProperty(M, 'config', {
   enumerable: true
 });
 
-// Make the M object read only and its properties cannot be changed or removed.
-Object.freeze(M);
 
 /******************************************************************************
  *  Load Library Modules                                                      *
@@ -140,8 +138,10 @@ if (installComplete) {
     writable: false,
     enumerable: true
   });
-
 }
+
+// Make the M object read only and its properties cannot be changed or removed.
+Object.freeze(M);
 
 // Set argument commands for use in configuration lib and main function
 // Example: node mbee.js <subcommand> <opts>
@@ -149,18 +149,20 @@ const subcommand = process.argv.slice(2, 3)[0];
 const opts = process.argv.slice(3);
 
 // Check for start command and build NOT completed
-if (subcommand === 'start' && !buildComplete) {
-  M.log.error('Must run build command before running start: "node mbee.js build"');
+if (!installComplete) {
+  // eslint-disable-next-line no-console
+  console.log('\n  Error: Must install modules before attempting to run other commands.'
+            + '\n\n  yarn install or npm install\n\n');
   process.exit(0);
 }
 
-// Define helper scripts
-const build = require(`${M.root}/scripts/build`);
-const clean = require(`${M.root}/scripts/clean`);
-const docker = require(`${M.root}/scripts/docker`);
-const lint = require(`${M.root}/scripts/linter`);
-const start = require(`${M.root}/scripts/start`);
-const test = require(`${M.root}/scripts/test`);
+// Check for start command and build NOT completed
+if (subcommand === 'start' && !buildComplete) {
+  // eslint-disable-next-line no-console
+  console.log('\n  Error: Must run build command before attempting to run start.'
+            + '\n\n  node mbee build\n\n');
+  process.exit(0);
+}
 
 // Invoke main
 main();
@@ -169,6 +171,14 @@ main();
  *  Main Function                                                             *
  ******************************************************************************/
 function main() {
+  /* eslint-disable global-require */
+  const build = require(`${M.root}/scripts/build`);
+  const clean = require(`${M.root}/scripts/clean`);
+  const docker = require(`${M.root}/scripts/docker`);
+  const lint = require(`${M.root}/scripts/linter`);
+  const start = require(`${M.root}/scripts/start`);
+  const test = require(`${M.root}/scripts/test`);
+
   const tasks = {
     build: build.build,
     clean: clean,
@@ -182,6 +192,6 @@ function main() {
     tasks[subcommand](opts);
   }
   else {
-    M.log.error('Unknown command');
+    console.log('Unknown command'); // eslint-disable-line no-console
   }
 }

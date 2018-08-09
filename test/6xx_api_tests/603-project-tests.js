@@ -25,15 +25,16 @@
  * TODO - fix the description
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove dependency on mongoose
 const request = require('request');
 
+// Load mbee modules
 const OrgController = M.require('controllers.OrganizationController');
 const AuthController = M.require('lib.auth');
 const User = M.require('models.User');
-const mock_express = M.require('lib.mock-express');
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -64,8 +65,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = mock_express.getReq(params, body);
-    const resObj = mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -142,7 +143,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PUT to update with invalid name', badPut);
   it('should POST second project', postProject02);
   it('should DELETE the first project to the organization', deleteProject01).timeout(5000);
-  it('should DELETE the second project to the organization', deleteProject02).timeout(5000);;
+  it('should DELETE the second project to the organization', deleteProject02).timeout(5000);
 });
 
 

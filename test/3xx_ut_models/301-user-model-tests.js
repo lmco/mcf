@@ -22,9 +22,11 @@
  * TODO - Description
  */
 
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose');
-const path = require('path');
+
+// Load mbee modules
 const User = M.require('models.User');
 const db = M.require('lib.db');
 

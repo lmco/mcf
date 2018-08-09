@@ -19,8 +19,8 @@
  * and decrypt functions in the library.
  */
 
+// Load node modules
 const chai = require('chai');
-
 
 
 /* --------------------( Main )-------------------- */

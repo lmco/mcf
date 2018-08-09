@@ -17,16 +17,7 @@
  * This cleans the existing MBEE build.
  */
 
-const path = require('path');
-
-
-if (module.parent == null) {
-  clean(process.argv.slice(2));
-}
-else {
-  module.exports = clean;
-}
-
+/* eslint-disable no-console */
 
 /**
  * Cleans project directory of non-persistent items. Removes the following
@@ -38,6 +29,16 @@ else {
  * TODO - Make this robust against missing node_modules directory and keep it
  * cross-platform.
  */
+
+// If the application is run directly from node, notify the user and fail
+if (module.parent == null) {
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this scrip by using the'
+    + 'following command... \n\nnode mbee clean\n');
+  process.exit(-1);
+}
+
+module.exports = clean;
 
 function clean(_args) {
   const del = require('del');  // eslint-disable-line global-require

@@ -19,10 +19,16 @@
  * MongoDB Database in order to find, save, update, and delete organizations.
  */
 
-const path = require('path');
+// Load node modules
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+
+// Load mbee modules
 const validators = M.require('lib.validators');
+
+/******************************************************************************
+ * Element Model
+ ******************************************************************************/
 
 /**
  * @class  User

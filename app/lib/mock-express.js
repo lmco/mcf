@@ -18,10 +18,8 @@
  * functions for use in the test framework.
  */
 
-const path = require('path');
-
+// Load mbee modules
 const errors = M.require('lib.errors');
-
 
 /**
  * mock_express.js

@@ -18,12 +18,11 @@
  * provides functions for interacting with users.
  */
 
-const path = require('path');
-const validators = M.require('lib.validators');
+// Load mbee modules
 const User = M.require('models.User');
-const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and

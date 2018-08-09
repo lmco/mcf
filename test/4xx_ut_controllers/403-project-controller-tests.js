@@ -11,18 +11,19 @@
  * as test the controlls with invalid inputs.
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove need for mongoose
 
-const ProjController = M.require('controllers.ProjectController');
+// Load mbee modules
 const UserController = M.require('controllers.UserController');
 const OrgController = M.require('controllers.OrganizationController');
+const ProjController = M.require('controllers.ProjectController');
 const ElemController = M.require('controllers.ElementController');
+const User = M.require('models.User');
 const Element = M.require('models.Element');
 const AuthController = M.require('lib.auth');
-const User = M.require('models.User');
-const mock_express = M.require('lib.mock-express');
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -54,8 +55,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = mock_express.getReq(params, body);
-    const resObj = mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);

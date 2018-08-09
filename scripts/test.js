@@ -17,20 +17,20 @@
  * This file executes the test suite with Mocha.
  */
 
+// Load node modules
 const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
-
-
 const Mocha = require('mocha');
 
+// If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
-  test(process.argv.slice(2));
-}
-else {
-  module.exports = test;
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this scrip by using the'
+    + 'following command... \n\nnode mbee test\n');
+  process.exit(-1);
 }
 
+module.exports = test;
 
 /**
  * Runs the collection of test suites by running the "test/runner.js" script

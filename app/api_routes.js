@@ -26,13 +26,14 @@
  * being undefined.
  */
 
-const path = require('path');
+// Load node modules
 const express = require('express');
-const Middleware = M.require('lib.middleware');
+const api = express.Router();
+
+// Load mbee modules
 const APIController = M.require('controllers.APIController');
 const AuthController = M.require('lib.auth');
-
-const api = express.Router();
+const Middleware = M.require('lib.middleware');
 
 
 /**

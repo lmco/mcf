@@ -19,16 +19,18 @@
  * define behaviors for specific objects.
  */
 
+// Load node modules
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
-const sani = M.require('lib.sanitization');
-const ElementController = M.require('controllers.ElementController');
+
+// Load mbee modules
+const UserController = M.require('controllers.UserController');
 const OrgController = M.require('controllers.OrganizationController');
 const ProjectController = M.require('controllers.ProjectController');
-const UserController = M.require('controllers.UserController');
+const ElementController = M.require('controllers.ElementController');
 const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
-
+const sani = M.require('lib.sanitization');
 
 /**
  * @class  APIController
@@ -131,9 +133,9 @@ class APIController {
   static version(req, res) {
     M.log.info(`GET "/api/version" requested by ${req.user.username}`);
     const obj = {
-      version: mbee.version,
-      version4: mbee.version4,
-      build: `${mbee.build}`
+      version: M.version,
+      version4: M.version4,
+      build: `${M.build}`
     };
     res.header('Content-Type', 'application/json');
     return res.send(APIController.formatJSON(obj));

@@ -19,14 +19,17 @@
  * handle other object behaviors.
  */
 
+// Load node modules
 const fs = require('fs');
 const path = require('path');
+const swaggerJSDoc = require('swagger-jsdoc');
+
+// Load mbee modules
 const User = M.require('models.User');
+const crypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
-const swaggerJSDoc = require('swagger-jsdoc');
-const crypto = M.require('lib.crypto');
 
 /**
  * UIController.js

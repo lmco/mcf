@@ -22,10 +22,11 @@
  * soft deletes, and hard deletes organizations.
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove the need for mongoose
 
+// Load mbee modules
 const Org = M.require('models.Organization');
 
 

@@ -24,14 +24,15 @@
  * TODO - description
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const request = require('request');
 const mongoose = require('mongoose'); // TODO - remove the need for mongoose
 
-const AuthController = M.require('lib.auth');
+// Load mbee modules
 const User = M.require('models.User');
-const mock_express = M.require('lib.mock-express');
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -61,8 +62,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = mock_express.getReq(params, body);
-    const resObj = mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);

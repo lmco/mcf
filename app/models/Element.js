@@ -35,13 +35,14 @@
  * @tutorial  elements
  */
 
-const path = require('path');
+// Load node modules
 const mongoose = require('mongoose');
-const validators = M.require("lib.validators")
+
+// load mbee modules
+const validators = M.require('lib.validators');
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };
-
 
 /******************************************************************************
  * Element Model
