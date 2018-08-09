@@ -46,7 +46,12 @@ function test(_args) {
     _args.push('--timeout');
     _args.push('5000');
   }
-  const args = ['--slow', '19', `${M.root}/test/**/*.js`].concat(_args);
+  // Add default slow speed if not provided
+  if (!_args.includes('--slow')) {
+    _args.push('--slow');
+    _args.push('19');
+  }
+  const args = [`${M.root}/test/**/*.js`].concat(_args);
 
   spawn(`${M.root}/node_modules/.bin/mocha`, args, { stdio: 'inherit' })
   .on('data', (data) => {
