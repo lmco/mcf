@@ -380,7 +380,7 @@ function rejectPatch(done) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(404);
     chai.expect(json.message).to.equal('Not Found');
-    chai.expect(json.description).to.equal('User does not exist.');
+    chai.expect(json.description).to.equal('Cannot find user.');
     done();
   });
 }
