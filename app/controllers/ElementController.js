@@ -284,7 +284,6 @@ class ElementController {
    */
   static findElementsQuery(elementQuery) {
     return new Promise((resolve, reject) => {
-
       const query = M.lib.sani.sanitize(elementQuery);
 
       Element.Element.find(query)
