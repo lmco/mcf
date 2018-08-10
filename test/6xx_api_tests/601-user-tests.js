@@ -94,8 +94,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should find out the user with the /whoami api tag', whoamIapi);
   it('should reject creating a user with invalid username', rejectUPost);
   it('should reject creating a user with two different usernames', rejectUsernames);
-  // JIRA-BUG: MBX-283 UNCOMMENT WHEN FIXED
-  // it('should reject creating a user with invalid first name', rejectNamePatch);
+  it('should reject creating a user with invalid first name', rejectNamePost);
   it('should reject a username that already exists', rejectExistingUname);
   it('should get all users', getUsers);
   it('should reject getting a user that does not exist', rejectGetNoU);
@@ -253,31 +252,30 @@ function rejectUsernames(done) {
   });
 }
 
-// /**
-//  * Makes an invalid POST request to /api/users/:username. This an attempt to
-//  * create a user with an invalid first name. Response should be an error
-//  * thrown with status code 400 or something.
-//  * JIRA-BUG: MBX-283 Uncomment test when implemented
-//  */
-// function rejectNamePatch(done) {
-//   request({
-//     url: `${test.url}/api/users/blindal`,
-//     headers: getHeaders(),
-//     method: 'POST',
-//     body: JSON.stringify({
-//       username: 'blindal',
-//       password: 'icantsee',
-//       fname: '',
-//       lname: 'Al'
-//     })
-//   },
-//   (err, response, body) => {
-//     const json = JSON.parse(body);
-//     chai.expect(response.statusCode).to.equal(500);
-//     chai.expect(json.message).to.equal('Internal Server Error');
-//     done();
-//   });
-// }
+/**
+ * Makes an invalid POST request to /api/users/:username. This an attempt to
+ * create a user with an invalid first name. Response should be an error
+ * thrown with status code 400 or something.
+ */
+function rejectNamePost(done) {
+  request({
+    url: `${test.url}/api/users/blindal`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      username: 'blindal',
+      password: 'icantsee',
+      fname: '',
+      lname: 'Al'
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.description).to.equal('First name is not valid.');
+    done();
+  });
+}
 
 /**
  * Makes an invalid POST request to /api/users/:username. This an attempt to
@@ -382,7 +380,7 @@ function rejectPatch(done) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(404);
     chai.expect(json.message).to.equal('Not Found');
-    chai.expect(json.description).to.equal('User does not exist.');
+    chai.expect(json.description).to.equal('Cannot find user.');
     done();
   });
 }
