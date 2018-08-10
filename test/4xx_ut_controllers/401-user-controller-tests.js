@@ -48,8 +48,7 @@ describe(M.getModuleName(module.filename), () => {
    * Before: run before all tests.
    * TODO - Describe what is being done
    */
-  before(function(done) {
-    this.timeout(6000);
+  before((done) => {
     const db = M.require('lib/db');
     db.connect();
 
@@ -100,8 +99,7 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests.
    * TODO - Describe what is being done
    */
-  after(function(done) {
-    this.timeout(5000);
+  after((done) => {
     const username = 'everettross';
     UserController.removeUser(reqUser, username)
     .then((delUser) => {
@@ -130,27 +128,28 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a user', createNewUser).timeout(3000);
-  it('should create an admin user', createAUser).timeout(3000);
-  it('should create a non admin user', createNonAUser).timeout(3000);
-  it('should create a second user', createUser02).timeout(3000);
-  it('should reject a creating a user with non A req user', nonACreate).timeout(3000);
-  it('should reject a user with no input to username', badUser).timeout(3000);
-  it('should reject username with invalid input', invalidUser).timeout(3000);
-  it('should reject username already in database', copyCatUser).timeout(3000);
-  it('should update the users last name', updateLName).timeout(3000);
-  it('should update the users custom tags', updateCustom).timeout(3000);
-  it('should reject updating the users username', updateUName).timeout(3000);
-  it('should reject updating a user that does not exist', updateNoUser).timeout(3000);
-  it('should reject update from non A user', updateAttempt).timeout(3000);
-  it('should find user', findUser).timeout(3000);
-  it('should reject finding a user that does not exist', noFindUser).timeout(3000);
-  it('should reject deleting a user that doesnt exist', fakeDelete).timeout(3000);
-  it('should reject deleting a user with a non admin user', nonADelete).timeout(3000);
-  it('should reject deleting themselves', deleteSelf).timeout(3000);
-  it('should delete user created', deleteUser).timeout(3000);
-  it('should delete second user created', deleteUser02).timeout(3000);
-  it('should delete admin user created', deleteAUser).timeout(3000);
+  it('should create a user', createNewUser);
+  it('should create an admin user', createAUser);
+  it('should create a non admin user', createNonAUser);
+  it('should create a second user', createUser02);
+  it('should reject a creating a user with non A req user', nonACreate);
+  it('should reject a user with no input to username', badUser);
+  it('should reject username with invalid input', invalidUser);
+  it('should reject username already in database', copyCatUser);
+  it('should update the users last name', updateLName);
+  it('should reject updating the first name with a bad name', updateBadFName);
+  it('should update the users custom tags', updateCustom);
+  it('should reject updating the users username', updateUName);
+  it('should reject updating a user that does not exist', updateNoUser);
+  it('should reject update from non A user', updateAttempt);
+  it('should find user', findUser);
+  it('should reject finding a user that does not exist', noFindUser);
+  it('should reject deleting a user that doesnt exist', fakeDelete);
+  it('should reject deleting a user with a non admin user', nonADelete);
+  it('should reject deleting themselves', deleteSelf);
+  it('should delete user created', deleteUser);
+  it('should delete second user created', deleteUser02);
+  it('should delete admin user created', deleteAUser);
 });
 
 
@@ -316,7 +315,7 @@ function badUser(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Save failed.');
+    chai.expect(error.description).to.equal('Username is not valid.');
     done();
   });
 }
@@ -341,7 +340,7 @@ function invalidUser(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Save failed.');
+    chai.expect(error.description).to.equal('Username is not valid.');
     done();
   });
 }
@@ -391,6 +390,26 @@ function updateLName(done) {
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Update the first name of the user
+ * with a bad first name.
+ */
+function updateBadFName(done) {
+  const username = 'blackpanther';
+  const userData = {
+    fname: 'KLAW@#$'
+  };
+  UserController.updateUser(reqUser, username, userData)
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Name is not valid.');
     done();
   });
 }
@@ -483,7 +502,7 @@ function updateNoUser(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('User does not exist.');
+    chai.expect(error.description).to.equal('Cannot find user.');
     done();
   });
 }

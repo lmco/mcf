@@ -54,16 +54,10 @@ class OrganizationController {
   static findOrgs(user) {
     return new Promise((resolve, reject) => {
       const userID = M.lib.sani.sanitize(user._id);
-      Organization.find({ 'permissions.read': userID, deleted: false })
-      .populate('projects read permissions.write permissions.admin')
-      .exec((err, orgs) => {
-        // If error occurs, return it
-        if (err) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
-        // Resolve the list of orgs
-        return resolve(orgs);
-      });
+
+      OrganizationController.findOrgsQuery({ 'permissions.read': userID, deleted: false })
+      .then((orgs) => resolve(orgs))
+      .catch((error) => reject(error));
     });
   }
 
@@ -104,18 +98,19 @@ class OrganizationController {
         searchParams = { id: orgID };
       }
 
-      Organization.findOne(searchParams)
-      .populate('projects permissions.read permissions.write permissions.admin')
-      .exec((err, org) => {
-        // If error occurs, return it
-        if (err) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
-
+      OrganizationController.findOrgsQuery(searchParams)
+      .then((orgs) => {
         // If no org is found, reject
-        if (!org) {
+        if (orgs.length === 0) {
           return reject(new errors.CustomError('Org not found.', 404));
         }
+
+        // Ensure only one org found
+        if (orgs.length > 1) {
+          return reject(new errors.CustomError('More than one org found.', 400));
+        }
+
+        const org = orgs[0];
 
         // If user is not a member
         // TODO - Is there a way we can include this as part of the query?
@@ -126,6 +121,39 @@ class OrganizationController {
 
         // If we find one org (which we should if it exists)
         return resolve(org);
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
+  /**
+   * @description  This function takes a query and finds the org.
+   *
+   * @example
+   * OrganizationController.findOrgsQuery({ id: 'org' })
+   * .then(function(org) {
+   *   // do something with the found orgs.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {Object} orgQuery  The query to be made to the database
+   */
+  static findOrgsQuery(orgQuery) {
+    return new Promise((resolve, reject) => {
+      const query = M.lib.sani.sanitize(orgQuery);
+
+      Organization.find(query)
+      .populate('projects permissions.read permissions.write permissions.admin')
+      .exec((err, orgs) => {
+        // If error occurs, return it
+        if (err) {
+          return reject(new errors.CustomError('Find failed.'));
+        }
+        // Resolve the list of orgs
+        return resolve(orgs);
       });
     });
   }
@@ -150,10 +178,17 @@ class OrganizationController {
    */
   static createOrg(user, orgInfo) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+      // Optional fields
+      let custom = null;
+
       try {
         utils.assertAdmin(user);
         utils.assertExists(['id', 'name'], orgInfo);
         utils.assertType([orgInfo.id, orgInfo.name], 'string');
+        if (utils.checkExists(['custom'], orgInfo)) {
+          utils.assertType([orgInfo.custom], 'object');
+          custom = M.lib.sani.html(orgInfo.custom);
+        }
       }
       catch (error) {
         return reject(error);
@@ -186,7 +221,8 @@ class OrganizationController {
               admin: [user._id],
               write: [user._id],
               read: [user._id]
-            }
+            },
+            custom: custom
           });
           // Save and resolve the new error
           newOrg.save((saveOrgErr) => { // eslint-disable-line consistent-return
@@ -290,7 +326,8 @@ class OrganizationController {
             return reject(new errors.CustomError(`Users cannot update [${updateField}] of organizations.`, 400));
           }
           // Error Check - Check if updated field is of type string
-          if (!utils.checkType([orgUpdate[updateField]], 'string')) {
+          if (!utils.checkType([orgUpdate[updateField]], 'string')
+            && (Organization.schema.obj[updateField].type.schemaName !== 'Mixed')) {
             return reject(new errors.CustomError(`The Organization [${updateField}] is not of type String`, 400));
           }
 
@@ -301,10 +338,23 @@ class OrganizationController {
             }
           }
 
-          // sanitize field
-          updateVal = M.lib.sani.sanitize(orgUpdate[updateField]);
-          // Update field in org object
-          org[updateField] = updateVal;
+          // Updates each individual tag that was provided.
+          if (Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
+            // eslint-disable-next-line no-loop-func
+            Object.keys(orgUpdate[updateField]).forEach((key) => {
+              org.custom[key] = M.lib.sani.sanitize(orgUpdate[updateField][key]);
+            });
+
+            // Special thing for mixed fields in Mongoose
+            // http://mongoosejs.com/docs/schematypes.html#mixed
+            org.markModified(updateField);
+          }
+          else {
+            // sanitize field
+            updateVal = M.lib.sani.sanitize(orgUpdate[updateField]);
+            // Update field in org object
+            org[updateField] = updateVal;
+          }
         }
 
         // Save updated org

@@ -44,7 +44,7 @@ const db = M.require('lib.db');
  * that group (the first parameter passed into describe) is derived from the
  * name of the current file.
  */
-describe(M.getModuleName(module.filename), () => {
+describe(M.getModuleName(module.filename), function() {
   /* Runs before all tests . Opens the database connection. */
   before(() => db.connect());
 
@@ -52,8 +52,12 @@ describe(M.getModuleName(module.filename), () => {
   after(() => mongoose.connection.close());
 
   /* Execute the tests */
+<<<<<<< HEAD
   it('clean database', cleanDB).timeout(5000);
   it('should create the default org if it doesnt exist', createDefaultOrg);
+=======
+  it('clean database', cleanDB);
+>>>>>>> master
 });
 
 

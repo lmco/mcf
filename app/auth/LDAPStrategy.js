@@ -26,6 +26,8 @@ const User = M.require('models.User');
 const UserController = M.require('controllers.UserController');
 const errors = M.require('lib.errors');
 
+const ldapConfig = M.config.auth.ldap;
+
 /**
  * LDAPStrategy
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
@@ -139,20 +141,20 @@ class LDAPStrategy {
       // Import Certs
       const cacerts = [];
       const projectRoot = M.root;
-      for (let i = 0; i < M.config.auth.ldap.ca.length; i++) {
-        const fname = M.config.auth.ldap.ca[i];
+      for (let i = 0; i < ldapConfig.ca.length; i++) {
+        const fname = ldapConfig.ca[i];
         const file = fs.readFileSync(path.join(projectRoot, fname));
         cacerts.push(file);
       }
       // Create ldapClient object with credentials and certs
       const ldapClient = ldap.createClient({
-        url: `${M.config.auth.ldap.url}:${M.config.auth.ldap.port}`,
+        url: `${ldapConfig.url}:${ldapConfig.port}`,
         tlsOptions: {
           ca: cacerts
         }
       });
       // bind object to LDAP server
-      ldapClient.bind(M.config.auth.ldap.bind_dn, M.config.auth.ldap.bind_dn_pass, (bindErr) => {
+      ldapClient.bind(ldapConfig.bind_dn, ldapConfig.bind_dn_pass, (bindErr) => {
         // Error Check - Return error if LDAP server bind fails
         if (bindErr) {
           return reject(bindErr);
@@ -177,31 +179,42 @@ class LDAPStrategy {
       const usernameSani = M.lib.sani.ldapFilter(username);
       // set filter for query based on username attribute and the configuration filter
       const filter = '(&'
-                   + `(${M.config.auth.ldap.attributes.username}=${usernameSani})`
-                   + `${M.config.auth.ldap.filter.replace('\\', '\\\\')})`; // avoids '\\\\' in JSON
+                   + `(${ldapConfig.attributes.username}=${usernameSani})`
+                   + `${ldapConfig.filter.replace('\\', '\\\\')})`; // avoids '\\\\' in JSON
 
       // log base and filter used for query
-      M.log.debug(`Using LDAP base: ${M.config.auth.ldap.base}`);
+      M.log.debug(`Using LDAP base: ${ldapConfig.base}`);
       M.log.debug(`Using search filter: ${filter}`);
       M.log.debug('Executing search ...');
+
 
       // Set filter, attributes, and scope of the search
       const opts = {
         filter: filter,
         scope: 'sub',
         attributes: [
-          M.config.auth.ldap.attributes.username,
-          M.config.auth.ldap.attributes.firstName,
-          M.config.auth.ldap.attributes.preferredName,
-          M.config.auth.ldap.attributes.lastName,
-          M.config.auth.ldap.attributes.eMail
+          ldapConfig.attributes.username,
+          ldapConfig.attributes.firstName,
+          ldapConfig.attributes.lastName,
+          ldapConfig.attributes.eMail
         ]
       };
+
+      // Check if a preferred name is used or set it to the default of firstName
+      if (!ldapConfig.attributes.hasOwnProperty('preferredName')) {
+        ldapConfig.attributes.preferredName = ldapConfig.attributes.firstName;
+      }
+      else if (ldapConfig.attributes.preferredName === '') {
+        ldapConfig.attributes.preferredName = ldapConfig.attributes.firstName;
+      }
+      else {
+        opts.attributes.push(ldapConfig.attributes.preferredName);
+      }
 
       // Create person Boolean for proper error handling
       let person = false;
       // Execute the search
-      ldapClient.search(M.config.auth.ldap.base, opts, (err, result) => {
+      ldapClient.search(ldapConfig.base, opts, (err, result) => {
         // If entry found, log it and set person to the return object for the callback
         result.on('searchEntry', (entry) => {
           M.log.debug('Search complete. Entry found.');
@@ -230,7 +243,7 @@ class LDAPStrategy {
    * @returns Promise returns the user information from the ldap server or an err.
    */
   static ldapAuth(ldapClient, user, password) {
-    M.log.debug(`Authenticating ${user[M.config.auth.ldap.attributes.username]} ...`);
+    M.log.debug(`Authenticating ${user[ldapConfig.attributes.username]} ...`);
     // define promise for function
     return new Promise((resolve, reject) => {
       ldapClient.bind(user.dn, password, (authErr) => {
@@ -240,7 +253,7 @@ class LDAPStrategy {
           return reject(authErr);
         }
         // If no error, unbind LDAP server and return the authenticated user object
-        M.log.debug(`User [${user[M.config.auth.ldap.attributes.username]
+        M.log.debug(`User [${user[ldapConfig.attributes.username]
         }] authenticated successfully via LDAP.`);
         ldapClient.destroy(); // Disconnect from ldap server after successful authentication
         return resolve(user);
@@ -260,15 +273,16 @@ class LDAPStrategy {
     // define promise for function
     return new Promise((resolve, reject) => {
       // Search for user in local database
-      UserController.findUser(user[M.config.auth.ldap.attributes.username])
+      UserController.findUser(user[ldapConfig.attributes.username])
       .then(foundUser => {
         // if found, update the names and emails of the user and re-save with the local database
         const userSave = foundUser;
         // Update user properties
-        userSave.fname = user[M.config.auth.ldap.attributes.firstName];
-        userSave.preferredName = user[M.config.auth.ldap.attributes.preferredName];
-        userSave.lname = user[M.config.auth.ldap.attributes.lastName];
-        userSave.email = user[M.config.auth.ldap.attributes.eMail];
+        userSave.fname = user[ldapConfig.attributes.firstName];
+        userSave.preferredName = user[ldapConfig.attributes.preferredName];
+        userSave.lname = user[ldapConfig.attributes.lastName];
+        userSave.email = user[ldapConfig.attributes.eMail];
+
         // Save updated user in database
         userSave.save((saveErr) => {
           if (saveErr) {
@@ -284,12 +298,12 @@ class LDAPStrategy {
         }
         // if findUser failed with user not found, create the user in the local database
         const initData = {
-          username: user[M.config.auth.ldap.attributes.username],
+          username: user[ldapConfig.attributes.username],
           password: (Math.random() + 1).toString(36).substring(7),
-          fname: user[M.config.auth.ldap.attributes.firstName],
-          preferredName: user[M.config.auth.ldap.attributes.preferredName],
-          lname: user[M.config.auth.ldap.attributes.lastName],
-          email: user[M.config.auth.ldap.attributes.eMail],
+          fname: user[ldapConfig.attributes.firstName],
+          preferredName: user[ldapConfig.attributes.preferredName],
+          lname: user[ldapConfig.attributes.lastName],
+          email: user[ldapConfig.attributes.eMail],
           provider: 'ldap'
         };
         // Initialize User object to be saved

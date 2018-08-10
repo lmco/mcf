@@ -54,15 +54,15 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a user', createUser).timeout(5000);
-  it('should verify a valid password', verifyValidPassword).timeout(5000);
-  it('shouldnt verify an invalid password', verifyInvalidPassword).timeout(5000);
+  it('should create a user', createUser);
+  it('should verify a valid password', verifyValidPassword);
+  it('shouldnt verify an invalid password', verifyInvalidPassword);
   it('should get a user from the database', getUser);
   it('should update a user', updateUser);
-  it('should soft delete a user', softDeleteUser).timeout(5000);
+  it('should soft delete a user', softDeleteUser);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
-  it('should login an LDAP user', loginLDAPUser).timeout(10000);
+  it('should login an LDAP user', loginLDAPUser);
 });
 
 
