@@ -29,7 +29,6 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost,*.lmco.com \
     NODE_TLS_REJECT_UNAUTHORIZED=0
 
-
 # Install dependencies
 RUN apk upgrade \
     && apk update \
@@ -48,6 +47,7 @@ RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
     && yarn config set http-proxy "http://proxy-lmi.global.lmco.com" \
     && yarn config set https-proxy "http://proxy-lmi.global.lmco.com"
 
+# Install modules using yarn from the package.json
 COPY ./package.json package.json
 RUN yarn install --production
 
