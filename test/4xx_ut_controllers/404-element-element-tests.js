@@ -188,7 +188,7 @@ function createChildElement(done) {
         id: org.id
       }
     },
-    type: 'Element',
+    type: 'Block',
     parent: 'elem0'
   };
   ElemController.createElement(user, newElement)
@@ -221,7 +221,7 @@ function createElementNonPackageParent(done) {
         id: org.id
       }
     },
-    type: 'Element',
+    type: 'Block',
     parent: 'elem1'
   };
   ElemController.createElement(user, newElement)
@@ -347,9 +347,9 @@ function findElements(done) {
  * Finds all elements of type Element for a project
  */
 function findElementsSpecificType(done) {
-  ElemController.findElements(user, org.id, proj.id, 'Element')
+  ElemController.findElements(user, org.id, proj.id, 'Block')
   .then((retElems) => {
-    chai.expect(retElems.length).to.equal(1);
+    chai.expect(retElems.length).to.equal(2);
     done();
   })
   .catch((error) => {
@@ -444,7 +444,7 @@ function softDeleteElement(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Element not found.');
+    chai.expect(error.description).to.equal('No elements found.');
     chai.expect(error.status).to.equal(404);
     // Search for soft deleted elements
     ElemController.findElement(user, org.id, proj.id, 'elem0', true)
@@ -470,7 +470,7 @@ function hardDeleteElement(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Element not found.');
+    chai.expect(error.description).to.equal('No elements found.');
     chai.expect(error.status).to.equal(404);
     done();
   });
@@ -498,12 +498,12 @@ function softDeleteAllElements(done) {
 function hardDeleteAllElements(done) {
   ElemController.removeElements(user, org.id, proj.id, { soft: false })
   .then(() => ElemController.findElements(user, org.id, proj.id))
-  .then((retElems2) => {
-    chai.expect(retElems2.length).to.equal(0);
+  .then(() => {
+    chai.expect(true).to.equal(false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.description).to.equal('No elements found.');
     done();
   });
 }
