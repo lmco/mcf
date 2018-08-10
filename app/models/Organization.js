@@ -137,6 +137,18 @@ const OrganizationSchema = new mongoose.Schema({
    */
   custom: {
     type: mongoose.Schema.Types.Mixed
+  },
+
+  /**
+   * @memberOf  Organization
+   * @property  visibility
+   * @type String
+   *
+   * @description The visibility level of the org. Can be public, internal or private.
+   */
+  visibility: {
+    type: String,
+    default: 'private'
   }
 });
 
