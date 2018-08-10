@@ -176,6 +176,21 @@ class UserController {
       if (!RegExp(valid.user.username).test(newUser.username)) {
         return reject(new errors.CustomError('Username is not valid.', 400));
       }
+      if (utils.checkExists(['fname'], newUser)) {
+        if (!RegExp(valid.user.name).test(newUser.fname)) {
+          return reject(new errors.CustomError('First name is not valid.', 400));
+        }
+      }
+      if (utils.checkExists(['lname'], newUser)) {
+        if (!RegExp(valid.user.name).test(newUser.lname)) {
+          return reject(new errors.CustomError('Last name is not valid.', 400));
+        }
+      }
+      if (utils.checkExists(['email'], newUser)) {
+        if (!RegExp(valid.user.email).test(newUser.email)) {
+          return reject(new errors.CustomError('Email is not valid.', 400));
+        }
+      }
 
       User.find({ username: M.lib.sani.sanitize(newUser.username) })
       .populate()
@@ -184,7 +199,7 @@ class UserController {
           return reject(findErr);
         }
 
-        // Make sure user doesg'n't already exist
+        // Make sure user doesn't already exist
         if (users.length >= 1) {
           return reject(new errors.CustomError('User already exists.', 400));
         }
@@ -222,7 +237,7 @@ class UserController {
    * @param  {Object} newUserData  Object containing new user data.
    */
   static updateUser(requestingUser, usernameToUpdate, newUserData) {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       try {
         utils.assertAdmin(requestingUser);
         utils.assertType([usernameToUpdate], 'string');
@@ -232,34 +247,21 @@ class UserController {
         return reject(error);
       }
 
-      // Check if user exists
-      User.find({ username: M.lib.sani.sanitize(usernameToUpdate), deletedOn: null })
-      .populate()
-      .exec((findErr, users) => {
-        // Error check
-        if (findErr) {
-          return reject(findErr);
-        }
-        // Fail, too many users found. This should never get hit
-        if (users.length > 1) {
-          return reject(new errors.CustomError('Too many users found.', 400));
-        }
-        // Fail, user does not exist
-        if (users.length < 1) {
-          return reject(new errors.CustomError('User does not exist.', 404));
-        }
-
-        const user = users[0];
-
-        // If user exists, update the existing user
-        M.log.debug('User found. Updating existing user ...');
-
+      UserController.findUser(usernameToUpdate)
+      .then((user) => {
         // Update user with properties found in newUserData
         const props = Object.keys(newUserData);
         for (let i = 0; i < props.length; i++) {
           // Error check - make sure the properties exist and can be changed
           if (!user.isUpdateAllowed(props[i])) {
             return reject(new errors.CustomError('Update not allowed', 401));
+          }
+
+          // If updating name, making sure it is valid
+          if (props[i] === 'fname' || props[i] === 'lname') {
+            if (!RegExp(valid.user.name).test(newUserData[props[i]])) {
+              return reject(new errors.CustomError('Name is not valid.', 400));
+            }
           }
 
           // Updates each individual tag that was provided.
@@ -286,8 +288,9 @@ class UserController {
           }
           return resolve(updatedUser);
         });
-      });
-    }));
+      })
+      .catch((error) => reject(error));
+    });
   }
 
 

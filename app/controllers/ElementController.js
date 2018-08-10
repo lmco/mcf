@@ -299,7 +299,7 @@ class ElementController {
   }
 
   /**
-   * @description  This function takes a query and finds the element.
+   * @description  This function takes a query and finds all matching elements.
    *
    * @example
    * ElementController.findElementQuery({ uid: 'org:project:id' })
