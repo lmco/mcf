@@ -30,6 +30,7 @@ const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
 
+console.log('THIS IS A DEMO');
 
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
