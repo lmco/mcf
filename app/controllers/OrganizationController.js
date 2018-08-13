@@ -180,6 +180,7 @@ class OrganizationController {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Optional fields
       let custom = null;
+      let visibility = 'private';
 
       try {
         utils.assertAdmin(user);
@@ -188,6 +189,14 @@ class OrganizationController {
         if (utils.checkExists(['custom'], orgInfo)) {
           utils.assertType([orgInfo.custom], 'object');
           custom = M.lib.sani.html(orgInfo.custom);
+        }
+        if (utils.checkExists(['visibility'], orgInfo)) {
+          utils.assertType([orgInfo.visibility], 'string');
+          visibility = orgInfo.visibility;
+          // Ensure the visibility level is valid
+          if (!Organization.schema.methods.getVisibilityLevels().includes(visibility)) {
+            return reject(new errors.CustomError('Invalid visibility type.', 400));
+          }
         }
       }
       catch (error) {
@@ -222,7 +231,8 @@ class OrganizationController {
               write: [user._id],
               read: [user._id]
             },
-            custom: custom
+            custom: custom,
+            visibility: visibility
           });
           // Save and resolve the new error
           newOrg.save((saveOrgErr) => { // eslint-disable-line consistent-return

@@ -313,7 +313,6 @@ function getUsers(done) {
     headers: getHeaders()
   },
   (err, response, body) => {
-    console.log(body);
     chai.expect(body).to.include(user);
     chai.expect(body).to.include('deadpool');
     chai.expect(body).to.include('vanessacarlysle');

@@ -263,7 +263,7 @@ module.exports.getPermissionStatus = function(user, object) {
     return ['read', 'write', 'admin'];
   }
 
-  let userPermissions = [];
+  const userPermissions = [];
 
   // See if the user has permissions on the object
   const read = object.permissions.read.map(u => u._id.toString());
@@ -282,7 +282,7 @@ module.exports.getPermissionStatus = function(user, object) {
 
   // If the user has any permissions on the object, return them
   if (userPermissions.length > 1) {
-    return usersPermissions;
+    return userPermissions;
   }
 
   // If the object is public, the user will have read access
@@ -290,7 +290,24 @@ module.exports.getPermissionStatus = function(user, object) {
     return ['read'];
   }
 
-  // TODO: Handle the internal case
+  // If it's a project and its visibility is internal
+  if (object.visibility === 'internal' && object instanceof Project) {
+    // See if the user has read permissions on the project's org
+    if (typeof object.org === 'object') {
+      const readOrg = object.org.permissions.read.map(u => u._id.toString());
+
+      if (readOrg.includes(user._id.toString())) {
+        userPermissions.push('read');
+      }
+    }
+    else {
+      throw new errors.CustomError('Org field not populated.', 400);
+    }
+  }
+
+  // Return the permissions which will either be blank
+  // or will be populated if its an internal project
+  return userPermissions;
 };
 
 module.exports.checkAccess = function(user, object, permission) {
