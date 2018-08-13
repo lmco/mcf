@@ -18,13 +18,13 @@
  * It also provides function for interacting with elements.
  */
 
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+// Load mbee modules
 const ProjController = M.require('controllers.ProjectController');
-// Element refers to the Element.js file, not the Element model
 const Element = M.require('models.Element');
-const errors = M.require('lib/errors');
-const utils = M.require('lib/utils');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const validators = M.require('lib.validators');
+const errors = M.require('lib.errors');
 
 
 /**
@@ -65,13 +65,13 @@ class ElementController {
         return resolve(error);
       }
 
-      const orgID = M.lib.sani.sanitize(organizationID);
-      const projID = M.lib.sani.sanitize(projectID);
+      const orgID = sani.sanitize(organizationID);
+      const projID = sani.sanitize(projectID);
       let type = elemType;
 
       // Ensure that the provided type is a valid one
       if (elemType !== '') {
-        type = M.lib.sani.sanitize(elemType);
+        type = sani.sanitize(elemType);
 
         // Checks to see if the type provided is either a model
         // or discriminator from Element.js. Do not confuse
@@ -155,8 +155,8 @@ class ElementController {
       }
 
       // Sanitize the parameters
-      const orgID = M.lib.sani.sanitize(organizationID);
-      const projID = M.lib.sani.sanitize(projectID);
+      const orgID = sani.sanitize(organizationID);
+      const projID = sani.sanitize(projectID);
       let _projID = null;
 
       // Ensure the project still exists
@@ -237,9 +237,9 @@ class ElementController {
       }
 
       // Sanitize the parameters
-      const orgID = M.lib.sani.sanitize(organizationID);
-      const projID = M.lib.sani.sanitize(projectID);
-      const elemID = M.lib.sani.sanitize(elementID);
+      const orgID = sani.sanitize(organizationID);
+      const projID = sani.sanitize(projectID);
+      const elemID = sani.sanitize(elementID);
       const elemUID = utils.createUID(orgID, projID, elemID);
 
       // Search for an element that matches the uid or uuid
@@ -336,27 +336,27 @@ class ElementController {
         utils.assertType([element.id, element.project.id, element.project.org.id, element.type], 'string');
         if (utils.checkExists(['name'], element)) {
           utils.assertType([element.name], 'string');
-          elemName = M.lib.sani.html(element.name);
-          if (!RegExp(M.lib.validators.element.name).test(elemName)) {
+          elemName = sani.html(element.name);
+          if (!RegExp(validators.element.name).test(elemName)) {
             return reject(new errors.CustomError('Element Name is not valid.', 400));
           }
         }
         if (utils.checkExists(['parent'], element)) {
           utils.assertType([element.parent], 'string');
-          parentID = M.lib.sani.html(element.parent);
+          parentID = sani.html(element.parent);
         }
         if (utils.checkExists(['custom'], element)) {
           utils.assertType([element.custom], 'object');
-          custom = M.lib.sani.html(element.custom);
+          custom = sani.html(element.custom);
         }
         if (utils.checkExists(['documentation'], element)) {
           utils.assertType([element.documentation], 'string');
-          documentation = M.lib.sani.html(element.documentation);
+          documentation = sani.html(element.documentation);
         }
         if (utils.checkExists(['uuid'], element)) {
           utils.assertType([element.uuid], 'string');
-          uuid = M.lib.sani.html(element.uuid);
-          if (!RegExp(M.lib.validators.element.uuid).test(uuid)) {
+          uuid = sani.html(element.uuid);
+          if (!RegExp(validators.element.uuid).test(uuid)) {
             return reject(new errors.CustomError('UUID is not valid.', 400));
           }
         }
@@ -365,14 +365,14 @@ class ElementController {
         return reject(error);
       }
 
-      const elemID = M.lib.sani.html(element.id);
-      const projID = M.lib.sani.html(element.project.id);
-      const orgID = M.lib.sani.html(element.project.org.id);
+      const elemID = sani.html(element.id);
+      const projID = sani.html(element.project.id);
+      const orgID = sani.html(element.project.org.id);
       const elemUID = utils.createUID(orgID, projID, elemID);
-      const elementType = M.lib.sani.html(element.type);
+      const elementType = sani.html(element.type);
 
       // Error check - make sure element ID and element name are valid
-      if (!RegExp(M.lib.validators.element.id).test(elemID)) {
+      if (!RegExp(validators.element.id).test(elemID)) {
         return reject(new errors.CustomError('Element ID is not valid.', 400));
       }
 
@@ -477,8 +477,8 @@ class ElementController {
       }
 
       // Sanitize
-      const target = M.lib.sani.html(elemInfo.target);
-      const source = M.lib.sani.html(elemInfo.source);
+      const target = sani.html(elemInfo.target);
+      const source = sani.html(elemInfo.source);
 
       // Target and source should not be the same element
       if (target === source) {
@@ -656,9 +656,9 @@ class ElementController {
       }
 
       // Sanitize inputs
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
-      const elemID = M.lib.sani.html(elementID);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
+      const elemID = sani.html(elementID);
 
       // Get the element
       ElementController.findElement(reqUser, orgID, projID, elemID)
@@ -710,7 +710,7 @@ class ElementController {
           if (Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
             Object.keys(elementUpdated[updateField]).forEach((key) => {
-              element.custom[key] = M.lib.sani.sanitize(elementUpdated[updateField][key]);
+              element.custom[key] = sani.sanitize(elementUpdated[updateField][key]);
             });
 
             // Special thing for mixed fields in Mongoose
@@ -719,7 +719,7 @@ class ElementController {
           }
           else {
             // sanitize field
-            updateVal = M.lib.sani.sanitize(elementUpdated[updateField]);
+            updateVal = sani.sanitize(elementUpdated[updateField]);
             // Update field in element object
             element[updateField] = updateVal;
           }
@@ -832,9 +832,9 @@ class ElementController {
         }
       }
       // Sanitize inputs
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
-      const elemID = M.lib.sani.html(elementID);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
+      const elemID = sani.html(elementID);
 
       // Find the element, even if it has already been soft deleted
       ElementController.findElement(reqUser, orgID, projID, elemID, true)

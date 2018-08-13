@@ -41,15 +41,15 @@ pipeline {
         stage('Build') {
             steps {
                 // Build
-                sh 'NODE_ENV=production node mbee install --dev'
-                sh 'NODE_ENV=production node mbee build'
+                sh 'yarn install --dev'
+                sh 'MBEE_ENV=production node mbee build'
                 sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
                 // Verify build
                 sh 'ls -l'
 
                 // Build the docker image
-                sh 'NODE_ENV=production node mbee docker --build'
+                sh 'MBEE_ENV=production node mbee docker --build'
             }
         }
 
@@ -59,9 +59,9 @@ pipeline {
         stage('Stage') {
             steps {
                 //Removes any existing running or stopped stage containers.
-                sh 'NODE_ENV=stage node mbee docker --clean'
+                sh 'MBEE_ENV=stage node mbee docker --clean'
                 /* Runs the container in the background. */
-                sh 'NODE_ENV=stage node mbee docker --run'
+                sh 'MBEE_ENV=stage node mbee docker --run'
             }
         }
 
@@ -78,7 +78,7 @@ pipeline {
                 // This timing may need to be updated as the test suite grows
                 timeout(time: 10, unit: 'MINUTES') {
                     retry(3) {
-                        sh 'NODE_ENV=stage node mbee test --grep "^[0-6]"'
+                        sh 'MBEE_ENV=stage node mbee test --grep "^[0-6]"'
                     }
                 }
             }
@@ -91,13 +91,13 @@ pipeline {
         stage('Run') {
             steps {
                 // Removes the staged container
-                sh 'NODE_ENV=stage node mbee docker --clean'
+                sh 'MBEE_ENV=stage node mbee docker --clean'
 
                 // Removes any existing production running containers
-                sh 'NODE_ENV=production node mbee docker --clean'
+                sh 'MBEE_ENV=production node mbee docker --clean'
 
                 // Runs the production container in the background
-                sh 'NODE_ENV=production node mbee docker --run'
+                sh 'MBEE_ENV=production node mbee docker --run'
             }
         }
 
@@ -109,7 +109,7 @@ pipeline {
     post {
         always {
             // Always ensure staged container is removed
-            sh 'NODE_ENV=stage node mbee docker --clean'
+            sh 'MBEE_ENV=stage node mbee docker --clean'
         }
         success {
             emailext body: "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} SUCCEEDED:\

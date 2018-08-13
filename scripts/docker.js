@@ -20,18 +20,16 @@
 
 /* eslint-disable no-console */
 
-const path = require('path');
+// Load node modules
 const { spawn, spawnSync } = require('child_process');
 
-const M = require(path.join(__dirname, '..', 'mbee.js'));
-
+// If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
-  docker(process.argv.slice(2));
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this script by using the '
+    + 'following command. \n\nnode mbee docker\n');
+  process.exit(-1);
 }
-else {
-  module.exports = docker;
-}
-
 
 /**
  * The Docker command can be used to build a Docker image or run a Docker
@@ -97,7 +95,7 @@ function docker(args) {
       '-d',
       '-it',
       '--restart=always',
-      '-e', `NODE_ENV=${M.env}`
+      '-e', `MBEE_ENV=${M.env}`
     ];
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
       rargs = rargs.concat(['-p', `${M.config.docker.http.port}:${M.config.server.http.port}`]);
@@ -146,3 +144,5 @@ function docker(args) {
     console.log('Invalid arguments');
   }
 }
+
+module.exports = docker;

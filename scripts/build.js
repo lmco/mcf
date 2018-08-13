@@ -13,21 +13,16 @@
 
 /* eslint-disable no-console */
 
-// Node.js Built-in Modules
-const fs = require('fs');
-const path = require('path');
-const { execSync, spawnSync } = require('child_process');
+// Load node modules
+const { execSync } = require('child_process');
 
-const M = require(path.join(__dirname, '..', 'mbee.js'));
-
+// If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
-  build(process.argv.slice(2));
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this script by using the '
+    + 'following command. \n\nnode mbee build\n');
+  process.exit(-1);
 }
-else {
-  module.exports.build = build;
-  module.exports.install = install;
-}
-
 
 /**
  * Builds the project by copy dependencies to their final location, compiling
@@ -140,92 +135,4 @@ function build(_args) {
   console.log('Build Complete.');
 }
 
-
-/**
- * Installs dependencies for MBEE. First, Yarn is configured via the configure
- * function. Then dependencies are installed via "yarn install". If the "--dev"
- * argument is specified, development dependencies are also installed.
- */
-
-function install(_args) {
-  console.log('Installing dependencies ...');
-  const buildTool = configure(); // Make sure Yarn is installed and configured
-
-  // Safely allow install to be called with no args
-  const args = (_args === undefined) ? [] : _args;
-
-  const cmd = spawnSync(buildTool, ['install'].concat(args), { stdio: 'inherit' });
-  if (cmd.stdout) {
-    // console.log('  ++', cmd.stdout.toString());
-  }
-  if (cmd.stderr && cmd.stderr.toString().trim() !== '') {
-    // console.error('  ++', cmd.stderr.toString());
-  }
-  if (cmd.status !== 0) {
-    process.exit(cmd.status || -1);
-  }
-
-  // Init the MBEE helper object and return.
-  console.log('Dependencies installed successfully.');
-}
-
-
-/**
- * Configures the system for build. The main purpose is to ensure that Yarn is
- * installed. If not, it is installed using NPM. If Yarn configuration
- * parameters are defined in the config.json file, Yarn is configured with
- * those key/value pairs.
- */
-
-function configure() {
-  console.log('Configuring build system ...');
-
-  // Make sure Yarn is installed
-  const yarnPath = execSync('which yarn').toString().replace('\n', '');
-  if (!fs.existsSync(yarnPath)) {
-    console.log('Installing yarn ...');
-    const cmd = spawnSync('npm', ['install', '-g', 'yarn']);
-    if (cmd.stdout) {
-      // console.log(cmd.stdout.toString());
-    }
-    if (cmd.stderr && cmd.stderr.toString().trim() !== '') {
-      // console.error(cmd.stderr.toString());
-    }
-    if (cmd.status !== 0) {
-      console.log('Warning: Yarn install failed. Using NPM.');
-      return 'npm';
-    }
-  }
-
-  // Configure Yarn - loop over config options and configure Yarn
-  if (M.config.hasOwnProperty('yarn')) {
-    const keys = Object.keys(M.config.yarn);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const val = M.config.yarn[key];
-      // Check if config is already set, if so. Don't mess with it.
-      let cmd = spawnSync('yarn', ['config', 'get', `${key}`]);
-      if (cmd.stdout) {
-        if (cmd.stdout.toString().replace('\n', '').trim() === val) {
-          continue;
-        }
-      }
-      if (cmd.status !== 0) {
-        process.exit(cmd.status || -1);
-      }
-
-      // Execute the 'yarn config' command
-      // console.log(`  + Setting ${key} to ${val}`)
-      cmd = spawnSync('yarn', ['config', 'set', `${key}`, val]);
-      if (cmd.status !== 0) {
-        process.exit(cmd.status || -1);
-      }
-    }
-  }
-  else {
-    console.log('  + Warning: No yarn section in config. Using NPM.');
-    return 'npm';
-  }
-  console.log('Configuration complete');
-  return 'yarn';
-}
+module.exports = build;

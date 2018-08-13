@@ -19,11 +19,16 @@
  * MongoDB Database in order to find, save, update, and delete organizations.
  */
 
-const path = require('path');
+// Load node modules
 const crypto = require('crypto');
 const mongoose = require('mongoose');
-const M = require(path.join('..', '..', 'mbee.js'));
 
+// Load mbee modules
+const validators = M.require('lib.validators');
+
+/******************************************************************************
+ * Element Model
+ ******************************************************************************/
 
 /**
  * @class  User
@@ -48,7 +53,7 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    match: RegExp(M.lib.validators.user.username)
+    match: RegExp(validators.user.username)
   },
 
   /**
@@ -73,7 +78,7 @@ const UserSchema = new mongoose.Schema({
      */
   email: {
     type: String,
-    match: RegExp(M.lib.validators.user.email)
+    match: RegExp(validators.user.email)
   },
 
   /**

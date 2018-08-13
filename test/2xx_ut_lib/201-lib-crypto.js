@@ -19,8 +19,8 @@
  * and decrypt functions in the library.
  */
 
+// Load node modules
 const chai = require('chai');
-const M = require('../../mbee.js');
 
 
 /* --------------------( Main )-------------------- */
@@ -40,7 +40,7 @@ describe(M.getModuleName(module.filename), () => {
  * decrypt functions
  */
 function checkCryptoFunctions(done) {
-  const crypto = M.require('lib/crypto');
+  const crypto = M.require('lib.crypto');
   chai.expect(crypto.hasOwnProperty('encrypt')).to.equal(true);
   chai.expect(crypto.hasOwnProperty('decrypt')).to.equal(true);
   chai.expect(typeof crypto.encrypt).to.equal('function');
@@ -53,7 +53,7 @@ function checkCryptoFunctions(done) {
  * returning 'HULK SMASH' after encrypting and decrypting.
  */
 function encryptTest(done) {
-  const crypto = M.require('lib/crypto');
+  const crypto = M.require('lib.crypto');
   const encrypted = crypto.encrypt('HULK SMASH');
   const decrypted = crypto.decrypt(encrypted);
   chai.expect(encrypted).to.not.equal('HULK SMASH');
