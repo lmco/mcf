@@ -46,22 +46,23 @@ pipeline {
          * Builds the production docker image based on the Dockerfile.
          */
         stage('Build') {
-            node{
+            stages{
                 stage('Build MBEE'){
+                    steps {
                         // Install dev dependencies
-                        yarn install --dev
+                        sh 'yarn install --dev'
 
-                        if (env.JOB_NAME == LeahPipeline1) {
+                        sh 'if (env.JOB_NAME == LeahPipeline1) {
                             echo 'I am inside the if statement'
-                        }
+                        }'
                         // Build
-                        NODE_ENV=stage node mbee build
+                        sh 'NODE_ENV=stage node mbee build'
 
                         // Verify build
-                        ls -l
+                        sh 'ls -l'
+                    }
                 }
-              }
-            stages {
+
                 stage('Build Docker MBEE'){
                     steps {
                         // it wont work in script need to ask Josh
