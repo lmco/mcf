@@ -30,7 +30,8 @@ module.exports.project = {
 module.exports.element = {
   uid: '^([a-zA-Z0-9])([a-zA-Z0-9-:]){0,}$',
   id: '^([a-zA-Z0-9])([a-zA-Z0-9-]){0,}$',
-  name: '^([a-zA-Z0-9-\\s])+$'
+  name: '^([a-zA-Z0-9-\\s])+$',
+  uuid: '([a-zA-Z0-9]{8}(-[a-zA-Z0-9]{4}){3}-[a-zA-Z0-9]{12})'
 };
 
 module.exports.user = {
@@ -61,7 +62,8 @@ module.exports.user = {
       return false;
     }
   },
-  email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$'
+  email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
+  name: '^([a-zA-Z])+([-a-zA-Z ])*$'
 };
 
 module.exports.url = {

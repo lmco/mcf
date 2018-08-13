@@ -47,7 +47,7 @@ class ProjectController {
    *
    * @example
    * ProjectController.findProjects({Tony Stark}, 'StarkIndustries')
-   * .then(function(org) {
+   * .then(function(projects) {
    *   // do something with the returned projects
    * })
    * .catch(function(error) {
@@ -79,8 +79,6 @@ class ProjectController {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
-        const popQuery = 'org';
-
         let searchParams = { org: org._id, deleted: false };
 
         if (softDeleted && reqUser.admin) {
@@ -88,25 +86,17 @@ class ProjectController {
         }
 
         // Search for project
-        Project.find(searchParams)
-        .populate(popQuery)
-        .exec((err, projects) => {
-          // Error Check - Database/Server Error
-          if (err) {
-            return reject(err);
-          }
-
-          // Error Check - Ensure at least one project is found
-          if (projects.length < 1) {
-            return resolve([]);
-          }
-
-
-          // Return resulting project
-          return resolve(projects);
-        });
+        return ProjectController.findProjectsQuery(searchParams);
       })
+      .then((projects) => {
+        // Error Check - Ensure at least one project is found
+        if (projects.length < 1) {
+          return resolve([]);
+        }
 
+        // Return resulting project
+        return resolve(projects);
+      })
       .catch((orgFindErr) => reject(orgFindErr));
     });
   }
@@ -116,8 +106,8 @@ class ProjectController {
    *
    * @example
    * ProjectController.removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
-   * .then(function(org) {
-   *   // Delete projects
+   * .then(function(projects) {
+   *   // do something with the deleted projects.
    * })
    * .catch(function(error) {
    *   M.log.error(error);
@@ -181,7 +171,7 @@ class ProjectController {
    *
    * @example
    * ProjectController.findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
-   * .then(function(org) {
+   * .then(function(project) {
    *   // do something with the returned project
    * })
    * .catch(function(error) {
@@ -215,18 +205,16 @@ class ProjectController {
         searchParams = { uid: projUID };
       }
 
-      // Search for project
-      Project.find(searchParams)
-      .populate('org permissions.read permissions.write permissions.admin')
-      .exec((err, projects) => {
-        // Error Check - Database/Server Error
-        if (err) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
-
+      ProjectController.findProjectsQuery(searchParams)
+      .then((projects) => {
         // Error Check - Ensure only 1 project is found
         if (projects.length < 1) {
           return reject(new errors.CustomError('Project not found.', 404));
+        }
+
+        // Ensure only one project was found
+        if (projects.length > 1) {
+          return reject(new errors.CustomError('More than one project found.', 400));
         }
 
         // Check Permissions
@@ -238,6 +226,40 @@ class ProjectController {
 
         // Return resulting project
         return resolve(project);
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
+  /**
+   * @description  This function takes a query and finds the project.
+   *
+   * @example
+   * ProjectController.findProjectsQuery({ uid: 'org:proj' })
+   * .then(function(projects) {
+   *   // do something with the found projects.
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {Object} projectQuery  The query to be made to the database
+   */
+  static findProjectsQuery(projectQuery) {
+    return new Promise((resolve, reject) => {
+      const query = sani.sanitize(projectQuery);
+
+      Project.find(query)
+      .populate('org permissions.read permissions.write permissions.admin')
+      .exec((err, projects) => {
+        // Error Check - Database/Server Error
+        if (err) {
+          return reject(err);
+        }
+
+        // Return resulting project
+        return resolve(projects);
       });
     });
   }
@@ -248,7 +270,7 @@ class ProjectController {
    *
    * @example
    * ProjectController.createProject({Tony Stark}, {Arc Reactor 1})
-   * .then(function(org) {
+   * .then(function(project) {
    *   // do something with the newly created project.
    * })
    * .catch(function(error) {
@@ -343,7 +365,7 @@ class ProjectController {
    *
    * @example
    * ProjectController.updateProject({Tony Stark}, {Arc Reactor 1})
-   * .then(function(org) {
+   * .then(function(project) {
    *   // do something with the updated project.
    * })
    * .catch(function(error) {
@@ -459,8 +481,8 @@ class ProjectController {
    *
    * @example
    * ProjectController.removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
-   * .then(function(org) {
-   *   // do something with the newly created project.
+   * .then(function(project) {
+   *   // do something with the deleted project.
    * })
    * .catch(function(error) {
    *   M.log.error(error);
@@ -544,15 +566,17 @@ class ProjectController {
    *
    * @example
    * ProjectController.removeProjectHelper({Arc}, true)
-   * .then(function(org) {
-   *   // do something with the newly created project.
+   * .then(function(project) {
+   *   // do something with the deleted project.
    * })
    * .catch(function(error) {
    *   M.log.error(error);
    * });
    *
    *
-   * @param  {Project} project  The project object to delete
+   * @param  {User} reqUser  The requesting user.
+   * @param  {String} orgID  The ID of the organization in question.
+   * @param  {String} projID  The ID of project to delete.
    * @param  {Boolean} softDelete  Flag denoting whether to soft delete or not.
    */
   static removeProjectHelper(reqUser, orgID, projID, softDelete) {
@@ -596,8 +620,8 @@ class ProjectController {
    *
    * @example
    * ProjectController.findAllPermissions({Tony Stark}, 'stark', 'arc')
-   * .then(function(org) {
-   *   // do something with the newly created project.
+   * .then(function(permissions) {
+   *   // do something with the list of user permissions
    * })
    * .catch(function(error) {
    *   M.log.error(error);
@@ -646,8 +670,8 @@ class ProjectController {
    *
    * @example
    * ProjectController.findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
-   * .then(function(org) {
-   *   // do something with the newly created project.
+   * .then(function(permissions) {
+   *   // do something with the list of permissions
    * })
    * .catch(function(error) {
    *   M.log.error(error);
@@ -683,8 +707,8 @@ class ProjectController {
    *
    * @example
    * ProjectController.setPermissions({Tony}, 'stark_industries', 'arc_reactor', {Jarvis}, 'write')
-   * .then(function(org) {
-   *   // do something with the newly created project.
+   * .then(function(project) {
+   *   // do something with the updated project.
    * })
    * .catch(function(error) {
    *   M.log.error(error);

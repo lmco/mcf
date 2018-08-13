@@ -77,11 +77,11 @@ class ElementController {
         // or discriminator from Element.js. Do not confuse
         // this Element as the Element model; it's just the exported file
         // containing the Element model along with Relationship, Block, etc.
-        const typeExists = Object.keys(Element).includes(type);
+        let typeExists = Object.keys(Element).includes(type);
 
-        // Handle Element case, where type should be null
+        // Ensure type is not 'Element'
         if (type === 'Element') {
-          type = null;
+          typeExists = false;
         }
 
         if (!typeExists) {
@@ -104,16 +104,9 @@ class ElementController {
           searchParams.type = type;
         }
 
-        Element.Element.find(searchParams)
-        .populate('parent project source target contains')
-        .exec((err, elements) => {
-          if (err) {
-            return reject(new errors.CustomError('Find failed.'));
-          }
-
-          return resolve(elements);
-        });
+        return ElementController.findElementsQuery(searchParams);
       })
+      .then((elements) => resolve(elements))
       .catch((error) => reject(error));
     });
   }
@@ -173,11 +166,6 @@ class ElementController {
         return ElementController.findElements(reqUser, orgID, projID);
       })
       .then((elements) => { // eslint-disable-line consistent-return
-        // If there are no elements found, return an error
-        if (elements.length === 0) {
-          return reject(new errors.CustomError('No elements found.', 404));
-        }
-
         // Ensure user has permission to delete all elements
         Object.keys(elements).forEach((element) => { // eslint-disable-line consistent-return
           const admins = elements[element].project.permissions.admin.map(u => u._id.toString());
@@ -254,31 +242,64 @@ class ElementController {
       const elemID = sani.sanitize(elementID);
       const elemUID = utils.createUID(orgID, projID, elemID);
 
-      let searchParams = { uid: elemUID, deleted: false };
+      // Search for an element that matches the uid or uuid
+      let searchParams = { $and: [{ $or: [{ uid: elemUID },
+        { uuid: elemID }] }, { deleted: false }] };
       if (softDeleted && reqUser.admin) {
-        searchParams = { uid: elemUID };
+        searchParams = { $or: [{ uid: elemUID }, { uuid: elemID }] };
       }
 
-      Element.Element.findOne(searchParams)
-      .populate('parent project source target contains')
-      .exec((findElementError, element) => {
-        if (findElementError) {
-          return reject(new errors.CustomError('Find failed.'));
+      ElementController.findElementsQuery(searchParams)
+      .then((elements) => {
+        // Ensure more than one element was not returned.
+        if (elements.length > 1) {
+          return reject(new errors.CustomError('More than one element found.', 400));
         }
 
-        // Ensure only one element is returned
-        if (!element) {
-          return reject(new errors.CustomError('Element not found.', 404));
-        }
+        const element = elements[0];
 
-        // Ensure user is part of the project
         const members = element.project.permissions.read.map(u => u._id.toString());
         if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
-        // Return resulting element
         return resolve(element);
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
+  /**
+   * @description  This function takes a query and finds all matching elements.
+   *
+   * @example
+   * ElementController.findElementQuery({ uid: 'org:project:id' })
+   * .then(function(element) {
+   *   // do something with the element
+   * })
+   * .catch(function(error) {
+   *   M.log.error(error);
+   * });
+   *
+   *
+   * @param  {Object} elementQuery  The query to be used to find the element.
+   */
+  static findElementsQuery(elementQuery) {
+    return new Promise((resolve, reject) => {
+      Element.Element.find(elementQuery)
+      .populate('parent project source target contains')
+      .exec((findElementError, elements) => {
+        if (findElementError) {
+          return reject(new errors.CustomError('Find failed.'));
+        }
+
+        // No elements found
+        if (elements.length === 0) {
+          return reject(new errors.CustomError('No elements found.', 404));
+        }
+
+        // Return resulting element
+        return resolve(elements);
       });
     });
   }
@@ -307,6 +328,7 @@ class ElementController {
       let parentID = null;
       let custom = null;
       let documentation = null;
+      let uuid = '';
 
       // Error checking, setting optional variables
       try {
@@ -315,6 +337,9 @@ class ElementController {
         if (utils.checkExists(['name'], element)) {
           utils.assertType([element.name], 'string');
           elemName = sani.html(element.name);
+          if (!RegExp(validators.element.name).test(elemName)) {
+            return reject(new errors.CustomError('Element Name is not valid.', 400));
+          }
         }
         if (utils.checkExists(['parent'], element)) {
           utils.assertType([element.parent], 'string');
@@ -327,6 +352,13 @@ class ElementController {
         if (utils.checkExists(['documentation'], element)) {
           utils.assertType([element.documentation], 'string');
           documentation = sani.html(element.documentation);
+        }
+        if (utils.checkExists(['uuid'], element)) {
+          utils.assertType([element.uuid], 'string');
+          uuid = sani.html(element.uuid);
+          if (!RegExp(validators.element.uuid).test(uuid)) {
+            return reject(new errors.CustomError('UUID is not valid.', 400));
+          }
         }
       }
       catch (error) {
@@ -343,11 +375,6 @@ class ElementController {
       if (!RegExp(validators.element.id).test(elemID)) {
         return reject(new errors.CustomError('Element ID is not valid.', 400));
       }
-      if (element.hasOwnProperty('name')) {
-        if (!RegExp(validators.element.name).test(elemName)) {
-          return reject(new errors.CustomError('Element Name is not valid.', 400));
-        }
-      }
 
       // Error check - make sure the project exists
       ProjController.findProject(reqUser, orgID, projID)
@@ -363,81 +390,58 @@ class ElementController {
         // Must nest promises since the catch uses proj, returned from findProject.
         ElementController.findElement(reqUser, orgID, projID, elemID)
         .then(() => reject(new errors.CustomError('Element already exists.', 400)))
-        .catch((findError) => { // eslint-disable-line consistent-return
-          // This is ok, we dont want the element to already exist.
-          if (findError.description === 'Element not found.') {
-            // Get the element type
-            let type = null;
-            Object.keys(Element).forEach((k) => {
-              if (elementType === Element[k].modelName) {
-                type = k;
-              }
-            });
-
-            const elemData = {
-              orgID: orgID,
-              elemID: elemID,
-              elemName: elemName,
-              project: proj,
-              elemUID: elemUID,
-              parentID: parentID,
-              custom: custom,
-              documentation: documentation
-            };
-
-            // If the given type is not a type we specified
-            if (type === null) {
-              return reject(new errors.CustomError('Invalid element type.', 400));
-            }
-            if (type === 'Relationship') {
-              ElementController.createRelationship(reqUser, elemData, element)
-              .then((newElement) => resolve(newElement))
-              .catch((createRelationshipError) => reject(createRelationshipError));
-            }
-            else if (type === 'Package') {
-              ElementController.createPackage(reqUser, elemData)
-              .then((newElement) => resolve(newElement))
-              .catch((createRelationshipError) => reject(createRelationshipError));
-            }
-            else if (type === 'Block') {
-              ElementController.createBlock(reqUser, elemData)
-              .then((newElement) => resolve(newElement))
-              .catch((createRelationshipError) => reject(createRelationshipError));
-            }
-            else {
-              // Create new element
-              const newElement = new Element.Element({
-                id: elemID,
-                name: elemName,
-                project: proj._id,
-                uid: elemUID,
-                custom: custom,
-                documentation: documentation
+        .catch(() => { // eslint-disable-line consistent-return
+          // Check if element with same uuid exists
+          ElementController.findElement(reqUser, orgID, projID, uuid)
+          .then(() => reject(new errors.CustomError('Element with uuid already exists.', 400)))
+          .catch((findError) => { // eslint-disable-line consistent-return
+            // This is ok, we dont want the element to already exist.
+            if (findError.description === 'No elements found.') {
+              // Get the element type
+              let type = null;
+              Object.keys(Element).forEach((k) => {
+                if ((elementType === Element[k].modelName) && (elementType !== 'Element')) {
+                  type = k;
+                }
               });
 
-              // Update the parent element if one was provided
-              ElementController.updateParent(reqUser, elemData.orgID,
-                elemData.project.id, parentID, newElement)
-              .then((parentElementID) => {
-                newElement.parent = parentElementID;
+              const elemData = {
+                orgID: orgID,
+                elemID: elemID,
+                elemName: elemName,
+                project: proj,
+                elemUID: elemUID,
+                parentID: parentID,
+                custom: custom,
+                documentation: documentation,
+                uuid: uuid
+              };
 
-                // Save the new element
-                newElement.save((saveErr, elemUpdate) => {
-                  if (saveErr) {
-                    return reject(new errors.CustomError('Save Failed'));
-                  }
-
-                  // Return the element if succesful
-                  return resolve(elemUpdate);
-                });
-              })
-              .catch((updateParentError) => reject(updateParentError));
+              // If the given type is not a type we specified
+              if (type === null) {
+                return reject(new errors.CustomError('Invalid element type.', 400));
+              }
+              if (type === 'Relationship') {
+                ElementController.createRelationship(reqUser, elemData, element)
+                .then((newElement) => resolve(newElement))
+                .catch((createRelationshipError) => reject(createRelationshipError));
+              }
+              else if (type === 'Package') {
+                ElementController.createPackage(reqUser, elemData)
+                .then((newElement) => resolve(newElement))
+                .catch((createRelationshipError) => reject(createRelationshipError));
+              }
+              else {
+                ElementController.createBlock(reqUser, elemData)
+                .then((newElement) => resolve(newElement))
+                .catch((createRelationshipError) => reject(createRelationshipError));
+              }
             }
-          }
-          else {
-            // Some other error, return it.
-            return reject(findError);
-          }
+            else {
+              // Some other error, return it.
+              return reject(findError);
+            }
+          });
         });
       })
       .catch((findProjectError) => reject(findProjectError));
@@ -495,7 +499,8 @@ class ElementController {
             target: targetElement._id,
             source: sourceElement._id,
             custom: elemData.custom,
-            documentation: elemData.documentation
+            documentation: elemData.documentation,
+            uuid: elemData.uuid
           });
 
           ElementController.updateParent(reqUser, elemData.orgID,
@@ -545,7 +550,8 @@ class ElementController {
         project: elemData.project._id,
         uid: elemData.elemUID,
         custom: elemData.custom,
-        documentation: elemData.documentation
+        documentation: elemData.documentation,
+        uuid: elemData.uuid
       });
 
       ElementController.updateParent(reqUser, elemData.orgID,
@@ -591,7 +597,8 @@ class ElementController {
         project: elemData.project._id,
         uid: elemData.elemUID,
         custom: elemData.custom,
-        documentation: elemData.documentation
+        documentation: elemData.documentation,
+        uuid: elemData.uuid
       });
 
       ElementController.updateParent(reqUser, elemData.orgID,

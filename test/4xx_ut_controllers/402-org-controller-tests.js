@@ -385,7 +385,7 @@ function deleteExistingOrg(done) {
 function softDeleteProjectAndOrg(done) {
   OrgController.createOrg(user, { id: 'boombox', name: 'Star Lord Walkman' })
   .then(() => ProjController.createProject(user, { id: 'godslayer', name: 'God Slayer', org: { id: 'boombox' } }))
-  .then(() => ElemController.createElement(user, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Element' }))
+  .then(() => ElemController.createElement(user, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Block' }))
   .then(() => OrgController.removeOrg(user, 'boombox', { soft: true }))
   .then(() => OrgController.findOrg(user, 'boombox'))
   .then((retOrg3) => {
@@ -467,10 +467,10 @@ function projWritePerm(done) {
   .then((proj) => {
     chai.expect(proj.id).to.equal('godslayer');
     chai.expect(proj.name).to.equal('God Slayer');
-    return ElemController.createElement(newUser, { id: '0000', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Element' });
+    return ElemController.createElement(newUser, { id: '0000', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Block' });
   })
   .then(() => {
-    ElemController.createElement(newUser, { id: '0001', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Element' });
+    ElemController.createElement(newUser, { id: '0001', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Block' });
     done();
   })
   .catch((error) => {

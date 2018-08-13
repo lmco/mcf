@@ -134,6 +134,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject username with invalid input', invalidUser);
   it('should reject username already in database', copyCatUser);
   it('should update the users last name', updateLName);
+  it('should reject updating the first name with a bad name', updateBadFName);
   it('should update the users custom tags', updateCustom);
   it('should reject updating the users username', updateUName);
   it('should reject updating a user that does not exist', updateNoUser);
@@ -391,6 +392,26 @@ function updateLName(done) {
 }
 
 /**
+ * Update the first name of the user
+ * with a bad first name.
+ */
+function updateBadFName(done) {
+  const username = 'blackpanther';
+  const userData = {
+    fname: 'KLAW@#$'
+  };
+  UserController.updateUser(reqUser, username, userData)
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Name is not valid.');
+    done();
+  });
+}
+
+/**
  * Tests to update custom field on the user.
  */
 function updateCustom(done) {
@@ -478,7 +499,7 @@ function updateNoUser(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('User does not exist.');
+    chai.expect(error.description).to.equal('Cannot find user.');
     done();
   });
 }

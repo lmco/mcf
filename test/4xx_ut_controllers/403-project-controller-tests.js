@@ -216,7 +216,7 @@ function createElements(done) {
         id: 'starkhq'
       }
     },
-    type: 'Element'
+    type: 'Block'
   };
   ElemController.createElement(allSeeingUser, elem0)
   .then(() => {
@@ -229,7 +229,7 @@ function createElements(done) {
           id: 'starkhq'
         }
       },
-      type: 'Element'
+      type: 'Block'
     };
     return ElemController.createElement(allSeeingUser, elem1);
   })

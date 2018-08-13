@@ -168,7 +168,7 @@ function postElement(done) {
           id: org.id
         }
       },
-      type: 'Element'
+      type: 'Block'
     })
   },
   (err, response, body) => {
