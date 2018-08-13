@@ -38,6 +38,7 @@
 const path = require('path');
 const mongoose = require('mongoose');
 const M = require(path.join('..', '..', 'mbee.js'));
+const uuidv4 = require('uuid/v4');
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };
@@ -83,16 +84,21 @@ const ElementSchema = new mongoose.Schema({
     match: RegExp(M.lib.validators.element.id),
     maxlength: [36, 'Element ID is too long'],
     minlength: [2, 'Element ID is too short']
-    // default: function() {
-    //   const parts = this.uid.split(':');  // split on the ':'' separator
-    //   const id = parts[parts.length - 1]; // the last part
-    //   return id;
-    // },
-    // set: function() {
-    //   const parts = this.uid.split(':');  // split on the ':'' separator
-    //   const id = parts[parts.length - 1]; // the last part
-    //   return id;
-    // }
+  },
+
+  /**
+   * @memberOf  Element
+   * @property  {String} uuid
+   *
+   * @description  The UUID of the element. Based on RFC 4122
+   */
+  uuid: {
+    type: String,
+    required: false,
+    unique: true,
+    set: function(v) {
+      return v;
+    }
   },
 
   /**
@@ -229,7 +235,12 @@ ElementSchema.index({ name: 'text', documentation: 'text' });
 ElementSchema.pre('save', function(next) {
   // Run our defined setters
   this.updatedOn = '';
+  // TODO: Set deleted to a boolean in the pre-save
   this.deleted = '';
+  // Only set uuid if it hasn't already been set
+  if (this.uuid === undefined || this.uuid === '') {
+    this.uuid = uuidv4();
+  }
   next();
 });
 
