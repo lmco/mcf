@@ -242,9 +242,11 @@ class ElementController {
       const elemID = M.lib.sani.sanitize(elementID);
       const elemUID = utils.createUID(orgID, projID, elemID);
 
-      let searchParams = { uid: elemUID, deleted: false };
+      // Search for an element that matches the uid or uuid
+      let searchParams = { $and: [{ $or: [{ uid: elemUID },
+        { uuid: elemID }] }, { deleted: false }] };
       if (softDeleted && reqUser.admin) {
-        searchParams = { uid: elemUID };
+        searchParams = { $or: [{ uid: elemUID }, { uuid: elemID }] };
       }
 
       ElementController.findElementsQuery(searchParams)
@@ -263,38 +265,7 @@ class ElementController {
 
         return resolve(element);
       })
-      .catch((error) => { // eslint-disable-line consistent-return
-        // Check and see if the id passed was a uuid
-        if (error.description === 'No elements found.') {
-          // Set up the query
-          searchParams = { uuid: elemID, deleted: false };
-          if (softDeleted && reqUser.admin) {
-            searchParams = { uuid: elemID };
-          }
-
-          // Search for the element by uuid
-          ElementController.findElementsQuery(searchParams)
-          .then((elements2) => {
-            // Ensure more than one element was not returned.
-            if (elements2.length > 1) {
-              return reject(new errors.CustomError('More than one element found.', 400));
-            }
-
-            const element2 = elements2[0];
-
-            const members = element2.project.permissions.read.map(u => u._id.toString());
-            if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
-              return reject(new errors.CustomError('User does not have permissions.', 401));
-            }
-
-            return resolve(element2);
-          })
-          .catch((error2) => reject(error2));
-        }
-        else {
-          return reject(error);
-        }
-      });
+      .catch((error) => reject(error));
     });
   }
 
@@ -315,9 +286,7 @@ class ElementController {
    */
   static findElementsQuery(elementQuery) {
     return new Promise((resolve, reject) => {
-      const query = M.lib.sani.sanitize(elementQuery);
-
-      Element.Element.find(query)
+      Element.Element.find(elementQuery)
       .populate('parent project source target contains')
       .exec((findElementError, elements) => {
         if (findElementError) {
