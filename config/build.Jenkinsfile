@@ -59,8 +59,6 @@ pipeline {
                             // Build
                             NODE_ENV=stage node mbee build
 
-                            sed -i 's/NO_BUILD_NUMBER/${env.BUILD_NUMBER}/g' package.json
-
                             // Verify build
                             ls -l
                         }
