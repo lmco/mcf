@@ -58,11 +58,12 @@ pipeline {
                             }
                             // Build
                             NODE_ENV=stage node mbee build
-                        }
-                        sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
-                        // Verify build
-                        sh 'ls -l'
+                            sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json
+
+                            // Verify build
+                            ls -l
+                        }
                     }
                 }
                 stage('Build Docker MBEE'){
