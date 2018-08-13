@@ -46,8 +46,7 @@ pipeline {
          * Builds the production docker image based on the Dockerfile.
          */
         stage('Build') {
-            stages {
-              node{
+            node{
                 stage('Build MBEE'){
                         // Install dev dependencies
                         yarn install --dev
@@ -62,15 +61,16 @@ pipeline {
                         ls -l
                 }
               }
-              stage('Build Docker MBEE'){
-                steps {
-                    // it wont work in script need to ask Josh
-                    //sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
+            stages {
+                stage('Build Docker MBEE'){
+                    steps {
+                        // it wont work in script need to ask Josh
+                        //sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
 
-                    sh "echo 'building'"
-                    sh "NODE_ENV=stage node mbee docker --build"
+                        sh "echo 'building'"
+                        sh "NODE_ENV=stage node mbee docker --build"
+                    }
                 }
-              }
             }
         }
         /**
