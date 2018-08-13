@@ -1,20 +1,14 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/000-init
+ * @module  test.000-init
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- * <br/>
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.<br/>
+ * @license Apache-2.0
  *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
- *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Leah De Laurell
+ * @author Josh Kaplan
  *
  * @description  This "test" is used to clean out the database before other
  * tests. It SHOULD NOT be run if testing against production databases. It
