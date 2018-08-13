@@ -122,11 +122,13 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a child element', createChildElement);
   it('should fail creating an element with a '
     + 'non-package parent', createElementNonPackageParent);
-  it('should create a block element', createBlock);
+  it('should create a block element', createBlockWithUUID);
   it('should create a relationship', createRelationship);
   it('should fail creating a relationship between same elements', createRelationshipSameElement);
+  it('should fail creating an element with existing uuid', createElementExistingUUID);
   it('should find all elements for a project', findElements);
   it('should find all elements of a specific type', findElementsSpecificType);
+  it('should find an element by its uuid', findElementByUUID);
   it('should throw an error for tryng to find an invalid element type', findElementsBadType);
   it('should find an element', findElement);
   it('should update an element', updateElement);
@@ -237,9 +239,9 @@ function createElementNonPackageParent(done) {
 }
 
 /**
- * Creates a block
+ * Creates a block with a uuid
  */
-function createBlock(done) {
+function createBlockWithUUID(done) {
   const newElement = {
     id: 'elem2',
     name: 'Loki brother of Thor',
@@ -250,12 +252,14 @@ function createBlock(done) {
       }
     },
     type: 'Block',
-    parent: 'elem0'
+    parent: 'elem0',
+    uuid: 'f239c90b-8cc2-475c-985c-ef653dc183b9'
   };
   ElemController.createElement(user, newElement)
   .then((retElem) => {
     chai.expect(retElem.id).to.equal('elem2');
     chai.expect(retElem.parent).to.not.equal(null);
+    chai.expect(retElem.uuid).to.equal('f239c90b-8cc2-475c-985c-ef653dc183b9');
     return ElemController.findElement(user, org.id, proj.id, 'elem0');
   })
   .then((retElem2) => {
@@ -329,6 +333,34 @@ function createRelationshipSameElement(done) {
 }
 
 /**
+ * Creates an element with existing uuid. Should fail.
+ */
+function createElementExistingUUID(done) {
+  const newElement = {
+    id: 'elem5',
+    name: 'Loki brother of Thor',
+    project: {
+      id: proj.id,
+      org: {
+        id: org.id
+      }
+    },
+    type: 'Block',
+    parent: 'elem0',
+    uuid: 'f239c90b-8cc2-475c-985c-ef653dc183b9'
+  };
+  ElemController.createElement(user, newElement)
+  .then((element) => {
+    chai.expect(element).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Element with uuid already exists.');
+    done();
+  });
+}
+
+/**
  * Finds all elements for a project
  */
 function findElements(done) {
@@ -354,6 +386,21 @@ function findElementsSpecificType(done) {
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * Finds an element by UUID
+ */
+function findElementByUUID(done) {
+  ElemController.findElement(user, org.id, proj.id, 'f239c90b-8cc2-475c-985c-ef653dc183b9')
+  .then((element) => {
+    chai.expect(element.uuid).to.equal('f239c90b-8cc2-475c-985c-ef653dc183b9');
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
     done();
   });
 }
