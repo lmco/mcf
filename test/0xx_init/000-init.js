@@ -101,7 +101,7 @@ function createDefaultOrg(done) {
       // users are still part of the org
       UserController.findUsers()
       .then((users) => {
-        let newList = [];
+        const newList = [];
 
         // Add all existing users to the read list
         Object.keys(users).forEach((user) => {
@@ -115,8 +115,8 @@ function createDefaultOrg(done) {
           done();
         });
       })
-      .catch((err) => {
-        chai.expect(err).to.equal(null);
+      .catch((err2) => {
+        chai.expect(err2).to.equal(null);
         done();
       });
     }

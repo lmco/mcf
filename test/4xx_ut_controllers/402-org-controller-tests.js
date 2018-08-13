@@ -48,7 +48,6 @@ let org = null;
 
 
 describe(M.getModuleName(module.filename), function() {
-
   this.timeout(5000);
 
   /**
@@ -437,14 +436,14 @@ function hardDeleteProjectAndOrg(done) {
  */
 function updateDefaultOrg(done) {
   OrgController.updateOrg(user, 'default', { name: 'New Name' })
-    .then(() => {
-      chai.expect(true).to.equal(false);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error.description).to.equal('Cannot update the default org.');
-      done();
-    });
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Cannot update the default org.');
+    done();
+  });
 }
 
 /**

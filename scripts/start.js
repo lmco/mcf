@@ -98,7 +98,7 @@ function start(args) {
       // users are still part of the org
       UserController.findUsers()
       .then((users) => {
-        let newList = [];
+        const newList = [];
 
         // Add all existing users to the read list
         Object.keys(users).forEach((user) => {
@@ -113,8 +113,8 @@ function start(args) {
           }
         });
       })
-      .catch((err) => {
-        throw err;
+      .catch((err2) => {
+        throw err2;
       });
     }
   });
