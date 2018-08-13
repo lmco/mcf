@@ -54,13 +54,24 @@ pipeline {
 
                         //sh 'if (env.JOB_NAME == LeahPipeline1) '
                         //    sh "echo 'I am inside the if statement'"
-                            
+
                         // Build
                         sh 'NODE_ENV=stage node mbee build'
 
                         // Verify build
                         sh 'ls -l'
                     }
+                }
+                stage ('Run a script call') {
+                    steps {
+                        script {
+                            if (env.JOB_NAME == 'LeahPipeline1') {
+                                echo 'I am inside the if statement'
+                            }
+                        }
+
+                    }
+
                 }
 
                 stage('Build Docker MBEE'){
