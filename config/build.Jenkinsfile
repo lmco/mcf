@@ -54,6 +54,7 @@ pipeline {
                             // Install dev dependencies
                             yarn install --dev
 
+                            echo 'before if statement'
                             if (env.JOB_NAME == 'LeahPipeline1') {
                                 echo 'I am inside the if statement'
                             }
