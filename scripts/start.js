@@ -81,7 +81,7 @@ function start(args) {
       throw err;
     }
 
-    // If the default org does not exist
+    // If the default org does not exist, create it
     if (org === null) {
       const defaultOrg = new Organization({
         id: 'default',
@@ -93,17 +93,30 @@ function start(args) {
         }
       });
     }
-    // else {
-    //   // Prune current users to ensure no deleted
-    //   // users are still part of the org
-    //   UserController.findUsers()
-    //   .then((users) => {
-    //     console.log(users);
-    //   })
-    //   .catch((err) => {
-    //     throw err;
-    //   });
-    // }
+    else {
+      // Prune current users to ensure no deleted
+      // users are still part of the org
+      UserController.findUsers()
+      .then((users) => {
+        let newList = [];
+
+        // Add all existing users to the read list
+        Object.keys(users).forEach((user) => {
+          newList.push(users[user]._id);
+        });
+        org.permissions.read = newList;
+
+        // Save the updated org
+        org.save((saveOrgErr) => {
+          if (saveOrgErr) {
+            throw saveOrgErr;
+          }
+        });
+      })
+      .catch((err) => {
+        throw err;
+      });
+    }
   });
 }
 

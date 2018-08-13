@@ -32,6 +32,7 @@ const User = M.require('models.User');
 const Organization = M.require('models.Organization');
 const Project = M.require('models.Project');
 const Element = M.require('models.Element');
+const UserController = M.require('controllers.UserController');
 const db = M.require('lib.db');
 
 
@@ -96,8 +97,28 @@ function createDefaultOrg(done) {
       });
     }
     else {
-      // Default org already exists
-      done();
+      // Prune current users to ensure no deleted
+      // users are still part of the org
+      UserController.findUsers()
+      .then((users) => {
+        let newList = [];
+
+        // Add all existing users to the read list
+        Object.keys(users).forEach((user) => {
+          newList.push(users[user]._id);
+        });
+        org.permissions.read = newList;
+
+        // Save the updated org
+        org.save((saveOrgErr) => {
+          chai.expect(saveOrgErr).to.equal(null);
+          done();
+        });
+      })
+      .catch((err) => {
+        chai.expect(err).to.equal(null);
+        done();
+      });
     }
   });
 }
