@@ -53,11 +53,13 @@ pipeline {
                             // Install dev dependencies
                             yarn install --dev
 
-                            if (${JOB_NAME} == LeahPipeline1) {
+                            if (${env.JOB_NAME} == LeahPipeline1) {
                                 echo 'I am inside the if statement'
                             }
                             // Build
                             NODE_ENV=stage node mbee build
+
+                            sed -i 's/NO_BUILD_NUMBER/${env.BUILD_NUMBER}/g' package.json
 
                             // Verify build
                             ls -l
@@ -67,7 +69,7 @@ pipeline {
                 stage('Build Docker MBEE'){
                     steps {
                         // it wont work in script need to ask Josh
-                        sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
+                        //sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
 
                         sh "echo 'building'"
                         sh "NODE_ENV=stage node mbee docker --build"
