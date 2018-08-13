@@ -22,7 +22,7 @@
 // Load node modules
 const crypto = require('crypto');
 const mongoose = require('mongoose');
-const errors = M.load('lib/errors');
+const errors = M.require('lib.errors');
 const Organization = M.require('models.Organization');
 
 // Load mbee modules
