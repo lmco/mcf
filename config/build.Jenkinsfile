@@ -53,7 +53,7 @@ pipeline {
                             // Install dev dependencies
                             yarn install --dev
 
-                            if (JOB_NAME == LeahPipeline1) {
+                            if (${JOB_NAME} == LeahPipeline1) {
                                 echo 'I am inside the if statement'
                             }
                             // Build
