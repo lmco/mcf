@@ -217,6 +217,9 @@ class UIController {
     if (RegExp(validators.url.next).test(req.body.next)) {
       next = req.body.next;
     }
+    else if (req.user.custom.hasOwnProperty('homepage')) {
+      next = req.user.custom.homepage;
+    }
     else {
       next = '/';
     }
