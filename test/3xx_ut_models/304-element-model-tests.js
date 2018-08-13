@@ -188,7 +188,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates a generic element
  */
 function createElement(done) {
-  const newElement = new Element.Element({
+  const newElement = new Element.Block({
     id: '0000',
     uid: 'avengers:timeloop:0000',
     name: 'The begining of time loop',
@@ -279,7 +279,7 @@ function createBlock01(done) {
     const newBlock = new Element.Block({
       id: '0002',
       uid: 'avengers:timeloop:0002',
-      name: 'In time loop',
+      name: 'In time loop 2',
       project: project._id,
       parent: pkg._id
     });
@@ -293,7 +293,7 @@ function createBlock01(done) {
 
       // Make sure it created what we expect and finish
       chai.expect(createdBlock.uid).to.equal('avengers:timeloop:0002');
-      chai.expect(createdBlock.name).to.equal('In time loop');
+      chai.expect(createdBlock.name).to.equal('In time loop 2');
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
       chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
 
