@@ -34,6 +34,7 @@ pipeline {
                 sh 'rm -rf public'
                 sh 'rm -rf logs/*'
                 sh 'rm -rf *.log'
+                sh 'rm -rf *.xml'
 
                 // checking to see if there are orphan volumes
                 // potentially need to delete all of the volumes
