@@ -50,7 +50,7 @@ pipeline {
                 stage('Build MBEE'){
                     steps {
                         script {
-
+                            echo 'before yarn'
                             // Install dev dependencies
                             yarn install --dev
 
