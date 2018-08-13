@@ -39,6 +39,7 @@ pipeline {
                 // checking to see if there are orphan volumes
                 // potentially need to delete all of the volumes
                 // sh 'docker volume ls'
+                sh 'yarn install --dev'
             }
         }
 
@@ -50,9 +51,9 @@ pipeline {
                 stage('Build MBEE'){
                     steps {
                         script {
-                            echo 'before yarn'
+                            //echo 'before yarn'
                             // Install dev dependencies
-                            yarn install --dev
+                            //yarn install --dev
 
                             echo 'before if statement'
                             if (env.JOB_NAME == 'LeahPipeline1') {
