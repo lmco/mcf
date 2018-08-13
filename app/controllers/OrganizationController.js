@@ -18,12 +18,12 @@
  * provides functions for interacting with organizations.
  */
 
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const Organization = M.require('models/Organization');
-const errors = M.require('lib/errors');
-const utils = M.require('lib/utils');
-
+// Load mbee modules
+const Organization = M.require('models.Organization');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const validators = M.require('lib.validators');
+const errors = M.require('lib.errors');
 
 /**
  * OrganizationController
@@ -53,7 +53,7 @@ class OrganizationController {
    */
   static findOrgs(user) {
     return new Promise((resolve, reject) => {
-      const userID = M.lib.sani.sanitize(user._id);
+      const userID = sani.sanitize(user._id);
 
       OrganizationController.findOrgsQuery({ 'permissions.read': userID, deleted: false })
       .then((orgs) => resolve(orgs))
@@ -91,7 +91,7 @@ class OrganizationController {
         return reject(error);
       }
 
-      const orgID = M.lib.sani.sanitize(organizationID);
+      const orgID = sani.sanitize(organizationID);
       let searchParams = { id: orgID, deleted: false };
 
       if (softDeleted && user.admin) {
@@ -122,7 +122,9 @@ class OrganizationController {
         // If we find one org (which we should if it exists)
         return resolve(org);
       })
-      .catch((error) => reject(error));
+      .catch((error) => {
+        reject(error);
+      });
     });
   }
 
@@ -143,7 +145,7 @@ class OrganizationController {
    */
   static findOrgsQuery(orgQuery) {
     return new Promise((resolve, reject) => {
-      const query = M.lib.sani.sanitize(orgQuery);
+      const query = sani.sanitize(orgQuery);
 
       Organization.find(query)
       .populate('projects permissions.read permissions.write permissions.admin')
@@ -187,7 +189,7 @@ class OrganizationController {
         utils.assertType([orgInfo.id, orgInfo.name], 'string');
         if (utils.checkExists(['custom'], orgInfo)) {
           utils.assertType([orgInfo.custom], 'object');
-          custom = M.lib.sani.html(orgInfo.custom);
+          custom = sani.html(orgInfo.custom);
         }
       }
       catch (error) {
@@ -195,14 +197,14 @@ class OrganizationController {
       }
 
       // Sanitize fields
-      const orgID = M.lib.sani.html(orgInfo.id);
-      const orgName = M.lib.sani.html(orgInfo.name);
+      const orgID = sani.html(orgInfo.id);
+      const orgName = sani.html(orgInfo.name);
 
       // Error check - Make sure a valid orgID and name is given
-      if (!RegExp(M.lib.validators.org.name).test(orgName)) {
+      if (!RegExp(validators.org.name).test(orgName)) {
         return reject(new errors.CustomError('Organization name is not valid.', 400));
       }
-      if (!RegExp(M.lib.validators.org.id).test(orgID)) {
+      if (!RegExp(validators.org.id).test(orgID)) {
         return reject(new errors.CustomError('Organization ID is not valid.', 400));
       }
 
@@ -280,7 +282,7 @@ class OrganizationController {
       }
 
       // Sanitize input argument
-      const orgID = M.lib.sani.html(organizationID);
+      const orgID = sani.html(organizationID);
 
       // Ensure user cannot update the default org
       if (orgID === 'default') {
@@ -333,7 +335,7 @@ class OrganizationController {
 
           // Handle case where the org name is updated, and is invalid
           if (updateField === 'name') {
-            if (!RegExp(M.lib.validators.org.name).test(orgUpdate[updateField])) {
+            if (!RegExp(validators.org.name).test(orgUpdate[updateField])) {
               return reject(new errors.CustomError('The updated organization name is not valid.', 400));
             }
           }
@@ -342,16 +344,15 @@ class OrganizationController {
           if (Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
             Object.keys(orgUpdate[updateField]).forEach((key) => {
-              org.custom[key] = M.lib.sani.sanitize(orgUpdate[updateField][key]);
+              org.custom[key] = sani.sanitize(orgUpdate[updateField][key]);
             });
-
             // Special thing for mixed fields in Mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             org.markModified(updateField);
           }
           else {
             // sanitize field
-            updateVal = M.lib.sani.sanitize(orgUpdate[updateField]);
+            updateVal = sani.sanitize(orgUpdate[updateField]);
             // Update field in org object
             org[updateField] = updateVal;
           }
@@ -393,7 +394,7 @@ class OrganizationController {
   static removeOrg(user, organizationID, options) {
     // Loading controller function wide since the project controller loads
     // the org controller globally. Both files cannot load each other globally.
-    const ProjController = M.require('controllers/ProjectController');
+    const ProjController = M.require('controllers.ProjectController');
 
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       let softDelete = true;
@@ -409,7 +410,7 @@ class OrganizationController {
         return reject(error);
       }
 
-      const orgID = M.lib.sani.html(organizationID);
+      const orgID = sani.html(organizationID);
 
       // Stop attempted deletion of default org
       if (orgID === 'default') {
@@ -567,7 +568,7 @@ class OrganizationController {
         return reject(new errors.CustomError('The permission entered is not a valid permission.', 400));
       }
 
-      const orgID = M.lib.sani.sanitize(organizationID);
+      const orgID = sani.sanitize(organizationID);
       OrganizationController.findOrg(reqUser, orgID)
       .then((org) => { // eslint-disable-line consistent-return
         // Ensure user is an admin within the organization
@@ -645,7 +646,7 @@ class OrganizationController {
         return reject(error);
       }
 
-      const orgID = M.lib.sani.sanitize(organizationID);
+      const orgID = sani.sanitize(organizationID);
       const returnDict = {};
 
       // Find the org

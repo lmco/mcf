@@ -21,16 +21,17 @@
  * update, find, soft delete, and hard delete of the projects.
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove the need for mongoose
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const ElemController = M.require('controllers/ElementController');
-const OrgController = M.require('controllers/OrganizationController');
-const ProjController = M.require('controllers/ProjectController');
-const AuthController = M.require('lib/auth');
-const User = M.require('models/User');
 
+// Load node modules
+const OrgController = M.require('controllers.OrganizationController');
+const ProjController = M.require('controllers.ProjectController');
+const ElemController = M.require('controllers.ElementController');
+const User = M.require('models.User');
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -60,8 +61,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);

@@ -18,25 +18,23 @@
  * The app is imported by the mbee.js script which then runs the server.
  */
 
+// Load node modules
 const path = require('path');
 const express = require('express');
-const bodyParser = require('body-parser');
+const expressLayouts = require('express-ejs-layouts');
 const session = require('express-session');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
-const expressLayouts = require('express-ejs-layouts');
 const flash = require('express-flash');
 
-const M = require(`${__dirname}/../mbee.js`);
+// Load mbee modules
+const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
 
-// Instantiates our application
-const app = express();
-
 // Connect to database, then initialize application
-M.lib.db
-.connect()
+db.connect()
 .then(conn => {
   initApp();
 })
@@ -45,6 +43,8 @@ M.lib.db
   process.exit(1);
 });
 
+// TODO: do we need this here if it's at the bottom?
+const app = express();
 module.exports = app;
 
 /**

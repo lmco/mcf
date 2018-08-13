@@ -41,14 +41,14 @@ pipeline {
         stage('Build') {
             steps {
                 // Build
-                sh 'NODE_ENV=test node mbee install --dev'
-                sh 'NODE_ENV=test node mbee build'
+                sh 'yarn install'
+                sh 'MBEE_ENV=test node mbee build'
 
                 // Verify build
                 sh 'ls -l'
 
                 // Build the docker image
-                sh 'NODE_ENV=test node mbee docker --build'
+                sh 'MBEE_ENV=test node mbee docker --build'
             }
         }
 
@@ -58,16 +58,16 @@ pipeline {
         stage('Deploy') {
             steps {
                 // Removes any existing running or stopped stage containers.
-                sh 'NODE_ENV=test node mbee docker --clean'
+                sh 'MBEE_ENV=test node mbee docker --clean'
                 /* Runs the container in the background. */
-                sh 'NODE_ENV=test node mbee docker --run'
+                sh 'MBEE_ENV=test node mbee docker --run'
             }
         }
 
         stage('Test') {
             steps {
                 // Runs the basic test suite against the running stage container
-                sh 'NODE_ENV=test node mbee lint'
+                sh 'MBEE_ENV=test node mbee lint'
                 // Wait to be sure server is up
                 sh 'sleep 30'
 
@@ -76,7 +76,7 @@ pipeline {
                 timeout(time: 10, unit: 'MINUTES') {
                     // creating a junit xml file
                     sh "echo 'running test'"
-                    sh 'NODE_ENV=test node mbee test --bail --reporter=mocha-junit-reporter --grep "^[0-6]"'
+                    sh 'MBEE_ENV=test node mbee test --bail true --reporter mocha-junit-reporter --grep "^[0-6]"'
                 }
              }
         }
@@ -95,9 +95,9 @@ pipeline {
             sh 'echo "Build and Deploy Complete"'
 
             // Gets the logs and prints them to the console
-            //sh 'NODE_ENV=test node mbee docker --get-logs'
+            //sh 'MBEE_ENV=test node mbee docker --get-logs'
             // Removes any test containers
-            sh 'NODE_ENV=test node mbee docker --clean'
+            sh 'MBEE_ENV=test node mbee docker --clean'
 
             junit 'test-results.xml'
         }

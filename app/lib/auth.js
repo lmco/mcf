@@ -18,10 +18,9 @@
  * a controller. It ensures that the auth strategy defined in the config.json.
  */
 
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const sani = M.lib.sani;
-const AuthModule = require(path.join(__dirname, '..', 'auth', M.config.auth.strategy));
+// Load mbee modules
+const AuthModule = M.require(`auth.${M.config.auth.strategy}`);
+const sani = M.require('lib.sanitization');
 
 // Error Check - Verify the AuthModule that has been imported implements the proper functions
 if (!AuthModule.hasOwnProperty('handleBasicAuth')) {

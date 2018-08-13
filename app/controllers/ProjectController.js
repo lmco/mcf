@@ -18,15 +18,13 @@
  * provides functions for interacting with projects.
  */
 
-/* Node.js Modules */
-const path = require('path');
-
-/* Local Modules */
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+// Load mbee modules
 const OrgController = M.require('controllers.OrganizationController');
-const Project = M.require('models/Project');
-const errors = M.require('lib/errors');
-const utils = M.require('lib/utils');
+const Project = M.require('models.Project');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const validators = M.require('lib.validators');
+const errors = M.require('lib.errors');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -71,7 +69,7 @@ class ProjectController {
       }
 
       // Sanitize project properties
-      const orgID = M.lib.sani.html(organizationID);
+      const orgID = sani.html(organizationID);
 
       OrgController.findOrg(reqUser, orgID, softDeleted)
       .then((org) => {
@@ -130,7 +128,7 @@ class ProjectController {
       }
 
       // Sanitize the orgid
-      const orgID = M.lib.sani.html(organizationID);
+      const orgID = sani.html(organizationID);
 
       // Ensure the org exists
       // TODO - Use populates rather than nested queries when possible
@@ -197,8 +195,8 @@ class ProjectController {
       }
 
       // Sanitize project properties
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
       const projUID = utils.createUID(orgID, projID);
 
       let searchParams = { uid: projUID, deleted: false };
@@ -250,7 +248,7 @@ class ProjectController {
    */
   static findProjectsQuery(projectQuery) {
     return new Promise((resolve, reject) => {
-      const query = M.lib.sani.sanitize(projectQuery);
+      const query = sani.sanitize(projectQuery);
 
       Project.find(query)
       .populate('org permissions.read permissions.write permissions.admin')
@@ -293,7 +291,7 @@ class ProjectController {
         utils.assertType([project.id, project.name, project.org.id], 'string');
         if (utils.checkExists(['custom'], project)) {
           utils.assertType([project.custom], 'object');
-          custom = M.lib.sani.html(project.custom);
+          custom = sani.html(project.custom);
         }
       }
       catch (error) {
@@ -301,15 +299,15 @@ class ProjectController {
       }
 
       // Sanitize project properties
-      const projID = M.lib.sani.html(project.id);
-      const projName = M.lib.sani.html(project.name);
-      const orgID = M.lib.sani.html(project.org.id);
+      const projID = sani.html(project.id);
+      const projName = sani.html(project.name);
+      const orgID = sani.html(project.org.id);
 
       // Error check - make sure project ID and project name are valid
-      if (!RegExp(M.lib.validators.project.id).test(projID)) {
+      if (!RegExp(validators.project.id).test(projID)) {
         return reject(new errors.CustomError('Project ID is not valid.', 400));
       }
-      if (!RegExp(M.lib.validators.project.name).test(projName)) {
+      if (!RegExp(validators.project.name).test(projName)) {
         return reject(new errors.CustomError('Project name is not valid.', 400));
       }
       // Error check - Make sure the org exists
@@ -397,8 +395,8 @@ class ProjectController {
       }
 
       // Sanitize project properties
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
 
       // Error check - check if the project already exists
       ProjectController.findProject(reqUser, orgID, projID)
@@ -444,12 +442,11 @@ class ProjectController {
             && (Project.schema.obj[updateField].type.schemaName !== 'Mixed')) {
             return reject(new errors.CustomError(`The Project [${updateField}] is not of type String`, 400));
           }
-
           // Updates each individual tag that was provided.
           if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
             Object.keys(projectUpdated[updateField]).forEach((key) => {
-              project.custom[key] = M.lib.sani.sanitize(projectUpdated[updateField][key]);
+              project.custom[key] = sani.sanitize(projectUpdated[updateField][key]);
             });
 
             // Special thing for mixed fields in Mongoose
@@ -458,7 +455,7 @@ class ProjectController {
           }
           else {
             // sanitize field
-            updateVal = M.lib.sani.sanitize(projectUpdated[updateField]);
+            updateVal = sani.sanitize(projectUpdated[updateField]);
             // Update field in project object
             project[updateField] = updateVal;
           }
@@ -500,7 +497,7 @@ class ProjectController {
   static removeProject(reqUser, organizationID, projectID, options) {
     // Loading controller function wide since the element controller loads
     // the project controller globally. Both files cannot load each other globally.
-    const ElemController = M.require('controllers/ElementController');
+    const ElemController = M.require('controllers.ElementController');
 
     return new Promise((resolve, reject) => {
       try {
@@ -525,8 +522,8 @@ class ProjectController {
       }
 
       // Sanitize project properties
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
 
       // Make sure the project exists first, even if it has already been soft deleted
       ProjectController.findProject(reqUser, orgID, projID, true)
@@ -637,8 +634,8 @@ class ProjectController {
    */
   static findAllPermissions(reqUser, organizationID, projectID) {
     return new Promise((resolve, reject) => {
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
 
       // Find Project
       ProjectController.findProject(reqUser, orgID, projID)
@@ -688,8 +685,8 @@ class ProjectController {
    */
   static findPermissions(reqUser, organizationID, projectID, user) {
     return new Promise((resolve, reject) => {
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
 
       // Find Project
       ProjectController.findAllPermissions(reqUser, orgID, projID)
@@ -734,9 +731,9 @@ class ProjectController {
       }
 
       // Sanitize input
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
-      const permType = M.lib.sani.html(permissionType);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
+      const permType = sani.html(permissionType);
 
       // Check if project exists
       ProjectController.findProject(reqUser, organizationID, projectID)

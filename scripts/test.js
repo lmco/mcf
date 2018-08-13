@@ -17,17 +17,18 @@
  * This file executes the test suite with Mocha.
  */
 
+// Load node modules
+const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
-const M = require(path.join(__dirname, '..', 'mbee.js'));
+const Mocha = require('mocha');
 
+// If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
-  test(process.argv.slice(2));
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this script by using the '
+    + 'following command. \n\nnode mbee test\n');
+  process.exit(-1);
 }
-else {
-  module.exports = test;
-}
-
 
 /**
  * Runs the collection of test suites by running the "test/runner.js" script
@@ -40,6 +41,7 @@ else {
  */
 function test(_args) {
   printHeader();
+
   // LM: Default timeout changed to 5000
   // Add default timeout if not provided
   if (!_args.includes('--timeout')) {
@@ -51,16 +53,64 @@ function test(_args) {
     _args.push('--slow');
     _args.push('19');
   }
-  const args = [`${M.root}/test/**/*.js`].concat(_args);
 
-  spawn(`${M.root}/node_modules/.bin/mocha`, args, { stdio: 'inherit' })
-  .on('data', (data) => {
-    console.log(data.toString()); // eslint-disable-line no-console
-  })
-  .on('exit', (code) => {
-    if (code !== 0) {
-      console.log('Tests failed.'); // eslint-disable-line no-console
-      process.exit(code);
+  // allocate options variable for mocha
+  const opts = {};
+
+  // Loop through _args array and load the opts object
+  for (let i = 0; i < _args.length; i += 2) {
+    // Check the arg starts with '--'
+    if (RegExp(/^(--)/).test(_args[i])) {
+      // The arg started with '--', remove '--' and load the arg in to the opts
+      // object as a key with the following arg as the value
+      opts[_args[i].replace('--', '')] = _args[i + 1];
+    }
+    else {
+      // The arg did NOT start with '--', log the error and exit the process
+      M.log.error(`invalid argument (${_args[i]})`);
+      process.exit(-1);
+    }
+  }
+
+  // Create mocha object with options
+  const mocha = new Mocha(opts);
+  // Set the test directory
+  const testDir = `${M.root}/test`;
+
+  // The mocha walk function is responsible for loading .js files into mocha
+  // for use during tests
+  const mochaWalk = function(dir) {
+    // Read the current directory and use a callback to filter the results
+    fs.readdirSync(dir).filter(function(file) {
+      // Check if the file is actually a directory
+      if (fs.lstatSync(path.join(dir, file)).isDirectory()) {
+        // The file is actually a directory, call mochaWalk recursively with the
+        // full path of the directory
+        mochaWalk(path.join(dir, file));
+      }
+      // Return true to the filter if the file is a javascript file
+      return file.substr(-3) === '.js';
+    })
+    // Loop through the resulting array of files
+    .forEach(function(file) {
+      // Add the full path and filename to mocha
+      mocha.addFile(path.join(dir, file));
+    });
+  };
+
+  // Call the mochaWalk function to load in all of the test files
+  mochaWalk(testDir);
+
+  // Run the tests.
+  mocha.run(function(failures) {
+    // Check for failures
+    if (failures) {
+      // mocha did not pass all test, exit with error code -1
+      process.exit(-1);
+    }
+    else {
+      // mocha passed all tests, exit with error code 0
+      process.exit(0);
     }
   });
 }
@@ -85,3 +135,5 @@ function printHeader() {
   console.log('_'.repeat(65)); // eslint-disable-line no-console
   console.log(''); // eslint-disable-line no-console
 }
+
+module.exports = test;

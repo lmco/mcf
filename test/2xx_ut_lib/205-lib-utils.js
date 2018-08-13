@@ -18,9 +18,11 @@
  * @description  This file tests the utility functions.
  */
 
+// Load node modules
 const chai = require('chai');
-const M = require('../../mbee.js');
-const utils = M.require('lib/utils'); // TODO - can we do M.lib.utils?
+
+// Load mbee modules
+const utils = M.require('lib.utils');
 
 
 /* --------------------( Main )-------------------- */

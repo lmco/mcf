@@ -11,17 +11,15 @@
  * @description Defines common cryptographic functions.
  */
 
-const path = require('path');
-const crypto = require('crypto');
-const mbee = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
+// Load node modules
+const crypto = require('crypto');  // NOTE: Refers to standard node cryto library
 
 /**
  * Encrypts data with AES-256 using the app secret and returns the
  * encrypted data as a base64 encoded string.
  */
 function encrypt(data) {
-  const secret = mbee.config.server.secret;
+  const secret = M.config.server.secret;
   const cipher = crypto.createCipher('aes-256-cbc', secret);
   let encrypted = cipher.update(data, 'utf8', 'hex');
   encrypted += cipher.final('hex');
@@ -37,11 +35,11 @@ module.exports.encrypt = encrypt;
  */
 function decrypt(data) {
   if (data === undefined || data.toString() === '') {
-    mbee.log.warn(`Can't decrypt ${data}. Returning ...`);
+    M.log.warn(`Can't decrypt ${data}. Returning ...`);
     return '{}';
   }
   try {
-    const secret = mbee.config.server.secret;
+    const secret = M.config.server.secret;
     const decipher = crypto.createDecipher('aes-256-cbc', secret);
     const hexData = Buffer.from(data, 'base64').toString('hex');
     let decrypted = decipher.update(hexData, 'hex', 'utf8');
@@ -49,8 +47,8 @@ function decrypt(data) {
     return decrypted;
   }
   catch (error) {
-    mbee.log.warn('Decryption failed.');
-    mbee.log.error(error);
+    M.log.warn('Decryption failed.');
+    M.log.error(error);
     return '{}';
   }
 }

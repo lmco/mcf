@@ -22,12 +22,11 @@
  * improve CI testing.
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose');
 
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
+// Load mbee modules
 const User = M.require('models.User');
 const Organization = M.require('models.Organization');
 const Project = M.require('models.Project');
@@ -38,6 +37,7 @@ const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
 
+console.log('THIS IS A DEMO');
 
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
