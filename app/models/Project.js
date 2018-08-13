@@ -167,6 +167,18 @@ const ProjectSchema = new mongoose.Schema({
    */
   custom: {
     type: mongoose.Schema.Types.Mixed
+  },
+
+  /**
+   * @memberOf  Project
+   * @property  visibility
+   * @type String
+   *
+   * @description The visibility level of the project. Can be public, internal or private.
+   */
+  visibility: {
+    type: String,
+    default: 'private'
   }
 });
 
@@ -182,6 +194,13 @@ ProjectSchema.methods.getPermissionLevels = function() {
   */
 ProjectSchema.methods.getValidUpdateFields = function() {
   return ['name', 'delete', 'deletedOn', 'custom'];
+};
+
+/**
+ * Returns a list of valid visibility levels.
+ */
+ProjectSchema.methods.getVisibilityLevels = function() {
+  return ['public', 'internal', 'private'];
 };
 
 

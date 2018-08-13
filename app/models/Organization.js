@@ -143,6 +143,18 @@ const OrganizationSchema = new mongoose.Schema({
    */
   custom: {
     type: mongoose.Schema.Types.Mixed
+  },
+
+  /**
+   * @memberOf  Organization
+   * @property  visibility
+   * @type String
+   *
+   * @description The visibility level of the org. Can be public or private.
+   */
+  visibility: {
+    type: String,
+    default: 'private'
   }
 });
 
@@ -185,6 +197,13 @@ OrganizationSchema.methods.getPermissionLevels = function() {
   */
 OrganizationSchema.methods.getValidUpdateFields = function() {
   return ['name', 'custom'];
+};
+
+/**
+ * Returns a list of valid visibility settings
+ */
+OrganizationSchema.methods.getVisibilityLevels = function() {
+  return ['public', 'private'];
 };
 
 // Required for virtual getters

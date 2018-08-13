@@ -55,17 +55,11 @@ class UserController {
    * });
    */
   static findUsers() {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       UserController.findUsersQuery({ deletedOn: null })
-      .then((users) => {
-        // Convert to public user data
-        const publicUsers = users.map(u => u.getPublicData());
-
-        // Return the users' public JSON
-        return resolve(publicUsers);
-      })
+      .then((users) => resolve(users))
       .catch((error) => reject(error));
-    }));
+    });
   }
 
 
