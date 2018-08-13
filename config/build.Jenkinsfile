@@ -39,7 +39,6 @@ pipeline {
                 // checking to see if there are orphan volumes
                 // potentially need to delete all of the volumes
                 // sh 'docker volume ls'
-                sh 'yarn install --dev'
             }
         }
 
