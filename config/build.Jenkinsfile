@@ -53,9 +53,9 @@ pipeline {
                             // Install dev dependencies
                             yarn install --dev
 
-                            if (env.JOB_NAME == LeahPipeline1) {
-                                echo 'I am inside the if statement'
-                            }
+                            //if (env.JOB_NAME == LeahPipeline1) {
+                            //    echo 'I am inside the if statement'
+                            //}
                             // Build
                             NODE_ENV=stage node mbee build
 
