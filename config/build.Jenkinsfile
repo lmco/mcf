@@ -49,16 +49,20 @@ pipeline {
             stages {
                 stage('Build MBEE'){
                     steps {
-                        // Install dev dependencies
-                        sh 'yarn install --dev'
+                        script {
+                            // Install dev dependencies
+                            yarn install --dev
 
-                        // Build
-                        sh 'NODE_ENV=stage node mbee build'
+                            if (JOB_NAME == LeahPipeline1) {
+                                echo 'I am inside the if statement'
+                            }
+                            // Build
+                            sh 'NODE_ENV=stage node mbee build'
+                        }
+                            sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
-                        sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
-
-                        // Verify build
-                        sh 'ls -l'
+                            // Verify build
+                            sh 'ls -l'
                     }
                 }
                 stage('Build Docker MBEE'){
