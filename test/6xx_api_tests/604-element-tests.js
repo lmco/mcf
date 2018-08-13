@@ -18,7 +18,7 @@
  * @description This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. These API controller tests are
- * specifically for the Element API tests: posting, putting, getting, and deleting
+ * specifically for the Element API tests: posting, patching, getting, and deleting
  * elements.
  * TODO - fix description
  */
@@ -49,8 +49,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - add description
    */
-  before(function(done) {
-    this.timeout(5000);
+  before((done) => {
     const db = M.require('lib/db'); // TODO - M.lib.db
     db.connect();
 
@@ -118,8 +117,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - Add detailed description
    */
-  after(function(done) {
-    this.timeout(5000);
+  after((done) => {
     // Delete the org
     OrgController.removeOrg(user, 'nineteenforty', { soft: false })
     .then((retOrg) => {
@@ -143,7 +141,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should create an element', postElement);
   it('should get an element', getElement);
   it('should get all elements for a project', getElements);
-  it('should update an elements name', putElement);
+  it('should update an elements name', patchElement);
   it('should delete an element', deleteElement);
 });
 
@@ -169,7 +167,7 @@ function postElement(done) {
           id: org.id
         }
       },
-      type: 'Element'
+      type: 'Block'
     })
   },
   (err, response, body) => {
@@ -215,13 +213,13 @@ function getElements(done) {
 }
 
 /**
- * Makes a PUT request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * Makes a PATCH request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
  */
-function putElement(done) {
+function patchElement(done) {
   request({
     url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       name: 'Captain America'
     })

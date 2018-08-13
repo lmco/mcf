@@ -20,7 +20,7 @@
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code we want to make sure everything still
  * works as it should. These API controller tests are specifically for the User
- * API tests: posting, putting, getting, and deleting a user.
+ * API tests: posting, patching, getting, and deleting a user.
  * TODO - description
  */
 
@@ -45,9 +45,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - Add desc
    */
-  before(function(done) {
-    this.timeout(5000);
-
+  before((done) => {
     const db = M.require('lib/db');
     db.connect();
 
@@ -79,7 +77,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - Add detailed description
    */
-  after(function(done) {
+  after((done) => {
     User.findOneAndRemove({
       username: M.config.test.username
     }, (err) => {
@@ -90,24 +88,23 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should get a username', getUser).timeout(3000);
-  it('should create a user', postUser).timeout(3000);
-  it('should create an admin user', postAUser).timeout(3000);
-  it('should find out the user with the /whoami api tag', whoamIapi).timeout(3000);
-  it('should reject creating a user with invalid username', rejectUPost).timeout(3000);
-  it('should reject creating a user with two different usernames', rejectUsernames).timeout(3000);
-  // JIRA-BUG: MBX-283 UNCOMMENT WHEN FIXED
-  // it('should reject creating a user with invalid first name', rejectNamePut).timeout(3000);
-  it('should reject a username that already exists', rejectExistingUname).timeout(3000);
-  it('should get all users', getUsers).timeout(3000);
-  it('should reject getting a user that does not exist', rejectGetNoU).timeout(3000);
-  it('should update a user', putUser).timeout(3000);
-  it('should reject an update a user that does not exist', rejectPut).timeout(3000);
-  it('should reject updating the username', rejectUPut).timeout(3000);
-  it('should reject updating with an invalid name', rejectName).timeout(3000);
-  it('should reject deleting a user that doesnt exist', rejectDelete).timeout(3000);
-  it('should delete a user', deleteUser).timeout(3000);
-  it('should delete the admin user', deleteAUser).timeout(3000);
+  it('should get a username', getUser);
+  it('should create a user', postUser);
+  it('should create an admin user', postAUser);
+  it('should find out the user with the /whoami api tag', whoamIapi);
+  it('should reject creating a user with invalid username', rejectUPost);
+  it('should reject creating a user with two different usernames', rejectUsernames);
+  it('should reject creating a user with invalid first name', rejectNamePost);
+  it('should reject a username that already exists', rejectExistingUname);
+  it('should get all users', getUsers);
+  it('should reject getting a user that does not exist', rejectGetNoU);
+  it('should update a user', patchUser);
+  it('should reject an update a user that does not exist', rejectPatch);
+  it('should reject updating the username', rejectUPatch);
+  it('should reject updating with an invalid name', rejectName);
+  it('should reject deleting a user that doesnt exist', rejectDelete);
+  it('should delete a user', deleteUser);
+  it('should delete the admin user', deleteAUser);
 });
 
 
@@ -209,7 +206,6 @@ function whoamIapi(done) {
 /**
  * Makes an invalid POST request to /api/users/:username. This an attempt to
  * create a user with an invalid username. Response is an error thrown.
- * JIRA-BUG: MBX-281, fix test when api errors are implemented.
  */
 function rejectUPost(done) {
   request({
@@ -225,8 +221,8 @@ function rejectUPost(done) {
   },
   (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(500);
-    chai.expect(json.message).to.equal('Internal Server Error');
+    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.description).to.equal('Username is not valid.');
     done();
   });
 }
@@ -256,31 +252,30 @@ function rejectUsernames(done) {
   });
 }
 
-// /**
-//  * Makes an invalid POST request to /api/users/:username. This an attempt to
-//  * create a user with an invalid first name. Response should be an error
-//  * thrown with status code 400 or something.
-//  * JIRA-BUG: MBX-283 Uncomment test when implemented
-//  */
-// function rejectNamePut(done) {
-//   request({
-//     url: `${test.url}/api/users/blindal`,
-//     headers: getHeaders(),
-//     method: 'POST',
-//     body: JSON.stringify({
-//       username: 'blindal',
-//       password: 'icantsee',
-//       fname: '',
-//       lname: 'Al'
-//     })
-//   },
-//   (err, response, body) => {
-//     const json = JSON.parse(body);
-//     chai.expect(response.statusCode).to.equal(500);
-//     chai.expect(json.message).to.equal('Internal Server Error');
-//     done();
-//   });
-// }
+/**
+ * Makes an invalid POST request to /api/users/:username. This an attempt to
+ * create a user with an invalid first name. Response should be an error
+ * thrown with status code 400 or something.
+ */
+function rejectNamePost(done) {
+  request({
+    url: `${test.url}/api/users/blindal`,
+    headers: getHeaders(),
+    method: 'POST',
+    body: JSON.stringify({
+      username: 'blindal',
+      password: 'icantsee',
+      fname: '',
+      lname: 'Al'
+    })
+  },
+  (err, response, body) => {
+    const json = JSON.parse(body);
+    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.description).to.equal('First name is not valid.');
+    done();
+  });
+}
 
 /**
  * Makes an invalid POST request to /api/users/:username. This an attempt to
@@ -345,14 +340,14 @@ function rejectGetNoU(done) {
 }
 
 /**
- * Makes a PUT request to /api/users/:username. This is to
+ * Makes a PATCH request to /api/users/:username. This is to
  * update a user. Response should succeed with a user object returned.
  */
-function putUser(done) {
+function patchUser(done) {
   request({
     url: `${test.url}/api/users/deadpool`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       fname: 'Mr Wade'
     })
@@ -368,15 +363,15 @@ function putUser(done) {
 }
 
 /**
- * Makes an invalid PUT request to /api/users/:username. This is to update a
+ * Makes an invalid PATCH request to /api/users/:username. This is to update a
  * user that does not exist. Response should throw an error saying user does not
  * exist.
  */
-function rejectPut(done) {
+function rejectPatch(done) {
   request({
     url: `${test.url}/api/users/francis`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       fname: 'Weapon X'
     })
@@ -385,21 +380,21 @@ function rejectPut(done) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(404);
     chai.expect(json.message).to.equal('Not Found');
-    chai.expect(json.description).to.equal('User does not exist.');
+    chai.expect(json.description).to.equal('Cannot find user.');
     done();
   });
 }
 
 /**
- * Makes an invalid PUT request to /api/users/:username. This is to update a
+ * Makes an invalid PATCH request to /api/users/:username. This is to update a
  * user that does not exist. Response should throw an error saying user does not
  * exist.
  */
-function rejectUPut(done) {
+function rejectUPatch(done) {
   request({
     url: `${test.url}/api/users/vanessacarlysle`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       username: 'deadpoolgf'
     })
@@ -414,7 +409,7 @@ function rejectUPut(done) {
 }
 
 /**
- * Makes an invalid PUT request to /api/users/:username. This is to update a
+ * Makes an invalid PATCH request to /api/users/:username. This is to update a
  * user that does not exist. Response should throw an error saying user does not
  * exist.
  */
@@ -422,7 +417,7 @@ function rejectName(done) {
   request({
     url: `${test.url}/api/users/vanessacarlysle`,
     headers: getHeaders(),
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({
       name: ''
     })

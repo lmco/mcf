@@ -56,8 +56,7 @@ describe(M.getModuleName(module.filename), () => {
    * Before: run before all tests
    * TODO - describe what the before function is doing.
    */
-  before(function(done) {
-    this.timeout(6000);
+  before((done) => {
     const db = M.require('lib/db');
     db.connect();
     const u = M.config.test.username;
@@ -130,30 +129,30 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a new org', addNewOrg).timeout(2500);
-  it('should create a second org', addSecondOrg).timeout(2500);
-  it('should find an existing org', findExistingOrg).timeout(2500);
-  it('should throw an error saying the field cannot be updated', updateOrgFieldErr).timeout(2500);
-  it('should throw an error saying the name field is not a string', updateOrgTypeErr).timeout(2500);
-  it('should reject update from non admin user', nonAUpdate).timeout(2500);
-  it('should update an orgs name', updateOrg).timeout(2500);
-  it('should update an orgs name using model object', updateOrgObject).timeout(2500);
-  it('should find all orgs a user has access to', findAllExistingOrgs).timeout(2500);
-  it('should soft delete an existing org', softDeleteExistingOrg).timeout(2500);
-  it('should delete an existing org', deleteExistingOrg).timeout(2500);
-  it('should soft-delete an existing org and its project', softDeleteProjectAndOrg).timeout(5000);
-  it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg).timeout(5000);
-  it('should add a user to an org', addUserRole).timeout(2500);
-  it('should let the non-admin user write a project', projWritePerm).timeout(2500);
-  it('should reject user changing their permissions', rejectUserRole).timeout(2500);
-  it('should get a users roles within an org', getUserRoles).timeout(2500);
-  it('should get all members with permissions in an org', getMembers).timeout(2500);
-  it('should throw an error saying the user is not an admin', nonAdminChangeRole).timeout(2500);
-  it('should remove a users role within an org', removeUserRole).timeout(2500);
-  it('should throw an error saying the user is not in the org', getOldUserRoles).timeout(2500);
-  it('should throw an error saying the user cannot change their own role', changeOwnRole).timeout(2500);
-  it('should throw an error the permission is not valid', invalidPermission).timeout(2500);
-  it('should throw an error saying the user is not an admin', nonAdminGetPermissions).timeout(2500);
+  it('should create a new org', addNewOrg);
+  it('should create a second org', addSecondOrg);
+  it('should find an existing org', findExistingOrg);
+  it('should throw an error saying the field cannot be updated', updateOrgFieldErr);
+  it('should throw an error saying the name field is not a string', updateOrgTypeErr);
+  it('should reject update from non admin user', nonAUpdate);
+  it('should update an orgs name', updateOrg);
+  it('should update an orgs name using model object', updateOrgObject);
+  it('should find all orgs a user has access to', findAllExistingOrgs);
+  it('should soft delete an existing org', softDeleteExistingOrg);
+  it('should delete an existing org', deleteExistingOrg);
+  it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
+  it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
+  it('should add a user to an org', addUserRole);
+  it('should let the non-admin user write a project', projWritePerm);
+  it('should reject user changing their permissions', rejectUserRole);
+  it('should get a users roles within an org', getUserRoles);
+  it('should get all members with permissions in an org', getMembers);
+  it('should throw an error saying the user is not an admin', nonAdminChangeRole);
+  it('should remove a users role within an org', removeUserRole);
+  it('should throw an error saying the user is not in the org', getOldUserRoles);
+  it('should throw an error saying the user cannot change their own role', changeOwnRole);
+  it('should throw an error the permission is not valid', invalidPermission);
+  it('should throw an error saying the user is not an admin', nonAdminGetPermissions);
 });
 
 
@@ -166,15 +165,20 @@ describe(M.getModuleName(module.filename), () => {
 function addNewOrg(done) {
   const orgData = {
     id: 'boombox',
-    name: 'Star Lords Boombox'
+    name: 'Star Lords Boombox',
+    custom: {
+      leader: 'Star Lord'
+    }
   };
   OrgController.createOrg(user, orgData)
+  .then(() => OrgController.findOrg(user, 'boombox'))
   .then((retOrg) => {
     chai.expect(retOrg.id).to.equal('boombox');
     chai.expect(retOrg.name).to.equal('Star Lords Boombox');
-    chai.expect(retOrg.permissions.read).to.include(user._id.toString());
-    chai.expect(retOrg.permissions.write).to.include(user._id.toString());
-    chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
+    chai.expect(retOrg.permissions.read[0].id).to.equal(user._id.toString());
+    chai.expect(retOrg.permissions.write[0].id).to.equal(user._id.toString());
+    chai.expect(retOrg.permissions.admin[0].id).to.equal(user._id.toString());
+    chai.expect(retOrg.custom.leader).to.equal('Star Lord');
     done();
   })
   .catch((error) => {
@@ -233,7 +237,6 @@ function findExistingOrg(done) {
  * Test should throw an error
  */
 function updateOrgFieldErr(done) {
-  this.timeout(5000);
   OrgController.updateOrg(user, 'boombox', { permissions: 'shouldNotChange' })
   .then((retOrg) => {
     chai.expect(typeof retOrg).to.equal('undefined');
@@ -250,7 +253,6 @@ function updateOrgFieldErr(done) {
  * Test should throw an error
  */
 function updateOrgTypeErr(done) {
-  this.timeout(5000);
   OrgController.updateOrg(user, 'boombox', { name: [] })
   .then((retOrg) => {
     chai.expect(typeof retOrg).to.equal('undefined');
@@ -287,9 +289,20 @@ function nonAUpdate(done) {
  * Tests updating an org
  */
 function updateOrg(done) {
-  OrgController.updateOrg(user, 'boombox', { id: 'boombox', name: 'Stolen boombox' })
+  const orgData = {
+    id: 'boombox',
+    name: 'Stolen boombox',
+    custom: {
+      leader: 'Groot',
+      musicType: 'I am Groot'
+    }
+  };
+  OrgController.updateOrg(user, 'boombox', orgData)
+  .then(() => OrgController.findOrg(user, 'boombox'))
   .then((retOrg) => {
     chai.expect(retOrg.name).to.equal('Stolen boombox');
+    chai.expect(retOrg.custom.leader).to.equal('Groot');
+    chai.expect(retOrg.custom.musicType).to.equal('I am Groot');
     done();
   })
   .catch((error) => {
@@ -370,7 +383,7 @@ function deleteExistingOrg(done) {
 function softDeleteProjectAndOrg(done) {
   OrgController.createOrg(user, { id: 'boombox', name: 'Star Lord Walkman' })
   .then(() => ProjController.createProject(user, { id: 'godslayer', name: 'God Slayer', org: { id: 'boombox' } }))
-  .then(() => ElemController.createElement(user, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Element' }))
+  .then(() => ElemController.createElement(user, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Block' }))
   .then(() => OrgController.removeOrg(user, 'boombox', { soft: true }))
   .then(() => OrgController.findOrg(user, 'boombox'))
   .then((retOrg3) => {
@@ -452,10 +465,10 @@ function projWritePerm(done) {
   .then((proj) => {
     chai.expect(proj.id).to.equal('godslayer');
     chai.expect(proj.name).to.equal('God Slayer');
-    return ElemController.createElement(newUser, { id: '0000', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Element' });
+    return ElemController.createElement(newUser, { id: '0000', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Block' });
   })
   .then(() => {
-    ElemController.createElement(newUser, { id: '0001', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Element' });
+    ElemController.createElement(newUser, { id: '0001', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Block' });
     done();
   })
   .catch((error) => {

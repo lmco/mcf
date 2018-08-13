@@ -39,9 +39,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * TODO - add description
    */
-  before(function(done) {
-    this.timeout(5000);
-
+  before((done) => {
     const db = M.require('lib/db');
     db.connect();
 
@@ -114,8 +112,7 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests.
    * TODO - add description
    */
-  after(function(done) {
-    this.timeout(5000);
+  after((done) => {
     // Removing the organization created
     OrgController.removeOrg(allSeeingUser, 'starkhq', { soft: false })
     .then(() => {
@@ -142,34 +139,34 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a new project', createProject).timeout(2500);
-  it('should create elements for the project', createElements).timeout(2500);
-  it('should throw an error saying the field cannot be updated', updateFieldError).timeout(2500);
-  it('should throw an error saying the field is not of type string', updateTypeError).timeout(2500);
-  it('should update a project', updateProject).timeout(2500);
-  it('should update a project using the Project object', updateProjectObject).timeout(2500);
-  it('should create a second project', createProject02).timeout(2500);
-  it('should fail to attempt to create a project with a long ID', createLongId).timeout(2500);
-  it('should attempt to create a project with a long name', createLongName).timeout(2500);
-  it('should reject attempt to create a project with a REALLY long name', createLongName02).timeout(2500);
-  it('should reject attempt to create a project with a period in name', createPeriodName).timeout(2500);
-  it('should reject creation of a project already made', recreateProject).timeout(2500);
-  it('should reject creation of project with invalid ID', noId).timeout(2500);
-  it('should reject creation of project with invalid Name', noName).timeout(2500);
-  it('should reject creation of project with invalid Org', noOrg).timeout(2500);
-  it('should reject creation of project with non-A user', nonACreator).timeout(2500);
-  it('should find a project', findProj).timeout(2500);
-  it('should not find a project', noProj).timeout(2500);
-  it('should update the original project', updateProj).timeout(2500);
-  it('should reject update to the id name', updateID).timeout(2500);
-  it('should reject non-A user from finding a project', nonAUser).timeout(2500);
-  it('should reject updating due to non-A user', updateNonA).timeout(2500);
-  it('should find the permissions on the project', findPerm).timeout(2500);
-  it('should set the permissions on the project', setPerm).timeout(5000);
-  it('should soft-delete a project', softDeleteProject).timeout(2500);
-  it('should delete a project', deleteProject).timeout(5000);
-  it('should delete second project', deleteProject02).timeout(5000);
-  it('should delete projects that were created with long names', deleteOthers).timeout(5000);
+  it('should create a new project', createProject);
+  it('should create elements for the project', createElements);
+  it('should throw an error saying the field cannot be updated', updateFieldError);
+  it('should throw an error saying the field is not of type string', updateTypeError);
+  it('should update a project', updateProject);
+  it('should update a project using the Project object', updateProjectObject);
+  it('should create a second project', createProject02);
+  it('should fail to attempt to create a project with a long ID', createLongId);
+  it('should attempt to create a project with a long name', createLongName);
+  it('should reject attempt to create a project with a REALLY long name', createLongName02);
+  it('should reject attempt to create a project with a period in name', createPeriodName);
+  it('should reject creation of a project already made', recreateProject);
+  it('should reject creation of project with invalid ID', noId);
+  it('should reject creation of project with invalid Name', noName);
+  it('should reject creation of project with invalid Org', noOrg);
+  it('should reject creation of project with non-A user', nonACreator);
+  it('should find a project', findProj);
+  it('should not find a project', noProj);
+  it('should update the original project', updateProj);
+  it('should reject update to the id name', updateID);
+  it('should reject non-A user from finding a project', nonAUser);
+  it('should reject updating due to non-A user', updateNonA);
+  it('should find the permissions on the project', findPerm);
+  it('should set the permissions on the project', setPerm);
+  it('should soft-delete a project', softDeleteProject);
+  it('should delete a project', deleteProject);
+  it('should delete second project', deleteProject02);
+  it('should delete projects that were created with long names', deleteOthers);
 });
 
 
@@ -185,12 +182,17 @@ function createProject(done) {
     name: 'Iron man Suite',
     org: {
       id: 'starkhq'
+    },
+    custom: {
+      builtFor: 'Tony'
     }
   };
   ProjController.createProject(allSeeingUser, projData)
+  .then((retProj) => ProjController.findProject(allSeeingUser, 'starkhq', retProj.id))
   .then((proj) => {
     chai.expect(proj.id).to.equal('ironman');
     chai.expect(proj.name).to.equal('Iron man Suite');
+    chai.expect(proj.custom.builtFor).to.equal('Tony');
     done();
   })
   .catch((error) => {
@@ -213,7 +215,7 @@ function createElements(done) {
         id: 'starkhq'
       }
     },
-    type: 'Element'
+    type: 'Block'
   };
   ElemController.createElement(allSeeingUser, elem0)
   .then(() => {
@@ -226,7 +228,7 @@ function createElements(done) {
           id: 'starkhq'
         }
       },
-      type: 'Element'
+      type: 'Block'
     };
     return ElemController.createElement(allSeeingUser, elem1);
   })
@@ -629,12 +631,19 @@ function updateProj(done) {
   const orgId = 'starkhq';
   const projId = 'ironman';
   const updateData = {
-    name: 'Tony Stark'
+    name: 'Tony Stark',
+    custom: {
+      builtFor: 'Rhodey',
+      version: 2.0
+    }
   };
   ProjController.updateProject(allSeeingUser, orgId, projId, updateData)
+  .then(() => ProjController.findProject(allSeeingUser, orgId, projId))
   .then((proj) => {
     chai.expect(proj.id).to.equal('ironman');
     chai.expect(proj.name).to.equal('Tony Stark');
+    chai.expect(proj.custom.builtFor).to.equal('Rhodey');
+    chai.expect(proj.custom.version).to.equal(2.0);
     done();
   })
   .catch((error) => {
