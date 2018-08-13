@@ -141,8 +141,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should PATCH an update to posted project', patchOrg01);
   it('should reject a PATCH to update with invalid name', badPatch);
   it('should POST second project', postProject02);
-  it('should DELETE the first project to the organization', deleteProject01).timeout(5000);
-  it('should DELETE the second project to the organization', deleteProject02).timeout(5000);
+  it('should DELETE the first project to the organization', deleteProject01);
+  it('should DELETE the second project to the organization', deleteProject02);
 });
 
 
