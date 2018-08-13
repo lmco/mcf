@@ -52,12 +52,8 @@ describe(M.getModuleName(module.filename), function() {
   after(() => mongoose.connection.close());
 
   /* Execute the tests */
-<<<<<<< HEAD
-  it('clean database', cleanDB).timeout(5000);
-  it('should create the default org if it doesnt exist', createDefaultOrg);
-=======
   it('clean database', cleanDB);
->>>>>>> master
+  it('should create the default org if it doesnt exist', createDefaultOrg);
 });
 
 
