@@ -20,8 +20,6 @@ const http = require('http');
 const https = require('https');
 
 const M = require(path.join(__dirname, '..', 'mbee.js'));
-const Organization = M.require('models.Organization');
-const UserController = M.require('controllers.UserController');
 
 /**
  * Runs the MBEE server based on the configuration provided in the environment
@@ -75,6 +73,8 @@ function start(args) {
   }
 
   // Create default org if it doesn't exist
+  const Organization = M.require('models.Organization');
+  const UserController = M.require('controllers.UserController');
   Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     if (err) {
