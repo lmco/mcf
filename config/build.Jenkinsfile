@@ -48,6 +48,13 @@ pipeline {
          */
         stage('Build') {
             stages{
+                stage('Test Script'){
+                    steps {
+                        script {
+                            yarn install --dev
+                        }
+                    }
+                }
                 stage('Build MBEE'){
                     steps {
                         script {
