@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/200-lib-tests
+ * @module test.200-lib-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,18 +15,14 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  Tests that the mbee library modules have successfully loaded
+ * @description Tests that the mbee library modules have successfully loaded
  * and all expected libraries exist.
  */
-
 
 // Load node modules
 const chai = require('chai');
 
-
 /* --------------------( Main )-------------------- */
-
-
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
  * or grouping several "it" tests into a single group. In this case, the name of
@@ -39,8 +35,6 @@ describe(M.getModuleName(module.filename), () => {
 
 
 /* --------------------( Tests )-------------------- */
-
-
 /**
  * @description Checks that all libraries are available.
  */
@@ -52,5 +46,7 @@ function loadLib(done) {
   // Check for logger
   chai.expect(M.hasOwnProperty('log')).to.equal(true);
 
+  // TODO: Check that auth and db have the functions they should. Also insure
+  // all interfaces that are expected to be available exist
   done();
 }

@@ -22,10 +22,10 @@
 // Load node modules
 const chai = require('chai');
 
+// Load MBEE modules
+const mbeeCrypto = M.require('lib.crypto');
 
 /* --------------------( Main )-------------------- */
-
-
 describe(M.getModuleName(module.filename), () => {
   it('should have encrypt and decrypt functions', checkCryptoFunctions);
   it('should encrypt and decrypt a message', encryptTest);
@@ -33,18 +33,15 @@ describe(M.getModuleName(module.filename), () => {
 
 
 /* --------------------( Tests )-------------------- */
-
-
 /**
- * @description Requires the crypto library and checks that it has encrypt and
- * decrypt functions
+ * @description Checks that the crypto library has encrypt and decrypt
+ * functions.
  */
 function checkCryptoFunctions(done) {
-  const crypto = M.require('lib.crypto');
-  chai.expect(crypto.hasOwnProperty('encrypt')).to.equal(true);
-  chai.expect(crypto.hasOwnProperty('decrypt')).to.equal(true);
-  chai.expect(typeof crypto.encrypt).to.equal('function');
-  chai.expect(typeof crypto.decrypt).to.equal('function');
+  chai.expect(mbeeCrypto.hasOwnProperty('encrypt')).to.equal(true);
+  chai.expect(mbeeCrypto.hasOwnProperty('decrypt')).to.equal(true);
+  chai.expect(typeof mbeeCrypto.encrypt).to.equal('function');
+  chai.expect(typeof mbeeCrypto.decrypt).to.equal('function');
   done();
 }
 
@@ -53,9 +50,8 @@ function checkCryptoFunctions(done) {
  * returning 'HULK SMASH' after encrypting and decrypting.
  */
 function encryptTest(done) {
-  const crypto = M.require('lib.crypto');
-  const encrypted = crypto.encrypt('HULK SMASH');
-  const decrypted = crypto.decrypt(encrypted);
+  const encrypted = mbeeCrypto.encrypt('HULK SMASH');
+  const decrypted = mbeeCrypto.decrypt(encrypted);
   chai.expect(encrypted).to.not.equal('HULK SMASH');
   chai.expect(decrypted).to.equal('HULK SMASH');
   done();

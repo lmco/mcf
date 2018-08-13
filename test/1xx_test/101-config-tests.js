@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/101-config-tests
+ * @module test.101-config-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,19 +15,18 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @desc This file tests some the configuration to ensure versions are correct.
+ * @description Tests the configuration was properly loaded into the global M
+ * object. For now, it only tests the version number.
  */
 
-// load node modules
+// Load node modules
 const path = require('path');
 const chai = require('chai');
 
+// Load the MBEE version number directly form the package.json file
 const version = require(path.join(M.root, 'package.json')).version;
 
-
 /* --------------------( Main )-------------------- */
-
-
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
  * or grouping several "it" tests into a single group. In this case, the name of
@@ -41,9 +40,8 @@ describe(M.getModuleName(module.filename), () => {
 
 
 /* --------------------( Tests )-------------------- */
-
 /**
- * Checks the MBEE runtime version against that in the package.json file.
+ * Checks the MBEE runtime version against the version in the package.json file.
  */
 function versionCheck(done) {
   chai.expect(M.version).to.equal(version);

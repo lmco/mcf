@@ -111,7 +111,7 @@ function test(_args) {
     else {
       // mocha passed all tests, exit with error code 0
       process.exit(0);
-    }
+    } // if (failures) {}
   });
 }
 

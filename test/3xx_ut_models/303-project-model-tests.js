@@ -34,15 +34,14 @@ const User = M.require('models.User');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
 
-/* --------------------( Test Data )-------------------- */
 
+/* --------------------( Test Data )-------------------- */
 // This is so the same parent org can be references across test functions
 let org = null;
 let user = null;
 
 
 /* --------------------( Main )-------------------- */
-
 describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests.

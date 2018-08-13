@@ -184,13 +184,12 @@ function createNewUser(done) {
   });
 }
 
-
 /**
  * Creates a user using the User Controller.
- * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
- * NOTE: As of right now the password key becomes a hash
- * need to eventually made password tests.
- */
+* IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
+* NOTE: As of right now the password key becomes a hash
+* need to eventually made password tests.
+*/
 // TODO - clean up description
 function createAUser(done) {
   const userData = {
