@@ -17,13 +17,14 @@
  * @description  Defines miscellaneous helper functions.
  */
 
-const M = require('../../mbee.js');
-const errors = M.require('lib/errors');
+// Load node modules
 const path = require('path');
 const fs = require('fs');
-const Organization = M.require('models/Organization');
-const Project = M.require('models/Project');
-let pluginFiles = null;
+
+// Load mbee modules
+const errors = M.require('lib.errors');
+const Organization = M.require('models.Organization');
+const Project = M.require('models.Project');
 
 module.exports.timeConversions = {
   MILLISECONDS: 1,
@@ -34,6 +35,8 @@ module.exports.timeConversions = {
 };
 
 function getPluginNames() {
+  let pluginFiles = null;
+
   if (M.config.server.plugins.enabled) {
     // Create a list of available plugins
     const pluginPath = path.join(__dirname, '..', '..', 'plugins');

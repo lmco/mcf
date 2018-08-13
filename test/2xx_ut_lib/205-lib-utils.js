@@ -18,9 +18,9 @@
  * @description  This file tests the utility functions.
  */
 
+// Load node modules
 const chai = require('chai');
-const M = require('../../mbee.js');
-const utils = M.require('lib/utils'); // TODO - can we do M.lib.utils?
+const utils = M.require('lib.utils');
 const mongoose = require('mongoose'); // TODO - remove need for mongoose
 const OrgController = M.require('controllers.OrganizationController');
 const ProjectConttroller = M.require('controllers.ProjectController');

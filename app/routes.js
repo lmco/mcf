@@ -15,21 +15,19 @@
  * Defines the MBEE routes mounted a '/'.
  */
 
-const path = require('path');
+// Load node modules
 const express = require('express');
-const M = require(path.join(__dirname, '..', 'mbee.js'));
-
-const UIController = M.require('controllers/UIController');
-const AuthController = M.require('lib/auth');
-const Middleware = M.require('lib/middleware');
-
 const router = express.Router();
 
+// Load mbee modules
+const UIController = M.require('controllers.UIController');
+const AuthController = M.require('lib.auth');
+const Middleware = M.require('lib.middleware');
 
+// TODO: Fix order of routes to actually reflect unauthenticated vs authenticated
 /**********************************************
  * Unauthenticated Routes
  **********************************************/
-
 
 /* This renders the about page */
 router.route('/about')
@@ -97,7 +95,7 @@ router.route('/')
 );
 
 /* This renders the home page for logged in users */
-router.route(`/:org(${M.lib.validators.org.id})/:project`)
+router.route('/:org/:project')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,

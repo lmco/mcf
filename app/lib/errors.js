@@ -17,9 +17,6 @@
  * @description  Defines the custom error class.
  */
 
-const M = require('../../mbee.js');
-const logger = M.require('lib/logger');
-
 module.exports.CustomError = class CustomError extends Error {
 
   /**
@@ -84,25 +81,25 @@ module.exports.CustomError = class CustomError extends Error {
   log(level = 'warn') {
     switch (level.toLowerCase()) {
       case 'warn':
-        logger.warn(this.description);
+        M.log.warn(this.description);
         break;
       case 'error':
-        logger.error(this.description);
+        M.log.error(this.description);
         break;
       case 'critical':
-        logger.critical(this.description);
+        M.log.critical(this.description);
         break;
       case 'info':
-        logger.info(this.description);
+        M.log.info(this.description);
         break;
       case 'debug':
-        logger.debug(this.description);
+        M.log.debug(this.description);
         break;
       case 'verbose':
-        logger.verbose(this.description);
+        M.log.verbose(this.description);
         break;
       default:
-        logger.error(this.description);
+        M.log.error(this.description);
     }
   }
 

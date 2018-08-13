@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const M = require(path.join(__dirname, '..', 'mbee.js'));
+
 const express = require('express');
 const pluginRouter = express.Router();
 

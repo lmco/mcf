@@ -18,10 +18,8 @@
  * routes in order to implement route logging or other various functionality.
  */
 
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const errors = M.require('lib/errors');
-
+// load mbee modules
+const errors = M.require('lib.errors');
 
 /**
  * MiddleWare.js

@@ -18,9 +18,11 @@
  * @description  Tests the sanitization module and each of its functions.
  */
 
+// Load node modules
 const chai = require('chai');
-const M = require('../../mbee.js');
-const sanitization = M.require('lib/sanitization'); // TODO - use M.lib.sani?
+
+// Load mbee modules
+const sani = M.require('lib.sanitization');
 
 
 /* --------------------( Main )-------------------- */
@@ -43,7 +45,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description  Loads the sanitization library.
  */
 function mongoSanTest(done) {
-  const mongoSan = sanitization.mongo({ $lt: 10 });
+  const mongoSan = sani.mongo({ $lt: 10 });
   chai.expect(Object.keys(mongoSan).length).to.equal(0);
   done();
 }
@@ -53,7 +55,7 @@ function mongoSanTest(done) {
  * html. Expected output to be an empty object
  */
 function stringKeyMongoTest(done) {
-  const mongoStringSan = sanitization.mongo({ '$<script>': null });
+  const mongoStringSan = sani.mongo({ '$<script>': null });
   chai.expect(Object.keys(mongoStringSan).length).to.equal(0);
   done();
 }
@@ -64,7 +66,7 @@ function stringKeyMongoTest(done) {
  */
 function htmlTest(done) {
   // TODO: sanitize against more special characters
-  const htmlSan = sanitization.html('<script>');
+  const htmlSan = sani.html('<script>');
   chai.expect(htmlSan).to.equal('&lt;script&gt;');
   done();
 }
@@ -81,7 +83,7 @@ function sanitizeHtmlObject(done) {
     email: null
   };
   // TODO: add tests for more special characters
-  const htmlSan = sanitization.html(data);
+  const htmlSan = sani.html(data);
   chai.expect(htmlSan.name).to.equal('Steve Rogers');
   chai.expect(htmlSan.fname).to.equal('&lt;script&gt;');
   chai.expect(htmlSan.lname).to.equal('&lt;/script&gt;');
@@ -96,7 +98,7 @@ function sanitizeHtmlObject(done) {
 function sanitizeAllowedCharacters(done) {
   const s = 'this string has &amp; and &lt; but also &sample';
   const expected = 'this string has &amp; and &lt; but also &amp;sample';
-  const htmlSan = sanitization.html(s);
+  const htmlSan = sani.html(s);
   chai.expect(htmlSan).to.equal(expected);
   done();
 }
@@ -107,7 +109,7 @@ function sanitizeAllowedCharacters(done) {
 function sanitizeLDAP(done) {
   const s = 'test1 \\ test2 * test3 ( test4 ) test5 NUL';
   const expected = 'test1 \\2A test2 \\28 test3 \\29 test4 \\5C test5 \\00';
-  const ldapSan = sanitization.ldapFilter(s);
+  const ldapSan = sani.ldapFilter(s);
   chai.expect(ldapSan).to.equal(expected);
   done();
 }

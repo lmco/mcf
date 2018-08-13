@@ -17,9 +17,6 @@
  * Defines common validators.
  */
 
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
 module.exports.org = {
   id: '^(?!(css|js|img|login|logout|about))([a-z])([a-z0-9-]){0,}$',
   name: '^([a-zA-Z0-9-\\s])+$'

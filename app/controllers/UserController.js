@@ -18,12 +18,13 @@
  * provides functions for interacting with users.
  */
 
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.require('models/User');
-const errors = M.require('lib/errors');
-const utils = M.require('lib/utils');
-const valid = M.require('lib/validators');
+// Load mbee modules
+const User = M.require('models.User');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
+const validators = M.require('lib/validators');
+
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -79,7 +80,7 @@ class UserController {
    */
   static findUser(searchedUsername) {
     return new Promise((resolve, reject) => {
-      const username = M.lib.sani.sanitize(searchedUsername);
+      const username = sani.sanitize(searchedUsername);
 
       const query = { username: username, deletedOn: null };
 
@@ -121,7 +122,7 @@ class UserController {
    */
   static findUsersQuery(usersQuery) {
     return new Promise((resolve, reject) => {
-      const query = M.lib.sani.sanitize(usersQuery);
+      const query = sani.sanitize(usersQuery);
 
       User.find(query)
       .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
@@ -167,26 +168,26 @@ class UserController {
       }
 
       // Ensure the username is properly formatted
-      if (!RegExp(valid.user.username).test(newUser.username)) {
+      if (!RegExp(validators.user.username).test(newUser.username)) {
         return reject(new errors.CustomError('Username is not valid.', 400));
       }
       if (utils.checkExists(['fname'], newUser)) {
-        if (!RegExp(valid.user.name).test(newUser.fname)) {
+        if (!RegExp(validators.user.name).test(newUser.fname)) {
           return reject(new errors.CustomError('First name is not valid.', 400));
         }
       }
       if (utils.checkExists(['lname'], newUser)) {
-        if (!RegExp(valid.user.name).test(newUser.lname)) {
+        if (!RegExp(validators.user.name).test(newUser.lname)) {
           return reject(new errors.CustomError('Last name is not valid.', 400));
         }
       }
       if (utils.checkExists(['email'], newUser)) {
-        if (!RegExp(valid.user.email).test(newUser.email)) {
+        if (!RegExp(validators.user.email).test(newUser.email)) {
           return reject(new errors.CustomError('Email is not valid.', 400));
         }
       }
 
-      User.find({ username: M.lib.sani.sanitize(newUser.username) })
+      User.find({ username: sani.sanitize(newUser.username) })
       .populate()
       .exec((findErr, users) => { // eslint-disable-line consistent-return
         if (findErr) {
@@ -200,7 +201,7 @@ class UserController {
         // Create the new user
         // We should just need to sanitize the input, the model should handle
         // data validation
-        const user = new User(M.lib.sani.sanitize(newUser));
+        const user = new User(sani.sanitize(newUser));
         user.save((saveErr) => {
           if (saveErr) {
             return reject(new errors.CustomError('Save failed.'));
@@ -253,7 +254,7 @@ class UserController {
 
           // If updating name, making sure it is valid
           if (props[i] === 'fname' || props[i] === 'lname') {
-            if (!RegExp(valid.user.name).test(newUserData[props[i]])) {
+            if (!RegExp(validators.user.name).test(newUserData[props[i]])) {
               return reject(new errors.CustomError('Name is not valid.', 400));
             }
           }
@@ -262,7 +263,7 @@ class UserController {
           if (User.schema.obj[props[i]].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
             Object.keys(newUserData[props[i]]).forEach((key) => {
-              user.custom[key] = M.lib.sani.sanitize(newUserData[props[i]][key]);
+              user.custom[key] = sani.sanitize(newUserData[props[i]][key]);
             });
 
             // Special thing for mixed fields in Mongoose
@@ -271,7 +272,7 @@ class UserController {
           }
           else {
             // sanitize field
-            user[props[i]] = M.lib.sani.sanitize(newUserData[props[i]]);
+            user[props[i]] = sani.sanitize(newUserData[props[i]]);
           }
         }
 
@@ -318,7 +319,7 @@ class UserController {
         return reject(new errors.CustomError('User cannot delete themselves.', 401));
       }
 
-      const username = M.lib.sani.sanitize(usernameToDelete);
+      const username = sani.sanitize(usernameToDelete);
 
       // Find the user first to ensure their existence
       UserController.findUser(username)
