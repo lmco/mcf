@@ -52,6 +52,7 @@ pipeline {
                             // Install dev dependencies
                             sh 'yarn install'
                             sh 'MBEE_ENV=stage node mbee build'
+                            sh 'yarn install --production'
 
                             //echo 'before if statement'
                             //if (env.JOB_NAME == 'LeahPipeline1') {
