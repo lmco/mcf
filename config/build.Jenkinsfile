@@ -49,10 +49,10 @@ pipeline {
             stages{
                 stage('Build MBEE'){
                     steps {
-                        script {
                             // Install dev dependencies
-                            sh 'yarn install --dev'
+                            sh 'yarn install'
                             sh 'NODE_ENV=stage node mbee build'
+
                             //echo 'before if statement'
                             //if (env.JOB_NAME == 'LeahPipeline1') {
                                 // Build
@@ -61,7 +61,6 @@ pipeline {
 
                             // Verify build
                             sh 'ls -l'
-                        }
                     }
                 }
 
