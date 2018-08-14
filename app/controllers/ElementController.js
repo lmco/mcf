@@ -93,8 +93,7 @@ class ElementController {
       ProjController.findProject(reqUser, orgID, projID, true)
       .then((project) => { // eslint-disable-line consistent-return
         // Ensure user is part of the project
-        const members = project.permissions.read.map(u => u._id.toString());
-        if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, project, 'read')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -168,8 +167,7 @@ class ElementController {
       .then((elements) => { // eslint-disable-line consistent-return
         // Ensure user has permission to delete all elements
         Object.keys(elements).forEach((element) => { // eslint-disable-line consistent-return
-          const admins = elements[element].project.permissions.admin.map(u => u._id.toString());
-          if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+          if (!utils.checkAccess(reqUser, elements[element].project, 'admin')) {
             return reject(new errors.CustomError(
               `User does not have permission to delete element ${elements[element].id}.`, 401
             ));
@@ -256,14 +254,11 @@ class ElementController {
           return reject(new errors.CustomError('More than one element found.', 400));
         }
 
-        const element = elements[0];
-
-        const members = element.project.permissions.read.map(u => u._id.toString());
-        if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, elements[0].project, 'read')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
-        return resolve(element);
+        return resolve(elements[0]);
       })
       .catch((error) => reject(error));
     });
@@ -380,9 +375,7 @@ class ElementController {
       ProjController.findProject(reqUser, orgID, projID)
       .then((proj) => { // eslint-disable-line consistent-return
         // Check Permissions
-        const writers = proj.permissions.write.map(u => u._id.toString());
-
-        if (!writers.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, proj, 'write')) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -664,8 +657,7 @@ class ElementController {
       ElementController.findElement(reqUser, orgID, projID, elemID)
       .then((element) => { // eslint-disable-line consistent-return
         // Check Permissions
-        const admins = element.project.permissions.admin.map(u => u._id.toString());
-        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, element.project, 'admin')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -840,8 +832,7 @@ class ElementController {
       ElementController.findElement(reqUser, orgID, projID, elemID, true)
       .then((element) => { // eslint-disable-line consistent-return
         // Check Permissions
-        const admins = element.project.permissions.admin.map(u => u._id.toString());
-        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, element.project, 'admin')) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
