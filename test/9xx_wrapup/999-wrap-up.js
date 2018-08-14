@@ -22,12 +22,11 @@
  * improve CI testing.
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO remove need for mongoose
 
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
+// Load mbee modules
 const User = M.require('models.User');
 const Organization = M.require('models.Organization');
 const Project = M.require('models.Project');
@@ -64,12 +63,14 @@ describe(M.getModuleName(module.filename), () => {
  * collections.
  */
 function cleanDB(done) {
-  User.remove({}).exec()                          // Remove the users
-  .then(() => Organization.remove({}).exec())     // Then remove the orgs
-  .then(() => Project.remove({}).exec())          // Then remove the projects
-  .then(() => Element.Element.remove({}).exec())  // Then remove the elements
-  .then(() => done())                             // Then finish the test
-  .catch(error => {                               // Catch any errors
-    chai.expect(error).to.equal(null);            // expect no errors
+  User.remove({}).exec()  // Remove users
+  // Remove all orgs except for the 'default' org.
+  .then(() => Organization.remove({ name: { $ne: 'default' } }).exec())  // Remove orgs
+  .then(() => Project.remove({}).exec())  // Remove projects
+  .then(() => Element.Element.remove({}).exec())  // Remove elements
+  .then(() => done())
+  .catch(error => {
+    chai.expect(error).to.equal(null);
+    done();
   });
 }

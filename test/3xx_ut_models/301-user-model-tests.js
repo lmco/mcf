@@ -22,12 +22,13 @@
  * TODO - Description
  */
 
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose');
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const User = M.require('models.User');
 
+// Load mbee modules
+const User = M.require('models.User');
+const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
 
@@ -43,7 +44,7 @@ describe(M.getModuleName(module.filename), () => {
    * Before: runs before all tests. Open the database connection.
    */
   before(() => {
-    M.lib.db.connect();
+    db.connect();
   });
 
   /**
@@ -240,11 +241,14 @@ function getSoftDeletedUser(done) {
  * @description Deletes the user.
  */
 function deleteUser(done) {
-  User.findOneAndRemove({
+  User.findOne({
     username: 'spiderman'
-  }, (err) => {
+  }, (err, user) => {
     chai.expect(err).to.equal(null);
-    done();
+    user.remove((err2) => {
+      chai.expect(err2).to.equal(null);
+      done();
+    });
   });
 }
 

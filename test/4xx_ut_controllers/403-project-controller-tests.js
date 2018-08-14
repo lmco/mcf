@@ -11,18 +11,19 @@
  * as test the controlls with invalid inputs.
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove need for mongoose
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const ProjController = M.require('controllers/ProjectController');
-const UserController = M.require('controllers/UserController');
-const OrgController = M.require('controllers/OrganizationController');
-const ElemController = M.require('controllers/ElementController');
-const Element = M.require('models/Element');
-const AuthController = M.require('lib/auth');
-const User = M.require('models/User');
 
+// Load mbee modules
+const UserController = M.require('controllers.UserController');
+const OrgController = M.require('controllers.OrganizationController');
+const ProjController = M.require('controllers.ProjectController');
+const ElemController = M.require('controllers.ElementController');
+const User = M.require('models.User');
+const Element = M.require('models.Element');
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -52,8 +53,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -123,12 +124,15 @@ describe(M.getModuleName(module.filename), () => {
     })
     .then((delUser2) => {
       chai.expect(delUser2).to.equal('pepperpotts');
-      User.findOneAndRemove({
+      User.findOne({
         username: M.config.test.username
-      }, (err) => {
+      }, (err, user) => {
         chai.expect(err).to.equal(null);
-        mongoose.connection.close();
-        done();
+        user.remove((err2) => {
+          chai.expect(err2).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       });
     })
     .catch((error) => {

@@ -23,17 +23,17 @@
  * and relationships, as well as, soft and har deletes root packages.
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 
-const User = M.require('models/User');
-const Org = M.require('models/Organization');
-const Project = M.require('models/Project');
-const Element = M.require('models/Element');
-const AuthController = M.require('lib/auth');
-
+// Load mbee modules
+const User = M.require('models.User');
+const Org = M.require('models.Organization');
+const Project = M.require('models.Project');
+const Element = M.require('models.Element');
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -63,8 +63,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -155,12 +155,15 @@ describe(M.getModuleName(module.filename), () => {
         // Expect error to be null
         chai.expect(orgRemoveErr).to.equal(null);
         // Delete reqUser
-        User.findOneAndRemove({
+        User.findOne({
           username: M.config.test.username
-        }, (err) => {
+        }, (err, foundUser) => {
           chai.expect(err).to.equal(null);
-          mongoose.connection.close();
-          done();
+          foundUser.remove((err2) => {
+            chai.expect(err2).to.equal(null);
+            mongoose.connection.close();
+            done();
+          });
         });
       });
     });
@@ -279,7 +282,7 @@ function createBlock01(done) {
     const newBlock = new Element.Block({
       id: '0002',
       uid: 'avengers:timeloop:0002',
-      name: 'In time loop',
+      name: 'In time loop 2',
       project: project._id,
       parent: pkg._id
     });
@@ -293,7 +296,7 @@ function createBlock01(done) {
 
       // Make sure it created what we expect and finish
       chai.expect(createdBlock.uid).to.equal('avengers:timeloop:0002');
-      chai.expect(createdBlock.name).to.equal('In time loop');
+      chai.expect(createdBlock.name).to.equal('In time loop 2');
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
       chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
 

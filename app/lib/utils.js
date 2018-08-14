@@ -17,11 +17,14 @@
  * @description  Defines miscellaneous helper functions.
  */
 
-const M = require('../../mbee.js');
-const errors = M.require('lib/errors');
+// Load node modules
 const path = require('path');
 const fs = require('fs');
-let pluginFiles = null;
+
+// Load mbee modules
+const errors = M.require('lib.errors');
+const Organization = M.require('models.Organization');
+const Project = M.require('models.Project');
 
 module.exports.timeConversions = {
   MILLISECONDS: 1,
@@ -32,6 +35,8 @@ module.exports.timeConversions = {
 };
 
 function getPluginNames() {
+  let pluginFiles = null;
+
   if (M.config.server.plugins.enabled) {
     // Create a list of available plugins
     const pluginPath = path.join(__dirname, '..', '..', 'plugins');
@@ -245,4 +250,65 @@ module.exports.parseUID = function(uid, index = null) {
 
     return splitUID[index - 1];
   }
+};
+
+/**
+ * @description  Checks if a user has permission to see an object
+ */
+module.exports.getPermissionStatus = function(user, object) {
+  // Ensure the obejct is an org or project
+  if (!(object instanceof Organization || object instanceof Project)) {
+    throw new errors.CustomError('Incorrect type of object', 400);
+  }
+
+  // System admin has all privs on all objects no matter what
+  if (user.admin) {
+    return ['read', 'write', 'admin'];
+  }
+
+  const userPermissions = [];
+
+  // See if the user has permissions on the object
+  const read = object.permissions.read.map(u => u._id.toString());
+  const write = object.permissions.write.map(u => u._id.toString());
+  const admin = object.permissions.admin.map(u => u._id.toString());
+
+  if (read.includes(user._id.toString())) {
+    userPermissions.push('read');
+  }
+  if (write.includes(user._id.toString())) {
+    userPermissions.push('write');
+  }
+  if (admin.includes(user._id.toString())) {
+    userPermissions.push('admin');
+  }
+
+  // If the user has any permissions on the object, return them
+  if (userPermissions.length > 1) {
+    return userPermissions;
+  }
+
+  // If it's a project and its visibility is internal
+  if (object.visibility === 'internal' && object instanceof Project) {
+    // See if the user has read permissions on the project's org
+    if (typeof object.org === 'object') {
+      const readOrg = object.org.permissions.read.map(u => u._id.toString());
+
+      if (readOrg.includes(user._id.toString())) {
+        userPermissions.push('read');
+      }
+    }
+    else {
+      throw new errors.CustomError('Org field not populated.', 400);
+    }
+  }
+
+  // Return the permissions which will either be blank
+  // or will be populated if its an internal project
+  return userPermissions;
+};
+
+module.exports.checkAccess = function(user, object, permission) {
+  const permissions = this.getPermissionStatus(user, object);
+  return permissions.includes(permission);
 };

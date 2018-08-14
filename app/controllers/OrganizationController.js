@@ -18,12 +18,12 @@
  * provides functions for interacting with organizations.
  */
 
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const Organization = M.require('models/Organization');
-const errors = M.require('lib/errors');
-const utils = M.require('lib/utils');
-
+// Load mbee modules
+const Organization = M.require('models.Organization');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const validators = M.require('lib.validators');
+const errors = M.require('lib.errors');
 
 /**
  * OrganizationController
@@ -53,7 +53,7 @@ class OrganizationController {
    */
   static findOrgs(user) {
     return new Promise((resolve, reject) => {
-      const userID = M.lib.sani.sanitize(user._id);
+      const userID = sani.sanitize(user._id);
 
       OrganizationController.findOrgsQuery({ 'permissions.read': userID, deleted: false })
       .then((orgs) => resolve(orgs))
@@ -91,7 +91,7 @@ class OrganizationController {
         return reject(error);
       }
 
-      const orgID = M.lib.sani.sanitize(organizationID);
+      const orgID = sani.sanitize(organizationID);
       let searchParams = { id: orgID, deleted: false };
 
       if (softDeleted && user.admin) {
@@ -110,17 +110,13 @@ class OrganizationController {
           return reject(new errors.CustomError('More than one org found.', 400));
         }
 
-        const org = orgs[0];
-
-        // If user is not a member
-        // TODO - Is there a way we can include this as part of the query?
-        const members = org.permissions.read.map(u => u._id.toString());
-        if (!members.includes(user._id.toString())) {
+        // Ensure user has read permissions on the org
+        if (!utils.checkAccess(user, orgs[0], 'read')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
         // If we find one org (which we should if it exists)
-        return resolve(org);
+        return resolve(orgs[0]);
       })
       .catch((error) => reject(error));
     });
@@ -143,7 +139,7 @@ class OrganizationController {
    */
   static findOrgsQuery(orgQuery) {
     return new Promise((resolve, reject) => {
-      const query = M.lib.sani.sanitize(orgQuery);
+      const query = sani.sanitize(orgQuery);
 
       Organization.find(query)
       .populate('projects permissions.read permissions.write permissions.admin')
@@ -180,6 +176,7 @@ class OrganizationController {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Optional fields
       let custom = null;
+      let visibility = 'private';
 
       try {
         utils.assertAdmin(user);
@@ -187,7 +184,15 @@ class OrganizationController {
         utils.assertType([orgInfo.id, orgInfo.name], 'string');
         if (utils.checkExists(['custom'], orgInfo)) {
           utils.assertType([orgInfo.custom], 'object');
-          custom = M.lib.sani.html(orgInfo.custom);
+          custom = sani.html(orgInfo.custom);
+        }
+        if (utils.checkExists(['visibility'], orgInfo)) {
+          utils.assertType([orgInfo.visibility], 'string');
+          visibility = orgInfo.visibility;
+          // Ensure the visibility level is valid
+          if (!Organization.schema.methods.getVisibilityLevels().includes(visibility)) {
+            return reject(new errors.CustomError('Invalid visibility type.', 400));
+          }
         }
       }
       catch (error) {
@@ -195,14 +200,14 @@ class OrganizationController {
       }
 
       // Sanitize fields
-      const orgID = M.lib.sani.html(orgInfo.id);
-      const orgName = M.lib.sani.html(orgInfo.name);
+      const orgID = sani.html(orgInfo.id);
+      const orgName = sani.html(orgInfo.name);
 
       // Error check - Make sure a valid orgID and name is given
-      if (!RegExp(M.lib.validators.org.name).test(orgName)) {
+      if (!RegExp(validators.org.name).test(orgName)) {
         return reject(new errors.CustomError('Organization name is not valid.', 400));
       }
-      if (!RegExp(M.lib.validators.org.id).test(orgID)) {
+      if (!RegExp(validators.org.id).test(orgID)) {
         return reject(new errors.CustomError('Organization ID is not valid.', 400));
       }
 
@@ -222,7 +227,8 @@ class OrganizationController {
               write: [user._id],
               read: [user._id]
             },
-            custom: custom
+            custom: custom,
+            visibility: visibility
           });
           // Save and resolve the new error
           newOrg.save((saveOrgErr) => { // eslint-disable-line consistent-return
@@ -260,7 +266,7 @@ class OrganizationController {
    *
    * @param  {User} user  The object containing the  requesting user.
    * @param  {String} organizationID  The organization ID.
-   * @param  {String} orgUpdate  The JSON of the updated org elements.
+   * @param  {Object} orgUpdate  The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -280,14 +286,18 @@ class OrganizationController {
       }
 
       // Sanitize input argument
-      const orgID = M.lib.sani.html(organizationID);
+      const orgID = sani.html(organizationID);
+
+      // Ensure user cannot update the default org
+      if (orgID === 'default') {
+        return reject(new errors.CustomError('Cannot update the default org.', 403));
+      }
 
       // Check if org exists
       OrganizationController.findOrg(user, orgID)
       .then((org) => { // eslint-disable-line consistent-return
-        // Error check - Make sure user is admin
-        const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-        if (!user.admin && !orgAdmins.includes(user._id.toString())) {
+        // Error check - Make sure user is an org admin or system admin
+        if (!utils.checkAccess(user, org, 'admin')) {
           return reject(new errors.CustomError('User cannot update organizations.', 401));
         }
 
@@ -328,7 +338,7 @@ class OrganizationController {
 
           // Handle case where the org name is updated, and is invalid
           if (updateField === 'name') {
-            if (!RegExp(M.lib.validators.org.name).test(orgUpdate[updateField])) {
+            if (!RegExp(validators.org.name).test(orgUpdate[updateField])) {
               return reject(new errors.CustomError('The updated organization name is not valid.', 400));
             }
           }
@@ -337,16 +347,15 @@ class OrganizationController {
           if (Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
             Object.keys(orgUpdate[updateField]).forEach((key) => {
-              org.custom[key] = M.lib.sani.sanitize(orgUpdate[updateField][key]);
+              org.custom[key] = sani.sanitize(orgUpdate[updateField][key]);
             });
-
             // Special thing for mixed fields in Mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             org.markModified(updateField);
           }
           else {
             // sanitize field
-            updateVal = M.lib.sani.sanitize(orgUpdate[updateField]);
+            updateVal = sani.sanitize(orgUpdate[updateField]);
             // Update field in org object
             org[updateField] = updateVal;
           }
@@ -388,7 +397,7 @@ class OrganizationController {
   static removeOrg(user, organizationID, options) {
     // Loading controller function wide since the project controller loads
     // the org controller globally. Both files cannot load each other globally.
-    const ProjController = M.require('controllers/ProjectController');
+    const ProjController = M.require('controllers.ProjectController');
 
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       let softDelete = true;
@@ -404,7 +413,12 @@ class OrganizationController {
         return reject(error);
       }
 
-      const orgID = M.lib.sani.html(organizationID);
+      const orgID = sani.html(organizationID);
+
+      // Stop attempted deletion of default org
+      if (orgID === 'default') {
+        return reject(new errors.CustomError('Cannot delete the default org.', 403));
+      }
 
       OrganizationController.findOrg(user, orgID, true)
       .then((foundOrg) => new Promise((res, rej) => { // eslint-disable-line consistent-return
@@ -557,12 +571,11 @@ class OrganizationController {
         return reject(new errors.CustomError('The permission entered is not a valid permission.', 400));
       }
 
-      const orgID = M.lib.sani.sanitize(organizationID);
+      const orgID = sani.sanitize(organizationID);
       OrganizationController.findOrg(reqUser, orgID)
       .then((org) => { // eslint-disable-line consistent-return
-        // Ensure user is an admin within the organization
-        const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-        if (!reqUser.admin && !orgAdmins.includes(reqUser._id.toString())) {
+        // Ensure user is an admin within the organization or system admin
+        if (!utils.checkAccess(reqUser, org, 'admin')) {
           return reject(new errors.CustomError('User cannot change organization permissions.', 401));
         }
 
@@ -635,7 +648,7 @@ class OrganizationController {
         return reject(error);
       }
 
-      const orgID = M.lib.sani.sanitize(organizationID);
+      const orgID = sani.sanitize(organizationID);
       const returnDict = {};
 
       // Find the org

@@ -22,21 +22,22 @@
  * improve CI testing.
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose');
 
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-
+// Load mbee modules
 const User = M.require('models.User');
 const Organization = M.require('models.Organization');
 const Project = M.require('models.Project');
 const Element = M.require('models.Element');
+const UserController = M.require('controllers.UserController');
 const db = M.require('lib.db');
 
 
 /* --------------------( Main )-------------------- */
 
+console.log('THIS IS A DEMO');
 
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
@@ -53,6 +54,7 @@ describe(M.getModuleName(module.filename), function() {
 
   /* Execute the tests */
   it('clean database', cleanDB);
+  it('should create the default org if it doesnt exist', createDefaultOrg);
 });
 
 
@@ -64,12 +66,59 @@ describe(M.getModuleName(module.filename), function() {
  * collections.
  */
 function cleanDB(done) {
-  User.remove({}).exec()                          // Remove the users
-  .then(() => Organization.remove({}).exec())     // Then remove the orgs
-  .then(() => Project.remove({}).exec())          // Then remove the projects
-  .then(() => Element.Element.remove({}).exec())  // Then remove the elements
-  .then(() => done())                             // Then finish the test
-  .catch(error => {                               // Catch any errors
-    chai.expect(error).to.equal(null);            // expect no errors
+  User.remove({}).exec()  // Remove users
+  // Remove all orgs except for the 'default' org.
+  .then(() => Organization.remove({ name: { $ne: 'default' } }).exec())  // Remove orgs
+  .then(() => Project.remove({}).exec())  // Remove projects
+  .then(() => Element.Element.remove({}).exec())  // Remove elements
+  .then(() => done())
+  .catch(error => {
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+
+/**
+ * @description Creates the default org if it doesn't already exist
+ */
+function createDefaultOrg(done) {
+  Organization.findOne({ id: 'default' })
+  .exec((err, org) => {
+    chai.expect(err).to.equal(null);
+    if (org === null) {
+      const defOrg = new Organization({
+        id: 'default',
+        name: 'default'
+      });
+      defOrg.save((saveErr) => {
+        chai.expect(saveErr).to.equal(null);
+        done();
+      });
+    }
+    else {
+      // Prune current users to ensure no deleted
+      // users are still part of the org
+      UserController.findUsers()
+      .then((users) => {
+        const newList = [];
+
+        // Add all existing users to the read list
+        Object.keys(users).forEach((user) => {
+          newList.push(users[user]._id);
+        });
+        org.permissions.read = newList;
+
+        // Save the updated org
+        org.save((saveOrgErr) => {
+          chai.expect(saveOrgErr).to.equal(null);
+          done();
+        });
+      })
+      .catch((err2) => {
+        chai.expect(err2).to.equal(null);
+        done();
+      });
+    }
   });
 }

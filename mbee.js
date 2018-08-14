@@ -11,123 +11,173 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /*
- * mbee.js
+ * @module mbee.js
  *
- * Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This file defines and implements the MBEE server functionality.
+ * @description This file defines and implements the MBEE server functionality.
  */
 
 // Node.js Built-in Modules
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs');                         // Access the filesystem
+const path = require('path');                     // Find directory paths
+const pkg = require(`${__dirname}/package.json`); // Metadata{version, build #, name, etc.]
 
-// Global MBEE helper object
-const M = { env: process.env.NODE_ENV || 'dev' };
-M.version = require(`${__dirname}/package.json`).version;
-M.build = require(`${__dirname}/package.json`).buildNumber;
-M.version4 = (M.build !== 'NO_BUILD_NUMBER')
-  ? `${M.version}.${M.build}`
-  : `${M.version}.0`;
+// The global MBEE helper object
+global.M = {};
 
 /**
- * This function provides a useful utility for requiring other MBEE modules in the app directory.
- * This should allow the path to the modules to be a bit simpler.
- * The global-require is explicitly disabled here due to the nature of this function.
+ * Defines the environment based on the MBEE_ENV environment variable.
+ * If the MBEE_ENV environment variable is not set, the default environment
+ * is set to 'default'.
  */
-M.load = m => require(path.join(__dirname, 'app', m)); // eslint-disable-line global-require
-// Similar to M.load, this is the future
-M.require = m => {
-  const p = path.join(__dirname, 'app', m.replace('.', path.sep));
-  return require(p); // eslint-disable-line global-require
-};
+Object.defineProperty(M, 'env', {
+  value: process.env.MBEE_ENV || 'default',
+  writable: false,
+  enumerable: true
+});
 
-// Given a file-name (typically passed in as module.filename), return the
-// module name
-M.getModuleName = fname => fname.split('/')[fname.split('/').length - 1];
+/**
+ * Defines the MBEE version by pulling the version field from the package.json.
+ */
+Object.defineProperty(M, 'version', {
+  value: pkg.version,
+  writable: false,
+  enumerable: true
+});
 
-// Configuration file parsing and initialization
-const parseJSON = M.require('lib.parse-json');
-M.config = JSON.parse(parseJSON.removeComments(path.join('config', `${M.env}.cfg`)));
+/**
+ * Defines the build number by pulling the 'build' field from the package.json.
+ * The default value if the build field does not exist is 'NO_BUILD_NUMBER'.
+ */
+Object.defineProperty(M, 'build', {
+  value: (pkg.hasOwnProperty('build')) ? pkg.build : 'NO_BUILD_NUMBER',
+  writable: false,
+  enumerable: true
+});
 
-// Set config secret if it's set to RANDOM
-if (M.config.server.secret === 'RANDOM') {
-  M.config.server.secret = Math.random().toString(36).substring(2, 15)
-    + Math.random().toString(36).substring(2, 15);
-}
+/**
+ * Defines the 4-digit version number by combining the 3-digit version number
+ * and appending the build number. If the build number does not exist, zero
+ * is used.
+ */
+Object.defineProperty(M, 'version4', {
+  value: RegExp('[0-9]+').test(M.build) ? `${M.version}.${M.build}` : `${M.version}.0`,
+  writable: false,
+  enumerable: true
+});
+
+/**
+ * This function provides a utility funtion for requiring other MBEE modules in
+ * the app directory. The global-require is explicitly disabled here due to the
+ * nature of this function.
+ */
+Object.defineProperty(M, 'require', {
+  value: m => {
+    const mod = m.split('.').join(path.sep);
+    const p = path.join(__dirname, 'app', mod);
+    return require(p); // eslint-disable-line global-require
+  },
+  writable: false,
+  enumerable: true
+});
+
+/**
+ * Given a file-name (typically passed in as module.filename),
+ * return the module name.
+ */
+Object.defineProperty(M, 'getModuleName', {
+  value: fname => fname.split('/')[fname.split('/').length - 1],
+  writable: false,
+  enumerable: true
+});
 
 // Set root and other path variables
-M.root = __dirname;
+Object.defineProperty(M, 'root', {
+  value: __dirname,
+  writable: false,
+  enumerable: true
+});
 
+// Extract configuration json file and initiate the config object
+const parseJSON = M.require('lib.parse-json');
+const configPath = path.join('config', `${M.env}.cfg`);
+const stripComments = parseJSON.removeComments(configPath);
+const config = JSON.parse(stripComments);
 
-// This exports the basic MBEE version and config data so that modules may
-// have access to that data when they are loaded.
-// Other MBEE modules like lib and controllers are loaded after this.
-// That means that modules should not try to call other modules when they are
-// loaded. They can, however, call other modules later because the 'mbee' object
-// is re-exported after the modules loading is complete (see below)
-module.exports = M;
+// Check if config secret is set to RANDOM
+if (config.server.secret === 'RANDOM') {
+  // Config state is RANDOM, generate and set config secret
+  const random1 = Math.random().toString(36).substring(2, 15);
+  const random2 = Math.random().toString(36).substring(2, 15);
+  config.server.secret = random1 + random2;
+}
 
-
-// Set argument commands for use in configuration lib and main function
-const subcommand = process.argv.slice(2, 3)[0];
-const opts = process.argv.slice(3);
+/**
+ * Define the MBEE configuration
+ */
+Object.defineProperty(M, 'config', {
+  value: config,
+  writeable: false,
+  enumerable: true
+});
 
 /******************************************************************************
  *  Load Library Modules                                                      *
  ******************************************************************************/
-// If dependencies have been installed, initialize the MBEE helper functions
-if (fs.existsSync(`${__dirname}/node_modules`)
-    && fs.existsSync(`${__dirname}/build`)) {
-  M.log = M.require('lib.logger');
-  M.lib = {
-    db: M.require('lib.db'),
-    crypto: M.require('lib.crypto'),
-    sani: M.require('lib.sanitization'),
-    startup: M.require('lib.startup'),
-    validators: M.require('lib.validators'),
-    parse_json: M.require('lib.parse-json'),
-    mock_express: M.require('lib.mock-express')
-  };
-  module.exports = M;
+// Check if the module/build folder exist
+const installComplete = fs.existsSync(`${M.root}/node_modules`);
+const buildComplete = fs.existsSync(`${M.root}/build`);
+
+// Check if dependencies are installed
+if (installComplete) {
+  // Initialize the MBEE logger/helper functions
+  Object.defineProperty(M, 'log', {
+    value: M.require('lib.logger'),
+    writable: false,
+    enumerable: true
+  });
 }
-else if (subcommand === 'start') {
-// eslint-disable-next-line no-console
-  console.log('\nERROR: Please run the build script before attempting other commands\n\n'
-    + '     node mbee build\n');
+
+// Make the M object read only and its properties cannot be changed or removed.
+Object.freeze(M);
+
+// Set argument commands for use in configuration lib and main function
+// Example: node mbee.js <subcommand> <opts>
+const subcommand = process.argv.slice(2, 3)[0];
+const opts = process.argv.slice(3);
+
+// Check for start command and build NOT completed
+if (!installComplete) {
+  // eslint-disable-next-line no-console
+  console.log('\n  Error: Must install modules before attempting to run other commands.'
+            + '\n\n  yarn install or npm install\n\n');
   process.exit(0);
 }
 
-const build = require(`${__dirname}/scripts/build`);
-const clean = require(`${__dirname}/scripts/clean`);
-const docker = require(`${__dirname}/scripts/docker`);
-const lint = require(`${__dirname}/scripts/linter`);
-const start = require(`${__dirname}/scripts/start`);
-const test = require(`${__dirname}/scripts/test`);
-
-// Call main
-if (module.parent == null) {
-  main();
+// Check for start command and build NOT completed
+if (subcommand === 'start' && !buildComplete) {
+  // eslint-disable-next-line no-console
+  console.log('\n  Error: Must run build command before attempting to run start.'
+            + '\n\n  node mbee build\n\n');
+  process.exit(0);
 }
+
+// Invoke main
+main();
 
 /******************************************************************************
  *  Main Function                                                             *
  ******************************************************************************/
 function main() {
-  const tasks = {
-    build: build.build,
-    clean: clean,
-    docker: docker,
-    install: build.install,
-    lint: lint,
-    start: start,
-    test: test
-  };
+  const tasks = ['clean', 'build', 'lint', 'docker', 'start', 'test'];
 
-  if (tasks.hasOwnProperty(subcommand)) {
-    tasks[subcommand](opts);
+  if (tasks.includes(subcommand)) {
+    // eslint-disable-next-line global-require
+    const task = require(path.join(M.root, 'scripts', subcommand));
+    task(opts);
   }
   else {
-    console.log('Unknown command.'); // eslint-disable-line no-console
+    console.log('Unknown command'); // eslint-disable-line no-console
   }
 }

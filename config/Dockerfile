@@ -21,46 +21,52 @@ FROM node:6.14.1-alpine
 MAINTAINER Josh Kaplan <joshua.d.kaplan@lmco.com>
 WORKDIR /lm/mbee
 
-RUN mkdir -p app \
-    && mkdir -p certs \
-    && mkdir -p config \
-    && mkdir -p plugins \
-    && mkdir -p public \
-    && mkdir -p scripts
-
-COPY ./app app
-COPY ./certs certs
-COPY ./plugins plugins
-COPY ./build build
-COPY ./scripts scripts
-COPY ./package.json package.json
-COPY ./mbee.js mbee.js
-COPY ./README.md README.md
-
 # Set proxy environment variables
 ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     HTTPS_PROXY="http://proxy-lmi.global.lmco.com:80" \
     http_proxy="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost,*.lmco.com \
-    NODE_ENV=production \
     NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Install dependencies
-RUN apk upgrade && \
-    apk update && \
-    apk add git && \
-    apk add openssh-client && \
-    chmod 400 certs/* && \
-    mkdir logs
-# Configuring yarn
-RUN yarn config set "http-proxy"  "http://proxy-lmi.global.lmco.com" && \
-    yarn config set "https-proxy" "http://proxy-lmi.global.lmco.com" && \
-    yarn config set "cafile" "./certs/LockheedMartinRootCertificationAuthority.pem" && \
-    yarn config set "strict-ssl" "false"
+RUN apk upgrade \
+    && apk update \
+    && apk add git \
+    && apk add openssh-client
 
-# installing dependencies
-RUN yarn install
+# Install certs
+RUN mkdir -p certs
+COPY ./certs certs
+RUN chmod 400 certs/*
+
+# Install Yarn Modules
+RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
+    && yarn config set cafile "certs/LockheedMartinRootCertificationAuthority.pem" \
+    && yarn config set strict-ssl false \
+    && yarn config set http-proxy "http://proxy-lmi.global.lmco.com" \
+    && yarn config set https-proxy "http://proxy-lmi.global.lmco.com"
+
+# Install modules using yarn from the package.json
+COPY ./package.json package.json
+RUN yarn install --production
+
+# Create Project Directory Structure
+RUN mkdir logs \
+    && mkdir -p config \
+    && mkdir -p scripts \
+    && mkdir -p plugins \
+    && mkdir -p build \
+    && mkdir -p public \
+    && mkdir -p app
+
+# Copy Project
+COPY ./scripts scripts
+COPY ./mbee.js mbee.js
+COPY ./plugins plugins
+COPY ./build build
+COPY ./app  app
+COPY ./README.md README.md
 
 #Install the configuration and run the server
 CMD ["node", "mbee.js", "start"]

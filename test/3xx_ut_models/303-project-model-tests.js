@@ -23,15 +23,16 @@
  * TODO - cleanup description
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
+// Load mbee modules
 const Org = M.require('models.Organization');
 const Project = M.require('models.Project');
 const User = M.require('models.User');
 const AuthController = M.require('lib.auth');
-
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -62,8 +63,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
 
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
@@ -108,12 +109,15 @@ describe(M.getModuleName(module.filename), () => {
         M.log.error(error);
       }
       chai.assert(error === null);
-      User.findOneAndRemove({
+      User.findOne({
         username: M.config.test.username
-      }, (err) => {
+      }, (err, foundUser) => {
         chai.expect(err).to.equal(null);
-        mongoose.connection.close();
-        done();
+        foundUser.remove((err2) => {
+          chai.expect(err2).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       });
     });
   });

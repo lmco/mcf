@@ -18,13 +18,13 @@
  * It also provides function for interacting with elements.
  */
 
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+// Load mbee modules
 const ProjController = M.require('controllers.ProjectController');
-// Element refers to the Element.js file, not the Element model
 const Element = M.require('models.Element');
-const errors = M.require('lib/errors');
-const utils = M.require('lib/utils');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const validators = M.require('lib.validators');
+const errors = M.require('lib.errors');
 
 
 /**
@@ -65,13 +65,13 @@ class ElementController {
         return resolve(error);
       }
 
-      const orgID = M.lib.sani.sanitize(organizationID);
-      const projID = M.lib.sani.sanitize(projectID);
+      const orgID = sani.sanitize(organizationID);
+      const projID = sani.sanitize(projectID);
       let type = elemType;
 
       // Ensure that the provided type is a valid one
       if (elemType !== '') {
-        type = M.lib.sani.sanitize(elemType);
+        type = sani.sanitize(elemType);
 
         // Checks to see if the type provided is either a model
         // or discriminator from Element.js. Do not confuse
@@ -93,8 +93,7 @@ class ElementController {
       ProjController.findProject(reqUser, orgID, projID, true)
       .then((project) => { // eslint-disable-line consistent-return
         // Ensure user is part of the project
-        const members = project.permissions.read.map(u => u._id.toString());
-        if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, project, 'read')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -155,8 +154,8 @@ class ElementController {
       }
 
       // Sanitize the parameters
-      const orgID = M.lib.sani.sanitize(organizationID);
-      const projID = M.lib.sani.sanitize(projectID);
+      const orgID = sani.sanitize(organizationID);
+      const projID = sani.sanitize(projectID);
       let _projID = null;
 
       // Ensure the project still exists
@@ -168,8 +167,7 @@ class ElementController {
       .then((elements) => { // eslint-disable-line consistent-return
         // Ensure user has permission to delete all elements
         Object.keys(elements).forEach((element) => { // eslint-disable-line consistent-return
-          const admins = elements[element].project.permissions.admin.map(u => u._id.toString());
-          if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+          if (!utils.checkAccess(reqUser, elements[element].project, 'admin')) {
             return reject(new errors.CustomError(
               `User does not have permission to delete element ${elements[element].id}.`, 401
             ));
@@ -237,14 +235,16 @@ class ElementController {
       }
 
       // Sanitize the parameters
-      const orgID = M.lib.sani.sanitize(organizationID);
-      const projID = M.lib.sani.sanitize(projectID);
-      const elemID = M.lib.sani.sanitize(elementID);
+      const orgID = sani.sanitize(organizationID);
+      const projID = sani.sanitize(projectID);
+      const elemID = sani.sanitize(elementID);
       const elemUID = utils.createUID(orgID, projID, elemID);
 
-      let searchParams = { uid: elemUID, deleted: false };
+      // Search for an element that matches the uid or uuid
+      let searchParams = { $and: [{ $or: [{ uid: elemUID },
+        { uuid: elemID }] }, { deleted: false }] };
       if (softDeleted && reqUser.admin) {
-        searchParams = { uid: elemUID };
+        searchParams = { $or: [{ uid: elemUID }, { uuid: elemID }] };
       }
 
       ElementController.findElementsQuery(searchParams)
@@ -254,14 +254,11 @@ class ElementController {
           return reject(new errors.CustomError('More than one element found.', 400));
         }
 
-        const element = elements[0];
-
-        const members = element.project.permissions.read.map(u => u._id.toString());
-        if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, elements[0].project, 'read')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
-        return resolve(element);
+        return resolve(elements[0]);
       })
       .catch((error) => reject(error));
     });
@@ -284,9 +281,7 @@ class ElementController {
    */
   static findElementsQuery(elementQuery) {
     return new Promise((resolve, reject) => {
-      const query = M.lib.sani.sanitize(elementQuery);
-
-      Element.Element.find(query)
+      Element.Element.find(elementQuery)
       .populate('parent project source target contains')
       .exec((findElementError, elements) => {
         if (findElementError) {
@@ -328,6 +323,7 @@ class ElementController {
       let parentID = null;
       let custom = null;
       let documentation = null;
+      let uuid = '';
 
       // Error checking, setting optional variables
       try {
@@ -335,48 +331,51 @@ class ElementController {
         utils.assertType([element.id, element.project.id, element.project.org.id, element.type], 'string');
         if (utils.checkExists(['name'], element)) {
           utils.assertType([element.name], 'string');
-          elemName = M.lib.sani.html(element.name);
+          elemName = sani.html(element.name);
+          if (!RegExp(validators.element.name).test(elemName)) {
+            return reject(new errors.CustomError('Element Name is not valid.', 400));
+          }
         }
         if (utils.checkExists(['parent'], element)) {
           utils.assertType([element.parent], 'string');
-          parentID = M.lib.sani.html(element.parent);
+          parentID = sani.html(element.parent);
         }
         if (utils.checkExists(['custom'], element)) {
           utils.assertType([element.custom], 'object');
-          custom = M.lib.sani.html(element.custom);
+          custom = sani.html(element.custom);
         }
         if (utils.checkExists(['documentation'], element)) {
           utils.assertType([element.documentation], 'string');
-          documentation = M.lib.sani.html(element.documentation);
+          documentation = sani.html(element.documentation);
+        }
+        if (utils.checkExists(['uuid'], element)) {
+          utils.assertType([element.uuid], 'string');
+          uuid = sani.html(element.uuid);
+          if (!RegExp(validators.element.uuid).test(uuid)) {
+            return reject(new errors.CustomError('UUID is not valid.', 400));
+          }
         }
       }
       catch (error) {
         return reject(error);
       }
 
-      const elemID = M.lib.sani.html(element.id);
-      const projID = M.lib.sani.html(element.project.id);
-      const orgID = M.lib.sani.html(element.project.org.id);
+      const elemID = sani.html(element.id);
+      const projID = sani.html(element.project.id);
+      const orgID = sani.html(element.project.org.id);
       const elemUID = utils.createUID(orgID, projID, elemID);
-      const elementType = M.lib.sani.html(element.type);
+      const elementType = sani.html(element.type);
 
       // Error check - make sure element ID and element name are valid
-      if (!RegExp(M.lib.validators.element.id).test(elemID)) {
+      if (!RegExp(validators.element.id).test(elemID)) {
         return reject(new errors.CustomError('Element ID is not valid.', 400));
-      }
-      if (element.hasOwnProperty('name')) {
-        if (!RegExp(M.lib.validators.element.name).test(elemName)) {
-          return reject(new errors.CustomError('Element Name is not valid.', 400));
-        }
       }
 
       // Error check - make sure the project exists
       ProjController.findProject(reqUser, orgID, projID)
       .then((proj) => { // eslint-disable-line consistent-return
         // Check Permissions
-        const writers = proj.permissions.write.map(u => u._id.toString());
-
-        if (!writers.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, proj, 'write')) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -384,52 +383,58 @@ class ElementController {
         // Must nest promises since the catch uses proj, returned from findProject.
         ElementController.findElement(reqUser, orgID, projID, elemID)
         .then(() => reject(new errors.CustomError('Element already exists.', 400)))
-        .catch((findError) => { // eslint-disable-line consistent-return
-          // This is ok, we dont want the element to already exist.
-          if (findError.description === 'No elements found.') {
-            // Get the element type
-            let type = null;
-            Object.keys(Element).forEach((k) => {
-              if ((elementType === Element[k].modelName) && (elementType !== 'Element')) {
-                type = k;
+        .catch(() => { // eslint-disable-line consistent-return
+          // Check if element with same uuid exists
+          ElementController.findElement(reqUser, orgID, projID, uuid)
+          .then(() => reject(new errors.CustomError('Element with uuid already exists.', 400)))
+          .catch((findError) => { // eslint-disable-line consistent-return
+            // This is ok, we dont want the element to already exist.
+            if (findError.description === 'No elements found.') {
+              // Get the element type
+              let type = null;
+              Object.keys(Element).forEach((k) => {
+                if ((elementType === Element[k].modelName) && (elementType !== 'Element')) {
+                  type = k;
+                }
+              });
+
+              const elemData = {
+                orgID: orgID,
+                elemID: elemID,
+                elemName: elemName,
+                project: proj,
+                elemUID: elemUID,
+                parentID: parentID,
+                custom: custom,
+                documentation: documentation,
+                uuid: uuid
+              };
+
+              // If the given type is not a type we specified
+              if (type === null) {
+                return reject(new errors.CustomError('Invalid element type.', 400));
               }
-            });
-
-            const elemData = {
-              orgID: orgID,
-              elemID: elemID,
-              elemName: elemName,
-              project: proj,
-              elemUID: elemUID,
-              parentID: parentID,
-              custom: custom,
-              documentation: documentation
-            };
-
-            // If the given type is not a type we specified
-            if (type === null) {
-              return reject(new errors.CustomError('Invalid element type.', 400));
-            }
-            if (type === 'Relationship') {
-              ElementController.createRelationship(reqUser, elemData, element)
-              .then((newElement) => resolve(newElement))
-              .catch((createRelationshipError) => reject(createRelationshipError));
-            }
-            else if (type === 'Package') {
-              ElementController.createPackage(reqUser, elemData)
-              .then((newElement) => resolve(newElement))
-              .catch((createRelationshipError) => reject(createRelationshipError));
+              if (type === 'Relationship') {
+                ElementController.createRelationship(reqUser, elemData, element)
+                .then((newElement) => resolve(newElement))
+                .catch((createRelationshipError) => reject(createRelationshipError));
+              }
+              else if (type === 'Package') {
+                ElementController.createPackage(reqUser, elemData)
+                .then((newElement) => resolve(newElement))
+                .catch((createRelationshipError) => reject(createRelationshipError));
+              }
+              else {
+                ElementController.createBlock(reqUser, elemData)
+                .then((newElement) => resolve(newElement))
+                .catch((createRelationshipError) => reject(createRelationshipError));
+              }
             }
             else {
-              ElementController.createBlock(reqUser, elemData)
-              .then((newElement) => resolve(newElement))
-              .catch((createRelationshipError) => reject(createRelationshipError));
+              // Some other error, return it.
+              return reject(findError);
             }
-          }
-          else {
-            // Some other error, return it.
-            return reject(findError);
-          }
+          });
         });
       })
       .catch((findProjectError) => reject(findProjectError));
@@ -465,8 +470,8 @@ class ElementController {
       }
 
       // Sanitize
-      const target = M.lib.sani.html(elemInfo.target);
-      const source = M.lib.sani.html(elemInfo.source);
+      const target = sani.html(elemInfo.target);
+      const source = sani.html(elemInfo.source);
 
       // Target and source should not be the same element
       if (target === source) {
@@ -487,7 +492,8 @@ class ElementController {
             target: targetElement._id,
             source: sourceElement._id,
             custom: elemData.custom,
-            documentation: elemData.documentation
+            documentation: elemData.documentation,
+            uuid: elemData.uuid
           });
 
           ElementController.updateParent(reqUser, elemData.orgID,
@@ -537,7 +543,8 @@ class ElementController {
         project: elemData.project._id,
         uid: elemData.elemUID,
         custom: elemData.custom,
-        documentation: elemData.documentation
+        documentation: elemData.documentation,
+        uuid: elemData.uuid
       });
 
       ElementController.updateParent(reqUser, elemData.orgID,
@@ -583,7 +590,8 @@ class ElementController {
         project: elemData.project._id,
         uid: elemData.elemUID,
         custom: elemData.custom,
-        documentation: elemData.documentation
+        documentation: elemData.documentation,
+        uuid: elemData.uuid
       });
 
       ElementController.updateParent(reqUser, elemData.orgID,
@@ -641,16 +649,15 @@ class ElementController {
       }
 
       // Sanitize inputs
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
-      const elemID = M.lib.sani.html(elementID);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
+      const elemID = sani.html(elementID);
 
       // Get the element
       ElementController.findElement(reqUser, orgID, projID, elemID)
       .then((element) => { // eslint-disable-line consistent-return
         // Check Permissions
-        const admins = element.project.permissions.admin.map(u => u._id.toString());
-        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, element.project, 'admin')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -695,7 +702,7 @@ class ElementController {
           if (Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
             Object.keys(elementUpdated[updateField]).forEach((key) => {
-              element.custom[key] = M.lib.sani.sanitize(elementUpdated[updateField][key]);
+              element.custom[key] = sani.sanitize(elementUpdated[updateField][key]);
             });
 
             // Special thing for mixed fields in Mongoose
@@ -704,7 +711,7 @@ class ElementController {
           }
           else {
             // sanitize field
-            updateVal = M.lib.sani.sanitize(elementUpdated[updateField]);
+            updateVal = sani.sanitize(elementUpdated[updateField]);
             // Update field in element object
             element[updateField] = updateVal;
           }
@@ -817,16 +824,15 @@ class ElementController {
         }
       }
       // Sanitize inputs
-      const orgID = M.lib.sani.html(organizationID);
-      const projID = M.lib.sani.html(projectID);
-      const elemID = M.lib.sani.html(elementID);
+      const orgID = sani.html(organizationID);
+      const projID = sani.html(projectID);
+      const elemID = sani.html(elementID);
 
       // Find the element, even if it has already been soft deleted
       ElementController.findElement(reqUser, orgID, projID, elemID, true)
       .then((element) => { // eslint-disable-line consistent-return
         // Check Permissions
-        const admins = element.project.permissions.admin.map(u => u._id.toString());
-        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, element.project, 'admin')) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 

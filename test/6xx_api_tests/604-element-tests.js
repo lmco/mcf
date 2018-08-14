@@ -23,16 +23,17 @@
  * TODO - fix description
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove need for mongoose
 const request = require('request');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const ProjController = M.require('controllers/ProjectController');
-const OrgController = M.require('controllers/OrganizationController');
-const AuthController = M.require('lib/auth');
-const User = M.require('models/User');
-const test = M.config.test;
+
+// Load mbee modules
+const OrgController = M.require('controllers.OrganizationController');
+const ProjController = M.require('controllers.ProjectController');
+const User = M.require('models.User');
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 
 
 /* --------------------( Test Data )-------------------- */
@@ -62,8 +63,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -122,12 +123,15 @@ describe(M.getModuleName(module.filename), () => {
     OrgController.removeOrg(user, 'nineteenforty', { soft: false })
     .then((retOrg) => {
       chai.expect(retOrg).to.not.equal(null);
-      User.findOneAndRemove({
+      User.findOne({
         username: M.config.test.username
-      }, (err) => {
+      }, (err, foundUser) => {
         chai.expect(err).to.equal(null);
-        mongoose.connection.close();
-        done();
+        foundUser.remove((err2) => {
+          chai.expect(err2).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       });
     })
     .catch((error) => {
@@ -155,7 +159,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postElement(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'POST',
     body: JSON.stringify({
@@ -183,7 +187,7 @@ function postElement(done) {
  */
 function getElement(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'GET'
   },
@@ -200,7 +204,7 @@ function getElement(done) {
  */
 function getElements(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements`,
     headers: getHeaders(),
     method: 'GET'
   },
@@ -217,7 +221,7 @@ function getElements(done) {
  */
 function patchElement(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'PATCH',
     body: JSON.stringify({
@@ -237,7 +241,7 @@ function patchElement(done) {
  */
 function deleteElement(done) {
   request({
-    url: `${test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
     method: 'DELETE',
     body: JSON.stringify({

@@ -25,17 +25,18 @@
  * TODO - Fix module description
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove the need for Mongo
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const ElemController = M.require('controllers/ElementController');
-const OrgController = M.require('controllers/OrganizationController');
-const ProjController = M.require('controllers/ProjectController');
-const UserController = M.require('controllers/UserController');
-const AuthController = M.require('lib/auth');
-const User = M.require('models/User');
 
+// Load mbee modules
+const UserController = M.require('controllers.UserController');
+const OrgController = M.require('controllers.OrganizationController');
+const ProjController = M.require('controllers.ProjectController');
+const ElemController = M.require('controllers.ElementController');
+const User = M.require('models.User');
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -47,10 +48,8 @@ let org = null;
 /* --------------------( Main )-------------------- */
 
 
-describe(M.getModuleName(module.filename), () => {
-  // NOTE: Changed from arrow function to allow for use of
-  // this so that a larger timeout could be set
-  // TODO -  use "TODO" not "NOTE"
+describe(M.getModuleName(module.filename), function() {
+  this.timeout(5000);
 
   /**
    * Before: run before all tests
@@ -67,8 +66,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -107,18 +106,22 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests.
    * TODO - describe what this function is doing.
    */
-  after((done) => {
+  after(function(done) {
+    this.timeout(5000);
     // Removing the organization created
     OrgController.removeOrg(user, 'gaurdians', { soft: false })
     .then(() => UserController.removeUser(user, newUser.username))
     .then((delUser2) => {
       chai.expect(delUser2).to.equal('groot');
-      User.findOneAndRemove({
+      User.findOne({
         username: M.config.test.username
-      }, (err) => {
+      }, (err, foundUser) => {
         chai.expect(err).to.equal(null);
-        mongoose.connection.close();
-        done();
+        foundUser.remove((err2) => {
+          chai.expect(err2).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       });
     })
     .catch((error) => {
@@ -142,6 +145,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should delete an existing org', deleteExistingOrg);
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
+  it('should fail trying to update the default org', updateDefaultOrg);
+  it('should fail trying to delete the default org', deleteDefaultOrg);
   it('should add a user to an org', addUserRole);
   it('should let the non-admin user write a project', projWritePerm);
   it('should reject user changing their permissions', rejectUserRole);
@@ -336,7 +341,7 @@ function updateOrgObject(done) {
 function findAllExistingOrgs(done) {
   OrgController.findOrgs(user)
   .then((orgs) => {
-    chai.expect(orgs.length).to.equal(2);
+    chai.expect(orgs.length).to.equal(3);
     done();
   })
   .catch((error) => {
@@ -425,6 +430,36 @@ function hardDeleteProjectAndOrg(done) {
       chai.expect(error2.description).to.equal('Project not found.');
       done();
     });
+  });
+}
+
+/**
+ * Tests trying to update the default organization
+ */
+function updateDefaultOrg(done) {
+  OrgController.updateOrg(user, 'default', { name: 'New Name' })
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Cannot update the default org.');
+    done();
+  });
+}
+
+/**
+ * Tests trying to delete the default organization
+ */
+function deleteDefaultOrg(done) {
+  OrgController.removeOrg(user, 'default', { soft: false })
+  .then(() => {
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.description).to.equal('Cannot delete the default org.');
+    done();
   });
 }
 

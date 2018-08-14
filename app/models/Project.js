@@ -15,14 +15,19 @@
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
  * @description
- * The ProjectModel.js file creates a mongoose model to interact with the MongoDB
- * Database in order to find, save, update, and delete projects.
+ * The ProjectModel.js file creates a mongoose model to interact with the
+ * MongoDB Database in order to find, save, update, and delete projects.
  */
 
-// Requirements
+// Load node modules
 const mongoose = require('mongoose');
-const path = require('path');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
+// Load mbee modules
+const validators = M.require('lib.validators');
+
+/******************************************************************************
+ * Project Model
+ ******************************************************************************/
 
 /**
  * @class Project
@@ -41,7 +46,7 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: true,
     index: true,
-    match: RegExp(M.lib.validators.project.id),
+    match: RegExp(validators.project.id),
     maxlength: [36, 'Too many characters in username']
   },
 
@@ -82,7 +87,7 @@ const ProjectSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    match: RegExp(M.lib.validators.project.name)
+    match: RegExp(validators.project.name)
   },
 
   /**
@@ -162,6 +167,18 @@ const ProjectSchema = new mongoose.Schema({
    */
   custom: {
     type: mongoose.Schema.Types.Mixed
+  },
+
+  /**
+   * @memberOf  Project
+   * @property  visibility
+   * @type String
+   *
+   * @description The visibility level of the project. Can be internal or private.
+   */
+  visibility: {
+    type: String,
+    default: 'private'
   }
 });
 
@@ -177,6 +194,13 @@ ProjectSchema.methods.getPermissionLevels = function() {
   */
 ProjectSchema.methods.getValidUpdateFields = function() {
   return ['name', 'delete', 'deletedOn', 'custom'];
+};
+
+/**
+ * Returns a list of valid visibility levels.
+ */
+ProjectSchema.methods.getVisibilityLevels = function() {
+  return ['internal', 'private'];
 };
 
 

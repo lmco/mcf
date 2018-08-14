@@ -1,7 +1,7 @@
 {
   "name": "mbee",
   "version": "0.5.0",
-  "buildNumber": "NO_BUILD_NUMBER",
+  "build": "NO_BUILD_NUMBER",
   "description": "Model-Based Engineering Environment",
   "main": "mbee.js",
   "repository": "https://gitlab.lmms.lmco.com/mbee/mbee.git",
@@ -21,6 +21,7 @@
     "mongodb": "^3.1.0-beta4",
     "mongoose": "^5.1.1",
     "swagger-jsdoc": "^1.9.7",
+    "uuid": "^3.3.2",
     "winston": "^3.0.0"
   },
   "devDependencies": {
@@ -44,11 +45,11 @@
     "swagger-ui-express": "^2.0.15"
   },
   "scripts": {
-    "build": "node scripts/build.js",
-    "clean": "node scripts/clean.js",
-    "docker": "node scripts/docker.js",
-    "lint": "node scripts/linter.js",
-    "start": "node mbee.js start",
-    "test": "node scripts/test.js"
+    "build": "node mbee build",
+    "clean": "node mbee clean",
+    "docker": "node mbee docker",
+    "lint": "node mbee lint",
+    "start": "node mbee start",
+    "test": "node mbee test"
   }
 }

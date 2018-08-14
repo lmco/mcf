@@ -19,17 +19,16 @@
 
 /* eslint-disable no-console */
 
-const path = require('path');
+// Load node modules
 const { spawn } = require('child_process');
-const M = require(path.join(__dirname, '..', 'mbee.js'));
 
+// If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
-  lint(process.argv.slice(2));
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this script by using the '
+    + 'following command. \n\nnode mbee lint\n');
+  process.exit(-1);
 }
-else {
-  module.exports = lint;
-}
-
 
 /**
  * Runs ESLint against the primary Javascript directories.
@@ -53,3 +52,5 @@ function lint(_args) {
     }
   });
 }
+
+module.exports = lint;

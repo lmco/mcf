@@ -19,11 +19,18 @@
  * MongoDB Database in order to find, save, update, and delete organizations.
  */
 
-const path = require('path');
+// Load node modules
 const crypto = require('crypto');
 const mongoose = require('mongoose');
-const M = require(path.join('..', '..', 'mbee.js'));
+const errors = M.require('lib.errors');
+const Organization = M.require('models.Organization');
 
+// Load mbee modules
+const validators = M.require('lib.validators');
+
+/******************************************************************************
+ * Element Model
+ ******************************************************************************/
 
 /**
  * @class  User
@@ -48,7 +55,7 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    match: RegExp(M.lib.validators.user.username)
+    match: RegExp(validators.user.username)
   },
 
   /**
@@ -73,7 +80,7 @@ const UserSchema = new mongoose.Schema({
      */
   email: {
     type: String,
-    match: RegExp(M.lib.validators.user.email)
+    match: RegExp(validators.user.email)
   },
 
   /**
@@ -241,7 +248,8 @@ const UserSchema = new mongoose.Schema({
    * used to represent additional model data.
    */
   custom: {
-    type: mongoose.Schema.Types.Mixed
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   }
 
 });
@@ -345,7 +353,43 @@ UserSchema.pre('save', function(next) {
   crypto.pbkdf2(this.password, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
     if (err) throw err;
     this.password = derivedKey.toString('hex');
-    next();
+    // Add the user to default org
+    // Using org model since we don't have a requesting user.
+    Organization.findOne({ id: 'default' })
+    .exec((err2, org) => {
+      if (err2) throw err2;
+      const members = org.permissions.read.map(u => u._id.toString());
+      if (!members.includes(this._id.toString())) {
+        org.permissions.read.push(this._id.toString());
+      }
+      org.save((saveErr) => {
+        if (saveErr) {
+          // If error occurs, return it
+          throw new errors.CustomError('Failed to add user to the default org.');
+        }
+        next();
+      });
+    });
+  });
+});
+
+/**
+ * @memberOf  User
+ * Run our pre-defined setters before delete.
+ */
+UserSchema.pre('remove', function(next) {
+  // Remove the user from them default org
+  // Using org model since we don't have a requesting user.
+  Organization.findOne({ id: 'default' })
+  .exec((err, org) => {
+    org.permissions.read.splice(org.permissions.read.indexOf(this._id.toString()), 1);
+    org.save((saveErr) => {
+      if (saveErr) {
+        // If error occurs, return it
+        throw new errors.CustomError('Failed to remove user from the default org.');
+      }
+      next();
+    });
   });
 });
 

@@ -13,13 +13,22 @@
 
 /* eslint-disable no-console */
 
-// Node.js Built-in Modules
+// Load node modules
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
 
-const M = require(path.join(__dirname, '..', 'mbee.js'));
+// If the application is run directly from node, notify the user and fail
+if (module.parent == null) {
+  // eslint-disable-next-line no-console
+  console.log('\nError: please use mbee to run this script by using the '
+    + 'following command. \n\nnode mbee start\n');
+  process.exit(-1);
+}
+
+// Load mbee modules
+const startup = M.require('lib.startup');
 
 /**
  * Runs the MBEE server based on the configuration provided in the environment
@@ -30,11 +39,10 @@ function start(args) {
   M.log.debug(`${`+ mbee.js executed as ${process.argv.join(' ')} `
   + `with env=${M.env} and configuration: `}${JSON.stringify(M.config)}`);
 
-  M.lib.startup();                                 // Print startup banner
+  startup(); // Print startup banner
 
   // Import the app, disable the global-import rule for this
-  const app = M.require('app');   // eslint-disable-line global-require
-
+  const app = M.require('app'); // eslint-disable-line global-require
 
   /* eslint-disable no-var, vars-on-top, block-scoped-var */
 
@@ -71,6 +79,53 @@ function start(args) {
       M.log.info(`MBEE server listening on port ${port}!`);
     });
   }
+
+  // Create default org if it doesn't exist
+  const Organization = M.require('models.Organization');
+  const UserController = M.require('controllers.UserController');
+  Organization.findOne({ id: 'default' })
+  .exec((err, org) => {
+    if (err) {
+      throw err;
+    }
+
+    // If the default org does not exist, create it
+    if (org === null) {
+      const defaultOrg = new Organization({
+        id: 'default',
+        name: 'default'
+      });
+      defaultOrg.save((saveOrgErr) => {
+        if (saveOrgErr) {
+          throw saveOrgErr;
+        }
+      });
+    }
+    else {
+      // Prune current users to ensure no deleted
+      // users are still part of the org
+      UserController.findUsers()
+      .then((users) => {
+        const newList = [];
+
+        // Add all existing users to the read list
+        Object.keys(users).forEach((user) => {
+          newList.push(users[user]._id);
+        });
+        org.permissions.read = newList;
+
+        // Save the updated org
+        org.save((saveOrgErr) => {
+          if (saveOrgErr) {
+            throw saveOrgErr;
+          }
+        });
+      })
+      .catch((err2) => {
+        throw err2;
+      });
+    }
+  });
 }
 
 module.exports = start;

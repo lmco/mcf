@@ -25,14 +25,16 @@
  * TODO - fix the description
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove dependency on mongoose
 const request = require('request');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const OrgController = M.require('controllers/OrganizationController');
-const AuthController = M.require('lib/auth');
-const User = M.require('models/User');
+
+// Load mbee modules
+const OrgController = M.require('controllers.OrganizationController');
+const AuthController = M.require('lib.auth');
+const User = M.require('models.User');
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -62,8 +64,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -107,17 +109,21 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests
    * TODO - describe
    */
+
   after((done) => {
     // Removing the Organization
     OrgController.removeOrg(user, 'biochemistry', { soft: false })
     .then((retOrg) => {
       chai.expect(retOrg.id).to.equal('biochemistry');
-      User.findOneAndRemove({
+      User.findOne({
         username: M.config.test.username
-      }, (err) => {
+      }, (err, foundUser) => {
         chai.expect(err).to.equal(null);
-        mongoose.connection.close();
-        done();
+        foundUser.remove((err2) => {
+          chai.expect(err2).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
       });
     })
     .catch((err2) => {
@@ -138,8 +144,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should PATCH an update to posted project', patchOrg01);
   it('should reject a PATCH to update with invalid name', badPatch);
   it('should POST second project', postProject02);
-  it('should DELETE the first project to the organization', deleteProject01);
-  it('should DELETE the second project to the organization', deleteProject02);
+  it('should DELETE the first project to the organization', deleteProject01).timeout(5000);
+  it('should DELETE the second project to the organization', deleteProject02).timeout(5000);
 });
 
 

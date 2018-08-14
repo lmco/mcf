@@ -17,15 +17,19 @@
  * @description This file implements our authentication using LDAP Active Directory.
  */
 
+// Load node modules
 const fs = require('fs');
 const path = require('path');
 const ldap = require('ldapjs');
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
+
+// Load mbee modules
 const LocalStrategy = M.require('auth.LocalStrategy');
-const User = M.require('models.User');
 const UserController = M.require('controllers.UserController');
+const User = M.require('models.User');
+const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
 
+// Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
 
 /**
@@ -176,7 +180,7 @@ class LDAPStrategy {
     M.log.debug('Attempting to search for LDAP user.');
     // define promise for function
     return new Promise((resolve, reject) => {
-      const usernameSani = M.lib.sani.ldapFilter(username);
+      const usernameSani = sani.ldapFilter(username);
       // set filter for query based on username attribute and the configuration filter
       const filter = '(&'
                    + `(${ldapConfig.attributes.username}=${usernameSani})`

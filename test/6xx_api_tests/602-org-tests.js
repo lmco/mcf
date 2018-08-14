@@ -26,14 +26,15 @@
  * TODO - fix description
  */
 
-const path = require('path');
+// Load node modules
 const chai = require('chai');
 const request = require('request');
 const mongoose = require('mongoose'); // TODO - remove dep on mongoose
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
-const AuthController = M.require('lib/auth');
-const User = M.require('models/User');
 
+// Load mbee modules
+const User = M.require('models.User');
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -60,8 +61,8 @@ describe(M.getModuleName(module.filename), () => {
       password: p
     };
 
-    const reqObj = M.lib.mock_express.getReq(params, body);
-    const resObj = M.lib.mock_express.getRes();
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
@@ -80,12 +81,15 @@ describe(M.getModuleName(module.filename), () => {
    * TODO - add description
    */
   after((done) => {
-    User.findOneAndRemove({
+    User.findOne({
       username: M.config.test.username
-    }, (err) => {
+    }, (err, foundUser) => {
       chai.expect(err).to.equal(null);
-      mongoose.connection.close();
-      done();
+      foundUser.remove((err2) => {
+        chai.expect(err2).to.equal(null);
+        mongoose.connection.close();
+        done();
+      });
     });
   });
 
@@ -99,7 +103,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PATCH to the org ID', rejectPatchID);
   it('should get organization roles for a user', orgRole);
   it('should reject a get org roles for another user', rejectRole);
-  it('should GET 2 organizations', getTwoOrgs);
+  it('should GET 3 organizations', getThreeOrgs);
   it('should reject a POST with ID mismatch', postOrg02Err);
   it('should reject a POST with invalid org id', postInvalidOrg);
   it('should reject a POST with missing org name', postOrg03);
@@ -130,7 +134,7 @@ function getOrgs(done) {
   (err, response, body) => {
     chai.expect(response.statusCode).to.equal(200);
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(0);
+    chai.expect(json.length).to.equal(1);
     chai.expect(err).to.equal(null);
     done();
   });
@@ -323,10 +327,10 @@ function rejectRole(done) {
 
 
 /**
- * Makes a GET request to /api/orgs. At this point we should have 2 orgs
+ * Makes a GET request to /api/orgs. At this point we should have 3 orgs
  * in the database.
  */
-function getTwoOrgs(done) {
+function getThreeOrgs(done) {
   request({
     url: `${test.url}/api/orgs`,
     headers: getHeaders()
@@ -334,7 +338,7 @@ function getTwoOrgs(done) {
   (err, response, body) => {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(3);
     chai.expect(err).to.equal(null);
     done();
   });
@@ -499,7 +503,7 @@ function deleteOrg02(done) {
 
 /**
  * Makes a GET request to /api/orgs. At this point our created orgs
- * should be deleted.
+ * should be deleted except for the default org.
  */
 function getOrgs03(done) {
   request({
@@ -510,7 +514,7 @@ function getOrgs03(done) {
     const json = JSON.parse(body);
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(err).to.equal(null);
-    chai.expect(json.length).to.equal(0);
+    chai.expect(json.length).to.equal(1);
     done();
   });
 }
