@@ -73,9 +73,8 @@ class ProjectController {
 
       OrgController.findOrg(reqUser, orgID, softDeleted)
       .then((org) => {
-        const orgReaders = org.permissions.read.map(u => u.username);
         // Error Check - See if user has read permissions on org
-        if (!orgReaders.includes(reqUser.username)) {
+        if (!utils.checkAccess(reqUser, org, 'read')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -142,8 +141,7 @@ class ProjectController {
 
         // Ensure user has permission to delete all projects
         Object.keys(projects).forEach((project) => {
-          const admins = projects[project].permissions.admin.map(u => u._id.toString());
-          if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+          if (!utils.checkAccess(reqUser, projects[project], 'admin')) {
             return reject(new errors.CustomError(
               `User does not have permission to delete project ${projects[project].id}.`, 401
             ));
@@ -218,14 +216,12 @@ class ProjectController {
         }
 
         // Check Permissions
-        const project = projects[0];
-        const members = project.permissions.read.map(u => u._id.toString());
-        if (!members.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, projects[0], 'read')) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
         // Return resulting project
-        return resolve(project);
+        return resolve(projects[0]);
       })
       .catch((error) => reject(error));
     });
@@ -323,9 +319,7 @@ class ProjectController {
       OrgController.findOrg(reqUser, orgID)
       .then((org) => {
         // Check Permissions
-        const writers = org.permissions.write.map(u => u._id.toString());
-
-        if (!writers.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, org, 'write')) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -412,8 +406,7 @@ class ProjectController {
       ProjectController.findProject(reqUser, orgID, projID)
       .then((project) => {
         // Check Permissions
-        const admins = project.permissions.admin.map(u => u._id.toString());
-        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, project, 'admin')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -655,7 +648,7 @@ class ProjectController {
         let permissionsList = [];
 
         // Check permissions
-        if (!memberList.includes(reqUser.username)) {
+        if (!utils.checkAccess(reqUser, project, 'read')) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -749,8 +742,7 @@ class ProjectController {
       ProjectController.findProject(reqUser, organizationID, projectID)
       .then((project) => {
         // Check permissions
-        const admins = project.permissions.admin.map(u => u._id.toString());
-        if (!admins.includes(reqUser._id.toString()) && !reqUser.admin) {
+        if (!utils.checkAccess(reqUser, project, 'admin')) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
