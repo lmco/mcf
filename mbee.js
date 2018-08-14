@@ -141,7 +141,8 @@ if (installComplete) {
 
 // Make the M object read only and its properties cannot be changed or removed.
 Object.freeze(M);
-
+console.log('M object is available');
+console.log(`M.require: ${M.hasOwnProperty('require')}`);
 // Set argument commands for use in configuration lib and main function
 // Example: node mbee.js <subcommand> <opts>
 const subcommand = process.argv.slice(2, 3)[0];

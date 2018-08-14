@@ -24,13 +24,12 @@ const mongoose = require('mongoose');
 const fname = module.filename;
 const name = fname.split('/')[fname.split('/').length - 1];
 
-const M = require(path.join(__dirname, '..', '..', 'mbee.js'));
 const User = M.require('models.User');
 const Organization = M.require('models.Organization');
 const Project = M.require('models.Project');
 const Elem = M.require('models.Element');
 
-const db = M.load('lib/db');
+const db = M.require('lib.db');
 
 /*------------------------------------
  *       Main
