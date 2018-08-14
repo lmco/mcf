@@ -46,9 +46,9 @@ pipeline {
             steps{
                 sh "yarn install --dev"
                 sh "echo 'before if statement'"
-                sh "if (env.JOB_NAME == 'LeahPipeline1')"
+                sh "if (${JOB_NAME} == 'LeahPipeline1')"
                     sh "echo 'I am inside the if statement'"
-                sh "if (env.JOB_NAME == 'NotLeahPipeline')"
+                sh "if (${JOB_NAME} == 'NotLeahPipeline')"
                     sh "echo 'I better not be printing'"
             }
         }
@@ -60,7 +60,6 @@ pipeline {
             stages{
                 stage('Build MBEE'){
                     steps {
-                        script {
                             //echo 'before yarn'
                             // Install dev dependencies
                             //yarn install --dev
@@ -71,11 +70,10 @@ pipeline {
                             //}
 
                             // Build
-                            NODE_ENV=stage node mbee build
+                            sh 'NODE_ENV=stage node mbee build'
 
                             // Verify build
-                            ls -l
-                        }
+                            sh 'ls -l'
                     }
                 }
 
