@@ -44,12 +44,16 @@ pipeline {
 
         stage('Test Script'){
             steps{
-                sh "yarn install --dev"
-                sh "echo 'before if statement'"
-                sh "if (${JOB_NAME} == 'LeahPipeline1')"
-                    sh "echo 'I am inside the if statement'"
-                sh "if (${JOB_NAME} == 'NotLeahPipeline')"
-                    sh "echo 'I better not be printing'"
+                script {
+                    sh "yarn install --dev"
+                    echo 'before if statement'
+                    if (env.JOB_NAME == 'LeahPipeline1'){
+                        sh "echo 'I am inside the if statement'"
+                    }
+                    else if (env.JOB_NAME == 'NotLeahPipeline'){
+                        sh "echo 'I better not be printing'"
+                    }
+                }
             }
         }
 
