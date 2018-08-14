@@ -51,12 +51,12 @@ pipeline {
                     steps {
                             // Install dev dependencies
                             sh 'yarn install'
-                            sh 'NODE_ENV=stage node mbee build'
+                            sh 'MBEE_ENV=stage node mbee build'
 
                             //echo 'before if statement'
                             //if (env.JOB_NAME == 'LeahPipeline1') {
                                 // Build
-                              //  sh 'NODE_ENV=stage node mbee build'
+                              //  sh 'MBEE_ENV=stage node mbee build'
                             //}
 
                             // Verify build
@@ -70,7 +70,7 @@ pipeline {
                         sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
 
                         sh "echo 'building'"
-                        sh "NODE_ENV=stage node mbee docker --build"
+                        sh "MBEE_ENV=stage node mbee docker --build"
                     }
                 }
             }
@@ -82,11 +82,11 @@ pipeline {
         stage('Run') {
             steps {
                 // Removes any existing production running containers
-                sh 'NODE_ENV=stage node mbee docker --clean'
+                sh 'MBEE_ENV=stage node mbee docker --clean'
 
                 // Runs the production container in the background
                 sh "echo 'run'"
-                sh "NODE_ENV=stage node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
+                sh "MBEE_ENV=stage node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
             }
         }
 
@@ -97,7 +97,7 @@ pipeline {
             steps {
                 // Wait to be sure server is up
                 sh 'sleep 20'
-                sh 'NODE_ENV=stage node mbee docker --get-logs'
+                sh 'MBEE_ENV=stage node mbee docker --get-logs'
 
             }
         }
@@ -107,7 +107,7 @@ pipeline {
                 // Runs the basic test suite against the running stage container
                 // The bail command will stop running tests after one test fails
                 timeout(time: 10, unit: 'MINUTES') {
-                    sh 'NODE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-6]"'
+                    sh 'MBEE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-6]"'
                 }
             }
         }
@@ -125,9 +125,9 @@ pipeline {
             // running test analysis
             junit 'test-results.xml'
             // Gets the logs and prints them to the console
-            sh 'NODE_ENV=stage node mbee docker --get-logs'
+            sh 'MBEE_ENV=stage node mbee docker --get-logs'
             // Removes any test containers
-            sh 'NODE_ENV=stage node mbee docker --clean'
+            sh 'MBEE_ENV=stage node mbee docker --clean'
         }
 
        /**
