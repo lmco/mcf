@@ -25,7 +25,7 @@ const mongoose = require('mongoose');
 const errors = M.require('lib.errors');
 const Organization = M.require('models.Organization');
 
-// Load mbee modules
+// Load MBEE modules
 const validators = M.require('lib.validators');
 
 /******************************************************************************
@@ -44,7 +44,7 @@ const UserSchema = new mongoose.Schema({
      * @property  username
      * @type {String}
      *
-     * @description  The `username` property is the user's unique name.
+     * @description The `username` property is the user's unique name.
      * It is indexed for faster lookup.
      * A username must be between 3 and 36 characters inclusive.
      */
@@ -63,7 +63,7 @@ const UserSchema = new mongoose.Schema({
      * @property password
      * @type {String}
      *
-     * @description  The `password` property stores the user's hashed password.
+     * @description The `password` property stores the user's hashed password.
      */
   password: {
     type: String,
@@ -88,7 +88,7 @@ const UserSchema = new mongoose.Schema({
      * @property  fname
      * @type  {String}
      *
-     * @description  The `fname` property is the user's first name.
+     * @description The `fname` property is the user's first name.
      */
   fname: {
     type: String,
@@ -101,7 +101,7 @@ const UserSchema = new mongoose.Schema({
    * @property  preferredName
    * @type  {String}
    *
-   * @description  The `preferredName` property is the user's preferred name
+   * @description The `preferredName` property is the user's preferred name
    * which may differ from their first name.
    */
   preferredName: {
@@ -129,7 +129,7 @@ const UserSchema = new mongoose.Schema({
      * @property  name
      * @type  {String}
      *
-     * @description  The `name` property stores the user's full name.
+     * @description The `name` property stores the user's full name.
      * It it set based on the fname and lname properties.
      */
   name: {
@@ -153,7 +153,7 @@ const UserSchema = new mongoose.Schema({
      * @property  admin
      * @type  {Boolean}
      *
-     * @description  The `admin` property defines whether or not the user is a global admin.
+     * @description The `admin` property defines whether or not the user is a global admin.
      * This refers to whether or not the user is a site-wide admin.
      */
   admin: {
@@ -166,7 +166,7 @@ const UserSchema = new mongoose.Schema({
      * @property  isLDAPUser
      * @type  {Boolean}
      *
-     * @description  The `isLDAPUser` property defines whether or not the user is an LDAP
+     * @description The `isLDAPUser` property defines whether or not the user is an LDAP
      * user. This impacts how the user is authenticated
      */
   provider: {
@@ -179,7 +179,7 @@ const UserSchema = new mongoose.Schema({
      * @property  createdOn
      * @type  {Date}
      *
-     * @description  The date on which the user was created.
+     * @description The date on which the user was created.
      * The setter is defined to only ever re-set to the current value.
      * This should prevent the created field from being overwritten.
      */
@@ -197,7 +197,7 @@ const UserSchema = new mongoose.Schema({
      * @property  updatedOn
      * @type  {Date}
      *
-     * @description  The date on which the user object was last updated.
+     * @description The date on which the user object was last updated.
      * The setter is run using pre-save middleware.
      */
   updatedOn: {
@@ -211,7 +211,7 @@ const UserSchema = new mongoose.Schema({
      * @property  deletedOn
      * @type  {Date}
      *
-     * @description  The date on which the user was deleted.
+     * @description The date on which the user was deleted.
      * This is used to provide soft-delete functionality.
      */
   deletedOn: {
@@ -225,7 +225,7 @@ const UserSchema = new mongoose.Schema({
      * @property  deleted
      * @type  {Boolean}
      *
-     * @description  This is the Boolean value that tells us whether or not the user has
+     * @description This is the Boolean value that tells us whether or not the user has
      * been deleted. It just makes is easier to check if a user is deleted.
      */
   deleted: {
@@ -259,7 +259,7 @@ const UserSchema = new mongoose.Schema({
   * @property  orgs.read
   * @type  {Organization}
   *
-  * @description  This is the list of orgs the user has read access to.
+  * @description This is the list of orgs the user has read access to.
   */
 UserSchema.virtual('orgs.read', {
   ref: 'Organization',
@@ -273,7 +273,7 @@ UserSchema.virtual('orgs.read', {
   * @property  orgs.write
   * @type  {Organization}
   *
-  * @description  This is the list of orgs the user has write access to.
+  * @description This is the list of orgs the user has write access to.
   */
 UserSchema.virtual('orgs.write', {
   ref: 'Organization',
@@ -287,7 +287,7 @@ UserSchema.virtual('orgs.write', {
   * @property  orgs.admin
   * @type  {Organization}
   *
-  * @description  This is the list of orgs the user has admin access to.
+  * @description This is the list of orgs the user has admin access to.
   */
 UserSchema.virtual('orgs.admin', {
   ref: 'Organization',
@@ -301,7 +301,7 @@ UserSchema.virtual('orgs.admin', {
   * @property  proj.read
   * @type  {Project}
   *
-  * @description  This is the list of projects the user has read access to.
+  * @description This is the list of projects the user has read access to.
   */
 UserSchema.virtual('proj.read', {
   ref: 'Project',
@@ -315,7 +315,7 @@ UserSchema.virtual('proj.read', {
   * @property  proj.write
   * @type  {Project}
   *
-  * @description  This is the list of projects the user has write access to.
+  * @description This is the list of projects the user has write access to.
   */
 UserSchema.virtual('proj.write', {
   ref: 'Project',
@@ -329,7 +329,7 @@ UserSchema.virtual('proj.write', {
   * @property  proj.admin
   * @type  {Project}
   *
-  * @description  This is the list of projects the user has admin access to.
+  * @description This is the list of projects the user has admin access to.
   */
 UserSchema.virtual('proj.admin', {
   ref: 'Project',

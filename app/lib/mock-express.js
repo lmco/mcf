@@ -14,11 +14,11 @@
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description  This class Defines functions which can return mock express
+ * @description This class Defines functions which can return mock express
  * functions for use in the test framework.
  */
 
-// Load mbee modules
+// Load MBEE modules
 const errors = M.require('lib.errors');
 
 /**
@@ -26,7 +26,7 @@ const errors = M.require('lib.errors');
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description  This defines test functions which can be used by
+ * @description This defines test functions which can be used by
  * routes in order to implement test functions
  */
 

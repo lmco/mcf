@@ -14,7 +14,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  Defines the database connection. This module defines a
+ * @description Defines the database connection. This module defines a
  * connect function which when called connects to the database.
  */
 

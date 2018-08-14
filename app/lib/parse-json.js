@@ -14,7 +14,7 @@
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description  This class Defines a class of parsing functions which can be used
+ * @description This class Defines a class of parsing functions which can be used
  * to parse json objects within the application.
  */
 
@@ -26,7 +26,7 @@ const path = require('path');
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description  This class Defines a class of parsing functions which can be
+ * @description This class Defines a class of parsing functions which can be
  * used in order to alter JSON objects for use within the application.
  */
 class ParseJSON {

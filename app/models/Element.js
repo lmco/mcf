@@ -38,7 +38,7 @@
 // Load node modules
 const mongoose = require('mongoose');
 
-// load mbee modules
+// Load MBEE modules
 const validators = M.require('lib.validators');
 const uuidv4 = require('uuid/v4');
 
@@ -60,7 +60,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf  Element
    * @property  {String} uid
    *
-   * @description  The unique ID of the element.
+   * @description The unique ID of the element.
    */
   uid: {
     type: String,
@@ -77,7 +77,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf  Element
    * @property  {String} id
    *
-   * @description  The ID of the element.
+   * @description The ID of the element.
    */
   id: {
     type: String,
@@ -91,7 +91,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf  Element
    * @property  {String} uuid
    *
-   * @description  The UUID of the element. Based on RFC 4122
+   * @description The UUID of the element. Based on RFC 4122
    */
   uuid: {
     type: String,
@@ -106,7 +106,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf Element
    * @property {String} name
    *
-   * @description  The element documentation
+   * @description The element documentation
    */
   name: {
     type: String,
@@ -120,7 +120,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf Element
    * @property {Schema.Types.ObjectId} project
    *
-   * @description  The project the element belongs to.
+   * @description The project the element belongs to.
    */
   project: {
     type: mongoose.Schema.Types.ObjectId,
@@ -132,7 +132,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf Element
    * @property {Schema.Types.ObjectId} parent
    *
-   * @description  The parent element containing the element. The model root
+   * @description The parent element containing the element. The model root
    * package will have a parent of null.
    */
   parent: {
@@ -146,7 +146,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf Element
    * @property {String} documentation
    *
-   * @description  The element documentation
+   * @description The element documentation
    */
   documentation: {
     type: String
@@ -168,7 +168,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf Element
    * @property {Date} createdOn
    *
-   * @description  The date on which the element was created.
+   * @description The date on which the element was created.
    * The setter is defined to only ever re-set to the current value.
    * This should prevent the created field from being overwritten.
    */
@@ -210,7 +210,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf Element
    * @property {Boolean} deleted
    *
-   * @description  This Boolean indicates whether or not the element has been
+   * @description This Boolean indicates whether or not the element has been
    * deleted. It is indented to provide and easier way to check deletion status
    * over the deletedOn date comparison.
    */

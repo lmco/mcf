@@ -22,7 +22,7 @@
 // Load node modules
 const mongoose = require('mongoose');
 
-// Load mbee modules
+// Load MBEE modules
 const validators = M.require('lib.validators');
 
 /******************************************************************************
@@ -40,7 +40,7 @@ const ProjectSchema = new mongoose.Schema({
     * @property  id
     * @type {String}
     *
-    * @description  The 'id' holds a non-unique project id.
+    * @description The 'id' holds a non-unique project id.
   */
   id: {
     type: String,
@@ -55,7 +55,7 @@ const ProjectSchema = new mongoose.Schema({
     * @property  org
     * @type {Organization}
     *
-    * @description  The 'org' holds a reference to the organization which it belongs t0.
+    * @description The 'org' holds a reference to the organization which it belongs t0.
     */
   org: {
     type: mongoose.Schema.Types.ObjectId,
@@ -68,7 +68,7 @@ const ProjectSchema = new mongoose.Schema({
     * @property  uid
     * @type {String}
     *
-    * @description  The 'uid' holds a unique project id which is the concatonation of the projects
+    * @description The 'uid' holds a unique project id which is the concatonation of the projects
     * org id and it's own id. example uid = 'starkIndustries:arcReactor'.
     */
   uid: {
@@ -81,7 +81,7 @@ const ProjectSchema = new mongoose.Schema({
     * @property  name
     * @type {String}
     *
-    * @description  The 'name' holds a project name to be displayed for an
+    * @description The 'name' holds a project name to be displayed for an
     * project.
     */
   name: {
@@ -94,12 +94,12 @@ const ProjectSchema = new mongoose.Schema({
     * @memberOf  Project
     * @property  permissions
     *
-    * @description  Permissions includes lists of users with certain permission levels
+    * @description Permissions includes lists of users with certain permission levels
     * or "roles" within project.
     */
   permissions: {
     /**
-     * @description  Contains the list of users with read access to the project.
+     * @description Contains the list of users with read access to the project.
      * @type {Array}
      */
     read: [{
@@ -108,7 +108,7 @@ const ProjectSchema = new mongoose.Schema({
     }],
 
     /**
-     * @description   Contains the list of users with write access to the project.
+     * @description  Contains the list of users with write access to the project.
      * @type  {Array}
      */
     write: [{
@@ -117,7 +117,7 @@ const ProjectSchema = new mongoose.Schema({
     }],
 
     /**
-     * @description  Contains the list of users with admin access to the project.
+     * @description Contains the list of users with admin access to the project.
      * @type {Array}
      */
     admin: [{
@@ -131,7 +131,7 @@ const ProjectSchema = new mongoose.Schema({
     * @property  deletedOn
     * @type {Date}
     *
-    * @description  The date the project was soft-deleted on.
+    * @description The date the project was soft-deleted on.
     */
   deletedOn: {
     type: Date,
@@ -143,7 +143,7 @@ const ProjectSchema = new mongoose.Schema({
     * @property  deleted
     * @type {Boolean}
     *
-    * @description  A boolean value displaying whether or not the project
+    * @description A boolean value displaying whether or not the project
     * has been soft deleted.
     */
   deleted: {

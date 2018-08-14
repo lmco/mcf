@@ -15,7 +15,7 @@
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This tests the Element Controller functionality. These tests
+ * @description This tests the Element Controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The element controller tests create,
  * update, find, soft delete, and hard delete of the projects.

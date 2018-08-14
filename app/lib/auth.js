@@ -18,7 +18,7 @@
  * a controller. It ensures that the auth strategy defined in the config.json.
  */
 
-// Load mbee modules
+// Load MBEE modules
 const AuthModule = M.require(`auth.${M.config.auth.strategy}`);
 const sani = M.require('lib.sanitization');
 
@@ -41,7 +41,7 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  ******************************************************************************/
 
 /**
- * @description  This function is the main authenticate function that is used to handle any
+ * @description This function is the main authenticate function that is used to handle any
  * supported type of authentication from basic, token, and form. This function implements the
  * different types of authentication according to the strategy set up in the configuration file.
  *
@@ -233,7 +233,7 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
 }
 
 /**
- * @description  This function implements doLogin. The purpose of this function is to preform
+ * @description This function implements doLogin. The purpose of this function is to preform
  * login type functions such as setting session tokens, storing logged in user in a database, or
  * writing login attempting in a log file.
  *

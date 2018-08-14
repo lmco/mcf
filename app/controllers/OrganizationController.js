@@ -14,11 +14,11 @@
  *
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This implements the behavior and logic for an organization and
+ * @description This implements the behavior and logic for an organization and
  * provides functions for interacting with organizations.
  */
 
-// Load mbee modules
+// Load MBEE modules
 const Organization = M.require('models.Organization');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
@@ -37,7 +37,7 @@ const errors = M.require('lib.errors');
 class OrganizationController {
 
   /**
-   * @description  This function takes a user objects and returns a list of
+   * @description This function takes a user objects and returns a list of
    * orgs that the user has at least read access too.
    *
    * @example
@@ -49,7 +49,7 @@ class OrganizationController {
    *     console.log(err);
    *   })
    *
-   * @param  {User} user  The user whose organizations to find
+   * @param {User} user  The user whose organizations to find
    */
   static findOrgs(user) {
     return new Promise((resolve, reject) => {
@@ -63,7 +63,7 @@ class OrganizationController {
 
 
   /**
-   * @description  This function takes a user and orgID and resolves the
+   * @description This function takes a user and orgID and resolves the
    *   organization.
    *
    * @example
@@ -76,9 +76,9 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} user  The requesting user object.
-   * @param  {String} organizationID  The string of the org ID.
-   * @param  {Boolean} softDeleted  An optional flag that allows users to
+   * @param {User} user  The requesting user object.
+   * @param {String} organizationID  The string of the org ID.
+   * @param {Boolean} softDeleted  An optional flag that allows users to
    *                   search for soft deleted projects as well.
    */
   static findOrg(user, organizationID, softDeleted = false) {
@@ -123,7 +123,7 @@ class OrganizationController {
   }
 
   /**
-   * @description  This function takes a query and finds the org.
+   * @description This function takes a query and finds the org.
    *
    * @example
    * OrganizationController.findOrgsQuery({ id: 'org' })
@@ -135,7 +135,7 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {Object} orgQuery  The query to be made to the database
+   * @param {Object} orgQuery  The query to be made to the database
    */
   static findOrgsQuery(orgQuery) {
     return new Promise((resolve, reject) => {
@@ -156,7 +156,7 @@ class OrganizationController {
 
 
   /**
-   * @description  This function takes a user and dictionary containing
+   * @description This function takes a user and dictionary containing
    *   the org id and name and creates a new organization.
    *
    * @example
@@ -169,8 +169,8 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} user  The object containing the user of the requesting user.
-   * @param  {Org} orgInfo  The JSON of the new org.
+   * @param {User} user  The object containing the user of the requesting user.
+   * @param {Org} orgInfo  The JSON of the new org.
    */
   static createOrg(user, orgInfo) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -251,7 +251,7 @@ class OrganizationController {
 
 
   /**
-   * @description  This function takes a user and org object and updates an
+   * @description This function takes a user and org object and updates an
    *   existing organization.
    *
    * @example
@@ -264,9 +264,9 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} user  The object containing the  requesting user.
-   * @param  {String} organizationID  The organization ID.
-   * @param  {Object} orgUpdate  The JSON of the updated org elements.
+   * @param {User} user  The object containing the  requesting user.
+   * @param {String} organizationID  The organization ID.
+   * @param {Object} orgUpdate  The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -377,7 +377,7 @@ class OrganizationController {
 
 
   /**
-   * @description  This function takes a user object, org object, and boolean flag
+   * @description This function takes a user object, org object, and boolean flag
    *   and (soft)deletes an existing organization.
    *
    * @example
@@ -390,9 +390,9 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} user  The object containing the  requesting user.
-   * @param  {String} organizationID  The ID of the org being deleted.
-   * @param  {Object} options  Contains the list of delete options.
+   * @param {User} user  The object containing the  requesting user.
+   * @param {String} organizationID  The ID of the org being deleted.
+   * @param {Object} options  Contains the list of delete options.
    */
   static removeOrg(user, organizationID, options) {
     // Loading controller function wide since the project controller loads
@@ -456,7 +456,7 @@ class OrganizationController {
   }
 
   /**
-   * @description  This function does the actual deletion or updating on an org.
+   * @description This function does the actual deletion or updating on an org.
    *   It was written to help clean up some code in the removeOrg function.
    *
    * @example
@@ -503,7 +503,7 @@ class OrganizationController {
   }
 
   /**
-   * @description  This function takes a user, second user and orgID and returns the
+   * @description This function takes a user, second user and orgID and returns the
    *   permissions the second user has within the org
    *
    * @example
@@ -534,7 +534,7 @@ class OrganizationController {
   }
 
   /**
-   * @description  This function takes a user, second user, orgID and role and updates a
+   * @description This function takes a user, second user, orgID and role and updates a
    *   users permissions within an organization
    *
    * @example
@@ -547,10 +547,10 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The ID of the org being deleted.
-   * @param  {User} setUser  The object containing the user whose roles are to be changed.
-   * @param  {String} role  The new role for the user.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The ID of the org being deleted.
+   * @param {User} setUser  The object containing the user whose roles are to be changed.
+   * @param {String} role  The new role for the user.
    */
   static setPermissions(reqUser, organizationID, setUser, role) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -622,7 +622,7 @@ class OrganizationController {
   }
 
   /**
-   * @description  This function takes a user and ordID and returns the permissions
+   * @description This function takes a user and ordID and returns the permissions
    *   object, displaying the users who have those permissions
    *
    * @example
@@ -635,8 +635,8 @@ class OrganizationController {
    * });
    *
    *
-   * @param  {User} user  The object containing the requesting user.
-   * @param  {String} organizationID  The ID of the org being deleted.
+   * @param {User} user  The object containing the requesting user.
+   * @param {String} organizationID  The ID of the org being deleted.
    */
   static findAllPermissions(user, organizationID) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return

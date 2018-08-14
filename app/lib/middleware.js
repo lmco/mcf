@@ -14,11 +14,11 @@
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description  This class Defines middleware functions which can be used by
+ * @description This class Defines middleware functions which can be used by
  * routes in order to implement route logging or other various functionality.
  */
 
-// load mbee modules
+// Load MBEE modules
 const errors = M.require('lib.errors');
 
 /**
@@ -26,7 +26,7 @@ const errors = M.require('lib.errors');
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description  This class Defines middleware functions which can be used by
+ * @description This class Defines middleware functions which can be used by
  * routes in order to implement route logging or other various functionality.
  */
 class Middleware {

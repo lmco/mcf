@@ -18,7 +18,7 @@
  * authentication. This should be the default authentication strategy for MBEE.
  */
 
-// Load mbee modules
+// Load MBEE modules
 const User = M.require('models.User');
 const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
@@ -38,7 +38,7 @@ class LocalStrategy {
    ******************************************************************************/
 
   /**
-   * @description  This function implements handleBasicAuth called in the auth.js library file.
+   * @description This function implements handleBasicAuth called in the auth.js library file.
    * The purpose of this function is to implement authentication via local auth using a username
    * and password as well as the configuration set up in the config file used. Handles basic-style
    * authentication. This function gets called both for he case of a basic auth header or for login
@@ -86,7 +86,7 @@ class LocalStrategy {
   }
 
   /**
-   * @description  This function implements handleTokenAuth called in the auth.js library file.
+   * @description This function implements handleTokenAuth called in the auth.js library file.
    * The purpose of this function is to implement authentication of a user who has passed in a
    * session token or bearer token. This function gets called both for the case of a token auth
    * header or a session token. Either way the token is provided to this function for auth.
@@ -179,7 +179,7 @@ class LocalStrategy {
   }
 
   /**
-   * @description  This function implements doLogin called in the auth.js library file.
+   * @description This function implements doLogin called in the auth.js library file.
    * The purpose of this function is to preform session or token setup for the node
    * application so that users can be authorized via token after logging in.
    *

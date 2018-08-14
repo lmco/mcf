@@ -18,7 +18,7 @@
  * deployments on the LMI.
  */
 
-// Load mbee modules
+// Load MBEE modules
 const LocalStrategy = M.require('auth.LocalStrategy');
 const LDAPStrategy = M.require('auth.LDAPStrategy');
 const User = M.require('models.User');
@@ -82,7 +82,7 @@ class LMICloudStrategy {
   }
 
   /**
-   * @description  This function implements handleTokenAuth called in the auth.js library file.
+   * @description This function implements handleTokenAuth called in the auth.js library file.
    * The purpose of this function is to implement authentication of a user who has
    * passed in a session token or bearer token. This particular instance just implements the same
    * tokenAuth provided by the Local Strategy.
@@ -110,7 +110,7 @@ class LMICloudStrategy {
   }
 
   /**
-   * @description  This function implements doLogin called in the auth.js library file.
+   * @description This function implements doLogin called in the auth.js library file.
    * The purpose of this function is to preform session or token setup for the node
    * application so that users can be authorized via token after logging in. This particular
    * implementation uses the Local Strategy doLogin function.

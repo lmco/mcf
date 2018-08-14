@@ -15,7 +15,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  Tests loading the MBEE crypto library and executing the encrypt
+ * @description Tests loading the MBEE crypto library and executing the encrypt
  * and decrypt functions in the library.
  */
 
@@ -26,6 +26,12 @@ const chai = require('chai');
 const mbeeCrypto = M.require('lib.crypto');
 
 /* --------------------( Main )-------------------- */
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
   it('should have encrypt and decrypt functions', checkCryptoFunctions);
   it('should encrypt and decrypt a message', encryptTest);

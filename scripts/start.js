@@ -27,7 +27,7 @@ if (module.parent == null) {
   process.exit(-1);
 }
 
-// Load mbee modules
+// Load MBEE modules
 const startup = M.require('lib.startup');
 
 /**

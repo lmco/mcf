@@ -14,19 +14,19 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  Defines the custom error class.
+ * @description Defines the custom error class.
  */
 
 module.exports.CustomError = class CustomError extends Error {
 
   /**
-   * @description  The CustomError constructor. It requires a description
+   * @description The CustomError constructor. It requires a description
    * and can optionally take a status and level. If not provided, the status
    * defaults to 500 and the level to null.
    *
-   * @param  {String} description  The custom error description.
-   * @param  {Number} status  The HTTP status code. Defaults to 500.
-   * @param  {String} level  The errors logger level. If provided,
+   * @param {String} description  The custom error description.
+   * @param {Number} status  The HTTP status code. Defaults to 500.
+   * @param {String} level  The errors logger level. If provided,
    *         will cause the logger to log automatically. Defaults to null.
    */
   constructor(description, status = 500, level = null) {
@@ -42,7 +42,7 @@ module.exports.CustomError = class CustomError extends Error {
   }
 
   /**
-   * @description  Returns a HTTP message based on the status code.
+   * @description Returns a HTTP message based on the status code.
    */
   getMessage() {
     switch (this.status) {
@@ -74,9 +74,9 @@ module.exports.CustomError = class CustomError extends Error {
   }
 
   /**
-   * @description  Logs the error based on the input level.
+   * @description Logs the error based on the input level.
    *
-   * @param  {String} level  The optional level parameter.
+   * @param {String} level  The optional level parameter.
    */
   log(level = 'warn') {
     switch (level.toLowerCase()) {
@@ -104,7 +104,7 @@ module.exports.CustomError = class CustomError extends Error {
   }
 
   /**
-   * @description  Returns a JSON Object containing the custom error fields.
+   * @description Returns a JSON Object containing the custom error fields.
    */
   toJSON() {
     return {
@@ -115,7 +115,7 @@ module.exports.CustomError = class CustomError extends Error {
   }
 
   /**
-   * @description  Overrides the console.log output of the CustomError.
+   * @description Overrides the console.log output of the CustomError.
    */
   // inspect() {
   //   return `${this.status} ERROR: ${this.description}`;

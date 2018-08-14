@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/204-lib-parse-json
+ * @module  test.204-lib-parse-json
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -22,13 +22,10 @@
 // Load node modules
 const chai = require('chai');
 
-// Load mbee modules
+// Load MBEE modules
 const parseJSON = M.require('lib.parse-json');
 
-
 /* --------------------( Main )-------------------- */
-
-
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
  * or grouping several "it" tests into a single group. In this case, the name of
@@ -39,10 +36,7 @@ describe(M.getModuleName(module.filename), () => {
   it('Should parse the configuration file', parseTest);
 });
 
-
 /* --------------------( Tests )-------------------- */
-
-
 /**
  * @description Checks to make sure the file is being properly parsed
  */
@@ -51,8 +45,11 @@ function parseTest(done) {
   // directory. This way we provide an example config that aligns with our
   // expected usage of that file rather than having to change JSON files in the
   // test directory if we alter the behavior of this module.
+
+  // Extract JSON file as a String, removing comments
   const parseString = parseJSON.removeComments('test/testParse.config');
   try {
+    // Convert String back to JSON Object
     const checkString = JSON.parse(parseString);
     chai.expect(typeof checkString).to.equal('object');
   }

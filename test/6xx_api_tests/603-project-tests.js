@@ -15,7 +15,7 @@
  *
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  This tests the API controller functionality. These tests
+ * @description This tests the API controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. These API controller tests are
  * specifically for the Project API tests: posting, patching, getting, and deleting
@@ -30,7 +30,7 @@ const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove dependency on mongoose
 const request = require('request');
 
-// Load mbee modules
+// Load MBEE modules
 const OrgController = M.require('controllers.OrganizationController');
 const AuthController = M.require('lib.auth');
 const User = M.require('models.User');

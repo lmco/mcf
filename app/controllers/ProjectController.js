@@ -14,11 +14,11 @@
  *
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This implements the behavior and logic for a project and
+ * @description This implements the behavior and logic for a project and
  * provides functions for interacting with projects.
  */
 
-// Load mbee modules
+// Load MBEE modules
 const OrgController = M.require('controllers.OrganizationController');
 const Project = M.require('models.Project');
 const utils = M.require('lib.utils');
@@ -43,7 +43,7 @@ const errors = M.require('lib.errors');
 class ProjectController {
 
   /**
-   * @description  The function finds all projects for a given orgID.
+   * @description The function finds all projects for a given orgID.
    *
    * @example
    * ProjectController.findProjects({Tony Stark}, 'StarkIndustries')
@@ -55,9 +55,9 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The organization ID for the org the project belongs to.
-   * @param  {Boolean} softDeleted  The optional flag to denote searching for deleted projects
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The organization ID for the org the project belongs to.
+   * @param {Boolean} softDeleted  The optional flag to denote searching for deleted projects
    */
   static findProjects(reqUser, organizationID, softDeleted = false) {
     return new Promise((resolve, reject) => {
@@ -101,7 +101,7 @@ class ProjectController {
   }
 
   /**
-   * @description  The function deletes all projects for an org.
+   * @description The function deletes all projects for an org.
    *
    * @example
    * ProjectController.removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
@@ -113,9 +113,9 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The organization ID for the org the project belongs to.
-   * @param  {Object} options  Contains a list of delete options.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The organization ID for the org the project belongs to.
+   * @param {Object} options  Contains a list of delete options.
    */
   static removeProjects(reqUser, organizationID, options) {
     return new Promise((resolve, reject) => {
@@ -165,7 +165,7 @@ class ProjectController {
 
 
   /**
-   * @description  The function finds a project.
+   * @description The function finds a project.
    *
    * @example
    * ProjectController.findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
@@ -177,9 +177,9 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The organization ID for the org the project belongs to.
-   * @param  {String} projectID  The project ID of the Project which is being searched for.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The organization ID for the org the project belongs to.
+   * @param {String} projectID  The project ID of the Project which is being searched for.
    * @param {Boolean} softDeleted  The flag to control whether or not to find softDeleted projects.
    */
   static findProject(reqUser, organizationID, projectID, softDeleted = false) {
@@ -228,7 +228,7 @@ class ProjectController {
   }
 
   /**
-   * @description  This function takes a query and finds the project.
+   * @description This function takes a query and finds the project.
    *
    * @example
    * ProjectController.findProjectsQuery({ uid: 'org:proj' })
@@ -240,7 +240,7 @@ class ProjectController {
    * });
    *
    *
-   * @param  {Object} projectQuery  The query to be made to the database
+   * @param {Object} projectQuery  The query to be made to the database
    */
   static findProjectsQuery(projectQuery) {
     return new Promise((resolve, reject) => {
@@ -262,7 +262,7 @@ class ProjectController {
 
 
   /**
-   * @description  The function creates a project.
+   * @description The function creates a project.
    *
    * @example
    * ProjectController.createProject({Tony Stark}, {Arc Reactor 1})
@@ -274,8 +274,8 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {Object} project  The object of the project being created.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {Object} project  The object of the project being created.
    */
   static createProject(reqUser, project) {
     return new Promise((resolve, reject) => {
@@ -365,7 +365,7 @@ class ProjectController {
 
 
   /**
-   * @description  The function updates a project.
+   * @description The function updates a project.
    *
    * @example
    * ProjectController.updateProject({Tony Stark}, {Arc Reactor 1})
@@ -377,10 +377,10 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The organization ID of the project.
-   * @param  {String} projectID  The project ID.
-   * @param  {Object} projectUpdated  The object of the updated project.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The organization ID of the project.
+   * @param {String} projectID  The project ID.
+   * @param {Object} projectUpdated  The object of the updated project.
    */
   static updateProject(reqUser, organizationID, projectID, projectUpdated) {
     return new Promise((resolve, reject) => {
@@ -480,7 +480,7 @@ class ProjectController {
 
 
   /**
-   * @description  The function deletes a project.
+   * @description The function deletes a project.
    *
    * @example
    * ProjectController.removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
@@ -492,10 +492,10 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The organization ID for the org the project belongs to.
-   * @param  {String} projectID  he project ID of the Project which is being deleted.
-   * @param  {Object} options  Contains the list of delete options.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The organization ID for the org the project belongs to.
+   * @param {String} projectID  he project ID of the Project which is being deleted.
+   * @param {Object} options  Contains the list of delete options.
    */
   static removeProject(reqUser, organizationID, projectID, options) {
     // Loading controller function wide since the element controller loads
@@ -565,7 +565,7 @@ class ProjectController {
   }
 
   /**
-   * @description  The function actually deletes the project.
+   * @description The function actually deletes the project.
    *
    * @example
    * ProjectController.removeProjectHelper({Arc}, true)
@@ -577,10 +577,10 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The requesting user.
-   * @param  {String} orgID  The ID of the organization in question.
-   * @param  {String} projID  The ID of project to delete.
-   * @param  {Boolean} softDelete  Flag denoting whether to soft delete or not.
+   * @param {User} reqUser  The requesting user.
+   * @param {String} orgID  The ID of the organization in question.
+   * @param {String} projID  The ID of project to delete.
+   * @param {Boolean} softDelete  Flag denoting whether to soft delete or not.
    */
   static removeProjectHelper(reqUser, orgID, projID, softDelete) {
     return new Promise((resolve, reject) => {
@@ -619,7 +619,7 @@ class ProjectController {
   }
 
   /**
-   * @description  The function finds a projects permissions.
+   * @description The function finds a projects permissions.
    *
    * @example
    * ProjectController.findAllPermissions({Tony Stark}, 'stark', 'arc')
@@ -631,9 +631,9 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The organization ID for the org the project belongs to.
-   * @param  {String} projectID  The project ID of the Project which is being deleted.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The organization ID for the org the project belongs to.
+   * @param {String} projectID  The project ID of the Project which is being deleted.
    */
   static findAllPermissions(reqUser, organizationID, projectID) {
     return new Promise((resolve, reject) => {
@@ -681,10 +681,10 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The organization ID for the org the project belongs to.
-   * @param  {String} projectID  The project ID of the Project which is being deleted.
-   * @param  {User} user The object containing the user to be searched for.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The organization ID for the org the project belongs to.
+   * @param {String} projectID  The project ID of the Project which is being deleted.
+   * @param {User} user The object containing the user to be searched for.
    */
   static findPermissions(reqUser, organizationID, projectID, user) {
     return new Promise((resolve, reject) => {
@@ -706,7 +706,7 @@ class ProjectController {
 
 
   /**
-   * @description  The function sets a user's permissions for a project.
+   * @description The function sets a user's permissions for a project.
    *
    * @example
    * ProjectController.setPermissions({Tony}, 'stark_industries', 'arc_reactor', {Jarvis}, 'write')
@@ -718,11 +718,11 @@ class ProjectController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The organization ID for the org the project belongs to.
-   * @param  {String} projectID  The project ID of the Project which is being deleted.
-   * @param  {User} setUser  The object containing the user which permissions are being set for.
-   * @param  {String} permissionType  The permission level or type being set for the user.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The organization ID for the org the project belongs to.
+   * @param {String} projectID  The project ID of the Project which is being deleted.
+   * @param {User} setUser  The object containing the user which permissions are being set for.
+   * @param {String} permissionType  The permission level or type being set for the user.
    */
   static setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
     return new Promise((resolve, reject) => {

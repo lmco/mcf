@@ -30,7 +30,7 @@
 const express = require('express');
 const api = express.Router();
 
-// Load mbee modules
+// Load MBEE modules
 const APIController = M.require('controllers.APIController');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');

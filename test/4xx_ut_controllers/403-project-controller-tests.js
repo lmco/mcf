@@ -4,7 +4,7 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description   This tests the Project Controller functionality. These tests
+ * @description  This tests the Project Controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The project controller tests create,
  * update, find, soft delete, hard delte, and permissions of projects. As well
@@ -15,7 +15,7 @@
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove need for mongoose
 
-// Load mbee modules
+// Load MBEE modules
 const UserController = M.require('controllers.UserController');
 const OrgController = M.require('controllers.OrganizationController');
 const ProjController = M.require('controllers.ProjectController');

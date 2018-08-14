@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/205-lib-utils
+ * @module  test.205-lib-utils
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,41 +15,54 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This file tests the utility functions.
+ * @description This file tests the utility functions.
  */
 
 // Load node modules
 const chai = require('chai');
-const utils = M.require('lib.utils');
-const mongoose = require('mongoose'); // TODO - remove need for mongoose
+
+// Load MBEE modules
 const OrgController = M.require('controllers.OrganizationController');
-const ProjectConttroller = M.require('controllers.ProjectController');
+const ProjectController = M.require('controllers.ProjectController');
 const UserController = M.require('controllers.UserController');
 const User = M.require('models.User');
+const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
-
+// Define global variables
 let admin = null;
 let nonAdmin = null;
 let org = null;
 let intProj = null;
 let privProj = null;
 
-
 /* --------------------( Main )-------------------- */
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
+  /**
+   * Before: Connect to database, Create module level users, projects, orgs
+   */
   before((done) => {
-    const db = M.require('lib/db');
+    // Connect to the database
     db.connect();
 
+    // Create new admin user
     admin = new User({
       username: 'adminuser',
       password: 'password',
       admin: true
     });
 
+    // Save admin user
     admin.save((saveUserErr) => {
       chai.expect(saveUserErr).to.equal(null);
+
+      // Create new non-admin user
       const nonAdminData = {
         username: 'nonadminuser',
         password: 'password'
@@ -57,31 +70,37 @@ describe(M.getModuleName(module.filename), () => {
       UserController.createUser(admin, nonAdminData)
       .then((user) => {
         nonAdmin = user;
-        return OrgController.createOrg(admin, { id: 'priv', name: 'Private Org' });
+
+        // Creating global org
+        return OrgController.createOrg(admin, { id: 'orgId', name: 'Org Name' });
       })
       .then((retOrg) => {
         org = retOrg;
+
+        // Create internal project
         const intProjData = {
           id: 'intproj',
-          name: 'Public Project',
+          name: 'Internal Project',
           org: {
             id: org.id
           },
           visibility: 'internal'
         };
-        return ProjectConttroller.createProject(admin, intProjData);
+        return ProjectController.createProject(admin, intProjData);
       })
       .then((proj) => {
         intProj = proj;
+
+        // Create private project
         const privProjData = {
           id: 'privproj',
-          name: 'Public Project',
+          name: 'Private Project',
           org: {
             id: org.id
           },
           visibility: 'private'
         };
-        return ProjectConttroller.createProject(admin, privProjData);
+        return ProjectController.createProject(admin, privProjData);
       })
       .then((proj) => {
         privProj = proj;
@@ -94,29 +113,37 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
-
+  /**
+   * After: Close database connection, deletes module level users, projects, orgs
+   */
   after((done) => {
+    // Remove org
     OrgController.removeOrg(admin, 'priv', { soft: false })
+
+    // Remove non-admin user
     .then(() => UserController.removeUser(admin, 'nonadminuser'))
     .then(() => {
+      // Remove admin user
       User.findOne({
         username: 'adminuser'
       }, (err, foundUser) => {
         chai.expect(err).to.equal(null);
         foundUser.remove((err2) => {
           chai.expect(err2).to.equal(null);
-          mongoose.connection.close();
+
+          // Disconnect database
+          db.disconnect();
           done();
         });
       });
     })
     .catch((error) => {
       chai.expect(error).to.equal(null);
-      mongoose.connection.close();
+      // Disconnect database
+      db.disconnect();
       done();
     });
   });
-
 
   it('should check that a string is a string and succeed', stringIsString);
   it('should check that a number is a string and fail', numberIsString);
@@ -133,11 +160,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should parse a valid uid and get the second element', parseValidUIDSecondElement);
   it('should return permissions on an internal project', permissionsInternalProject);
   it('should return permissions on a private project', permissionsPrivateProject);
-});
-
+}); // END: describe()
 
 /* --------------------( Test Data )-------------------- */
-
 const sampleObj = {
   project: {
     id: 'myID',
@@ -149,47 +174,44 @@ const sampleObj = {
   type: 'Element'
 };
 
-
 /* --------------------( Tests )-------------------- */
-
-
 /**
- * @description Checks that a string is a string.
- *
- * TODO - Does the test really check that a string is a string or are we testing
- * that the assertType function works using string input? Cleanup descriptions
- * on this and other tests.
+ * @description Test assertType() correctly checks for valid type.
+ * Note: Possible types: string, object, number, undefined, boolean, symbol
  */
 function stringIsString(done) {
   try {
+    // Check content of array is of type string.
     utils.assertType(['hello', 'goodbye'], 'string');
   }
   catch (error) {
     chai.expect(error.message).to.equal(null);
     done();
   }
+  // Checks for correct type and returns a boolean
   chai.expect(utils.checkType(['hello', 'goodbye'], 'string')).to.equal(true);
   done();
 }
 
-
 /**
- * @description Checks that a number is a string.
+ * @description Test assertType() correctly checks for WRONG type within an array.
+ * Note: Possible types: string, object, number, undefined, boolean, symbol
  */
 function numberIsString(done) {
   try {
+    // Check if array content are of string type
     utils.assertType([1, 2], 'string');
-    // TODO - add comment explaining the line below
+    // Check for false, number do not equal string
     chai.expect(true).to.equal(false);
     done();
   }
   catch (error) {
     chai.expect(error.status).to.equal(400);
   }
+  // Checks for correct type and returns a boolean
   chai.expect(utils.checkType([1, 2], 'string')).to.equal(false);
   done();
 }
-
 
 /**
  * @description Checks that an object is an object.
@@ -202,14 +224,13 @@ function objectIsObject(done) {
     chai.expect(error.message).to.equal(null);
     done();
   }
+  // Checks for correct type and returns a boolean
   chai.expect(utils.checkType([{ hello: 'string' }], 'object')).to.equal(true);
   done();
 }
 
-
 /**
  * @description Checks that the key project.id exists.
- * TODO - This test got messy after a merge, let's fix it.
  */
 function projectIDExists(done) {
   try {
@@ -218,34 +239,30 @@ function projectIDExists(done) {
   catch (error) {
     chai.expect(error.message).to.equal(null);
   }
+  // Checks for correct key and returns true
   chai.expect(utils.checkExists(['project.id'], sampleObj)).to.equal(true);
   done();
 }
 
-
 /**
- * @description Checks that the key project.user exists.
- *
- * TODO - consider explaining that the assert function is expected to throw
- * an error that should be caught in the catch block.
- *
- * TODO - This test got messy after a merge, let's fix it.
+ * @description Checks that the key project.user exists. Errors if not exist
  */
 function projectUserExists(done) {
   try {
+    // Check if key 'project.user' exist in sampleObj
     utils.assertExists(['project.user'], sampleObj);
     chai.expect(true).to.equal(false);
   }
   catch (error) {
     chai.expect(error.status).to.equal(400);
   }
+  // Checks for INCORRECT key and returns false
   chai.expect(utils.checkExists(['project.user'], sampleObj)).to.equal(false);
   done();
 }
 
-
 /**
- * @description Checks that multiple keys exist.
+ * @description Checks that all keys within an array exist else error.
  */
 function multipleExist(done) {
   try {
@@ -257,7 +274,6 @@ function multipleExist(done) {
   chai.expect(utils.checkExists(['project.name', 'project.org.id'], sampleObj)).to.equal(true);
   done();
 }
-
 
 /**
  * @description Check that a user is an admin and succeed.
@@ -274,9 +290,8 @@ function userIsAdmin(done) {
   done();
 }
 
-
 /**
- * @description Check that a user is an admin and fail.
+ * @description Check that a user is an admin and fails.
  */
 function userIsNotAdmin(done) {
   const user = { name: 'Stormtrooper 123', admin: false };
@@ -291,9 +306,8 @@ function userIsNotAdmin(done) {
   done();
 }
 
-
 /**
- * @description  Creates a uid from valid parameters
+ * @description Creates a uid from valid parameters
  */
 function validUID(done) {
   try {
@@ -307,9 +321,8 @@ function validUID(done) {
   }
 }
 
-
 /**
- * @description  Creates a uid from invalid parameters
+ * @description Creates a uid from invalid parameters
  */
 function invalidUID(done) {
   try {
@@ -323,9 +336,8 @@ function invalidUID(done) {
   }
 }
 
-
 /**
- * @description  Should parse a valid uid.
+ * @description Parse a valid uid. Checks array element exist.
  */
 function parseValidUID(done) {
   try {
@@ -341,9 +353,8 @@ function parseValidUID(done) {
   }
 }
 
-
 /**
- * @description  Should parse an invalid uid.
+ * @description Parse an invalid uid. Expected error.
  */
 function parseInvalidUID(done) {
   try {
@@ -358,9 +369,8 @@ function parseInvalidUID(done) {
   }
 }
 
-
 /**
- * @description  Should parse a valid uid and get the 2nd element.
+ * @description Parse a valid uid and get the 2nd element.
  */
 function parseValidUIDSecondElement(done) {
   try {
@@ -375,17 +385,25 @@ function parseValidUIDSecondElement(done) {
 }
 
 /**
- * @description  Should return user permissions on an internal project
- * when the user is not part of the project, but part of the org
+ * @description Test internal project visibility. Gives non-admin user within the same organization
+ * read access to an 'internal' project.
  */
 function permissionsInternalProject(done) {
-  OrgController.setPermissions(admin, 'priv', nonAdmin, 'read')
-  .then(() => ProjectConttroller.findProject(admin, org.id, intProj.id))
+  // Admin sets read permission for non-admin user
+  OrgController.setPermissions(admin, org.id, nonAdmin, 'read')
+  // Find the project
+  .then(() => ProjectController.findProject(admin, org.id, intProj.id))
   .then((proj) => {
+    // Get non-admin permission from current
     const intProjPerm = utils.getPermissionStatus(nonAdmin, proj);
+    // Check that the non-admin user now has read permission
     chai.expect(intProjPerm).to.include('read');
+
+    // Checks non-admin has read permission
     const intProjRead = utils.checkAccess(nonAdmin, proj, 'read');
     chai.expect(intProjRead).to.equal(true);
+
+    // Checks non-admin has write permission, expected to be false
     const intProjWrite = utils.checkAccess(nonAdmin, proj, 'write');
     chai.expect(intProjWrite).to.equal(false);
     done();
@@ -397,14 +415,20 @@ function permissionsInternalProject(done) {
 }
 
 /**
- * @description  Should return user permissions on a private project
- * when the user is not part of the project, but part of the org
+ * @description Test user permissions on a private project
+ * when the user is not part of the project within the same organization.
  */
 function permissionsPrivateProject(done) {
-  ProjectConttroller.findProject(admin, org.id, privProj.id)
+  // Find project
+  ProjectController.findProject(admin, org.id, privProj.id)
   .then((proj) => {
+    // Get project's permission for non-admin user
     const privProjPerm = utils.getPermissionStatus(nonAdmin, proj);
+
+    // Test permission to be empty
     chai.expect(privProjPerm).to.be.empty; // eslint-disable-line no-unused-expressions
+
+    // Check if non-admin user has read access
     const privProjRead = utils.checkAccess(nonAdmin, proj, 'read');
     chai.expect(privProjRead).to.equal(false);
     done();

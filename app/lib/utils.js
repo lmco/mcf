@@ -14,14 +14,14 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  Defines miscellaneous helper functions.
+ * @description Defines miscellaneous helper functions.
  */
 
 // Load node modules
 const path = require('path');
 const fs = require('fs');
 
-// Load mbee modules
+// Load MBEE modules
 const errors = M.require('lib.errors');
 const Organization = M.require('models.Organization');
 const Project = M.require('models.Project');
@@ -55,11 +55,11 @@ function getPluginNames() {
 
 /**
  * @description Defines a one size fits all render function
- *   with built-in defaults
+ * with built-in defaults
  *
- * @param  {Object} req  Request object
- * @param  {Object} res  Response object
- * @param  {Object} params A list of parameters to render
+ * @param {Object} req  Request object
+ * @param {Object} res  Response object
+ * @param {Object} params A list of parameters to render
  */
 module.exports.render = function(req, res, params) {
   // If you would like something to be rendered by default,
@@ -102,13 +102,23 @@ module.exports.render = function(req, res, params) {
 };
 
 /**
- * @description  Checks an array of arguments to see if
- *   they are of a specified type and throws an error.
+ * @description Checks an array of arguments for a specified type and throws an error.
+ * Note: Possible types: string, object, number, undefined, boolean, symbol
  *
- * @param  {Object} params  A list of values to check.
- * @param  {String} type  The type to check.
+ * EMPTY ARRAY and valid types DO NOT ERROR.
+ *
+ * @param {Object} params  An array of values to check.
+ * @param {String} type    The type to check.
  */
 module.exports.assertType = function(params, type) {
+  // Define valid type
+  const validType = ['string', 'object', 'number', 'undefined', 'boolean', 'symbol'];
+
+  // Check type NOT included in validTypes
+  if (!validType.includes(type)) {
+    // Invalid type, throw error
+    throw new errors.CustomError(`${type} is not a valid javascript type.`, 400);
+  }
   Object.keys(params).forEach((param) => {
     if (typeof params[param] !== type) { // eslint-disable-line valid-typeof
       throw new errors.CustomError(`Value is not a ${type}.`, 400);
@@ -117,11 +127,11 @@ module.exports.assertType = function(params, type) {
 };
 
 /**
- * @description  Checks an array of arguments to see if
- *   they are of a specified type and returns a boolean.
+ * @description Checks an array of arguments to see if
+ * they are of a specified type and returns a boolean.
  *
- * @param  {Object} params  A list of values to check.
- * @param  {String} type  The type to check.
+ * @param {Object} params  An array of values to check.
+ * @param {String} type  The type to check.
  */
 module.exports.checkType = function(params, type) {
   try {
@@ -134,12 +144,22 @@ module.exports.checkType = function(params, type) {
 };
 
 /**
- * @description  Checks an array of strings to make
- *  sure that they are keys within a given object and throws an error.
+ * @description Checks an array of strings. Throws an error if string keys are NOT within a given object.
+ * @example
+ * assertExists(name.first,[{name:{first:'foo', last:'bar'}}]);
+ * Checks 'name.first' exist within object below:
+ *  {
+ *      name: {
+ *          first: 'foo',
+ *          last: 'bar'
+ *      }
+ *  }
  *
- * @param  {Object} params  A list of strings denoting keys.
- * @param  {Object} obj  The object being searched.
- * @param  {String} parent  The parent key, defaults to null.
+ * @param {Object} params  A list of strings denoting keys.
+ * @param {Object} obj  The object being searched.
+ * @param {String} parent  The parent key, defaults to null.
+ *
+ * @return {Object} CustomError of 400
  */
 module.exports.assertExists = function(params, obj, parent = null) {
   try {
@@ -169,12 +189,12 @@ module.exports.assertExists = function(params, obj, parent = null) {
 };
 
 /**
- * @description  Checks an array of strings to make
+ * @description Checks an array of strings to make
  *  sure that they are keys within a given object and returns a boolean.
  *
- * @param  {Object} params  A list of strings denoting keys.
- * @param  {Object} obj  The object being searched.
- * @param  {String} parent  The parent key, defaults to null.
+ * @param {Object} params  A list of strings denoting keys.
+ * @param {Object} obj  The object being searched.
+ * @param {String} parent  The parent key, defaults to null.
  */
 module.exports.checkExists = function(params, obj, parent = null) {
   try {
@@ -187,9 +207,9 @@ module.exports.checkExists = function(params, obj, parent = null) {
 };
 
 /**
- * @description  Checks whether the user is an admin or not. Throws an error
+ * @description Checks whether the user is an admin or not. Throws an error
  *
- * @param  {User} user  The user object being checked.
+ * @param {User} user  The user object being checked.
  */
 module.exports.assertAdmin = function(user) {
   if (!user.admin) {
@@ -198,18 +218,18 @@ module.exports.assertAdmin = function(user) {
 };
 
 /**
- * @description  Checks whether the user is an admin or not and returns a boolean
+ * @description Checks whether the user is an admin or not and returns a boolean
  *
- * @param  {User} user  The user object being checked.
+ * @param {User} user  The user object being checked.
  */
 module.exports.checkAdmin = function(user) {
   return user.admin;
 };
 
 /**
- * @description  Creates a colon delimited string from any number of arguments.
+ * @description Creates a colon delimited string from any number of arguments.
  *
- * @param  {String}  args  An infinite number of strings to be appended.
+ * @param {String}  args  An infinite number of strings to be appended.
  */
 module.exports.createUID = function(...args) {
   try {
@@ -217,6 +237,7 @@ module.exports.createUID = function(...args) {
     this.assertType(args, 'string');
 
     let returnString = '';
+    // Loops through all args
     for (let i = 0; i < args.length; i++) {
       returnString += args[i];
       if (i < args.length - 1) {
@@ -231,10 +252,11 @@ module.exports.createUID = function(...args) {
 };
 
 /**
- * @description  Splits a uid up and returns an array of elements
+ * @description Splits a uid up and returns an array of elements.
+ * Note: optionally returns a specific element if specified index.
  *
- * @param  {String}  uid  The uid.
- * @param  {Number}  index  AN optional index that if provided returns
+ * @param {String}  uid  The uid.
+ * @param {Number}  OPTIONAL - index that if provided returns
  *         the nth element in the return array.
  */
 module.exports.parseUID = function(uid, index = null) {
@@ -245,15 +267,16 @@ module.exports.parseUID = function(uid, index = null) {
   else {
     const splitUID = uid.split(':');
     if (!index) {
+      // Returns the entire array
       return splitUID;
     }
-
+    // Returns a specific element
     return splitUID[index - 1];
   }
 };
 
 /**
- * @description  Checks if a user has permission to see an object
+ * @description Checks if a user has permission to see an object
  */
 module.exports.getPermissionStatus = function(user, object) {
   // Ensure the obejct is an org or project
@@ -308,6 +331,13 @@ module.exports.getPermissionStatus = function(user, object) {
   return userPermissions;
 };
 
+/**
+ * @description Checks if permission exist
+ *
+ * @param {String} user - the user object
+ * @param {String} object - project or organization
+ * @param {String} permission - types: [read, write, admin]
+ */
 module.exports.checkAccess = function(user, object, permission) {
   const permissions = this.getPermissionStatus(user, object);
   return permissions.includes(permission);

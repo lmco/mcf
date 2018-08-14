@@ -28,7 +28,7 @@ const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
 const flash = require('express-flash');
 
-// Load mbee modules
+// Load MBEE modules
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');

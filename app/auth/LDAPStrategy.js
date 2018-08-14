@@ -22,7 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const ldap = require('ldapjs');
 
-// Load mbee modules
+// Load MBEE modules
 const LocalStrategy = M.require('auth.LocalStrategy');
 const UserController = M.require('controllers.UserController');
 const User = M.require('models.User');
@@ -44,7 +44,7 @@ class LDAPStrategy {
    ******************************************************************************/
 
   /**
-   * @description  This function implements handleBasicAuth called in the auth.js library file.
+   * @description This function implements handleBasicAuth called in the auth.js library file.
    * The purpose of this function is to implement authentication via LDAP using a
    * username and password as well as the configuration set up in the config file used.
    *
@@ -85,7 +85,7 @@ class LDAPStrategy {
   }
 
   /**
-   * @description  This function implements handleTokenAuth called in the auth.js library file.
+   * @description This function implements handleTokenAuth called in the auth.js library file.
    * The purpose of this function is to implement authentication of a user who has
    * passed in a session token or bearer token. This particular instance just implements the same
    * tokenAuth provided by the Local Strategy.
@@ -113,7 +113,7 @@ class LDAPStrategy {
   }
 
   /**
-   * @description  This function implements doLogin called in the auth.js library file.
+   * @description This function implements doLogin called in the auth.js library file.
    * The purpose of this function is to preform session or token setup for the node
    * application so that users can be authorized via token after logging in. This particular
    * implementation uses the Local Strategy doLogin function.
@@ -132,7 +132,7 @@ class LDAPStrategy {
    ******************************************************************************/
 
   /**
-   * @description  This is a helper function of the lDAPStrategy class that is used
+   * @description This is a helper function of the lDAPStrategy class that is used
    * to set the this.ldapClient variable which is the object capable of binding to
    * the ldap server.
    *
@@ -170,7 +170,7 @@ class LDAPStrategy {
   }
 
   /**
-   * @description  This is a helper function of the lDAPStrategy class that is used
+   * @description This is a helper function of the lDAPStrategy class that is used
    * to search for a user within the specified base and filter from the configuration
    * file.
    *
@@ -241,7 +241,7 @@ class LDAPStrategy {
   }
 
   /**
-   * @description  This is a helper function of the lDAPStrategy class that is used
+   * @description This is a helper function of the lDAPStrategy class that is used
    * to authenticate an ldap user after being found using their password.
    *
    * @returns Promise returns the user information from the ldap server or an err.
@@ -266,7 +266,7 @@ class LDAPStrategy {
   }
 
   /**
-   * @description  This is a helper function of the lDAPStrategy class that is used
+   * @description This is a helper function of the lDAPStrategy class that is used
    * to sync LDAP information to the local database including first name, last name,
    * and email.
    *

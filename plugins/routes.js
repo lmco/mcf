@@ -9,7 +9,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  This file implements the plugin loading and routing logic.
+ * @description This file implements the plugin loading and routing logic.
  */
 
 const fs = require('fs');

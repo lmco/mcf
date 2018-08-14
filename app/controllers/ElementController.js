@@ -14,11 +14,11 @@
  *
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This implements the behavior and logic for elements.
+ * @description This implements the behavior and logic for elements.
  * It also provides function for interacting with elements.
  */
 
-// Load mbee modules
+// Load MBEE modules
 const ProjController = M.require('controllers.ProjectController');
 const Element = M.require('models.Element');
 const utils = M.require('lib.utils');
@@ -38,7 +38,7 @@ const errors = M.require('lib.errors');
 class ElementController {
 
   /**
-   * @description  This function takes a user, orgID, projID and optional type
+   * @description This function takes a user, orgID, projID and optional type
    * and returns all elements attached to the project.
    *
    * @example
@@ -51,10 +51,10 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser   The user object of the requesting user.
-   * @param  {String} organizationID   The organization ID.
-   * @param  {String} projectID   The project ID.
-   * @param  {String} elemType   An optional string denoting the type of element.
+   * @param {User} reqUser   The user object of the requesting user.
+   * @param {String} organizationID   The organization ID.
+   * @param {String} projectID   The project ID.
+   * @param {String} elemType   An optional string denoting the type of element.
    */
   static findElements(reqUser, organizationID, projectID, elemType = '') {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -111,7 +111,7 @@ class ElementController {
   }
 
   /**
-   * @description  This function takes a user, orgID, projID and a
+   * @description This function takes a user, orgID, projID and a
    * list of options all removes all elements  attatched to a project.
    *
    * @example
@@ -124,10 +124,10 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {String} organizationID  The organization ID.
-   * @param  {String} projectID  The project ID.
-   * @param  {Object} options  Delete options.
+   * @param {User} reqUser  The user object of the requesting user.
+   * @param {String} organizationID  The organization ID.
+   * @param {String} projectID  The project ID.
+   * @param {Object} options  Delete options.
    */
   static removeElements(reqUser, organizationID, projectID, options) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -204,7 +204,7 @@ class ElementController {
   }
 
   /**
-   * @description  This function takes a user, orgID, projID, elementID
+   * @description This function takes a user, orgID, projID, elementID
    * and optional boolean flag and returns the element if it's found.
    *
    * @example
@@ -217,11 +217,11 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {String} organizationID  The organization ID.
-   * @param  {String} projectID  The project ID.
-   * @param  {String} elementID  The element ID.
-   * @param  {Boolean} softDeleted  An optional flag that allows users to search for
+   * @param {User} reqUser  The user object of the requesting user.
+   * @param {String} organizationID  The organization ID.
+   * @param {String} projectID  The project ID.
+   * @param {String} elementID  The element ID.
+   * @param {Boolean} softDeleted  An optional flag that allows users to search for
    *                   soft deleted projects as well.
    */
   static findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
@@ -265,7 +265,7 @@ class ElementController {
   }
 
   /**
-   * @description  This function takes a query and finds all matching elements.
+   * @description This function takes a query and finds all matching elements.
    *
    * @example
    * ElementController.findElementQuery({ uid: 'org:project:id' })
@@ -277,7 +277,7 @@ class ElementController {
    * });
    *
    *
-   * @param  {Object} elementQuery  The query to be used to find the element.
+   * @param {Object} elementQuery  The query to be used to find the element.
    */
   static findElementsQuery(elementQuery) {
     return new Promise((resolve, reject) => {
@@ -301,7 +301,7 @@ class ElementController {
 
 
   /**
-   * @description  This function takes a user and element data, and creates a project.
+   * @description This function takes a user and element data, and creates a project.
    *
    * @example
    * ElementController.createElement({Austin}, {Element 1})
@@ -313,8 +313,8 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {Object} element  The JSON object containing the element data
+   * @param {User} reqUser  The user object of the requesting user.
+   * @param {Object} element  The JSON object containing the element data
    */
   static createElement(reqUser, element) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -442,7 +442,7 @@ class ElementController {
   }
 
   /**
-   * @description  Handles additional step of creating a relationship
+   * @description Handles additional step of creating a relationship
    *
    * @example
    * ElementController.createRelationship({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null, {})
@@ -454,9 +454,9 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {Object} elemData  The object containing the sanitized element data.
-   * @param  {Object} elemInfo  The JSON object containing the element data. Should contain
+   * @param {User} reqUser  The user object of the requesting user.
+   * @param {Object} elemData  The object containing the sanitized element data.
+   * @param {Object} elemInfo  The JSON object containing the element data. Should contain
    *                  a source and target field.
    */
   static createRelationship(reqUser, elemData, elemInfo) {
@@ -520,7 +520,7 @@ class ElementController {
   }
 
   /**
-   * @description  Handles additional step of creating a package.
+   * @description Handles additional step of creating a package.
    *
    * @example
    * ElementController.createPackage({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null)
@@ -532,8 +532,8 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {Object} elemData  The object containing the sanitized element data.
+   * @param {User} reqUser  The user object of the requesting user.
+   * @param {Object} elemData  The object containing the sanitized element data.
    */
   static createPackage(reqUser, elemData) {
     return new Promise((resolve, reject) => {
@@ -567,7 +567,7 @@ class ElementController {
   }
 
   /**
-   * @description  Handles additional step of creating a block.
+   * @description Handles additional step of creating a block.
    *
    * @example
    * ElementController.createBlock({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null)
@@ -579,8 +579,8 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {Object} elemData  The object containing the sanitized element data.
+   * @param {User} reqUser  The user object of the requesting user.
+   * @param {Object} elemData  The object containing the sanitized element data.
    */
   static createBlock(reqUser, elemData) {
     return new Promise((resolve, reject) => {
@@ -614,7 +614,7 @@ class ElementController {
   }
 
   /**
-   * @description  The function updates an element.
+   * @description The function updates an element.
    *
    * @example
    * ElementController.updateElement('austin', 'lockheed', 'mbee', 'elem1', { name: 'New Name'} )
@@ -626,11 +626,11 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser  The object containing the requesting user.
-   * @param  {String} organizationID  The organization ID of the project.
-   * @param  {String} projectID  The project ID.
-   * @param  {String} elementID  The element ID.
-   * @param  {Object} elementUpdated  The object of the updated element.
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {String} organizationID  The organization ID of the project.
+   * @param {String} projectID  The project ID.
+   * @param {String} elementID  The element ID.
+   * @param {Object} elementUpdated  The object of the updated element.
    */
   static updateElement(reqUser, organizationID, projectID, elementID, elementUpdated) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -731,7 +731,7 @@ class ElementController {
   }
 
   /**
-   * @description  This function updates the parent element.
+   * @description This function updates the parent element.
    *
    * @example
    * ElementController.updateParent('austin', 'lockheed', 'mbee', 'elem0', {Elem1})
@@ -743,11 +743,11 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {String} orgID  The organization ID.
-   * @param  {String} projID  The project ID.
-   * @param  {String} elemID  The element ID.
-   * @param  {Element} newElement  The new child element.
+   * @param {User} reqUser  The user object of the requesting user.
+   * @param {String} orgID  The organization ID.
+   * @param {String} projID  The project ID.
+   * @param {String} elemID  The element ID.
+   * @param {Element} newElement  The new child element.
    */
   static updateParent(reqUser, orgID, projID, elemID, newElement) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -781,7 +781,7 @@ class ElementController {
   }
 
   /**
-   * @description  This function takes a user, orgID, projID, elementID
+   * @description This function takes a user, orgID, projID, elementID
    * and JSON object of options and deletes an element.
    *
    * @example
@@ -794,11 +794,11 @@ class ElementController {
    * });
    *
    *
-   * @param  {User} reqUser  The user object of the requesting user.
-   * @param  {String} organizationID  The organization ID.
-   * @param  {String} projectID  The project ID.
-   * @param  {String} elementID  The element ID.
-   * @param  {Object} options  An object with delete options.
+   * @param {User} reqUser  The user object of the requesting user.
+   * @param {String} organizationID  The organization ID.
+   * @param {String} projectID  The project ID.
+   * @param {String} elementID  The element ID.
+   * @param {Object} options  An object with delete options.
    */
   static removeElement(reqUser, organizationID, projectID, elementID, options) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return

@@ -27,7 +27,7 @@
 const chai = require('chai');
 const mongoose = require('mongoose');
 
-// Load mbee modules
+// Load MBEE modules
 const User = M.require('models.User');
 const Org = M.require('models.Organization');
 const Project = M.require('models.Project');

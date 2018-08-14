@@ -16,7 +16,7 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This tests the Organization Model functionality. These tests
+ * @description This tests the Organization Model functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The organization model tests create,
  * soft deletes, and hard deletes organizations.
@@ -26,7 +26,7 @@
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove the need for mongoose
 
-// Load mbee modules
+// Load MBEE modules
 const Org = M.require('models.Organization');
 
 

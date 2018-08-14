@@ -14,11 +14,11 @@
  *
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This implements the behavior and logic for a user and
+ * @description This implements the behavior and logic for a user and
  * provides functions for interacting with users.
  */
 
-// Load mbee modules
+// Load MBEE modules
 const User = M.require('models.User');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
@@ -43,7 +43,7 @@ const validators = M.require('lib/validators');
 class UserController {
 
   /**
-   * @description  This function finds all users.
+   * @description This function finds all users.
    *
    * @example
    * UserController.findUsers()
@@ -64,7 +64,7 @@ class UserController {
 
 
   /**
-   * @description  This function takes a username and finds a user
+   * @description This function takes a username and finds a user
    *
    * @example
    * UserController.findUser('tstark')
@@ -76,7 +76,7 @@ class UserController {
    * });
    *
    *
-   * @param  {String} searchedUsername  The username of the searched user.
+   * @param {String} searchedUsername  The username of the searched user.
    */
   static findUser(searchedUsername) {
     return new Promise((resolve, reject) => {
@@ -106,7 +106,7 @@ class UserController {
 
 
   /**
-   * @description  Finds users by a database query.
+   * @description Finds users by a database query.
    *
    * @example
    * UserController.findUsersQuery({ fname: 'Tony' })
@@ -118,7 +118,7 @@ class UserController {
    * });
    *
    *
-   * @param  {Object} usersQuery  The query to be made to the database.
+   * @param {Object} usersQuery  The query to be made to the database.
    */
   static findUsersQuery(usersQuery) {
     return new Promise((resolve, reject) => {
@@ -140,7 +140,7 @@ class UserController {
 
 
   /**
-   * @description  This function takes a user object and new user data
+   * @description This function takes a user object and new user data
    * and creates a new user.
    *
    * @example
@@ -153,8 +153,8 @@ class UserController {
    * });
    *
    *
-   * @param  {User} requestingUser  The object containing the requesting user.
-   * @param  {Object} newUser  Object containing new user data.
+   * @param {User} requestingUser  The object containing the requesting user.
+   * @param {Object} newUser  Object containing new user data.
    */
   static createUser(requestingUser, newUser) { // eslint-disable-line consistent-return
     return new Promise(((resolve, reject) => {
@@ -214,7 +214,7 @@ class UserController {
 
 
   /**
-   * @description  This function takes a user object, username and
+   * @description This function takes a user object, username and
    * JSON data and updates a users.
    *
    * @example
@@ -227,9 +227,9 @@ class UserController {
    * });
    *
    *
-   * @param  {User} requestingUser  The object containing the requesting user.
-   * @param  {String} usernameToUpdate  The username of the user to be updated.
-   * @param  {Object} newUserData  Object containing new user data.
+   * @param {User} requestingUser  The object containing the requesting user.
+   * @param {String} usernameToUpdate  The username of the user to be updated.
+   * @param {Object} newUserData  Object containing new user data.
    */
   static updateUser(requestingUser, usernameToUpdate, newUserData) {
     return new Promise((resolve, reject) => {
@@ -290,7 +290,7 @@ class UserController {
 
 
   /**
-   * @description  This function takes a user object and username and deletes a user.
+   * @description This function takes a user object and username and deletes a user.
    *
    * @example
    * UserController.removeUser({Tony}, 'ppotts')
@@ -302,8 +302,8 @@ class UserController {
    * });
    *
    *
-   * @param  {User} requestingUser  The object containing the requesting user.
-   * @param  {String} usernameToDelete  The username of the user to be deleted.
+   * @param {User} requestingUser  The object containing the requesting user.
+   * @param {String} usernameToDelete  The username of the user to be deleted.
    */
   static removeUser(requestingUser, usernameToDelete) {
     return new Promise(((resolve, reject) => {

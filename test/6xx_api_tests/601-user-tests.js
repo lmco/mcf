@@ -29,7 +29,7 @@ const chai = require('chai');
 const request = require('request');
 const mongoose = require('mongoose'); // TODO - remove the need for mongoose
 
-// Load mbee modules
+// Load MBEE modules
 const User = M.require('models.User');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');

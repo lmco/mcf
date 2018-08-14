@@ -16,7 +16,7 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This tests the Project Model functionality. These tests
+ * @description This tests the Project Model functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The project model tests create,
  * soft delete, and hard delete projects.
@@ -27,7 +27,7 @@
 const chai = require('chai');
 const mongoose = require('mongoose');
 
-// Load mbee modules
+// Load MBEE modules
 const Org = M.require('models.Organization');
 const Project = M.require('models.Project');
 const User = M.require('models.User');

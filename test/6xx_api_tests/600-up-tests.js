@@ -15,7 +15,7 @@
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  This file defines basic tests of the API being up. TODO
+ * @description This file defines basic tests of the API being up. TODO
  */
 
 // Load node modules

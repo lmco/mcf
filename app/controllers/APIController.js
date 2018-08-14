@@ -14,7 +14,7 @@
  *
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This implement all of the API functionality. All API routes
+ * @description This implement all of the API functionality. All API routes
  * map to function in this controller which in turn uses other controllers that
  * define behaviors for specific objects.
  */
@@ -23,7 +23,7 @@
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
-// Load mbee modules
+// Load MBEE modules
 const UserController = M.require('controllers.UserController');
 const OrgController = M.require('controllers.OrganizationController');
 const ProjectController = M.require('controllers.ProjectController');
@@ -37,7 +37,7 @@ const sani = M.require('lib.sanitization');
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  Defines API-related control functionality.
+ * @description Defines API-related control functionality.
  */
 class APIController {
 
@@ -54,7 +54,7 @@ class APIController {
 
 
   /**
-   * @description  This is a helper method for defining a route that is not yet
+   * @description This is a helper method for defining a route that is not yet
    * implemented. Mapping routes to this method will return a response of
    * 501 Not Implemented.
    *
@@ -92,7 +92,7 @@ class APIController {
   /**
    * GET /api/doc/swagger.json
    *
-   * @description  Returns the swagger JSON specification.
+   * @description Returns the swagger JSON specification.
    */
   static swaggerJSON(req, res) {
     const swaggerSpec = APIController.swaggerSpec();
@@ -176,7 +176,7 @@ class APIController {
   /**
    * POST /api/orgs
    *
-   * @description  Accepts an array of JSON objects containing organization data.
+   * @description Accepts an array of JSON objects containing organization data.
    * Attempts to create each of the organizations. If any of the organizations
    * fail, the entire request fails and none of the organizations are created.
    *
@@ -209,7 +209,7 @@ class APIController {
   /**
    * DELETE /api/orgs
    *
-   * @description  This function will soft-delete all orgs.
+   * @description This function will soft-delete all orgs.
    *
    * This method is not yet implemented.
    */
@@ -288,7 +288,7 @@ class APIController {
   /**
    * PATCH /api/orgs/:orgid
    *
-   * @description  Takes an orgid in the URI and JSON encoded data in the body.
+   * @description Takes an orgid in the URI and JSON encoded data in the body.
    * Updates the org specified by the URI with the data provided in the body.
    * The organization ID cannot be updated and should not be provided in the
    * body.
@@ -332,7 +332,7 @@ class APIController {
   /**
    * DELETE /api/orgs/:orgid
    *
-   * @description  Takes an orgid in the URI and options in the body and
+   * @description Takes an orgid in the URI and options in the body and
    * deletes the corresponding organization. Returns a success message if
    * successful, otherwise an error message is returned.
    */
@@ -356,7 +356,7 @@ class APIController {
   /**
    * GET /api/orgs/:orgid/members/:username
    *
-   * @description  Takes an orgid and username in the URI and returns
+   * @description Takes an orgid and username in the URI and returns
    * an array of roles which the user has within the organization
    */
   static getOrgRole(req, res) { // eslint-disable-line consistent-return
@@ -380,7 +380,7 @@ class APIController {
    * POST /api/orgs/:orgid/members/:username
    * PATCH /api/orgs/:orgid/members/:username
    *
-   * @description  Takes an orgid and username in the URI and updates a given
+   * @description Takes an orgid and username in the URI and updates a given
    * members role within the organization. Requires a role in the body
    */
   static postOrgRole(req, res) { // eslint-disable-line consistent-return
@@ -433,7 +433,7 @@ class APIController {
   /**
    * GET /orgs/:orgid/members/
    *
-   * @description  Returns an array of members and their permission based on orgid
+   * @description Returns an array of members and their permission based on orgid
    *
    */
   static getAllOrgRoles(req, res) { // eslint-disable-line consistent-return
@@ -461,7 +461,7 @@ class APIController {
   /**
    * GET /api/org/:orgid/projects
    *
-   * @description  Takes an orgid in the request params and returns an array of
+   * @description Takes an orgid in the request params and returns an array of
    * the project objects for that organization. Returns an error message if
    * organization not found or other error occurs.
    */
@@ -489,7 +489,7 @@ class APIController {
   /**
    * POST /api/org/:orgid/projects
    *
-   * @description  It is defined here so that calls to the corresponding route
+   * @description It is defined here so that calls to the corresponding route
    * can be caught and error messages returned rather than throwing a 500
    * server error.
    */
@@ -501,7 +501,7 @@ class APIController {
   /**
    * PATCH /api/org/:orgid/projects
    *
-   * @description  This function is not intented to be implemented. It is
+   * @description This function is not intented to be implemented. It is
    * defined here so that calls to the corresponding route can be caught and
    * error messages returned rather than throwing a 500 server error.
    *
@@ -516,7 +516,7 @@ class APIController {
   /**
    * DELETE /api/org/:orgid/projects
    *
-   * @description  This function is not intended to be implemented. It is
+   * @description This function is not intended to be implemented. It is
    * defined here so that calls to the corresponding route can be caught and
    * error messages returned rather than throwing a 500 server error.
    *
@@ -530,7 +530,7 @@ class APIController {
   /**
    * GET /api/org/:orgid/projects/:projectid
    *
-   * @description  Returns an array of all projects based on orgid and projectid.
+   * @description Returns an array of all projects based on orgid and projectid.
    */
   static getProject(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.
@@ -599,7 +599,7 @@ class APIController {
   /**
    * PATCH /api/orgs/:orgid/projects/:projectid
    *
-   * @description  Takes an organization ID and project ID via URI and JSON
+   * @description Takes an organization ID and project ID via URI and JSON
    * encoded project data in the body. Updates the project corresponding to the
    * URI with the data passed in the body.
    */

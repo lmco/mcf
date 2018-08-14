@@ -28,7 +28,7 @@ const chai = require('chai');
 const mongoose = require('mongoose'); // TODO - remove need for mongoose
 const request = require('request');
 
-// Load mbee modules
+// Load MBEE modules
 const OrgController = M.require('controllers.OrganizationController');
 const ProjController = M.require('controllers.ProjectController');
 const User = M.require('models.User');

@@ -14,7 +14,7 @@
  *
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
  *
- * @description  This implements the behavior and logic for the user interface.
+ * @description This implements the behavior and logic for the user interface.
  * All UI routes map to this controller which in turn uses other controllers to
  * handle other object behaviors.
  */
@@ -24,7 +24,7 @@ const fs = require('fs');
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
-// Load mbee modules
+// Load MBEE modules
 const User = M.require('models.User');
 const crypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
@@ -36,7 +36,7 @@ const validators = M.require('lib.validators');
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  This class Defines UI-related controller functionallity.
+ * @description This class Defines UI-related controller functionallity.
  * It handles the server-side logic for most UI routes and renders the
  * appropriate views.
  */

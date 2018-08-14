@@ -21,7 +21,7 @@
 // Load node modules
 const mongoose = require('mongoose');
 
-// Load mbee modules
+// Load MBEE modules
 const validators = M.require('lib.validators');
 
 /******************************************************************************

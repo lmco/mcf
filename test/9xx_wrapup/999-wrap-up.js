@@ -16,7 +16,7 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  This "test" is used to clean out the database before other
+ * @description This "test" is used to clean out the database before other
  * tests. It SHOULD NOT be run if testing against production databases. It
  * is intended for use in CI/CD testing to ensure the database is empty and
  * improve CI testing.
@@ -26,7 +26,7 @@
 const chai = require('chai');
 const mongoose = require('mongoose'); // TODO remove need for mongoose
 
-// Load mbee modules
+// Load MBEE modules
 const User = M.require('models.User');
 const Organization = M.require('models.Organization');
 const Project = M.require('models.Project');

@@ -15,16 +15,22 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  Tests the sanitization module and each of its functions.
+ * @description Tests the sanitization module and each of its functions.
  */
 
 // Load node modules
 const chai = require('chai');
 
-// Load mbee modules
+// Load MBEE modules
 const sani = M.require('lib.sanitization');
 
 /* --------------------( Main )-------------------- */
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
   it('should remove invalid mongo query keys from objects', mongoSanTest);
   it('should remove mongo queries if the keys are strings', stringKeyMongoTest);
@@ -36,7 +42,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description  Loads the sanitization library.
+ * @description Loads the sanitization library.
  */
 function mongoSanTest(done) {
   const mongoSan = sani.mongo({ $lt: 10 });
@@ -45,7 +51,7 @@ function mongoSanTest(done) {
 }
 
 /**
- * @description  Tests the html and mongo sanitization with input of
+ * @description Tests the html and mongo sanitization with input of
  * html. Expected output to be an empty object
  */
 function stringKeyMongoTest(done) {
@@ -55,7 +61,7 @@ function stringKeyMongoTest(done) {
 }
 
 /**
- * @description  Tests the html sanitation with html input.
+ * @description Tests the html sanitation with html input.
  * Expected to change the html input.
  */
 function htmlTest(done) {
@@ -66,7 +72,7 @@ function htmlTest(done) {
 }
 
 /**
- * @description  Test sanitation of a JSON Object.
+ * @description Test sanitation of a JSON Object.
  */
 function sanitizeHtmlObject(done) {
   const data = {
@@ -82,12 +88,12 @@ function sanitizeHtmlObject(done) {
   chai.expect(htmlSan.fname).to.equal('&lt;script&gt;');
   chai.expect(htmlSan.lname).to.equal('&lt;/script&gt;');
   chai.expect(htmlSan.admin).to.equal(true);
-  chai.expect(htmlSan.email).to.equal('');
+  chai.expect(htmlSan.email).to.equal(null);
   done();
 }
 
 /**
- * @description  Should attempt to sanitize &amp; and other allowed exceptions.
+ * @description Should attempt to sanitize &amp; and other allowed exceptions.
  */
 function sanitizeAllowedCharacters(done) {
   const s = 'this string has &amp; and &lt; but also &sample';
@@ -98,7 +104,7 @@ function sanitizeAllowedCharacters(done) {
 }
 
 /**
- * @description  Should attempt to sanitize ldap special filter chars.
+ * @description Should attempt to sanitize ldap special filter chars.
  */
 function sanitizeLDAP(done) {
   const s = 'test1 \\ test2 * test3 ( test4 ) test5 NUL';
