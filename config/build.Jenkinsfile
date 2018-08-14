@@ -94,20 +94,6 @@ pipeline {
                         echo "Building Production Docker"
                         sh "MBEE_ENV=production node mbee docker --build"
                     }
-                    else if (env.JOB_NAME == 'Production') {
-                        // Build
-                        echo "Building Production Environment"
-                        sh 'MBEE_ENV=production node mbee build'
-                        sh 'yarn install --production'
-
-                        // Verify build
-                        sh 'ls -l'
-
-                        sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
-
-                        echo "Building Production Docker"
-                        sh "MBEE_ENV=production node mbee docker --build"
-                    }
                     else if (env.JOB_NAME == 'LeahPipeline1') {
                         // Build
                         echo "Building Leah's Environment"
@@ -131,12 +117,40 @@ pipeline {
          */
         stage('Run') {
             steps {
-                // Removes any existing production running containers
-                sh 'MBEE_ENV=stage node mbee docker --clean'
+                script {
+                    if (env.JOB_NAME == 'Stage') {
+                        // Removes any existing production running containers
+                        sh 'MBEE_ENV=stage node mbee docker --clean'
 
-                // Runs the production container in the background
-                sh "echo 'run'"
-                sh "MBEE_ENV=stage node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
+                        // Runs the production container in the background
+                        sh "echo 'run'"
+                        sh "MBEE_ENV=stage node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
+                    }
+                    if (env.JOB_NAME == 'merge-request') {
+                        // Removes any existing production running containers
+                        sh 'MBEE_ENV=test node mbee docker --clean'
+
+                        // Runs the production container in the background
+                        echo "Running Test Environment"
+                        sh "MBEE_ENV=test node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
+                    }
+                    if (env.JOB_NAME == 'dev.mbee.us.lmco.com') {
+                        // Removes any existing production running containers
+                        sh 'MBEE_ENV=production node mbee docker --clean'
+
+                        // Runs the production container in the background
+                        echo "Running Production Environment"
+                        sh "MBEE_ENV=production node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
+                    }
+                    if (env.JOB_NAME == 'LeahPipeline1') {
+                        // Removes any existing production running containers
+                        sh 'MBEE_ENV=stage node mbee docker --clean'
+
+                        // Runs the production container in the background
+                        echo "Running Leah's Environment"
+                        sh "MBEE_ENV=stage node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
+                    }
+                }
             }
         }
 
