@@ -95,17 +95,13 @@ function test(_args) {
     .forEach(function(file) {
       // Add the full path and filename to mocha
       mocha.addFile(path.join(dir, file));
-      console.log('inside mocha walk');
     });
   };
 
   // Call the mochaWalk function to load in all of the test files
   mochaWalk(testDir);
-  console.log('before mocha run');
   // Run the tests.
   mocha.run(function(failures) {
-    console.log('in mocha run');
-
     // Check for failures
     if (failures) {
       // mocha did not pass all test, exit with error code -1
@@ -116,7 +112,6 @@ function test(_args) {
       process.exit(0);
     }
   });
-  console.log('after mocha walk');
 }
 
 
