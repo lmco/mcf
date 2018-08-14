@@ -246,7 +246,8 @@ const UserSchema = new mongoose.Schema({
    * used to represent additional model data.
    */
   custom: {
-    type: mongoose.Schema.Types.Mixed
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   }
 
 });
