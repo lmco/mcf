@@ -53,6 +53,7 @@ RUN yarn install --production
 
 # Create Project Directory Structure
 RUN mkdir logs \
+    && mkdir -p config \
     && mkdir -p scripts \
     && mkdir -p plugins \
     && mkdir -p build \
