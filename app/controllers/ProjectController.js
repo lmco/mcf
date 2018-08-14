@@ -285,6 +285,7 @@ class ProjectController {
     return new Promise((resolve, reject) => {
       // Optional fields
       let custom = null;
+      let visibility = 'private';
 
       try {
         utils.assertExists(['id', 'name', 'org.id'], project);
@@ -292,6 +293,14 @@ class ProjectController {
         if (utils.checkExists(['custom'], project)) {
           utils.assertType([project.custom], 'object');
           custom = sani.html(project.custom);
+        }
+        if (utils.checkExists(['visibility'], project)) {
+          utils.assertType([project.visibility], 'string');
+          visibility = project.visibility;
+          // Ensure the visibility level is valid
+          if (!Project.schema.methods.getVisibilityLevels().includes(visibility)) {
+            return reject(new errors.CustomError('Invalid visibility type.', 400));
+          }
         }
       }
       catch (error) {
@@ -338,7 +347,8 @@ class ProjectController {
                 admin: [reqUser._id]
               },
               uid: utils.createUID(orgID, projID),
-              custom: custom
+              custom: custom,
+              visibility: visibility
             });
 
             newProject.save((saveErr, projectUpdated) => {
