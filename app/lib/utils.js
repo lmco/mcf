@@ -288,11 +288,6 @@ module.exports.getPermissionStatus = function(user, object) {
     return userPermissions;
   }
 
-  // If the object is public, the user will have read access
-  if (object.visibility === 'public') {
-    return ['read'];
-  }
-
   // If it's a project and its visibility is internal
   if (object.visibility === 'internal' && object instanceof Project) {
     // See if the user has read permissions on the project's org

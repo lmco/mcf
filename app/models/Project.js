@@ -174,7 +174,7 @@ const ProjectSchema = new mongoose.Schema({
    * @property  visibility
    * @type String
    *
-   * @description The visibility level of the project. Can be public, internal or private.
+   * @description The visibility level of the project. Can be internal or private.
    */
   visibility: {
     type: String,
@@ -200,7 +200,7 @@ ProjectSchema.methods.getValidUpdateFields = function() {
  * Returns a list of valid visibility levels.
  */
 ProjectSchema.methods.getVisibilityLevels = function() {
-  return ['public', 'internal', 'private'];
+  return ['internal', 'private'];
 };
 
 

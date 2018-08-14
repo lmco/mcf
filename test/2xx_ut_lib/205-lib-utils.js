@@ -30,12 +30,9 @@ const User = M.require('models.User');
 
 let admin = null;
 let nonAdmin = null;
-let privOrg = null;
-let pubOrg = null;
-let pubProj = null;
+let org = null;
 let intProj = null;
 let privProj = null;
-let privProjPubOrg = null;
 
 
 /* --------------------( Main )-------------------- */
@@ -62,29 +59,13 @@ describe(M.getModuleName(module.filename), () => {
         nonAdmin = user;
         return OrgController.createOrg(admin, { id: 'priv', name: 'Private Org' });
       })
-      .then((org) => {
-        privOrg = org;
-        return OrgController.createOrg(admin, { id: 'pub', name: 'Public', visibility: 'public' });
-      })
-      .then((org) => {
-        pubOrg = org;
-        const pubProjData = {
-          id: 'pubproj',
-          name: 'Public Project',
-          org: {
-            id: privOrg.id
-          },
-          visibility: 'public'
-        };
-        return ProjectConttroller.createProject(admin, pubProjData);
-      })
-      .then((proj) => {
-        pubProj = proj;
+      .then((retOrg) => {
+        org = retOrg;
         const intProjData = {
           id: 'intproj',
           name: 'Public Project',
           org: {
-            id: privOrg.id
+            id: org.id
           },
           visibility: 'internal'
         };
@@ -96,7 +77,7 @@ describe(M.getModuleName(module.filename), () => {
           id: 'privproj',
           name: 'Public Project',
           org: {
-            id: privOrg.id
+            id: org.id
           },
           visibility: 'private'
         };
@@ -104,18 +85,6 @@ describe(M.getModuleName(module.filename), () => {
       })
       .then((proj) => {
         privProj = proj;
-        const privProjPubOrgData = {
-          id: 'privprojpuborg',
-          name: 'Public Project',
-          org: {
-            id: pubOrg.id
-          },
-          visibility: 'private'
-        };
-        return ProjectConttroller.createProject(admin, privProjPubOrgData);
-      })
-      .then((proj) => {
-        privProjPubOrg = proj;
         done();
       })
       .catch((error) => {
@@ -128,7 +97,6 @@ describe(M.getModuleName(module.filename), () => {
 
   after((done) => {
     OrgController.removeOrg(admin, 'priv', { soft: false })
-    .then(() => OrgController.removeOrg(admin, 'pub', { soft: false }))
     .then(() => UserController.removeUser(admin, 'nonadminuser'))
     .then(() => {
       User.findOne({
@@ -163,10 +131,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should parse a valid uid', parseValidUID);
   it('should try to parse an invalid uid and fail', parseInvalidUID);
   it('should parse a valid uid and get the second element', parseValidUIDSecondElement);
-  it('should return permissions on a public project', permissionsPublicProject);
   it('should return permissions on an internal project', permissionsInternalProject);
   it('should return permissions on a private project', permissionsPrivateProject);
-  it('should return permissions on a public org', permissionsPublicOrg);
 });
 
 
@@ -408,35 +374,13 @@ function parseValidUIDSecondElement(done) {
   }
 }
 
-
-/**
- * @description  Should return user permissions on a public project
- * when the user is not part of the project
- */
-function permissionsPublicProject(done) {
-  OrgController.setPermissions(admin, 'priv', nonAdmin, 'read')
-  .then(() => {
-    const pubProjPerm = utils.getPermissionStatus(nonAdmin, pubProj);
-    chai.expect(pubProjPerm).to.include('read');
-    const pubProjRead = utils.checkAccess(nonAdmin, pubProj, 'read');
-    chai.expect(pubProjRead).to.equal(true);
-    const pubProjWrite = utils.checkAccess(nonAdmin, pubProj, 'write');
-    chai.expect(pubProjWrite).to.equal(false);
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
-
 /**
  * @description  Should return user permissions on an internal project
  * when the user is not part of the project, but part of the org
  */
 function permissionsInternalProject(done) {
-  ProjectConttroller.findProject(admin, privOrg.id, intProj.id)
+  OrgController.setPermissions(admin, 'priv', nonAdmin, 'read')
+  .then(() => ProjectConttroller.findProject(admin, org.id, intProj.id))
   .then((proj) => {
     const intProjPerm = utils.getPermissionStatus(nonAdmin, proj);
     chai.expect(intProjPerm).to.include('read');
@@ -457,7 +401,7 @@ function permissionsInternalProject(done) {
  * when the user is not part of the project, but part of the org
  */
 function permissionsPrivateProject(done) {
-  ProjectConttroller.findProject(admin, privOrg.id, privProj.id)
+  ProjectConttroller.findProject(admin, org.id, privProj.id)
   .then((proj) => {
     const privProjPerm = utils.getPermissionStatus(nonAdmin, proj);
     chai.expect(privProjPerm).to.be.empty; // eslint-disable-line no-unused-expressions
@@ -469,19 +413,4 @@ function permissionsPrivateProject(done) {
     chai.expect(error).to.equal(null);
     done();
   });
-}
-
-/**
- * @description  Should return user permissions on a public org
- */
-function permissionsPublicOrg(done) {
-  const pubOrgPerm = utils.getPermissionStatus(nonAdmin, pubOrg);
-  chai.expect(pubOrgPerm).to.include('read');
-  const pubOrgRead = utils.checkAccess(nonAdmin, pubOrg, 'read');
-  chai.expect(pubOrgRead).to.equal(true);
-  const pubOrgPrivProjPerm = utils.getPermissionStatus(nonAdmin, privProjPubOrg);
-  chai.expect(pubOrgPrivProjPerm).to.be.empty; // eslint-disable-line no-unused-expressions
-  const pubOrgPrivProjRead = utils.checkAccess(nonAdmin, privProjPubOrg, 'read');
-  chai.expect(pubOrgPrivProjRead).to.equal(false);
-  done();
 }
