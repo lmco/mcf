@@ -43,7 +43,7 @@ pipeline {
         }
 
         stage('Test Script'){
-            node {
+            node ("trying to run stuff"){
                 sh "yarn install --dev"
                 echo 'before if statement'
                 if (env.JOB_NAME == 'LeahPipeline1') {
@@ -51,7 +51,7 @@ pipeline {
                 }
             }
         }
-        
+
         /**
          * Builds the production docker image based on the Dockerfile.
          */
