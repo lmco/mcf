@@ -53,8 +53,14 @@ pipeline {
                             // Install dev dependencies
                             sh 'yarn install'
 
-                            if (env.JOB_NAME == 'LeahPipeline1') {
+                            if (env.JOB_NAME == 'Stage') {
                                 // Build
+                                echo "Building Stage Env"
+                                sh 'MBEE_ENV=stage node mbee build'
+                            }
+                            else if (env.JOB_NAME == 'LeahPipeline1') {
+                                // Build
+                                echo "Building on Leahs Pipeline"
                                 sh 'MBEE_ENV=stage node mbee build'
                                 sh 'yarn install --dev'
                             }
