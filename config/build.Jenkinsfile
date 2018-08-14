@@ -43,12 +43,13 @@ pipeline {
         }
 
         stage('Test Script'){
-            node ("trying to run stuff"){
+            steps{
                 sh "yarn install --dev"
-                echo 'before if statement'
-                if (env.JOB_NAME == 'LeahPipeline1') {
-                    echo 'I am inside the if statement'
-                }
+                sh "echo 'before if statement'"
+                sh "if (env.JOB_NAME == 'LeahPipeline1')"
+                    sh "echo 'I am inside the if statement'"
+                sh "if (env.JOB_NAME == 'NotLeahPipeline')"
+                    sh "echo 'I better not be printing'"
             }
         }
 
