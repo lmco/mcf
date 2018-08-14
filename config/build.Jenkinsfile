@@ -126,7 +126,7 @@ pipeline {
                         sh "echo 'run'"
                         sh "MBEE_ENV=stage node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
                     }
-                    if (env.JOB_NAME == 'merge-request') {
+                    else if (env.JOB_NAME == 'merge-request') {
                         // Removes any existing production running containers
                         sh 'MBEE_ENV=test node mbee docker --clean'
 
@@ -134,7 +134,7 @@ pipeline {
                         echo "Running Test Environment"
                         sh "MBEE_ENV=test node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
                     }
-                    if (env.JOB_NAME == 'dev.mbee.us.lmco.com') {
+                    else if (env.JOB_NAME == 'dev.mbee.us.lmco.com') {
                         // Removes any existing production running containers
                         sh 'MBEE_ENV=production node mbee docker --clean'
 
@@ -142,7 +142,7 @@ pipeline {
                         echo "Running Production Environment"
                         sh "MBEE_ENV=production node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
                     }
-                    if (env.JOB_NAME == 'LeahPipeline1') {
+                    else if (env.JOB_NAME == 'LeahPipeline1') {
                         // Removes any existing production running containers
                         sh 'MBEE_ENV=stage node mbee docker --clean'
 
@@ -154,24 +154,27 @@ pipeline {
             }
         }
 
-        /**
-         * Executes functional tests against the staged server.
-         */
-        stage('Wait for Server') {
-            steps {
-                // Wait to be sure server is up
-                sh 'sleep 20'
-                sh 'MBEE_ENV=stage node mbee docker --get-logs'
-
-            }
-        }
-
         stage('Run tests') {
             steps {
-                // Runs the basic test suite against the running stage container
-                // The bail command will stop running tests after one test fails
-                timeout(time: 10, unit: 'MINUTES') {
-                    sh 'MBEE_ENV=stage node mbee test --bail true --reporter mocha-junit-reporter --grep "^[0-6]"'
+                script {
+                    sleep 30
+
+                    // Runs the basic test suite against the running stage container
+                    // The bail command will stop running tests after one test fails
+                    timeout(time: 10, unit: 'MINUTES') {
+                        if (env.JOB_NAME == 'Stage') {
+                            sh 'MBEE_ENV=stage node mbee test --bail true --reporter mocha-junit-reporter --grep "^[0-6]"'
+                        }
+                        else if (env.JOB_NAME == 'merge-request') {
+                            sh 'MBEE_ENV=test node mbee test --bail true --reporter mocha-junit-reporter --grep "^[0-6]"'
+                        }
+                        else if (env.JOB_NAME == 'LeahPipeline1') {
+                            sh 'MBEE_ENV=stage node mbee test --bail true --reporter mocha-junit-reporter --grep "^[0-6]"'
+                        }
+                        else {
+                            echo "Tests did not run."
+                        }
+                    }
                 }
             }
         }
