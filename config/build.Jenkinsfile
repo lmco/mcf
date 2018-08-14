@@ -109,7 +109,7 @@ pipeline {
                 // Runs the basic test suite against the running stage container
                 // The bail command will stop running tests after one test fails
                 timeout(time: 10, unit: 'MINUTES') {
-                    sh 'MBEE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep "^[0-6]"'
+                    sh "MBEE_ENV=stage node mbee test --reporter=mocha-junit-reporter --grep '^[0-6]'"
                 }
             }
         }
