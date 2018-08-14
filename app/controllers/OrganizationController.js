@@ -262,7 +262,7 @@ class OrganizationController {
    *
    * @param  {User} user  The object containing the  requesting user.
    * @param  {String} organizationID  The organization ID.
-   * @param  {String} orgUpdate  The JSON of the updated org elements.
+   * @param  {Object} orgUpdate  The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -283,6 +283,11 @@ class OrganizationController {
 
       // Sanitize input argument
       const orgID = sani.html(organizationID);
+
+      // Ensure user cannot update the default org
+      if (orgID === 'default') {
+        return reject(new errors.CustomError('Cannot update the default org.', 403));
+      }
 
       // Check if org exists
       OrganizationController.findOrg(user, orgID)
@@ -406,6 +411,11 @@ class OrganizationController {
       }
 
       const orgID = sani.html(organizationID);
+
+      // Stop attempted deletion of default org
+      if (orgID === 'default') {
+        return reject(new errors.CustomError('Cannot delete the default org.', 403));
+      }
 
       OrganizationController.findOrg(user, orgID, true)
       .then((foundOrg) => new Promise((res, rej) => { // eslint-disable-line consistent-return

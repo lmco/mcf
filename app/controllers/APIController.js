@@ -761,7 +761,10 @@ class APIController {
     UserController.findUsers()
     .then((users) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(users));
+
+      // Return only the public data
+      const publicUsers = users.map(u => u.getPublicData());
+      return res.status(200).send(APIController.formatJSON(publicUsers));
     })
     .catch((error) => res.status(error.status).send(error));
   }

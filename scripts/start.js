@@ -79,6 +79,53 @@ function start(args) {
       M.log.info(`MBEE server listening on port ${port}!`);
     });
   }
+
+  // Create default org if it doesn't exist
+  const Organization = M.require('models.Organization');
+  const UserController = M.require('controllers.UserController');
+  Organization.findOne({ id: 'default' })
+  .exec((err, org) => {
+    if (err) {
+      throw err;
+    }
+
+    // If the default org does not exist, create it
+    if (org === null) {
+      const defaultOrg = new Organization({
+        id: 'default',
+        name: 'default'
+      });
+      defaultOrg.save((saveOrgErr) => {
+        if (saveOrgErr) {
+          throw saveOrgErr;
+        }
+      });
+    }
+    else {
+      // Prune current users to ensure no deleted
+      // users are still part of the org
+      UserController.findUsers()
+      .then((users) => {
+        const newList = [];
+
+        // Add all existing users to the read list
+        Object.keys(users).forEach((user) => {
+          newList.push(users[user]._id);
+        });
+        org.permissions.read = newList;
+
+        // Save the updated org
+        org.save((saveOrgErr) => {
+          if (saveOrgErr) {
+            throw saveOrgErr;
+          }
+        });
+      })
+      .catch((err2) => {
+        throw err2;
+      });
+    }
+  });
 }
 
 module.exports = start;

@@ -55,17 +55,11 @@ class UserController {
    * });
    */
   static findUsers() {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       UserController.findUsersQuery({ deletedOn: null })
-      .then((users) => {
-        // Convert to public user data
-        const publicUsers = users.map(u => u.getPublicData());
-
-        // Return the users' public JSON
-        return resolve(publicUsers);
-      })
+      .then((users) => resolve(users))
       .catch((error) => reject(error));
-    }));
+    });
   }
 
 
@@ -329,11 +323,9 @@ class UserController {
 
       // Find the user first to ensure their existence
       UserController.findUser(username)
-      .then(() => {
+      .then((user) => {
         // Do the deletion
-        User.findOneAndRemove({ username: username })
-        .populate()
-        .exec((err) => {
+        user.remove((err) => {
           if (err) {
             return reject(new errors.CustomError('Find and delete failed.'));
           }
