@@ -52,12 +52,12 @@ pipeline {
                         script {
                             // Install dev dependencies
                             sh 'yarn install --dev'
-
+                            sh 'NODE_ENV=stage node mbee build'
                             //echo 'before if statement'
-                            if (env.JOB_NAME == 'LeahPipeline1') {
+                            //if (env.JOB_NAME == 'LeahPipeline1') {
                                 // Build
-                                sh 'NODE_ENV=stage node mbee build'
-                            }
+                              //  sh 'NODE_ENV=stage node mbee build'
+                            //}
 
                             // Verify build
                             sh 'ls -l'
