@@ -50,7 +50,7 @@ pipeline {
                 stage('Build MBEE'){
                     steps {
                             // Install dev dependencies
-                            sh 'yarn install --dev'
+                            sh 'yarn install'
                             sh 'NODE_ENV=stage node mbee build'
 
                             //echo 'before if statement'
