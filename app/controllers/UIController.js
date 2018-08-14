@@ -207,7 +207,7 @@ class UIController {
 
   /**
    * This is the final function in the UI authentication chain. First,
-   * the authentication conroller's authenticate() and doLogin() functions
+   * the authentication controller's authenticate() and doLogin() functions
    * are called. This function should only get called once login was
    * successful. It handles the appropriate redirect for the user.
    */
@@ -216,6 +216,9 @@ class UIController {
     let next = null;
     if (RegExp(validators.url.next).test(req.body.next)) {
       next = req.body.next;
+    }
+    else if (req.user.custom.hasOwnProperty('homepage')) {
+      next = req.user.custom.homepage;
     }
     else {
       next = '/';
