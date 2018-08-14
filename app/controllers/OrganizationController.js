@@ -110,21 +110,15 @@ class OrganizationController {
           return reject(new errors.CustomError('More than one org found.', 400));
         }
 
-        const org = orgs[0];
-
-        // If user is not a member
-        // TODO - Is there a way we can include this as part of the query?
-        const members = org.permissions.read.map(u => u._id.toString());
-        if (!members.includes(user._id.toString())) {
+        // Ensure user has read permissions on the org
+        if (!utils.checkAccess(user, orgs[0], 'read')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
         // If we find one org (which we should if it exists)
-        return resolve(org);
+        return resolve(orgs[0]);
       })
-      .catch((error) => {
-        reject(error);
-      });
+      .catch((error) => reject(error));
     });
   }
 
@@ -182,6 +176,7 @@ class OrganizationController {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Optional fields
       let custom = null;
+      let visibility = 'private';
 
       try {
         utils.assertAdmin(user);
@@ -190,6 +185,14 @@ class OrganizationController {
         if (utils.checkExists(['custom'], orgInfo)) {
           utils.assertType([orgInfo.custom], 'object');
           custom = sani.html(orgInfo.custom);
+        }
+        if (utils.checkExists(['visibility'], orgInfo)) {
+          utils.assertType([orgInfo.visibility], 'string');
+          visibility = orgInfo.visibility;
+          // Ensure the visibility level is valid
+          if (!Organization.schema.methods.getVisibilityLevels().includes(visibility)) {
+            return reject(new errors.CustomError('Invalid visibility type.', 400));
+          }
         }
       }
       catch (error) {
@@ -224,7 +227,8 @@ class OrganizationController {
               write: [user._id],
               read: [user._id]
             },
-            custom: custom
+            custom: custom,
+            visibility: visibility
           });
           // Save and resolve the new error
           newOrg.save((saveOrgErr) => { // eslint-disable-line consistent-return
@@ -262,7 +266,7 @@ class OrganizationController {
    *
    * @param  {User} user  The object containing the  requesting user.
    * @param  {String} organizationID  The organization ID.
-   * @param  {String} orgUpdate  The JSON of the updated org elements.
+   * @param  {Object} orgUpdate  The JSON of the updated org elements.
    */
   static updateOrg(user, organizationID, orgUpdate) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
@@ -284,12 +288,16 @@ class OrganizationController {
       // Sanitize input argument
       const orgID = sani.html(organizationID);
 
+      // Ensure user cannot update the default org
+      if (orgID === 'default') {
+        return reject(new errors.CustomError('Cannot update the default org.', 403));
+      }
+
       // Check if org exists
       OrganizationController.findOrg(user, orgID)
       .then((org) => { // eslint-disable-line consistent-return
-        // Error check - Make sure user is admin
-        const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-        if (!user.admin && !orgAdmins.includes(user._id.toString())) {
+        // Error check - Make sure user is an org admin or system admin
+        if (!utils.checkAccess(user, org, 'admin')) {
           return reject(new errors.CustomError('User cannot update organizations.', 401));
         }
 
@@ -406,6 +414,11 @@ class OrganizationController {
       }
 
       const orgID = sani.html(organizationID);
+
+      // Stop attempted deletion of default org
+      if (orgID === 'default') {
+        return reject(new errors.CustomError('Cannot delete the default org.', 403));
+      }
 
       OrganizationController.findOrg(user, orgID, true)
       .then((foundOrg) => new Promise((res, rej) => { // eslint-disable-line consistent-return
@@ -561,9 +574,8 @@ class OrganizationController {
       const orgID = sani.sanitize(organizationID);
       OrganizationController.findOrg(reqUser, orgID)
       .then((org) => { // eslint-disable-line consistent-return
-        // Ensure user is an admin within the organization
-        const orgAdmins = org.permissions.admin.map(u => u._id.toString());
-        if (!reqUser.admin && !orgAdmins.includes(reqUser._id.toString())) {
+        // Ensure user is an admin within the organization or system admin
+        if (!utils.checkAccess(reqUser, org, 'admin')) {
           return reject(new errors.CustomError('User cannot change organization permissions.', 401));
         }
 

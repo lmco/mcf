@@ -241,11 +241,14 @@ function getSoftDeletedUser(done) {
  * @description Deletes the user.
  */
 function deleteUser(done) {
-  User.findOneAndRemove({
+  User.findOne({
     username: 'spiderman'
-  }, (err) => {
+  }, (err, user) => {
     chai.expect(err).to.equal(null);
-    done();
+    user.remove((err2) => {
+      chai.expect(err2).to.equal(null);
+      done();
+    });
   });
 }
 

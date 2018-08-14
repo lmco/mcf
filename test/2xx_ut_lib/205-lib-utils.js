@@ -20,14 +20,104 @@
 
 // Load node modules
 const chai = require('chai');
-
-// Load mbee modules
 const utils = M.require('lib.utils');
+const mongoose = require('mongoose'); // TODO - remove need for mongoose
+const OrgController = M.require('controllers.OrganizationController');
+const ProjectConttroller = M.require('controllers.ProjectController');
+const UserController = M.require('controllers.UserController');
+const User = M.require('models.User');
+
+
+let admin = null;
+let nonAdmin = null;
+let org = null;
+let intProj = null;
+let privProj = null;
 
 
 /* --------------------( Main )-------------------- */
 
 describe(M.getModuleName(module.filename), () => {
+  before((done) => {
+    const db = M.require('lib/db');
+    db.connect();
+
+    admin = new User({
+      username: 'adminuser',
+      password: 'password',
+      admin: true
+    });
+
+    admin.save((saveUserErr) => {
+      chai.expect(saveUserErr).to.equal(null);
+      const nonAdminData = {
+        username: 'nonadminuser',
+        password: 'password'
+      };
+      UserController.createUser(admin, nonAdminData)
+      .then((user) => {
+        nonAdmin = user;
+        return OrgController.createOrg(admin, { id: 'priv', name: 'Private Org' });
+      })
+      .then((retOrg) => {
+        org = retOrg;
+        const intProjData = {
+          id: 'intproj',
+          name: 'Public Project',
+          org: {
+            id: org.id
+          },
+          visibility: 'internal'
+        };
+        return ProjectConttroller.createProject(admin, intProjData);
+      })
+      .then((proj) => {
+        intProj = proj;
+        const privProjData = {
+          id: 'privproj',
+          name: 'Public Project',
+          org: {
+            id: org.id
+          },
+          visibility: 'private'
+        };
+        return ProjectConttroller.createProject(admin, privProjData);
+      })
+      .then((proj) => {
+        privProj = proj;
+        done();
+      })
+      .catch((error) => {
+        chai.expect(error).to.equal(null);
+        done();
+      });
+    });
+  });
+
+
+  after((done) => {
+    OrgController.removeOrg(admin, 'priv', { soft: false })
+    .then(() => UserController.removeUser(admin, 'nonadminuser'))
+    .then(() => {
+      User.findOne({
+        username: 'adminuser'
+      }, (err, foundUser) => {
+        chai.expect(err).to.equal(null);
+        foundUser.remove((err2) => {
+          chai.expect(err2).to.equal(null);
+          mongoose.connection.close();
+          done();
+        });
+      });
+    })
+    .catch((error) => {
+      chai.expect(error).to.equal(null);
+      mongoose.connection.close();
+      done();
+    });
+  });
+
+
   it('should check that a string is a string and succeed', stringIsString);
   it('should check that a number is a string and fail', numberIsString);
   it('should check that an object is an object and succeed', objectIsObject);
@@ -41,6 +131,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should parse a valid uid', parseValidUID);
   it('should try to parse an invalid uid and fail', parseInvalidUID);
   it('should parse a valid uid and get the second element', parseValidUIDSecondElement);
+  it('should return permissions on an internal project', permissionsInternalProject);
+  it('should return permissions on a private project', permissionsPrivateProject);
 });
 
 
@@ -280,4 +372,45 @@ function parseValidUIDSecondElement(done) {
     chai.expect(error.description).to.equal(null);
     done();
   }
+}
+
+/**
+ * @description  Should return user permissions on an internal project
+ * when the user is not part of the project, but part of the org
+ */
+function permissionsInternalProject(done) {
+  OrgController.setPermissions(admin, 'priv', nonAdmin, 'read')
+  .then(() => ProjectConttroller.findProject(admin, org.id, intProj.id))
+  .then((proj) => {
+    const intProjPerm = utils.getPermissionStatus(nonAdmin, proj);
+    chai.expect(intProjPerm).to.include('read');
+    const intProjRead = utils.checkAccess(nonAdmin, proj, 'read');
+    chai.expect(intProjRead).to.equal(true);
+    const intProjWrite = utils.checkAccess(nonAdmin, proj, 'write');
+    chai.expect(intProjWrite).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description  Should return user permissions on a private project
+ * when the user is not part of the project, but part of the org
+ */
+function permissionsPrivateProject(done) {
+  ProjectConttroller.findProject(admin, org.id, privProj.id)
+  .then((proj) => {
+    const privProjPerm = utils.getPermissionStatus(nonAdmin, proj);
+    chai.expect(privProjPerm).to.be.empty; // eslint-disable-line no-unused-expressions
+    const privProjRead = utils.checkAccess(nonAdmin, proj, 'read');
+    chai.expect(privProjRead).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+    done();
+  });
 }
