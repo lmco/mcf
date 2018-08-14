@@ -323,11 +323,9 @@ class UserController {
 
       // Find the user first to ensure their existence
       UserController.findUser(username)
-      .then(() => {
+      .then((user) => {
         // Do the deletion
-        User.findOneAndRemove({ username: username })
-        .populate()
-        .exec((err) => {
+        user.remove((err) => {
           if (err) {
             return reject(new errors.CustomError('Find and delete failed.'));
           }

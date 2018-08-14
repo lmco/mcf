@@ -155,12 +155,15 @@ describe(M.getModuleName(module.filename), () => {
         // Expect error to be null
         chai.expect(orgRemoveErr).to.equal(null);
         // Delete reqUser
-        User.findOneAndRemove({
+        User.findOne({
           username: M.config.test.username
-        }, (err) => {
+        }, (err, foundUser) => {
           chai.expect(err).to.equal(null);
-          mongoose.connection.close();
-          done();
+          foundUser.remove((err2) => {
+            chai.expect(err2).to.equal(null);
+            mongoose.connection.close();
+            done();
+          });
         });
       });
     });
