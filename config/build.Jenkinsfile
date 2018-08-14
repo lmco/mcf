@@ -46,89 +46,85 @@ pipeline {
          * Builds the production docker image based on the Dockerfile.
          */
         stage('Build') {
-            stages{
-                stage('Build MBEE'){
-                    steps {
-                        script{
-                            // Install dev dependencies
-                            sh 'yarn install'
+            steps {
+                script{
+                    // Install dev dependencies
+                    sh 'yarn install'
 
-                            /**
-                             * Depending on the job, whether it be test, developement, stage, or
-                             * production, the if statements see where the Jenkinsfile is being run
-                             * and builds mbee and docker based on that Job.
-                             */
-                            if (env.JOB_NAME == 'Stage') {
-                                // Build
-                                echo "Building Stage Environment"
-                                sh 'MBEE_ENV=stage node mbee build'
+                    /**
+                    * Depending on the job, whether it be test, developement, stage, or
+                    * production, the if statements see where the Jenkinsfile is being run
+                    * and builds mbee and docker based on that Job.
+                    */
+                    if (env.JOB_NAME == 'Stage') {
+                        // Build
+                        echo "Building Stage Environment"
+                        sh 'MBEE_ENV=stage node mbee build'
 
-                                // Verify build
-                                sh 'ls -l'
+                        // Verify build
+                        sh 'ls -l'
 
-                                sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
+                        sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
 
-                                echo "Building Stage Docker"
-                                sh "MBEE_ENV=stage node mbee docker --build"
-                            }
-                            else if (env.JOB_NAME == 'merge-request') {
-                                // Build
-                                echo "Building Test Environment"
-                                sh 'MBEE_ENV=test node mbee build'
+                        echo "Building Stage Docker"
+                        sh "MBEE_ENV=stage node mbee docker --build"
+                    }
+                    else if (env.JOB_NAME == 'merge-request') {
+                        // Build
+                        echo "Building Test Environment"
+                        sh 'MBEE_ENV=test node mbee build'
 
-                                // Verify build
-                                sh 'ls -l'
+                        // Verify build
+                        sh 'ls -l'
 
-                                echo "Building Test Docker"
-                                sh "MBEE_ENV=test node mbee docker --build"
-                            }
-                            else if (env.JOB_NAME == 'dev.mbee.us.lmco.com') {
-                                // Build
-                                echo "Building Production Environment"
-                                sh 'MBEE_ENV=production node mbee build'
-                                sh 'yarn install --production'
+                        echo "Building Test Docker"
+                        sh "MBEE_ENV=test node mbee docker --build"
+                    }
+                    else if (env.JOB_NAME == 'dev.mbee.us.lmco.com') {
+                        // Build
+                        echo "Building Production Environment"
+                        sh 'MBEE_ENV=production node mbee build'
+                        sh 'yarn install --production'
 
-                                // Verify build
-                                sh 'ls -l'
+                        // Verify build
+                        sh 'ls -l'
 
-                                sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
+                        sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
 
-                                echo "Building Production Docker"
-                                sh "MBEE_ENV=production node mbee docker --build"
-                            }
-                            else if (env.JOB_NAME == 'Production') {
-                                // Build
-                                echo "Building Production Environment"
-                                sh 'MBEE_ENV=production node mbee build'
-                                sh 'yarn install --production'
+                        echo "Building Production Docker"
+                        sh "MBEE_ENV=production node mbee docker --build"
+                    }
+                    else if (env.JOB_NAME == 'Production') {
+                        // Build
+                        echo "Building Production Environment"
+                        sh 'MBEE_ENV=production node mbee build'
+                        sh 'yarn install --production'
 
-                                // Verify build
-                                sh 'ls -l'
+                        // Verify build
+                        sh 'ls -l'
 
-                                sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
+                        sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
 
-                                echo "Building Production Docker"
-                                sh "MBEE_ENV=production node mbee docker --build"
-                            }
-                            else if (env.JOB_NAME == 'LeahPipeline1') {
-                                // Build
-                                echo "Building Leah's Environment"
-                                sh 'MBEE_ENV=stage node mbee build'
+                        echo "Building Production Docker"
+                        sh "MBEE_ENV=production node mbee docker --build"
+                    }
+                    else if (env.JOB_NAME == 'LeahPipeline1') {
+                        // Build
+                        echo "Building Leah's Environment"
+                        sh 'MBEE_ENV=stage node mbee build'
 
-                                // Verify build
-                                sh 'ls -l'
+                        // Verify build
+                        sh 'ls -l'
 
-                                sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
+                        sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
 
-                                echo "Building Leah's Docker"
-                                sh "MBEE_ENV=stage node mbee docker --build"
-                            }
-                        }
+                        echo "Building Leah's Docker"
+                        sh "MBEE_ENV=stage node mbee docker --build"
                     }
                 }
             }
         }
-        
+
         /**
          * First, stops and removes current container.
          * Then runs the newly built docker container.
