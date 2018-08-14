@@ -42,21 +42,21 @@ pipeline {
             }
         }
 
+        stage('Test Script'){
+            node {
+                sh "yarn install --dev"
+                echo 'before if statement'
+                if (env.JOB_NAME == 'LeahPipeline1') {
+                    echo 'I am inside the if statement'
+                }
+            }
+        }
+        
         /**
          * Builds the production docker image based on the Dockerfile.
          */
         stage('Build') {
             stages{
-                stage('Test Script'){
-                    node {
-                        sh "yarn install --dev"
-                        echo 'before if statement'
-                        if (env.JOB_NAME == 'LeahPipeline1') {
-                            echo 'I am inside the if statement'
-                        }
-
-                    }
-                }
                 stage('Build MBEE'){
                     steps {
                         script {
