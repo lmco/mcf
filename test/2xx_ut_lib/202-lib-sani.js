@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/202-lib-sani
+ * @module  test.202-lib-sani
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -24,10 +24,7 @@ const chai = require('chai');
 // Load mbee modules
 const sani = M.require('lib.sanitization');
 
-
 /* --------------------( Main )-------------------- */
-
-
 describe(M.getModuleName(module.filename), () => {
   it('should remove invalid mongo query keys from objects', mongoSanTest);
   it('should remove mongo queries if the keys are strings', stringKeyMongoTest);
@@ -37,10 +34,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should sanitize an LDAP filter', sanitizeLDAP);
 });
 
-
 /* --------------------( Tests )-------------------- */
-
-
 /**
  * @description  Loads the sanitization library.
  */

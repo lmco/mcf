@@ -33,7 +33,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should load libraries', loadLib);
 });
 
-
 /* --------------------( Tests )-------------------- */
 /**
  * @description Checks that all libraries are available.

@@ -38,7 +38,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should check the version', versionCheck);
 });
 
-
 /* --------------------( Tests )-------------------- */
 /**
  * Checks the MBEE runtime version against the version in the package.json file.

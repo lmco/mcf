@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/201-lib-crypto
+ * @module  test.201-lib-crypto
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,7 +15,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  Tests loading the crypto library and executing the encrypt
+ * @description  Tests loading the MBEE crypto library and executing the encrypt
  * and decrypt functions in the library.
  */
 
@@ -30,7 +30,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should have encrypt and decrypt functions', checkCryptoFunctions);
   it('should encrypt and decrypt a message', encryptTest);
 });
-
 
 /* --------------------( Tests )-------------------- */
 /**

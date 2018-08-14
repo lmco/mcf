@@ -58,7 +58,6 @@ describe(M.getModuleName(module.filename), function() {
   it('clean database', cleanDB);
 });
 
-
 /* --------------------( Tests )-------------------- */
 /**
  * @description Cleans out the database by removing all items from all MongoDB

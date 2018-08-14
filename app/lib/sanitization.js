@@ -51,17 +51,22 @@ module.exports.html = function(s) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
   }
+
+  // TODO: Handle null case, potentially undefine and booleans(true/false)
   if (s === null) {
     return '';
   }
+
+  // Check if object type
   if (s instanceof Object) {
+    // Loop through each object
     Object.keys(s).forEach((k) => {
+      // Sanitize value
       const newVal = module.exports.html(s[k]);
       s[k] = newVal;
     });
     return s;
   }
-
   return s;
 };
 

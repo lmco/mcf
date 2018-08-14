@@ -36,7 +36,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should run simple assertions', assertionsTest);
 });
 
-
 /* --------------------( Tests )-------------------- */
 /**
  * Runs an empty test case. This show that Mocha is working.
