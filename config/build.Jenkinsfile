@@ -62,6 +62,7 @@ pipeline {
 
                             // Verify build
                             sh 'ls -l'
+                            sh 'ls -l config'
                     }
                 }
 
