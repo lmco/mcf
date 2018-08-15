@@ -146,7 +146,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a non admin user', createNonAUser);
   it('should reject a creating a user with non A req user', nonACreate);
   it('should reject a user with no input to username', badUser);
-  it('should reject username with invalid input', invalidUser);
   it('should reject username already in database', copyCatUser);
   it('should update the users last name', updateLName);
   it('should reject updating the first name with a bad name', updateBadFName);
@@ -315,31 +314,6 @@ function badUser(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Username is not valid.'
-    chai.expect(error.description).to.equal('Username is not valid.');
-    done();
-  });
-}
-
-/**
- * @description Tests a user that inputted html elements
- * into their username. This should santize the name
- * and reject the user, throwing an error.
- */
-function invalidUser(done) {
-  const userData = {
-    username: '$<script>',
-    password: 'iaminvalid',
-    fname: 'Fake',
-    lname: 'Panther'
-  };
-  UserController.createUser(reqUser, userData)
-  .then(() => {
-    // then function should never be hit
-    // below causes failure
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
     chai.expect(error.description).to.equal('Username is not valid.');
     done();
   });
