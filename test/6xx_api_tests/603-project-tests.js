@@ -121,7 +121,7 @@ describe(M.getModuleName(module.filename), () => {
         chai.expect(err).to.equal(null);
         foundUser.remove((err2) => {
           chai.expect(err2).to.equal(null);
-          mongoose.connection.close();
+          db.disconnect();
           done();
         });
       });
@@ -129,7 +129,7 @@ describe(M.getModuleName(module.filename), () => {
     .catch((err2) => {
       const error2 = JSON.parse(err2.message);
       chai.expect(error2.description).to.equal(null);
-      mongoose.connection.close();
+      db.disconnect();
       done();
     });
   });

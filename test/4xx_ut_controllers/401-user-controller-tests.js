@@ -114,7 +114,7 @@ describe(M.getModuleName(module.filename), () => {
           chai.expect(err).to.equal(null);
           user.remove((err2) => {
             chai.expect(err2).to.equal(null);
-            mongoose.connection.close();
+            db.disconnect();
             done();
           });
         });
@@ -122,7 +122,7 @@ describe(M.getModuleName(module.filename), () => {
     })
     .catch((error) => {
       chai.expect(error.description).to.equal(null);
-      mongoose.connection.close(); // TODO - Remove the need for mongoose
+      db.disconnect(); // TODO - Remove the need for mongoose
       done();
     });
   });

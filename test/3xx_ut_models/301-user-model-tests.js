@@ -15,7 +15,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description Tests the User Model by performing various actions such as a
+ * @description Tests the user model by performing various actions such as a
  * find, create, updated, soft delete, and hard delete. Does NOT test the user
  * controller but instead directly manipulates data using mongoose to check
  * the user model methods, validators, setters, and getters.
@@ -23,7 +23,6 @@
 
 // Load node modules
 const chai = require('chai');
-const mongoose = require('mongoose');
 
 // Load MBEE modules
 const User = M.require('models.User');
@@ -48,7 +47,7 @@ describe(M.getModuleName(module.filename), () => {
    * After: runs after all tests. Close database connection.
    */
   after(() => {
-    mongoose.connection.close();
+    db.disconnect();
   });
 
   /* Execute the tests */
