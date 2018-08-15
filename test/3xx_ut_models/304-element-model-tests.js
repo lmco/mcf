@@ -135,7 +135,7 @@ describe(M.getModuleName(module.filename), () => {
       Org.findOneAndRemove({
         id: org.id
       })
-      .exec((orgRemoveErr) => { // TODO - use promises where possible
+      .exec((orgRemoveErr) => { // TODO: use promises where possible
         // Check for no error
         chai.expect(orgRemoveErr).to.equal(null);
 
@@ -162,6 +162,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a block (1)', createBlock01);
   it('should create a block (2)', createBlock02);
   it('should create a relationship between blocks', createRelationship);
+  // TODO: consider adding a find relationship test
   it('should hard delete blocks and relationships', deleteBlocksAndRelationships);
   it('should soft-delete the root package', softDeleteRootPackage);
   it('should hard delete the root package', deleteRootPackage);
@@ -338,9 +339,8 @@ function createBlock02(done) {
   });
 }
 
-
 /**
- * @description Creates a relationship between the blocks in the project's root Package
+ * @description Creates a relationship between the elements in the project's root package
  */
 function createRelationship(done) {
   // Start by grabbing the root package
@@ -354,11 +354,12 @@ function createRelationship(done) {
       chai.expect(findRootErr).to.equal(null);
     }
 
+    // Expect the package to contain two child elements already
     chai.expect(pkg.contains.length).to.equal(2);
     const source = pkg.contains[0];
     const target = pkg.contains[1];
 
-    // Create the new block
+    // Create the new relationship connecting the two existing blocks
     const newRelationship = new Element.Relationship({
       id: '0004',
       uid: 'avengers:timeloop:0004',
@@ -371,10 +372,8 @@ function createRelationship(done) {
 
     // Save and verify it was created
     newRelationship.save((saveErr, createdRelationship) => {
-      if (saveErr) {
-        M.log.error(saveErr);
-        chai.expect(saveErr).to.equal(null);
-      }
+      // Expect no error
+      chai.expect(saveErr).to.equal(null);
 
       // Make sure it created what we expect and finish
       chai.expect(createdRelationship.uid).to.equal('avengers:timeloop:0004');
@@ -384,9 +383,12 @@ function createRelationship(done) {
       chai.expect(createdRelationship.source.toString()).to.equal(source.toString());
       chai.expect(createdRelationship.target.toString()).to.equal(target.toString());
 
-      // Add the block to the package.contains field
+      // Add the relationship to the package.contains field
       pkg.contains.push(createdRelationship);
+
+      // Save the updated package
       pkg.save((packageSaveErr) => {
+        // Expect no error
         chai.expect(packageSaveErr).to.equal(null);
         done();
       });
@@ -394,30 +396,32 @@ function createRelationship(done) {
   });
 }
 
-
 /**
- * @description Deletes the previosly created blocks and relationships
+ * @description Delete the previously created blocks and relationships
  */
 function deleteBlocksAndRelationships(done) {
-  // Delete the relationship
+  // Find and delete the element of type 'relationship'
   Element.Relationship.findOneAndRemove({
     uid: 'avengers:timeloop:0004'
   })
   .exec((relDeleteError) => {
+    // Expect no error
     chai.expect(relDeleteError).to.equal(null);
 
-    // Delete the second block
+    // Find and delete the second block that was created
     Element.Block.findOneAndRemove({
       uid: 'avengers:timeloop:0003'
     })
     .exec((block02DeleteError) => {
+      // Expect no error
       chai.expect(block02DeleteError).to.equal(null);
 
-      // Delete the first block
+      // Find and delete the first block that was created
       Element.Block.findOneAndRemove({
         uid: 'avengers:timeloop:0002'
       })
       .exec((block01DeleteError) => {
+        // Expect no error
         chai.expect(block01DeleteError).to.equal(null);
         done();
       });
@@ -429,21 +433,34 @@ function deleteBlocksAndRelationships(done) {
  * @description Soft deletes the previously created root package
  */
 function softDeleteRootPackage(done) {
+  // TODO: Remove LM specific comments
   // LM: Changed from findOneAndUpdate to a find and then update
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
+  // Find the package based on uid
   Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
   .exec((err, elem) => {
-    elem.deleted = true;
-    elem.save((saveErr) => {
-      chai.expect(err).to.equal(null);
+    // Expect no error
+    chai.expect(err).to.equal(null);
 
+    // Set deleted field to true
+    elem.deleted = true;
+
+    // Save the updated package
+    elem.save((saveErr) => {
+      // Expect no error
+      chai.expect(saveErr).to.equal(null);
+
+      // Find updated package
       Element.Package.findOne({
         uid: 'avengers:timeloop:0001'
       })
       .exec((findErr, foundElem) => {
+        // Expect no error
         chai.expect(findErr).to.equal(null);
+
+        // Ensure package has been soft-deleted
         chai.expect(foundElem.deleted).to.equal(true);
         chai.expect(foundElem.deletedOn).to.not.equal(null);
         done();
@@ -452,15 +469,16 @@ function softDeleteRootPackage(done) {
   });
 }
 
-
 /**
- * @description Deletes the previously created root package
+ * @description Hard delete the previously created root package
  */
 function deleteRootPackage(done) {
+  // Find and delete the package
   Element.Package.findOneAndRemove({
     uid: 'avengers:timeloop:0001'
   })
   .exec((err) => {
+    // Expect no error
     chai.expect(err).to.equal(null);
     done();
   });

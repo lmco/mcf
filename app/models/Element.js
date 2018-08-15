@@ -56,6 +56,8 @@ const options = { discriminatorKey: 'type' };
  */
 const ElementSchema = new mongoose.Schema({
 
+  // TODO: Elaborate more on differences between id, _id, uid, uuid
+
   /**
    * @memberOf  Element
    * @property  {String} uid

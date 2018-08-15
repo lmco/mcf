@@ -15,62 +15,68 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This tests the User controller functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code. The user controller tests create, delete,
- * update, and find users. As well as test the controlls with invalid inputs.
+ * @description Tests the user controller functionality: create,
+ * delete, update, and find users.
  *
- * TODO - Fix module description
  */
 
 // Load node modules
 const chai = require('chai');
-const mongoose = require('mongoose'); // TODO - remove need for mongoose
 
 // Load MBEE modules
 const UserController = M.require('controllers.UserController');
 const User = M.require('models.User');
 const AuthController = M.require('lib.auth');
+const db = M.require('lib.db');
 const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
-
+// Variables used across test functions
 let reqUser = null;
 let nonAUser = null;
 let badAUser = null;
 
-
 /* --------------------( Main )-------------------- */
-
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests.
-   * TODO - Describe what is being done
+   * Before: run before all tests. Creating admin user
+   * and setting the file-global admin user
    */
   before((done) => {
-    const db = M.require('lib/db');
+    // Connect to the database
     db.connect();
 
-    const u = M.config.test.username;
-    const p = M.config.test.password;
     const params = {};
     const body = {
-      username: u,
-      password: p
+      username: M.config.test.username,
+      password: M.config.test.password
     };
 
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
+
+    // Authenticate user
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
+      // Expect no error
       chai.expect(err).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+
+      // Find the user and update admin status
+      User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
           reqUser = userUpdate;
+          // Expect no error
           chai.expect(updateErr).to.equal(null);
           chai.expect(userUpdate).to.not.equal(null);
+
+          // TODO: Remove the second user, black panther only used in one test
           // Creating a new admin user
           const userData2 = {
             username: 'blackpanther',
@@ -96,42 +102,48 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: run after all tests.
-   * TODO - Describe what is being done
+   * After: run after all tests. Delete admin user,
+   * non-admin user.
    */
   after((done) => {
-    const username = 'everettross';
-    UserController.removeUser(reqUser, username)
-    .then((delUser) => {
-      chai.expect(delUser).to.equal('everettross');
-      const user2 = 'blackpanther';
-      UserController.removeUser(reqUser, user2)
-      .then((delBadUser) => {
-        chai.expect(delBadUser).to.equal('blackpanther');
-        User.findOne({
-          username: M.config.test.username
-        }, (err, user) => {
-          chai.expect(err).to.equal(null);
-          user.remove((err2) => {
-            chai.expect(err2).to.equal(null);
-            db.disconnect();
-            done();
-          });
+    // TODO: Remove black panther
+    const user2 = 'blackpanther';
+    UserController.removeUser(reqUser, user2)
+    .then((delBadUser) => {
+      chai.expect(delBadUser).to.equal('blackpanther');
+      // Find the admin user
+      User.findOne({
+        username: M.config.test.username
+      }, (err, user) => {
+        // Expect no error
+        chai.expect(err).to.equal(null);
+
+        // Delete admin user
+        user.remove((err2) => {
+          // Expect no error
+          chai.expect(err2).to.equal(null);
+
+          // Disconnect from the database
+          db.disconnect();
+          done();
         });
       });
     })
     .catch((error) => {
+      // Expect no error
       chai.expect(error.description).to.equal(null);
-      db.disconnect(); // TODO - Remove the need for mongoose
+
+      // Disconnect from the database
+      db.disconnect();
       done();
     });
   });
 
   /* Execute the tests */
   it('should create a user', createNewUser);
+  // TODO: MBX-323 Contemplate removing repetitive create user tests
   it('should create an admin user', createAUser);
   it('should create a non admin user', createNonAUser);
-  it('should create a second user', createUser02);
   it('should reject a creating a user with non A req user', nonACreate);
   it('should reject a user with no input to username', badUser);
   it('should reject username with invalid input', invalidUser);
@@ -157,13 +169,10 @@ describe(M.getModuleName(module.filename), () => {
 
 
 /**
- * @description Creates a user using the User Controller.
- * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
- * NOTE: As of right now the password key becomes a hash
- * need to eventually made password tests.
+ * @description Creates a user using the user controller.
  */
-// TODO - clean up description
 function createNewUser(done) {
+  // Create user data
   const userData = {
     username: 'shuri',
     password: 'iamaprincess',
@@ -173,9 +182,13 @@ function createNewUser(done) {
       location: 'Wakanda'
     }
   };
+
+  // Create user via the controller
   UserController.createUser(reqUser, userData)
+    // Find newly created user
   .then((newUser) => UserController.findUser(newUser.username))
   .then((foundUser) => {
+    // Verify user created properly
     chai.expect(foundUser.username).to.equal('shuri');
     chai.expect(foundUser.fname).to.equal('Shuri');
     chai.expect(foundUser.lname).to.equal('Panther');
@@ -183,18 +196,16 @@ function createNewUser(done) {
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
   });
 }
 
 /**
- * Creates a user using the User Controller.
-* IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
-* NOTE: As of right now the password key becomes a hash
-* need to eventually made password tests.
-*/
-// TODO - clean up description
+ * @description Create an admin user using the user controller.
+ */
 function createAUser(done) {
+  // Create user data
   const userData = {
     username: 'erikkillmonger',
     password: 'iamtryingtobethepanther',
@@ -202,8 +213,11 @@ function createAUser(done) {
     lname: 'Killmonger',
     admin: true
   };
+
+  // Create user via user controller
   UserController.createUser(reqUser, userData)
   .then((newUser) => {
+    // Verify user create properly
     chai.expect(newUser.username).to.equal('erikkillmonger');
     chai.expect(newUser.fname).to.equal('Erik');
     chai.expect(newUser.lname).to.equal('Killmonger');
@@ -211,18 +225,17 @@ function createAUser(done) {
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Creates a non admin user using the User Controller.
- * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
- * NOTE: As of right now the password key becomes a hash
- * need to eventually made password tests.
+ * @description Creates a non admin user using the user controller.
  */
 function createNonAUser(done) {
+  // Create user data
   const userData = {
     username: 'klaw',
     password: 'iendupdying',
@@ -230,97 +243,85 @@ function createNonAUser(done) {
     lname: 'Klaw',
     admin: false
   };
+
+  // Create user via user controller
   UserController.createUser(reqUser, userData)
   .then((newUser) => {
+    // Set the file-global non-admin user
     nonAUser = newUser;
+
+    // Verify user created properly
     chai.expect(newUser.username).to.equal('klaw');
     chai.expect(newUser.fname).to.equal('Klaw');
     chai.expect(newUser.lname).to.equal('Klaw');
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Creates a second user using the User Controller
- * IMPLEMENT:  chai.expect(newUser.password).to.equal('iamajedi');
- * NOTE: As of right now the password key becomes a hash
- * need to eventually made password tests.
- */
-function createUser02(done) {
-  const userData = {
-    username: 'everettross',
-    password: 'iamFBI',
-    fname: 'Everett',
-    lname: 'K Ross'
-  };
-  UserController.createUser(reqUser, userData)
-  .then((newUser) => {
-    chai.expect(newUser.username).to.equal('everettross');
-    chai.expect(newUser.fname).to.equal('Everett');
-    chai.expect(newUser.lname).to.equal('K Ross');
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal(null);
-  });
-}
-
-/**
- * Attempts to create a user using the User Controller with a
- * non admin user. An error should be thrown with this test
- * saying the requesting user does not have permissions.
+ * @description Verifies non-admin user CANNOT create new user.
+ * Expected error thrown: 'User does not have permissions.'
  */
 function nonACreate(done) {
+  // Create user data
   const userData = {
     username: 'njobu',
     password: 'fatheroferik',
     fname: 'NJobi',
     lname: 'Panther Dad'
   };
+
+  // Create user via controller
   UserController.createUser(nonAUser, userData)
   .then(() => {
-    // Should fail, throwing error
+    // Expected createUser to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'User does not have permissions'
     chai.expect(error.description).to.equal('User does not have permissions.');
     done();
   });
 }
 
 /**
- * Tests creating a user with invalid input into
- * the username. An error should be thrown due to
- * not being able to save the username.
+ * @description Verifies createUser fails given invalid data.
+ * Expected error thrown: 'Username is not valid.'
  */
 
 function badUser(done) {
+  // Create user data
   const userData = {
     username: '',
     password: 'iamnotblackpanther',
     fname: 'Not',
     lname: 'Black Panther'
   };
+
+  // Create user via user controller
   UserController.createUser(reqUser, userData)
   .then(() => {
-    // then function should never hit
-    // below causes failure
+    // Expected createUser to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'Username is not valid.'
     chai.expect(error.description).to.equal('Username is not valid.');
     done();
   });
 }
 
 /**
- * Tests a user that inputted html elements
+ * @description Tests a user that inputted html elements
  * into their username. This should santize the name
  * and reject the user, throwing an error.
  */
@@ -587,7 +588,7 @@ function nonADelete(done) {
  * Tests a user attempting to delete themselves.
  * An error is thrown saying they cannot delete themselves.
  */
-
+// TODO: Change black panther to the MBEE config user
 function deleteSelf(done) {
   const username = 'blackpanther';
   UserController.removeUser(badAUser, username)
