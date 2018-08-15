@@ -147,7 +147,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a creating a user with non A req user', nonACreate);
   it('should reject a user with no input to username', badUser);
   it('should reject username already in database', copyCatUser);
-  it('should update the users last name', updateLName);
+  it('should update the users first name', updateFirstName);
   it('should reject updating the first name with a bad name', updateBadFName);
   it('should update the users custom tags', updateCustom);
   it('should reject updating the users username', updateUName);
@@ -320,49 +320,53 @@ function badUser(done) {
 }
 
 /**
- * Tests creating a user with username already
- * created. Test should throw an error saying
- * user already exists.
+ * @description Verifies createsUser CANNOT recreate existing username.
+ * Expected error thrown: 'User already exists.'
  */
-
 function copyCatUser(done) {
+  // Create user data
   const userData = {
     username: 'shuri',
     password: 'nottherealShuri',
     fname: 'Shuri',
     lname: 'Shuri'
   };
+
+  // Create user via user controller
   UserController.createUser(reqUser, userData)
   .then(() => {
-    // then function should never be hit
-    // below causes failure
+    // Expected createUser to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'User already exists.'
     chai.expect(error.description).to.equal('User already exists.');
     done();
   });
 }
 
 /**
- * Updating the last name of the first user
- * with the user controller.
+ * @description Verifies user first name is updated.
  */
-
-function updateLName(done) {
+function updateFirstName(done) {
   const username = 'blackpanther';
   const userData = {
     fname: 'Okoye'
   };
+
+  // Updates user via user controller
   UserController.updateUser(reqUser, username, userData)
   .then((updatedUser) => {
+    // Verifies user controller updates first name
     chai.expect(updatedUser.username).to.equal('blackpanther');
     chai.expect(updatedUser.fname).to.equal('Okoye');
     chai.expect(updatedUser.lname).to.equal('Panther');
     done();
   })
   .catch((error) => {
+    // Expects no error
     chai.expect(error.description).to.equal(null);
     done();
   });
