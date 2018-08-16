@@ -16,18 +16,14 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This tests the Organization Controller functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code. The organization controller tests create,
- * update, find, soft delete, hard delte, and permissions of organzations. As well as
- * test the controlls with invalid inputs.
- *
- * TODO - Fix module description
+ * @description Tests the organization controller functionality: create,
+ * delete, update, and find organizations. As well as setting and updating
+ * permissions of organizations.
+ * // TODO : change description to summarize "it" functions (JIRA MBX-325)
  */
 
 // Load node modules
 const chai = require('chai');
-const mongoose = require('mongoose'); // TODO - remove the need for Mongo
 
 // Load MBEE modules
 const UserController = M.require('controllers.UserController');
@@ -37,47 +33,54 @@ const ElemController = M.require('controllers.ElementController');
 const User = M.require('models.User');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
+const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-
-let user = null;
+// Variables used across test functions
+let adminUser = null;
 let newUser = null;
 let org = null;
 
-
 /* --------------------( Main )-------------------- */
-
-
-describe(M.getModuleName(module.filename), function() {
-  this.timeout(5000);
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
+describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests
-   * TODO - describe what the before function is doing.
+   * Before: run before all tests. Creating an admin and
+   * non-admin user and setting the file-global admin user.
    */
   before((done) => {
-    const db = M.require('lib/db');
+    // Connect to the database
     db.connect();
-    const u = M.config.test.username;
-    const p = M.config.test.password;
+
     const params = {};
     const body = {
-      username: u,
-      password: p
+      username: M.config.test.username,
+      password: M.config.test.password
     };
 
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
+
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
+      // Expect no error
       chai.expect(err).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+
+      // Find the user and update admin status
+      User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
           // Setting it equal to global variable
-          user = userUpdate;
+          adminUser = userUpdate;
+          // Expect no error
           chai.expect(updateErr).to.equal(null);
           chai.expect(userUpdate).to.not.equal(null);
+
           // Creating a new non-admin user
           const nonAuserData = {
             username: 'groot',
@@ -86,7 +89,7 @@ describe(M.getModuleName(module.filename), function() {
             lname: 'Tree',
             admin: false
           };
-          UserController.createUser(user, nonAuserData)
+          UserController.createUser(adminUser, nonAuserData)
           .then((nonAu) => {
             newUser = nonAu;
             chai.expect(nonAu.username).to.equal('groot');
@@ -103,41 +106,51 @@ describe(M.getModuleName(module.filename), function() {
   });
 
   /**
-   * After: run after all tests.
-   * TODO - describe what this function is doing.
+   * After: run after all tests. Delete admin user,
+   * non-admin user, and organization.
    */
-  after(function(done) {
-    this.timeout(5000);
-    // Removing the organization created
-    OrgController.removeOrg(user, 'gaurdians', { soft: false })
-    .then(() => UserController.removeUser(user, newUser.username))
+  after((done) => {
+    // Removing organization
+    OrgController.removeOrg(adminUser, 'gaurdians', { soft: false })
+    // Removing non-admin user
+    .then(() => UserController.removeUser(adminUser, newUser.username))
     .then((delUser2) => {
       chai.expect(delUser2).to.equal('groot');
+      // Find admin user
       User.findOne({
         username: M.config.test.username
       }, (err, foundUser) => {
+        // Expect no error
         chai.expect(err).to.equal(null);
+
+        // Remove admin user
         foundUser.remove((err2) => {
+          // Expect no error
           chai.expect(err2).to.equal(null);
+
+          // Disconnect from the database
           db.disconnect();
           done();
         });
       });
     })
     .catch((error) => {
+      // Expect no error
       chai.expect(error.description).to.equal(null);
+
+      // Disconnect from the database
       db.disconnect();
       done();
     });
   });
 
   /* Execute the tests */
-  it('should create a new org', addNewOrg);
-  it('should create a second org', addSecondOrg);
+  it('should create a new org', createNewOrg);
+  it('should create a second org', createSecondOrg);
   it('should find an existing org', findExistingOrg);
   it('should throw an error saying the field cannot be updated', updateOrgFieldErr);
   it('should throw an error saying the name field is not a string', updateOrgTypeErr);
-  it('should reject update from non admin user', nonAUpdate);
+  it('should reject update from non admin user', rejectNonAdminUpdate);
   it('should update an orgs name', updateOrg);
   it('should update an orgs name using model object', updateOrgObject);
   it('should find all orgs a user has access to', findAllExistingOrgs);
@@ -146,28 +159,25 @@ describe(M.getModuleName(module.filename), function() {
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
   it('should fail trying to update the default org', updateDefaultOrg);
-  it('should fail trying to delete the default org', deleteDefaultOrg);
-  it('should add a user to an org', addUserRole);
-  it('should let the non-admin user write a project', projWritePerm);
+  it('should fail trying to delete the default org', rejectDefaultOrgDelete);
+  it('should add a user to an org', setUserOrgRole);
+  it('should let the non-admin user write a project', verifyUserWritePerm);
   it('should reject user changing their permissions', rejectUserRole);
   it('should get a users roles within an org', getUserRoles);
   it('should get all members with permissions in an org', getMembers);
-  it('should throw an error saying the user is not an admin', nonAdminChangeRole);
+  it('should throw an error saying the user is not an admin', rejectNonAdminSetPermissions);
   it('should remove a users role within an org', removeUserRole);
-  it('should throw an error saying the user is not in the org', getOldUserRoles);
-  it('should throw an error saying the user cannot change their own role', changeOwnRole);
-  it('should throw an error the permission is not valid', invalidPermission);
-  it('should throw an error saying the user is not an admin', nonAdminGetPermissions);
+  it('should throw an error saying the user is not in the org', rejectGetUserRoles);
+  it('should throw an error the permission is not valid', rejectInvalidPermission);
+  it('should throw an error saying the user is not an admin', rejectNonAdminGetPermissions);
 });
 
-
 /* --------------------( Tests )-------------------- */
-
-
 /**
- * Tests creating an org
+ * @description Creates an organization using the org controller.
  */
-function addNewOrg(done) {
+function createNewOrg(done) {
+  // Create org data
   const orgData = {
     id: 'boombox',
     name: 'Star Lords Boombox',
@@ -175,125 +185,146 @@ function addNewOrg(done) {
       leader: 'Star Lord'
     }
   };
-  OrgController.createOrg(user, orgData)
-  .then(() => OrgController.findOrg(user, 'boombox'))
+
+  // Create org via controller
+  OrgController.createOrg(adminUser, orgData)
+    // Find newly created org
+  .then(() => OrgController.findOrg(adminUser, 'boombox'))
   .then((retOrg) => {
+    // Verify org created properly
     chai.expect(retOrg.id).to.equal('boombox');
     chai.expect(retOrg.name).to.equal('Star Lords Boombox');
-    chai.expect(retOrg.permissions.read[0].id).to.equal(user._id.toString());
-    chai.expect(retOrg.permissions.write[0].id).to.equal(user._id.toString());
-    chai.expect(retOrg.permissions.admin[0].id).to.equal(user._id.toString());
+    chai.expect(retOrg.permissions.read[0].id).to.equal(adminUser._id.toString());
+    chai.expect(retOrg.permissions.write[0].id).to.equal(adminUser._id.toString());
+    chai.expect(retOrg.permissions.admin[0].id).to.equal(adminUser._id.toString());
     chai.expect(retOrg.custom.leader).to.equal('Star Lord');
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
   });
 }
 
 /**
- * Test creating a second org
+ * @description Creates a second organization using the org controller.
  */
-
-function addSecondOrg(done) {
+function createSecondOrg(done) {
+  // Creates org data
   const orgData = {
     id: 'gaurdians',
     name: 'Gaurdians of Galaxy',
     permissions: {
-      admin: [user._id],
-      write: [user._id],
-      read: [user._id]
+      admin: [adminUser._id],
+      write: [adminUser._id],
+      read: [adminUser._id]
     }
   };
-  OrgController.createOrg(user, orgData)
+
+  // Creates org via the controller
+  OrgController.createOrg(adminUser, orgData)
   .then((retOrg) => {
-    // Set org equal to global varaible to be use later
+    // Set org equal to global org for later use
     org = retOrg;
+
+    // Verify org created properly
     chai.expect(retOrg.id).to.equal('gaurdians');
     chai.expect(retOrg.name).to.equal('Gaurdians of Galaxy');
-    chai.expect(retOrg.permissions.read).to.include(user._id.toString());
-    chai.expect(retOrg.permissions.write).to.include(user._id.toString());
-    chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
+    chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
+    chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
+    chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Tests finding a single org which should exist
+ * @description Find organization previously created in createOrg test.
  */
 function findExistingOrg(done) {
-  OrgController.findOrg(user, 'boombox')
+  // Find org previously created
+  OrgController.findOrg(adminUser, 'boombox')
   .then((retOrg) => {
+    // Verify org was found
     chai.expect(retOrg.name).to.equal('Star Lords Boombox');
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Attempting update to an org field with invalid permissions.
- * Test should throw an error
+ * @description Verifies a user CANNOT update permissions.
+ * Expected error thrown: 'Users cannot update [permissions] of organizations.'
  */
 function updateOrgFieldErr(done) {
-  OrgController.updateOrg(user, 'boombox', { permissions: 'shouldNotChange' })
+  // Update organization
+  OrgController.updateOrg(adminUser, 'boombox', { permissions: 'shouldNotChange' })
   .then((retOrg) => {
-    chai.expect(typeof retOrg).to.equal('undefined');
+    // Expected updateOrg() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'Users cannot update [permissions] of organizations.'
     chai.expect(error.description).to.equal('Users cannot update [permissions] of organizations.');
     done();
   });
 }
 
 /**
- * Attempting update to an org with invalid name field name.
- * Test should throw an error
+ * @description Verifies updateOrg fails given invalid data.
+ * Expected error thrown: 'The Organization [name] is not of type String'
  */
 function updateOrgTypeErr(done) {
-  OrgController.updateOrg(user, 'boombox', { name: [] })
+  // Update organization
+  OrgController.updateOrg(adminUser, 'boombox', { name: [] })
   .then((retOrg) => {
-    chai.expect(typeof retOrg).to.equal('undefined');
+    // Expected updateOrg() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'The Organization [name] is not of type String'
     chai.expect(error.description).to.equal('The Organization [name] is not of type String');
     done();
   });
 }
 
 /**
- * Testing to see if the code will reject the update
- * from a user that does not have admin rights.
- * This test should throw an error.
+ * @description Verifies non-admin user CANNOT update org.
+ * Expected error thrown: 'User does not have permissions.'
  */
-
-function nonAUpdate(done) {
+function rejectNonAdminUpdate(done) {
+  // Update org
   OrgController.updateOrg(newUser, 'boombox', { name: 'betterreject' })
   .then(() => {
-    // should not come into then function
-    // fail test if does
+    // Expected updateOrg() to fail
+    // Should not execute, force test to fail
     chai.AssertionError(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'User does not have permissions.'
     chai.expect(error.description).to.equal('User does not have permissions.');
     done();
   });
 }
 
-
 /**
- * Tests updating an org
+ * @description Updates an organization's name.
  */
 function updateOrg(done) {
+  // Create org data
   const orgData = {
     id: 'boombox',
     name: 'Stolen boombox',
@@ -302,107 +333,148 @@ function updateOrg(done) {
       musicType: 'I am Groot'
     }
   };
-  OrgController.updateOrg(user, 'boombox', orgData)
-  .then(() => OrgController.findOrg(user, 'boombox'))
+
+  // Update organization via org controller
+  OrgController.updateOrg(adminUser, 'boombox', orgData)
+  // Find updated org
+  .then(() => OrgController.findOrg(adminUser, 'boombox'))
   .then((retOrg) => {
+    // Verify org was updated
     chai.expect(retOrg.name).to.equal('Stolen boombox');
     chai.expect(retOrg.custom.leader).to.equal('Groot');
     chai.expect(retOrg.custom.musicType).to.equal('I am Groot');
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Tests updating an org
+ * @description Updating an organization model object.
  */
 function updateOrgObject(done) {
-  OrgController.findOrg(user, 'boombox')
+  // Find existing organization
+  OrgController.findOrg(adminUser, 'boombox')
   .then((retOrg) => {
+    // Update model object: org name
     retOrg.name = 'Back to Star Lord';
-    return OrgController.updateOrg(user, 'boombox', retOrg);
+    // Update org via org controller
+    return OrgController.updateOrg(adminUser, 'boombox', retOrg);
   })
   .then((retOrgUpdate) => {
+    // Verify model object was updated
     chai.expect(retOrgUpdate.name).to.equal('Back to Star Lord');
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Find all existing orgs a user has access to
+ * @description Find all existing orgs a user has access to.
  */
 function findAllExistingOrgs(done) {
-  OrgController.findOrgs(user)
+  // Find orgs via controller
+  OrgController.findOrgs(adminUser)
   .then((orgs) => {
+    // Verify correct number of orgs was returned
     chai.expect(orgs.length).to.equal(3);
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Soft-delete an existing org
+ * @description Soft-delete an existing org.
  */
 function softDeleteExistingOrg(done) {
-  OrgController.removeOrg(user, 'boombox', { soft: true })
-  .then(() => OrgController.findOrg(user, 'boombox'))
-  .then((orgTwo) => {
-    chai.expect(orgTwo).to.equal(null);
+  // Soft delete an org via controller
+  OrgController.removeOrg(adminUser, 'boombox', { soft: true })
+  // Find org to soft delete
+  // TODO : Change verification to use returned org instead of findOrg (JIRA MBX-326)
+  // TODO : Add test to verify findOrg doesnt find soft deleted org (JIRA MBX-326)
+  .then(() => OrgController.findOrg(adminUser, 'boombox'))
+  .then(() => {
+    // Expected findOrg() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'Org not found.'
     chai.expect(error.description).to.equal('Org not found.');
     done();
   });
 }
 
 /**
- * Tests deleting an existing org
+ * @description Deletes an existing org.
  */
 function deleteExistingOrg(done) {
-  OrgController.removeOrg(user, 'boombox', { soft: false })
-  .then(() => OrgController.findOrg(user, 'boombox'))
-  .then((orgTwo) => {
-    chai.expect(orgTwo).to.equal(null);
+  // Deletes org via controller
+  OrgController.removeOrg(adminUser, 'boombox', { soft: false })
+  // Find deleted org
+  .then(() => OrgController.findOrg(adminUser, 'boombox'))
+  .then(() => {
+    // Expected findOrg to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'Org not found.'
     chai.expect(error.description).to.equal('Org not found.');
     done();
   });
 }
 
 /**
- * Tests that projects are soft deleted with orgs
+ * @description Verify projects soft deleted when org soft deleted.
+ * // TODO : Consider changing project controller to model (JIRA)
+ * // TODO : Consider taking out element (JIRA)
+ * // TODO :  Change verification to use returned org instead of findOrg (JIRA)
  */
 function softDeleteProjectAndOrg(done) {
-  OrgController.createOrg(user, { id: 'boombox', name: 'Star Lord Walkman' })
-  .then(() => ProjController.createProject(user, { id: 'godslayer', name: 'God Slayer', org: { id: 'boombox' } }))
-  .then(() => ElemController.createElement(user, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Block' }))
-  .then(() => OrgController.removeOrg(user, 'boombox', { soft: true }))
-  .then(() => OrgController.findOrg(user, 'boombox'))
-  .then((retOrg3) => {
-    chai.expect(retOrg3).to.equal(null);
+  // Create an org via controller
+  OrgController.createOrg(adminUser, { id: 'boombox', name: 'Star Lord Walkman' })
+  // Create a project via controller
+  .then(() => ProjController.createProject(adminUser, { id: 'godslayer', name: 'God Slayer', org: { id: 'boombox' } }))
+  // Create element via controller
+  .then(() => ElemController.createElement(adminUser, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Block' }))
+  // Soft delete org via controller
+  .then(() => OrgController.removeOrg(adminUser, 'boombox', { soft: true }))
+  // Find org via controller
+  .then(() => OrgController.findOrg(adminUser, 'boombox'))
+  .then(() => {
+    // Expected findOrg() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'Org not found.'
     chai.expect(error.description).to.equal('Org not found.');
-    ProjController.findProject(user, 'boombox', 'godslayer')
-    .then((retProj2) => {
-      chai.expect(retProj2).to.equal(null);
+
+    // Find project
+    ProjController.findProject(adminUser, 'boombox', 'godslayer')
+    .then(() => {
+      // Expected findOrg() to fail
+      // Should not execute, force test to fail
+      chai.assert(true === false);
       done();
     })
     .catch((error2) => {
+      // Expected error thrown: 'Project not found.'
       chai.expect(error2.description).to.equal('Project not found.');
       done();
     });
@@ -410,23 +482,33 @@ function softDeleteProjectAndOrg(done) {
 }
 
 /**
- * Tests that projects are hard deleted with orgs
+ * @description Verify projects deleted when org deleted.
  */
 function hardDeleteProjectAndOrg(done) {
-  OrgController.removeOrg(user, 'boombox', { soft: false })
-  .then(() => OrgController.findOrg(user, 'boombox'))
-  .then((retOrg3) => {
-    chai.expect(retOrg3).to.equal(null);
+  // Delete an org via controller
+  OrgController.removeOrg(adminUser, 'boombox', { soft: false })
+  // Find deleted org
+  .then(() => OrgController.findOrg(adminUser, 'boombox'))
+  .then(() => {
+    // Expected findOrg() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'Org not found.'
     chai.expect(error.description).to.equal('Org not found.');
-    ProjController.findProject(user, 'boombox', 'godslayer', true)
-    .then((retProj2) => {
-      chai.expect(retProj2).to.equal(null);
+
+    // Find deleted project
+    ProjController.findProject(adminUser, 'boombox', 'godslayer', true)
+    .then(() => {
+      // Expected findProject() to fail
+      // Should not execute, force test to fail
+      chai.assert(true === false);
       done();
     })
     .catch((error2) => {
+      // Expected error thrown: 'Project not found.'
       chai.expect(error2.description).to.equal('Project not found.');
       done();
     });
@@ -434,61 +516,73 @@ function hardDeleteProjectAndOrg(done) {
 }
 
 /**
- * Tests trying to update the default organization
+ * @description Verifies default organization CANNOT be updated.
+ * Expected error thrown: 'Cannot update the default org.'
  */
 function updateDefaultOrg(done) {
-  OrgController.updateOrg(user, 'default', { name: 'New Name' })
+  // Update default org
+  OrgController.updateOrg(adminUser, 'default', { name: 'New Name' })
   .then(() => {
-    chai.expect(true).to.equal(false);
+    // Expected createUser to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'Cannot update the default org.'
     chai.expect(error.description).to.equal('Cannot update the default org.');
     done();
   });
 }
 
 /**
- * Tests trying to delete the default organization
+ * @description Verifies default organization CANNOT be deleted.
+ * Expected error thrown: 'Cannot delete the default org.'
  */
-function deleteDefaultOrg(done) {
-  OrgController.removeOrg(user, 'default', { soft: false })
+function rejectDefaultOrgDelete(done) {
+  // Delete default org
+  OrgController.removeOrg(adminUser, 'default', { soft: false })
   .then(() => {
-    chai.expect(true).to.equal(false);
+    // Expected createUser to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'Cannot delete the default org.'
     chai.expect(error.description).to.equal('Cannot delete the default org.');
     done();
   });
 }
 
 /**
- * Tests adding a user to an org
+ * @description Verifies setting user permissions on an org.
  */
-function addUserRole(done) {
-  // Increase a users role
-  OrgController.setPermissions(user, org.id.toString(), newUser, 'write')
-  .then(() => OrgController.findOrg(user, org.id.toString()))
+function setUserOrgRole(done) {
+  // Set user permissions via controller
+  OrgController.setPermissions(adminUser, org.id.toString(), newUser, 'write')
+  // Find org
+  .then(() => OrgController.findOrg(adminUser, org.id.toString()))
   .then((retOrg2) => {
+    // Verify user permissions on org
     chai.expect(retOrg2.permissions.write[1]._id.toString()).to.equal(newUser._id.toString());
     chai.expect(retOrg2.permissions.read[1]._id.toString()).to.equal(newUser._id.toString());
     chai.expect(retOrg2.permissions.admin.length).to.equal(1);
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Test to see if the newUser can actually write to the
- * organization now that new permissions have been set.
- * This means they can create a project.
+ * @description Verifies new user permissions give correct access on org.
+ * // TODO : Consider moving to project or removing test
  */
-
-function projWritePerm(done) {
+function verifyUserWritePerm(done) {
+  // Create project data
   const projData = {
     id: 'godslayer',
     name: 'God Slayer',
@@ -496,163 +590,199 @@ function projWritePerm(done) {
       id: 'gaurdians'
     }
   };
+
+  // Create project via project controller
   ProjController.createProject(newUser, projData)
   .then((proj) => {
+    // Verify project created properly
     chai.expect(proj.id).to.equal('godslayer');
     chai.expect(proj.name).to.equal('God Slayer');
-    return ElemController.createElement(newUser, { id: '0000', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Block' });
+    const elemData = {
+      id: '0000',
+      project: {
+        id: 'godslayer',
+        org: { id: 'gaurdians' } },
+      type: 'Block' };
+
+    // Create element via element controller
+    return ElemController.createElement(newUser, elemData);
   })
   .then(() => {
-    ElemController.createElement(newUser, { id: '0001', project: { id: 'godslayer', org: { id: 'gaurdians' } }, type: 'Block' });
+    const elemData02 = {
+      id: '0001',
+      project: {
+        id: 'godslayer',
+        org: { id: 'gaurdians' } },
+      type: 'Block' };
+
+    // Create second element via element controller
+    ElemController.createElement(newUser, elemData02);
     done();
   })
   .catch((error) => {
+    // No error expected
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Test is to set the permissions of the owner
- * of the org, which should get denied.
+ * @description Verifies user CANNOT change own permissions.
+ * Expected error thrown: 'User cannot change their own permissions.'
  */
-
 function rejectUserRole(done) {
-  OrgController.setPermissions(user, 'boombox', user, 'REMOVE_ALL')
+  // Set permissions via controller
+  OrgController.setPermissions(adminUser, 'boombox', adminUser, 'REMOVE_ALL')
   .then(() => {
+    // Expected createUser to fail
+    // Should not execute, force test to fail
     chai.AssertionError(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'User cannot change their own permissions.'
     chai.expect(error.description).to.equal('User cannot change their own permissions.');
     done();
   });
 }
 
 /**
- * Tests retrieving the roles a specific user has
+ * @description Finds permissions of user on an existing org.
  */
 function getUserRoles(done) {
-  OrgController.findPermissions(user, newUser, org.id.toString())
+  // Find permissions via controller
+  OrgController.findPermissions(adminUser, newUser, org.id.toString())
   .then((roles) => {
+    // Verifies user permissions
     chai.expect(roles.read).to.equal(true);
     chai.expect(roles.write).to.equal(true);
     chai.expect(roles.admin).to.equal(false);
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Tests retrieving all members roles for a specified project
+ * @description Find all user permissions on an existing organization.
  */
 function getMembers(done) {
-  const mber = M.config.test.username;
-  OrgController.findAllPermissions(user, org.id.toString())
+  // Find all user permissions via controller
+  OrgController.findAllPermissions(adminUser, org.id.toString())
   .then((members) => {
+    // Verify user permissions are correct
     chai.expect(members.groot.read).to.equal(true);
     chai.expect(members.groot.write).to.equal(true);
     chai.expect(members.groot.admin).to.equal(false);
-    chai.expect(members[mber].read).to.equal(true);
-    chai.expect(members[mber].write).to.equal(true);
-    chai.expect(members[mber].admin).to.equal(true);
+    chai.expect(members[adminUser].read).to.equal(true);
+    chai.expect(members[adminUser].write).to.equal(true);
+    chai.expect(members[adminUser].admin).to.equal(true);
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
   });
 }
 
 /**
- * Non-admin try to change a users role
+ * @description Verifies non-admin user CANNOT set permissions.
+ * Expected error thrown: 'User cannot change organization permissions.'
  */
-function nonAdminChangeRole(done) {
-  OrgController.setPermissions(newUser, org.id.toString(), user, 'REMOVE_ALL')
+function rejectNonAdminSetPermissions(done) {
+  // Set permissions via controller
+  OrgController.setPermissions(newUser, org.id.toString(), adminUser, 'REMOVE_ALL')
   .then(() => {
-    chai.fail('A non-admin should not be able to change permissions');
+    // Expected createUser to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'User cannot change organization permissions.'
     chai.expect(error.description).to.equal('User cannot change organization permissions.');
     done();
   });
 }
 
 /**
- * Tests removing a users role within an org
+ * @description Verifies removing user permissions on an existing org.
  */
 function removeUserRole(done) {
-  OrgController.setPermissions(user, org.id.toString(), newUser, 'REMOVE_ALL')
+  // Set permissions via controller
+  OrgController.setPermissions(adminUser, org.id.toString(), newUser, 'REMOVE_ALL')
   .then(() => {
+    // Verify user permissions are correct
     chai.expect(org.permissions.write).to.not.include(newUser._id.toString());
     chai.expect(org.permissions.read).to.not.include(newUser._id.toString());
     chai.expect(org.permissions.admin).to.not.include(newUser._id.toString());
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error.description).to.equal(null);
     done();
   });
 }
 
 /**
- * Tests retrieving the roles a specific user has
+ * @description Verifies users not within org does not have permission.
+ * Expected error thrown: 'User is not part of this organization.'
  */
-function getOldUserRoles(done) {
-  OrgController.findPermissions(user, newUser, org.id.toString())
+function rejectGetUserRoles(done) {
+  // Find permissions via controller
+  OrgController.findPermissions(adminUser, newUser, org.id.toString())
   .then(() => {
-    chai.fail('The user doesnt exist in the org, this should have given an error.');
+    // Expected createUser to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'User is not part of this organization.'
     chai.expect(error.description).to.equal('User is not part of this organization.');
     done();
   });
 }
 
 /**
- * Try to change the same users role
+ * @description Verifies user CANNOT change permissions to an unsupported role.
+ * Expected error thrown: 'The permission entered is not a valid permission.'
  */
-function changeOwnRole(done) {
-  OrgController.setPermissions(user, org.id.toString(), user, 'REMOVE_ALL')
+function rejectInvalidPermission(done) {
+  // Set permissions via controller
+  OrgController.setPermissions(adminUser, 'gaurdians', newUser, 'overlord')
   .then(() => {
-    chai.fail('The same user should NOT have been able to change their own permissions.');
+    // Expected createUser to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('User cannot change their own permissions.');
-    done();
-  });
-}
-
-/*
- * Try to change to an unsupported role
- */
-function invalidPermission(done) {
-  OrgController.setPermissions(user, 'gaurdians', newUser, 'overlord')
-  .then(() => {
-    chai.fail('This type of role should not be allowed...');
-    done();
-  })
-  .catch((error) => {
+    // Expected error thrown: 'The permission entered is not a valid permission.'
     chai.expect(error.description).to.equal('The permission entered is not a valid permission.');
     done();
   });
 }
 
-/*
- * Non-admin attempt to retrieve permissions
+/**
+ * @description Verifies non-admin CANNOT retrieve permissions.
+ * Expected error thrown: 'User does not have permissions.'
  */
-function nonAdminGetPermissions(done) {
+function rejectNonAdminGetPermissions(done) {
+  // Find permissions via controller
   OrgController.findAllPermissions(newUser, 'gaurdians')
   .then(() => {
-    chai.fail('User doesnt have the right permissions, they shouldnt be able to retrieve any.');
+    // Expected createUser to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
+    // Expected error thrown: 'User does not have permissions.'
     chai.expect(error.description).to.equal('User does not have permissions.');
     done();
   });

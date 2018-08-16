@@ -72,6 +72,7 @@ describe(M.getModuleName(module.filename), () => {
       // Find the user and update admin status
       User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
+          // Setting it equal to global variable
           reqUser = userUpdate;
           // Expect no error
           chai.expect(updateErr).to.equal(null);
@@ -164,7 +165,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should delete admin user created', deleteAdminUser);
 });
 
-
 /* --------------------( Tests )-------------------- */
 /**
  * @description Creates a user using the user controller.
@@ -244,9 +244,9 @@ function createNonAdminUser(done) {
 
   // Create user via user controller
   UserController.createUser(reqUser, userData)
-    .then((newUser) => {
-      // Set the file-global non-admin user
-      nonAdminUser = newUser;
+  .then((newUser) => {
+    // Set the file-global non-admin user
+    nonAdminUser = newUser;
 
     // Verify user created properly
     chai.expect(newUser.username).to.equal('klaw');
@@ -276,24 +276,23 @@ function rejectUserCreateByNonAdmin(done) {
 
   // Create user via controller
   UserController.createUser(nonAdminUser, userData)
-    .then(() => {
-      // Expected createUser to fail
-      // Should not execute, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((error) => {
-      // Expected error thrown: 'User does not have permissions'
-      chai.expect(error.description).to.equal('User does not have permissions.');
-      done();
-    });
+  .then(() => {
+    // Expected createUser to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'User does not have permissions'
+    chai.expect(error.description).to.equal('User does not have permissions.');
+    done();
+  });
 }
 
 /**
  * @description Verifies createUser fails given invalid data.
  * Expected error thrown: 'Username is not valid.'
  */
-
 function badUser(done) {
   // Create user data
   const userData = {
@@ -305,17 +304,17 @@ function badUser(done) {
 
   // Create user via user controller
   UserController.createUser(reqUser, userData)
-    .then(() => {
-      // Expected createUser to fail
-      // Should not execute, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((error) => {
-      // Expected error thrown: 'Username is not valid.'
-      chai.expect(error.description).to.equal('Username is not valid.');
-      done();
-    });
+  .then(() => {
+    // Expected createUser to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Username is not valid.'
+    chai.expect(error.description).to.equal('Username is not valid.');
+    done();
+  });
 }
 
 /**
