@@ -50,7 +50,7 @@ let org = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests. Creating an admin and
+   * Before: Run before all tests. Creating an admin and
    * non-admin user and setting the file-global admin user.
    */
   before((done) => {
@@ -106,7 +106,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: run after all tests. Delete admin user,
+   * After: Run after all tests. Delete admin user,
    * non-admin user, and organization.
    */
   after((done) => {
@@ -426,7 +426,7 @@ function deleteExistingOrg(done) {
   // Find deleted org
   .then(() => OrgController.findOrg(adminUser, 'boombox'))
   .then(() => {
-    // Expected findOrg to fail
+    // Expected findOrg() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
@@ -440,6 +440,7 @@ function deleteExistingOrg(done) {
 
 /**
  * @description Verify projects soft deleted when org soft deleted.
+ * Expected error thrown: 'Project not found.'
  * // TODO : Consider changing project controller to model (JIRA)
  * // TODO : Consider taking out element (JIRA)
  * // TODO :  Change verification to use returned org instead of findOrg (JIRA)
@@ -468,7 +469,7 @@ function softDeleteProjectAndOrg(done) {
     // Find project
     ProjController.findProject(adminUser, 'boombox', 'godslayer')
     .then(() => {
-      // Expected findOrg() to fail
+      // Expected findProject() to fail
       // Should not execute, force test to fail
       chai.assert(true === false);
       done();
@@ -483,6 +484,7 @@ function softDeleteProjectAndOrg(done) {
 
 /**
  * @description Verify projects deleted when org deleted.
+ * Expected error thrown: 'Project not found.'
  */
 function hardDeleteProjectAndOrg(done) {
   // Delete an org via controller
@@ -523,7 +525,7 @@ function updateDefaultOrg(done) {
   // Update default org
   OrgController.updateOrg(adminUser, 'default', { name: 'New Name' })
   .then(() => {
-    // Expected createUser to fail
+    // Expected updateOrg() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
@@ -543,7 +545,7 @@ function rejectDefaultOrgDelete(done) {
   // Delete default org
   OrgController.removeOrg(adminUser, 'default', { soft: false })
   .then(() => {
-    // Expected createUser to fail
+    // Expected removeOrg() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
@@ -634,7 +636,7 @@ function rejectUserRole(done) {
   // Set permissions via controller
   OrgController.setPermissions(adminUser, 'boombox', adminUser, 'REMOVE_ALL')
   .then(() => {
-    // Expected createUser to fail
+    // Expected setPermissions() to fail
     // Should not execute, force test to fail
     chai.AssertionError(true === false);
     done();
@@ -696,7 +698,7 @@ function rejectNonAdminSetPermissions(done) {
   // Set permissions via controller
   OrgController.setPermissions(newUser, org.id.toString(), adminUser, 'REMOVE_ALL')
   .then(() => {
-    // Expected createUser to fail
+    // Expected setPermissions() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
@@ -736,7 +738,7 @@ function rejectGetUserRoles(done) {
   // Find permissions via controller
   OrgController.findPermissions(adminUser, newUser, org.id.toString())
   .then(() => {
-    // Expected createUser to fail
+    // Expected findPermissions() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
@@ -756,7 +758,7 @@ function rejectInvalidPermission(done) {
   // Set permissions via controller
   OrgController.setPermissions(adminUser, 'gaurdians', newUser, 'overlord')
   .then(() => {
-    // Expected createUser to fail
+    // Expected setPermissions() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
@@ -776,7 +778,7 @@ function rejectNonAdminGetPermissions(done) {
   // Find permissions via controller
   OrgController.findAllPermissions(newUser, 'gaurdians')
   .then(() => {
-    // Expected createUser to fail
+    // Expected findAllPermissions() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
