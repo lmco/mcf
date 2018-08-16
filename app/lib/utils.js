@@ -144,7 +144,9 @@ module.exports.checkType = function(params, type) {
 };
 
 /**
- * @description Checks an array of strings. Throws an error if string keys are NOT within a given object.
+ * @description Checks an array of strings. Throws an error if string keys
+ * are NOT within a given object.
+ *
  * @example
  * assertExists(name.first,[{name:{first:'foo', last:'bar'}}]);
  * Checks 'name.first' exist within object below:

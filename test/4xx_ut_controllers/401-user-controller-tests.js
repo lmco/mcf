@@ -183,7 +183,7 @@ function createNewUser(done) {
 
   // Create user via the controller
   UserController.createUser(reqUser, userData)
-    // Find newly created user
+  // Find newly created user
   .then((newUser) => UserController.findUser(newUser.username))
   .then((foundUser) => {
     // Verify user created properly
@@ -354,18 +354,18 @@ function updateFirstName(done) {
 
   // Updates user via user controller
   UserController.updateUser(reqUser, username, userData)
-    .then((updatedUser) => {
-      // Verifies user controller updates first name
-      chai.expect(updatedUser.username).to.equal('blackpanther');
-      chai.expect(updatedUser.fname).to.equal('Okoye');
-      chai.expect(updatedUser.lname).to.equal('Panther');
-      done();
-    })
-    .catch((error) => {
-      // Expects no error
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then((updatedUser) => {
+    // Verifies user controller updates first name
+    chai.expect(updatedUser.username).to.equal('blackpanther');
+    chai.expect(updatedUser.fname).to.equal('Okoye');
+    chai.expect(updatedUser.lname).to.equal('Panther');
+    done();
+  })
+  .catch((error) => {
+    // Expects no error
+    chai.expect(error.description).to.equal(null);
+    done();
+  });
 }
 
 /**
@@ -376,17 +376,17 @@ function rejectInvalidFirstNameUpdate(done) {
   const username = 'blackpanther';
   const userData = { fname: 'KLAW@#$' }; // TODO: Add this style to style guide
   UserController.updateUser(reqUser, username, userData)
-    .then(() => {
-      // Expect update to fail
-      // Should not execute, force test to fail
-      chai.expect(true).to.equal(false);
-      done();
-    })
-    .catch((error) => {
-      // Expect error thrown: 'Name is not valid.'
-      chai.expect(error.description).to.equal('Name is not valid.');
-      done();
-    });
+  .then(() => {
+    // Expect update to fail
+    // Should not execute, force test to fail
+    chai.expect(true).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    // Expect error thrown: 'Name is not valid.'
+    chai.expect(error.description).to.equal('Name is not valid.');
+    done();
+  });
 }
 
 /**
@@ -401,22 +401,18 @@ function updateCustomData(done) {
     }
   };
   UserController.updateUser(reqUser, username, userData)
-    .then((updatedUser) => {
-      // After update, retrieve the updated user from the database.
-      // TODO: MBX-324 Make change to align with controller behavior once updated
-      return UserController.findUser(updatedUser.username);
-    })
-    .then((retUser) => {
-      // Verify changes to custom data
-      chai.expect(retUser.custom.location).to.equal('Oakland');
-      chai.expect(retUser.custom.gender).to.equal('Female');
-      done();
-    })
-    .catch((error) => {
-      // Expect no error to occur
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then((updatedUser) => UserController.findUser(updatedUser.username))
+  .then((retUser) => {
+    // Verify changes to custom data
+    chai.expect(retUser.custom.location).to.equal('Oakland');
+    chai.expect(retUser.custom.gender).to.equal('Female');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error to occur
+    chai.expect(error.description).to.equal(null);
+    done();
+  });
 }
 
 /**
@@ -425,20 +421,20 @@ function updateCustomData(done) {
  */
 function rejectUsernameUpdate(done) {
   const username = 'erikkillmonger';
-  const userData = {username: 'goldpanther'};
+  const userData = { username: 'goldpanther' };
 
   // Expect update to fail
   UserController.updateUser(reqUser, username, userData)
-    .then((updatedUser) => {
-      // TODO: MBX-324 This isn't returning the updated user, fix in controller
-      chai.expect(updatedUser.username).to.equal('goldpanther');
-      done();
-    })
-    .catch((error) => {
-      // Expect error thrown: 'Update not allowed'
-      chai.expect(error.description).to.equal('Update not allowed');
-      done();
-    });
+  .then((updatedUser) => {
+    // TODO: MBX-324 This isn't returning the updated user, fix in controller
+    chai.expect(updatedUser.username).to.equal('goldpanther');
+    done();
+  })
+  .catch((error) => {
+    // Expect error thrown: 'Update not allowed'
+    chai.expect(error.description).to.equal('Update not allowed');
+    done();
+  });
 }
 
 /**
@@ -450,17 +446,17 @@ function rejectUserUpdateByNonAdmin(done) {
   const userData = { lname: 'Faker' };
   // Expect update to fail
   UserController.updateUser(nonAdminUser, username, userData)
-    .then(() => {
-      // Update succeeded, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((error) => {
-      // Expect error thrown: 'User does not have permissions.'
-      // TODO: Some errors have punctuation and some don't, make consistent
-      chai.expect(error.description).to.equal('User does not have permissions.');
-      done();
-    });
+  .then(() => {
+    // Update succeeded, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expect error thrown: 'User does not have permissions.'
+    // TODO: Some errors have punctuation and some don't, make consistent
+    chai.expect(error.description).to.equal('User does not have permissions.');
+    done();
+  });
 }
 
 /**
@@ -473,16 +469,16 @@ function updateNonExistentUser(done) {
 
   // Expect update to fail
   UserController.updateUser(reqUser, username, userData)
-    .then(() => {
-      // Update succeeded, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((error) => {
-      // Expect error thrown: 'Cannot find user.'
-      chai.expect(error.description).to.equal('Cannot find user.');
-      done();
-    });
+  .then(() => {
+    // Update succeeded, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expect error thrown: 'Cannot find user.'
+    chai.expect(error.description).to.equal('Cannot find user.');
+    done();
+  });
 }
 
 /**
@@ -492,18 +488,18 @@ function findExistingUser(done) {
   const username = 'blackpanther';
   // Expect find user to succeed
   UserController.findUser(username)
-    .then((searchUser) => {
-      // Found a user, verify user data
-      chai.expect(searchUser.username).to.equal('blackpanther');
-      chai.expect(searchUser.fname).to.equal('Okoye');
-      chai.expect(searchUser.lname).to.equal('Panther');
-      done();
-    })
-    .catch((error) => {
-      // Expect no error
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then((searchUser) => {
+    // Found a user, verify user data
+    chai.expect(searchUser.username).to.equal('blackpanther');
+    chai.expect(searchUser.fname).to.equal('Okoye');
+    chai.expect(searchUser.lname).to.equal('Panther');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error.description).to.equal(null);
+    done();
+  });
 }
 
 /**
@@ -514,16 +510,16 @@ function rejectFindNonExistentUser(done) {
   const username = 'nopanther';
   // Expect findUser to throw error
   UserController.findUser(username)
-    .then((searchUser) => {
-      // User was found, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((err) => {
-      // Expect error thrown: 'Cannot find user.'
-      chai.expect(err.description).to.equal('Cannot find user.');
-      done();
-    });
+  .then((searchUser) => {
+    // User was found, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((err) => {
+    // Expect error thrown: 'Cannot find user.'
+    chai.expect(err.description).to.equal('Cannot find user.');
+    done();
+  });
 }
 
 /**
@@ -534,19 +530,19 @@ function rejectDeleteNonExistentUser(done) {
   const username = 'wkabi';
   // Expect remove user to fail
   UserController.removeUser(reqUser, username)
-    .then((delUser) => {
-      // Remove succeeded, force test to fail.
-      chai.assert(true === false);
-      done();
-    })
-    .catch((err) => {
-      // Expect error thrown: 'Cannot find user.'
-      // TODO: Consider changing to 'User not found'
-      // TODO: Make tests check err.message rather than description
-      //       This is so descriptions can be more easily changed
-      chai.expect(err.description).to.equal('Cannot find user.');
-      done();
-    });
+  .then((delUser) => {
+    // Remove succeeded, force test to fail.
+    chai.assert(true === false);
+    done();
+  })
+  .catch((err) => {
+    // Expect error thrown: 'Cannot find user.'
+    // TODO: Consider changing to 'User not found'
+    // TODO: Make tests check err.message rather than description
+    //       This is so descriptions can be more easily changed
+    chai.expect(err.description).to.equal('Cannot find user.');
+    done();
+  });
 }
 
 /**
@@ -557,16 +553,16 @@ function rejectDeleteByNonAdmin(done) {
   const username = 'shuri';
   // Expect remove to fail
   UserController.removeUser(nonAdminUser, username)
-    .then(() => {
-      // Remove user succeeded, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((error) => {
-      // Expect error thrown: 'User does not have permissions.'
-      chai.expect(error.description).to.equal('User does not have permissions.');
-      done();
-    });
+  .then(() => {
+    // Remove user succeeded, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expect error thrown: 'User does not have permissions.'
+    chai.expect(error.description).to.equal('User does not have permissions.');
+    done();
+  });
 }
 
 /**
@@ -578,16 +574,16 @@ function rejectDeleteSelf(done) {
   const username = 'blackpanther';
   // Expect remove to fail
   UserController.removeUser(badAUser, username)
-    .then(() => {
-      // Remove succeeded, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((err) => {
-      // Expect error thrown: 'User cannot delete themselves.'
-      chai.expect(err.description).to.equal('User cannot delete themselves.');
-      done();
-    });
+  .then(() => {
+    // Remove succeeded, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((err) => {
+    // Expect error thrown: 'User cannot delete themselves.'
+    chai.expect(err.description).to.equal('User cannot delete themselves.');
+    done();
+  });
 }
 
 /**
@@ -597,16 +593,16 @@ function deleteUser(done) {
   const username = 'shuri';
   // Expect remove user to succeed
   UserController.removeUser(reqUser, username)
-    .then((delUser) => {
-      // Remove user succeeded, verify result
-      chai.expect(delUser).to.equal('shuri');
-      done();
-    })
-    .catch((error) => {
-      // Expect no error
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then((delUser) => {
+    // Remove user succeeded, verify result
+    chai.expect(delUser).to.equal('shuri');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error.description).to.equal(null);
+    done();
+  });
 }
 
 /**
@@ -616,16 +612,16 @@ function deleteUser2(done) {
   const username = 'erikkillmonger';
   // Expect remove user to succeed
   UserController.removeUser(reqUser, username)
-    .then((delUser) => {
-      // Remove user succeeded, verify result
-      chai.expect(delUser).to.equal('erikkillmonger');
-      done();
-    })
-    .catch((error) => {
-      // Expect no error
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then((delUser) => {
+    // Remove user succeeded, verify result
+    chai.expect(delUser).to.equal('erikkillmonger');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error.description).to.equal(null);
+    done();
+  });
 }
 
 /**
@@ -637,14 +633,14 @@ function deleteAdminUser(done) {
   const username = 'klaw';
   // Expect remove user to succeed
   UserController.removeUser(reqUser, username)
-    .then((delUser) => {
-      // Remove user succeeded, verify result
-      chai.expect(delUser).to.equal('klaw');
-      done();
-    })
-    .catch((error) => {
-      // Expect no error
-      chai.expect(error.description).to.equal(null);
-      done();
-    });
+  .then((delUser) => {
+    // Remove user succeeded, verify result
+    chai.expect(delUser).to.equal('klaw');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error.description).to.equal(null);
+    done();
+  });
 }

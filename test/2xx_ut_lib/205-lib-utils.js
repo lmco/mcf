@@ -72,7 +72,7 @@ describe(M.getModuleName(module.filename), () => {
         nonAdmin = user;
 
         // Creating global org
-        return OrgController.createOrg(admin, { id: 'orgId', name: 'Org Name' });
+        return OrgController.createOrg(admin, { id: 'orgid', name: 'Org Name' });
       })
       .then((retOrg) => {
         org = retOrg;
@@ -118,7 +118,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove org
-    OrgController.removeOrg(admin, 'priv', { soft: false })
+    OrgController.removeOrg(admin, 'orgid', { soft: false })
 
     // Remove non-admin user
     .then(() => UserController.removeUser(admin, 'nonadminuser'))

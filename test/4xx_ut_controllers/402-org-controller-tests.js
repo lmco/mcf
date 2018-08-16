@@ -188,7 +188,7 @@ function createNewOrg(done) {
 
   // Create org via controller
   OrgController.createOrg(adminUser, orgData)
-    // Find newly created org
+  // Find newly created org
   .then(() => OrgController.findOrg(adminUser, 'boombox'))
   .then((retOrg) => {
     // Verify org created properly
@@ -679,14 +679,15 @@ function getMembers(done) {
     chai.expect(members.groot.read).to.equal(true);
     chai.expect(members.groot.write).to.equal(true);
     chai.expect(members.groot.admin).to.equal(false);
-    chai.expect(members[adminUser].read).to.equal(true);
-    chai.expect(members[adminUser].write).to.equal(true);
-    chai.expect(members[adminUser].admin).to.equal(true);
+    chai.expect(members[adminUser.username].read).to.equal(true);
+    chai.expect(members[adminUser.username].write).to.equal(true);
+    chai.expect(members[adminUser.username].admin).to.equal(true);
     done();
   })
   .catch((error) => {
     // Expect no error
     chai.expect(error.description).to.equal(null);
+    done();
   });
 }
 
