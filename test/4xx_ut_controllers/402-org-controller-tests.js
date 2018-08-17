@@ -22,7 +22,7 @@
  * // TODO : change description to summarize "it" functions (JIRA MBX-325)
  */
 
-// Load node modules
+// Load NPM modules
 const chai = require('chai');
 
 // Load MBEE modules

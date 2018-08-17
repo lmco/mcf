@@ -381,6 +381,7 @@ class ElementController {
 
         // Error check - check if the element already exists
         // Must nest promises since the catch uses proj, returned from findProject.
+        // TODO: Cut this down to one query
         ElementController.findElement(reqUser, orgID, projID, elemID)
         .then(() => reject(new errors.CustomError('Element already exists.', 400)))
         .catch(() => { // eslint-disable-line consistent-return

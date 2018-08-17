@@ -11,7 +11,7 @@
  * as test the controlls with invalid inputs.
  */
 
-// Load node modules
+// Load NPM modules
 const chai = require('chai');
 
 // Load MBEE modules
