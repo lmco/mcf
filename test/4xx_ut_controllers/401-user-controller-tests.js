@@ -33,7 +33,7 @@ const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
-let reqUser = null;
+let adminUser = null;
 let nonAdminUser = null;
 let badAUser = null;
 
@@ -73,7 +73,7 @@ describe(M.getModuleName(module.filename), () => {
       User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
           // Setting it equal to global variable
-          reqUser = userUpdate;
+          adminUser = userUpdate;
           // Expect no error
           chai.expect(updateErr).to.equal(null);
           chai.expect(userUpdate).to.not.equal(null);
@@ -87,7 +87,7 @@ describe(M.getModuleName(module.filename), () => {
             lname: 'Panther',
             admin: true
           };
-          UserController.createUser(reqUser, userData2)
+          UserController.createUser(adminUser, userData2)
           .then((anotherUser) => {
             badAUser = anotherUser;
             chai.expect(anotherUser.username).to.equal('blackpanther');
@@ -110,7 +110,7 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // TODO: Remove black panther
     const user2 = 'blackpanther';
-    UserController.removeUser(reqUser, user2)
+    UserController.removeUser(adminUser, user2)
     .then((delBadUser) => {
       chai.expect(delBadUser).to.equal('blackpanther');
       // Find the admin user
@@ -182,7 +182,7 @@ function createNewUser(done) {
   };
 
   // Create user via the controller
-  UserController.createUser(reqUser, userData)
+  UserController.createUser(adminUser, userData)
   // Find newly created user
   .then((newUser) => UserController.findUser(newUser.username))
   .then((foundUser) => {
@@ -213,7 +213,7 @@ function createAUser(done) {
   };
 
   // Create user via user controller
-  UserController.createUser(reqUser, userData)
+  UserController.createUser(adminUser, userData)
   .then((newUser) => {
     // Verify user create properly
     chai.expect(newUser.username).to.equal('erikkillmonger');
@@ -243,7 +243,7 @@ function createNonAdminUser(done) {
   };
 
   // Create user via user controller
-  UserController.createUser(reqUser, userData)
+  UserController.createUser(adminUser, userData)
   .then((newUser) => {
     // Set the file-global non-admin user
     nonAdminUser = newUser;
@@ -303,7 +303,7 @@ function badUser(done) {
   };
 
   // Create user via user controller
-  UserController.createUser(reqUser, userData)
+  UserController.createUser(adminUser, userData)
   .then(() => {
     // Expected createUser to fail
     // Should not execute, force test to fail
@@ -331,7 +331,7 @@ function copyCatUser(done) {
   };
 
   // Create user via user controller
-  UserController.createUser(reqUser, userData)
+  UserController.createUser(adminUser, userData)
   .then(() => {
     // Expected createUser to fail
     // Should not execute, force test to fail
@@ -353,7 +353,7 @@ function updateFirstName(done) {
   const userData = { fname: 'Okoye' };
 
   // Updates user via user controller
-  UserController.updateUser(reqUser, username, userData)
+  UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => {
     // Verifies user controller updates first name
     chai.expect(updatedUser.username).to.equal('blackpanther');
@@ -375,7 +375,7 @@ function updateFirstName(done) {
 function rejectInvalidFirstNameUpdate(done) {
   const username = 'blackpanther';
   const userData = { fname: 'KLAW@#$' }; // TODO: Add this style to style guide
-  UserController.updateUser(reqUser, username, userData)
+  UserController.updateUser(adminUser, username, userData)
   .then(() => {
     // Expect update to fail
     // Should not execute, force test to fail
@@ -400,7 +400,7 @@ function updateCustomData(done) {
       gender: 'Female'
     }
   };
-  UserController.updateUser(reqUser, username, userData)
+  UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => UserController.findUser(updatedUser.username))
   .then((retUser) => {
     // Verify changes to custom data
@@ -424,7 +424,7 @@ function rejectUsernameUpdate(done) {
   const userData = { username: 'goldpanther' };
 
   // Expect update to fail
-  UserController.updateUser(reqUser, username, userData)
+  UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => {
     // TODO: MBX-324 This isn't returning the updated user, fix in controller
     chai.expect(updatedUser.username).to.equal('goldpanther');
@@ -468,7 +468,7 @@ function updateNonExistentUser(done) {
   const userData = { fname: 'Nakia' };
 
   // Expect update to fail
-  UserController.updateUser(reqUser, username, userData)
+  UserController.updateUser(adminUser, username, userData)
   .then(() => {
     // Update succeeded, force test to fail
     chai.assert(true === false);
@@ -529,7 +529,7 @@ function rejectFindNonExistentUser(done) {
 function rejectDeleteNonExistentUser(done) {
   const username = 'wkabi';
   // Expect remove user to fail
-  UserController.removeUser(reqUser, username)
+  UserController.removeUser(adminUser, username)
   .then((delUser) => {
     // Remove succeeded, force test to fail.
     chai.assert(true === false);
@@ -592,7 +592,7 @@ function rejectDeleteSelf(done) {
 function deleteUser(done) {
   const username = 'shuri';
   // Expect remove user to succeed
-  UserController.removeUser(reqUser, username)
+  UserController.removeUser(adminUser, username)
   .then((delUser) => {
     // Remove user succeeded, verify result
     chai.expect(delUser).to.equal('shuri');
@@ -611,7 +611,7 @@ function deleteUser(done) {
 function deleteUser2(done) {
   const username = 'erikkillmonger';
   // Expect remove user to succeed
-  UserController.removeUser(reqUser, username)
+  UserController.removeUser(adminUser, username)
   .then((delUser) => {
     // Remove user succeeded, verify result
     chai.expect(delUser).to.equal('erikkillmonger');
@@ -632,7 +632,7 @@ function deleteUser2(done) {
 function deleteAdminUser(done) {
   const username = 'klaw';
   // Expect remove user to succeed
-  UserController.removeUser(reqUser, username)
+  UserController.removeUser(adminUser, username)
   .then((delUser) => {
     // Remove user succeeded, verify result
     chai.expect(delUser).to.equal('klaw');

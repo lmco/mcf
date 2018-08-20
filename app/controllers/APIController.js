@@ -750,6 +750,7 @@ class APIController {
    * GET /api/users
    *
    * @description Gets and returns all users.
+   * // TODO: Require user to be an admin (JIRA MBX-348)
    */
   static getUsers(req, res) { // eslint-disable-line consistent-return
     // If for some reason we don't have a user, fail.

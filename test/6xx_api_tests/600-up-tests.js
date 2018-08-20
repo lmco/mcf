@@ -61,7 +61,7 @@ function upTest(done) {
 }
 
 /**
- * @description Verify swagger API documentation is up and running.
+ * @description Verifies swagger API documentation is up and running.
  */
 function swaggerJSONTest(done) {
   // API GET request swagger documentation
@@ -80,6 +80,7 @@ function swaggerJSONTest(done) {
   });
 }
 
+/* ----------( Helper Functions )----------*/
 /**
  * @description Helper function for reading ca file.
  */
