@@ -23,6 +23,7 @@
  */
 
 // Load node modules
+const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
 
@@ -130,18 +131,19 @@ describe(M.getModuleName(module.filename), () => {
 function getUser(done) {
   // Make a user API GET request
   request({
-    url: `${test.url}/api/users/${reqUser}`,
-    headers: getHeaders()
+    url: `${test.url}/api/users/${reqUser.username}`,
+    headers: getHeaders(),
+    ca: readCaFile()
   },
   (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Verifies status 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct username
-    chai.expect(json.username).to.equal(reqUser);
-    // Verifies status 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Expect no error
-    chai.expect(err).to.equal(null);
+    chai.expect(json.username).to.equal(reqUser.username);
     done();
   });
 }
@@ -155,6 +157,7 @@ function postUser(done) {
   request({
     url: `${test.url}/api/users/deadpool`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     // Creates new user data as POST request body
     body: JSON.stringify({
@@ -188,6 +191,7 @@ function postAdminUser(done) {
   request({
     url: `${test.url}/api/users/vanessacarlysle`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     // Creates new admin user data as POST request body
     body: JSON.stringify({
@@ -220,7 +224,8 @@ function whoAmI(done) {
   // Make a WHOAMI API request
   request({
     url: `${test.url}/api/users/whoami`,
-    headers: getHeaders()
+    headers: getHeaders(),
+    ca: readCaFile()
   },
   (err, response, body) => {
     // Expect no error
@@ -245,6 +250,7 @@ function rejectInvalidUsernamePost(done) {
   request({
     url: `${test.url}/api/users/!babyLegs`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     // Create new user data as POST request body
     body: JSON.stringify({
@@ -277,6 +283,7 @@ function rejectNonmatchingUsernames(done) {
   request({
     url: `${test.url}/api/users/weasel`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     // Create new user data as POST request body
     body: JSON.stringify({
@@ -307,7 +314,8 @@ function getUsers(done) {
   // Make GET API request
   request({
     url: `${test.url}/api/users`,
-    headers: getHeaders()
+    headers: getHeaders(),
+    ca: readCaFile()
   },
   (err, response, body) => {
     // Expect no error
@@ -315,7 +323,7 @@ function getUsers(done) {
     // Verifies status 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verifies users exist
-    chai.expect(body).to.include(reqUser);
+    chai.expect(body).to.include(reqUser.username);
     chai.expect(body).to.include('deadpool');
     chai.expect(body).to.include('vanessacarlysle');
     done();
@@ -331,7 +339,8 @@ function rejectGetNonexisting(done) {
   // Make GET API request
   request({
     url: `${test.url}/api/users/pool`,
-    headers: getHeaders()
+    headers: getHeaders(),
+    ca: readCaFile()
   },
   (err, response, body) => {
     // Expect no error
@@ -355,6 +364,7 @@ function patchUser(done) {
   request({
     url: `${test.url}/api/users/deadpool`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'PATCH',
     // Set update parameter in request body
     body: JSON.stringify({
@@ -385,6 +395,7 @@ function rejectPatchNonexisting(done) {
   request({
     url: `${test.url}/api/users/francis`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'PATCH',
     // Set update parameter in request body
     body: JSON.stringify({
@@ -414,6 +425,7 @@ function rejectDeleteNonexisting(done) {
   request({
     url: `${test.url}/api/users/francis`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
     // Set soft delete parameter in request body
     body: JSON.stringify({
@@ -442,6 +454,7 @@ function deleteUser(done) {
   request({
     url: `${test.url}/api/users/deadpool`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
     // Set soft delete parameter in request body
     body: JSON.stringify({
@@ -470,6 +483,7 @@ function deleteAdminUser(done) {
   request({
     url: `${test.url}/api/users/vanessacarlysle`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
     // Set soft delete parameter in request body
     body: JSON.stringify({
@@ -500,4 +514,11 @@ function getHeaders() {
     'Content-Type': 'application/json',
     authorization: basicAuthHeader
   };
+}
+
+
+function readCaFile() { // eslint-disable-line consistent-return
+  if (test.hasOwnProperty('ca')) {
+    return fs.readFileSync(`${M.root}/${test.ca}`);
+  }
 }
