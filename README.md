@@ -1,6 +1,6 @@
 # Model-Based Engineering Environment
 
-TODO 
+TODO
 
 The Model-Based Engineering Environment or MBEE is modeling collaboration tool
 that integrates system models with multidisciplinary engineering data to enable
@@ -114,7 +114,7 @@ for up-to-date documentation on MongoDB.
 
 
 ## Test
-
+// TODO: Document the 600 tests certs
 ### Test Framework Overview
 Tests will be executed in order. To do this effectively without having to
 rename the entire test collection when a new test suite is added somewhere in
