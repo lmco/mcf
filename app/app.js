@@ -88,7 +88,7 @@ function initApp() {
 
   // Load the API Routes
   if (M.config.server.api.enabled) {
-    app.use('/api', M.require('api_routes'));
+    app.use('/api', M.require('api-routes'));
   }
 
   // Load the plugin routes

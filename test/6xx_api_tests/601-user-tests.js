@@ -28,7 +28,7 @@ const chai = require('chai');
 const request = require('request');
 
 // Load MBEE modules
-const User = M.require('models.User');
+const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
@@ -36,7 +36,6 @@ const db = M.require('lib.db');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const test = M.config.test;
-let reqUser = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -74,8 +73,6 @@ describe(M.getModuleName(module.filename), () => {
       // Find the user and update admin status
       User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
-          // Setting it equal to global variable
-          reqUser = userUpdate;
           // Expect no error
           chai.expect(updateErr).to.equal(null);
           chai.expect(userUpdate).to.not.equal(null);
@@ -131,7 +128,7 @@ describe(M.getModuleName(module.filename), () => {
 function getUser(done) {
   // Make a user API GET request
   request({
-    url: `${test.url}/api/users/${reqUser.username}`,
+    url: `${test.url}/api/users/${M.config.test.username}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -143,7 +140,7 @@ function getUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct username
-    chai.expect(json.username).to.equal(reqUser.username);
+    chai.expect(json.username).to.equal(M.config.test.username);
     done();
   });
 }
@@ -323,7 +320,7 @@ function getUsers(done) {
     // Verifies status 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verifies users exist
-    chai.expect(body).to.include(reqUser.username);
+    chai.expect(body).to.include(M.config.test.username);
     chai.expect(body).to.include('deadpool');
     chai.expect(body).to.include('vanessacarlysle');
     done();

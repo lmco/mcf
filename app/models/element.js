@@ -37,10 +37,10 @@
 
 // Load node modules
 const mongoose = require('mongoose');
+const uuidv4 = require('uuid/v4');
 
 // Load MBEE modules
 const validators = M.require('lib.validators');
-const uuidv4 = require('uuid/v4');
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };

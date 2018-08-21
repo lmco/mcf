@@ -28,11 +28,11 @@ const mongoose = require('mongoose');
 
 // Load MBEE modules
 // TODO: Turn into lowercase modules
-const User = M.require('models.User');
-const Organization = M.require('models.Organization');
-const Project = M.require('models.Project');
-const Element = M.require('models.Element');
-const UserController = M.require('controllers.UserController');
+const User = M.require('models.user');
+const Organization = M.require('models.organization');
+const Project = M.require('models.project');
+const Element = M.require('models.element');
+const UserController = M.require('controllers.user-controller');
 const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */

@@ -27,7 +27,7 @@
 const chai = require('chai');
 
 // Load MBEE modules
-const Org = M.require('models.Organization');
+const Org = M.require('models.organization');
 const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */

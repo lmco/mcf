@@ -25,14 +25,14 @@ const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // Load MBEE modules
-const User = M.require('models.User');
+const User = M.require('models.user');
 const crypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 
 /**
- * UIController.js
+ * UiControllerr.js
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -40,7 +40,7 @@ const validators = M.require('lib.validators');
  * It handles the server-side logic for most UI routes and renders the
  * appropriate views.
  */
-class UIController {
+class UiController {
 
   /**
    * Renders the home page.
@@ -96,7 +96,7 @@ class UIController {
         }
       },
       apis: [
-        path.join(M.root, 'app', 'api_routes.js') // Path to the API docs
+        path.join(M.root, 'app', 'api-routes.js') // Path to the API docs
       ]
     });
   }
@@ -109,7 +109,7 @@ class UIController {
   static swaggerDoc(req, res) {
     return utils.render(req, res, {
       name: 'swagger',
-      swagger: UIController.swaggerSpec(),
+      swagger: UiController.swaggerSpec(),
       user: null,
       title: 'MBEE API Documentation'
     });
@@ -246,4 +246,4 @@ class UIController {
 
 }
 
-module.exports = UIController;
+module.exports = UiController;

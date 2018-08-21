@@ -19,7 +19,7 @@
  */
 
 // Load MBEE modules
-const Organization = M.require('models.Organization');
+const Organization = M.require('models.organization');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
@@ -397,7 +397,7 @@ class OrganizationController {
   static removeOrg(user, organizationID, options) {
     // Loading controller function wide since the project controller loads
     // the org controller globally. Both files cannot load each other globally.
-    const ProjController = M.require('controllers.ProjectController');
+    const ProjController = M.require('controllers.project-controller');
 
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       let softDelete = true;

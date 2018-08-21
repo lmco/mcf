@@ -20,7 +20,7 @@ const express = require('express');
 const router = express.Router();
 
 // Load MBEE modules
-const UIController = M.require('controllers.UIController');
+const UIController = M.require('controllers.ui-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
 

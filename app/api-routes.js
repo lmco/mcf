@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /*
- * api_routes.js
+ * api-routes.js
  *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -31,7 +31,7 @@ const express = require('express');
 const api = express.Router();
 
 // Load MBEE modules
-const APIController = M.require('controllers.APIController');
+const APIController = M.require('controllers.api-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
 

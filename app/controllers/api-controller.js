@@ -24,22 +24,22 @@ const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // Load MBEE modules
-const UserController = M.require('controllers.UserController');
-const OrgController = M.require('controllers.OrganizationController');
-const ProjectController = M.require('controllers.ProjectController');
-const ElementController = M.require('controllers.ElementController');
+const UserController = M.require('controllers.user-controller');
+const OrgController = M.require('controllers.organization-controller');
+const ProjectController = M.require('controllers.project-controller');
+const ElementController = M.require('controllers.element-controller');
 const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 
 /**
- * @class  APIController
+ * @class  ApiController
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description Defines API-related control functionality.
  */
-class APIController {
+class ApiController {
 
   /**
    * @description This is a utility function that formats an object as JSON.
@@ -79,7 +79,7 @@ class APIController {
         }
       },
       apis: [
-        path.join(__dirname, '..', 'api_routes.js') // Path to the API docs
+        path.join(__dirname, '..', 'api-routes.js') // Path to the API docs
       ]
     });
   }
@@ -95,9 +95,9 @@ class APIController {
    * @description Returns the swagger JSON specification.
    */
   static swaggerJSON(req, res) {
-    const swaggerSpec = APIController.swaggerSpec();
+    const swaggerSpec = ApiController.swaggerSpec();
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(APIController.formatJSON(swaggerSpec));
+    return res.status(200).send(ApiController.formatJSON(swaggerSpec));
   }
 
 
@@ -108,7 +108,7 @@ class APIController {
    */
   static login(req, res) {
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(APIController.formatJSON({
+    return res.status(200).send(ApiController.formatJSON({
       token: req.session.token
     }));
   }
@@ -138,7 +138,7 @@ class APIController {
       build: `${M.build}`
     };
     res.header('Content-Type', 'application/json');
-    return res.send(APIController.formatJSON(obj));
+    return res.send(ApiController.formatJSON(obj));
   }
 
 
@@ -167,7 +167,7 @@ class APIController {
 
       // Return 200 and the orgs
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(orgsPublicData));
+      return res.status(200).send(ApiController.formatJSON(orgsPublicData));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -232,7 +232,7 @@ class APIController {
     OrgController.findOrg(req.user, orgid)
     .then((org) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(org.getPublicData()));
+      return res.status(200).send(ApiController.formatJSON(org.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -279,7 +279,7 @@ class APIController {
     .then((org) => {
       // Return OK status and the created org
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(org));
+      return res.status(200).send(ApiController.formatJSON(org));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -323,7 +323,7 @@ class APIController {
     .then((org) => {
       // Return OK status and the created org
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(org));
+      return res.status(200).send(ApiController.formatJSON(org));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -348,7 +348,7 @@ class APIController {
     OrgController.removeOrg(req.user, orgid, req.body)
     .then((org) => {
       res.header('Content-Type', 'application/json');
-      return res.send(APIController.formatJSON(org.getPublicData()));
+      return res.send(ApiController.formatJSON(org.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -371,7 +371,7 @@ class APIController {
     .then((user) => OrgController.findPermissions(req.user, user, orgID))
     .then((roles) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(roles));
+      return res.status(200).send(ApiController.formatJSON(roles));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -402,7 +402,7 @@ class APIController {
     .then((user) => OrgController.setPermissions(req.user, orgID, user, req.body.role))
     .then((org) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(org.getPublicData()));
+      return res.status(200).send(ApiController.formatJSON(org.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -425,7 +425,7 @@ class APIController {
     .then((user) => OrgController.setPermissions(req.user, orgID, user, 'REMOVE_ALL'))
     .then((org) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(org.getPublicData()));
+      return res.status(200).send(ApiController.formatJSON(org.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -447,7 +447,7 @@ class APIController {
     OrgController.findAllPermissions(req.user, orgID)
     .then((members) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(members));
+      return res.status(200).send(ApiController.formatJSON(members));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -480,7 +480,7 @@ class APIController {
     .then((projects) => {
       // Return project
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(projects));
+      return res.status(200).send(ApiController.formatJSON(projects));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -545,7 +545,7 @@ class APIController {
     ProjectController.findProject(req.user, orgid, projectid, true)
     .then((project) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
+      return res.status(200).send(ApiController.formatJSON(project));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -590,7 +590,7 @@ class APIController {
     })
     .then((project) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
+      return res.status(200).send(ApiController.formatJSON(project));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -624,7 +624,7 @@ class APIController {
     ProjectController.updateProject(req.user, orgId, projectId, req.body)
     .then((project) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
+      return res.status(200).send(ApiController.formatJSON(project));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -649,7 +649,7 @@ class APIController {
     ProjectController.removeProject(req.user, orgId, projectId, req.body)
     .then((project) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
+      return res.status(200).send(ApiController.formatJSON(project));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -669,7 +669,7 @@ class APIController {
     ProjectController.findAllPermissions(req.user, orgID, projectID)
     .then((permissions) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(permissions));
+      return res.status(200).send(ApiController.formatJSON(permissions));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -690,7 +690,7 @@ class APIController {
     .then((user) => ProjectController.findPermissions(req.user, orgID, projectID, user))
     .then((permissions) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(permissions));
+      return res.status(200).send(ApiController.formatJSON(permissions));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -712,7 +712,7 @@ class APIController {
     .then((user) => ProjectController.setPermissions(req.user, orgID, projectID, user, permType))
     .then((project) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
+      return res.status(200).send(ApiController.formatJSON(project));
     })
     // Return and log error if caught
     .catch((error) => res.status(error.status).send(error));
@@ -735,7 +735,7 @@ class APIController {
     .then((user) => ProjectController.setPermissions(req.user, orgID, projectID, user, permType))
     .then((project) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(project));
+      return res.status(200).send(ApiController.formatJSON(project));
     })
     // Return and log error if caught
     .catch((error) => res.status(error.status).send(error));
@@ -765,7 +765,7 @@ class APIController {
 
       // Return only the public data
       const publicUsers = users.map(u => u.getPublicData());
-      return res.status(200).send(APIController.formatJSON(publicUsers));
+      return res.status(200).send(ApiController.formatJSON(publicUsers));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -785,7 +785,7 @@ class APIController {
     UserController.findUser(sani.sanitize(req.params.username))
     .then((user) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+      return res.status(200).send(ApiController.formatJSON(user.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -817,7 +817,7 @@ class APIController {
     UserController.createUser(req.user, req.body)
     .then((user) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+      return res.status(200).send(ApiController.formatJSON(user.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -837,7 +837,7 @@ class APIController {
     UserController.updateUser(req.user, req.params.username, req.body)
     .then((user) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(user.getPublicData()));
+      return res.status(200).send(ApiController.formatJSON(user.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -857,7 +857,7 @@ class APIController {
     UserController.removeUser(req.user, req.params.username)
     .then((user) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(user));
+      return res.status(200).send(ApiController.formatJSON(user));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -876,7 +876,7 @@ class APIController {
 
     // Otherwise return 200 and the user's public JSON
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(APIController.formatJSON(req.user.getPublicData()));
+    return res.status(200).send(ApiController.formatJSON(req.user.getPublicData()));
   }
 
 
@@ -910,7 +910,7 @@ class APIController {
     ElementController.findElements(req.user, orgid, projid)
     .then((elements) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(elements));
+      return res.status(200).send(ApiController.formatJSON(elements));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -942,7 +942,7 @@ class APIController {
     ElementController.findElement(req.user, orgid, projid, elemid)
     .then((element) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(element));
+      return res.status(200).send(ApiController.formatJSON(element));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -963,7 +963,7 @@ class APIController {
     ElementController.createElement(req.user, req.body)
     .then((element) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(element));
+      return res.status(200).send(ApiController.formatJSON(element));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -995,7 +995,7 @@ class APIController {
     ElementController.updateElement(req.user, orgid, projid, elemid, req.body)
     .then((element) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(element));
+      return res.status(200).send(ApiController.formatJSON(element));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -1027,7 +1027,7 @@ class APIController {
     ElementController.removeElement(req.user, orgid, projid, elemid, req.body)
     .then((element) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(APIController.formatJSON(element));
+      return res.status(200).send(ApiController.formatJSON(element));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -1035,4 +1035,4 @@ class APIController {
 }
 
 // Expose the API controller
-module.exports = APIController;
+module.exports = ApiController;

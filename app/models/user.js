@@ -23,7 +23,7 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const errors = M.require('lib.errors');
-const Organization = M.require('models.Organization');
+const Organization = M.require('models.organization');
 
 // Load MBEE modules
 const validators = M.require('lib.validators');

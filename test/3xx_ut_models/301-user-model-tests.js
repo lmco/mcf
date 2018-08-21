@@ -25,7 +25,7 @@
 const chai = require('chai');
 
 // Load MBEE modules
-const User = M.require('models.User');
+const User = M.require('models.user');
 const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */

@@ -25,10 +25,10 @@
 const chai = require('chai');
 
 // Load MBEE modules
-const OrgController = M.require('controllers.OrganizationController');
-const ProjController = M.require('controllers.ProjectController');
-const ElemController = M.require('controllers.ElementController');
-const User = M.require('models.User');
+const OrgController = M.require('controllers.organization-controller');
+const ProjController = M.require('controllers.project-controller');
+const ElemController = M.require('controllers.element-controller');
+const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');

@@ -19,8 +19,8 @@
  */
 
 // Load MBEE modules
-const OrgController = M.require('controllers.OrganizationController');
-const Project = M.require('models.Project');
+const OrgController = M.require('controllers.organization-controller');
+const Project = M.require('models.project');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
@@ -33,7 +33,7 @@ const errors = M.require('lib.errors');
 /* eslint-disable consistent-return */
 
 /**
- * ProjectController.js
+ * project-controller.js
  *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -500,7 +500,7 @@ class ProjectController {
   static removeProject(reqUser, organizationID, projectID, options) {
     // Loading controller function wide since the element controller loads
     // the project controller globally. Both files cannot load each other globally.
-    const ElemController = M.require('controllers.ElementController');
+    const ElemController = M.require('controllers.element-controller');
 
     return new Promise((resolve, reject) => {
       try {
