@@ -19,7 +19,7 @@
  * @description Tests the organization controller functionality: create,
  * delete, update, and find organizations. As well as setting and updating
  * permissions of organizations.
- * // TODO : change description to summarize "it" functions (JIRA MBX-325)
+ * // TODO : MBX-325 change description to summarize "it" functions
  */
 
 // Load NPM modules
@@ -401,8 +401,8 @@ function softDeleteExistingOrg(done) {
   // Soft delete an org via controller
   OrgController.removeOrg(adminUser, 'boombox', { soft: true })
   // Find org to soft delete
-  // TODO : Change verification to use returned org instead of findOrg (JIRA MBX-326)
-  // TODO : Add test to verify findOrg doesnt find soft deleted org (JIRA MBX-326)
+  // TODO : MBX-326 Change verification to use returned org instead of findOrg
+  // TODO : MBX-326 Add test to verify findOrg doesnt find soft deleted org
   .then(() => OrgController.findOrg(adminUser, 'boombox'))
   .then(() => {
     // Expected findOrg() to fail
@@ -441,9 +441,10 @@ function deleteExistingOrg(done) {
 /**
  * @description Verify projects soft deleted when org soft deleted.
  * Expected error thrown: 'Project not found.'
- * // TODO : Consider changing project controller to model (JIRA)
- * // TODO : Consider taking out element (JIRA)
- * // TODO :  Change verification to use returned org instead of findOrg (JIRA)
+ * // TODO : MBX-380 Discuss changing project controller to model
+ * // TODO : MBX-380 Discuss taking out element
+ * // TODO : MBX-381 Change verification of soft delete org to check the soft
+ *           delete field instead of simply insuring a findOrg fails.
  */
 function softDeleteProjectAndOrg(done) {
   // Create an org via controller
@@ -581,7 +582,8 @@ function setUserOrgRole(done) {
 
 /**
  * @description Verifies new user permissions give correct access on org.
- * // TODO : Consider moving to project or removing test
+ * // TODO : MBX-382 Discuss moving to test to project controller tests or
+ *           removing
  */
 function verifyUserWritePerm(done) {
   // Create project data

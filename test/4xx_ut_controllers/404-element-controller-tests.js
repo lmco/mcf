@@ -48,7 +48,7 @@ let proj = null;
 describe(M.getModuleName(module.filename), () => {
   /**
    * This function runs before all the tests in this test suite.
-   * TODO - What does this function do?
+   * TODO: MBX-384 What does this function do?
    */
   // TODO: MBX-346 Create a common before function
   before((done) => {
@@ -62,14 +62,14 @@ describe(M.getModuleName(module.filename), () => {
       password: M.config.test.password
     };
 
-    // TODO: Change user creation approach
+    // TODO: MBX-385 Change user creation approach
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
 
     AuthController.authenticate(reqObj, resObj, (err) => {
       // After authentication, user is created
 
-      const ldapuser = reqObj.user; // TODO: not LDAP user
+      const ldapuser = reqObj.user; // TODO: MBX-385 not LDAP user
       chai.expect(err).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
 
@@ -572,7 +572,7 @@ function softDeleteAllElements(done) {
   // Find elements in project
   .then(() => ElemController.findElements(user, org.id, proj.id))
   .then((retElems2) => {
-    // TODO (austin): Why is the test passing?
+    // TODO (austin): MBX-386 Why is the test passing?
     // findElements returns soft-deleted elements by default, this is
     // inconsistent behavior.
     chai.expect(retElems2.length).to.equal(3);

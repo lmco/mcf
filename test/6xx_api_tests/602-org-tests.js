@@ -114,9 +114,6 @@ describe(M.getModuleName(module.filename), () => {
 });
 
 /* --------------------( Tests )-------------------- */
-// TODO - add descriptions to all functions and fix spacing between functions
-
-
 /** TEST?! Need to ask Josh about testing before any orgs are added to the database.
  * Makes a GET request to /api/org1. This should happen before any orgs
  * are added to the database. So the response should be an empty array.

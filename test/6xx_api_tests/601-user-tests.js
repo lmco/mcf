@@ -18,8 +18,8 @@
  *
  * @description This tests the user API controller functionality:
  * GET, POST, PATCH, and DELETE a user.
- * // TODO: Create test to verify only admin user can make GET request of all
- * // users (JIRA MBX-348)
+ * // TODO: MBX-348 Create test to verify only admin user can make GET request of all
+ * // users
  */
 
 // Load node modules
@@ -181,7 +181,7 @@ function postUser(done) {
 /**
  * @description Makes a POST request to /api/users/:username. Verifies POST
  * request to user API admin user.
- * // TODO: delete one of the POST tests and make one admin user
+ * // TODO: MBX-387 delete one of the POST tests and make one admin user
  */
 function postAdminUser(done) {
   // Make a user API POST request

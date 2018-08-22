@@ -17,7 +17,7 @@
  *
  * @description Tests the user controller functionality: create,
  * delete, update, and find users.
- * TODO: Better organize tests, it's unclear how many users are being created/deleted.
+ * TODO: MBX-375 Better organize tests, it's unclear how many users are being created/deleted.
  */
 
 // Load node modules
@@ -78,7 +78,7 @@ describe(M.getModuleName(module.filename), () => {
           chai.expect(updateErr).to.equal(null);
           chai.expect(userUpdate).to.not.equal(null);
 
-          // TODO: Remove the second user, black panther only used in one test
+          // TODO: MBX-375 Remove the second user, black panther only used in one test
           // Creating a new admin user
           const userData2 = {
             username: 'blackpanther',
@@ -108,7 +108,7 @@ describe(M.getModuleName(module.filename), () => {
    * non-admin user.
    */
   after((done) => {
-    // TODO: Remove black panther
+    // TODO: MBX-375 Remove black panther
     const user2 = 'blackpanther';
     UserController.removeUser(adminUser, user2)
     .then((delBadUser) => {
@@ -374,7 +374,7 @@ function updateFirstName(done) {
  */
 function rejectInvalidFirstNameUpdate(done) {
   const username = 'blackpanther';
-  const userData = { fname: 'KLAW@#$' }; // TODO: Add this style to style guide
+  const userData = { fname: 'KLAW@#$' }; // TODO: MBX-376 Add this style to style guide
   UserController.updateUser(adminUser, username, userData)
   .then(() => {
     // Expect update to fail
@@ -453,7 +453,7 @@ function rejectUserUpdateByNonAdmin(done) {
   })
   .catch((error) => {
     // Expect error thrown: 'User does not have permissions.'
-    // TODO: Some errors have punctuation and some don't, make consistent
+    // TODO: MBX-377 Some errors have punctuation and some don't, make consistent
     chai.expect(error.description).to.equal('User does not have permissions.');
     done();
   });
@@ -537,8 +537,8 @@ function rejectDeleteNonExistentUser(done) {
   })
   .catch((err) => {
     // Expect error thrown: 'Cannot find user.'
-    // TODO: Consider changing to 'User not found'
-    // TODO: Make tests check err.message rather than description
+    // TODO: MBX-378 Consider changing to 'User not found'
+    // TODO: MBX-379 Make tests check err.message rather than description
     //       This is so descriptions can be more easily changed
     chai.expect(err.description).to.equal('Cannot find user.');
     done();
@@ -569,7 +569,7 @@ function rejectDeleteByNonAdmin(done) {
  * @description Verifies that a user cannot delete themselves.
  * Expects error thrown: 'User cannot delete themselves.'
  */
-// TODO: Change black panther to the MBEE config user
+// TODO: MBX-375 Change black panther to the MBEE config user
 function rejectDeleteSelf(done) {
   const username = 'blackpanther';
   // Expect remove to fail
@@ -626,8 +626,7 @@ function deleteUser2(done) {
 
 /**
  * @description Deletes the admin user.
- * TODO: this user is not an admin, should this just be deleteUser3 ?
- *       See TODO added in header
+ * TODO: MBX-375 this user is not an admin, should this just be deleteUser3?
  */
 function deleteAdminUser(done) {
   const username = 'klaw';
