@@ -214,7 +214,7 @@ other test suites or the order of test execution.
 
 ### API Documentation
 The API is documentation is generated with Swagger with Swagger-JSDoc.
-The API routes, which are defined in [app/api_routes.js](app/api_routes.js),
+The API routes, which are defined in [app/api-routes.js](app/api-routes.js),
 are documented via Swagger-JSDoc block comments. All API documentation and
 API definition occurs in that file.
 

@@ -19,11 +19,11 @@
  */
 
 // Load MBEE modules
-const User = M.require('models.User');
+const User = M.require('models.user');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
-const validators = M.require('lib/validators');
+const validators = M.require('lib.validators');
 
 
 // We are disabling the eslint consistent-return rule for this file.

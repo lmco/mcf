@@ -27,10 +27,10 @@ const chai = require('chai');
 const mongoose = require('mongoose'); // TODO remove need for mongoose
 
 // Load MBEE modules
-const User = M.require('models.User');
-const Organization = M.require('models.Organization');
-const Project = M.require('models.Project');
-const Element = M.require('models.Element');
+const User = M.require('models.user');
+const Organization = M.require('models.organization');
+const Project = M.require('models.project');
+const Element = M.require('models.element');
 const db = M.require('lib.db');
 
 

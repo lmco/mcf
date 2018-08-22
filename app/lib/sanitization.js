@@ -52,7 +52,7 @@ module.exports.html = function(s) {
     .replace(/'/g, '&#039;');
   }
 
-  // TODO: Handle null case, potentially undefined and booleans(true/false)
+  // TODO: Handle null case, potentially undefined and booleans(true/false) (MBX-359)
 
   // Check if object type
   if (s instanceof Object) {

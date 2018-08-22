@@ -131,7 +131,7 @@ const formatter = printf((msg) => {
 
 // Creates the log directory if it doesn't already exist
 const logDir = (M.config.log.dir === undefined) ? 'logs' : M.config.log.dir;
-// TODO: make OS Specific
+// TODO: make OS Specific (MBX-358)
 const cmd = `mkdir -p ${logDir}`;
 execSync(cmd);
 

@@ -43,7 +43,7 @@ db.connect()
   process.exit(1);
 });
 
-// TODO: do we need this here if it's at the bottom?
+// Initialize express() as app and export the object
 const app = express();
 module.exports = app;
 
@@ -88,7 +88,7 @@ function initApp() {
 
   // Load the API Routes
   if (M.config.server.api.enabled) {
-    app.use('/api', M.require('api_routes'));
+    app.use('/api', M.require('api-routes'));
   }
 
   // Load the plugin routes

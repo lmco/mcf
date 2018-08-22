@@ -23,8 +23,8 @@ const fs = require('fs');
 
 // Load MBEE modules
 const errors = M.require('lib.errors');
-const Organization = M.require('models.Organization');
-const Project = M.require('models.Project');
+const Organization = M.require('models.organization');
+const Project = M.require('models.project');
 
 module.exports.timeConversions = {
   MILLISECONDS: 1,

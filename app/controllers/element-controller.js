@@ -19,8 +19,8 @@
  */
 
 // Load MBEE modules
-const ProjController = M.require('controllers.ProjectController');
-const Element = M.require('models.Element');
+const ProjController = M.require('controllers.project-controller');
+const Element = M.require('models.element');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
@@ -74,7 +74,7 @@ class ElementController {
         type = sani.sanitize(elemType);
 
         // Checks to see if the type provided is either a model
-        // or discriminator from Element.js. Do not confuse
+        // or discriminator from element.js. Do not confuse
         // this Element as the Element model; it's just the exported file
         // containing the Element model along with Relationship, Block, etc.
         let typeExists = Object.keys(Element).includes(type);
@@ -381,7 +381,7 @@ class ElementController {
 
         // Error check - check if the element already exists
         // Must nest promises since the catch uses proj, returned from findProject.
-        // TODO: Cut this down to one query
+        // TODO: Cut this down to one query (MBX-352)
         ElementController.findElement(reqUser, orgID, projID, elemID)
         .then(() => reject(new errors.CustomError('Element already exists.', 400)))
         .catch(() => { // eslint-disable-line consistent-return

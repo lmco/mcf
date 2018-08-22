@@ -23,9 +23,9 @@ const path = require('path');
 const ldap = require('ldapjs');
 
 // Load MBEE modules
-const LocalStrategy = M.require('auth.LocalStrategy');
-const UserController = M.require('controllers.UserController');
-const User = M.require('models.User');
+const LocalStrategy = M.require('auth.local-strategy');
+const UserController = M.require('controllers.user-controller');
+const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
 
@@ -33,11 +33,11 @@ const errors = M.require('lib.errors');
 const ldapConfig = M.config.auth.ldap;
 
 /**
- * LDAPStrategy
+ * LdapStrategy
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  * @classdesc  This class defines authentication in the LMI cloud environment.
  */
-class LDAPStrategy {
+class LdapStrategy {
 
   /******************************************************************************
    *  LDAP Authentication Implementations                                       *
@@ -67,14 +67,14 @@ class LDAPStrategy {
     // Run through the LDAP helper functions defined below.
     return new Promise((resolve, reject) => {
       // Connect to database
-      LDAPStrategy.ldapConnect()
+      LdapStrategy.ldapConnect()
       .then(ldapClient => {
         // Search for user
-        LDAPStrategy.ldapSearch(ldapClient, username)
+        LdapStrategy.ldapSearch(ldapClient, username)
         // Authenticate user
-        .then(userFound => LDAPStrategy.ldapAuth(ldapClient, userFound, password))
+        .then(userFound => LdapStrategy.ldapAuth(ldapClient, userFound, password))
         // Sync user with local database
-        .then(userAuth => LDAPStrategy.ldapSync(userAuth))
+        .then(userAuth => LdapStrategy.ldapSync(userAuth))
         // return authenticated user object
         .then(userSynced => resolve(userSynced))
         // Return any error that may have occurred in the above functions
@@ -326,4 +326,4 @@ class LDAPStrategy {
 }
 
 // export module
-module.exports = LDAPStrategy;
+module.exports = LdapStrategy;

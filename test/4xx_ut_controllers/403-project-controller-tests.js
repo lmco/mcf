@@ -15,12 +15,12 @@
 const chai = require('chai');
 
 // Load MBEE modules
-const UserController = M.require('controllers.UserController');
-const OrgController = M.require('controllers.OrganizationController');
-const ProjController = M.require('controllers.ProjectController');
-const ElemController = M.require('controllers.ElementController');
-const User = M.require('models.User');
-const Element = M.require('models.Element');
+const UserController = M.require('controllers.user-controller');
+const OrgController = M.require('controllers.organization-controller');
+const ProjController = M.require('controllers.project-controller');
+const ElemController = M.require('controllers.element-controller');
+const User = M.require('models.user');
+const Element = M.require('models.element');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
@@ -207,7 +207,8 @@ function createProject(done) {
 
 /**
  * @description Verifies elements created for the main project
- *  TODO: Create using element model, consider including in delete project test, Move to before()
+ *  TODO: MBX-380 Create using element model, consider including in delete
+ *        project test, Move to before()
  */
 function createElements(done) {
   const elem0 = {
@@ -359,7 +360,7 @@ function createProject02(done) {
 /**
  * @description Verifies invalid field string with over 36 characters when creating a project.
  * Expected error thrown: 'Save failed.'
- *  TODO: Move to 303 and Use model controller
+ *  TODO: MBX-383 Test is actually verifying the validators for the model. Move to 303
  */
 function verifyProjectFieldMaxChar(done) {
   const projData = {

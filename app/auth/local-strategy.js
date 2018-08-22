@@ -19,7 +19,7 @@
  */
 
 // Load MBEE modules
-const User = M.require('models.User');
+const User = M.require('models.user');
 const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');

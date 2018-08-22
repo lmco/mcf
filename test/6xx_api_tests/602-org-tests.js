@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/602-org-tests
+ * @module  test.602-org-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -16,58 +16,57 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This tests the API controller functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code we want to make sure everything still
- * works as it should. These API controller tests are specifically for the Organization
- * API tests: posting, patching, getting, and deleting orgs. Some tests are
- * conducting with invalid inputs for the org api controlls.
+ * @description This tests the organization API controller functionality:
+ * GET, POST, PATCH, and DELETE of an organization.
  *
- * TODO - fix description
  */
 
 // Load node modules
 const chai = require('chai');
 const request = require('request');
-const mongoose = require('mongoose'); // TODO - remove dep on mongoose
 
 // Load MBEE modules
-const User = M.require('models.User');
+const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
+const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-
+// Variables used across test functions
 const test = M.config.test;
 
-
 /* --------------------( Main )-------------------- */
-
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * TODO - describe this function
+   * Before: run before all tests. Create the requesting user.
    */
   before((done) => {
-    const db = M.require('lib/db'); // TODO M.lib.db
     db.connect();
 
     // Creating a Requesting Admin
-    const u = M.config.test.username;
-    const p = M.config.test.password;
     const params = {};
     const body = {
-      username: u,
-      password: p
+      username: M.config.test.username,
+      password: M.config.test.password
     };
 
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
+
+    // Authenticate User
     AuthController.authenticate(reqObj, resObj, (err) => {
-      const ldapuser = reqObj.user;
+      // Expect no error
       chai.expect(err).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+      chai.expect(reqObj.user.username).to.equal(M.config.test.username);
+
+      // Fin the user and update the admin status
+      User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
           // Setting it equal to global variable
           chai.expect(updateErr).to.equal(null);
@@ -78,7 +77,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * TODO - add description
+   * After: run after all tests. Delete requesting user.
    */
   after((done) => {
     User.findOne({
@@ -115,9 +114,6 @@ describe(M.getModuleName(module.filename), () => {
 });
 
 /* --------------------( Tests )-------------------- */
-// TODO - add descriptions to all functions and fix spacing between functions
-
-
 /** TEST?! Need to ask Josh about testing before any orgs are added to the database.
  * Makes a GET request to /api/org1. This should happen before any orgs
  * are added to the database. So the response should be an empty array.

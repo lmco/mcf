@@ -27,10 +27,10 @@
 const chai = require('chai');
 
 // Load MBEE modules
-const User = M.require('models.User');
-const Org = M.require('models.Organization');
-const Project = M.require('models.Project');
-const Element = M.require('models.Element');
+const User = M.require('models.user');
+const Org = M.require('models.organization');
+const Project = M.require('models.project');
+const Element = M.require('models.element');
 const db = M.require('lib/db');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
@@ -60,7 +60,7 @@ describe(M.getModuleName(module.filename), () => {
       password: M.config.test.password
     };
 
-    // TODO: Create a user and set them to an admin of the Organization and
+    // TODO: Create a user and set them to an admin of the Organization and (MBX-374)
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
     AuthController.authenticate(reqObj, resObj, (err) => {
@@ -135,11 +135,11 @@ describe(M.getModuleName(module.filename), () => {
       Org.findOneAndRemove({
         id: org.id
       })
-      .exec((orgRemoveErr) => { // TODO: use promises where possible
+      .exec((orgRemoveErr) => { // TODO: use promises where possible (MBX-374)
         // Check for no error
         chai.expect(orgRemoveErr).to.equal(null);
 
-        // TODO: remove user created in before()
+        // TODO: remove user created in before() (MBX-374)
         User.findOne({
           username: M.config.test.username
         }, (err, foundUser) => {
@@ -162,7 +162,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a block (1)', createBlock01);
   it('should create a block (2)', createBlock02);
   it('should create a relationship between blocks', createRelationship);
-  // TODO: consider adding a find relationship test
+  // TODO: consider adding a find relationship test (MBX-374)
   it('should hard delete blocks and relationships', deleteBlocksAndRelationships);
   it('should soft-delete the root package', softDeleteRootPackage);
   it('should hard delete the root package', deleteRootPackage);
@@ -433,7 +433,7 @@ function deleteBlocksAndRelationships(done) {
  * @description Soft deletes the previously created root package
  */
 function softDeleteRootPackage(done) {
-  // TODO: Remove LM specific comments
+  // TODO: Remove LM specific comments (MBX-370)
   // LM: Changed from findOneAndUpdate to a find and then update
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.

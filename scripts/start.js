@@ -81,8 +81,8 @@ function start(args) {
   }
 
   // Create default org if it doesn't exist
-  const Organization = M.require('models.Organization');
-  const UserController = M.require('controllers.UserController');
+  const Organization = M.require('models.organization');
+  const UserController = M.require('controllers.user-controller');
   Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     if (err) {

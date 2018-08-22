@@ -31,9 +31,9 @@ const mongoose = require('mongoose'); // TODO - remove dependency on mongoose
 const request = require('request');
 
 // Load MBEE modules
-const OrgController = M.require('controllers.OrganizationController');
+const OrgController = M.require('controllers.organization-controller');
 const AuthController = M.require('lib.auth');
-const User = M.require('models.User');
+const User = M.require('models.user');
 const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */

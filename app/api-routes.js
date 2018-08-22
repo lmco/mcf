@@ -10,7 +10,7 @@
  * control laws. Contact legal and export compliance prior to distribution.  *
  *****************************************************************************/
 /*
- * api_routes.js
+ * api-routes.js
  *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -31,7 +31,7 @@ const express = require('express');
 const api = express.Router();
 
 // Load MBEE modules
-const APIController = M.require('controllers.APIController');
+const APIController = M.require('controllers.api-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
 
@@ -655,7 +655,7 @@ api.route('/orgs/:orgid/members')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getAllOrgRoles // TODO: Consider renaming to getAllOrgMemRoles
+  APIController.getAllOrgRoles // TODO: Consider renaming to getAllOrgMemRoles (MBX-363)
 );
 
 /**
@@ -826,7 +826,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjectRoles // TODO: Rename to getProjMemRoles
+  APIController.getProjectRoles // TODO: Rename to getProjMemRoles (MBX-363)
 );
 
 /**
@@ -963,7 +963,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjectRole // TODO: Consider renaming to getProjMemRole
+  APIController.getProjectRole // TODO: Consider renaming to getProjMemRole (MBX-363)
 )
 .post(
   AuthController.authenticate,

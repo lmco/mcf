@@ -19,19 +19,19 @@
  */
 
 // Load MBEE modules
-const LocalStrategy = M.require('auth.LocalStrategy');
-const LDAPStrategy = M.require('auth.LDAPStrategy');
-const User = M.require('models.User');
+const LocalStrategy = M.require('auth.local-strategy');
+const LDAPStrategy = M.require('auth.ldap-strategy');
+const User = M.require('models.user');
 const errors = M.require('lib.errors');
 
 /**
- * LMICloudStrategy
+ * LmiCloudStrategy
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @classdesc This class defines authentication in the LMI cloud environment.
  */
-class LMICloudStrategy {
+class LmiCloudStrategy {
 
   /******************************************************************************
    *  LMI-CLOUD Authentication Implementations                                  *
@@ -125,4 +125,4 @@ class LMICloudStrategy {
 
 }
 
-module.exports = LMICloudStrategy;
+module.exports = LmiCloudStrategy;

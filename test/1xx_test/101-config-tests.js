@@ -34,7 +34,7 @@ const version = require(path.join(M.root, 'package.json')).version;
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  // TODO - Add checks for environment and other expected M object properties
+  // TODO - Add checks for environment and other expected M object properties (MBX-366)
   it('should check the version', versionCheck);
 });
 

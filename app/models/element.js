@@ -37,10 +37,10 @@
 
 // Load node modules
 const mongoose = require('mongoose');
+const uuidv4 = require('uuid/v4');
 
 // Load MBEE modules
 const validators = M.require('lib.validators');
-const uuidv4 = require('uuid/v4');
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };
@@ -56,7 +56,7 @@ const options = { discriminatorKey: 'type' };
  */
 const ElementSchema = new mongoose.Schema({
 
-  // TODO: Elaborate more on differences between id, _id, uid, uuid
+  // TODO: Elaborate more on differences between id, _id, uid, uuid (MBX-361)
 
   /**
    * @memberOf  Element
@@ -238,7 +238,7 @@ ElementSchema.index({ name: 'text', documentation: 'text' });
 ElementSchema.pre('save', function(next) {
   // Run our defined setters
   this.updatedOn = '';
-  // TODO: Set deleted to a boolean in the pre-save
+  // TODO: Set deleted to a boolean in the pre-save (MBX-361)
   this.deleted = '';
   // Only set uuid if it hasn't already been set
   if (this.uuid === undefined || this.uuid === '') {
