@@ -45,7 +45,7 @@ function loadLib(done) {
   // Check for logger
   chai.expect(M.hasOwnProperty('log')).to.equal(true);
 
-  // TODO: Check that auth and db have the functions they should. Also insure
+  // TODO: Check that auth and db have the functions they should. Also ensure (MBX-367)
   // all interfaces that are expected to be available exist
   done();
 }

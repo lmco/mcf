@@ -19,7 +19,7 @@
  * helper functions - used to validate data within MBEE.
  */
 
-// TODO: include examples for each REGEXP
+// TODO: include examples for each REGEXP (MBX-360)
 
 /**
  * @description Regular Expressions to validate organization data
@@ -66,9 +66,9 @@ module.exports.project = {
 /**
  * @description Regular Expressions to validate element data
  *
- * uid: TODO: ask austin where he is using this and discuss if it is necessary
+ * uid: TODO: ask austin where he is using this and discuss if it is necessary (MBX-360)
  *
- * id: TODO: Discuss what the valid ID should be (ie: only start with lower case? stay lowercase?)
+ * id: TODO: Discuss what the valid ID should be (ie: only start with lower case? stay lowercase?) (MBX-360)
  *   - MUST start with lowercase letter -> ^([a-z])
  *   - MUST ONLY include lowercase letters, numbers, or '-'
  *   - Must be of length 1 or more
@@ -117,7 +117,7 @@ module.exports.element = {
  */
 module.exports.user = {
   username: '^([a-z])([a-z0-9_]){0,}$',
-  // TODO: enforce use of special characters
+  // TODO: enforce use of special characters (MBX-360)
   password: function(p) {
     // Error check - Make sure password is a string
     if (typeof (p) !== typeof ('')) {

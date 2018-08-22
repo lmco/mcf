@@ -27,7 +27,6 @@ const chai = require('chai');
 const mongoose = require('mongoose');
 
 // Load MBEE modules
-// TODO: Turn into lowercase modules
 const User = M.require('models.user');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');

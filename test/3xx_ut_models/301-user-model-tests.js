@@ -198,7 +198,7 @@ function updateUser(done) {
  * @description Checks that a user can be soft deleted.
  */
 function softDeleteUser(done) {
-  // TODO (JU) - remove before public release
+  // TODO (JU) - remove before public release (MBX-370)
   // LM: Changed from findOneAndUpdate to a findOne and Save
   // Note: findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
@@ -265,7 +265,8 @@ function deleteUser(done) {
 }
 
 /**
- * TODO -  Remove, replace, or rename this test as needed.
+ * TODO -  Remove, replace, or rename this test as needed. (MBX-371)
+ * Update test to work with any auth strategy, not just with LDAP
  * The test is dependent only on an LDAP configuration which may not always be
  * the case.
  *

@@ -43,7 +43,8 @@ db.connect()
   process.exit(1);
 });
 
-// TODO: do we need this here if it's at the bottom?
+// TODO: do we need this here if it's at the bottom? [lines 49 and 108] (MBX-364)
+// Figure out why we are exporting app [module.exports = app;]
 const app = express();
 module.exports = app;
 

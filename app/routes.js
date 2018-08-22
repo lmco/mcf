@@ -24,7 +24,7 @@ const UIController = M.require('controllers.ui-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
 
-// TODO: Fix order of routes to actually reflect unauthenticated vs authenticated
+// TODO: Fix order of routes to actually reflect unauthenticated vs authenticated (MBX-365)
 /**********************************************
  * Unauthenticated Routes
  **********************************************/

@@ -183,7 +183,7 @@ class ApiController {
    * This method is not yet implemented.
    */
   static postOrgs(req, res) {
-    // TODO - Discuss the possibility of batch creation of orgs.
+    // TODO - Discuss the possibility of batch creation of orgs. (MBX-353)
     // We may need to look into using transactions with mongo to make this work.
     res.status(501).send('Not Implemented.');
   }
@@ -200,7 +200,7 @@ class ApiController {
    * This method is not yet implemented.
    */
   static patchOrgs(req, res) {
-    // TODO - Discuss the possibility of batch updates to orgs by passing
+    // TODO - Discuss the possibility of batch updates to orgs by passing (MBX-354)
     // an array of existing orgs. Must define behavior for this.
     res.status(501).send('Not Implemented.');
   }
@@ -214,7 +214,7 @@ class ApiController {
    * This method is not yet implemented.
    */
   static deleteOrgs(req, res) {
-    // TODO - Discuss and define behavior for this will work
+    // TODO - Discuss and define behavior for how orgs wil be deleted (MBX-355)
     // or if it is necessary.
     res.status(501).send('Not Implemented.');
   }
@@ -505,8 +505,7 @@ class ApiController {
    * defined here so that calls to the corresponding route can be caught and
    * error messages returned rather than throwing a 500 server error.
    *
-   * TODO (jk) - Figure out how we want to handle a change to an orgid.
-   * For now, this assumes orgid won't change and stuff will break if it does
+   * TODO (jk) - Implement batchPatch Multiple batch to projects in a single operation. (MBX-356)
    */
   static patchProjects(req, res) {
     return res.status(501).send('Not Implemented.');
@@ -519,8 +518,6 @@ class ApiController {
    * @description This function is not intended to be implemented. It is
    * defined here so that calls to the corresponding route can be caught and
    * error messages returned rather than throwing a 500 server error.
-   *
-   * TODO (jk) - This may be one of the ugliest functions I've ever written. Fix it.
    */
   static deleteProjects(req, res) {
     return res.status(501).send('Not Implemented.');

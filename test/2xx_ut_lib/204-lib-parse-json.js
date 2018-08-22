@@ -41,7 +41,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Checks to make sure the file is being properly parsed
  */
 function parseTest(done) {
-  // TODO - Consider creating and using an example.cfg file in the config
+  // TODO -  Create an example.cfg file in the config (MBX-369)
   // directory. This way we provide an example config that aligns with our
   // expected usage of that file rather than having to change JSON files in the
   // test directory if we alter the behavior of this module.

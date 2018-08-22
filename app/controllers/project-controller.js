@@ -130,7 +130,9 @@ class ProjectController {
       const orgID = sani.html(organizationID);
 
       // Ensure the org exists
-      // TODO - Use populates rather than nested queries when possible
+      // TODO - Use populates rather than nested queries when possible (MBX-357)
+      //        Doing findOrgs() then findProj(), Instead we should reduces the number of queries below
+      //        Not sure if removeProjects() should remove all projects. Instead remove a list of projects
       OrgController.findOrg(reqUser, orgID, true)
       .then((org) => ProjectController.findProjects(reqUser, org.id, true))
       .then((projects) => {

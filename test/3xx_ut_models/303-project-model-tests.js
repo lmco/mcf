@@ -20,7 +20,7 @@
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The project model tests create,
  * soft delete, and hard delete projects.
- * TODO - cleanup description
+ * TODO - cleanup description (MBX-373)
  */
 
 // Load node modules
@@ -50,9 +50,9 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests.
    *
-   * TODO - Say what this function is doing.
+   * TODO - Say what this function is doing. (MBX-373)
    *
-   * TODO - consider abstracting some of the test data out to the 'Test Data'
+   * TODO - consider abstracting some of the test data out to the 'Test Data' (MBX-373)
    * section above.
    */
   before((done) => {
@@ -66,13 +66,13 @@ describe(M.getModuleName(module.filename), () => {
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
 
-    // TODO: Create a user and set them to an admin of the Organization and
+    // TODO: Create a user and set them to an admin of the Organization and (MBX-373)
     // Project. NOT a global admin.
     AuthController.authenticate(reqObj, resObj, (err) => {
       chai.expect(err).to.equal(null);
       chai.expect(reqObj.user.username).to.equal(M.config.test.username);
 
-      // TODO - consider using an .exec rather than callback to make this cleaner
+      // TODO - consider using an .exec rather than callback to make this cleaner (MBX-373)
       User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
           chai.expect(updateErr).to.equal(null);
@@ -103,7 +103,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: runs after all tests
    */
-  // TODO: Remove user that was previously created
+  // TODO: Remove user that was previously created (MBX-373)
   after((done) => {
     Org.findOneAndRemove({ id: org.id }, (error) => {
       if (error) {
@@ -123,7 +123,7 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
-  // TODO: Add more tests for find, update, and permission tests.
+  // TODO: Add more tests for find, update, and permission tests. (MBX-373)
   /* Execute the tests */
   it('should create a project', createProject);
   it('should soft delete a project', softDeleteProject);
@@ -137,10 +137,10 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createProject(done) {
   // Create a project model object
-  const id = 'gaurdiansofgalaxy';
+  const id = 'guardiansofgalaxy';
   const newProject = new Project({
     id: id,
-    name: 'Gaurdians of the Galaxy', // TODO - spelling
+    name: 'Guardians of the Galaxy',
     org: org._id,
     permissions: {
       admin: [userAdmin._id],
@@ -162,14 +162,14 @@ function createProject(done) {
  * test.
  */
 function softDeleteProject(done) {
-  // TODO: remove LM specific comments below
+  // TODO: remove LM specific comments below (MBX-370)
   // LM: Changed from findOneAndUpdate to a find and then update
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
 
   // Find project previously created in createProject test
-  Project.findOne({ id: 'gaurdiansofgalaxy' })
+  Project.findOne({ id: 'guardiansofgalaxy' })
   .exec((err, proj) => {
     // Set project deleted field to true
     proj.deleted = true;
@@ -195,7 +195,7 @@ function softDeleteProject(done) {
  */
 function deleteProject(done) {
   // Find and remove the project previously created in createProject test.
-  Project.findOneAndRemove({ id: 'gaurdiansofgalaxy' }, (err) => {
+  Project.findOneAndRemove({ id: 'guardiansofgalaxy' }, (err) => {
     // Check for no error
     chai.expect(err).to.equal(null);
     done();

@@ -53,7 +53,9 @@ describe(M.getModuleName(module.filename), () => {
     db.disconnect();
   });
 
-  // TODO: add a find, update, and permission tests
+  // TODO: add a find, update, and permission tests (MBX-372)
+  // Add test for setting and retrieving org permissions
+  // Add test to retrieves and updates orgs
   /* Execute the tests */
   it('should create an organization', createOrg);
   it('should soft delete an organization', softDeleteOrg);
@@ -82,7 +84,7 @@ function createOrg(done) {
  * @description Soft-deletes the organization previously created in createOrg.
  */
 function softDeleteOrg(done) {
-  // TODO: remove LM specific comments in public
+  // TODO: remove LM specific comments in public (MBX-370)
   // LM: Changed from findOneAndUpdate to a find and then update
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.

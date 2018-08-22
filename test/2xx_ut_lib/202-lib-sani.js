@@ -65,7 +65,7 @@ function stringKeyMongoTest(done) {
  * Expected to change the html input.
  */
 function htmlTest(done) {
-  // TODO: sanitize against more special characters
+  // TODO: sanitize against more special characters (MBX-368)
   const htmlSan = sani.html('<script>');
   chai.expect(htmlSan).to.equal('&lt;script&gt;');
   done();
@@ -82,7 +82,7 @@ function sanitizeHtmlObject(done) {
     admin: true,
     email: null
   };
-  // TODO: add tests for more special characters
+  // TODO: add tests for more special characters (MBX-368)
   const htmlSan = sani.html(data);
   chai.expect(htmlSan.name).to.equal('Steve Rogers');
   chai.expect(htmlSan.fname).to.equal('&lt;script&gt;');
