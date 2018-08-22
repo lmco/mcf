@@ -213,7 +213,7 @@ class OrganizationController {
 
       // Check if org already exists
       OrganizationController.findOrg(user, orgID)
-      .then(() => reject(new errors.CustomError('An organization with the same ID already exists.', 403)))
+      .then(() => reject(new errors.CustomError('An organization with the same uid already exists.', 403)))
       .catch((findOrgError) => { // eslint-disable-line consistent-return
         // Org not found is what we want, so proceed when this error
         // occurs since we aim to create a new org.
@@ -240,7 +240,7 @@ class OrganizationController {
         }
         else {
           if (findOrgError.description === 'User does not have permissions.') {
-            return reject(new errors.CustomError('An organization with the same ID already exists.', 403));
+            return reject(new errors.CustomError('An organization with the same uid already exists.', 403));
           }
           // There was some other error, return it.
           return reject(findOrgError);
@@ -298,7 +298,7 @@ class OrganizationController {
       .then((org) => { // eslint-disable-line consistent-return
         // Error check - Make sure user is an org admin or system admin
         if (!utils.checkAccess(user, org, 'admin')) {
-          return reject(new errors.CustomError('User cannot update organizations.', 401));
+          return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
         // get list of keys the user is trying to update

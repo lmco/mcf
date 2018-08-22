@@ -435,7 +435,7 @@ function rejectDuplicateProjectId(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Project already exists.'
-    chai.expect(error.description).to.equal('Project already exists.');
+    chai.expect(error.description).to.equal('A project with a matching uid already exists.');
     done();
   });
 }

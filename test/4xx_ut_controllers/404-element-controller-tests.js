@@ -151,7 +151,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should find all elements of a specific type', findElementsSpecificType);
   it('should find an element by its uuid', findElementByUUID);
   it('should throw an error for tryng to find an invalid element type', rejectFindElementsInvalidType);
-
   it('should update an element', updateElement);
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
@@ -392,7 +391,7 @@ function rejectCreateElementExistingUUID(done) {
   })
   .catch((error) => {
     // Expect error thrown: 'Element with uuid already exists.'
-    chai.expect(error.description).to.equal('Element with uuid already exists.');
+    chai.expect(error.description).to.equal('An element with a matching uuid already exists.');
     done();
   });
 }

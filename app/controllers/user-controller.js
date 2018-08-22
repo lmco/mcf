@@ -196,7 +196,7 @@ class UserController {
 
         // Make sure user doesn't already exist
         if (users.length >= 1) {
-          return reject(new errors.CustomError('User already exists.', 403));
+          return reject(new errors.CustomError('a user with a matching username already exists.', 403));
         }
         // Create the new user
         // We should just need to sanitize the input, the model should handle
