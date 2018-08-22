@@ -65,9 +65,20 @@ function stringKeyMongoTest(done) {
  * Expected to change the html input.
  */
 function htmlTest(done) {
-  // TODO: sanitize against more special characters (MBX-368)
-  const htmlSan = sani.html('<script>');
-  chai.expect(htmlSan).to.equal('&lt;script&gt;');
+  // TODO: Some of the special characters do not render, which ones matter most
+  // Ask about the $ sign? is it necessary? if so, it errored out
+  const htmlLessThan = sani.html('<script>');
+  const htmlAnd = sani.html('&nbsp');
+  // const htmlQuote = sani.html("'OR 1=1");
+  // const htmlDoubleQuote = sani.html('"double it up');
+  // const htmlAllInOne = sani.html('# % ? ;');
+  // const htmlTickEqual = sani.html('`OR 1=1');
+  chai.expect(htmlLessThan).to.equal('&lt;script&gt;');
+  chai.expect(htmlAnd).to.equal('&amp;nbsp');
+  // chai.expect(htmlQuote).to.equal('&#039;OR 1&equals;1');
+  // chai.expect(htmlDoubleQuote).to.equal('&quot;double it up');
+  // chai.expect(htmlAllInOne).to.equal('&num; &percnt; &quest; &semi;');
+  // chai.expect(htmlTickEqual).to.equal('&grace;OR 1&equals;1');
   done();
 }
 
