@@ -252,7 +252,7 @@ function createElements(done) {
 
 /**
  * @description Verifies project object cannot update immutable field.
- * Expected error thrown: 'Users cannot update [id] of Projects.'
+ * Expected error thrown: 'Project property [id] cannot be changed.'
  */
 function rejectImmutableField(done) {
   // Update project
@@ -264,8 +264,8 @@ function rejectImmutableField(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Users cannot update [id] of Projects.'
-    chai.expect(error.description).to.equal('Users cannot update [id] of Projects.');
+    // Expected error thrown: 'Project property [id] cannot be changed.'
+    chai.expect(error.description).to.equal('Project property [id] cannot be changed.');
     done();
   });
 }
@@ -658,7 +658,7 @@ function updateProj(done) {
 
 /**
  * @description Verifies immutable project Id CANNOT be updated.
- * Expected error thrown: 'Users cannot update [id] of Projects.'
+ * Expected error thrown: 'Project property [id] cannot be changed.'
  */
 function rejectProjectId(done) {
   const orgId = 'starkhq';
@@ -676,8 +676,8 @@ function rejectProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Users cannot update [id] of Projects.'
-    chai.expect(error.description).to.equal('Users cannot update [id] of Projects.');
+    // Expected error thrown: 'Project property [id] cannot be changed.'
+    chai.expect(error.description).to.equal('Project property [id] cannot be changed.');
     done();
   });
 }

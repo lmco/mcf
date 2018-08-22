@@ -144,6 +144,7 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
+  // TODO: use 'reject' instead of 'fail' or 'throw an error'
   /* Execute the tests */
   it('should create a new org', createNewOrg);
   it('should create a second org', createSecondOrg);
@@ -262,7 +263,7 @@ function findExistingOrg(done) {
 
 /**
  * @description Verifies a user CANNOT update permissions.
- * Expected error thrown: 'Users cannot update [permissions] of organizations.'
+ * Expected error thrown: 'Organization property [permissions] cannot be changed.'
  */
 function updateOrgFieldErr(done) {
   // Update organization
@@ -274,8 +275,8 @@ function updateOrgFieldErr(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Users cannot update [permissions] of organizations.'
-    chai.expect(error.description).to.equal('Users cannot update [permissions] of organizations.');
+    // Expected error thrown: 'Organization property [permissions] cannot be changed.'
+    chai.expect(error.description).to.equal('Organization property [permissions] cannot be changed.');
     done();
   });
 }
@@ -540,7 +541,7 @@ function updateDefaultOrg(done) {
 
 /**
  * @description Verifies default organization CANNOT be deleted.
- * Expected error thrown: 'Cannot delete the default org.'
+ * Expected error thrown: 'The default organization cannot be deleted.'
  */
 function rejectDefaultOrgDelete(done) {
   // Delete default org
@@ -552,8 +553,8 @@ function rejectDefaultOrgDelete(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Cannot delete the default org.'
-    chai.expect(error.description).to.equal('Cannot delete the default org.');
+    // Expected error thrown: 'The default organization cannot be deleted.'
+    chai.expect(error.description).to.equal('The default organization cannot be deleted.');
     done();
   });
 }
@@ -735,7 +736,7 @@ function removeUserRole(done) {
 
 /**
  * @description Verifies users not within org does not have permission.
- * Expected error thrown: 'User is not part of this organization.'
+ * Expected error thrown: 'User does not have permissions.'
  */
 function rejectGetUserRoles(done) {
   // Find permissions via controller
@@ -747,8 +748,8 @@ function rejectGetUserRoles(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User is not part of this organization.'
-    chai.expect(error.description).to.equal('User is not part of this organization.');
+    // Expected error thrown: 'User does not have permissions.'
+    chai.expect(error.description).to.equal('User does not have permissions.');
     done();
   });
 }

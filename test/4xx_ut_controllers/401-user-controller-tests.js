@@ -417,7 +417,7 @@ function updateCustomData(done) {
 
 /**
  * @description Verifies that a username cannot be changed.
- * Expects error thrown: 'Update not allowed'
+ * Expects error thrown: 'Forbidden'
  */
 function rejectUsernameUpdate(done) {
   const username = 'erikkillmonger';
@@ -427,12 +427,14 @@ function rejectUsernameUpdate(done) {
   UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => {
     // TODO: MBX-324 This isn't returning the updated user, fix in controller
+    // TODO: (JU) This isnt supposed to return the updated user?
+    //       It is suppose to reject it and throw an error
     chai.expect(updatedUser.username).to.equal('goldpanther');
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Update not allowed'
-    chai.expect(error.description).to.equal('Update not allowed');
+    // Expect error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -447,6 +449,7 @@ function rejectUserUpdateByNonAdmin(done) {
   // Expect update to fail
   UserController.updateUser(nonAdminUser, username, userData)
   .then(() => {
+    // TODO: Fix file to support new comment style on a reject test.
     // Update succeeded, force test to fail
     chai.assert(true === false);
     done();

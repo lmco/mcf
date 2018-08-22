@@ -27,7 +27,6 @@
 
 // Load node modules
 const chai = require('chai');
-const mongoose = require('mongoose'); // TODO - remove dependency on mongoose
 const request = require('request');
 
 // Load MBEE modules
@@ -35,6 +34,7 @@ const OrgController = M.require('controllers.organization-controller');
 const AuthController = M.require('lib.auth');
 const User = M.require('models.user');
 const mockExpress = M.require('lib.mock-express');
+const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 
@@ -52,7 +52,6 @@ describe(M.getModuleName(module.filename), () => {
    * TODO - describe
    */
   before((done) => {
-    const db = M.require('lib/db'); // TODO - M.lib.db
     db.connect();
 
     // Creating a Requesting Admin
@@ -347,8 +346,8 @@ function badPatch(done) {
   },
   (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(400);
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(response.statusCode).to.equal(403);
+    chai.expect(json.message).to.equal('Forbidden');
     done();
   });
 }
