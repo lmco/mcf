@@ -213,7 +213,7 @@ class OrganizationController {
 
       // Check if org already exists
       OrganizationController.findOrg(user, orgID)
-      .then(() => reject(new errors.CustomError('An organization with the same ID already exists.', 400)))
+      .then(() => reject(new errors.CustomError('An organization with the same ID already exists.', 403)))
       .catch((findOrgError) => { // eslint-disable-line consistent-return
         // Org not found is what we want, so proceed when this error
         // occurs since we aim to create a new org.
@@ -240,7 +240,7 @@ class OrganizationController {
         }
         else {
           if (findOrgError.description === 'User does not have permissions.') {
-            return reject(new errors.CustomError('An org with the same ID already exists.', 400));
+            return reject(new errors.CustomError('An organization with the same ID already exists.', 403));
           }
           // There was some other error, return it.
           return reject(findOrgError);
@@ -328,7 +328,7 @@ class OrganizationController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject(new errors.CustomError(`Users cannot update [${updateField}] of organizations.`, 400));
+            return reject(new errors.CustomError(`Organization property [${updateField}] cannot be changed.`, 403));
           }
           // Error Check - Check if updated field is of type string
           if (!utils.checkType([orgUpdate[updateField]], 'string')
@@ -417,7 +417,7 @@ class OrganizationController {
 
       // Stop attempted deletion of default org
       if (orgID === 'default') {
-        return reject(new errors.CustomError('Cannot delete the default org.', 403));
+        return reject(new errors.CustomError('The default organization cannot be deleted.', 403));
       }
 
       OrganizationController.findOrg(user, orgID, true)
@@ -525,7 +525,7 @@ class OrganizationController {
       OrganizationController.findAllPermissions(user, organizationID)
       .then(users => {
         if (users[username.username] === undefined) {
-          return reject(new errors.CustomError('User is not part of this organization.', 400));
+          return reject(new errors.CustomError('User does not have permissions.', 401));
         }
         return resolve(users[username.username]);
       })
@@ -552,11 +552,12 @@ class OrganizationController {
    * @param {User} setUser  The object containing the user whose roles are to be changed.
    * @param {String} role  The new role for the user.
    */
+  // TODO: Check if the user who's permissions is being set exists
   static setPermissions(reqUser, organizationID, setUser, role) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       // Stop a user from changing their own permissions
       if (reqUser._id.toString() === setUser._id.toString()) {
-        return reject(new errors.CustomError('User cannot change their own permissions.', 401));
+        return reject(new errors.CustomError('User cannot change their own permissions.', 403));
       }
 
       try {

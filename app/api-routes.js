@@ -248,6 +248,9 @@ api.route('/orgs')
  *                      authorized to perform this function. Either
  *                      authentication failed or the user does not have
  *                      authorization to view this org.
+ *       403:
+ *         description: Forbidden - This implies the user tried to create an org
+ *                      which already exists.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
@@ -296,6 +299,9 @@ api.route('/orgs')
  *                      authorized to perform this function. Either
  *                      authentication failed or the user does not have
  *                      authorization to view this org.
+ *       403:
+ *         description: Forbidden - This implies the user tried to update a
+ *                      property of the org which was immutable.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
@@ -518,6 +524,9 @@ api.route('/orgs/:orgid/projects')
  *                      authorized to perform this function. Either
  *                      authentication failed or the user does not have
  *                      authorization to view this org/project.
+ *       403:
+ *         description: Forbidden - This implies the user tried to create a
+ *                      project which already exists.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
@@ -570,6 +579,9 @@ api.route('/orgs/:orgid/projects')
  *                      authorized to perform this function. Either
  *                      authentication failed or the user does not have
  *                      authorization to view this organization or project.
+ *       403:
+ *         description: Forbidden - This implies the user tried to update a
+ *                      property of a project that is immutable.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
@@ -648,7 +660,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Success - The members of an org and thier permissions
  *                      were succesfully retrieved and returned as JSON.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/members')
@@ -683,7 +695,7 @@ api.route('/orgs/:orgid/members')
  *         description: Success - The member of the org and thier permissions
  *                      were succesfully retrieved and returned as JSON.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   post:
  *     tags:
@@ -711,8 +723,11 @@ api.route('/orgs/:orgid/members')
  *       200:
  *         description: Success - The members permissions were set or updated,
  *                      and the organization is returned in JSON.
+ *       403:
+ *         description: Forbidden - This implies the user tried to set their
+ *                      own permissions.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   patch:
  *     tags:
@@ -740,8 +755,11 @@ api.route('/orgs/:orgid/members')
  *       200:
  *         description: Success - The members permissions were set or updated,
  *                      and the organization is returned in JSON.
+ *       403:
+ *         description: Forbidden - This implies the user tried to change their
+ *                      own permissions.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   delete:
  *     tags:
@@ -764,8 +782,11 @@ api.route('/orgs/:orgid/members')
  *       200:
  *         description: Success - The members permissions were deleted,
  *                      and the organization is returned in JSON.
+ *       403:
+ *         description: Forbidden - This implies the user tried to remove their
+ *                      own permissions.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  */
 
@@ -819,7 +840,7 @@ api.route('/orgs/:orgid/members/:username')
  *         description: Success - The members of a project and thier permissions
  *                      were succesfully retrieved and returned as JSON.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members')
@@ -859,7 +880,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         description: Success - The member of the project and thier permissions
  *                      were succesfully retrieved and returned as JSON.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   post:
  *     tags:
@@ -892,8 +913,11 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *       200:
  *         description: Success - The members permissions were set or updated,
  *                      and the project is returned in JSON.
+ *       403:
+ *         description: Forbidden - This implies the user tried to set their
+ *                      own permissions.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   patch:
  *     tags:
@@ -926,8 +950,11 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *       200:
  *         description: Success - The members permissions were set or updated,
  *                      and the project is returned in JSON.
+ *       403:
+ *         description: Forbidden - This implies the user tried to change their
+ *                      own permissions.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  *   delete:
  *     tags:
@@ -955,8 +982,11 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *       200:
  *         description: Success - The members permissions were deleted,
  *                      and the project is returned in JSON.
+ *       403:
+ *         description: Forbidden - This implies the user tried to remove their
+ *                      own permissions.
  *       500:
- *         description: Internal Server Error - Something went wront on the
+ *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:username')
@@ -1159,6 +1189,9 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *                      authorized to perform this function. Either
  *                      authentication failed or the user does not have
  *                      authorization to view this org/project.
+ *       403:
+ *         description: Forbidden - This implies that the user tried to create
+ *                      an element that already has a matching uid or uuid.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
@@ -1217,6 +1250,9 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *                      authorized to perform this function. Either
  *                      authentication failed or the user does not have
  *                      authorization to view this organization or project.
+ *       403:
+ *         description: Forbidden - This implies that the user tried to update
+ *                      a property of an element that is immutable.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
@@ -1447,6 +1483,9 @@ api.route('/users/whoami')
  *         description: Unauthorized - This implies that the user is not
  *                      authorized to perform this function or authentication
  *                      failed.
+ *       403:
+ *         description: Forbidden - This implies that the user tried to create
+ *                      a user with a matching username of an existing user
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
@@ -1496,6 +1535,9 @@ api.route('/users/whoami')
  *         description: Unauthorized - This implies that the user is not
  *                      authorized to perform this function or authentication
  *                      failed.
+ *       403:
+ *         description: Forbidden - This implies that the user tried to update
+ *                      the property of a user that is immutable.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.
@@ -1521,6 +1563,9 @@ api.route('/users/whoami')
  *         description: Unauthorized - This implies that the user is not
  *                      authorized to perform this function or authentication
  *                      failed.
+ *       403:
+ *         description: Forbidden - This implies that the user tried to remove
+ *                      themselves.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
  *                      server side. Details may exist in the application logs.

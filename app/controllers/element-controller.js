@@ -383,11 +383,11 @@ class ElementController {
         // Must nest promises since the catch uses proj, returned from findProject.
         // TODO: Cut this down to one query (MBX-352)
         ElementController.findElement(reqUser, orgID, projID, elemID)
-        .then(() => reject(new errors.CustomError('Element already exists.', 400)))
+        .then(() => reject(new errors.CustomError('Element already exists.', 403)))
         .catch(() => { // eslint-disable-line consistent-return
           // Check if element with same uuid exists
           ElementController.findElement(reqUser, orgID, projID, uuid)
-          .then(() => reject(new errors.CustomError('Element with uuid already exists.', 400)))
+          .then(() => reject(new errors.CustomError('Element with uuid already exists.', 403)))
           .catch((findError) => { // eslint-disable-line consistent-return
             // This is ok, we dont want the element to already exist.
             if (findError.description === 'No elements found.') {
@@ -690,7 +690,7 @@ class ElementController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject(new errors.CustomError(`Users cannot update [${updateField}] of Elements.`, 400));
+            return reject(new errors.CustomError(`Element property [${updateField}] cannot be changed.`, 403));
           }
 
           // Error Check - Check if updated field is of type string
@@ -817,6 +817,7 @@ class ElementController {
         if (options.soft === false && reqUser.admin) {
           softDelete = false;
         }
+        // TODO: change to custom error
         else if (options.soft === false && !reqUser.admin) {
           return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
         }
@@ -851,7 +852,7 @@ class ElementController {
             });
           }
           else {
-            return reject(new errors.CustomError('Element no longer exists.', 404));
+            return reject(new errors.CustomError('Element not found.', 404));
           }
         }
         else {

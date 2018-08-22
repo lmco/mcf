@@ -131,8 +131,9 @@ class ProjectController {
 
       // Ensure the org exists
       // TODO - Use populates rather than nested queries when possible (MBX-357)
-      //        Doing findOrgs() then findProj(), Instead we should reduces the number of queries below
-      //        Not sure if removeProjects() should remove all projects. Instead remove a list of projects
+      //        Doing findOrgs() then findProj(), Instead we should reduces the number of queries
+      //        below Not sure if removeProjects() should remove all projects. Instead remove a
+      //        list of projects
       OrgController.findOrg(reqUser, orgID, true)
       .then((org) => ProjectController.findProjects(reqUser, org.id, true))
       .then((projects) => {
@@ -328,7 +329,7 @@ class ProjectController {
         // Error check - check if the project already exists
         // Must nest promise since it uses the return from findOrg
         ProjectController.findProject(reqUser, org.id, projID)
-        .then(() => reject(new errors.CustomError('Project already exists.', 400)))
+        .then(() => reject(new errors.CustomError('Project already exists.', 403)))
         .catch((error) => {
           // This is ok, we dont want the project to already exist.
           if (error.description === 'Project not found.') {
@@ -440,7 +441,7 @@ class ProjectController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject(new errors.CustomError(`Users cannot update [${updateField}] of Projects.`, 400));
+            return reject(new errors.CustomError(`Project property [${updateField}] cannot be changed.`, 403));
           }
           // Error Check - Check if updated field is of type string
           if (!utils.checkType([projectUpdated[updateField]], 'string')
@@ -758,7 +759,7 @@ class ProjectController {
 
         // Error Check - Do not allow admin user to downgrade their permissions
         if (reqUser.username === setUser.username && permType !== permissionLevels[-1]) {
-          return reject(new errors.CustomError('User cannot change their own permissions.', 401));
+          return reject(new errors.CustomError('User cannot change their own permissions.', 403));
         }
 
         // Grab the index of the permission type
