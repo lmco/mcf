@@ -283,7 +283,7 @@ module.exports.parseUID = function(uid, index = null) {
 module.exports.getPermissionStatus = function(user, object) {
   // Ensure the obejct is an org or project
   if (!(object instanceof Organization || object instanceof Project)) {
-    throw new errors.CustomError('Incorrect type of object', 400);
+    throw new errors.CustomError('Incorrect type of object.', 400);
   }
 
   // System admin has all privs on all objects no matter what

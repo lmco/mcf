@@ -294,8 +294,8 @@ function updateOrgTypeErr(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'The Organization [name] is not of type String'
-    chai.expect(error.description).to.equal('The Organization [name] is not of type String');
+    // Expected error thrown: 'The Organization [name] is not of type String.'
+    chai.expect(error.description).to.equal('The Organization [name] is not of type String.');
     done();
   });
 }

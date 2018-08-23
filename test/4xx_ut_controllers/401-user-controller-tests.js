@@ -337,8 +337,8 @@ function rejectUsernameUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Update not allowed'
-    chai.expect(error.description).to.equal('Update not allowed');
+    // Expect error thrown: 'Update not allowed.'
+    chai.expect(error.description).to.equal('Update not allowed.');
     done();
   });
 }
@@ -359,7 +359,6 @@ function rejectUserUpdateByNonAdmin(done) {
   })
   .catch((error) => {
     // Expect error thrown: 'User does not have permissions.'
-    // TODO: MBX-377 Some errors have punctuation and some don't, make consistent
     chai.expect(error.description).to.equal('User does not have permissions.');
     done();
   });

@@ -283,8 +283,8 @@ function updateTypeError(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'The Project [name] is not of type String'
-    chai.expect(error.description).to.equal('The Project [name] is not of type String');
+    // Expected error thrown: 'The Project [name] is not of type String.'
+    chai.expect(error.description).to.equal('The Project [name] is not of type String.');
     done();
   });
 }

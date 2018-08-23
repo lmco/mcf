@@ -457,7 +457,7 @@ class ElementController {
 
       // Target and source should not be the same element
       if (target === source) {
-        return reject(new errors.CustomError('Target and source cannot be the same element', 400));
+        return reject(new errors.CustomError('Target and source cannot be the same element.', 400));
       }
 
       // Find the target to make sure it exists
@@ -486,7 +486,7 @@ class ElementController {
             // Save the new element
             newElement.save((saveErr, elemUpdate) => {
               if (saveErr) {
-                return reject(new errors.CustomError('Save Failed'));
+                return reject(new errors.CustomError('Save failed.'));
               }
 
               // Return the element if succesful
@@ -537,7 +537,7 @@ class ElementController {
         // Save the new element
         newElement.save((saveErr, elemUpdate) => {
           if (saveErr) {
-            return reject(new errors.CustomError('Save Failed'));
+            return reject(new errors.CustomError('Save failed.'));
           }
 
           // Return the element if succesful
@@ -584,7 +584,7 @@ class ElementController {
         // Save the new element
         newElement.save((saveErr, elemUpdate) => {
           if (saveErr) {
-            return reject(new errors.CustomError('Save Failed'));
+            return reject(new errors.CustomError('Save failed.'));
           }
 
           // Return the element if succesful
@@ -656,7 +656,7 @@ class ElementController {
           updateField = elemUpdateFields[i];
           // Error Check - Check if updated field also exists in the original element.
           if (!element.toJSON().hasOwnProperty(updateField)) {
-            return reject(new errors.CustomError(`Element does not contain field ${updateField}`, 400));
+            return reject(new errors.CustomError(`Element does not contain field ${updateField}.`, 400));
           }
           // if parameter is of type object, stringify and compare
           if (utils.checkType([elementUpdated[updateField]], 'object')) {
@@ -677,7 +677,7 @@ class ElementController {
           // Error Check - Check if updated field is of type string
           if (!utils.checkType([elementUpdated[updateField]], 'string')
             && (Element.Element.schema.obj[updateField].type.schemaName !== 'Mixed')) {
-            return reject(new errors.CustomError(`The Element [${updateField}] is not of type String`, 400));
+            return reject(new errors.CustomError(`The Element [${updateField}] is not of type String.`, 400));
           }
 
           // Updates each individual tag that was provided.
@@ -799,10 +799,11 @@ class ElementController {
           softDelete = false;
         }
         else if (options.soft === false && !reqUser.admin) {
-          return reject(new Error(JSON.stringify({ status: 401, message: 'Unauthorized', description: 'User does not have permission to permanently delete a project.' })));
+          return reject(new errors.CustomError('User does not have permission to hard delete an'
+            + ' element.', 401));
         }
         else if (options.soft !== false && options.soft !== true) {
-          return reject(new Error(JSON.stringify({ status: 400, message: 'Bad Request', description: 'Invalid argument for the soft delete field.' })));
+          return reject(new errors.CustomError('Invalid argument for the soft delete field.', 400));
         }
       }
       // Sanitize inputs
