@@ -136,6 +136,7 @@ class ElementController {
       let _projID = null;
 
       // Ensure the project still exists
+      // TODO: Contemplate removing findProject. If removed, changed how hard-delete works.
       ProjController.findProject(reqUser, orgID, projID, true)
       .then((project) => {
         _projID = project._id;
