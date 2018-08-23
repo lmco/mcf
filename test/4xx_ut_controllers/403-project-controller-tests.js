@@ -733,7 +733,8 @@ function findPerm(done) {
 /**
  * @description Admin user sets then verifies non-admin has write/read permissions on project.
  */
-function setPerm(done) {
+// TODO: If keeping function, remove the eslint-disable-line below
+function setPerm(done) { // eslint-disable-line no-unused-vars
   // Admin sets permissions for non-admin
   ProjController.setPermissions(adminUser, 'starkhq', project.id.toString(), nonAuser, 'write')
   .then(() => ProjController.findProject(adminUser, 'starkhq', project.id.toString()))

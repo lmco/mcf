@@ -368,7 +368,7 @@ function rejectUserUpdateByNonAdmin(done) {
 
 /**
  * @description Verify update of a non-existent user fails.
- * Expect error thrown: 'Cannot find user.'
+ * Expect error thrown: 'User not found.'
  */
 function updateNonExistentUser(done) {
   const username = 'fakeblackpanther';
@@ -382,8 +382,8 @@ function updateNonExistentUser(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Cannot find user.'
-    chai.expect(error.description).to.equal('Cannot find user.');
+    // Expect error thrown: 'User not found.'
+    chai.expect(error.description).to.equal('User not found.');
     done();
   });
 }
@@ -411,7 +411,7 @@ function findExistingUser(done) {
 
 /**
  * @description Verified findUser fails when the user does not exist.
- * Expect error thrown: 'Cannot find user.'
+ * Expect error thrown: 'User not found.'
  */
 function rejectFindNonExistentUser(done) {
   const username = 'nopanther';
@@ -423,15 +423,15 @@ function rejectFindNonExistentUser(done) {
     done();
   })
   .catch((err) => {
-    // Expect error thrown: 'Cannot find user.'
-    chai.expect(err.description).to.equal('Cannot find user.');
+    // Expect error thrown: 'User not found.'
+    chai.expect(err.description).to.equal('User not found.');
     done();
   });
 }
 
 /**
  * @description Verifies that deleting a non-existent user fails.
- * Expect error thrown: 'Cannot find user.'
+ * Expect error thrown: 'User not found.'
  */
 function rejectDeleteNonExistentUser(done) {
   const username = 'wkabi';
@@ -443,11 +443,10 @@ function rejectDeleteNonExistentUser(done) {
     done();
   })
   .catch((err) => {
-    // Expect error thrown: 'Cannot find user.'
-    // TODO: MBX-378 Consider changing to 'User not found'
+    // Expect error thrown: 'User not found.'
     // TODO: MBX-379 Make tests check err.message rather than description
     //       This is so descriptions can be more easily changed
-    chai.expect(err.description).to.equal('Cannot find user.');
+    chai.expect(err.description).to.equal('User not found.');
     done();
   });
 }

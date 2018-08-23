@@ -655,7 +655,7 @@ api.route('/orgs/:orgid/members')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getAllOrgRoles // TODO: Consider renaming to getAllOrgMemRoles (MBX-363)
+  APIController.getAllOrgMemRoles
 );
 
 /**
@@ -826,7 +826,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjectRoles // TODO: Rename to getProjMemRoles (MBX-363)
+  APIController.getProjMemRoles
 );
 
 /**
@@ -963,7 +963,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjectRole // TODO: Consider renaming to getProjMemRole (MBX-363)
+  APIController.getProjMemRole
 )
 .post(
   AuthController.authenticate,
