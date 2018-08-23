@@ -742,17 +742,24 @@ class ApiController {
    * User API Endpoints
    ****************************************************************************/
 
-
   /**
    * GET /api/users
    *
-   * @description Gets and returns all users.
-   * // TODO: Require user to be an admin (JIRA MBX-348)
+   * @description Gets and returns all users. Must be an Admin user to perform this.
    */
   static getUsers(req, res) { // eslint-disable-line consistent-return
-    // If for some reason we don't have a user, fail.
+    // Check if users exist
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
+    try {
+      // Check if request user is admin
+      utils.assertAdmin(req.user);
+    }
+    catch (error) {
+      // Error: throws 401 'User does not have permissions.'
       return res.status(error.status).send(error);
     }
 
