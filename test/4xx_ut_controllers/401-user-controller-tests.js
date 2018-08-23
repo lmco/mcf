@@ -115,12 +115,11 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a user', createNewUser);
-  it('should create a non admin user', createNonAdminUser);
   it('should reject a creating a user with non A req user', rejectUserCreateByNonAdmin);
   it('should reject a user with no input to username', badUser);
   it('should reject username already in database', copyCatUser);
   it('should update the users first name', updateFirstName);
-  it('should reject updating the first name with a bad name', rejectInvalidFirstNameUpdate);
+  it('should reject updating the first name with a bad name', rejectInvalidLastNameUpdate);
   it('should update the users custom tags', updateCustomData);
   it('should reject updating the users username', rejectUsernameUpdate);
   it('should reject updating a user that does not exist', updateNonExistentUser);
@@ -131,7 +130,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject deleting a user with a non admin user', rejectDeleteByNonAdmin);
   it('should reject deleting themselves', rejectDeleteSelf);
   it('should delete user created', deleteUser);
-  it('should delete second user created', deleteUser2);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -141,9 +139,9 @@ describe(M.getModuleName(module.filename), () => {
 function createNewUser(done) {
   // Create user data
   const userData = {
-    username: 'shuri',
-    password: 'iamaprincess',
-    fname: 'Shuri',
+    username: 'blackpanther',
+    password: 'forwakanda',
+    fname: 'Tchalla',
     lname: 'Panther',
     custom: {
       location: 'Wakanda'
@@ -153,51 +151,20 @@ function createNewUser(done) {
   // Create user via the controller
   UserController.createUser(adminUser, userData)
   // Find newly created user
-  .then((newUser) => UserController.findUser(newUser.username))
-  .then((foundUser) => {
-    // Verify user created properly
-    chai.expect(foundUser.username).to.equal('shuri');
-    chai.expect(foundUser.fname).to.equal('Shuri');
-    chai.expect(foundUser.lname).to.equal('Panther');
-    chai.expect(foundUser.custom.location).to.equal('Wakanda');
-    done();
-  })
-  .catch((error) => {
-    // Expect no error
-    chai.expect(error.description).to.equal(null);
-  });
-}
-
-/**
- * @description Create an admin user using the user controller.
- */
-function createNonAdminUser(done) {
-  // Create user data
-  const userData = {
-    username: 'blackpanther',
-    password: 'theheartshapedherb',
-    fname: 'Black',
-    lname: 'Panther',
-    admin: false
-  };
-
-  // Create user via user controller
-  UserController.createUser(adminUser, userData)
   .then((newUser) => {
     // Setting as global-file user
     nonAdminUser = newUser;
 
-    // Verify user create properly
+    // Verify user created properly
     chai.expect(newUser.username).to.equal('blackpanther');
-    chai.expect(newUser.fname).to.equal('Black');
+    chai.expect(newUser.fname).to.equal('Tchalla');
     chai.expect(newUser.lname).to.equal('Panther');
-    chai.expect(newUser.admin).to.equal(false);
+    chai.expect(newUser.custom.location).to.equal('Wakanda');
     done();
   })
   .catch((error) => {
     // Expect no error
     chai.expect(error.description).to.equal(null);
-    done();
   });
 }
 
@@ -264,10 +231,10 @@ function badUser(done) {
 function copyCatUser(done) {
   // Create user data
   const userData = {
-    username: 'shuri',
-    password: 'nottherealShuri',
-    fname: 'Shuri',
-    lname: 'Shuri'
+    username: 'blackpanther',
+    password: 'nottherealone',
+    fname: 'Tchalla',
+    lname: 'Panther'
   };
 
   // Create user via user controller
@@ -290,14 +257,14 @@ function copyCatUser(done) {
  */
 function updateFirstName(done) {
   const username = 'blackpanther';
-  const userData = { fname: 'Okoye' };
+  const userData = { fname: 'Black' };
 
   // Updates user via user controller
   UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => {
     // Verifies user controller updates first name
     chai.expect(updatedUser.username).to.equal('blackpanther');
-    chai.expect(updatedUser.fname).to.equal('Okoye');
+    chai.expect(updatedUser.fname).to.equal('Black');
     chai.expect(updatedUser.lname).to.equal('Panther');
     done();
   })
@@ -312,9 +279,9 @@ function updateFirstName(done) {
  * @description Verify that update fails when given invalid input.
  * Expects error thrown: 'Name is not valid.'
  */
-function rejectInvalidFirstNameUpdate(done) {
+function rejectInvalidLastNameUpdate(done) {
   const username = 'blackpanther';
-  const userData = { fname: 'KLAW@#$' }; // TODO: MBX-376 Add this style to style guide
+  const userData = { lname: 'KLAW@#$' }; // TODO: MBX-376 Add this style to style guide
   UserController.updateUser(adminUser, username, userData)
   .then(() => {
     // Expect update to fail
@@ -333,19 +300,19 @@ function rejectInvalidFirstNameUpdate(done) {
  * @description Verifies updates to a user's custom data field.
  */
 function updateCustomData(done) {
-  const username = 'shuri';
+  const username = 'blackpanther';
   const userData = {
     custom: {
-      location: 'Oakland',
-      gender: 'Female'
+      location: 'America',
+      gender: 'Male'
     }
   };
   UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => UserController.findUser(updatedUser.username))
   .then((retUser) => {
     // Verify changes to custom data
-    chai.expect(retUser.custom.location).to.equal('Oakland');
-    chai.expect(retUser.custom.gender).to.equal('Female');
+    chai.expect(retUser.custom.location).to.equal('America');
+    chai.expect(retUser.custom.gender).to.equal('Male');
     done();
   })
   .catch((error) => {
@@ -431,7 +398,7 @@ function findExistingUser(done) {
   .then((searchUser) => {
     // Found a user, verify user data
     chai.expect(searchUser.username).to.equal('blackpanther');
-    chai.expect(searchUser.fname).to.equal('Okoye');
+    chai.expect(searchUser.fname).to.equal('Black');
     chai.expect(searchUser.lname).to.equal('Panther');
     done();
   })
@@ -490,7 +457,7 @@ function rejectDeleteNonExistentUser(done) {
  * Expect error thrown: 'User does not have permissions.'
  */
 function rejectDeleteByNonAdmin(done) {
-  const username = 'shuri';
+  const username = 'blackpanther';
   // Expect remove to fail
   UserController.removeUser(nonAdminUser, username)
   .then(() => {
@@ -529,25 +496,6 @@ function rejectDeleteSelf(done) {
  * @description Verifies a user can be deleted.
  */
 function deleteUser(done) {
-  const username = 'shuri';
-  // Expect remove user to succeed
-  UserController.removeUser(adminUser, username)
-  .then((delUser) => {
-    // Remove user succeeded, verify result
-    chai.expect(delUser).to.equal('shuri');
-    done();
-  })
-  .catch((error) => {
-    // Expect no error
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies a user can be deleted.
- */
-function deleteUser2(done) {
   const username = 'blackpanther';
   // Expect remove user to succeed
   UserController.removeUser(adminUser, username)
@@ -562,3 +510,4 @@ function deleteUser2(done) {
     done();
   });
 }
+
