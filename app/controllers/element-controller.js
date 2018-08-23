@@ -54,12 +54,13 @@ class ElementController {
    * @param {User} reqUser   The user object of the requesting user.
    * @param {String} organizationID   The organization ID.
    * @param {String} projectID   The project ID.
-   * @param {String} elemType   An optional string denoting the type of element.
+   * @param {Boolean} softDeleted   The optional flag to denote searching for deleted elements
    */
-  static findElements(reqUser, organizationID, projectID, elemType = '') {
+  static findElements(reqUser, organizationID, projectID, softDeleted = false) {
     return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
         utils.assertType([organizationID, projectID], 'string');
+        utils.assertType([softDeleted], 'boolean');
       }
       catch (error) {
         return resolve(error);
@@ -67,30 +68,9 @@ class ElementController {
 
       const orgID = sani.sanitize(organizationID);
       const projID = sani.sanitize(projectID);
-      let type = elemType;
-
-      // Ensure that the provided type is a valid one
-      if (elemType !== '') {
-        type = sani.sanitize(elemType);
-
-        // Checks to see if the type provided is either a model
-        // or discriminator from element.js. Do not confuse
-        // this Element as the Element model; it's just the exported file
-        // containing the Element model along with Relationship, Block, etc.
-        let typeExists = Object.keys(Element).includes(type);
-
-        // Ensure type is not 'Element'
-        if (type === 'Element') {
-          typeExists = false;
-        }
-
-        if (!typeExists) {
-          return reject(new errors.CustomError('Invalid element type.', 400));
-        }
-      }
 
       // Find the project
-      ProjController.findProject(reqUser, orgID, projID, true)
+      ProjController.findProject(reqUser, orgID, projID, softDeleted)
       .then((project) => { // eslint-disable-line consistent-return
         // Ensure user is part of the project
         if (!utils.checkAccess(reqUser, project, 'read')) {
@@ -99,9 +79,6 @@ class ElementController {
 
         // Create the list of search parameters
         const searchParams = { project: project._id };
-        if (type !== '') {
-          searchParams.type = type;
-        }
 
         return ElementController.findElementsQuery(searchParams);
       })
@@ -162,7 +139,7 @@ class ElementController {
       ProjController.findProject(reqUser, orgID, projID, true)
       .then((project) => {
         _projID = project._id;
-        return ElementController.findElements(reqUser, orgID, projID);
+        return ElementController.findElements(reqUser, orgID, projID, true);
       })
       .then((elements) => { // eslint-disable-line consistent-return
         // Ensure user has permission to delete all elements
