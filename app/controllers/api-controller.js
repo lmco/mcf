@@ -436,7 +436,7 @@ class ApiController {
    * @description Returns an array of members and their permission based on orgid
    *
    */
-  static getAllOrgRoles(req, res) { // eslint-disable-line consistent-return
+  static getAllOrgMemRoles(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -652,7 +652,7 @@ class ApiController {
   }
 
 
-  static getProjectRoles(req, res) { // eslint-disable-line consistent-return
+  static getProjMemRoles(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
       return res.status(error.status).send(error);
@@ -671,7 +671,7 @@ class ApiController {
     .catch((error) => res.status(error.status).send(error));
   }
 
-  static getProjectRole(req, res) { // eslint-disable-line consistent-return
+  static getProjMemRole(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
       return res.status(error.status).send(error);
