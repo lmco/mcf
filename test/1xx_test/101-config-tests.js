@@ -22,6 +22,7 @@
 // Load node modules
 const path = require('path');
 const chai = require('chai');
+const spawn = require('child_process').spawn;
 
 // Load the MBEE version number directly form the package.json file
 const version = require(path.join(M.root, 'package.json')).version;
@@ -48,5 +49,7 @@ function environmentCheck(done){
   // span or exec allows run
   // matches the config file
   // echo $MBEE_ENV
+  var cmd = spawn('echo', ['$MBEE_ENV'], { stdio: 'inherit' });
+  console.log('stdout:', cmd.stdout);
   done();
 }
