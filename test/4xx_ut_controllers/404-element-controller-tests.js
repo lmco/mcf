@@ -148,14 +148,12 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a relationship', createRelationship);
   it('should fail creating an element with existing uuid', rejectCreateElementExistingUUID);
   it('should find all elements for a project', findElements);
-  it('should find all elements of a specific type', findElementsSpecificType);
   it('should find an element by its uuid', findElementByUUID);
-  it('should throw an error for tryng to find an invalid element type', rejectFindElementsInvalidType);
-
   it('should update an element', updateElement);
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
   it('should soft delete all elements', softDeleteAllElements);
+  it('should fail finding all non-soft-deleted elements', verifyFindNonSoftDelElem);
   it('should hard delete all elements', hardDeleteAllElements);
 });
 
@@ -416,24 +414,6 @@ function findElements(done) {
 }
 
 /**
- * @description Verifies elements can be found by type.
- */
-function findElementsSpecificType(done) {
-  // Find the elements
-  ElemController.findElements(user, org.id, proj.id, 'Block')
-  .then((retElems) => {
-    // Expect 2 elements found
-    chai.expect(retElems.length).to.equal(2);
-    done();
-  })
-  .catch((error) => {
-    // Expect no error
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
  * @description Verifies an element can be found by UUID
  */
 function findElementByUUID(done) {
@@ -447,25 +427,6 @@ function findElementByUUID(done) {
   .catch((error) => {
     // Expect no error
     chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies searching for element with invalid type fails.
- */
-function rejectFindElementsInvalidType(done) {
-  // Lookup elements
-  ElemController.findElements(user, org.id, proj.id, 'Parent')
-  .then((retElems) => {
-    // Expected findElements() to fail
-    // Element find succeeded, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expect error thrown: 'Invalid element type.'
-    chai.expect(error.description).to.equal('Invalid element type.');
     done();
   });
 }
@@ -514,7 +475,7 @@ function softDeleteElement(done) {
     // Try to find the element and expect it to fail
     return ElemController.findElement(user, org.id, proj.id, 'elem0');
   })
-  .then((retElem2) => {
+  .then(() => {
     // Expected findElement() to fail
     // findElement() succeeded, force test to fail
     chai.assert(true === false);
@@ -549,7 +510,7 @@ function hardDeleteElement(done) {
   ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: false })
   // Then search for the element (including soft-deleted elements)
   .then(() => ElemController.findElement(user, org.id, proj.id, 'elem0', true))
-  .then((retElem2) => {
+  .then(() => {
     // Expect no element found
     // Element was found, force test to fail
     chai.assert(true === false);
@@ -569,17 +530,37 @@ function hardDeleteElement(done) {
 function softDeleteAllElements(done) {
   // Delete all elements in project
   ElemController.removeElements(user, org.id, proj.id, { soft: true })
-  // Find elements in project
-  .then(() => ElemController.findElements(user, org.id, proj.id))
-  .then((retElems2) => {
-    // TODO (austin): MBX-386 Why is the test passing?
-    // findElements returns soft-deleted elements by default, this is
-    // inconsistent behavior.
-    chai.expect(retElems2.length).to.equal(3);
+  // Find all existing elements in project, including soft-deleted elements
+  .then(() => ElemController.findElements(user, org.id, proj.id, true))
+  .then((retElems) => {
+    // Find succeeded, verify elements were returned
+    chai.expect(retElems.length).to.equal(3);
+    // Verify elements deleted field is set to true
+    chai.expect(retElems[0].deleted).to.equal(true);
     done();
   })
   .catch((error) => {
     chai.expect(error.description).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that findElements() does not return soft-deleted
+ * elements by default.
+ */
+function verifyFindNonSoftDelElem(done) {
+  // Find elements which have NOT been soft-deleted
+  ElemController.findElements(user, org.id, proj.id)
+  .then(() => {
+    // Expect no elements found
+    // Elements were found, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expect error thrown: 'No elements found.'
+    chai.expect(error.description).to.equal('No elements found.');
     done();
   });
 }

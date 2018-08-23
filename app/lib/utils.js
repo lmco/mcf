@@ -336,8 +336,8 @@ module.exports.getPermissionStatus = function(user, object) {
 /**
  * @description Checks if permission exist
  *
- * @param {String} user - the user object
- * @param {String} object - project or organization
+ * @param {User} user - the user object
+ * @param {Object} object - project or organization
  * @param {String} permission - types: [read, write, admin]
  */
 module.exports.checkAccess = function(user, object, permission) {

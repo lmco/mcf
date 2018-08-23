@@ -793,7 +793,7 @@ function deleteProject(done) {
     chai.expect(error.description).to.equal('Project not found.');
 
     // Check if elements still exist
-    // Note: Elements are delete with projects
+    // Note: Elements are deleted with projects
     Element.Element.findOne({ id: '0000' })
     .exec((findElementError, element) => {
       // Expect no element
