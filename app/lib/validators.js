@@ -68,7 +68,8 @@ module.exports.project = {
  *
  * uid: TODO: ask austin where he is using this and discuss if it is necessary (MBX-360)
  *
- * id: TODO: Discuss what the valid ID should be (ie: only start with lower case? stay lowercase?) (MBX-360)
+ * id:
+ * TODO: MBX-360 Discuss what valid ID should be (ie: only start with lowercase? stay lowercase?)
  *   - MUST start with lowercase letter -> ^([a-z])
  *   - MUST ONLY include lowercase letters, numbers, or '-'
  *   - Must be of length 1 or more
