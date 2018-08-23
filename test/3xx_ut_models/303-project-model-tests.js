@@ -18,7 +18,7 @@
  *
  * @description This tests the Project Model functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code. The project model tests create,
+ * when making changes/updates to the code. The project model tests, create,
  * soft delete, and hard delete projects.
  * TODO - cleanup description (MBX-373)
  */
@@ -125,12 +125,35 @@ describe(M.getModuleName(module.filename), () => {
 
   // TODO: Add more tests for find, update, and permission tests. (MBX-373)
   /* Execute the tests */
+  it('should fail to attempt to create a project with a long ID', verifyProjectFieldMaxChar);
   it('should create a project', createProject);
   it('should soft delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
 });
 
 /* --------------------( Tests )-------------------- */
+/**
+ * @description Verifies invalid field string with over 36 characters when creating a project.
+ * Expected error thrown: 'Too many characters in username'
+ */
+function verifyProjectFieldMaxChar(done) {
+  const projData = {
+    id: 'thisisaverylongidnamepleaseacceptmeorbreak',
+    name: 'Long Id',
+    org: org._id
+  };
+
+  // Create a new model project
+  const newProject = new Project(projData);
+
+  // Save project model object to database
+  newProject.save((err) => {
+    // Expected error thrown: 'Too many characters in username'
+    chai.expect(err.message).to.equal('Project validation failed: id: Too many characters in username');
+    done();
+  });
+}
+
 /**
  * @description Creates a Project using the Project model and saves it to the
  * database.
