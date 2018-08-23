@@ -149,7 +149,6 @@ function createNewUser(done) {
 
   // Create user via the controller
   UserController.createUser(adminUser, userData)
-  // Find newly created user
   .then((newUser) => {
     // Setting as global-file user
     nonAdminUser = newUser;
@@ -164,6 +163,7 @@ function createNewUser(done) {
   .catch((error) => {
     // Expect no error
     chai.expect(error.description).to.equal(null);
+    done();
   });
 }
 
