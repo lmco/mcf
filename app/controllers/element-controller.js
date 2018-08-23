@@ -78,7 +78,10 @@ class ElementController {
         }
 
         // Create the list of search parameters
-        const searchParams = { project: project._id };
+        let searchParams = { project: project._id, deleted: softDeleted };
+        if (softDeleted) {
+          searchParams = { project: project._id };
+        }
 
         return ElementController.findElementsQuery(searchParams);
       })
