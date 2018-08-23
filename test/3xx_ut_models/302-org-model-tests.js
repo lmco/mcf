@@ -53,11 +53,15 @@ describe(M.getModuleName(module.filename), () => {
     db.disconnect();
   });
 
-  // TODO: add a find, update, and permission tests (MBX-372)
+  // TODO: add a permission tests (MBX-372)
   // Add test for setting and retrieving org permissions
   // Add test to retrieves and updates orgs
   /* Execute the tests */
   it('should create an organization', createOrg);
+  it('should find an organization', findOrg);
+  it('should update an organization', updateOrg);
+  // What does is mean with permissions(update? Find? Need a user)
+  it('should get all permissions of an organization', findPermissionOrg);
   it('should soft delete an organization', softDeleteOrg);
   it('should hard delete an organization', deleteOrg);
 });
@@ -76,6 +80,66 @@ function createOrg(done) {
   // Save the Organization model object to the database
   org.save((err) => {
     chai.expect(err).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Finds an organization using the Organization Model
+ */
+function findOrg(done) {
+  // Find the created organization from the previous createOrg() test
+  org.findOne({
+    id: 'avengers',
+    name: 'Avengers Initiative'
+  }, (err, retOrg) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+
+    // Verify correct org is returned
+    chai.expect(retOrg.id).to.equal('avengers');
+    chai.expect(retOrg.name).to.equal('Avengers Initiative');
+
+    done();
+  });
+}
+
+/**
+ * @description Updates an organization using the Organization Model
+ */
+function updateOrg(done) {
+  // Find and update the org created in the previous createOrg() test
+  org.findOneAndUpdate({
+    id: 'avengers',
+  }, {
+    name: 'Avengers'
+  }, (err, retOrg) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+
+    // Verify correct org is updated correctly
+    chai.expect(retOrg.id).to.equal('avengers');
+    chai.expect(retOrg.name).to.equal('Avengers');
+
+    done();
+  });
+}
+
+/**
+ * @description Finds permissions an organization using the Organization Model.
+ */
+function findPermissionOrg(done) {
+  // Finds permissions on the org created in the previous createOrg() test
+  org.findAllPermissions({
+    id: 'avengers',
+  }, (err, retOrg) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+
+    // Verify correct org is updated correctly
+    chai.expect(retOrg.id).to.equal('avengers');
+    chai.expect(retOrg.name).to.equal('Avengers');
+
     done();
   });
 }

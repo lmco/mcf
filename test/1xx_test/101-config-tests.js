@@ -35,14 +35,18 @@ const version = require(path.join(M.root, 'package.json')).version;
  */
 describe(M.getModuleName(module.filename), () => {
   // TODO - Add checks for environment and other expected M object properties (MBX-366)
-  it('should check the version', versionCheck);
+  it('should check the environment', environmentCheck);
 });
 
 /* --------------------( Tests )-------------------- */
+
 /**
- * Checks the MBEE runtime version against the version in the package.json file.
+ * @description Verifies the environment.
  */
-function versionCheck(done) {
-  chai.expect(M.version).to.equal(version);
+function environmentCheck(done){
+  // check environment?
+  // span or exec allows run
+  // matches the config file
+  // echo $MBEE_ENV
   done();
 }
