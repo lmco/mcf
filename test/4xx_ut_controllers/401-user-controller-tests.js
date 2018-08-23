@@ -17,7 +17,6 @@
  *
  * @description Tests the user controller functionality: create,
  * delete, update, and find users.
- * TODO: MBX-375 Better organize tests, it's unclear how many users are being created/deleted.
  */
 
 // Load node modules
