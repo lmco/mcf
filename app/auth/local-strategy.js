@@ -70,13 +70,13 @@ class LocalStrategy {
           return reject(findUserErr);
         }
         if (!user) {
-          return reject(new errors.CustomError('No user found', 401));
+          return reject(new errors.CustomError('No user found.', 401));
         }
         // Compute the password hash on given password
         user.verifyPassword(password)
         .then(result => {
           if (!result) {
-            return reject(new errors.CustomError('Invalid password', 401));
+            return reject(new errors.CustomError('Invalid password.', 401));
           }
           return resolve(user);
         })
@@ -143,7 +143,7 @@ class LocalStrategy {
             req.user = null;
             req.session.destroy();
             // Return error
-            return reject(new errors.CustomError('No User found', 404));
+            return reject(new errors.CustomError('No user found.', 404));
           }
           return resolve(user);
         });
@@ -165,7 +165,7 @@ class LocalStrategy {
             req.user = null;
             req.session.destroy();
             // Return error
-            return reject(new errors.CustomError('No user found', 404));
+            return reject(new errors.CustomError('No user found.', 404));
           }
           // return User object if authentication was successful
           return resolve(user);
@@ -173,7 +173,7 @@ class LocalStrategy {
       }
       // If token is expired user is unauthorized
       else {
-        return reject(new errors.CustomError('Token is expired or session is invalid', 401));
+        return reject(new errors.CustomError('Token is expired or session is invalid.', 401));
       }
     });
   }

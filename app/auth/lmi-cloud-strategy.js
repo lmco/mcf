@@ -75,7 +75,7 @@ class LmiCloudStrategy {
         else {
           M.log.debug('Found Users: ');
           M.log.debug(users);
-          return reject(new errors.CustomError('More than one User found'));
+          return reject(new errors.CustomError('More than one user found.'));
         }
       });
     });

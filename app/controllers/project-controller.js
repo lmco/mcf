@@ -131,9 +131,8 @@ class ProjectController {
 
       // Ensure the org exists
       // TODO - Use populates rather than nested queries when possible (MBX-357)
-      //        Doing findOrgs() then findProj(), Instead we should reduces the number of queries
-      //        below Not sure if removeProjects() should remove all projects. Instead remove a
-      //        list of projects
+      // Doing findOrgs() then findProj(), Instead we should reduces the number of queries below
+      // Not sure if removeProjects() should remove all projects. Instead remove a list of projects
       OrgController.findOrg(reqUser, orgID, true)
       .then((org) => ProjectController.findProjects(reqUser, org.id, true))
       .then((projects) => {
@@ -426,7 +425,7 @@ class ProjectController {
           updateField = projUpdateFields[i];
           // Error Check - Check if updated field also exists in the original project.
           if (!project.toJSON().hasOwnProperty(updateField)) {
-            return reject(new errors.CustomError(`Project does not contain field ${updateField}`, 400));
+            return reject(new errors.CustomError(`Project does not contain field ${updateField}.`, 400));
           }
           // if parameter is of type object, stringify and compare
           if (utils.checkType([projectUpdated[updateField]], 'object')) {
@@ -446,7 +445,7 @@ class ProjectController {
           // Error Check - Check if updated field is of type string
           if (!utils.checkType([projectUpdated[updateField]], 'string')
             && (Project.schema.obj[updateField].type.schemaName !== 'Mixed')) {
-            return reject(new errors.CustomError(`The Project [${updateField}] is not of type String`, 400));
+            return reject(new errors.CustomError(`The Project [${updateField}] is not of type String.`, 400));
           }
           // Updates each individual tag that was provided.
           if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {

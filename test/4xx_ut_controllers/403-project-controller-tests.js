@@ -153,7 +153,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should update a project', updateProjectName);
   it('should update a project using the Project object', updateProjectObject);
   it('should create a second project', createProject02);
-  it('should fail to attempt to create a project with a long ID', verifyProjectFieldMaxChar);
   it('should reject attempt to create a project with a period in name', createPeriodName);
   it('should reject creation of a project already made', rejectDuplicateProjectId);
   it('should reject creation of project with invalid ID', rejectInvalidProjectId);
@@ -284,8 +283,8 @@ function updateTypeError(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'The Project [name] is not of type String'
-    chai.expect(error.description).to.equal('The Project [name] is not of type String');
+    // Expected error thrown: 'The Project [name] is not of type String.'
+    chai.expect(error.description).to.equal('The Project [name] is not of type String.');
     done();
   });
 }
@@ -353,34 +352,6 @@ function createProject02(done) {
   .catch((error) => {
     // Expect no error
     chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies invalid field string with over 36 characters when creating a project.
- * Expected error thrown: 'Save failed.'
- *  TODO: MBX-383 Test is actually verifying the validators for the model. Move to 303
- */
-function verifyProjectFieldMaxChar(done) {
-  const projData = {
-    id: 'thisisaverylongidnamepleaseacceptmeorbreak',
-    name: 'Long Id',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  // Create project
-  ProjController.createProject(adminUser, projData)
-  .then(() => {
-    // Expected createProject() to fail
-    // Should fail, throw error
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Save failed.'
-    chai.expect(error.description).to.equal('Save failed.');
     done();
   });
 }
@@ -733,7 +704,8 @@ function findPerm(done) {
 /**
  * @description Admin user sets then verifies non-admin has write/read permissions on project.
  */
-function setPerm(done) {
+// TODO: If keeping function, remove the eslint-disable-line below
+function setPerm(done) { // eslint-disable-line no-unused-vars
   // Admin sets permissions for non-admin
   ProjController.setPermissions(adminUser, 'starkhq', project.id.toString(), nonAuser, 'write')
   .then(() => ProjController.findProject(adminUser, 'starkhq', project.id.toString()))
@@ -792,7 +764,7 @@ function deleteProject(done) {
     chai.expect(error.description).to.equal('Project not found.');
 
     // Check if elements still exist
-    // Note: Elements are delete with projects
+    // Note: Elements are deleted with projects
     Element.Element.findOne({ id: '0000' })
     .exec((findElementError, element) => {
       // Expect no element

@@ -88,7 +88,7 @@ class UserController {
       .then((users) => {
         // Ensure a user was found
         if (users.length < 1) {
-          return reject(new errors.CustomError('Cannot find user.', 404));
+          return reject(new errors.CustomError('User not found.', 404));
         }
 
         // Ensure only one user was found

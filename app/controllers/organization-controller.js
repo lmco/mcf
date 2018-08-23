@@ -314,7 +314,7 @@ class OrganizationController {
           updateField = orgUpdateFields[i];
           // Error Check - Check if updated field also exists in the original org.
           if (!org.toJSON().hasOwnProperty(updateField)) {
-            return reject(new errors.CustomError(`Organization does not contain field ${updateField}`, 400));
+            return reject(new errors.CustomError(`Organization does not contain field ${updateField}.`, 400));
           }
           // if parameter is of type object, stringify and compare
           if (utils.checkType([orgUpdate[updateField]], 'object')) {
@@ -333,7 +333,7 @@ class OrganizationController {
           // Error Check - Check if updated field is of type string
           if (!utils.checkType([orgUpdate[updateField]], 'string')
             && (Organization.schema.obj[updateField].type.schemaName !== 'Mixed')) {
-            return reject(new errors.CustomError(`The Organization [${updateField}] is not of type String`, 400));
+            return reject(new errors.CustomError(`The Organization [${updateField}] is not of type String.`, 400));
           }
 
           // Handle case where the org name is updated, and is invalid

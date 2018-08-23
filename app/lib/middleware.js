@@ -60,7 +60,7 @@ module.exports.disableUserAPI = function disableUserAPI(req, res, next) {
   // Check if the request method is disabled
   if (!M.config.server.api.userAPI[req.method.toLowerCase()]) {
     // Create error message '<method> <url> is disabled'
-    const message = `${req.method} ${req.originalUrl} is disabled`;
+    const message = `${req.method} ${req.originalUrl} is disabled.`;
     // Create custom error 403 Forbidden
     const error = new errors.CustomError(message, 403);
     // Log custom error
