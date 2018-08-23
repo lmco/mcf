@@ -118,7 +118,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a user with no input to username', badUser);
   it('should reject username already in database', copyCatUser);
   it('should update the users first name', updateFirstName);
-  it('should reject updating the first name with a bad name', rejectInvalidLastNameUpdate);
+  it('should reject updating the last name with a bad name', rejectInvalidLastNameUpdate);
   it('should update the users custom tags', updateCustomData);
   it('should reject updating the users username', rejectUsernameUpdate);
   it('should reject updating a user that does not exist', updateNonExistentUser);
@@ -508,4 +508,3 @@ function deleteUser(done) {
     done();
   });
 }
-
