@@ -704,7 +704,8 @@ function findPerm(done) {
 /**
  * @description Admin user sets then verifies non-admin has write/read permissions on project.
  */
-function setPerm(done) {
+// TODO: If keeping function, remove the eslint-disable-line below
+function setPerm(done) { // eslint-disable-line no-unused-vars
   // Admin sets permissions for non-admin
   ProjController.setPermissions(adminUser, 'starkhq', project.id.toString(), nonAuser, 'write')
   .then(() => ProjController.findProject(adminUser, 'starkhq', project.id.toString()))
@@ -763,7 +764,7 @@ function deleteProject(done) {
     chai.expect(error.description).to.equal('Project not found.');
 
     // Check if elements still exist
-    // Note: Elements are delete with projects
+    // Note: Elements are deleted with projects
     Element.Element.findOne({ id: '0000' })
     .exec((findElementError, element) => {
       // Expect no element
