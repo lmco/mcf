@@ -22,10 +22,9 @@
 // Load node modules
 const path = require('path');
 const chai = require('chai');
-const spawn = require('child_process').spawn;
 
 // Load the MBEE version number directly form the package.json file
-const version = require(path.join(M.root, 'package.json')).version;
+const parseJSON = M.require('lib.parse-json');
 
 /* --------------------( Main )-------------------- */
 /**
@@ -35,7 +34,7 @@ const version = require(path.join(M.root, 'package.json')).version;
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  // TODO - Add checks for environment and other expected M object properties (MBX-366)
+  // TODO: Ask Josh how to check the environment
   it('should check the environment', environmentCheck);
 });
 
@@ -45,11 +44,12 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies the environment.
  */
 function environmentCheck(done){
-  // check environment?
-  // span or exec allows run
-  // matches the config file
-  // echo $MBEE_ENV
-  var cmd = spawn('echo', ['$MBEE_ENV'], { stdio: 'inherit' });
-  console.log('stdout:', cmd.stdout);
+  const processEnv = process.env.MBEE_ENV;
+  // chai.expect(processEnv).to.equal(M.env);
+  const processEnvPath = path.join('config', `${processEnv}.cfg`);
+  const stripComments = parseJSON.removeComments(processEnvPath);
+  const config = JSON.parse(stripComments);
+  chai.expect(config).to.equal(M.config);
+  // chai.expect(processEnv).to.equal(M.env);
   done();
 }
