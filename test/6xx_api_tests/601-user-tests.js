@@ -107,7 +107,6 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   it('should get a username', getUser);
   it('should create a user', postUser);
-  it('should create an admin user', postAdminUser);
   it('should find out the user with the /whoami api tag', whoAmI);
   it('should reject creating a user with invalid username', rejectInvalidUsernamePost);
   it('should reject creating a user with two different usernames', rejectNonmatchingUsernames);
@@ -117,7 +116,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject an update a user that does not exist', rejectPatchNonexisting);
   it('should reject deleting a user that doesnt exist', rejectDeleteNonexisting);
   it('should delete a user', deleteUser);
-  it('should delete the admin user', deleteAdminUser);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -174,41 +172,6 @@ function postUser(done) {
     // Verifies correct response body
     chai.expect(json.username).to.equal('deadpool');
     chai.expect(json.fname).to.equal('Wade');
-    done();
-  });
-}
-
-/**
- * @description Makes a POST request to /api/users/:username. Verifies POST
- * request to user API admin user.
- * // TODO: MBX-387 delete one of the POST tests and make one admin user
- */
-function postAdminUser(done) {
-  // Make a user API POST request
-  request({
-    url: `${test.url}/api/users/vanessacarlysle`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    // Creates new admin user data as POST request body
-    body: JSON.stringify({
-      username: 'vanessacarlysle',
-      password: 'deadpoolswife',
-      fname: 'Vanessa',
-      lname: 'Carlysle',
-      admin: true
-    })
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Verifies status 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Parse body to JSON object
-    const json = JSON.parse(body);
-    // Verifies correct response body
-    chai.expect(json.username).to.equal('vanessacarlysle');
-    chai.expect(json.fname).to.equal('Vanessa');
     done();
   });
 }
@@ -322,7 +285,6 @@ function getUsers(done) {
     // Verifies users exist
     chai.expect(body).to.include(M.config.test.username);
     chai.expect(body).to.include('deadpool');
-    chai.expect(body).to.include('vanessacarlysle');
     done();
   });
 }
@@ -467,35 +429,6 @@ function deleteUser(done) {
     const json = JSON.parse(body);
     // Verifies correct response body
     chai.expect(json).to.equal('deadpool');
-    done();
-  });
-}
-
-/**
- * @description Makes a DELETE request to /api/users/:username. Verifies DELETE
- * request of user.
- */
-function deleteAdminUser(done) {
-  // Make a DELETE request
-  request({
-    url: `${test.url}/api/users/vanessacarlysle`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'DELETE',
-    // Set soft delete parameter in request body
-    body: JSON.stringify({
-      soft: false
-    })
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Verifies status 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Parse body to JSON object
-    const json = JSON.parse(body);
-    // Verifies correct response body
-    chai.expect(json).to.equal('vanessacarlysle');
     done();
   });
 }

@@ -17,7 +17,6 @@
  *
  * @description Tests the user controller functionality: create,
  * delete, update, and find users.
- * TODO: MBX-375 Better organize tests, it's unclear how many users are being created/deleted.
  */
 
 // Load node modules
@@ -35,7 +34,6 @@ const mockExpress = M.require('lib.mock-express');
 // Variables used across test functions
 let adminUser = null;
 let nonAdminUser = null;
-let badAUser = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -77,28 +75,7 @@ describe(M.getModuleName(module.filename), () => {
           // Expect no error
           chai.expect(updateErr).to.equal(null);
           chai.expect(userUpdate).to.not.equal(null);
-
-          // TODO: MBX-375 Remove the second user, black panther only used in one test
-          // Creating a new admin user
-          const userData2 = {
-            username: 'blackpanther',
-            password: 'theheartshapedherb',
-            fname: 'Black',
-            lname: 'Panther',
-            admin: true
-          };
-          UserController.createUser(adminUser, userData2)
-          .then((anotherUser) => {
-            badAUser = anotherUser;
-            chai.expect(anotherUser.username).to.equal('blackpanther');
-            chai.expect(anotherUser.fname).to.equal('Black');
-            chai.expect(anotherUser.lname).to.equal('Panther');
-            done();
-          })
-          .catch((error) => {
-            chai.expect(error).to.equal(null);
-            done();
-          });
+          done();
         });
     });
   });
@@ -108,27 +85,21 @@ describe(M.getModuleName(module.filename), () => {
    * non-admin user.
    */
   after((done) => {
-    // TODO: MBX-375 Remove black panther
-    const user2 = 'blackpanther';
-    UserController.removeUser(adminUser, user2)
-    .then((delBadUser) => {
-      chai.expect(delBadUser).to.equal('blackpanther');
-      // Find the admin user
-      User.findOne({
-        username: M.config.test.username
-      }, (err, user) => {
+    // Find the admin user
+    User.findOne({
+      username: M.config.test.username
+    }, (err, user) => {
+      // Expect no error
+      chai.expect(err).to.equal(null);
+
+      // Delete admin user
+      user.remove((err2) => {
         // Expect no error
-        chai.expect(err).to.equal(null);
+        chai.expect(err2).to.equal(null);
 
-        // Delete admin user
-        user.remove((err2) => {
-          // Expect no error
-          chai.expect(err2).to.equal(null);
-
-          // Disconnect from the database
-          db.disconnect();
-          done();
-        });
+        // Disconnect from the database
+        db.disconnect();
+        done();
       });
     })
     .catch((error) => {
@@ -143,14 +114,11 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a user', createNewUser);
-  // TODO: MBX-323 Contemplate removing repetitive create user tests
-  it('should create an admin user', createAUser);
-  it('should create a non admin user', createNonAdminUser);
   it('should reject a creating a user with non A req user', rejectUserCreateByNonAdmin);
   it('should reject a user with no input to username', badUser);
   it('should reject username already in database', copyCatUser);
   it('should update the users first name', updateFirstName);
-  it('should reject updating the first name with a bad name', rejectInvalidFirstNameUpdate);
+  it('should reject updating the last name with a bad name', rejectInvalidLastNameUpdate);
   it('should update the users custom tags', updateCustomData);
   it('should reject updating the users username', rejectUsernameUpdate);
   it('should reject updating a user that does not exist', updateNonExistentUser);
@@ -161,8 +129,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject deleting a user with a non admin user', rejectDeleteByNonAdmin);
   it('should reject deleting themselves', rejectDeleteSelf);
   it('should delete user created', deleteUser);
-  it('should delete second user created', deleteUser2);
-  it('should delete admin user created', deleteAdminUser);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -172,9 +138,9 @@ describe(M.getModuleName(module.filename), () => {
 function createNewUser(done) {
   // Create user data
   const userData = {
-    username: 'shuri',
-    password: 'iamaprincess',
-    fname: 'Shuri',
+    username: 'blackpanther',
+    password: 'forwakanda',
+    fname: 'Tchalla',
     lname: 'Panther',
     custom: {
       location: 'Wakanda'
@@ -183,75 +149,15 @@ function createNewUser(done) {
 
   // Create user via the controller
   UserController.createUser(adminUser, userData)
-  // Find newly created user
-  .then((newUser) => UserController.findUser(newUser.username))
-  .then((foundUser) => {
-    // Verify user created properly
-    chai.expect(foundUser.username).to.equal('shuri');
-    chai.expect(foundUser.fname).to.equal('Shuri');
-    chai.expect(foundUser.lname).to.equal('Panther');
-    chai.expect(foundUser.custom.location).to.equal('Wakanda');
-    done();
-  })
-  .catch((error) => {
-    // Expect no error
-    chai.expect(error.description).to.equal(null);
-  });
-}
-
-/**
- * @description Create an admin user using the user controller.
- */
-function createAUser(done) {
-  // Create user data
-  const userData = {
-    username: 'erikkillmonger',
-    password: 'iamtryingtobethepanther',
-    fname: 'Erik',
-    lname: 'Killmonger',
-    admin: true
-  };
-
-  // Create user via user controller
-  UserController.createUser(adminUser, userData)
   .then((newUser) => {
-    // Verify user create properly
-    chai.expect(newUser.username).to.equal('erikkillmonger');
-    chai.expect(newUser.fname).to.equal('Erik');
-    chai.expect(newUser.lname).to.equal('Killmonger');
-    chai.expect(newUser.admin).to.equal(true);
-    done();
-  })
-  .catch((error) => {
-    // Expect no error
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Creates a non admin user using the user controller.
- */
-function createNonAdminUser(done) {
-  // Create user data
-  const userData = {
-    username: 'klaw',
-    password: 'iendupdying',
-    fname: 'Klaw',
-    lname: 'Klaw',
-    admin: false
-  };
-
-  // Create user via user controller
-  UserController.createUser(adminUser, userData)
-  .then((newUser) => {
-    // Set the file-global non-admin user
+    // Setting as global-file user
     nonAdminUser = newUser;
 
     // Verify user created properly
-    chai.expect(newUser.username).to.equal('klaw');
-    chai.expect(newUser.fname).to.equal('Klaw');
-    chai.expect(newUser.lname).to.equal('Klaw');
+    chai.expect(newUser.username).to.equal('blackpanther');
+    chai.expect(newUser.fname).to.equal('Tchalla');
+    chai.expect(newUser.lname).to.equal('Panther');
+    chai.expect(newUser.custom.location).to.equal('Wakanda');
     done();
   })
   .catch((error) => {
@@ -324,10 +230,10 @@ function badUser(done) {
 function copyCatUser(done) {
   // Create user data
   const userData = {
-    username: 'shuri',
-    password: 'nottherealShuri',
-    fname: 'Shuri',
-    lname: 'Shuri'
+    username: 'blackpanther',
+    password: 'nottherealone',
+    fname: 'Tchalla',
+    lname: 'Panther'
   };
 
   // Create user via user controller
@@ -350,14 +256,14 @@ function copyCatUser(done) {
  */
 function updateFirstName(done) {
   const username = 'blackpanther';
-  const userData = { fname: 'Okoye' };
+  const userData = { fname: 'Black' };
 
   // Updates user via user controller
   UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => {
     // Verifies user controller updates first name
     chai.expect(updatedUser.username).to.equal('blackpanther');
-    chai.expect(updatedUser.fname).to.equal('Okoye');
+    chai.expect(updatedUser.fname).to.equal('Black');
     chai.expect(updatedUser.lname).to.equal('Panther');
     done();
   })
@@ -372,9 +278,9 @@ function updateFirstName(done) {
  * @description Verify that update fails when given invalid input.
  * Expects error thrown: 'Name is not valid.'
  */
-function rejectInvalidFirstNameUpdate(done) {
+function rejectInvalidLastNameUpdate(done) {
   const username = 'blackpanther';
-  const userData = { fname: 'KLAW@#$' }; // TODO: MBX-376 Add this style to style guide
+  const userData = { lname: 'KLAW@#$' }; // TODO: MBX-376 Add this style to style guide
   UserController.updateUser(adminUser, username, userData)
   .then(() => {
     // Expect update to fail
@@ -393,19 +299,19 @@ function rejectInvalidFirstNameUpdate(done) {
  * @description Verifies updates to a user's custom data field.
  */
 function updateCustomData(done) {
-  const username = 'shuri';
+  const username = 'blackpanther';
   const userData = {
     custom: {
-      location: 'Oakland',
-      gender: 'Female'
+      location: 'America',
+      gender: 'Male'
     }
   };
   UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => UserController.findUser(updatedUser.username))
   .then((retUser) => {
     // Verify changes to custom data
-    chai.expect(retUser.custom.location).to.equal('Oakland');
-    chai.expect(retUser.custom.gender).to.equal('Female');
+    chai.expect(retUser.custom.location).to.equal('America');
+    chai.expect(retUser.custom.gender).to.equal('Male');
     done();
   })
   .catch((error) => {
@@ -420,7 +326,7 @@ function updateCustomData(done) {
  * Expects error thrown: 'Update not allowed'
  */
 function rejectUsernameUpdate(done) {
-  const username = 'erikkillmonger';
+  const username = 'blackpanther';
   const userData = { username: 'goldpanther' };
 
   // Expect update to fail
@@ -491,7 +397,7 @@ function findExistingUser(done) {
   .then((searchUser) => {
     // Found a user, verify user data
     chai.expect(searchUser.username).to.equal('blackpanther');
-    chai.expect(searchUser.fname).to.equal('Okoye');
+    chai.expect(searchUser.fname).to.equal('Black');
     chai.expect(searchUser.lname).to.equal('Panther');
     done();
   })
@@ -549,7 +455,7 @@ function rejectDeleteNonExistentUser(done) {
  * Expect error thrown: 'User does not have permissions.'
  */
 function rejectDeleteByNonAdmin(done) {
-  const username = 'shuri';
+  const username = 'blackpanther';
   // Expect remove to fail
   UserController.removeUser(nonAdminUser, username)
   .then(() => {
@@ -568,11 +474,10 @@ function rejectDeleteByNonAdmin(done) {
  * @description Verifies that a user cannot delete themselves.
  * Expects error thrown: 'User cannot delete themselves.'
  */
-// TODO: MBX-375 Change black panther to the MBEE config user
 function rejectDeleteSelf(done) {
-  const username = 'blackpanther';
+  const username = M.config.test.username;
   // Expect remove to fail
-  UserController.removeUser(badAUser, username)
+  UserController.removeUser(adminUser, username)
   .then(() => {
     // Remove succeeded, force test to fail
     chai.assert(true === false);
@@ -589,51 +494,12 @@ function rejectDeleteSelf(done) {
  * @description Verifies a user can be deleted.
  */
 function deleteUser(done) {
-  const username = 'shuri';
+  const username = 'blackpanther';
   // Expect remove user to succeed
   UserController.removeUser(adminUser, username)
   .then((delUser) => {
     // Remove user succeeded, verify result
-    chai.expect(delUser).to.equal('shuri');
-    done();
-  })
-  .catch((error) => {
-    // Expect no error
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies a user can be deleted.
- */
-function deleteUser2(done) {
-  const username = 'erikkillmonger';
-  // Expect remove user to succeed
-  UserController.removeUser(adminUser, username)
-  .then((delUser) => {
-    // Remove user succeeded, verify result
-    chai.expect(delUser).to.equal('erikkillmonger');
-    done();
-  })
-  .catch((error) => {
-    // Expect no error
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Deletes the admin user.
- * TODO: MBX-375 this user is not an admin, should this just be deleteUser3?
- */
-function deleteAdminUser(done) {
-  const username = 'klaw';
-  // Expect remove user to succeed
-  UserController.removeUser(adminUser, username)
-  .then((delUser) => {
-    // Remove user succeeded, verify result
-    chai.expect(delUser).to.equal('klaw');
+    chai.expect(delUser).to.equal('blackpanther');
     done();
   })
   .catch((error) => {
