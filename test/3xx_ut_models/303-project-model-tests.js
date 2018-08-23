@@ -152,6 +152,7 @@ function verifyProjectFieldMaxChar(done) {
     chai.expect(err.message).to.equal('Project validation failed: id: Too many characters in username');
     done();
   });
+}
 
 /**
  * @description Creates a Project using the Project model and saves it to the
