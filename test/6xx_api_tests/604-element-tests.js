@@ -25,7 +25,6 @@
 
 // Load node modules
 const chai = require('chai');
-const mongoose = require('mongoose'); // TODO - remove need for mongoose
 const request = require('request');
 
 // Load MBEE modules
@@ -34,6 +33,7 @@ const ProjController = M.require('controllers.project-controller');
 const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
+const db = M.require('lib.db');
 
 
 /* --------------------( Test Data )-------------------- */
@@ -51,7 +51,6 @@ describe(M.getModuleName(module.filename), () => {
    * TODO - add description
    */
   before((done) => {
-    const db = M.require('lib/db'); // TODO - M.lib.db
     db.connect();
 
     // Creating a Requesting Admin

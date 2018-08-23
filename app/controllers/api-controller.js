@@ -436,7 +436,7 @@ class ApiController {
    * @description Returns an array of members and their permission based on orgid
    *
    */
-  static getAllOrgRoles(req, res) { // eslint-disable-line consistent-return
+  static getAllOrgMemRoles(req, res) { // eslint-disable-line consistent-return
     // If no user in the request
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -652,7 +652,7 @@ class ApiController {
   }
 
 
-  static getProjectRoles(req, res) { // eslint-disable-line consistent-return
+  static getProjMemRoles(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
       return res.status(error.status).send(error);
@@ -671,7 +671,7 @@ class ApiController {
     .catch((error) => res.status(error.status).send(error));
   }
 
-  static getProjectRole(req, res) { // eslint-disable-line consistent-return
+  static getProjMemRole(req, res) { // eslint-disable-line consistent-return
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
       return res.status(error.status).send(error);
@@ -742,17 +742,24 @@ class ApiController {
    * User API Endpoints
    ****************************************************************************/
 
-
   /**
    * GET /api/users
    *
-   * @description Gets and returns all users.
-   * // TODO: Require user to be an admin (JIRA MBX-348)
+   * @description Gets and returns all users. Must be an Admin user to perform this.
    */
   static getUsers(req, res) { // eslint-disable-line consistent-return
-    // If for some reason we don't have a user, fail.
+    // Check if users exist
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
+    try {
+      // Check if request user is admin
+      utils.assertAdmin(req.user);
+    }
+    catch (error) {
+      // Error: throws 401 'User does not have permissions.'
       return res.status(error.status).send(error);
     }
 
