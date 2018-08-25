@@ -454,12 +454,9 @@ function deleteExistingOrg(done) {
 }
 
 /**
- * @description Verify projects soft deleted when org soft deleted.
- * Expected error thrown: 'Project not found.'
+ * @description Verify projects and elements soft deleted when org soft deleted.
  * // TODO : MBX-380 Discuss changing project controller to model
  * // TODO : MBX-380 Discuss taking out element
- * // TODO : MBX-381 Change verification of soft delete org to check the soft
- *           delete field instead of simply insuring a findOrg fails.
  */
 function softDeleteProjectAndOrg(done) {
   // Create an org via controller
@@ -471,30 +468,26 @@ function softDeleteProjectAndOrg(done) {
   // Soft delete org via controller
   .then(() => OrgController.removeOrg(adminUser, 'boombox', { soft: true }))
   // Find org via controller
-  .then(() => OrgController.findOrg(adminUser, 'boombox'))
-  .then(() => {
-    // Expected findOrg() to fail
-    // Should not execute, force test to fail
-    chai.assert(true === false);
+  .then(() => OrgController.findOrg(adminUser, 'boombox', true))
+  .then((retOrg) => {
+    // Expect organization deleted field to be true
+    chai.expect(retOrg.deleted).to.equal(true);
+    return ProjController.findProject(adminUser, 'boombox', 'godslayer', true);
+  })
+  .then((retProject) => {
+    // Expect project deleted field to be true
+    chai.expect(retProject.deleted).to.equal(true);
+    return ElemController.findElement(adminUser, 'boombox', 'godslayer', '0000', true);
+  })
+  .then((retElement) => {
+    // Expect element deleted field to be true
+    chai.expect(retElement.deleted).to.equal(true);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Org not found.'
-    chai.expect(error.description).to.equal('Org not found.');
-
-    // Find project
-    ProjController.findProject(adminUser, 'boombox', 'godslayer')
-    .then(() => {
-      // Expected findProject() to fail
-      // Should not execute, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((error2) => {
-      // Expected error thrown: 'Project not found.'
-      chai.expect(error2.description).to.equal('Project not found.');
-      done();
-    });
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
