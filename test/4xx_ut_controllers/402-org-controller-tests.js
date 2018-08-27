@@ -157,6 +157,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft delete an existing org', softDeleteExistingOrg);
   it('should delete an existing org', deleteExistingOrg);
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
+  it('should fail finding a soft-deleted org', rejectFindSoftDelOrg);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
   it('should fail trying to update the default org', updateDefaultOrg);
   it('should fail trying to delete the default org', rejectDefaultOrgDelete);
@@ -294,8 +295,8 @@ function updateOrgTypeErr(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'The Organization [name] is not of type String'
-    chai.expect(error.description).to.equal('The Organization [name] is not of type String');
+    // Expected error thrown: 'The Organization [name] is not of type String.'
+    chai.expect(error.description).to.equal('The Organization [name] is not of type String.');
     done();
   });
 }
@@ -400,13 +401,27 @@ function findAllExistingOrgs(done) {
 function softDeleteExistingOrg(done) {
   // Soft delete an org via controller
   OrgController.removeOrg(adminUser, 'boombox', { soft: true })
-  // Find org to soft delete
-  // TODO : MBX-326 Change verification to use returned org instead of findOrg
-  // TODO : MBX-326 Add test to verify findOrg doesnt find soft deleted org
-  .then(() => OrgController.findOrg(adminUser, 'boombox'))
+  .then((retOrg) => {
+    // Expect the deleted flag on the returned org to be set to true
+    chai.expect(retOrg.deleted).to.equal(true);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verify soft-deleted org cannot be found.
+ * Expected error thrown: 'Org not found.'
+ */
+function rejectFindSoftDelOrg(done) {
+  OrgController.findOrg(adminUser, 'boombox')
   .then(() => {
     // Expected findOrg() to fail
-    // Should not execute, force test to fail
+    // No org should be found, force test to fail
     chai.assert(true === false);
     done();
   })

@@ -24,26 +24,12 @@ const UIController = M.require('controllers.ui-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
 
-// TODO: Fix order of routes to actually reflect unauthenticated vs authenticated (MBX-365)
-/**********************************************
- * Unauthenticated Routes
- **********************************************/
-
-/* This renders the about page */
-router.route('/about')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.showAboutPage
-);
-
-
+/* ---------- Unauthenticated Routes ----------*/
 /**
  * This renders the swagger doc page for the API routes
  */
 router.route('/doc/api')
 .get(Middleware.logRoute, UIController.swaggerDoc);
-
 
 /**
  * Both routes map to the same controller. The controller method handles
@@ -63,7 +49,7 @@ router.route('/doc/developers')
 router.route('/doc/developers/:page')
 .get(Middleware.logRoute, UIController.renderJSDoc);
 
-
+/* ---------- Authenticated Routes ----------*/
 /**
  * GET shows the login page.
  * POST is the route that actually logs in the user.
@@ -81,10 +67,13 @@ router.route('/login')
   UIController.login
 );
 
-
-/**********************************************
-/* Authenticated Routes
- **********************************************/
+/* This renders the about page */
+router.route('/about')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.showAboutPage
+);
 
 /* This renders the home page for logged in users */
 router.route('/')
