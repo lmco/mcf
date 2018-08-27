@@ -20,6 +20,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const errors = M.require('lib.errors');
 
 /**
  * ParseJSON.js
@@ -39,7 +40,7 @@ class ParseJSON {
   static removeComments(filename) {
     // Error Check - Make sure the filename parameter passed in is of type string
     if (typeof filename !== 'string') {
-      return new Error('Error: filename is not of type String.');
+      return new errors.CustomError('Error: filename is not of type String.', 400);
     }
 
     // Attempt to read file into array separated by each newline character.

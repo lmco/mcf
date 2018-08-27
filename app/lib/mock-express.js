@@ -33,10 +33,10 @@ const errors = M.require('lib.errors');
 module.exports.getReq = function getReq(params, body) {
   // Error-Check
   if (typeof params !== 'object') {
-    throw errors.CustomError('params is not of type object');
+    throw errors.CustomError('params is not of type object.');
   }
   if (typeof params !== 'object') {
-    throw errors.CustomError('body is not of type object');
+    throw errors.CustomError('body is not of type object.');
   }
 
   return {
