@@ -64,7 +64,8 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(reqObj.user.username).to.equal(M.config.test.username);
 
       // TODO - consider using an .exec rather than callback to make this cleaner (MBX-373)
-      User.findOneAndUpdate({username: reqObj.user.username}, {admin: true}, {new: true},
+      User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true },
+        { new: true },
         (updateErr, userUpdate) => {
           chai.expect(updateErr).to.equal(null);
           chai.expect(userUpdate).to.not.equal(null);
