@@ -20,11 +20,7 @@
  */
 
 // Load node modules
-const path = require('path');
 const chai = require('chai');
-
-// Load the MBEE version number directly form the package.json file
-const version = require(path.join(M.root, 'package.json')).version;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -34,15 +30,27 @@ const version = require(path.join(M.root, 'package.json')).version;
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  // TODO - Add checks for environment and other expected M object properties (MBX-366)
-  it('should check the version', versionCheck);
+  it('should check the environment', environmentCheck);
+  it('should confirm configuration', configCheck);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * Checks the MBEE runtime version against the version in the package.json file.
+ * @description Verifies the environment.
  */
-function versionCheck(done) {
-  chai.expect(M.version).to.equal(version);
+function environmentCheck(done) {
+  // Verify inputted environment is configuration environment
+  const processEnv = process.env.MBEE_ENV;
+  chai.expect(processEnv).to.equal(M.env);
+  done();
+}
+
+/**
+ * @description Verifies the configuration file.
+ */
+function configCheck(done) {
+  // Verify config file has properties db and auth
+  chai.expect(M.config).hasOwnProperty('db');
+  chai.expect(M.config).hasOwnProperty('auth');
   done();
 }
