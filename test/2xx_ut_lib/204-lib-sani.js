@@ -63,6 +63,8 @@ function stringKeyMongoTest(done) {
 /**
  * @description Tests the html sanitation with html input.
  * Expected to change the html input.
+ * Same thing occurring in a test more than once
+ * TODO: &nbsp -> dont want to replace the &
  */
 function htmlTest(done) {
   // TODO: Chat with Josh to confirm the html characters to check for
