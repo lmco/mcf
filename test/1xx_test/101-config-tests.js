@@ -20,11 +20,7 @@
  */
 
 // Load node modules
-const path = require('path');
 const chai = require('chai');
-
-// Load the MBEE version number directly form the package.json file
-const parseJSON = M.require('lib.parse-json');
 
 /* --------------------( Main )-------------------- */
 /**
@@ -42,7 +38,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies the environment.
  */
-function environmentCheck(done){
+function environmentCheck(done) {
   // Verify inputted environment is configuration environment
   const processEnv = process.env.MBEE_ENV;
   chai.expect(processEnv).to.equal(M.env);
@@ -52,7 +48,7 @@ function environmentCheck(done){
 /**
  * @description Verifies the configuration file.
  */
-function configCheck(done){
+function configCheck(done) {
   // Verify config file has properties db and auth
   chai.expect(M.config).hasOwnProperty('db');
   chai.expect(M.config).hasOwnProperty('auth');
