@@ -55,7 +55,6 @@ describe(M.getModuleName(module.filename), () => {
 
   // TODO: add a permission tests (MBX-372)
   // Add test for setting and retrieving org permissions
-  // Add test to retrieves and updates orgs
   /* Execute the tests */
   it('should create an organization', createOrg);
   it('should find an organization', findOrg);
@@ -110,7 +109,7 @@ function findOrg(done) {
 function updateOrg(done) {
   // Find and update the org created in the previous createOrg() test
   org.findOneAndUpdate({
-    id: 'avengers',
+    id: 'avengers'
   }, {
     name: 'Avengers'
   }, (err, retOrg) => {
