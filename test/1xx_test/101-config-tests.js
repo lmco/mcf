@@ -34,22 +34,27 @@ const parseJSON = M.require('lib.parse-json');
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  // TODO: Ask Josh how to check the environment
   it('should check the environment', environmentCheck);
+  it('should confirm configuration', configCheck);
 });
 
 /* --------------------( Tests )-------------------- */
-
 /**
  * @description Verifies the environment.
  */
 function environmentCheck(done){
+  // Verify inputted environment is configuration environment
   const processEnv = process.env.MBEE_ENV;
-  // chai.expect(processEnv).to.equal(M.env);
-  const processEnvPath = path.join('config', `${processEnv}.cfg`);
-  const stripComments = parseJSON.removeComments(processEnvPath);
-  const config = JSON.parse(stripComments);
-  chai.expect(config).to.equal(M.config);
-  // chai.expect(processEnv).to.equal(M.env);
+  chai.expect(processEnv).to.equal(M.env);
+  done();
+}
+
+/**
+ * @description Verifies the configuration file.
+ */
+function configCheck(done){
+  // Verify config file has properties db and auth
+  chai.expect(M.config).hasOwnProperty('db');
+  chai.expect(M.config).hasOwnProperty('auth');
   done();
 }
