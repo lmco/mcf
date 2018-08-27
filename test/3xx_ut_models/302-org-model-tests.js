@@ -100,7 +100,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should create an organization', createOrg);
   it('should find an organization', findOrg);
   it('should update an organization', updateOrg);
-  it('should get all permissions of an organization', findPermissionOrg);
+  it('should get all permissions of an organization', findOrgPermissions);
   it('should soft delete an organization', softDeleteOrg);
   it('should hard delete an organization', deleteOrg);
 });
@@ -178,7 +178,7 @@ function updateOrg(done) {
 /**
  * @description Finds permissions an organization using the Organization Model.
  */
-function findPermissionOrg(done) {
+function findOrgPermissions(done) {
   // Finds permissions on the org created in the previous createOrg() test
   Org.findOne({
     id: 'avengers'
