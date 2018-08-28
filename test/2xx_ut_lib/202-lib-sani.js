@@ -67,8 +67,6 @@ function stringKeyMongoTest(done) {
  */
 function htmlTest(done) {
   const htmlLessThan = sani.html('<script>');
-  const htmlAnd = sani.html('&nbsp');
-  const htmlNbspMore = sani.html('&nbsp<script>');
   const htmlQuote = sani.html("'OR 1=1");
   const htmlDoubleQuote = sani.html('"double it up');
   const htmlTickEqual = sani.html('`OR 1=1');
@@ -81,8 +79,6 @@ function htmlTest(done) {
   const htmlNum = sani.html('#hashslingingslasher');
   const htmlHat = sani.html('3^2');
   chai.expect(htmlLessThan).to.equal('&lt;script&gt;');
-  chai.expect(htmlAnd).to.equal('&nbsp');
-  chai.expect(htmlNbspMore).to.equal('&nbsp&lt;script&gt;');
   chai.expect(htmlQuote).to.equal('&#039;OR 1&equals;1');
   chai.expect(htmlDoubleQuote).to.equal('&quot;double it up');
   chai.expect(htmlTickEqual).to.equal('&grave;OR 1&equals;1');
@@ -121,8 +117,8 @@ function sanitizeHtmlObject(done) {
  * @description Should attempt to sanitize &amp; and other allowed exceptions.
  */
 function sanitizeAllowedCharacters(done) {
-  const s = 'this string has &amp; and &lt; but also &sample';
-  const expected = 'this string has &amp; and &lt; but also &amp;sample';
+  const s = 'this string has &amp;, &lt;, &nbsp; and  but also &sample';
+  const expected = 'this string has &amp;, &lt;, &nbsp; and  but also &amp;sample';
   const htmlSan = sani.html(s);
   chai.expect(htmlSan).to.equal(expected);
   done();
