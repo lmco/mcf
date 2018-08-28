@@ -122,8 +122,8 @@ function createOrg(done) {
     }
   });
   // Save the Organization model object to the database
-  org.save((err) => {
-    chai.expect(err).to.equal(null);
+  org.save((error) => {
+    chai.expect(error).to.equal(null);
     done();
   });
 }
@@ -209,13 +209,15 @@ function softDeleteOrg(done) {
     // Set the deleted field of the organization to true
     org.deleted = true;
     // Save the updated organization object to the database
-    org.save((saveErr) => {
+    org.save((error) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
       // Find the previously updated organization
       Org.findOne({
         id: org.id
-      }, (err2, org2) => {
+      }, (error2, org2) => {
         // Verify the organization has been soft deleted.
-        chai.expect(err2).to.equal(null);
+        chai.expect(error2).to.equal(null);
         chai.expect(org2.deletedOn).to.not.equal(null);
         chai.expect(org2.deleted).to.equal(true);
         done();
@@ -231,9 +233,9 @@ function deleteOrg(done) {
   // find and remove the organization
   Org.findOneAndRemove({
     id: 'avengers'
-  }, (err) => {
+  }, (error) => {
     // Check that the remove action did not fail.
-    chai.expect(err).to.equal(null);
+    chai.expect(error).to.equal(null);
     done();
   });
 }
