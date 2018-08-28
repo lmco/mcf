@@ -28,8 +28,7 @@ const chai = require('chai');
 // Load MBEE modules
 const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
-const ProjController = M.require('controllers.project-controller');
-const ElemController = M.require('controllers.element-controller');
+const Project = M.require('models.project');
 const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
@@ -162,7 +161,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should fail trying to update the default org', updateDefaultOrg);
   it('should fail trying to delete the default org', rejectDefaultOrgDelete);
   it('should add a user to an org', setUserOrgRole);
-  it('should let the non-admin user write a project', verifyUserWritePerm);
   it('should reject user changing their permissions', rejectUserRole);
   it('should get a users roles within an org', getUserRoles);
   it('should get all members with permissions in an org', getMembers);
@@ -456,18 +454,24 @@ function deleteExistingOrg(done) {
 /**
  * @description Verify projects soft deleted when org soft deleted.
  * Expected error thrown: 'Project not found.'
- * // TODO : MBX-380 Discuss changing project controller to model
- * // TODO : MBX-380 Discuss taking out element
  * // TODO : MBX-381 Change verification of soft delete org to check the soft
  *           delete field instead of simply insuring a findOrg fails.
  */
 function softDeleteProjectAndOrg(done) {
   // Create an org via controller
   OrgController.createOrg(adminUser, { id: 'boombox', name: 'Star Lord Walkman' })
-  // Create a project via controller
-  .then(() => ProjController.createProject(adminUser, { id: 'godslayer', name: 'God Slayer', org: { id: 'boombox' } }))
-  // Create element via controller
-  .then(() => ElemController.createElement(adminUser, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Block' }))
+  .then((retOrg) => {
+    // Create the project via the model
+    const proj = new Project({
+      id: 'godslayer',
+      name: 'God Slayer',
+      org: retOrg._id,
+      uid: 'boombox:godslayer'
+    });
+
+    // Save the project to the database
+    return proj.save();
+  })
   // Soft delete org via controller
   .then(() => OrgController.removeOrg(adminUser, 'boombox', { soft: true }))
   // Find org via controller
@@ -483,16 +487,12 @@ function softDeleteProjectAndOrg(done) {
     chai.expect(error.description).to.equal('Org not found.');
 
     // Find project
-    ProjController.findProject(adminUser, 'boombox', 'godslayer')
-    .then(() => {
-      // Expected findProject() to fail
-      // Should not execute, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((error2) => {
-      // Expected error thrown: 'Project not found.'
-      chai.expect(error2.description).to.equal('Project not found.');
+    Project.findOne({ id: 'godslayer' })
+    .exec((findErr, foundProj) => {
+      // Expect no error
+      chai.expect(findErr).to.equal(null);
+      // Expect found project's deleted parameter to be true
+      chai.expect(foundProj.deleted).to.equal(true);
       done();
     });
   });
@@ -518,16 +518,12 @@ function hardDeleteProjectAndOrg(done) {
     chai.expect(error.description).to.equal('Org not found.');
 
     // Find deleted project
-    ProjController.findProject(adminUser, 'boombox', 'godslayer', true)
-    .then(() => {
-      // Expected findProject() to fail
-      // Should not execute, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((error2) => {
-      // Expected error thrown: 'Project not found.'
-      chai.expect(error2.description).to.equal('Project not found.');
+    Project.findOne({ id: 'godslayer' })
+    .exec((findProjErr, proj) => {
+      // Expect no error
+      chai.expect(findProjErr).to.equal(null);
+      // Expect there to be no projects
+      chai.expect(proj).to.equal(null);
       done();
     });
   });
@@ -590,56 +586,6 @@ function setUserOrgRole(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies new user permissions give correct access on org.
- * // TODO : MBX-382 Discuss moving to test to project controller tests or
- *           removing
- */
-function verifyUserWritePerm(done) {
-  // Create project data
-  const projData = {
-    id: 'godslayer',
-    name: 'God Slayer',
-    org: {
-      id: 'gaurdians'
-    }
-  };
-
-  // Create project via project controller
-  ProjController.createProject(newUser, projData)
-  .then((proj) => {
-    // Verify project created properly
-    chai.expect(proj.id).to.equal('godslayer');
-    chai.expect(proj.name).to.equal('God Slayer');
-    const elemData = {
-      id: '0000',
-      project: {
-        id: 'godslayer',
-        org: { id: 'gaurdians' } },
-      type: 'Block' };
-
-    // Create element via element controller
-    return ElemController.createElement(newUser, elemData);
-  })
-  .then(() => {
-    const elemData02 = {
-      id: '0001',
-      project: {
-        id: 'godslayer',
-        org: { id: 'gaurdians' } },
-      type: 'Block' };
-
-    // Create second element via element controller
-    ElemController.createElement(newUser, elemData02);
-    done();
-  })
-  .catch((error) => {
-    // No error expected
     chai.expect(error.description).to.equal(null);
     done();
   });
