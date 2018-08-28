@@ -449,11 +449,6 @@ class ElementController {
       const target = sani.html(elemInfo.target);
       const source = sani.html(elemInfo.source);
 
-      // Target and source should not be the same element
-      if (target === source) {
-        return reject(new errors.CustomError('Target and source cannot be the same element.', 400));
-      }
-
       // Find the target to make sure it exists
       ElementController.findElement(reqUser, elemData.orgID, elemData.project.id, target)
       .then((targetElement) => {
