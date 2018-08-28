@@ -16,9 +16,6 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests the Element Controller functionality.
- *
- * TODO: MBX-345 Relationships can have an identical source and target, but
- * cannot reference self.
  */
 
 // Load NPM modules
@@ -389,8 +386,8 @@ function rejectCreateElementExistingUUID(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Element with uuid already exists.'
-    chai.expect(error.description).to.equal('Element with uuid already exists.');
+    // Expect error thrown: 'Element already exists.'
+    chai.expect(error.description).to.equal('Element already exists.');
     done();
   });
 }

@@ -27,12 +27,12 @@
 const chai = require('chai');
 
 // Load MBEE modules
-const User = M.require('models.user');
+const Element = M.require('models.element');
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
-const Element = M.require('models.element');
-const db = M.require('lib/db');
+const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
+const db = M.require('lib/db');
 const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */

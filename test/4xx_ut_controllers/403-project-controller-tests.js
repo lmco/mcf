@@ -18,12 +18,12 @@ const chai = require('chai');
 const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
-const ElemController = M.require('controllers.element-controller');
-const User = M.require('models.user');
 const Element = M.require('models.element');
+const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -147,7 +147,6 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a new project', createProject);
-  it('should create elements for the project', createElements);
   it('should throw an error saying the field cannot be updated', rejectImmutableField);
   it('should throw an error saying the field is not of type string', updateTypeError);
   it('should update a project', updateProjectName);
@@ -193,53 +192,13 @@ function createProject(done) {
   ProjController.createProject(adminUser, projData)
   .then((retProj) => ProjController.findProject(adminUser, 'starkhq', retProj.id))
   .then((proj) => {
+    // Set the file-global project
+    project = proj;
+
+    // Verify project was created successfully
     chai.expect(proj.id).to.equal('ironman');
     chai.expect(proj.name).to.equal('Iron man Suite');
     chai.expect(proj.custom.builtFor).to.equal('Tony');
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies elements created for the main project
- *  TODO: MBX-380 Create using element model, consider including in delete
- *        project test, Move to before()
- */
-function createElements(done) {
-  const elem0 = {
-    id: '0000',
-    name: 'smart missiles',
-    project: {
-      id: 'ironman',
-      org: {
-        id: 'starkhq'
-      }
-    },
-    type: 'Block'
-  };
-
-  // Create element0
-  ElemController.createElement(adminUser, elem0)
-  .then(() => {
-    const elem1 = {
-      id: '0001',
-      name: 'JARVIS',
-      project: {
-        id: 'ironman',
-        org: {
-          id: 'starkhq'
-        }
-      },
-      type: 'Block'
-    };
-    // Create and return element1
-    return ElemController.createElement(adminUser, elem1);
-  })
-  .then(() => {
     done();
   })
   .catch((error) => {
@@ -344,7 +303,6 @@ function createProject02(done) {
   ProjController.createProject(adminUser, projData)
   .then((proj) => {
     // Verfy project fields
-    project = proj;
     chai.expect(proj.id).to.equal('arcreactor');
     chai.expect(proj.name).to.equal('Arc Reactor');
     done();
@@ -728,8 +686,17 @@ function setPerm(done) { // eslint-disable-line no-unused-vars
  * Expected error thrown: 'Project not found.'
  */
 function softDeleteProject(done) {
-  // Remove project
-  ProjController.removeProject(adminUser, org.id, 'ironman', { soft: true })
+  // Create an element via the Element model
+  const elem = new Element.Block({
+    id: '0000',
+    uid: utils.createUID(org.id, project.id, '0000'),
+    project: project._id
+  });
+
+  // Save the element
+  elem.save()
+  // Soft-delete the project
+  .then(() => ProjController.removeProject(adminUser, org.id, 'ironman', { soft: true }))
   // Find project
   .then(() => ProjController.findProject(adminUser, org.id, 'ironman'))
   .then(() => {
@@ -750,7 +717,7 @@ function softDeleteProject(done) {
  * Expected error thrown: 'Project not found.'
  */
 function deleteProject(done) {
-  // Remove project
+  // Hard-delete the project
   ProjController.removeProject(adminUser, org.id, 'ironman', { soft: false })
   .then(() => ProjController.findProject(adminUser, org.id, 'ironman'))
   .then(() => {
