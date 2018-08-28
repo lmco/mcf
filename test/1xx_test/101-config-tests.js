@@ -41,8 +41,14 @@ describe(M.getModuleName(module.filename), () => {
 function environmentCheck(done) {
   // Verify inputted environment is configuration environment
   const processEnv = process.env.MBEE_ENV;
-  chai.expect(processEnv).to.equal(M.env);
-  done();
+  if (typeof processEnv !== 'undefined') {
+    chai.expect(processEnv).to.equal(M.env);
+    done();
+  }
+  else {
+    chai.expect(M.env).to.equal('default');
+    done();
+  }
 }
 
 /**
