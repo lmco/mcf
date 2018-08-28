@@ -44,12 +44,22 @@ module.exports.mongo = function(s) {
  */
 module.exports.html = function(s) {
   if (typeof s === 'string') {
-    return String(s)
-    .replace(/&(?![(amp;)(lt;)(gt;)(quot;)(#039;)])/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    if (s.hasOwnProperty('&nbsp')){
+      return String(s)
+        .replace(/&(?![(amp;)(lt;)(gt;)(quot;)(#039;)])/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    else {
+      return String(s)
+        .replace(/&(?![(amp;)(lt;)(gt;)(quot;)(#039;)])/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
   }
 
   // TODO: Handle null case, potentially undefined and booleans(true/false) (MBX-359)
