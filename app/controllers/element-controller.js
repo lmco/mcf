@@ -362,61 +362,55 @@ class ElementController {
 
         // Error check - check if the element already exists
         // Must nest promises since the catch uses proj, returned from findProject.
-        // TODO: Cut this down to one query (MBX-352)
-        ElementController.findElement(reqUser, orgID, projID, elemID)
+        ElementController.findElementsQuery({ $or: [{ uid: elemUID }, { uuid: uuid }] })
         .then(() => reject(new errors.CustomError('Element already exists.', 400)))
-        .catch(() => { // eslint-disable-line consistent-return
-          // Check if element with same uuid exists
-          ElementController.findElement(reqUser, orgID, projID, uuid)
-          .then(() => reject(new errors.CustomError('Element with uuid already exists.', 400)))
-          .catch((findError) => { // eslint-disable-line consistent-return
-            // This is ok, we dont want the element to already exist.
-            if (findError.description === 'No elements found.') {
-              // Get the element type
-              let type = null;
-              Object.keys(Element).forEach((k) => {
-                if ((elementType === Element[k].modelName) && (elementType !== 'Element')) {
-                  type = k;
-                }
-              });
+        .catch((findError) => { // eslint-disable-line consistent-return
+          // This is ok, we dont want the element to already exist.
+          if (findError.description === 'No elements found.') {
+            // Get the element type
+            let type = null;
+            Object.keys(Element).forEach((k) => {
+              if ((elementType === Element[k].modelName) && (elementType !== 'Element')) {
+                type = k;
+              }
+            });
 
-              const elemData = {
-                orgID: orgID,
-                elemID: elemID,
-                elemName: elemName,
-                project: proj,
-                elemUID: elemUID,
-                parentID: parentID,
-                custom: custom,
-                documentation: documentation,
-                uuid: uuid
-              };
+            const elemData = {
+              orgID: orgID,
+              elemID: elemID,
+              elemName: elemName,
+              project: proj,
+              elemUID: elemUID,
+              parentID: parentID,
+              custom: custom,
+              documentation: documentation,
+              uuid: uuid
+            };
 
-              // If the given type is not a type we specified
-              if (type === null) {
-                return reject(new errors.CustomError('Invalid element type.', 400));
-              }
-              if (type === 'Relationship') {
-                ElementController.createRelationship(reqUser, elemData, element)
-                .then((newElement) => resolve(newElement))
-                .catch((createRelationshipError) => reject(createRelationshipError));
-              }
-              else if (type === 'Package') {
-                ElementController.createPackage(reqUser, elemData)
-                .then((newElement) => resolve(newElement))
-                .catch((createRelationshipError) => reject(createRelationshipError));
-              }
-              else {
-                ElementController.createBlock(reqUser, elemData)
-                .then((newElement) => resolve(newElement))
-                .catch((createRelationshipError) => reject(createRelationshipError));
-              }
+            // If the given type is not a type we specified
+            if (type === null) {
+              return reject(new errors.CustomError('Invalid element type.', 400));
+            }
+            if (type === 'Relationship') {
+              ElementController.createRelationship(reqUser, elemData, element)
+              .then((newElement) => resolve(newElement))
+              .catch((createRelationshipError) => reject(createRelationshipError));
+            }
+            else if (type === 'Package') {
+              ElementController.createPackage(reqUser, elemData)
+              .then((newElement) => resolve(newElement))
+              .catch((createRelationshipError) => reject(createRelationshipError));
             }
             else {
-              // Some other error, return it.
-              return reject(findError);
+              ElementController.createBlock(reqUser, elemData)
+              .then((newElement) => resolve(newElement))
+              .catch((createRelationshipError) => reject(createRelationshipError));
             }
-          });
+          }
+          else {
+            // Some other error, return it.
+            return reject(findError);
+          }
         });
       })
       .catch((findProjectError) => reject(findProjectError));
