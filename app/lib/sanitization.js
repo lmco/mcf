@@ -60,7 +60,7 @@ module.exports.html = function(s) {
     .replace(/\^/g, '&Hat;')
     .replace(/'/g, '&#039;');
   }
-  if ((typeof s === 'undefined') || (typeof s === 'boolean') || (s === null)){
+  if ((typeof s === 'undefined') || (typeof s === 'boolean') || (s === null)) {
     return s;
   }
 
