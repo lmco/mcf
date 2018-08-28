@@ -22,11 +22,20 @@
  * schema definition from the more generic 'Element'.</p>
  *
  * <p>The following element types are defined: Block, Relationship, and Package.
- * Currently, a block does not extend the Element schema other than applying
- * adding the 'type' of 'Block'. Relationships add 'source' and 'target' fields
- * that reference other elements, allowing relationships to represent a link
- * between other elements. A package adds a 'contains' field which references
- * other elements, allowing packages to be used to structure the model.</p>
+ *
+ * Element:
+ *   Block Element:
+ *     Currently, a block does not extend the Element schema other than applying
+ *     adding the 'type' of 'Block'.
+ *
+ *   Relationship Element:
+ *     Relationships add 'source' and 'target' fields
+ *     that reference other elements, allowing relationships to represent a link
+ *     between other elements.
+ *
+ *   Package Element:
+ *     A package adds a 'contains' field which references
+ *     other elements, allowing packages to be used to structure the model.</p>
  *
  * <p>A project will have one root element whose "parent" field will
  * be null. All other elements will have a parent that should be a package (
@@ -56,13 +65,16 @@ const options = { discriminatorKey: 'type' };
  */
 const ElementSchema = new mongoose.Schema({
 
-  // TODO: Elaborate more on differences between id, _id, uid, uuid (MBX-361)
-
   /**
-   * @memberOf  Element
-   * @property  {String} uid
+   * @memberOf Element
+   * @property {String} uid
    *
-   * @description The unique ID of the element.
+   * @description Automatically generated ID. The concatenation of organization
+   * id, project id, and element id, separated by colon.
+   * Limits betwwen 2 to 128 characters.
+   *
+   *   Ex: <organization id>:<project id,>:<element id>
+   *       OrganizationA:ProjectX:ModelElementA
    */
   uid: {
     type: String,
@@ -74,12 +86,14 @@ const ElementSchema = new mongoose.Schema({
     minlength: [2, 'Element UID is too short']
   },
 
-
   /**
-   * @memberOf  Element
-   * @property  {String} id
+   * @memberOf Element
+   * @property {String} id
    *
-   * @description The ID of the element.
+   * @description A unique element ID. Limits betwwen 2 to 36 characters.
+   * - MUST ONLY include lowercase letters, numbers, or '-'
+   *
+   *   Ex: ModelAElement
    */
   id: {
     type: String,
@@ -90,10 +104,15 @@ const ElementSchema = new mongoose.Schema({
   },
 
   /**
-   * @memberOf  Element
-   * @property  {String} uuid
+   * @memberOf Element
+   * @property {String} uuid
    *
-   * @description The UUID of the element. Based on RFC 4122
+   * @description The UUID of an element. Automatically generated ID or taken
+   * from aother database. Based on RFC 4122
+   * - MUST follow the following format: xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+   *     where x is a number or a lowercase letter from a-f
+   *
+   *   Ex: f81d4fae-7dec-11d0-a765-00a0c91e6bf6
    */
   uuid: {
     type: String,
@@ -108,7 +127,9 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf Element
    * @property {String} name
    *
-   * @description The element documentation
+   * @description The element name. Used for a more descriptive name.
+   *
+   *   Ex: Model A Elements In Sub System B
    */
   name: {
     type: String,
@@ -122,7 +143,7 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf Element
    * @property {Schema.Types.ObjectId} project
    *
-   * @description The project the element belongs to.
+   * @description The project this element belongs to.
    */
   project: {
     type: mongoose.Schema.Types.ObjectId,
@@ -134,8 +155,9 @@ const ElementSchema = new mongoose.Schema({
    * @memberOf Element
    * @property {Schema.Types.ObjectId} parent
    *
-   * @description The parent element containing the element. The model root
-   * package will have a parent of null.
+   * @description The parent element containing this element.
+   * Note: only package elements will have a parent
+   * Root will have a parent of null.
    */
   parent: {
     type: mongoose.Schema.Types.ObjectId,
@@ -238,8 +260,7 @@ ElementSchema.index({ name: 'text', documentation: 'text' });
 ElementSchema.pre('save', function(next) {
   // Run our defined setters
   this.updatedOn = '';
-  // TODO: Set deleted to a boolean in the pre-save (MBX-361)
-  this.deleted = '';
+
   // Only set uuid if it hasn't already been set
   if (this.uuid === undefined || this.uuid === '') {
     this.uuid = uuidv4();
@@ -259,7 +280,6 @@ ElementSchema.methods.getValidUpdateFields = function() {
  * @type {Element}
  */
 const Element = mongoose.model('Element', ElementSchema);
-
 
 /******************************************************************************
  * Block Model
@@ -335,7 +355,6 @@ const RelationshipSchema = new mongoose.Schema({
  */
 const Relationship = Element.discriminator('Relationship', RelationshipSchema);
 
-
 /******************************************************************************
  * Package Model
  ******************************************************************************/
@@ -364,7 +383,6 @@ const PackageSchema = new mongoose.Schema({
   }]
 }, options);
 
-
 /**
  * The Relationship model is an Element discriminator. That is to say a
  * Relationship is a type of Element. It shares the element's schema and may
@@ -372,7 +390,6 @@ const PackageSchema = new mongoose.Schema({
  * @type {Relationship}
  */
 const Package = Element.discriminator('Package', PackageSchema);
-
 
 // Expose models
 module.exports.Element = Element;
