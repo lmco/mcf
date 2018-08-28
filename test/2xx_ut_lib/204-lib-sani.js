@@ -64,21 +64,36 @@ function stringKeyMongoTest(done) {
  * @description Tests the html sanitation with html input.
  * Expected to change the html input.
  * Same thing occurring in a test more than once
- * TODO: &nbsp -> dont want to replace the &
  */
 function htmlTest(done) {
-  // TODO: Chat with Josh to confirm the html characters to check for
-  // Do we want to do the equals sign? Or the tick mark?
   const htmlLessThan = sani.html('<script>');
   const htmlAnd = sani.html('&nbsp');
+  const htmlNbspMore = sani.html('&nbsp<script>');
   const htmlQuote = sani.html("'OR 1=1");
   const htmlDoubleQuote = sani.html('"double it up');
-  //const htmlTickEqual = sani.html('`OR 1=1');
+  const htmlTickEqual = sani.html('`OR 1=1');
+  const htmlNull = sani.html(null);
+  const htmlBool = sani.html(false);
+  const htmlSlash = sani.html('/p');
+  const htmlBackSlash = sani.html('\\p');
+  const htmlPercent = sani.html('100%');
+  const htmlParentheses = sani.html('(inside)');
+  const htmlNum = sani.html('#hashslingingslasher');
+  const htmlHat = sani.html('3^2');
   chai.expect(htmlLessThan).to.equal('&lt;script&gt;');
-  chai.expect(htmlAnd).to.equal('&amp;nbsp');
-  chai.expect(htmlQuote).to.equal('&#039;OR 1=1');
+  chai.expect(htmlAnd).to.equal('&nbsp');
+  chai.expect(htmlNbspMore).to.equal('&nbsp&lt;script&gt;');
+  chai.expect(htmlQuote).to.equal('&#039;OR 1&equals;1');
   chai.expect(htmlDoubleQuote).to.equal('&quot;double it up');
-  //chai.expect(htmlTickEqual).to.equal('&grace;OR 1=1');
+  chai.expect(htmlTickEqual).to.equal('&grave;OR 1&equals;1');
+  chai.expect(htmlNull).to.equal(null);
+  chai.expect(htmlBool).to.equal(false);
+  chai.expect(htmlSlash).to.equal('&sol;p');
+  chai.expect(htmlBackSlash).to.equal('&bsol;p');
+  chai.expect(htmlPercent).to.equal('100&percnt;');
+  chai.expect(htmlParentheses).to.equal('&lpar;inside&rpar;');
+  chai.expect(htmlNum).to.equal('&num;hashslingingslasher');
+  chai.expect(htmlHat).to.equal('3&Hat;2');
   done();
 }
 
@@ -93,11 +108,10 @@ function sanitizeHtmlObject(done) {
     admin: true,
     email: null
   };
-  // TODO: add tests for more special characters (MBX-368)
   const htmlSan = sani.html(data);
   chai.expect(htmlSan.name).to.equal('Steve Rogers');
   chai.expect(htmlSan.fname).to.equal('&lt;script&gt;');
-  chai.expect(htmlSan.lname).to.equal('&lt;/script&gt;');
+  chai.expect(htmlSan.lname).to.equal('&lt;&sol;script&gt;');
   chai.expect(htmlSan.admin).to.equal(true);
   chai.expect(htmlSan.email).to.equal(null);
   done();
