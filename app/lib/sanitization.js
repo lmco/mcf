@@ -45,14 +45,24 @@ module.exports.mongo = function(s) {
 module.exports.html = function(s) {
   if (typeof s === 'string') {
     return String(s)
-    .replace(/&(?![(amp;)(lt;)(gt;)(quot;)(#039;)])/g, '&amp;')
+    .replace(/&(?!(amp;)|(lt;)|(gt;)|(quot;)|(#039;)|(nbsp))/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+    .replace(/`/g, '&grave;')
+    .replace(/=/g, '&equals;')
+    .replace(/\//g, '&sol;')
+    .replace(/\\/g, '&bsol;')
+    .replace(/%/g, '&percnt;')
+    .replace(/\(/g, '&lpar;')
+    .replace(/\)/g, '&rpar;')
+    .replace(/#/g, '&num;')
+    .replace(/\^/g, '&Hat;')
     .replace(/'/g, '&#039;');
   }
-
-  // TODO: Handle null case, potentially undefined and booleans(true/false) (MBX-359)
+  if ((typeof s === 'undefined') || (typeof s === 'boolean') || (s === null)) {
+    return s;
+  }
 
   // Check if object type
   if (s instanceof Object) {
