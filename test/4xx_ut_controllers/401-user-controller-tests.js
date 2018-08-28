@@ -61,10 +61,10 @@ describe(M.getModuleName(module.filename), () => {
     const resObj = mockExpress.getRes();
 
     // Authenticate user
-    AuthController.authenticate(reqObj, resObj, (err) => {
+    AuthController.authenticate(reqObj, resObj, (error) => {
       const ldapuser = reqObj.user;
       // Expect no error
-      chai.expect(err).to.equal(null);
+      chai.expect(error).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
 
       // Find the user and update admin status
@@ -88,14 +88,14 @@ describe(M.getModuleName(module.filename), () => {
     // Find the admin user
     User.findOne({
       username: M.config.test.username
-    }, (err, user) => {
+    }, (error, user) => {
       // Expect no error
-      chai.expect(err).to.equal(null);
+      chai.expect(error).to.equal(null);
 
       // Delete admin user
-      user.remove((err2) => {
+      user.remove((error2) => {
         // Expect no error
-        chai.expect(err2).to.equal(null);
+        chai.expect(error2).to.equal(null);
 
         // Disconnect from the database
         db.disconnect();
@@ -104,7 +104,7 @@ describe(M.getModuleName(module.filename), () => {
     })
     .catch((error) => {
       // Expect no error
-      chai.expect(error.description).to.equal(null);
+      chai.expect(error.message).to.equal(null);
 
       // Disconnect from the database
       db.disconnect();
@@ -162,14 +162,14 @@ function createNewUser(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies non-admin user CANNOT create new user.
- * Expected error thrown: 'User does not have permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectUserCreateByNonAdmin(done) {
   // Create user data
@@ -189,15 +189,15 @@ function rejectUserCreateByNonAdmin(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User does not have permissions'
-    chai.expect(error.description).to.equal('User does not have permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
 
 /**
  * @description Verifies createUser fails given invalid data.
- * Expected error thrown: 'Username is not valid.'
+ * Expected error thrown: 'Bad Request'
  */
 function badUser(done) {
   // Create user data
@@ -217,15 +217,15 @@ function badUser(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Username is not valid.'
-    chai.expect(error.description).to.equal('Username is not valid.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies createsUser CANNOT recreate existing username.
- * Expected error thrown: 'User already exists.'
+ * Expected error thrown: 'Bad Request'
  */
 function copyCatUser(done) {
   // Create user data
@@ -245,8 +245,8 @@ function copyCatUser(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User already exists.'
-    chai.expect(error.description).to.equal('User already exists.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -269,14 +269,14 @@ function updateFirstName(done) {
   })
   .catch((error) => {
     // Expects no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verify that update fails when given invalid input.
- * Expects error thrown: 'Name is not valid.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidLastNameUpdate(done) {
   const username = 'blackpanther';
@@ -289,8 +289,8 @@ function rejectInvalidLastNameUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Name is not valid.'
-    chai.expect(error.description).to.equal('Name is not valid.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -316,14 +316,14 @@ function updateCustomData(done) {
   })
   .catch((error) => {
     // Expect no error to occur
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies that a username cannot be changed.
- * Expects error thrown: 'Update not allowed'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectUsernameUpdate(done) {
   const username = 'blackpanther';
@@ -337,15 +337,15 @@ function rejectUsernameUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Update not allowed.'
-    chai.expect(error.description).to.equal('Update not allowed.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
 
 /**
  * @description Verifies that a non-admin CANNOT update a user.
- * Expect error thrown: 'User does not have permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectUserUpdateByNonAdmin(done) {
   const username = 'blackpanther';
@@ -358,15 +358,15 @@ function rejectUserUpdateByNonAdmin(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'User does not have permissions.'
-    chai.expect(error.description).to.equal('User does not have permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
 
 /**
  * @description Verify update of a non-existent user fails.
- * Expect error thrown: 'User not found.'
+ * Expected error thrown: 'Not Found'
  */
 function updateNonExistentUser(done) {
   const username = 'fakeblackpanther';
@@ -380,8 +380,8 @@ function updateNonExistentUser(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'User not found.'
-    chai.expect(error.description).to.equal('User not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
@@ -402,14 +402,14 @@ function findExistingUser(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verified findUser fails when the user does not exist.
- * Expect error thrown: 'User not found.'
+ * Expected error thrown: 'Not Found'
  */
 function rejectFindNonExistentUser(done) {
   const username = 'nopanther';
@@ -420,16 +420,16 @@ function rejectFindNonExistentUser(done) {
     chai.assert(true === false);
     done();
   })
-  .catch((err) => {
-    // Expect error thrown: 'User not found.'
-    chai.expect(err.description).to.equal('User not found.');
+  .catch((error) => {
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
 
 /**
  * @description Verifies that deleting a non-existent user fails.
- * Expect error thrown: 'User not found.'
+ * Expected error thrown: 'Not Found'
  */
 function rejectDeleteNonExistentUser(done) {
   const username = 'wkabi';
@@ -440,18 +440,16 @@ function rejectDeleteNonExistentUser(done) {
     chai.assert(true === false);
     done();
   })
-  .catch((err) => {
-    // Expect error thrown: 'User not found.'
-    // TODO: MBX-379 Make tests check err.message rather than description
-    //       This is so descriptions can be more easily changed
-    chai.expect(err.description).to.equal('User not found.');
+  .catch((error) => {
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
 
 /**
  * @description Verifies that a non-admin user CANNOT delete other users.
- * Expect error thrown: 'User does not have permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectDeleteByNonAdmin(done) {
   const username = 'blackpanther';
@@ -463,15 +461,15 @@ function rejectDeleteByNonAdmin(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'User does not have permissions.'
-    chai.expect(error.description).to.equal('User does not have permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
 
 /**
  * @description Verifies that a user cannot delete themselves.
- * Expects error thrown: 'User cannot delete themselves.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectDeleteSelf(done) {
   const username = M.config.test.username;
@@ -482,9 +480,9 @@ function rejectDeleteSelf(done) {
     chai.assert(true === false);
     done();
   })
-  .catch((err) => {
-    // Expect error thrown: 'User cannot delete themselves.'
-    chai.expect(err.description).to.equal('User cannot delete themselves.');
+  .catch((error) => {
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
@@ -503,7 +501,7 @@ function deleteUser(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }

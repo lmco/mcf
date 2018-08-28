@@ -107,7 +107,7 @@ describe(M.getModuleName(module.filename), () => {
         done();
       })
       .catch((error) => {
-        chai.expect(error).to.equal(null);
+        chai.expect(error.message).to.equal(null);
         done();
       });
     });
@@ -138,7 +138,7 @@ describe(M.getModuleName(module.filename), () => {
       });
     })
     .catch((error) => {
-      chai.expect(error).to.equal(null);
+      chai.expect(error.message).to.equal(null);
       // Disconnect database
       db.disconnect();
       done();
@@ -206,7 +206,7 @@ function numberIsString(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.status).to.equal(400);
+    chai.expect(error.message).to.equal('Bad Request');
   }
   // Checks for correct type and returns a boolean
   chai.expect(utils.checkType([1, 2], 'string')).to.equal(false);
@@ -254,7 +254,7 @@ function projectUserExists(done) {
     chai.expect(true).to.equal(false);
   }
   catch (error) {
-    chai.expect(error.status).to.equal(400);
+    chai.expect(error.message).to.equal('Bad Request');
   }
   // Checks for INCORRECT key and returns false
   chai.expect(utils.checkExists(['project.user'], sampleObj)).to.equal(false);
@@ -300,7 +300,7 @@ function userIsNotAdmin(done) {
     chai.expect(true).to.equal(false);
   }
   catch (error) {
-    chai.expect(error.status).to.equal(401);
+    chai.expect(error.message).to.equal('Unauthorized');
   }
   chai.expect(utils.checkAdmin(user)).to.equal(false);
   done();
@@ -331,7 +331,7 @@ function invalidUID(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.description).to.equal('Value is not a string.');
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   }
 }
@@ -348,7 +348,7 @@ function parseValidUID(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   }
 }
@@ -363,8 +363,7 @@ function parseInvalidUID(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.description).to.equal('Invalid UID.');
-    chai.expect(error.status).to.equal(400);
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   }
 }
@@ -379,7 +378,7 @@ function parseValidUIDSecondElement(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   }
 }
@@ -409,7 +408,7 @@ function permissionsInternalProject(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -434,7 +433,7 @@ function permissionsPrivateProject(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }

@@ -68,8 +68,8 @@ describe(M.getModuleName(module.filename), () => {
 
     // TODO: Create a user and set them to an admin of the Organization and (MBX-373)
     // Project. NOT a global admin.
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      chai.expect(err).to.equal(null);
+    AuthController.authenticate(reqObj, resObj, (error) => {
+      chai.expect(error).to.equal(null);
       chai.expect(reqObj.user.username).to.equal(M.config.test.username);
 
       // TODO - consider using an .exec rather than callback to make this cleaner (MBX-373)
@@ -89,9 +89,9 @@ describe(M.getModuleName(module.filename), () => {
             }
           });
 
-          org.save((error) => {
-            if (error) {
-              M.log.error(error);
+          org.save((error2) => {
+            if (error2) {
+              M.log.error(error2);
               done();
             }
             done();
@@ -112,10 +112,10 @@ describe(M.getModuleName(module.filename), () => {
       chai.assert(error === null);
       User.findOne({
         username: M.config.test.username
-      }, (err, foundUser) => {
-        chai.expect(err).to.equal(null);
-        foundUser.remove((err2) => {
-          chai.expect(err2).to.equal(null);
+      }, (error2, foundUser) => {
+        chai.expect(error2).to.equal(null);
+        foundUser.remove((error3) => {
+          chai.expect(error3).to.equal(null);
           db.disconnect();
           done();
         });
@@ -147,9 +147,9 @@ function verifyProjectFieldMaxChar(done) {
   const newProject = new Project(projData);
 
   // Save project model object to database
-  newProject.save((err) => {
+  newProject.save((error) => {
     // Expected error thrown: 'Too many characters in username'
-    chai.expect(err.message).to.equal('Project validation failed: id: Too many characters in username');
+    chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username');
     done();
   });
 }
@@ -173,9 +173,9 @@ function createProject(done) {
     uid: `${id}:${org.id}`
   });
   // Save project model object to database
-  newProject.save((err) => {
+  newProject.save((error) => {
     // Check for no error
-    chai.expect(err).to.equal(null);
+    chai.expect(error).to.equal(null);
     done();
   });
 }
@@ -193,7 +193,7 @@ function softDeleteProject(done) {
 
   // Find project previously created in createProject test
   Project.findOne({ id: 'guardiansofgalaxy' })
-  .exec((err, proj) => {
+  .exec((error, proj) => {
     // Set project deleted field to true
     proj.deleted = true;
     // Save updated project to database
@@ -201,9 +201,9 @@ function softDeleteProject(done) {
       // Find previously updated project
       Project.findOne({
         id: proj.id
-      }, (err2, proj2) => {
+      }, (error2, proj2) => {
         // Check object fields were successfully updated for soft delete
-        chai.expect(err).to.equal(null);
+        chai.expect(error).to.equal(null);
         chai.expect(proj2.deleted).to.equal(true);
         chai.expect(proj2.deletedOn).to.not.equal(null);
         done();
@@ -218,9 +218,9 @@ function softDeleteProject(done) {
  */
 function deleteProject(done) {
   // Find and remove the project previously created in createProject test.
-  Project.findOneAndRemove({ id: 'guardiansofgalaxy' }, (err) => {
+  Project.findOneAndRemove({ id: 'guardiansofgalaxy' }, (error) => {
     // Check for no error
-    chai.expect(err).to.equal(null);
+    chai.expect(error).to.equal(null);
     done();
   });
 }
