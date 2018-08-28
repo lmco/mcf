@@ -94,7 +94,7 @@ describe(M.getModuleName(module.filename), () => {
           })
           .catch((firsterr) => {
             const error1 = JSON.parse(firsterr.message);
-            chai.expect(error1.description).to.equal(null);
+            chai.expect(error1.message).to.equal(null);
             done();
           });
         });
@@ -124,7 +124,7 @@ describe(M.getModuleName(module.filename), () => {
     })
     .catch((err2) => {
       const error2 = JSON.parse(err2.message);
-      chai.expect(error2.description).to.equal(null);
+      chai.expect(error2.message).to.equal(null);
       db.disconnect();
       done();
     });
@@ -214,9 +214,8 @@ function postBadProject(done) {
   },
   (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(json.description).to.equal('Project ID is not valid.');
-    chai.expect(json.message).to.equal('Bad Request');
     chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
@@ -241,9 +240,8 @@ function postBadOrg(done) {
   },
   (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(json.description).to.equal('Org not found.');
-    chai.expect(json.message).to.equal('Not Found');
     chai.expect(response.statusCode).to.equal(404);
+    chai.expect(json.message).to.equal('Not Found');
     done();
   });
 }
@@ -269,9 +267,8 @@ function confusingOrg(done) {
   },
   (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    chai.expect(json.description).to.equal('Project ID in the body does not match ID in the params.');
     chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
@@ -296,8 +293,8 @@ function postInvalidProject(done) {
   },
   (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
     chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

@@ -18,12 +18,12 @@ const chai = require('chai');
 const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
-const ElemController = M.require('controllers.element-controller');
-const User = M.require('models.user');
 const Element = M.require('models.element');
+const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -58,9 +58,9 @@ describe(M.getModuleName(module.filename), () => {
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
 
-    AuthController.authenticate(reqObj, resObj, (err) => {
+    AuthController.authenticate(reqObj, resObj, (error) => {
       const ldapuser = reqObj.user;
-      chai.expect(err).to.equal(null);
+      chai.expect(error).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
 
       // Find the user and update admin status
@@ -108,8 +108,8 @@ describe(M.getModuleName(module.filename), () => {
             chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
             done();
           })
-          .catch((error) => {
-            chai.expect(error.description).to.equal(null);
+          .catch((error2) => {
+            chai.expect(error2.message).to.equal(null);
             done();
           });
         });
@@ -131,17 +131,17 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(delUser2).to.equal('pepperpotts');
       User.findOne({
         username: M.config.test.username
-      }, (err, user) => {
-        chai.expect(err).to.equal(null);
-        user.remove((err2) => {
-          chai.expect(err2).to.equal(null);
+      }, (error, user) => {
+        chai.expect(error).to.equal(null);
+        user.remove((error2) => {
+          chai.expect(error2).to.equal(null);
           db.disconnect();
           done();
         });
       });
     })
     .catch((error) => {
-      chai.expect(error.description).to.equal(null);
+      chai.expect(error.message).to.equal(null);
       db.disconnect();
       done();
     });
@@ -149,7 +149,6 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a new project', createProject);
-  it('should create elements for the project', createElements);
   it('should throw an error saying the field cannot be updated', rejectImmutableField);
   it('should throw an error saying the field is not of type string', updateTypeError);
   it('should update a project', updateProjectName);
@@ -195,65 +194,25 @@ function createProject(done) {
   ProjController.createProject(adminUser, projData)
   .then((retProj) => ProjController.findProject(adminUser, 'starkhq', retProj.id))
   .then((proj) => {
+    // Set the file-global project
+    project = proj;
+
+    // Verify project was created successfully
     chai.expect(proj.id).to.equal('ironman');
     chai.expect(proj.name).to.equal('Iron man Suite');
     chai.expect(proj.custom.builtFor).to.equal('Tony');
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies elements created for the main project
- *  TODO: MBX-380 Create using element model, consider including in delete
- *        project test, Move to before()
- */
-function createElements(done) {
-  const elem0 = {
-    id: '0000',
-    name: 'smart missiles',
-    project: {
-      id: 'ironman',
-      org: {
-        id: 'starkhq'
-      }
-    },
-    type: 'Block'
-  };
-
-  // Create element0
-  ElemController.createElement(adminUser, elem0)
-  .then(() => {
-    const elem1 = {
-      id: '0001',
-      name: 'JARVIS',
-      project: {
-        id: 'ironman',
-        org: {
-          id: 'starkhq'
-        }
-      },
-      type: 'Block'
-    };
-    // Create and return element1
-    return ElemController.createElement(adminUser, elem1);
-  })
-  .then(() => {
-    done();
-  })
-  .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies project object cannot update immutable field.
- * Expected error thrown: 'Users cannot update [id] of Projects.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectImmutableField(done) {
   // Update project
@@ -265,15 +224,15 @@ function rejectImmutableField(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Users cannot update [id] of Projects.'
-    chai.expect(error.description).to.equal('Users cannot update [id] of Projects.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies user CANNOT update project with invalid project name.
- * Expected error thrown: 'The Project [name] is not of type String'
+ * Expected error thrown: 'Bad Request'
  */
 function updateTypeError(done) {
   // Update project
@@ -285,8 +244,8 @@ function updateTypeError(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'The Project [name] is not of type String.'
-    chai.expect(error.description).to.equal('The Project [name] is not of type String.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -304,7 +263,7 @@ function updateProjectName(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -326,7 +285,7 @@ function updateProjectObject(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -346,21 +305,20 @@ function createProject02(done) {
   ProjController.createProject(adminUser, projData)
   .then((proj) => {
     // Verfy project fields
-    project = proj;
     chai.expect(proj.id).to.equal('arcreactor');
     chai.expect(proj.name).to.equal('Arc Reactor');
     done();
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies project name does not contain periods.
- * Expected error thrown: 'Project name is not valid.'
+ * Expected error thrown: 'Bad Request'
  */
 function createPeriodName(done) {
   const projData = {
@@ -379,15 +337,15 @@ function createPeriodName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project name is not valid.'
-    chai.expect(error.description).to.equal('Project name is not valid.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies existing projects CANNOT be recreated.
- * Expected error thrown: 'Project already exists.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectDuplicateProjectId(done) {
   const projData = {
@@ -407,15 +365,15 @@ function rejectDuplicateProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project already exists.'
-    chai.expect(error.description).to.equal('Project already exists.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verfies user CANNOT create project with invalid ID.
- * Expected error thrown: 'Project ID is not valid.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectId(done) {
   const projData = {
@@ -436,14 +394,14 @@ function rejectInvalidProjectId(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Project ID is not valid.'
-    chai.expect(error.description).to.equal('Project ID is not valid.');
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies user CANNOT create a project without name input.
- * Expected error thrown: 'Project name is not valid.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectName(done) {
   const projData = {
@@ -463,15 +421,15 @@ function rejectInvalidProjectName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project name is not valid.'
-    chai.expect(error.description).to.equal('Project name is not valid.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies user CANNOT create project without organization id.
- * Expected error thrown: 'Org not found.'
+ * Expected error thrown: 'Not Found'
  */
 function rejectInvalidOrgId(done) {
   const projData = {
@@ -491,8 +449,8 @@ function rejectInvalidOrgId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Org not found.'
-    chai.expect(error.description).to.equal('Org not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
@@ -501,7 +459,7 @@ function rejectInvalidOrgId(done) {
  * @description Verifies non-admin CANNOT create a project.
  * Note: non-admin is NOT a site wide admin
  *       non-admin does NOT have write permissions with Org
- * Expected error thrown: 'User does not have permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectNonAdminCreateProject(done) {
   const projData = {
@@ -521,8 +479,8 @@ function rejectNonAdminCreateProject(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User does not have permissions.'
-    chai.expect(error.description).to.equal('User does not have permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
@@ -544,14 +502,14 @@ function findProj(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies NONEXISTENT project does not exist.
- * Expected error thrown: 'Project not found.'
+ * Expected error thrown: 'Not Found'
  */
 function rejectFindNonexistentProject(done) {
   const orgId = 'starkhq';
@@ -566,8 +524,8 @@ function rejectFindNonexistentProject(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project not found.'
-    chai.expect(error.description).to.equal('Project not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
@@ -576,7 +534,7 @@ function rejectFindNonexistentProject(done) {
  * @description Verifies non-admin user CANNOT find project
  * Note: non-admin is NOT a site wide admin
  *       non-admin does NOT have read permissions with Org
- * Expected error thrown: 'User does not have permission.'
+ * Expected error thrown: 'Unauthorized'
  */
 function nonAUser(done) {
   const orgId = 'starkhq';
@@ -591,8 +549,8 @@ function nonAUser(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User does not have permission.'
-    chai.expect(error.description).to.equal('User does not have permission.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
@@ -624,14 +582,14 @@ function updateProj(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies immutable project Id CANNOT be updated.
- * Expected error thrown: 'Users cannot update [id] of Projects.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectProjectId(done) {
   const orgId = 'starkhq';
@@ -649,8 +607,8 @@ function rejectProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Users cannot update [id] of Projects.'
-    chai.expect(error.description).to.equal('Users cannot update [id] of Projects.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -659,7 +617,7 @@ function rejectProjectId(done) {
  * @description Verifies non-admin CANNOT update project.
  * Note: non-admin is NOT a site wide admin
  *       non-admin does NOT have admin permissions with project
- * Expected error thrown: 'User does not have permission.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectNonAdminProjectUpdate(done) {
   const orgId = 'starkhq';
@@ -677,8 +635,8 @@ function rejectNonAdminProjectUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User does not have permission.'
-    chai.expect(error.description).to.equal('User does not have permission.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
@@ -698,7 +656,7 @@ function findPerm(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -720,18 +678,27 @@ function setPerm(done) { // eslint-disable-line no-unused-vars
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies project NOT found after soft-deletion.
- * Expected error thrown: 'Project not found.'
+ * Expected error thrown: 'Not Found'
  */
 function softDeleteProject(done) {
-  // Remove project
-  ProjController.removeProject(adminUser, org.id, 'ironman', { soft: true })
+  // Create an element via the Element model
+  const elem = new Element.Block({
+    id: '0000',
+    uid: utils.createUID(org.id, project.id, '0000'),
+    project: project._id
+  });
+
+  // Save the element
+  elem.save()
+  // Soft-delete the project
+  .then(() => ProjController.removeProject(adminUser, org.id, 'ironman', { soft: true }))
   // Find project
   .then(() => ProjController.findProject(adminUser, org.id, 'ironman'))
   .then(() => {
@@ -741,18 +708,18 @@ function softDeleteProject(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project not found.'
-    chai.expect(error.description).to.equal('Project not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
 
 /**
  * @description Verifies project NOT found after deletion.
- * Expected error thrown: 'Project not found.'
+ * Expected error thrown: 'Not Found'
  */
 function deleteProject(done) {
-  // Remove project
+  // Hard-delete the project
   ProjController.removeProject(adminUser, org.id, 'ironman', { soft: false })
   .then(() => ProjController.findProject(adminUser, org.id, 'ironman'))
   .then(() => {
@@ -762,8 +729,8 @@ function deleteProject(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project not found.'
-    chai.expect(error.description).to.equal('Project not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
 
     // Check if elements still exist
     // Note: Elements are deleted with projects
@@ -778,6 +745,7 @@ function deleteProject(done) {
 
 /**
  * @description Verifies project NOT found after deletion.
+ * Expected error thrown: 'Not Found'
  */
 function deleteProject02(done) {
   // Remove project
@@ -790,8 +758,8 @@ function deleteProject02(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project not found.'
-    chai.expect(error.description).to.equal('Project not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }

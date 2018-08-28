@@ -63,11 +63,33 @@ function stringKeyMongoTest(done) {
 /**
  * @description Tests the html sanitation with html input.
  * Expected to change the html input.
+ * Same thing occurring in a test more than once
  */
 function htmlTest(done) {
-  // TODO: sanitize against more special characters (MBX-368)
-  const htmlSan = sani.html('<script>');
-  chai.expect(htmlSan).to.equal('&lt;script&gt;');
+  const htmlLessThan = sani.html('<script>');
+  const htmlQuote = sani.html("'OR 1=1");
+  const htmlDoubleQuote = sani.html('"double it up');
+  const htmlTickEqual = sani.html('`OR 1=1');
+  const htmlNull = sani.html(null);
+  const htmlBool = sani.html(false);
+  const htmlSlash = sani.html('/p');
+  const htmlBackSlash = sani.html('\\p');
+  const htmlPercent = sani.html('100%');
+  const htmlParentheses = sani.html('(inside)');
+  const htmlNum = sani.html('#hashslingingslasher');
+  const htmlHat = sani.html('3^2');
+  chai.expect(htmlLessThan).to.equal('&lt;script&gt;');
+  chai.expect(htmlQuote).to.equal('&#039;OR 1&equals;1');
+  chai.expect(htmlDoubleQuote).to.equal('&quot;double it up');
+  chai.expect(htmlTickEqual).to.equal('&grave;OR 1&equals;1');
+  chai.expect(htmlNull).to.equal(null);
+  chai.expect(htmlBool).to.equal(false);
+  chai.expect(htmlSlash).to.equal('&sol;p');
+  chai.expect(htmlBackSlash).to.equal('&bsol;p');
+  chai.expect(htmlPercent).to.equal('100&percnt;');
+  chai.expect(htmlParentheses).to.equal('&lpar;inside&rpar;');
+  chai.expect(htmlNum).to.equal('&num;hashslingingslasher');
+  chai.expect(htmlHat).to.equal('3&Hat;2');
   done();
 }
 
@@ -82,11 +104,10 @@ function sanitizeHtmlObject(done) {
     admin: true,
     email: null
   };
-  // TODO: add tests for more special characters (MBX-368)
   const htmlSan = sani.html(data);
   chai.expect(htmlSan.name).to.equal('Steve Rogers');
   chai.expect(htmlSan.fname).to.equal('&lt;script&gt;');
-  chai.expect(htmlSan.lname).to.equal('&lt;/script&gt;');
+  chai.expect(htmlSan.lname).to.equal('&lt;&sol;script&gt;');
   chai.expect(htmlSan.admin).to.equal(true);
   chai.expect(htmlSan.email).to.equal(null);
   done();
@@ -96,8 +117,8 @@ function sanitizeHtmlObject(done) {
  * @description Should attempt to sanitize &amp; and other allowed exceptions.
  */
 function sanitizeAllowedCharacters(done) {
-  const s = 'this string has &amp; and &lt; but also &sample';
-  const expected = 'this string has &amp; and &lt; but also &amp;sample';
+  const s = 'this string has &amp;, &lt;, &nbsp; and  but also &sample';
+  const expected = 'this string has &amp;, &lt;, &nbsp; and  but also &amp;sample';
   const htmlSan = sani.html(s);
   chai.expect(htmlSan).to.equal(expected);
   done();

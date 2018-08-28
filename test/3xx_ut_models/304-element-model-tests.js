@@ -27,12 +27,12 @@
 const chai = require('chai');
 
 // Load MBEE modules
-const User = M.require('models.user');
+const Element = M.require('models.element');
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
-const Element = M.require('models.element');
-const db = M.require('lib/db');
+const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
+const db = M.require('lib/db');
 const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
@@ -63,8 +63,8 @@ describe(M.getModuleName(module.filename), () => {
     // TODO: Create a user and set them to an admin of the Organization and (MBX-374)
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      chai.expect(err).to.equal(null);
+    AuthController.authenticate(reqObj, resObj, (error) => {
+      chai.expect(error).to.equal(null);
       chai.expect(reqObj.user.username).to.equal(M.config.test.username);
       User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true }, { new: true },
         (updateErr, updatedUser) => {
@@ -142,10 +142,10 @@ describe(M.getModuleName(module.filename), () => {
         // TODO: remove user created in before() (MBX-374)
         User.findOne({
           username: M.config.test.username
-        }, (err, foundUser) => {
-          chai.expect(err).to.equal(null);
-          foundUser.remove((err2) => {
-            chai.expect(err2).to.equal(null);
+        }, (error, foundUser) => {
+          chai.expect(error).to.equal(null);
+          foundUser.remove((error2) => {
+            chai.expect(error2).to.equal(null);
             db.disconnect();
             done();
           });
@@ -183,9 +183,9 @@ function createElement(done) {
     parent: null
   });
   // Save block element model object to database
-  newElement.save((err, createdElement) => {
+  newElement.save((error, createdElement) => {
     // Check for no error
-    chai.expect(err).to.equal(null);
+    chai.expect(error).to.equal(null);
     // Check block element saved correctly
     chai.expect(createdElement.uid).to.equal('avengers:timeloop:0000');
     chai.expect(createdElement.id).to.equal('0000');
@@ -201,9 +201,9 @@ function deleteElement(done) {
   Element.Element.findOneAndRemove({
     uid: 'avengers:timeloop:0000'
   })
-  .exec((err) => {
+  .exec((error) => {
     // Check for no error
-    chai.expect(err).to.equal(null);
+    chai.expect(error).to.equal(null);
     done();
   });
 }
@@ -222,9 +222,9 @@ function createRootPackage(done) {
   });
 
   // Save the root package element to the database
-  newPackage.save((err) => {
+  newPackage.save((error) => {
     // Check for no error
-    chai.expect(err).to.equal(null);
+    chai.expect(error).to.equal(null);
 
     // Find the root package element
     Element.Package.find({
@@ -440,9 +440,9 @@ function softDeleteRootPackage(done) {
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
   // Find the package based on uid
   Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
-  .exec((err, elem) => {
+  .exec((error, elem) => {
     // Expect no error
-    chai.expect(err).to.equal(null);
+    chai.expect(error).to.equal(null);
 
     // Set deleted field to true
     elem.deleted = true;
@@ -477,9 +477,9 @@ function deleteRootPackage(done) {
   Element.Package.findOneAndRemove({
     uid: 'avengers:timeloop:0001'
   })
-  .exec((err) => {
+  .exec((error) => {
     // Expect no error
-    chai.expect(err).to.equal(null);
+    chai.expect(error).to.equal(null);
     done();
   });
 }
