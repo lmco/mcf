@@ -63,11 +63,11 @@ describe(M.getModuleName(module.filename), () => {
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
 
-    AuthController.authenticate(reqObj, resObj, (err) => {
+    AuthController.authenticate(reqObj, resObj, (error) => {
       // After authentication, user is created
 
       const ldapuser = reqObj.user; // TODO: MBX-385 not LDAP user
-      chai.expect(err).to.equal(null);
+      chai.expect(error).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
 
       // Make the test user admin
@@ -120,10 +120,10 @@ describe(M.getModuleName(module.filename), () => {
       // close the db connection and finish
       User.findOne({
         username: M.config.test.username
-      }, (err, foundUser) => {
-        chai.expect(err).to.equal(null);
-        foundUser.remove((err2) => {
-          chai.expect(err2).to.equal(null);
+      }, (error, foundUser) => {
+        chai.expect(error).to.equal(null);
+        foundUser.remove((error2) => {
+          chai.expect(error2).to.equal(null);
           db.disconnect();
           done();
         });
@@ -188,7 +188,7 @@ function createPackage(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -207,7 +207,7 @@ function findElement(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -247,7 +247,7 @@ function createChildElement(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -256,7 +256,7 @@ function createChildElement(done) {
 /**
  * @description Verify that element's parent MUST be a package by creating
  * an element with a parent of type Block and expecting failure.
- * Expect error thrown to be: 'Parent element is not of type Package.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectElementInvalidParentType(done) {
   // New element data
@@ -282,8 +282,8 @@ function rejectElementInvalidParentType(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Parent element is not of type Package.'
-    chai.expect(error.description).to.equal('Parent element is not of type Package.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -318,7 +318,7 @@ function createBlockWithUUID(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -353,13 +353,14 @@ function createRelationship(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies UUID is unique.
+ * Expected error thrown: 'Bad Request'
  */
 function rejectCreateElementExistingUUID(done) {
   // Element data
@@ -379,15 +380,15 @@ function rejectCreateElementExistingUUID(done) {
 
   // Create the element, expected to fail
   ElemController.createElement(user, newElement)
-  .then((element) => {
+  .then(() => {
     // Expect createElement() to fail
     // Element create succeeded, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Element already exists.'
-    chai.expect(error.description).to.equal('Element already exists.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -405,7 +406,7 @@ function findElements(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -455,13 +456,14 @@ function updateElement(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies an element can be soft-deleted.
+ * Expected error thrown: 'Not Found'
  */
 function softDeleteElement(done) {
   // Soft delete the element
@@ -479,8 +481,8 @@ function softDeleteElement(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown by findElement(): 'No elements found.'
-    chai.expect(error.description).to.equal('No elements found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
 
     // Find element again
     // NOTE: The 'true' parameter tells the function to include soft-deleted
@@ -493,7 +495,7 @@ function softDeleteElement(done) {
     })
     .catch((error2) => {
       // Expect no error
-      chai.expect(error2.description).to.equal(null);
+      chai.expect(error2.message).to.equal(null);
       done();
     });
   });
@@ -501,6 +503,7 @@ function softDeleteElement(done) {
 
 /**
  * @description Verifies an element can be hard-deleted.
+ * Expected error thrown: 'Not Found'
  */
 function hardDeleteElement(done) {
   // Hard delete the element
@@ -514,8 +517,8 @@ function hardDeleteElement(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'No elements found.'
-    chai.expect(error.description).to.equal('No elements found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
@@ -537,7 +540,7 @@ function softDeleteAllElements(done) {
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -545,6 +548,7 @@ function softDeleteAllElements(done) {
 /**
  * @description Verifies that findElements() does not return soft-deleted
  * elements by default.
+ * Expected error thrown: 'Not Found'
  */
 function verifyFindNonSoftDelElem(done) {
   // Find elements which have NOT been soft-deleted
@@ -556,8 +560,8 @@ function verifyFindNonSoftDelElem(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'No elements found.'
-    chai.expect(error.description).to.equal('No elements found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
@@ -565,6 +569,7 @@ function verifyFindNonSoftDelElem(done) {
 /**
  * @description Verifies hard-delete of multiple elements by deleting
  * all elements in a project.
+ * Expected error thrown: 'Not Found'
  */
 function hardDeleteAllElements(done) {
   // Delete all elements in project
@@ -577,8 +582,8 @@ function hardDeleteAllElements(done) {
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'No elements found.'
-    chai.expect(error.description).to.equal('No elements found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
