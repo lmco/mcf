@@ -42,10 +42,7 @@ const test = M.config.test;
 let org = null;
 let user = null;
 
-
 /* --------------------( Main )-------------------- */
-
-
 describe(M.getModuleName(module.filename), () => {
   /**
    * Before: run before all tests
@@ -417,9 +414,7 @@ function deleteProject02(done) {
   });
 }
 
-
 /* ----------( Helper Functions )----------*/
-
 /**
  * Produces and returns an object containing common request headers.
  */

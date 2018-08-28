@@ -37,7 +37,7 @@ const mockExpress = M.require('lib.mock-express');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 let org = null;
-let userAdmin = null;
+let adminUser = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -68,24 +68,26 @@ describe(M.getModuleName(module.filename), () => {
 
     // TODO: Create a user and set them to an admin of the Organization and (MBX-373)
     // Project. NOT a global admin.
+    // Authenicate user
+    // Note: non-admin user is created during authenticate if NOT exist. (ldap only)
     AuthController.authenticate(reqObj, resObj, (err) => {
       chai.expect(err).to.equal(null);
       chai.expect(reqObj.user.username).to.equal(M.config.test.username);
 
       // TODO - consider using an .exec rather than callback to make this cleaner (MBX-373)
       User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
+        (updateErr, updatedUser) => {
           chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-          userAdmin = userUpdate;
+          chai.expect(updatedUser).to.not.equal(null);
+          adminUser = updatedUser;
           // Create a parent organization before creating any projects
           org = new Org({
             id: 'avengers',
             name: 'Age of Ultron',
             permissions: {
-              admin: [userAdmin._id],
-              write: [userAdmin._id],
-              read: [userAdmin._id]
+              admin: [adminUser._id],
+              write: [adminUser._id],
+              read: [adminUser._id]
             }
           });
 
@@ -166,9 +168,9 @@ function createProject(done) {
     name: 'Guardians of the Galaxy',
     org: org._id,
     permissions: {
-      admin: [userAdmin._id],
-      write: [userAdmin._id],
-      read: [userAdmin._id]
+      admin: [adminUser._id],
+      write: [adminUser._id],
+      read: [adminUser._id]
     },
     uid: `${id}:${org.id}`
   });

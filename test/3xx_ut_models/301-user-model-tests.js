@@ -64,7 +64,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a user and save it to the database using the User model.
+ * @description Creates a user via model and save it to the database.
  */
 function createUser(done) {
   // Create a new User object
