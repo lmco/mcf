@@ -684,7 +684,7 @@ class ApiController {
 
     // Find User
     UserController.findUser(username)
-    .then((user) => ProjectController.findPermissions(req.user, orgID, projectID, user))
+    .then((user) => ProjectController.findPermissions(req.user, user, orgID, projectID))
     .then((permissions) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(ApiController.formatJSON(permissions));
