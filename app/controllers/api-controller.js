@@ -162,7 +162,6 @@ class ApiController {
       // Make sure we only return the orgs public data
       const orgsPublicData = [];
       for (let i = 0; i < orgs.length; i++) {
-        UserController.getPublicUserData(orgs[i]);
         orgsPublicData.push(orgs[i].getPublicData());
       }
       // Return 200 and the orgs
@@ -231,7 +230,6 @@ class ApiController {
 
     OrgController.findOrg(req.user, orgid)
     .then((org) => {
-      UserController.getPublicUserData(org);
       res.header('Content-Type', 'application/json');
       return res.status(200).send(ApiController.formatJSON(org.getPublicData()));
     })
@@ -479,12 +477,13 @@ class ApiController {
     // Call project find with user and organization ID
     ProjectController.findProjects(req.user, orgid)
     .then((projects) => {
+      const projectPublicData = [];
       for (let i = 0; i < projects.length; i++) {
-        UserController.getPublicUserData(projects[i]);
+        projectPublicData.push(projects[i].getPublicData());
       }
       // Return project
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(ApiController.formatJSON(projects));
+      return res.status(200).send(ApiController.formatJSON(projectPublicData));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -545,9 +544,8 @@ class ApiController {
 
     ProjectController.findProject(req.user, orgid, projectid, true)
     .then((project) => {
-      UserController.getPublicUserData(project);
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(ApiController.formatJSON(project));
+      return res.status(200).send(ApiController.formatJSON(project.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }

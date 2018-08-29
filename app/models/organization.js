@@ -165,12 +165,11 @@ OrganizationSchema.virtual('projects', {
   * Returns the orgs's Public data.
   */
 OrganizationSchema.methods.getPublicData = function() {
-  return {
-    id: this.id,
-    name: this.name,
-    projects: this.projects,
-    permissions: this.permissions
-  };
+  this.permissions.read = this.permissions.read.map(u => u.getPublicData());
+  this.permissions.write = this.permissions.write.map(u => u.getPublicData());
+  this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
+
+  return this;
 };
 
 /**
