@@ -31,7 +31,7 @@ const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-let user = null;
+let adminUser = null;
 let org = null;
 let proj = null;
 
@@ -44,7 +44,7 @@ let proj = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * This function runs before all the tests in this test suite.
+   * After: Connect to database. Create an admin user, organization, and project
    * TODO: MBX-384 What does this function do?
    */
   // TODO: MBX-346 Create a common before function
@@ -63,9 +63,9 @@ describe(M.getModuleName(module.filename), () => {
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
 
+    // Authenicate user
+    // Note: non-admin user is created during authenticate if NOT exist.(ldap only)
     AuthController.authenticate(reqObj, resObj, (error) => {
-      // After authentication, user is created
-
       const ldapuser = reqObj.user; // TODO: MBX-385 not LDAP user
       chai.expect(error).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
@@ -78,20 +78,20 @@ describe(M.getModuleName(module.filename), () => {
       }, {
         new: true
       },
-      (updateErr, userUpdate) => {
+      (updateErr, updatedUser) => {
         // Set global user to updated user
-        user = userUpdate;
+        adminUser = updatedUser;
         chai.expect(updateErr).to.equal(null);
-        chai.expect(userUpdate).to.not.equal(null);
+        chai.expect(updatedUser).to.not.equal(null);
         // Create an organization
         const orgData = {
           id: 'asgard',
           name: 'Asgard'
         };
-        OrgController.createOrg(user, orgData)
+        OrgController.createOrg(adminUser, orgData)
         .then((retOrg) => {
           org = retOrg;
-          return ProjController.createProject(user, {
+          return ProjController.createProject(adminUser, {
             id: 'thor',
             name: 'Thor Odinson',
             org: { id: org.id }
@@ -110,11 +110,12 @@ describe(M.getModuleName(module.filename), () => {
   }); // END: before()
 
   /**
-   * This function runs after all the tests are done
+   * After: Remove Organization, including its projects.
+   * Close database connection.
    */
   after((done) => {
     // Remove the project and org together
-    OrgController.removeOrg(user, org.id, { soft: false })
+    OrgController.removeOrg(adminUser, org.id, { soft: false })
     .then(() => {
       // Once db items are removed, remove reqUser
       // close the db connection and finish
@@ -178,7 +179,7 @@ function createPackage(done) {
   };
 
   // Create the element
-  ElemController.createElement(user, newElement)
+  ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Element was created, verify its properties
     chai.expect(retElem.id).to.equal('elem0');
@@ -198,7 +199,7 @@ function createPackage(done) {
  */
 function findElement(done) {
   // Find the element we just created
-  ElemController.findElement(user, org.id, proj.id, 'elem0')
+  ElemController.findElement(adminUser, org.id, proj.id, 'elem0')
   .then((retElem) => {
     // Element was found, verify properties
     chai.expect(retElem.name).to.equal('Mjolnir');
@@ -232,13 +233,13 @@ function createChildElement(done) {
   };
 
   // Create the element
-  ElemController.createElement(user, newElement)
+  ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Element was created, verify its properties
     chai.expect(retElem.id).to.equal('elem1');
     chai.expect(retElem.parent).to.not.equal(null);
     // Find the parent element
-    return ElemController.findElement(user, org.id, proj.id, 'elem0');
+    return ElemController.findElement(adminUser, org.id, proj.id, 'elem0');
   })
   .then((retElem2) => {
     // Expect the parent element to contain the new element
@@ -274,7 +275,7 @@ function rejectElementInvalidParentType(done) {
   };
 
   // Create the new element, expected to fail
-  ElemController.createElement(user, newElement)
+  ElemController.createElement(adminUser, newElement)
   .then(() => {
     // Expected createElement() to fail
     // Element was created, force test to fail
@@ -308,7 +309,7 @@ function createBlockWithUUID(done) {
   };
 
   // Create the element
-  ElemController.createElement(user, newElement)
+  ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Expect element create to succeed, verify element properties
     chai.expect(retElem.id).to.equal('elem2');
@@ -343,7 +344,7 @@ function createRelationship(done) {
   };
 
   // Create the relationship
-  ElemController.createElement(user, newElement)
+  ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Expect createElement() to succeed and verify element properties
     chai.expect(retElem.id).to.equal('rel1');
@@ -379,8 +380,13 @@ function rejectCreateElementExistingUUID(done) {
   };
 
   // Create the element, expected to fail
+<<<<<<< HEAD
+  ElemController.createElement(adminUser, newElement)
+  .then((element) => {
+=======
   ElemController.createElement(user, newElement)
   .then(() => {
+>>>>>>> prc-001
     // Expect createElement() to fail
     // Element create succeeded, force test to fail
     chai.assert(true === false);
@@ -398,7 +404,7 @@ function rejectCreateElementExistingUUID(done) {
  */
 function findElements(done) {
   // Lookup all elements in a project
-  ElemController.findElements(user, org.id, proj.id)
+  ElemController.findElements(adminUser, org.id, proj.id)
   .then((retElems) => {
     // Expect 4 elements to be found
     chai.expect(retElems.length).to.equal(4);
@@ -416,7 +422,7 @@ function findElements(done) {
  */
 function findElementByUUID(done) {
   // Lookup the element
-  ElemController.findElement(user, org.id, proj.id, 'f239c90b-8cc2-475c-985c-ef653dc183b9')
+  ElemController.findElement(adminUser, org.id, proj.id, 'f239c90b-8cc2-475c-985c-ef653dc183b9')
   .then((element) => {
     // Expect element to be found
     chai.expect(element.uuid).to.equal('f239c90b-8cc2-475c-985c-ef653dc183b9');
@@ -434,7 +440,7 @@ function findElementByUUID(done) {
  */
 function updateElement(done) {
   // Update the element with new data
-  ElemController.updateElement(user, org.id, proj.id, 'elem0', {
+  ElemController.updateElement(adminUser, org.id, proj.id, 'elem0', {
     name: 'Thors Hammer',
     documentation: 'This is some different documentation',
     custom: {
@@ -442,7 +448,7 @@ function updateElement(done) {
       marvel: false
     }
   })
-  .then(() => ElemController.findElement(user, org.id, proj.id, 'elem0'))
+  .then(() => ElemController.findElement(adminUser, org.id, proj.id, 'elem0'))
   .then((retElem) => {
     // Expect findElement() to succeed
     // Verify the found element's properties
@@ -467,12 +473,12 @@ function updateElement(done) {
  */
 function softDeleteElement(done) {
   // Soft delete the element
-  ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: true })
+  ElemController.removeElement(adminUser, org.id, proj.id, 'elem0', { soft: true })
   .then((retElem) => {
     // Verify that the element's deleted field is now true
     chai.expect(retElem.deleted).to.equal(true);
     // Try to find the element and expect it to fail
-    return ElemController.findElement(user, org.id, proj.id, 'elem0');
+    return ElemController.findElement(adminUser, org.id, proj.id, 'elem0');
   })
   .then(() => {
     // Expected findElement() to fail
@@ -487,7 +493,7 @@ function softDeleteElement(done) {
     // Find element again
     // NOTE: The 'true' parameter tells the function to include soft-deleted
     // elements in the results
-    ElemController.findElement(user, org.id, proj.id, 'elem0', true)
+    ElemController.findElement(adminUser, org.id, proj.id, 'elem0', true)
     .then((retElem2) => {
       // Find succeded, verify element properties
       chai.expect(retElem2.id).to.equal('elem0');
@@ -507,9 +513,9 @@ function softDeleteElement(done) {
  */
 function hardDeleteElement(done) {
   // Hard delete the element
-  ElemController.removeElement(user, org.id, proj.id, 'elem0', { soft: false })
+  ElemController.removeElement(adminUser, org.id, proj.id, 'elem0', { soft: false })
   // Then search for the element (including soft-deleted elements)
-  .then(() => ElemController.findElement(user, org.id, proj.id, 'elem0', true))
+  .then(() => ElemController.findElement(adminUser, org.id, proj.id, 'elem0', true))
   .then(() => {
     // Expect no element found
     // Element was found, force test to fail
@@ -529,9 +535,9 @@ function hardDeleteElement(done) {
  */
 function softDeleteAllElements(done) {
   // Delete all elements in project
-  ElemController.removeElements(user, org.id, proj.id, { soft: true })
+  ElemController.removeElements(adminUser, org.id, proj.id, { soft: true })
   // Find all existing elements in project, including soft-deleted elements
-  .then(() => ElemController.findElements(user, org.id, proj.id, true))
+  .then(() => ElemController.findElements(adminUser, org.id, proj.id, true))
   .then((retElems) => {
     // Find succeeded, verify elements were returned
     chai.expect(retElems.length).to.equal(3);
@@ -552,7 +558,7 @@ function softDeleteAllElements(done) {
  */
 function verifyFindNonSoftDelElem(done) {
   // Find elements which have NOT been soft-deleted
-  ElemController.findElements(user, org.id, proj.id)
+  ElemController.findElements(adminUser, org.id, proj.id)
   .then(() => {
     // Expect no elements found
     // Elements were found, force test to fail
@@ -573,8 +579,8 @@ function verifyFindNonSoftDelElem(done) {
  */
 function hardDeleteAllElements(done) {
   // Delete all elements in project
-  ElemController.removeElements(user, org.id, proj.id, { soft: false })
-  .then(() => ElemController.findElements(user, org.id, proj.id))
+  ElemController.removeElements(adminUser, org.id, proj.id, { soft: false })
+  .then(() => ElemController.findElements(adminUser, org.id, proj.id))
   .then(() => {
     // Expect no elements found
     // Elements were found, force test to fail

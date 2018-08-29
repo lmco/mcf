@@ -44,7 +44,7 @@ const test = M.config.test;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests. Create the requesting user.
+   * Before: Run before all tests. Find user and evaluate to admin.
    */
   before((done) => {
     db.connect();
@@ -60,12 +60,13 @@ describe(M.getModuleName(module.filename), () => {
     const resObj = mockExpress.getRes();
 
     // Authenticate User
+    // Note: non-admin user is created during authenticate if NOT exist.(ldap only)
     AuthController.authenticate(reqObj, resObj, (err) => {
       // Expect no error
       chai.expect(err).to.equal(null);
       chai.expect(reqObj.user.username).to.equal(M.config.test.username);
 
-      // Fin the user and update the admin status
+      // Find the user and update the admin status
       User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
           // Setting it equal to global variable
