@@ -20,14 +20,22 @@
 
 /* LM light theme colors */
 $lm-light-background: #FFF;
-$lm-light-color: #333; 
+$lm-light-color: #333;
 
 /* LM dark theme colors*/
 $lm-dark-background: #333;
-$lm-dark-color: #FFF; 
+$lm-dark-color: #FFF;
 
 /* Swagger Colors */
 $swagger-border-color-get:      #9a9a9a;
 $swagger-border-color-post:     #9a9a9a;
 $swagger-border-color-put:      #9a9a9a;
 $swagger-border-color-delete:   #9a9a9a;
+$swagger-border-color-patch:    #9a9a9a;
+
+
+$swagger-background-color-get:      #f8f8f8;
+$swagger-background-color-post:     #f8f8f8;
+$swagger-background-color-put:      #f8f8f8;
+$swagger-background-color-delete:   #f8f8f8;
+$swagger-background-color-patch:    #f8f8f8;

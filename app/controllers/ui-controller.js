@@ -47,8 +47,7 @@ class UiController {
    */
 
   static home(req, res) {
-    return utils.render(req, res, {
-      name: 'home',
+    return utils.render(req, res, 'home', {
       title: 'MBEE | Model-Based Engineering Environment'
     });
   }
@@ -61,8 +60,7 @@ class UiController {
    */
 
   static mbee(req, res) {
-    return utils.render(req, res, {
-      name: 'mbee',
+    return utils.render(req, res, 'mbee', {
       org: sani.sanitize(req.params.org),
       project: sani.sanitize(req.params.project),
       title: 'MBEE | Model-Based Engineering Environment'
@@ -77,8 +75,7 @@ class UiController {
    */
 
   static admin(req, res) {
-    return utils.render(req, res, {
-      name: 'admin',
+    return utils.render(req, res, 'admin', {
       title: 'Admin | Model-Based Engineering Environment'
     });
   }
@@ -107,11 +104,9 @@ class UiController {
    * @description Renders the swagger doc.
    */
   static swaggerDoc(req, res) {
-    return utils.render(req, res, {
-      name: 'swagger',
+    return utils.render(req, res, 'swagger', {
       swagger: UiController.swaggerSpec(),
-      user: null,
-      title: 'MBEE API Documentation'
+      title: 'API Documentation | Model-Based Engineering Environment'
     });
   }
 
@@ -135,9 +130,7 @@ class UiController {
         req.user = user;
       }
       // Disables because database document is being directly used
-      return utils.render(req, res, {
-        name: 'about',
-        user: req.user,
+      return utils.render(req, res, 'about', {
         info: {
           version: M.version4
         },
@@ -156,9 +149,7 @@ class UiController {
     }
     const page = sani.html(req.params.page);
     // renter the page
-    return utils.render(req, res, {
-      name: 'fm',
-      user: (req.user) ? req.user : '',
+    return utils.render(req, res, 'fm', {
       content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8')
     });
   }
@@ -173,9 +164,7 @@ class UiController {
     }
     const page = sani.html(req.params.page);
     // renter the page
-    return utils.render(req, res, {
-      name: 'jsdoc',
-      user: (req.user) ? req.user : '',
+    return utils.render(req, res, 'jsdoc', {
       content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8')
     });
   }
@@ -195,9 +184,7 @@ class UiController {
     }
 
     // render the login page
-    return utils.render(req, res, {
-      name: 'login',
-      user: '',
+    return utils.render(req, res, 'login', {
       title: 'Login | Model-Based Engineering Environment',
       next: next,
       err: req.flash('loginError')
