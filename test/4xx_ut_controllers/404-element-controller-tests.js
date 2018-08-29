@@ -380,13 +380,8 @@ function rejectCreateElementExistingUUID(done) {
   };
 
   // Create the element, expected to fail
-<<<<<<< HEAD
-  ElemController.createElement(adminUser, newElement)
-  .then((element) => {
-=======
   ElemController.createElement(user, newElement)
   .then(() => {
->>>>>>> prc-001
     // Expect createElement() to fail
     // Element create succeeded, force test to fail
     chai.assert(true === false);
