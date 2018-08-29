@@ -31,6 +31,7 @@ const Org = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
 const db = M.require('lib/db');
+const utils = M.require('lib/utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -117,13 +118,73 @@ describe(M.getModuleName(module.filename), () => {
 
   // TODO: Add more tests for find, update, and permission tests. (MBX-373)
   /* Execute the tests */
-  it('should fail to attempt to create a project with a long ID', verifyProjectFieldMaxChar);
   it('should create a project', createProject);
-  it('should soft delete a project', softDeleteProject);
+  it('should update a project', updateProject);
   it('should delete a project', deleteProject);
+  it('should fail creating a project with a long ID', verifyProjectFieldMaxChar);
 });
 
 /* --------------------( Tests )-------------------- */
+/**
+ * @description Creates a project using the project model and saves it to the
+ * database.
+ */
+function createProject(done) {
+  // Create a project model object
+  const newProject = new Project({
+    id: 'guardiansofgalaxy',
+    name: 'Guardians of the Galaxy',
+    org: org._id,
+    permissions: {
+      admin: [user._id],
+      write: [user._id],
+      read: [user._id]
+    },
+    uid: utils.createUID(org.id, 'guardiansofgalaxy')
+  });
+  // Save project model object to database
+  newProject.save((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates a projects name
+ */
+function updateProject(done) {
+  // Find and update project previously created in createProject test
+  Project.findOneAndUpdate({
+    id: 'guardiansofgalaxy' },
+  { name: 'Guardians of the Galaxy 2' })
+  // Find previously updated project
+  .then(() => Project.findOne({ id: 'guardiansofgalaxy' }))
+  .then((proj) => {
+    // Ensure project name was successfully updated
+    chai.expect(proj.name).to.equal('Guardians of the Galaxy 2');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Hard deletes the project previously created in createProject
+ * test.
+ */
+function deleteProject(done) {
+  // Find and remove the project previously created in createProject test.
+  Project.findOneAndRemove({ id: 'guardiansofgalaxy' }, (error) => {
+    // Check for no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
 /**
  * @description Verifies invalid field string with over 36 characters when creating a project.
  * Expected error thrown: 'Too many characters in username'
@@ -142,77 +203,6 @@ function verifyProjectFieldMaxChar(done) {
   newProject.save((error) => {
     // Expected error thrown: 'Too many characters in username'
     chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username');
-    done();
-  });
-}
-
-/**
- * @description Creates a Project using the Project model and saves it to the
- * database.
- */
-function createProject(done) {
-  // Create a project model object
-  const id = 'guardiansofgalaxy';
-  const newProject = new Project({
-    id: id,
-    name: 'Guardians of the Galaxy',
-    org: org._id,
-    permissions: {
-      admin: [user._id],
-      write: [user._id],
-      read: [user._id]
-    },
-    uid: `${id}:${org.id}`
-  });
-  // Save project model object to database
-  newProject.save((error) => {
-    // Check for no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Soft deletes the project previously created in createProject
- * test.
- */
-function softDeleteProject(done) {
-  // TODO: remove LM specific comments below (MBX-370)
-  // LM: Changed from findOneAndUpdate to a find and then update
-  // findOneAndUpdate does not call setters, and was causing strange
-  // behavior with the deleted and deletedOn fields.
-  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-
-  // Find project previously created in createProject test
-  Project.findOne({ id: 'guardiansofgalaxy' })
-  .exec((error, proj) => {
-    // Set project deleted field to true
-    proj.deleted = true;
-    // Save updated project to database
-    proj.save((saveErr) => {
-      // Find previously updated project
-      Project.findOne({
-        id: proj.id
-      }, (error2, proj2) => {
-        // Check object fields were successfully updated for soft delete
-        chai.expect(error).to.equal(null);
-        chai.expect(proj2.deleted).to.equal(true);
-        chai.expect(proj2.deletedOn).to.not.equal(null);
-        done();
-      });
-    });
-  });
-}
-
-/**
- * @description Hard deletes the project previously created in createProject
- * test.
- */
-function deleteProject(done) {
-  // Find and remove the project previously created in createProject test.
-  Project.findOneAndRemove({ id: 'guardiansofgalaxy' }, (error) => {
-    // Check for no error
-    chai.expect(error).to.equal(null);
     done();
   });
 }
