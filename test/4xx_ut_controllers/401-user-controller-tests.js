@@ -243,7 +243,7 @@ function rejectDuplicateUser(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -434,7 +434,7 @@ function rejectDeleteSelf(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
