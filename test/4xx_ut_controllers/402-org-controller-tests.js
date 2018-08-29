@@ -49,8 +49,8 @@ let org = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests. Creating an admin and
-   * non-admin user and setting the file-global admin user.
+   * Before: Run before all tests. Create admin and
+   * non-admin user. Set admin user globally.
    */
   before((done) => {
     // Connect to the database
@@ -143,6 +143,7 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
+  // TODO: use 'reject' instead of 'fail' or 'throw an error'
   /* Execute the tests */
   it('should create a new org', createNewOrg);
   it('should create a second org', createSecondOrg);
@@ -275,7 +276,7 @@ function updateOrgFieldErr(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -454,10 +455,9 @@ function deleteExistingOrg(done) {
 }
 
 /**
- * @description Verify projects soft deleted when org soft deleted.
- * Expected error thrown: 'Not Found'
- * // TODO : MBX-381 Change verification of soft delete org to check the soft
- *           delete field instead of simply insuring a findOrg fails.
+ * @description Verify projects and elements soft deleted when org soft deleted.
+ * // TODO : MBX-380 Discuss changing project controller to model
+ * // TODO : MBX-380 Discuss taking out element
  */
 function softDeleteProjectAndOrg(done) {
   // Create an org via controller
@@ -477,26 +477,25 @@ function softDeleteProjectAndOrg(done) {
   // Soft delete org via controller
   .then(() => OrgController.removeOrg(adminUser, 'boombox', { soft: true }))
   // Find org via controller
-  .then(() => OrgController.findOrg(adminUser, 'boombox'))
-  .then(() => {
-    // Expected findOrg() to fail
-    // Should not execute, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Not Found'
-    chai.expect(error.message).to.equal('Not Found');
+  .then(() => OrgController.findOrg(adminUser, 'boombox', true))
+  .then((retOrg) => {
+    // Expect organization deleted field to be true
+    chai.expect(retOrg.deleted).to.equal(true);
 
     // Find project
     Project.findOne({ id: 'godslayer' })
-    .exec((error2, foundProj) => {
+    .exec((findProjectErr, foundProj) => {
       // Expect no error
-      chai.expect(error2).to.equal(null);
+      chai.expect(findProjectErr).to.equal(null);
       // Expect found project's deleted parameter to be true
       chai.expect(foundProj.deleted).to.equal(true);
       done();
     });
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
@@ -608,7 +607,7 @@ function rejectUserRole(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -698,20 +697,20 @@ function removeUserRole(done) {
 
 /**
  * @description Verifies users not within org does not have permission.
- * Expected error thrown: 'Bad Request'
  */
 function rejectGetUserRoles(done) {
   // Find permissions via controller
   OrgController.findPermissions(adminUser, newUser, org.id.toString())
-  .then(() => {
-    // Expected findPermissions() to fail
-    // Should not execute, force test to fail
-    chai.assert(true === false);
+  .then((roles) => {
+    // Expected findPermissions() to succeed with user having no permissions
+    // expect the object to be empty
+    chai.expect(typeof roles).to.equal('object');
+    chai.expect(Object.keys(roles).length).to.equal(0);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }

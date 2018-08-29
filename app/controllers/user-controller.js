@@ -197,7 +197,7 @@ class UserController {
 
         // Make sure user doesn't already exist
         if (users.length >= 1) {
-          return reject(new errors.CustomError('User already exists.', 400));
+          return reject(new errors.CustomError('A user with a matching username already exists.', 403));
         }
         // Create the new user
         // We should just need to sanitize the input, the model should handle
@@ -250,7 +250,7 @@ class UserController {
         for (let i = 0; i < props.length; i++) {
           // Error check - make sure the properties exist and can be changed
           if (!user.isUpdateAllowed(props[i])) {
-            return reject(new errors.CustomError('Update not allowed.', 401));
+            return reject(new errors.CustomError(`User property [${props[i]}] cannot be changed.`, 403));
           }
 
           // If updating name, making sure it is valid
@@ -317,7 +317,7 @@ class UserController {
 
       // Error check - prevent user from being stupid
       if (requestingUser.username === usernameToDelete) {
-        return reject(new errors.CustomError('User cannot delete themselves.', 401));
+        return reject(new errors.CustomError('User cannot delete themselves.', 403));
       }
 
       const username = sani.sanitize(usernameToDelete);

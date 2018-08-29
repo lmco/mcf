@@ -328,7 +328,7 @@ class ProjectController {
         // Error check - check if the project already exists
         // Must nest promise since it uses the return from findOrg
         ProjectController.findProject(reqUser, org.id, projID)
-        .then(() => reject(new errors.CustomError('Project already exists.', 400)))
+        .then(() => reject(new errors.CustomError('A project with a matching ID already exists.', 403)))
         .catch((error) => {
           // This is ok, we dont want the project to already exist.
           if (error.description === 'Project not found.') {
@@ -440,7 +440,7 @@ class ProjectController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject(new errors.CustomError(`Users cannot update [${updateField}] of Projects.`, 400));
+            return reject(new errors.CustomError(`Project property [${updateField}] cannot be changed.`, 403));
           }
           // Error Check - Check if updated field is of type string
           if (!utils.checkType([projectUpdated[updateField]], 'string')
@@ -684,23 +684,23 @@ class ProjectController {
    *
    *
    * @param {User} reqUser  The object containing the requesting user.
+   * @param {User} findUser The object containing the user to be searched for.
    * @param {String} organizationID  The organization ID for the org the project belongs to.
    * @param {String} projectID  The project ID of the Project which is being deleted.
-   * @param {User} user The object containing the user to be searched for.
    */
-  static findPermissions(reqUser, organizationID, projectID, user) {
+  static findPermissions(reqUser, findUser, organizationID, projectID) {
     return new Promise((resolve, reject) => {
       const orgID = sani.html(organizationID);
       const projID = sani.html(projectID);
 
       // Find Project
       ProjectController.findAllPermissions(reqUser, orgID, projID)
-      .then((permissionList) => {
-        if (!permissionList.hasOwnProperty(user.username)) {
-          return reject(new errors.CustomError('User not found.', 404));
+      .then(permissionList => {
+        if (!permissionList.hasOwnProperty(findUser.username)) {
+          return resolve({});
         }
 
-        return resolve(permissionList[user.username]);
+        return resolve(permissionList[findUser.username]);
       })
       .catch((findPermissionsErr) => reject(findPermissionsErr));
     });
@@ -725,6 +725,9 @@ class ProjectController {
    * @param {String} projectID  The project ID of the Project which is being deleted.
    * @param {User} setUser  The object containing the user which permissions are being set for.
    * @param {String} permissionType  The permission level or type being set for the user.
+   *
+   * TODO: Adopt consistent interfaces between similar functions in orgs,
+   * specifically, the same function in OrgController. Talk to Josh.
    */
   static setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
     return new Promise((resolve, reject) => {
@@ -758,7 +761,7 @@ class ProjectController {
 
         // Error Check - Do not allow admin user to downgrade their permissions
         if (reqUser.username === setUser.username && permType !== permissionLevels[-1]) {
-          return reject(new errors.CustomError('User cannot change their own permissions.', 401));
+          return reject(new errors.CustomError('User cannot change their own permissions.', 403));
         }
 
         // Grab the index of the permission type

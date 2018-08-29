@@ -27,7 +27,7 @@ const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
-let nonAuser = null;
+let nonAdminUser = null;
 let adminUser = null;
 let org = null;
 let project = null;
@@ -42,7 +42,8 @@ let project = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all test. Create non-admin user and organization.
+   * Before: Run before all tests. Create admin and
+   * non-admin user. Set admin user globally. Create organization.
    */
   before((done) => {
     db.connect();
@@ -70,17 +71,18 @@ describe(M.getModuleName(module.filename), () => {
           chai.expect(updateErr).to.equal(null);
           chai.expect(userUpdate).to.not.equal(null);
 
-          // Creating a non admin user
-          const nonAuserData = {
+          // Define non-admin user data
+          const nonAdminUserData = {
             username: 'pepperpotts',
             password: 'gfoftonystark',
             fname: 'Pepper',
             lname: 'Potts',
             admin: false
           };
-          UserController.createUser(adminUser, nonAuserData)
+          // Admin creates a non admin user
+          UserController.createUser(adminUser, nonAdminUserData)
           .then((nonAu) => {
-            nonAuser = nonAu;
+            nonAdminUser = nonAu;
             chai.expect(nonAu.username).to.equal('pepperpotts');
             chai.expect(nonAu.fname).to.equal('Pepper');
             chai.expect(nonAu.lname).to.equal('Potts');
@@ -165,7 +167,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject non-A user from finding a project', nonAUser);
   it('should reject updating due to non-A user', rejectNonAdminProjectUpdate);
   it('should find the permissions on the project', findPerm);
-  // it('should set the permissions on the project', setPerm);
+  it('should set the permissions on the project', setPerm);
   // TODO: MBX-330: User need to be part of org before project permission set.
   it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
@@ -223,7 +225,7 @@ function rejectImmutableField(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -364,7 +366,7 @@ function rejectDuplicateProjectId(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -469,7 +471,7 @@ function rejectNonAdminCreateProject(done) {
   };
 
   // Create project
-  ProjController.createProject(nonAuser, projData)
+  ProjController.createProject(nonAdminUser, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -539,7 +541,7 @@ function nonAUser(done) {
   const projId = 'ironman';
 
   // Find project
-  ProjController.findProject(nonAuser, orgId, projId)
+  ProjController.findProject(nonAdminUser, orgId, projId)
   .then(() => {
     // Expected findProject() to fail
     // Should not execute, force test to fail
@@ -606,7 +608,7 @@ function rejectProjectId(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -625,7 +627,7 @@ function rejectNonAdminProjectUpdate(done) {
   };
 
   // Update project
-  ProjController.updateProject(nonAuser, orgId, projId, updateData)
+  ProjController.updateProject(nonAdminUser, orgId, projId, updateData)
   .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail
@@ -644,7 +646,7 @@ function rejectNonAdminProjectUpdate(done) {
  */
 function findPerm(done) {
   // Find permissions
-  ProjController.findPermissions(adminUser, org.id, 'ironman', adminUser)
+  ProjController.findPermissions(adminUser, adminUser, org.id, 'ironman')
   .then((perm) => {
     // Verfy permissions
     chai.expect(perm.read).to.equal(true);
@@ -660,17 +662,18 @@ function findPerm(done) {
 }
 
 /**
- * @description Admin user sets then verifies non-admin has write/read permissions on project.
+ * @description Admin user sets then verifies non-admin has write/read
+ * permissions on project.
  */
 // TODO: If keeping function, remove the eslint-disable-line below
 function setPerm(done) { // eslint-disable-line no-unused-vars
   // Admin sets permissions for non-admin
-  ProjController.setPermissions(adminUser, 'starkhq', project.id.toString(), nonAuser, 'write')
+  ProjController.setPermissions(adminUser, 'starkhq', project.id.toString(), nonAdminUser, 'write')
   .then(() => ProjController.findProject(adminUser, 'starkhq', project.id.toString()))
   .then((retProj) => {
     // Verify permissions for non-admin
-    chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
-    chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
+    chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAdminUser._id.toString());
+    chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAdminUser._id.toString());
     chai.expect(retProj.permissions.admin.length).to.equal(1);
     done();
   })

@@ -44,8 +44,8 @@ let nonAdminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests. Creating admin user
-   * and setting the file-global admin user
+   * Before: run before all tests. Create admin user.
+   * Set admin user globally.
    */
   before((done) => {
     // Connect to the database
@@ -69,12 +69,12 @@ describe(M.getModuleName(module.filename), () => {
 
       // Find the user and update admin status
       User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
+        (updateErr, updatedUser) => {
           // Setting it equal to global variable
-          adminUser = userUpdate;
+          adminUser = updatedUser;
           // Expect no error
           chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
+          chai.expect(updatedUser).to.not.equal(null);
           done();
         });
     });
@@ -243,7 +243,7 @@ function rejectDuplicateUser(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -298,7 +298,7 @@ function rejectInvalidLastNameUpdate(done) {
 
 /**
  * @description Verifies that a username cannot be changed.
- * Expected error thrown: 'Unauthorized'
+ * Expects error thrown: 'Forbidden'
  */
 function rejectUsernameUpdate(done) {
   // Create user data
@@ -309,14 +309,16 @@ function rejectUsernameUpdate(done) {
   UserController.updateUser(adminUser, username, userData)
   .then(() => {
     // TODO: MBX-324 This isn't returning the updated user, fix in controller
+    // TODO: (JU) This isnt supposed to return the updated user?
+    //       It is suppose to reject it and throw an error
     // Expect updateUser() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expect error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -432,7 +434,7 @@ function rejectDeleteSelf(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }

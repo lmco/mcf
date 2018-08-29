@@ -46,8 +46,8 @@ const test = M.config.test;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests. Creating admin user
-   * and setting the file-global admin user
+   * Before: Run before all tests. Find
+   * non-admin user and elevate to admin user.
    */
   before((done) => {
     // Connect to the database
@@ -63,7 +63,8 @@ describe(M.getModuleName(module.filename), () => {
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
 
-    // Authenticate user
+    // Authenticate User
+    // Note: non-admin user is created during authenticate if NOT exist.(ldap only)
     AuthController.authenticate(reqObj, resObj, (err) => {
       const ldapuser = reqObj.user;
       // Expect no error
@@ -82,7 +83,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: run after all tests. Delete requesting user.
+   * After: run after all tests. Delete user.
    */
   after((done) => {
     // Find requesting user
