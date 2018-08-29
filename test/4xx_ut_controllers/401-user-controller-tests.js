@@ -243,7 +243,7 @@ function rejectDuplicateUser(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -298,7 +298,7 @@ function rejectInvalidLastNameUpdate(done) {
 
 /**
  * @description Verifies that a username cannot be changed.
- * Expected error thrown: 'Unauthorized'
+ * Expects error thrown: 'Forbidden'
  */
 function rejectUsernameUpdate(done) {
   // Create user data
@@ -314,8 +314,8 @@ function rejectUsernameUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expect error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -431,7 +431,7 @@ function rejectDeleteSelf(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
