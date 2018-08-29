@@ -16,11 +16,9 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests the Project Model functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/updates to the code. The project model tests, create,
- * soft delete, and hard delete projects.
- * TODO - cleanup description (MBX-373)
+ * @description This tests the Project Model functionality. The project
+ * model tests, create, find, update, and delete projects. THe tests also
+ * test the max character limit on the ID field.
  */
 
 // Load node modules
@@ -29,14 +27,12 @@ const chai = require('chai');
 // Load MBEE modules
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
-const User = M.require('models.user');
 const db = M.require('lib/db');
 const utils = M.require('lib/utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 let org = null;
-let user = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -48,37 +44,19 @@ let user = null;
 describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests. Creates a file-global
-   * organization and user to be used in tests.
+   * organization to be used in tests.
    */
   before((done) => {
     db.connect();
 
-    // Create user data
-    const newUser = new User({
-      username: M.config.test.username,
-      password: M.config.test.password
+    // Create a parent organization before creating any projects
+    org = new Org({
+      id: 'avengers',
+      name: 'Age of Ultron'
     });
 
-    // Save the user via user model
-    newUser.save()
-    .then((retUser) => {
-      // Set file-global user
-      user = retUser;
-
-      // Create a parent organization before creating any projects
-      org = new Org({
-        id: 'avengers',
-        name: 'Age of Ultron',
-        permissions: {
-          admin: [user._id],
-          write: [user._id],
-          read: [user._id]
-        }
-      });
-
-      // Save the org via the org model
-      return org.save();
-    })
+    // Save the org via the org model
+    org.save()
     .then((retOrg) => {
       // Set file-global org
       org = retOrg;
@@ -92,18 +70,13 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: runs after all tests. Deletes file-global
-   * organization and user
+   * After: runs after all tests. Deletes file-global organization.
    */
   after((done) => {
     // Delete the org
     Org.findOneAndRemove({ id: org.id })
-    // Find the user
-    .then(() => User.findOne({ username: M.config.test.username }))
-    // Delete the user
-    .then((foundUser) => foundUser.remove())
     .then(() => {
-      // Deletes should succeed, close DB connection
+      // Delete should succeed, close DB connection
       db.disconnect();
       done();
     })
@@ -116,7 +89,6 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
-  // TODO: Add more tests for find, and permission tests. (MBX-373)
   /* Execute the tests */
   it('should create a project', createProject);
   it('should find a project', findProject);
@@ -136,11 +108,6 @@ function createProject(done) {
     id: 'guardiansofgalaxy',
     name: 'Guardians of the Galaxy',
     org: org._id,
-    permissions: {
-      admin: [user._id],
-      write: [user._id],
-      read: [user._id]
-    },
     uid: utils.createUID(org.id, 'guardiansofgalaxy')
   });
   // Save project model object to database
@@ -158,7 +125,7 @@ function findProject(done) {
   // Find the project
   Project.findOne({ id: 'guardiansofgalaxy' })
   .then((proj) => {
-    // Esnure project data is correct
+    // Ensure project data is correct
     chai.expect(proj.name).to.equal('Guardians of the Galaxy');
     done();
   })
@@ -212,21 +179,19 @@ function deleteProject(done) {
 
 /**
  * @description Verifies invalid field string with over 36 characters when creating a project.
- * Expected error thrown: 'Too many characters in username'
+ * Expected error thrown: 'Project validation failed: id: Too many characters in username'
  */
 function verifyProjectFieldMaxChar(done) {
-  const projData = {
+  // Create a new model project
+  const newProject = new Project({
     id: 'thisisaverylongidnamepleaseacceptmeorbreak',
     name: 'Long Id',
     org: org._id
-  };
-
-  // Create a new model project
-  const newProject = new Project(projData);
+  });
 
   // Save project model object to database
   newProject.save((error) => {
-    // Expected error thrown: 'Too many characters in username'
+    // Expected error thrown: 'Project validation failed: id: Too many characters in username'
     chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username');
     done();
   });
