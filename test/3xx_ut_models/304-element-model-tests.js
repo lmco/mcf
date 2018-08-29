@@ -18,7 +18,7 @@
  *
  * @description This tests the Element Model functionality. The element
  * model tests create root packages, blocks, and relationships. These tests
- * find, update and delete the blocks. THe relationship and package are
+ * find, update and delete the blocks. The relationship and package are
  * also deleted.
  */
 
@@ -109,11 +109,11 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a root package', createRootPackage);
-  it('should create a block (1)', createBlock);
+  it('should create a block', createBlock);
   it('should create a relationship between blocks', createRelationship);
   it('should find a block', findBlock);
   it('should update a block', updateBlock);
-  it('should delete blocks and relationships', deleteElements);
+  it('should delete all elements', deleteElements);
 });
 
 
@@ -134,12 +134,11 @@ function createRootPackage(done) {
   // Save the root package element to the database
   newPackage.save()
   // Find the root package element
-  .then(() => Element.Package.find({ uid: 'avengers:timeloop:0001' }))
-  .then((packages) => {
+  .then(() => Element.Package.findOne({ uid: 'avengers:timeloop:0001' }))
+  .then((package) => {
     // Check the root package element saved correctly
-    chai.expect(packages.length).to.equal(1);
-    chai.expect(packages[0].uid).to.equal('avengers:timeloop:0001');
-    chai.expect(packages[0].type).to.equal('Package');
+    chai.expect(package.uid).to.equal('avengers:timeloop:0001');
+    chai.expect(package.type).to.equal('Package');
     done();
   })
   .catch((error) => {
@@ -155,9 +154,7 @@ function createRootPackage(done) {
  */
 function createBlock(done) {
   // Find root package element created in createRootPackage test
-  Element.Package.findOne({
-    uid: 'avengers:timeloop:0001'
-  })
+  Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
   .then((pkg) => {
     // Create new block element object
     const newBlock = new Element.Block({
