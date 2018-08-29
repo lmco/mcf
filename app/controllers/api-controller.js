@@ -348,9 +348,11 @@ class ApiController {
     OrgController.removeOrg(req.user, orgid, req.body)
     .then((org) => {
       res.header('Content-Type', 'application/json');
-      return res.send(ApiController.formatJSON(org.getPublicData()));
+      return res.send(ApiController.formatJSON(org));
     })
-    .catch((error) => res.status(error.status).send(error));
+    .catch((error) => {
+      return res.status(error.status).send(error);
+    });
   }
 
   /**
