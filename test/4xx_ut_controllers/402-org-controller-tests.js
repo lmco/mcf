@@ -698,20 +698,20 @@ function removeUserRole(done) {
 
 /**
  * @description Verifies users not within org does not have permission.
- * Expected error thrown: 'Bad Request'
  */
 function rejectGetUserRoles(done) {
   // Find permissions via controller
   OrgController.findPermissions(adminUser, newUser, org.id.toString())
-  .then(() => {
-    // Expected findPermissions() to fail
-    // Should not execute, force test to fail
-    chai.assert(true === false);
+  .then((roles) => {
+    // Expected findPermissions() to succeed with user having no permissions
+    // expect the object to be empty
+    chai.expect(typeof roles).to.equal('object');
+    chai.expect(Object.keys(roles).length).to.equal(0);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }
