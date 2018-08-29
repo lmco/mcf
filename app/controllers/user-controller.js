@@ -25,7 +25,6 @@ const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
 const validators = M.require('lib.validators');
 
-
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
 // throws the warning in cases where it doesn't apply. For this reason, the

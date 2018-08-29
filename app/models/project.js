@@ -183,6 +183,17 @@ const ProjectSchema = new mongoose.Schema({
 });
 
 /**
+ * Returns the project's Public data.
+ */
+ProjectSchema.methods.getPublicData = function() {
+  this.permissions.read = this.permissions.read.map(u => u.getPublicData());
+  this.permissions.write = this.permissions.write.map(u => u.getPublicData());
+  this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
+
+  return this;
+};
+
+/**
   * Returns the permission levels in order of inheritance for projects.
   */
 ProjectSchema.methods.getPermissionLevels = function() {

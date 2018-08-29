@@ -140,6 +140,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should PATCH an update to posted project', patchOrg01);
   it('should reject a PATCH to update with invalid name', badPatch);
   it('should POST second project', postProject02);
+  it('should GET the two projects POSTed previously', getAllProjects);
   it('should DELETE the first project to the organization', deleteProject01).timeout(5000);
   it('should DELETE the second project to the organization', deleteProject02).timeout(5000);
 });
@@ -183,8 +184,7 @@ function postProject01(done) {
 function getProject01(done) {
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
-    headers: getHeaders(),
-    method: 'GET'
+    headers: getHeaders()
   },
   (err, response, body) => {
     chai.expect(response.statusCode).to.equal(200);
@@ -369,6 +369,23 @@ function postProject02(done) {
     chai.expect(response.statusCode).to.equal(200);
     chai.expect(json.id).to.equal('bettyross');
     chai.expect(json.name).to.equal('Hulks GF');
+    done();
+  });
+}
+
+/**
+ * Makes a GET request to /api/orgs/:orgid/projects. This should happen after two posts
+ * to the projects are made. This should succeed.
+ */
+function getAllProjects(done) {
+  request({
+    url: `${test.url}/api/orgs/biochemistry/projects`,
+    headers: getHeaders()
+  },
+  (err, response, body) => {
+    chai.expect(response.statusCode).to.equal(200);
+    const json = JSON.parse(body);
+    chai.expect(json.length).to.equal(2);
     done();
   });
 }

@@ -348,9 +348,11 @@ class ApiController {
     OrgController.removeOrg(req.user, orgid, req.body)
     .then((org) => {
       res.header('Content-Type', 'application/json');
-      return res.send(ApiController.formatJSON(org.getPublicData()));
+      return res.send(ApiController.formatJSON(org));
     })
-    .catch((error) => res.status(error.status).send(error));
+    .catch((error) => {
+      return res.status(error.status).send(error);
+    });
   }
 
   /**
@@ -478,9 +480,13 @@ class ApiController {
     // Call project find with user and organization ID
     ProjectController.findProjects(req.user, orgid)
     .then((projects) => {
+      const projectPublicData = [];
+      for (let i = 0; i < projects.length; i++) {
+        projectPublicData.push(projects[i].getPublicData());
+      }
       // Return project
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(ApiController.formatJSON(projects));
+      return res.status(200).send(ApiController.formatJSON(projectPublicData));
     })
     .catch((error) => res.status(error.status).send(error));
   }
@@ -542,7 +548,7 @@ class ApiController {
     ProjectController.findProject(req.user, orgid, projectid, true)
     .then((project) => {
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(ApiController.formatJSON(project));
+      return res.status(200).send(ApiController.formatJSON(project.getPublicData()));
     })
     .catch((error) => res.status(error.status).send(error));
   }

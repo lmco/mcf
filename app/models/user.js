@@ -358,9 +358,13 @@ UserSchema.pre('save', function(next) {
     Organization.findOne({ id: 'default' })
     .exec((err2, org) => {
       if (err2) throw err2;
-      const members = org.permissions.read.map(u => u._id.toString());
-      if (!members.includes(this._id.toString())) {
+      const membersRead = org.permissions.read.map(u => u._id.toString());
+      const membersWrite = org.permissions.write.map(u => u._id.toString());
+      if (!membersRead.includes(this._id.toString())) {
         org.permissions.read.push(this._id.toString());
+      }
+      if (!membersWrite.includes(this._id.toString())) {
+        org.permissions.write.push(this._id.toString());
       }
       org.save((saveErr) => {
         if (saveErr) {
@@ -383,6 +387,7 @@ UserSchema.pre('remove', function(next) {
   Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     org.permissions.read.splice(org.permissions.read.indexOf(this._id.toString()), 1);
+    org.permissions.write.splice(org.permissions.write.indexOf(this._id.toString()), 1);
     org.save((saveErr) => {
       if (saveErr) {
         // If error occurs, return it
