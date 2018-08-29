@@ -31,13 +31,11 @@ const Org = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
 const db = M.require('lib/db');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 let org = null;
-let adminUser = null;
+let user = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -57,49 +55,42 @@ describe(M.getModuleName(module.filename), () => {
    */
   before((done) => {
     db.connect();
-    const params = {};
-    const body = {
+
+    // Create user data
+    const newUser = new User({
       username: M.config.test.username,
       password: M.config.test.password
-    };
+    });
 
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
+    // Save the user via user model
+    newUser.save()
+    .then((retUser) => {
+      // Set file-global user
+      user = retUser;
 
-    // TODO: Create a user and set them to an admin of the Organization and (MBX-373)
-    // Project. NOT a global admin.
+      // Create a parent organization before creating any projects
+      org = new Org({
+        id: 'avengers',
+        name: 'Age of Ultron',
+        permissions: {
+          admin: [user._id],
+          write: [user._id],
+          read: [user._id]
+        }
+      });
 
-    // Authenicate user
-    // Note: non-admin user is created during authenticate if NOT exist. (ldap only)
-    AuthController.authenticate(reqObj, resObj, (error) => {
+      // Save the org via the org model
+      return org.save();
+    })
+    .then((retOrg) => {
+      // Set file-global org
+      org = retOrg;
+      done();
+    })
+    .catch((error) => {
+      // Expect no error
       chai.expect(error).to.equal(null);
-      chai.expect(reqObj.user.username).to.equal(M.config.test.username);
-
-      // TODO - consider using an .exec rather than callback to make this cleaner (MBX-373)
-      User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true }, { new: true },
-        (updateErr, updatedUser) => {
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(updatedUser).to.not.equal(null);
-          adminUser = updatedUser;
-          // Create a parent organization before creating any projects
-          org = new Org({
-            id: 'avengers',
-            name: 'Age of Ultron',
-            permissions: {
-              admin: [adminUser._id],
-              write: [adminUser._id],
-              read: [adminUser._id]
-            }
-          });
-
-          org.save((error2) => {
-            if (error2) {
-              M.log.error(error2);
-              done();
-            }
-            done();
-          });
-        });
+      done();
     });
   });
 
@@ -169,9 +160,9 @@ function createProject(done) {
     name: 'Guardians of the Galaxy',
     org: org._id,
     permissions: {
-      admin: [adminUser._id],
-      write: [adminUser._id],
-      read: [adminUser._id]
+      admin: [user._id],
+      write: [user._id],
+      read: [user._id]
     },
     uid: `${id}:${org.id}`
   });
