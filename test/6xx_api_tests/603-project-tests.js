@@ -340,8 +340,8 @@ function badPatch(done) {
   },
   (err, response, body) => {
     const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(400);
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(response.statusCode).to.equal(403);
+    chai.expect(json.message).to.equal('Forbidden');
     done();
   });
 }
