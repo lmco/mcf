@@ -116,7 +116,7 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
-  // TODO: Add more tests for find, update, and permission tests. (MBX-373)
+  // TODO: Add more tests for find, and permission tests. (MBX-373)
   /* Execute the tests */
   it('should create a project', createProject);
   it('should update a project', updateProject);
@@ -173,13 +173,19 @@ function updateProject(done) {
 }
 
 /**
- * @description Hard deletes the project previously created in createProject
- * test.
+ * @description Deletes the project previously created in createProject test.
  */
 function deleteProject(done) {
   // Find and remove the project previously created in createProject test.
-  Project.findOneAndRemove({ id: 'guardiansofgalaxy' }, (error) => {
-    // Check for no error
+  Project.findOneAndRemove({ id: 'guardiansofgalaxy' })
+  .then(() => Project.find({ id: 'guardiansofgalaxy' }))
+  .then((projects) => {
+    // Expect to find no projects
+    chai.expect(projects.length).to.equal(0);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
     chai.expect(error).to.equal(null);
     done();
   });
