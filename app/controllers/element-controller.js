@@ -364,11 +364,11 @@ class ElementController {
         // Must nest promises since the catch uses proj, returned from findProject.
         // TODO: Cut this down to one query (MBX-352)
         ElementController.findElement(reqUser, orgID, projID, elemID)
-        .then(() => reject(new errors.CustomError('An element with a matching uid already exists.', 403)))
+        .then(() => reject(new errors.CustomError('An element with a matching ID already exists.', 403)))
         .catch(() => { // eslint-disable-line consistent-return
           // Check if element with same uuid exists
           ElementController.findElement(reqUser, orgID, projID, uuid)
-          .then(() => reject(new errors.CustomError('An element with a matching uuid already exists.', 403)))
+          .then(() => reject(new errors.CustomError('An element with a matching UUID already exists.', 403)))
           .catch((findError) => { // eslint-disable-line consistent-return
             // This is ok, we dont want the element to already exist.
             if (findError.description === 'No elements found.') {

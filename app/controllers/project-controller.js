@@ -328,7 +328,7 @@ class ProjectController {
         // Error check - check if the project already exists
         // Must nest promise since it uses the return from findOrg
         ProjectController.findProject(reqUser, org.id, projID)
-        .then(() => reject(new errors.CustomError('A project with a matching uid already exists.', 403)))
+        .then(() => reject(new errors.CustomError('A project with a matching ID already exists.', 403)))
         .catch((error) => {
           // This is ok, we dont want the project to already exist.
           if (error.description === 'Project not found.') {
