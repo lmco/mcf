@@ -46,12 +46,8 @@ let user = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests.
-   *
-   * TODO - Say what this function is doing. (MBX-373)
-   *
-   * TODO - consider abstracting some of the test data out to the 'Test Data' (MBX-373)
-   * section above.
+   * Before: runs before all tests. Creates a file-global
+   * organization and user to be used in tests.
    */
   before((done) => {
     db.connect();
@@ -95,25 +91,27 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: runs after all tests
+   * After: runs after all tests. Deletes file-global
+   * organization and user
    */
-  // TODO: Remove user that was previously created (MBX-373)
   after((done) => {
-    Org.findOneAndRemove({ id: org.id }, (error) => {
-      if (error) {
-        M.log.error(error);
-      }
-      chai.assert(error === null);
-      User.findOne({
-        username: M.config.test.username
-      }, (error2, foundUser) => {
-        chai.expect(error2).to.equal(null);
-        foundUser.remove((error3) => {
-          chai.expect(error3).to.equal(null);
-          db.disconnect();
-          done();
-        });
-      });
+    // Delete the org
+    Org.findOneAndRemove({ id: org.id })
+    // Find the user
+    .then(() => User.findOne({ username: M.config.test.username }))
+    // Delete the user
+    .then((foundUser) => foundUser.remove())
+    .then(() => {
+      // Deletes should succeed, close DB connection
+      db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
+
+      db.disconnect();
+      done();
     });
   });
 
