@@ -119,6 +119,7 @@ describe(M.getModuleName(module.filename), () => {
   // TODO: Add more tests for find, and permission tests. (MBX-373)
   /* Execute the tests */
   it('should create a project', createProject);
+  it('should find a project', findProject);
   it('should update a project', updateProject);
   it('should delete a project', deleteProject);
   it('should fail creating a project with a long ID', verifyProjectFieldMaxChar);
@@ -144,6 +145,24 @@ function createProject(done) {
   });
   // Save project model object to database
   newProject.save((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Finds a previously created project
+ */
+function findProject(done) {
+  // Find the project
+  Project.findOne({ id: 'guardiansofgalaxy' })
+  .then((proj) => {
+    // Esnure project data is correct
+    chai.expect(proj.name).to.equal('Guardians of the Galaxy');
+    done();
+  })
+  .catch((error) => {
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
