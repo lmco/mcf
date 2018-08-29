@@ -250,7 +250,6 @@ function findExistingOrg(done) {
   OrgController.findOrg(adminUser, 'boombox')
   .then((retOrg) => {
     // Verify org was found
-    console.log(retOrg.permissions);
     chai.expect(retOrg.name).to.equal('Star Lords Boombox');
     done();
   })
