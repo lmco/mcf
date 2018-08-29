@@ -28,8 +28,7 @@ const chai = require('chai');
 // Load MBEE modules
 const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
-const ProjController = M.require('controllers.project-controller');
-const ElemController = M.require('controllers.element-controller');
+const Project = M.require('models.project');
 const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
@@ -50,8 +49,8 @@ let org = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests. Creating an admin and
-   * non-admin user and setting the file-global admin user.
+   * Before: Run before all tests. Create admin and
+   * non-admin user. Set admin user globally.
    */
   before((done) => {
     // Connect to the database
@@ -66,10 +65,10 @@ describe(M.getModuleName(module.filename), () => {
     const reqObj = mockExpress.getReq(params, body);
     const resObj = mockExpress.getRes();
 
-    AuthController.authenticate(reqObj, resObj, (err) => {
+    AuthController.authenticate(reqObj, resObj, (error) => {
       const ldapuser = reqObj.user;
       // Expect no error
-      chai.expect(err).to.equal(null);
+      chai.expect(error).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
 
       // Find the user and update admin status
@@ -97,8 +96,8 @@ describe(M.getModuleName(module.filename), () => {
             chai.expect(nonAu.lname).to.equal('Tree');
             done();
           })
-          .catch((error) => {
-            chai.expect(error.description).to.equal(null);
+          .catch((error2) => {
+            chai.expect(error2.message).to.equal(null);
             done();
           });
         });
@@ -119,14 +118,14 @@ describe(M.getModuleName(module.filename), () => {
       // Find admin user
       User.findOne({
         username: M.config.test.username
-      }, (err, foundUser) => {
+      }, (error, foundUser) => {
         // Expect no error
-        chai.expect(err).to.equal(null);
+        chai.expect(error).to.equal(null);
 
         // Remove admin user
-        foundUser.remove((err2) => {
+        foundUser.remove((error2) => {
           // Expect no error
-          chai.expect(err2).to.equal(null);
+          chai.expect(error2).to.equal(null);
 
           // Disconnect from the database
           db.disconnect();
@@ -136,7 +135,7 @@ describe(M.getModuleName(module.filename), () => {
     })
     .catch((error) => {
       // Expect no error
-      chai.expect(error.description).to.equal(null);
+      chai.expect(error.message).to.equal(null);
 
       // Disconnect from the database
       db.disconnect();
@@ -162,7 +161,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should fail trying to update the default org', updateDefaultOrg);
   it('should fail trying to delete the default org', rejectDefaultOrgDelete);
   it('should add a user to an org', setUserOrgRole);
-  it('should let the non-admin user write a project', verifyUserWritePerm);
   it('should reject user changing their permissions', rejectUserRole);
   it('should get a users roles within an org', getUserRoles);
   it('should get all members with permissions in an org', getMembers);
@@ -203,7 +201,7 @@ function createNewOrg(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
   });
 }
 
@@ -238,7 +236,7 @@ function createSecondOrg(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -256,14 +254,14 @@ function findExistingOrg(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies a user CANNOT update permissions.
- * Expected error thrown: 'Users cannot update [permissions] of organizations.'
+ * Expected error thrown: 'Bad Request'
  */
 function updateOrgFieldErr(done) {
   // Update organization
@@ -275,15 +273,15 @@ function updateOrgFieldErr(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Users cannot update [permissions] of organizations.'
-    chai.expect(error.description).to.equal('Users cannot update [permissions] of organizations.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies updateOrg fails given invalid data.
- * Expected error thrown: 'The Organization [name] is not of type String'
+ * Expected error thrown: 'Bad Request'
  */
 function updateOrgTypeErr(done) {
   // Update organization
@@ -295,15 +293,15 @@ function updateOrgTypeErr(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'The Organization [name] is not of type String.'
-    chai.expect(error.description).to.equal('The Organization [name] is not of type String.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies non-admin user CANNOT update org.
- * Expected error thrown: 'User does not have permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectNonAdminUpdate(done) {
   // Update org
@@ -315,8 +313,8 @@ function rejectNonAdminUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User does not have permissions.'
-    chai.expect(error.description).to.equal('User does not have permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
@@ -348,7 +346,7 @@ function updateOrg(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -372,7 +370,7 @@ function updateOrgObject(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -390,7 +388,7 @@ function findAllExistingOrgs(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -408,14 +406,14 @@ function softDeleteExistingOrg(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verify soft-deleted org cannot be found.
- * Expected error thrown: 'Org not found.'
+ * Expected error thrown: 'Not Found'
  */
 function rejectFindSoftDelOrg(done) {
   OrgController.findOrg(adminUser, 'boombox')
@@ -426,14 +424,15 @@ function rejectFindSoftDelOrg(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Org not found.'
-    chai.expect(error.description).to.equal('Org not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
 
 /**
  * @description Deletes an existing org.
+ * Expected error thrown: 'Not Found'
  */
 function deleteExistingOrg(done) {
   // Deletes org via controller
@@ -447,8 +446,8 @@ function deleteExistingOrg(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Org not found.'
-    chai.expect(error.description).to.equal('Org not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
@@ -461,10 +460,18 @@ function deleteExistingOrg(done) {
 function softDeleteProjectAndOrg(done) {
   // Create an org via controller
   OrgController.createOrg(adminUser, { id: 'boombox', name: 'Star Lord Walkman' })
-  // Create a project via controller
-  .then(() => ProjController.createProject(adminUser, { id: 'godslayer', name: 'God Slayer', org: { id: 'boombox' } }))
-  // Create element via controller
-  .then(() => ElemController.createElement(adminUser, { id: '0000', project: { id: 'godslayer', org: { id: 'boombox' } }, type: 'Block' }))
+  .then((retOrg) => {
+    // Create the project via the model
+    const proj = new Project({
+      id: 'godslayer',
+      name: 'God Slayer',
+      org: retOrg._id,
+      uid: 'boombox:godslayer'
+    });
+
+    // Save the project to the database
+    return proj.save();
+  })
   // Soft delete org via controller
   .then(() => OrgController.removeOrg(adminUser, 'boombox', { soft: true }))
   // Find org via controller
@@ -472,17 +479,16 @@ function softDeleteProjectAndOrg(done) {
   .then((retOrg) => {
     // Expect organization deleted field to be true
     chai.expect(retOrg.deleted).to.equal(true);
-    return ProjController.findProject(adminUser, 'boombox', 'godslayer', true);
-  })
-  .then((retProject) => {
-    // Expect project deleted field to be true
-    chai.expect(retProject.deleted).to.equal(true);
-    return ElemController.findElement(adminUser, 'boombox', 'godslayer', '0000', true);
-  })
-  .then((retElement) => {
-    // Expect element deleted field to be true
-    chai.expect(retElement.deleted).to.equal(true);
-    done();
+
+    // Find project
+    Project.findOne({ id: 'godslayer' })
+    .exec((findProjectErr, foundProj) => {
+      // Expect no error
+      chai.expect(findProjectErr).to.equal(null);
+      // Expect found project's deleted parameter to be true
+      chai.expect(foundProj.deleted).to.equal(true);
+      done();
+    });
   })
   .catch((error) => {
     // Expect no error
@@ -493,7 +499,7 @@ function softDeleteProjectAndOrg(done) {
 
 /**
  * @description Verify projects deleted when org deleted.
- * Expected error thrown: 'Project not found.'
+ * Expected error thrown: 'Not Found'
  */
 function hardDeleteProjectAndOrg(done) {
   // Delete an org via controller
@@ -507,20 +513,16 @@ function hardDeleteProjectAndOrg(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Org not found.'
-    chai.expect(error.description).to.equal('Org not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
 
     // Find deleted project
-    ProjController.findProject(adminUser, 'boombox', 'godslayer', true)
-    .then(() => {
-      // Expected findProject() to fail
-      // Should not execute, force test to fail
-      chai.assert(true === false);
-      done();
-    })
-    .catch((error2) => {
-      // Expected error thrown: 'Project not found.'
-      chai.expect(error2.description).to.equal('Project not found.');
+    Project.findOne({ id: 'godslayer' })
+    .exec((error2, proj) => {
+      // Expect no error
+      chai.expect(error2).to.equal(null);
+      // Expect there to be no projects found
+      chai.expect(proj).to.equal(null);
       done();
     });
   });
@@ -528,7 +530,7 @@ function hardDeleteProjectAndOrg(done) {
 
 /**
  * @description Verifies default organization CANNOT be updated.
- * Expected error thrown: 'Cannot update the default org.'
+ * Expected error thrown: 'Forbidden'
  */
 function updateDefaultOrg(done) {
   // Update default org
@@ -540,15 +542,15 @@ function updateDefaultOrg(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Cannot update the default org.'
-    chai.expect(error.description).to.equal('Cannot update the default org.');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
 
 /**
  * @description Verifies default organization CANNOT be deleted.
- * Expected error thrown: 'Cannot delete the default org.'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectDefaultOrgDelete(done) {
   // Delete default org
@@ -560,8 +562,8 @@ function rejectDefaultOrgDelete(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Cannot delete the default org.'
-    chai.expect(error.description).to.equal('Cannot delete the default org.');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -583,64 +585,14 @@ function setUserOrgRole(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies new user permissions give correct access on org.
- * // TODO : MBX-382 Discuss moving to test to project controller tests or
- *           removing
- */
-function verifyUserWritePerm(done) {
-  // Create project data
-  const projData = {
-    id: 'godslayer',
-    name: 'God Slayer',
-    org: {
-      id: 'gaurdians'
-    }
-  };
-
-  // Create project via project controller
-  ProjController.createProject(newUser, projData)
-  .then((proj) => {
-    // Verify project created properly
-    chai.expect(proj.id).to.equal('godslayer');
-    chai.expect(proj.name).to.equal('God Slayer');
-    const elemData = {
-      id: '0000',
-      project: {
-        id: 'godslayer',
-        org: { id: 'gaurdians' } },
-      type: 'Block' };
-
-    // Create element via element controller
-    return ElemController.createElement(newUser, elemData);
-  })
-  .then(() => {
-    const elemData02 = {
-      id: '0001',
-      project: {
-        id: 'godslayer',
-        org: { id: 'gaurdians' } },
-      type: 'Block' };
-
-    // Create second element via element controller
-    ElemController.createElement(newUser, elemData02);
-    done();
-  })
-  .catch((error) => {
-    // No error expected
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies user CANNOT change own permissions.
- * Expected error thrown: 'User cannot change their own permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectUserRole(done) {
   // Set permissions via controller
@@ -652,8 +604,8 @@ function rejectUserRole(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User cannot change their own permissions.'
-    chai.expect(error.description).to.equal('User cannot change their own permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
@@ -673,7 +625,7 @@ function getUserRoles(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -696,14 +648,14 @@ function getMembers(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies non-admin user CANNOT set permissions.
- * Expected error thrown: 'User cannot change organization permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectNonAdminSetPermissions(done) {
   // Set permissions via controller
@@ -715,8 +667,8 @@ function rejectNonAdminSetPermissions(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User cannot change organization permissions.'
-    chai.expect(error.description).to.equal('User cannot change organization permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
@@ -736,14 +688,14 @@ function removeUserRole(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies users not within org does not have permission.
- * Expected error thrown: 'User is not part of this organization.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectGetUserRoles(done) {
   // Find permissions via controller
@@ -755,15 +707,15 @@ function rejectGetUserRoles(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User is not part of this organization.'
-    chai.expect(error.description).to.equal('User is not part of this organization.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies user CANNOT change permissions to an unsupported role.
- * Expected error thrown: 'The permission entered is not a valid permission.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidPermission(done) {
   // Set permissions via controller
@@ -775,15 +727,15 @@ function rejectInvalidPermission(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'The permission entered is not a valid permission.'
-    chai.expect(error.description).to.equal('The permission entered is not a valid permission.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies non-admin CANNOT retrieve permissions.
- * Expected error thrown: 'User does not have permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectNonAdminGetPermissions(done) {
   // Find permissions via controller
@@ -795,8 +747,8 @@ function rejectNonAdminGetPermissions(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User does not have permissions.'
-    chai.expect(error.description).to.equal('User does not have permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }

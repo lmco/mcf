@@ -44,8 +44,8 @@ let nonAdminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests. Creating admin user
-   * and setting the file-global admin user
+   * Before: run before all tests. Create admin user.
+   * Set admin user globally.
    */
   before((done) => {
     // Connect to the database
@@ -61,20 +61,20 @@ describe(M.getModuleName(module.filename), () => {
     const resObj = mockExpress.getRes();
 
     // Authenticate user
-    AuthController.authenticate(reqObj, resObj, (err) => {
+    AuthController.authenticate(reqObj, resObj, (error) => {
       const ldapuser = reqObj.user;
       // Expect no error
-      chai.expect(err).to.equal(null);
+      chai.expect(error).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
 
       // Find the user and update admin status
       User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
+        (updateErr, updatedUser) => {
           // Setting it equal to global variable
-          adminUser = userUpdate;
+          adminUser = updatedUser;
           // Expect no error
           chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
+          chai.expect(updatedUser).to.not.equal(null);
           done();
         });
     });
@@ -88,14 +88,14 @@ describe(M.getModuleName(module.filename), () => {
     // Find the admin user
     User.findOne({
       username: M.config.test.username
-    }, (err, user) => {
+    }, (error, user) => {
       // Expect no error
-      chai.expect(err).to.equal(null);
+      chai.expect(error).to.equal(null);
 
       // Delete admin user
-      user.remove((err2) => {
+      user.remove((error2) => {
         // Expect no error
-        chai.expect(err2).to.equal(null);
+        chai.expect(error2).to.equal(null);
 
         // Disconnect from the database
         db.disconnect();
@@ -104,7 +104,7 @@ describe(M.getModuleName(module.filename), () => {
     })
     .catch((error) => {
       // Expect no error
-      chai.expect(error.description).to.equal(null);
+      chai.expect(error.message).to.equal(null);
 
       // Disconnect from the database
       db.disconnect();
@@ -114,21 +114,18 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a user', createNewUser);
-  it('should reject a creating a user with non A req user', rejectUserCreateByNonAdmin);
-  it('should reject a user with no input to username', badUser);
-  it('should reject username already in database', copyCatUser);
+  it('should reject creating a user with non-admin user', rejectUserCreateByNonAdmin);
+  it('should reject creating a user with no username', rejectInvalidCreate);
+  it('should reject creating an already existing user', rejectDuplicateUser);
   it('should update the users first name', updateFirstName);
-  it('should reject updating the last name with a bad name', rejectInvalidLastNameUpdate);
-  it('should update the users custom tags', updateCustomData);
+  it('should reject updating the last name with an invalid name', rejectInvalidLastNameUpdate);
   it('should reject updating the users username', rejectUsernameUpdate);
-  it('should reject updating a user that does not exist', updateNonExistentUser);
-  it('should reject update from non A user', rejectUserUpdateByNonAdmin);
-  it('should find user', findExistingUser);
+  it('should reject update from a non-admin user', rejectUserUpdateByNonAdmin);
+  it('should find a user', findExistingUser);
   it('should reject finding a user that does not exist', rejectFindNonExistentUser);
-  it('should reject deleting a user that doesnt exist', rejectDeleteNonExistentUser);
-  it('should reject deleting a user with a non admin user', rejectDeleteByNonAdmin);
+  it('should reject deleting a user with a non-admin user', rejectDeleteByNonAdmin);
   it('should reject deleting themselves', rejectDeleteSelf);
-  it('should delete user created', deleteUser);
+  it('should delete a user', deleteUser);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -147,7 +144,7 @@ function createNewUser(done) {
     }
   };
 
-  // Create user via the controller
+  // Create user via controller
   UserController.createUser(adminUser, userData)
   .then((newUser) => {
     // Setting as global-file user
@@ -162,14 +159,14 @@ function createNewUser(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verifies non-admin user CANNOT create new user.
- * Expected error thrown: 'User does not have permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectUserCreateByNonAdmin(done) {
   // Create user data
@@ -183,23 +180,23 @@ function rejectUserCreateByNonAdmin(done) {
   // Create user via controller
   UserController.createUser(nonAdminUser, userData)
   .then(() => {
-    // Expected createUser to fail
+    // Expected createUser() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User does not have permissions'
-    chai.expect(error.description).to.equal('User does not have permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
 
 /**
  * @description Verifies createUser fails given invalid data.
- * Expected error thrown: 'Username is not valid.'
+ * Expected error thrown: 'Bad Request'
  */
-function badUser(done) {
+function rejectInvalidCreate(done) {
   // Create user data
   const userData = {
     username: '',
@@ -208,26 +205,26 @@ function badUser(done) {
     lname: 'Black Panther'
   };
 
-  // Create user via user controller
+  // Create user via controller
   UserController.createUser(adminUser, userData)
   .then(() => {
-    // Expected createUser to fail
+    // Expected createUser() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Username is not valid.'
-    chai.expect(error.description).to.equal('Username is not valid.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
- * @description Verifies createsUser CANNOT recreate existing username.
- * Expected error thrown: 'User already exists.'
+ * @description Verifies createsUser() CANNOT recreate existing username.
+ * Expected error thrown: 'Bad Request'
  */
-function copyCatUser(done) {
+function rejectDuplicateUser(done) {
   // Create user data
   const userData = {
     username: 'blackpanther',
@@ -236,17 +233,17 @@ function copyCatUser(done) {
     lname: 'Panther'
   };
 
-  // Create user via user controller
+  // Create user via controller
   UserController.createUser(adminUser, userData)
   .then(() => {
-    // Expected createUser to fail
+    // Expected createUser() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'User already exists.'
-    chai.expect(error.description).to.equal('User already exists.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -255,10 +252,11 @@ function copyCatUser(done) {
  * @description Verifies user first name is updated.
  */
 function updateFirstName(done) {
+  // Create user data
   const username = 'blackpanther';
   const userData = { fname: 'Black' };
 
-  // Updates user via user controller
+  // Updates user via controller
   UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => {
     // Verifies user controller updates first name
@@ -268,130 +266,93 @@ function updateFirstName(done) {
     done();
   })
   .catch((error) => {
-    // Expects no error
-    chai.expect(error.description).to.equal(null);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
  * @description Verify that update fails when given invalid input.
- * Expects error thrown: 'Name is not valid.'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidLastNameUpdate(done) {
+  // Create user data
   const username = 'blackpanther';
   const userData = { lname: 'KLAW@#$' }; // TODO: MBX-376 Add this style to style guide
+
+  // Update user via controller
   UserController.updateUser(adminUser, username, userData)
   .then(() => {
-    // Expect update to fail
+    // Expect updateUser() to fail
     // Should not execute, force test to fail
-    chai.expect(true).to.equal(false);
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Name is not valid.'
-    chai.expect(error.description).to.equal('Name is not valid.');
-    done();
-  });
-}
-
-/**
- * @description Verifies updates to a user's custom data field.
- */
-function updateCustomData(done) {
-  const username = 'blackpanther';
-  const userData = {
-    custom: {
-      location: 'America',
-      gender: 'Male'
-    }
-  };
-  UserController.updateUser(adminUser, username, userData)
-  .then((updatedUser) => UserController.findUser(updatedUser.username))
-  .then((retUser) => {
-    // Verify changes to custom data
-    chai.expect(retUser.custom.location).to.equal('America');
-    chai.expect(retUser.custom.gender).to.equal('Male');
-    done();
-  })
-  .catch((error) => {
-    // Expect no error to occur
-    chai.expect(error.description).to.equal(null);
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies that a username cannot be changed.
- * Expects error thrown: 'Update not allowed'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectUsernameUpdate(done) {
+  // Create user data
   const username = 'blackpanther';
   const userData = { username: 'goldpanther' };
 
-  // Expect update to fail
+  // Update user via controller
   UserController.updateUser(adminUser, username, userData)
-  .then((updatedUser) => {
+  .then(() => {
     // TODO: MBX-324 This isn't returning the updated user, fix in controller
-    chai.expect(updatedUser.username).to.equal('goldpanther');
+    // Expect updateUser() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'Update not allowed.'
-    chai.expect(error.description).to.equal('Update not allowed.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
 
 /**
  * @description Verifies that a non-admin CANNOT update a user.
- * Expect error thrown: 'User does not have permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectUserUpdateByNonAdmin(done) {
+  // Create user data
   const username = 'blackpanther';
   const userData = { lname: 'Faker' };
-  // Expect update to fail
+
+  // Update user via controller
   UserController.updateUser(nonAdminUser, username, userData)
   .then(() => {
-    // Update succeeded, force test to fail
+    // Expect updateUser() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'User does not have permissions.'
-    chai.expect(error.description).to.equal('User does not have permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
 
 /**
- * @description Verify update of a non-existent user fails.
- * Expect error thrown: 'User not found.'
- */
-function updateNonExistentUser(done) {
-  const username = 'fakeblackpanther';
-  const userData = { fname: 'Nakia' };
-
-  // Expect update to fail
-  UserController.updateUser(adminUser, username, userData)
-  .then(() => {
-    // Update succeeded, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expect error thrown: 'User not found.'
-    chai.expect(error.description).to.equal('User not found.');
-    done();
-  });
-}
-
-/**
- * @description Verifies the UserController.findUser function retrieves a user.
+ * @description Verifies findUser() retrieves a user.
  */
 function findExistingUser(done) {
+  // Create user data
   const username = 'blackpanther';
-  // Expect find user to succeed
+
+  // Find user via controller
   UserController.findUser(username)
   .then((searchUser) => {
     // Found a user, verify user data
@@ -402,108 +363,101 @@ function findExistingUser(done) {
   })
   .catch((error) => {
     // Expect no error
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
- * @description Verified findUser fails when the user does not exist.
- * Expect error thrown: 'User not found.'
+ * @description Verified findUser() fails when the user does not exist.
+ * Expected error thrown: 'Not Found'
  */
 function rejectFindNonExistentUser(done) {
+  // Create user data
   const username = 'nopanther';
-  // Expect findUser to throw error
-  UserController.findUser(username)
-  .then((searchUser) => {
-    // User was found, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((err) => {
-    // Expect error thrown: 'User not found.'
-    chai.expect(err.description).to.equal('User not found.');
-    done();
-  });
-}
 
-/**
- * @description Verifies that deleting a non-existent user fails.
- * Expect error thrown: 'User not found.'
- */
-function rejectDeleteNonExistentUser(done) {
-  const username = 'wkabi';
-  // Expect remove user to fail
-  UserController.removeUser(adminUser, username)
-  .then((delUser) => {
-    // Remove succeeded, force test to fail.
+  // Find user via controller
+  UserController.findUser(username)
+  .then(() => {
+    // Expect findUser() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
-  .catch((err) => {
-    // Expect error thrown: 'User not found.'
-    // TODO: MBX-379 Make tests check err.message rather than description
-    //       This is so descriptions can be more easily changed
-    chai.expect(err.description).to.equal('User not found.');
+  .catch((error) => {
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
 
 /**
  * @description Verifies that a non-admin user CANNOT delete other users.
- * Expect error thrown: 'User does not have permissions.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectDeleteByNonAdmin(done) {
+  // Create user data
   const username = 'blackpanther';
-  // Expect remove to fail
+
+  // Delete user via controller
   UserController.removeUser(nonAdminUser, username)
   .then(() => {
-    // Remove user succeeded, force test to fail
+    // Expect removeUser() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expect error thrown: 'User does not have permissions.'
-    chai.expect(error.description).to.equal('User does not have permissions.');
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
 
 /**
  * @description Verifies that a user cannot delete themselves.
- * Expects error thrown: 'User cannot delete themselves.'
+ * Expected error thrown: 'Unauthorized'
  */
 function rejectDeleteSelf(done) {
+  // Create user data
   const username = M.config.test.username;
-  // Expect remove to fail
+
+  // Remove user via controller
   UserController.removeUser(adminUser, username)
   .then(() => {
-    // Remove succeeded, force test to fail
+    // Expect removeUser() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
-  .catch((err) => {
-    // Expect error thrown: 'User cannot delete themselves.'
-    chai.expect(err.description).to.equal('User cannot delete themselves.');
+  .catch((error) => {
+    // Expected error thrown: 'Unauthorized'
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }
 
 /**
- * @description Verifies a user can be deleted.
+ * @description Verifies a user can be deleted and cannot be found afterwards.
+ * Expected error thrown: 'Not Found'
  */
 function deleteUser(done) {
+  // Create user data
   const username = 'blackpanther';
-  // Expect remove user to succeed
+
+  // Delete user via controller
   UserController.removeUser(adminUser, username)
-  .then((delUser) => {
-    // Remove user succeeded, verify result
-    chai.expect(delUser).to.equal('blackpanther');
+  // Remove user succeeded, attempt to find user
+  .then(() => UserController.findUser('blackpanther'))
+  .then(() => {
+    // Expect findUser() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    // Expect no error
-    chai.expect(error.description).to.equal(null);
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }

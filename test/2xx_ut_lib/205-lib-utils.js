@@ -30,8 +30,8 @@ const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
 // Define global variables
-let admin = null;
-let nonAdmin = null;
+let adminUser = null;
+let nonAdminUser = null;
 let org = null;
 let intProj = null;
 let privProj = null;
@@ -45,21 +45,21 @@ let privProj = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Connect to database, Create module level users, projects, orgs
+   * Before: Connect to database, Create admin and non-admin user, projects, orgs
    */
   before((done) => {
     // Connect to the database
     db.connect();
 
     // Create new admin user
-    admin = new User({
+    adminUser = new User({
       username: 'adminuser',
       password: 'password',
       admin: true
     });
 
     // Save admin user
-    admin.save((saveUserErr) => {
+    adminUser.save((saveUserErr) => {
       chai.expect(saveUserErr).to.equal(null);
 
       // Create new non-admin user
@@ -67,12 +67,12 @@ describe(M.getModuleName(module.filename), () => {
         username: 'nonadminuser',
         password: 'password'
       };
-      UserController.createUser(admin, nonAdminData)
+      UserController.createUser(adminUser, nonAdminData)
       .then((user) => {
-        nonAdmin = user;
+        nonAdminUser = user;
 
         // Creating global org
-        return OrgController.createOrg(admin, { id: 'orgid', name: 'Org Name' });
+        return OrgController.createOrg(adminUser, { id: 'orgid', name: 'Org Name' });
       })
       .then((retOrg) => {
         org = retOrg;
@@ -86,7 +86,7 @@ describe(M.getModuleName(module.filename), () => {
           },
           visibility: 'internal'
         };
-        return ProjectController.createProject(admin, intProjData);
+        return ProjectController.createProject(adminUser, intProjData);
       })
       .then((proj) => {
         intProj = proj;
@@ -100,14 +100,14 @@ describe(M.getModuleName(module.filename), () => {
           },
           visibility: 'private'
         };
-        return ProjectController.createProject(admin, privProjData);
+        return ProjectController.createProject(adminUser, privProjData);
       })
       .then((proj) => {
         privProj = proj;
         done();
       })
       .catch((error) => {
-        chai.expect(error).to.equal(null);
+        chai.expect(error.message).to.equal(null);
         done();
       });
     });
@@ -118,10 +118,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove org
-    OrgController.removeOrg(admin, 'orgid', { soft: false })
+    OrgController.removeOrg(adminUser, 'orgid', { soft: false })
 
     // Remove non-admin user
-    .then(() => UserController.removeUser(admin, 'nonadminuser'))
+    .then(() => UserController.removeUser(adminUser, 'nonadminuser'))
     .then(() => {
       // Remove admin user
       User.findOne({
@@ -138,7 +138,7 @@ describe(M.getModuleName(module.filename), () => {
       });
     })
     .catch((error) => {
-      chai.expect(error).to.equal(null);
+      chai.expect(error.message).to.equal(null);
       // Disconnect database
       db.disconnect();
       done();
@@ -206,7 +206,7 @@ function numberIsString(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.status).to.equal(400);
+    chai.expect(error.message).to.equal('Bad Request');
   }
   // Checks for correct type and returns a boolean
   chai.expect(utils.checkType([1, 2], 'string')).to.equal(false);
@@ -254,7 +254,7 @@ function projectUserExists(done) {
     chai.expect(true).to.equal(false);
   }
   catch (error) {
-    chai.expect(error.status).to.equal(400);
+    chai.expect(error.message).to.equal('Bad Request');
   }
   // Checks for INCORRECT key and returns false
   chai.expect(utils.checkExists(['project.user'], sampleObj)).to.equal(false);
@@ -300,7 +300,7 @@ function userIsNotAdmin(done) {
     chai.expect(true).to.equal(false);
   }
   catch (error) {
-    chai.expect(error.status).to.equal(401);
+    chai.expect(error.message).to.equal('Unauthorized');
   }
   chai.expect(utils.checkAdmin(user)).to.equal(false);
   done();
@@ -331,7 +331,7 @@ function invalidUID(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.description).to.equal('Value is not a string.');
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   }
 }
@@ -348,7 +348,7 @@ function parseValidUID(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   }
 }
@@ -363,8 +363,7 @@ function parseInvalidUID(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.description).to.equal('Invalid UID.');
-    chai.expect(error.status).to.equal(400);
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   }
 }
@@ -379,7 +378,7 @@ function parseValidUIDSecondElement(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.description).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   }
 }
@@ -390,26 +389,26 @@ function parseValidUIDSecondElement(done) {
  */
 function permissionsInternalProject(done) {
   // Admin sets read permission for non-admin user
-  OrgController.setPermissions(admin, org.id, nonAdmin, 'read')
+  OrgController.setPermissions(adminUser, org.id, nonAdminUser, 'read')
   // Find the project
-  .then(() => ProjectController.findProject(admin, org.id, intProj.id))
+  .then(() => ProjectController.findProject(adminUser, org.id, intProj.id))
   .then((proj) => {
     // Get non-admin permission from current
-    const intProjPerm = utils.getPermissionStatus(nonAdmin, proj);
+    const intProjPerm = utils.getPermissionStatus(nonAdminUser, proj);
     // Check that the non-admin user now has read permission
     chai.expect(intProjPerm).to.include('read');
 
     // Checks non-admin has read permission
-    const intProjRead = utils.checkAccess(nonAdmin, proj, 'read');
+    const intProjRead = utils.checkAccess(nonAdminUser, proj, 'read');
     chai.expect(intProjRead).to.equal(true);
 
     // Checks non-admin has write permission, expected to be false
-    const intProjWrite = utils.checkAccess(nonAdmin, proj, 'write');
+    const intProjWrite = utils.checkAccess(nonAdminUser, proj, 'write');
     chai.expect(intProjWrite).to.equal(false);
     done();
   })
   .catch((error) => {
-    chai.expect(error).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -420,21 +419,21 @@ function permissionsInternalProject(done) {
  */
 function permissionsPrivateProject(done) {
   // Find project
-  ProjectController.findProject(admin, org.id, privProj.id)
+  ProjectController.findProject(adminUser, org.id, privProj.id)
   .then((proj) => {
     // Get project's permission for non-admin user
-    const privProjPerm = utils.getPermissionStatus(nonAdmin, proj);
+    const privProjPerm = utils.getPermissionStatus(nonAdminUser, proj);
 
     // Test permission to be empty
     chai.expect(privProjPerm).to.be.empty; // eslint-disable-line no-unused-expressions
 
     // Check if non-admin user has read access
-    const privProjRead = utils.checkAccess(nonAdmin, proj, 'read');
+    const privProjRead = utils.checkAccess(nonAdminUser, proj, 'read');
     chai.expect(privProjRead).to.equal(false);
     done();
   })
   .catch((error) => {
-    chai.expect(error).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
