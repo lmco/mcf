@@ -308,7 +308,6 @@ function rejectUsernameUpdate(done) {
   // Update user via controller
   UserController.updateUser(adminUser, username, userData)
   .then(() => {
-    // TODO: MBX-324 This isn't returning the updated user, fix in controller
     // Expect updateUser() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
