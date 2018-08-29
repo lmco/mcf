@@ -135,10 +135,10 @@ function createRootPackage(done) {
   newPackage.save()
   // Find the root package element
   .then(() => Element.Package.findOne({ uid: 'avengers:timeloop:0001' }))
-  .then((package) => {
+  .then((retPackage) => {
     // Check the root package element saved correctly
-    chai.expect(package.uid).to.equal('avengers:timeloop:0001');
-    chai.expect(package.type).to.equal('Package');
+    chai.expect(retPackage.uid).to.equal('avengers:timeloop:0001');
+    chai.expect(retPackage.type).to.equal('Package');
     done();
   })
   .catch((error) => {
