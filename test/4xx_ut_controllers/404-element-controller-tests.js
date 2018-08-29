@@ -390,7 +390,7 @@ function rejectCreateElementExistingUUID(done) {
   })
   .catch((error) => {
     // Expect error thrown: 'Element with uuid already exists.'
-    chai.expect(error.description).to.equal('An element with a matching uuid already exists.');
+    chai.expect(error.description).to.equal('An element with a matching UUID already exists.');
     done();
   });
 }

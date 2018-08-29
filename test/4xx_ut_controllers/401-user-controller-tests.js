@@ -246,7 +246,7 @@ function copyCatUser(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'User already exists.'
-    chai.expect(error.description).to.equal('a user with a matching username already exists.');
+    chai.expect(error.description).to.equal('A user with a matching username already exists.');
     done();
   });
 }
