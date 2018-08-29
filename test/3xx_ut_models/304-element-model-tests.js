@@ -54,7 +54,7 @@ describe(M.getModuleName(module.filename), () => {
     // Create the organization model object
     const newOrg = new Org({
       id: 'avengers',
-      name: 'The Avengers',
+      name: 'The Avengers'
     });
 
     // Save the organization model object to the database
@@ -110,8 +110,7 @@ describe(M.getModuleName(module.filename), () => {
   // TODO: Add tests for find and update
   /* Execute the tests */
   it('should create a root package', createRootPackage);
-  it('should create a block (1)', createBlock01);
-  it('should create a block (2)', createBlock02);
+  it('should create a block (1)', createBlock);
   it('should create a relationship between blocks', createRelationship);
   // TODO: consider adding a find relationship test (MBX-374)
   it('should hard delete blocks and relationships', deleteBlocksAndRelationships);
@@ -159,7 +158,7 @@ function createRootPackage(done) {
  * @description Creates a block element in the root package previously created
  * in the createRootPackage test
  */
-function createBlock01(done) {
+function createBlock(done) {
   // Find root package element created in createRootPackage test
   Element.Package.findOne({
     uid: 'avengers:timeloop:0001'
@@ -203,56 +202,6 @@ function createBlock01(done) {
 }
 
 /**
- * @description Creates a second block element in the root package previously
- * created in the createRootPackage test
- */
-function createBlock02(done) {
-  // Find root package element created in createRootPackage test
-  Element.Package.findOne({
-    uid: 'avengers:timeloop:0001'
-  })
-  .exec((findRootErr, pkg) => {
-    // Check for no error
-    if (findRootErr) {
-      M.log.error(findRootErr);
-      chai.expect(findRootErr).to.equal(null);
-    }
-
-    // Create second new block element object
-    const newBlock = new Element.Block({
-      id: '0003',
-      uid: 'avengers:timeloop:0003',
-      name: 'Going on repeat',
-      project: project._id,
-      parent: pkg._id
-    });
-
-    // Save second block element object to the database
-    newBlock.save((saveErr, createdBlock) => {
-      if (saveErr) {
-        M.log.error(saveErr);
-        chai.expect(saveErr).to.equal(null);
-      }
-
-      // Check second block element object saved correctly
-      chai.expect(createdBlock.uid).to.equal('avengers:timeloop:0003');
-      chai.expect(createdBlock.name).to.equal('Going on repeat');
-      chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
-      // Check second block element has root package as its parent
-      chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
-
-      // Add second block element to root package's contains field
-      pkg.contains.push(createdBlock);
-      pkg.save((packageSaveErr) => {
-        // Expect no error
-        chai.expect(packageSaveErr).to.equal(null);
-        done();
-      });
-    });
-  });
-}
-
-/**
  * @description Creates a relationship between the elements in the project's root package
  */
 function createRelationship(done) {
@@ -267,15 +216,15 @@ function createRelationship(done) {
       chai.expect(findRootErr).to.equal(null);
     }
 
-    // Expect the package to contain two child elements already
-    chai.expect(pkg.contains.length).to.equal(2);
+    // Expect the package to contain one child element already
+    chai.expect(pkg.contains.length).to.equal(1);
     const source = pkg.contains[0];
-    const target = pkg.contains[1];
+    const target = pkg.contains[0];
 
-    // Create the new relationship connecting the two existing blocks
+    // Create the new relationship connecting the existing block
     const newRelationship = new Element.Relationship({
-      id: '0004',
-      uid: 'avengers:timeloop:0004',
+      id: '0003',
+      uid: 'avengers:timeloop:0003',
       name: 'Time looping',
       project: project._id,
       parent: pkg._id,
@@ -289,7 +238,7 @@ function createRelationship(done) {
       chai.expect(saveErr).to.equal(null);
 
       // Make sure it created what we expect and finish
-      chai.expect(createdRelationship.uid).to.equal('avengers:timeloop:0004');
+      chai.expect(createdRelationship.uid).to.equal('avengers:timeloop:0003');
       chai.expect(createdRelationship.name).to.equal('Time looping');
       chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
       chai.expect(createdRelationship.parent.toString()).to.equal(pkg._id.toString());
@@ -310,34 +259,25 @@ function createRelationship(done) {
 }
 
 /**
- * @description Delete the previously created blocks and relationships
+ * @description Delete the previously created block and relationship
  */
 function deleteBlocksAndRelationships(done) {
   // Find and delete the element of type 'relationship'
   Element.Relationship.findOneAndRemove({
-    uid: 'avengers:timeloop:0004'
+    uid: 'avengers:timeloop:0003'
   })
   .exec((relDeleteError) => {
     // Expect no error
     chai.expect(relDeleteError).to.equal(null);
 
-    // Find and delete the second block that was created
+    // Find and delete the block that was created
     Element.Block.findOneAndRemove({
-      uid: 'avengers:timeloop:0003'
+      uid: 'avengers:timeloop:0002'
     })
-    .exec((block02DeleteError) => {
+    .exec((block01DeleteError) => {
       // Expect no error
-      chai.expect(block02DeleteError).to.equal(null);
-
-      // Find and delete the first block that was created
-      Element.Block.findOneAndRemove({
-        uid: 'avengers:timeloop:0002'
-      })
-      .exec((block01DeleteError) => {
-        // Expect no error
-        chai.expect(block01DeleteError).to.equal(null);
-        done();
-      });
+      chai.expect(block01DeleteError).to.equal(null);
+      done();
     });
   });
 }
