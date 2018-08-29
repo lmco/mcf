@@ -684,23 +684,23 @@ class ProjectController {
    *
    *
    * @param {User} reqUser  The object containing the requesting user.
+   * @param {User} findUser The object containing the user to be searched for.
    * @param {String} organizationID  The organization ID for the org the project belongs to.
    * @param {String} projectID  The project ID of the Project which is being deleted.
-   * @param {User} user The object containing the user to be searched for.
    */
-  static findPermissions(reqUser, organizationID, projectID, user) {
+  static findPermissions(reqUser, findUser, organizationID, projectID) {
     return new Promise((resolve, reject) => {
       const orgID = sani.html(organizationID);
       const projID = sani.html(projectID);
 
       // Find Project
       ProjectController.findAllPermissions(reqUser, orgID, projID)
-      .then((permissionList) => {
-        if (!permissionList.hasOwnProperty(user.username)) {
-          return reject(new errors.CustomError('User not found.', 404));
+      .then(permissionList => {
+        if (!permissionList.hasOwnProperty(findUser.username)) {
+          return resolve({});
         }
 
-        return resolve(permissionList[user.username]);
+        return resolve(permissionList[findUser.username]);
       })
       .catch((findPermissionsErr) => reject(findPermissionsErr));
     });
@@ -725,6 +725,9 @@ class ProjectController {
    * @param {String} projectID  The project ID of the Project which is being deleted.
    * @param {User} setUser  The object containing the user which permissions are being set for.
    * @param {String} permissionType  The permission level or type being set for the user.
+   *
+   * TODO: Adopt consistent interfaces between similar functions in orgs,
+   * specifically, the same function in OrgController. Talk to Josh.
    */
   static setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
     return new Promise((resolve, reject) => {

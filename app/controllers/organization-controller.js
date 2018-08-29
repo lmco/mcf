@@ -516,18 +516,18 @@ class OrganizationController {
    * });
    *
    *
-   * @param {User} user  The object containing the requesting user.
-   * @param {User} username  The object containing the user whose info is being returned
+   * @param {User} reqUser  The object containing the requesting user.
+   * @param {User} findUser  The object containing the user whose info is being returned
    * @param {string} organizationID  The ID of the organization
    */
-  static findPermissions(user, username, organizationID) {
+  static findPermissions(reqUser, findUser, organizationID) {
     return new Promise((resolve, reject) => {
-      OrganizationController.findAllPermissions(user, organizationID)
-      .then(users => {
-        if (users[username.username] === undefined) {
-          return reject(new errors.CustomError('User does not have permissions.', 401));
+      OrganizationController.findAllPermissions(reqUser, organizationID)
+      .then(permissionList => {
+        if (!permissionList.hasOwnProperty(findUser.username)) {
+          return resolve({});
         }
-        return resolve(users[username.username]);
+        return resolve(permissionList[findUser.username]);
       })
       .catch(error => reject(error));
     });
