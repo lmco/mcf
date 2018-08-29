@@ -114,7 +114,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a relationship between blocks', createRelationship);
   // TODO: consider adding a find relationship test (MBX-374)
   it('should hard delete blocks and relationships', deleteBlocksAndRelationships);
-  it('should soft-delete the root package', softDeleteRootPackage);
   it('should hard delete the root package', deleteRootPackage);
 });
 
@@ -278,46 +277,6 @@ function deleteBlocksAndRelationships(done) {
       // Expect no error
       chai.expect(block01DeleteError).to.equal(null);
       done();
-    });
-  });
-}
-
-/**
- * @description Soft deletes the previously created root package
- */
-function softDeleteRootPackage(done) {
-  // TODO: Remove LM specific comments (MBX-370)
-  // LM: Changed from findOneAndUpdate to a find and then update
-  // findOneAndUpdate does not call setters, and was causing strange
-  // behavior with the deleted and deletedOn fields.
-  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-  // Find the package based on uid
-  Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
-  .exec((error, elem) => {
-    // Expect no error
-    chai.expect(error).to.equal(null);
-
-    // Set deleted field to true
-    elem.deleted = true;
-
-    // Save the updated package
-    elem.save((saveErr) => {
-      // Expect no error
-      chai.expect(saveErr).to.equal(null);
-
-      // Find updated package
-      Element.Package.findOne({
-        uid: 'avengers:timeloop:0001'
-      })
-      .exec((findErr, foundElem) => {
-        // Expect no error
-        chai.expect(findErr).to.equal(null);
-
-        // Ensure package has been soft-deleted
-        chai.expect(foundElem.deleted).to.equal(true);
-        chai.expect(foundElem.deletedOn).to.not.equal(null);
-        done();
-      });
     });
   });
 }
