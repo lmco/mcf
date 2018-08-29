@@ -387,6 +387,7 @@ UserSchema.pre('remove', function(next) {
   Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     org.permissions.read.splice(org.permissions.read.indexOf(this._id.toString()), 1);
+    org.permissions.write.splice(org.permissions.write.indexOf(this._id.toString()), 1);
     org.save((saveErr) => {
       if (saveErr) {
         // If error occurs, return it
