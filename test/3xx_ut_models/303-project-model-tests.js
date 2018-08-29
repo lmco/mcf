@@ -72,7 +72,7 @@ describe(M.getModuleName(module.filename), () => {
     // Authenicate user
     // Note: non-admin user is created during authenticate if NOT exist. (ldap only)
     AuthController.authenticate(reqObj, resObj, (error) => {
-      chai.expect(err).to.equal(null);
+      chai.expect(error).to.equal(null);
       chai.expect(reqObj.user.username).to.equal(M.config.test.username);
 
       // TODO - consider using an .exec rather than callback to make this cleaner (MBX-373)
