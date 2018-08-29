@@ -29,6 +29,12 @@ const chai = require('chai');
 // Load MBEE modules
 const Org = M.require('models.organization');
 const db = M.require('lib.db');
+const AuthController = M.require('lib.auth');
+const User = M.require('models.user');
+const mockExpress = M.require('lib.mock-express');
+
+// Variables used across test functions
+let userAdmin = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -39,29 +45,66 @@ const db = M.require('lib.db');
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests. Open database connection.
+   * Before: runs before all tests. Open database connection and creates admin
+   * user.
    */
-  before(() => {
+  before((done) => {
     db.connect();
+    const params = {};
+    const body = {
+      username: M.config.test.username,
+      password: M.config.test.password
+    };
+
+    const reqObj = mockExpress.getReq(params, body);
+    const resObj = mockExpress.getRes();
+
+    AuthController.authenticate(reqObj, resObj, (err) => {
+      chai.expect(err).to.equal(null);
+      chai.expect(reqObj.user.username).to.equal(M.config.test.username);
+
+      // TODO - consider using an .exec rather than callback to make this cleaner (MBX-373)
+      User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true },
+        { new: true },
+        (updateErr, userUpdate) => {
+          chai.expect(updateErr).to.equal(null);
+          chai.expect(userUpdate).to.not.equal(null);
+
+          userAdmin = userUpdate;
+          done();
+        });
+    });
   });
 
   /**
-   * After: runs after all tests. Close database connection.
+   * After: runs after all tests. Deletes admin user and close database
+   * connection.
    */
-  after(() => {
-    // Disconnect from database
-    db.disconnect();
+  after((done) => {
+    // Find user
+    User.findOne({
+      username: M.config.test.username
+    }, (err, foundUser) => {
+      chai.expect(err).to.equal(null);
+      // Remove user
+      foundUser.remove((err2) => {
+        chai.expect(err2).to.equal(null);
+
+        // Disconnect from database
+        db.disconnect();
+        done();
+      });
+    });
   });
 
-  // TODO: add a find, update, and permission tests (MBX-372)
-  // Add test for setting and retrieving org permissions
-  // Add test to retrieves and updates orgs
   /* Execute the tests */
   it('should create an organization', createOrg);
+  it('should find an organization', findOrg);
+  it('should update an organization', updateOrg);
+  it('should get all permissions of an organization', findOrgPermissions);
   it('should soft delete an organization', softDeleteOrg);
   it('should hard delete an organization', deleteOrg);
 });
-
 
 /* --------------------( Tests )-------------------- */
 /**
@@ -71,11 +114,81 @@ function createOrg(done) {
   // Create an organization from the Organization model object
   const org = new Org({
     id: 'avengers',
-    name: 'Avengers Initiative'
+    name: 'Avengers Initiative',
+    permissions: {
+      admin: [userAdmin._id],
+      write: [userAdmin._id],
+      read: [userAdmin._id]
+    }
   });
   // Save the Organization model object to the database
-  org.save((err) => {
+  org.save((error) => {
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Finds an organization using the Organization Model
+ */
+function findOrg(done) {
+  // Find the created organization from the previous createOrg() test
+  Org.findOne({
+    id: 'avengers',
+    name: 'Avengers Initiative'
+  }, (err, retOrg) => {
+    // Expect no error
     chai.expect(err).to.equal(null);
+
+    // Verify correct org is returned
+    chai.expect(retOrg.id).to.equal('avengers');
+    chai.expect(retOrg.name).to.equal('Avengers Initiative');
+
+    done();
+  });
+}
+
+/**
+ * @description Updates an organization using the Organization Model
+ */
+function updateOrg(done) {
+  // Find and update the org created in the previous createOrg() test
+  Org.findOneAndUpdate({
+    id: 'avengers'
+  }, {
+    name: 'Avengers'
+  }, (err, org) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+
+    // Find the updated org
+    Org.findOne({
+      id: org.id
+    }, (err2, retOrg) => {
+      // Expect no error
+      chai.expect(err2).to.equal(null);
+
+      // Verify org is updated correctly
+      chai.expect(retOrg.id).to.equal('avengers');
+      chai.expect(retOrg.name).to.equal('Avengers');
+      done();
+    });
+  });
+}
+
+/**
+ * @description Finds permissions an organization using the Organization Model.
+ */
+function findOrgPermissions(done) {
+  // Finds permissions on the org created in the previous createOrg() test
+  Org.findOne({
+    id: 'avengers'
+  }, (err, retOrg) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+
+    // Confirming user permissions are in organization
+    chai.expect(retOrg.permissions.write[0].toString()).to.equal(userAdmin._id.toString());
     done();
   });
 }
@@ -96,13 +209,15 @@ function softDeleteOrg(done) {
     // Set the deleted field of the organization to true
     org.deleted = true;
     // Save the updated organization object to the database
-    org.save((saveErr) => {
+    org.save((error) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
       // Find the previously updated organization
       Org.findOne({
         id: org.id
-      }, (err2, org2) => {
+      }, (error2, org2) => {
         // Verify the organization has been soft deleted.
-        chai.expect(err2).to.equal(null);
+        chai.expect(error2).to.equal(null);
         chai.expect(org2.deletedOn).to.not.equal(null);
         chai.expect(org2.deleted).to.equal(true);
         done();
@@ -118,9 +233,9 @@ function deleteOrg(done) {
   // find and remove the organization
   Org.findOneAndRemove({
     id: 'avengers'
-  }, (err) => {
+  }, (error) => {
     // Check that the remove action did not fail.
-    chai.expect(err).to.equal(null);
+    chai.expect(error).to.equal(null);
     done();
   });
 }

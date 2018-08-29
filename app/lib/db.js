@@ -52,6 +52,7 @@ module.exports.connect = function() {
       const caPath = path.join(M.root, 'certs', M.config.db.ca);
       const caFile = fs.readFileSync(caPath, 'utf8');
       options.sslCA = caFile;
+      options.useNewUrlParser = true;
     }
 
     mongoose.connect(connectURL, options, (err, msg) => {
