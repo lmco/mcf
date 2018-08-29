@@ -30,16 +30,12 @@ const chai = require('chai');
 const Element = M.require('models.element');
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
 const db = M.require('lib/db');
-const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 let org = null;
 let project = null;
-let user = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -54,68 +50,39 @@ describe(M.getModuleName(module.filename), () => {
    */
   before((done) => {
     db.connect();
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
 
-    // TODO: Create a user and set them to an admin of the Organization and (MBX-374)
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-    AuthController.authenticate(reqObj, resObj, (error) => {
-      chai.expect(error).to.equal(null);
-      chai.expect(reqObj.user.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true }, { new: true },
-        (updateErr, updatedUser) => {
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(updatedUser).to.not.equal(null);
-          user = updatedUser;
+    // Create the organization model object
+    const newOrg = new Org({
+      id: 'avengers',
+      name: 'The Avengers',
+    });
 
-          // Create the organization model object
-          const newOrg = new Org({
-            id: 'avengers',
-            name: 'The Avengers',
-            permissions: {
-              admin: [user._id],
-              write: [user._id],
-              read: [user._id]
-            }
-          });
+    // Save the organization model object to the database
+    newOrg.save((orgSaveErr, savedOrg) => {
+      // Check for no error
+      chai.expect(orgSaveErr).to.equal(null);
 
-          // Save the organization model object to the database
-          newOrg.save((orgSaveErr, savedOrg) => {
-            // Check for no error
-            chai.expect(orgSaveErr).to.equal(null);
+      // Update organization for test data
+      org = savedOrg;
 
-            // Update organization for test data
-            org = savedOrg;
+      // Create the project model object
+      const newProject = new Project({
+        id: 'timeloop',
+        name: 'Time Gem',
+        org: org._id,
+        uid: `${org.id}:timeloop`
+      });
 
-            // Create the project model object
-            const newProject = new Project({
-              id: 'timeloop',
-              name: 'Time Gem',
-              org: org._id,
-              permissions: {
-                admin: [user._id],
-                write: [user._id],
-                read: [user._id]
-              },
-              uid: `${org.id}:timeloop`
-            });
+      // Save the project model object to the database
+      newProject.save((projectSaveErr, savedProject) => {
+        // Check for no error
+        chai.expect(projectSaveErr).to.equal(null);
 
-            // Save the project model object to the database
-            newProject.save((projectSaveErr, savedProject) => {
-              // Check for no error
-              chai.expect(projectSaveErr).to.equal(null);
+        // Update project for test data
+        project = savedProject;
 
-              // Update project for test data
-              project = savedProject;
-
-              done();
-            });
-          });
-        });
+        done();
+      });
     });
   });
 
@@ -124,40 +91,24 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the project created in before()
-    Project.findOneAndRemove({
-      uid: project.uid
+    Project.findOneAndRemove({ uid: project.uid })
+    // Remove the org created in before()
+    .then(() => Org.findOneAndRemove({ id: org.id }))
+    .then(() => {
+      db.disconnect();
+      done();
     })
-    .exec((projectRemoveErr) => {
-      // Check for no error
-      chai.expect(projectRemoveErr).to.equal(null);
+    .catch((error) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
 
-      // Remove the org created in before()
-      Org.findOneAndRemove({
-        id: org.id
-      })
-      .exec((orgRemoveErr) => { // TODO: use promises where possible (MBX-374)
-        // Check for no error
-        chai.expect(orgRemoveErr).to.equal(null);
-
-        // TODO: remove user created in before() (MBX-374)
-        User.findOne({
-          username: M.config.test.username
-        }, (error, foundUser) => {
-          chai.expect(error).to.equal(null);
-          foundUser.remove((error2) => {
-            chai.expect(error2).to.equal(null);
-            db.disconnect();
-            done();
-          });
-        });
-      });
+      db.disconnect();
+      done();
     });
   });
 
-  // Add tests for find, update, and permissions
+  // TODO: Add tests for find and update
   /* Execute the tests */
-  it('should create a generic element', createElement);
-  it('should delete the generic element', deleteElement);
   it('should create a root package', createRootPackage);
   it('should create a block (1)', createBlock01);
   it('should create a block (2)', createBlock02);
@@ -170,44 +121,6 @@ describe(M.getModuleName(module.filename), () => {
 
 
 /* --------------------( Tests )-------------------- */
-/**
- * @description Creates a generic block element
- */
-function createElement(done) {
-  // Create new block element model object
-  const newElement = new Element.Block({
-    id: '0000',
-    uid: 'avengers:timeloop:0000',
-    name: 'The begining of time loop',
-    project: project._id,
-    parent: null
-  });
-  // Save block element model object to database
-  newElement.save((error, createdElement) => {
-    // Check for no error
-    chai.expect(error).to.equal(null);
-    // Check block element saved correctly
-    chai.expect(createdElement.uid).to.equal('avengers:timeloop:0000');
-    chai.expect(createdElement.id).to.equal('0000');
-    done();
-  });
-}
-
-/**
- * @description Deletes block element previously created in createElement test
- */
-function deleteElement(done) {
-  // Find and remove the block element created in createElement test
-  Element.Element.findOneAndRemove({
-    uid: 'avengers:timeloop:0000'
-  })
-  .exec((error) => {
-    // Check for no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
 /**
  * @description Creates a root package element for test data project
  */
