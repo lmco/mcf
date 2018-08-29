@@ -164,6 +164,7 @@ class ApiController {
       for (let i = 0; i < orgs.length; i++) {
         orgsPublicData.push(orgs[i].getPublicData());
       }
+      
       // Return 200 and the orgs
       res.header('Content-Type', 'application/json');
       return res.status(200).send(ApiController.formatJSON(orgsPublicData));
