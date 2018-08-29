@@ -166,7 +166,7 @@ OrganizationSchema.virtual('projects', {
   */
 OrganizationSchema.methods.getPublicData = function() {
   return {
-    id: this.username,
+    id: this.id,
     name: this.name,
     projects: this.projects,
     permissions: this.permissions

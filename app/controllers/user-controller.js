@@ -24,7 +24,8 @@ const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
 const validators = M.require('lib.validators');
-
+const Organization = M.require('models.organization');
+const Project = M.require('models.project');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -334,6 +335,32 @@ class UserController {
       })
       .catch((error) => reject(error));
     }));
+  }
+
+
+  /**
+   * @description This function takes a object of an org or project and
+   * returns the public data of the users on that org or project.
+   *
+   * @example
+   *
+   *
+   * @param {User} requestingUser  The object containing the requesting user.
+   * @param {String} usernameToDelete  The username of the user to be deleted.
+   */
+  static getPublicUserData(modelObject) {
+    return new Promise((resolve, reject) => {
+      if (!(object instanceof Organization || object instanceof Project)) {
+        return reject(new errors.CustomError('Incorrect type of object.', 400));
+      }
+      const membersRead = modelObject.permissions.read.map(u => u.getPublicData());
+      const membersWrite = modelObject.permissions.write.map(u => u.getPublicData());
+      const membersAdmin = modelObject.permissions.admin.map(u => u.getPublicData());
+      modelObject.permissions.read = membersRead;
+      modelObject.permissions.write = membersWrite;
+      modelObject.permissions.admin = membersAdmin;
+      return resolve(modelObject);
+    });
   }
 
 }
