@@ -16,11 +16,10 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests the Element Model functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code. The element model tests create elements,
- * root packages, blocks, and relationships. These tests also hard deletes blocks
- * and relationships, as well as, soft and har deletes root packages.
+ * @description This tests the Element Model functionality. The element
+ * model tests create root packages, blocks, and relationships. These tests
+ * find, update and delete the blocks. THe relationship and package are
+ * also deleted.
  */
 
 // Load node modules
@@ -58,12 +57,10 @@ describe(M.getModuleName(module.filename), () => {
     });
 
     // Save the organization model object to the database
-    newOrg.save((orgSaveErr, savedOrg) => {
-      // Check for no error
-      chai.expect(orgSaveErr).to.equal(null);
-
+    newOrg.save()
+    .then((retOrg) => {
       // Update organization for test data
-      org = savedOrg;
+      org = retOrg;
 
       // Create the project model object
       const newProject = new Project({
@@ -74,15 +71,18 @@ describe(M.getModuleName(module.filename), () => {
       });
 
       // Save the project model object to the database
-      newProject.save((projectSaveErr, savedProject) => {
-        // Check for no error
-        chai.expect(projectSaveErr).to.equal(null);
+      return newProject.save();
+    })
+    .then((retProj) => {
+      // Update project for test data
+      project = retProj;
 
-        // Update project for test data
-        project = savedProject;
-
-        done();
-      });
+      done();
+    })
+    .catch((error) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
@@ -107,14 +107,13 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
-  // TODO: Add tests for find and update
   /* Execute the tests */
   it('should create a root package', createRootPackage);
   it('should create a block (1)', createBlock);
   it('should create a relationship between blocks', createRelationship);
-  // TODO: consider adding a find relationship test (MBX-374)
-  it('should hard delete blocks and relationships', deleteBlocksAndRelationships);
-  it('should hard delete the root package', deleteRootPackage);
+  it('should find a block', findBlock);
+  it('should update a block', updateBlock);
+  it('should delete blocks and relationships', deleteElements);
 });
 
 
@@ -133,23 +132,20 @@ function createRootPackage(done) {
   });
 
   // Save the root package element to the database
-  newPackage.save((error) => {
-    // Check for no error
+  newPackage.save()
+  // Find the root package element
+  .then(() => Element.Package.find({ uid: 'avengers:timeloop:0001' }))
+  .then((packages) => {
+    // Check the root package element saved correctly
+    chai.expect(packages.length).to.equal(1);
+    chai.expect(packages[0].uid).to.equal('avengers:timeloop:0001');
+    chai.expect(packages[0].type).to.equal('Package');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
     chai.expect(error).to.equal(null);
-
-    // Find the root package element
-    Element.Package.find({
-      uid: 'avengers:timeloop:0001'
-    })
-    .exec((findErr, packages) => {
-      // Check for no error
-      chai.expect(findErr).to.equal(null);
-      // Check the root package element saved correctly
-      chai.expect(packages.length).to.equal(1);
-      chai.expect(packages[0].uid).to.equal('avengers:timeloop:0001');
-      chai.expect(packages[0].type).to.equal('Package');
-      done();
-    });
+    done();
   });
 }
 
@@ -162,10 +158,7 @@ function createBlock(done) {
   Element.Package.findOne({
     uid: 'avengers:timeloop:0001'
   })
-  .exec((findRootErr, pkg) => {
-    // Check for no error
-    chai.expect(findRootErr).to.equal(null);
-
+  .then((pkg) => {
     // Create new block element object
     const newBlock = new Element.Block({
       id: '0002',
@@ -177,10 +170,8 @@ function createBlock(done) {
 
     // Save block element object to database
     newBlock.save((saveErr, createdBlock) => {
-      if (saveErr) {
-        M.log.error(saveErr);
-        chai.expect(saveErr).to.equal(null);
-      }
+      // Expect no error
+      chai.expect(saveErr).to.equal(null);
 
       // Check block element object saved correctly
       chai.expect(createdBlock.uid).to.equal('avengers:timeloop:0002');
@@ -197,6 +188,11 @@ function createBlock(done) {
         done();
       });
     });
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
@@ -205,16 +201,8 @@ function createBlock(done) {
  */
 function createRelationship(done) {
   // Start by grabbing the root package
-  Element.Package.findOne({
-    uid: 'avengers:timeloop:0001'
-  })
-  .exec((findRootErr, pkg) => {
-    // Make sure no errors occur in lookup
-    if (findRootErr) {
-      M.log.error(findRootErr);
-      chai.expect(findRootErr).to.equal(null);
-    }
-
+  Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
+  .then((pkg) => {
     // Expect the package to contain one child element already
     chai.expect(pkg.contains.length).to.equal(1);
     const source = pkg.contains[0];
@@ -254,42 +242,70 @@ function createRelationship(done) {
         done();
       });
     });
-  });
-}
-
-/**
- * @description Delete the previously created block and relationship
- */
-function deleteBlocksAndRelationships(done) {
-  // Find and delete the element of type 'relationship'
-  Element.Relationship.findOneAndRemove({
-    uid: 'avengers:timeloop:0003'
   })
-  .exec((relDeleteError) => {
+  .catch((error) => {
     // Expect no error
-    chai.expect(relDeleteError).to.equal(null);
-
-    // Find and delete the block that was created
-    Element.Block.findOneAndRemove({
-      uid: 'avengers:timeloop:0002'
-    })
-    .exec((block01DeleteError) => {
-      // Expect no error
-      chai.expect(block01DeleteError).to.equal(null);
-      done();
-    });
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
 /**
- * @description Hard delete the previously created root package
+ * @description Find the previously created block
  */
-function deleteRootPackage(done) {
-  // Find and delete the package
-  Element.Package.findOneAndRemove({
-    uid: 'avengers:timeloop:0001'
+function findBlock(done) {
+  // Find the block
+  Element.Element.findOne({ id: '0002' })
+  .then((element) => {
+    // Verify found element is correct
+    chai.expect(element.name).to.equal('In time loop 2');
+    done();
   })
-  .exec((error) => {
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Update the previously created block
+ */
+function updateBlock(done) {
+  // Update the block
+  Element.Element.findOneAndUpdate({ id: '0002' }, { name: 'No more looping' })
+  // Find the updated element
+  .then(() => Element.Element.findOne({ id: '0002' }))
+  .then((element) => {
+    // Verify the found element was update successfully
+    chai.expect(element.name).to.equal('No more looping');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Delete the previously created block, relationship and package
+ */
+function deleteElements(done) {
+  // Find and delete the element of type 'relationship'
+  Element.Relationship.findOneAndRemove({ uid: 'avengers:timeloop:0003' })
+  // Find and delete the element of type 'Block'
+  .then(() => Element.Block.findOneAndRemove({ uid: 'avengers:timeloop:0002' }))
+  // Find and delete the element of type 'Package'
+  .then(() => Element.Package.findOneAndRemove({ uid: 'avengers:timeloop:0001' }))
+  // Attempt to find any elements
+  .then(() => Element.Element.find())
+  .then((elements) => {
+    // Expect no elements to be found
+    chai.expect(elements.length).to.equal(0);
+    done();
+  })
+  .catch((error) => {
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
