@@ -49,8 +49,8 @@ let org = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests. Creating an admin and
-   * non-admin user and setting the file-global admin user.
+   * Before: Run before all tests. Create admin and
+   * non-admin user. Set admin user globally.
    */
   before((done) => {
     // Connect to the database

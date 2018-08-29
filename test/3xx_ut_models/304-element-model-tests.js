@@ -67,10 +67,10 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(error).to.equal(null);
       chai.expect(reqObj.user.username).to.equal(M.config.test.username);
       User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
+        (updateErr, updatedUser) => {
           chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-          user = userUpdate;
+          chai.expect(updatedUser).to.not.equal(null);
+          user = updatedUser;
 
           // Create the organization model object
           const newOrg = new Org({

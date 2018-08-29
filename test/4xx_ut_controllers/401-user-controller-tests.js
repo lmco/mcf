@@ -44,8 +44,8 @@ let nonAdminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests. Creating admin user
-   * and setting the file-global admin user
+   * Before: run before all tests. Create admin user.
+   * Set admin user globally.
    */
   before((done) => {
     // Connect to the database
@@ -69,12 +69,12 @@ describe(M.getModuleName(module.filename), () => {
 
       // Find the user and update admin status
       User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
+        (updateErr, updatedUser) => {
           // Setting it equal to global variable
-          adminUser = userUpdate;
+          adminUser = updatedUser;
           // Expect no error
           chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
+          chai.expect(updatedUser).to.not.equal(null);
           done();
         });
     });
