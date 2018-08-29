@@ -380,7 +380,7 @@ function rejectCreateElementExistingUUID(done) {
   };
 
   // Create the element, expected to fail
-  ElemController.createElement(user, newElement)
+  ElemController.createElement(adminUser, newElement)
   .then(() => {
     // Expect createElement() to fail
     // Element create succeeded, force test to fail
