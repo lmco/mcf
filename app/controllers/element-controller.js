@@ -660,7 +660,7 @@ class ElementController {
           }
           // Error Check - Check if field can be updated
           if (!validUpdateFields.includes(updateField)) {
-            return reject(new errors.CustomError(`Users cannot update [${updateField}] of Elements.`, 400));
+            return reject(new errors.CustomError(`Element property [${updateField}] cannot be changed.`, 403));
           }
 
           // Error Check - Check if updated field is of type string
@@ -787,6 +787,7 @@ class ElementController {
         if (options.soft === false && reqUser.admin) {
           softDelete = false;
         }
+        // TODO: change to custom error
         else if (options.soft === false && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission to hard delete an'
             + ' element.', 401));
@@ -822,7 +823,7 @@ class ElementController {
             });
           }
           else {
-            return reject(new errors.CustomError('Element no longer exists.', 404));
+            return reject(new errors.CustomError('Element not found.', 404));
           }
         }
         else {

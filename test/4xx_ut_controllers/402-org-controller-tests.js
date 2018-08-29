@@ -143,6 +143,7 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
+  // TODO: use 'reject' instead of 'fail' or 'throw an error'
   /* Execute the tests */
   it('should create a new org', createNewOrg);
   it('should create a second org', createSecondOrg);
@@ -274,7 +275,7 @@ function updateOrgFieldErr(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -607,7 +608,7 @@ function rejectUserRole(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -710,7 +711,7 @@ function rejectGetUserRoles(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Unauthorized');
     done();
   });
 }

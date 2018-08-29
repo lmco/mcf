@@ -449,9 +449,9 @@ function postOrg04(done) {
     })
   },
   (err, response, body) => {
-    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(response.statusCode).to.equal(403);
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.message).to.equal('Forbidden');
     chai.expect(err).to.equal(null);
     done();
   });
