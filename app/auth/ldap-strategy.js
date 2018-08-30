@@ -231,7 +231,7 @@ class LdapStrategy {
           M.log.debug(status);
           if (!person) {
             ldapClient.destroy(); // Disconnect from ldap server on failure
-            return reject(new errors.CustomError('Error: Invalid username or password.', 401));
+            return reject(new errors.CustomError('Invalid username or password.', 401));
           }
           // If entry is found, return LDAP object
           return resolve(person.object);
@@ -254,7 +254,8 @@ class LdapStrategy {
         // If an error occurs, fail.
         if (authErr) {
           ldapClient.destroy(); // Disconnect from ldap server on failure
-          return reject(authErr);
+          M.log.error(authErr);
+          return reject(new errors.CustomError('Invalid username or password.', 401));
         }
         // If no error, unbind LDAP server and return the authenticated user object
         M.log.debug(`User [${user[ldapConfig.attributes.username]
