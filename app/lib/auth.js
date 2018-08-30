@@ -108,7 +108,13 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
       })
       .catch(err => {
         M.log.error(err);
-        req.flash('loginError', err.message);
+        M.log.error(err.stack);
+        if (err.description === 'Invalid username or password.') {
+          req.flash('loginError', err.message);
+        }
+        else {
+          req.flash('loginError', 'Internal Server Error');
+        }
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
@@ -137,7 +143,13 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
       })
       .catch(err => {
         M.log.error(err);
-        req.flash('loginError', err.message);
+        M.log.error(err.stack);
+        if (err.description === 'Invalid username or password.') {
+          req.flash('loginError', err.description);
+        }
+        else {
+          req.flash('loginError', 'Internal Server Error');
+        }
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
@@ -173,7 +185,13 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     })
     .catch(err => {
       M.log.error(err);
-      req.flash('loginError', err.message);
+      M.log.error(err.stack);
+      if (err.description === 'Invalid username or password.') {
+        req.flash('loginError', err.description);
+      }
+      else {
+        req.flash('loginError', 'Internal Server Error');
+      }
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
@@ -213,7 +231,13 @@ function authenticate(req, res, next) { // eslint-disable-line consistent-return
     })
     .catch(err => {
       M.log.error(err.stack);
-      req.flash('loginError', err.message);
+      if (err.description === 'Invalid username or password.') {
+        req.flash('loginError', err.description);
+      }
+      else {
+        req.flash('loginError', 'Internal Server Error');
+      }
+
       // return proper error for API route or redirect for UI
       // 'back' returns to the original login?next=originalUrl
       return (req.originalUrl.startsWith('/api'))
