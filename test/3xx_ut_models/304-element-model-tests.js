@@ -16,11 +16,10 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests the Element Model functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code. The element model tests create elements,
- * root packages, blocks, and relationships. These tests also hard deletes blocks
- * and relationships, as well as, soft and har deletes root packages.
+ * @description This tests the Element Model functionality. The element
+ * model tests create root packages, blocks, and relationships. These tests
+ * find, update and delete the blocks. The relationship and package are
+ * also deleted.
  */
 
 // Load node modules
@@ -30,16 +29,12 @@ const chai = require('chai');
 const Element = M.require('models.element');
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
 const db = M.require('lib/db');
-const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 let org = null;
 let project = null;
-let user = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -54,68 +49,40 @@ describe(M.getModuleName(module.filename), () => {
    */
   before((done) => {
     db.connect();
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
 
-    // TODO: Create a user and set them to an admin of the Organization and (MBX-374)
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-    AuthController.authenticate(reqObj, resObj, (error) => {
+    // Create the organization model object
+    const newOrg = new Org({
+      id: 'avengers',
+      name: 'The Avengers'
+    });
+
+    // Save the organization model object to the database
+    newOrg.save()
+    .then((retOrg) => {
+      // Update organization for test data
+      org = retOrg;
+
+      // Create the project model object
+      const newProject = new Project({
+        id: 'timeloop',
+        name: 'Time Gem',
+        org: org._id,
+        uid: `${org.id}:timeloop`
+      });
+
+      // Save the project model object to the database
+      return newProject.save();
+    })
+    .then((retProj) => {
+      // Update project for test data
+      project = retProj;
+
+      done();
+    })
+    .catch((error) => {
+      // Expect no error
       chai.expect(error).to.equal(null);
-      chai.expect(reqObj.user.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true }, { new: true },
-        (updateErr, updatedUser) => {
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(updatedUser).to.not.equal(null);
-          user = updatedUser;
-
-          // Create the organization model object
-          const newOrg = new Org({
-            id: 'avengers',
-            name: 'The Avengers',
-            permissions: {
-              admin: [user._id],
-              write: [user._id],
-              read: [user._id]
-            }
-          });
-
-          // Save the organization model object to the database
-          newOrg.save((orgSaveErr, savedOrg) => {
-            // Check for no error
-            chai.expect(orgSaveErr).to.equal(null);
-
-            // Update organization for test data
-            org = savedOrg;
-
-            // Create the project model object
-            const newProject = new Project({
-              id: 'timeloop',
-              name: 'Time Gem',
-              org: org._id,
-              permissions: {
-                admin: [user._id],
-                write: [user._id],
-                read: [user._id]
-              },
-              uid: `${org.id}:timeloop`
-            });
-
-            // Save the project model object to the database
-            newProject.save((projectSaveErr, savedProject) => {
-              // Check for no error
-              chai.expect(projectSaveErr).to.equal(null);
-
-              // Update project for test data
-              project = savedProject;
-
-              done();
-            });
-          });
-        });
+      done();
     });
   });
 
@@ -124,90 +91,33 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the project created in before()
-    Project.findOneAndRemove({
-      uid: project.uid
+    Project.findOneAndRemove({ uid: project.uid })
+    // Remove the org created in before()
+    .then(() => Org.findOneAndRemove({ id: org.id }))
+    .then(() => {
+      db.disconnect();
+      done();
     })
-    .exec((projectRemoveErr) => {
-      // Check for no error
-      chai.expect(projectRemoveErr).to.equal(null);
+    .catch((error) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
 
-      // Remove the org created in before()
-      Org.findOneAndRemove({
-        id: org.id
-      })
-      .exec((orgRemoveErr) => { // TODO: use promises where possible (MBX-374)
-        // Check for no error
-        chai.expect(orgRemoveErr).to.equal(null);
-
-        // TODO: remove user created in before() (MBX-374)
-        User.findOne({
-          username: M.config.test.username
-        }, (error, foundUser) => {
-          chai.expect(error).to.equal(null);
-          foundUser.remove((error2) => {
-            chai.expect(error2).to.equal(null);
-            db.disconnect();
-            done();
-          });
-        });
-      });
+      db.disconnect();
+      done();
     });
   });
 
-  // Add tests for find, update, and permissions
   /* Execute the tests */
-  it('should create a generic element', createElement);
-  it('should delete the generic element', deleteElement);
   it('should create a root package', createRootPackage);
-  it('should create a block (1)', createBlock01);
-  it('should create a block (2)', createBlock02);
+  it('should create a block', createBlock);
   it('should create a relationship between blocks', createRelationship);
-  // TODO: consider adding a find relationship test (MBX-374)
-  it('should hard delete blocks and relationships', deleteBlocksAndRelationships);
-  it('should soft-delete the root package', softDeleteRootPackage);
-  it('should hard delete the root package', deleteRootPackage);
+  it('should find a block', findBlock);
+  it('should update a block', updateBlock);
+  it('should delete all elements', deleteElements);
 });
 
 
 /* --------------------( Tests )-------------------- */
-/**
- * @description Creates a generic block element
- */
-function createElement(done) {
-  // Create new block element model object
-  const newElement = new Element.Block({
-    id: '0000',
-    uid: 'avengers:timeloop:0000',
-    name: 'The begining of time loop',
-    project: project._id,
-    parent: null
-  });
-  // Save block element model object to database
-  newElement.save((error, createdElement) => {
-    // Check for no error
-    chai.expect(error).to.equal(null);
-    // Check block element saved correctly
-    chai.expect(createdElement.uid).to.equal('avengers:timeloop:0000');
-    chai.expect(createdElement.id).to.equal('0000');
-    done();
-  });
-}
-
-/**
- * @description Deletes block element previously created in createElement test
- */
-function deleteElement(done) {
-  // Find and remove the block element created in createElement test
-  Element.Element.findOneAndRemove({
-    uid: 'avengers:timeloop:0000'
-  })
-  .exec((error) => {
-    // Check for no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
 /**
  * @description Creates a root package element for test data project
  */
@@ -222,23 +132,19 @@ function createRootPackage(done) {
   });
 
   // Save the root package element to the database
-  newPackage.save((error) => {
-    // Check for no error
+  newPackage.save()
+  // Find the root package element
+  .then(() => Element.Package.findOne({ uid: 'avengers:timeloop:0001' }))
+  .then((retPackage) => {
+    // Check the root package element saved correctly
+    chai.expect(retPackage.uid).to.equal('avengers:timeloop:0001');
+    chai.expect(retPackage.type).to.equal('Package');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
     chai.expect(error).to.equal(null);
-
-    // Find the root package element
-    Element.Package.find({
-      uid: 'avengers:timeloop:0001'
-    })
-    .exec((findErr, packages) => {
-      // Check for no error
-      chai.expect(findErr).to.equal(null);
-      // Check the root package element saved correctly
-      chai.expect(packages.length).to.equal(1);
-      chai.expect(packages[0].uid).to.equal('avengers:timeloop:0001');
-      chai.expect(packages[0].type).to.equal('Package');
-      done();
-    });
+    done();
   });
 }
 
@@ -246,15 +152,10 @@ function createRootPackage(done) {
  * @description Creates a block element in the root package previously created
  * in the createRootPackage test
  */
-function createBlock01(done) {
+function createBlock(done) {
   // Find root package element created in createRootPackage test
-  Element.Package.findOne({
-    uid: 'avengers:timeloop:0001'
-  })
-  .exec((findRootErr, pkg) => {
-    // Check for no error
-    chai.expect(findRootErr).to.equal(null);
-
+  Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
+  .then((pkg) => {
     // Create new block element object
     const newBlock = new Element.Block({
       id: '0002',
@@ -266,10 +167,8 @@ function createBlock01(done) {
 
     // Save block element object to database
     newBlock.save((saveErr, createdBlock) => {
-      if (saveErr) {
-        M.log.error(saveErr);
-        chai.expect(saveErr).to.equal(null);
-      }
+      // Expect no error
+      chai.expect(saveErr).to.equal(null);
 
       // Check block element object saved correctly
       chai.expect(createdBlock.uid).to.equal('avengers:timeloop:0002');
@@ -286,56 +185,11 @@ function createBlock01(done) {
         done();
       });
     });
-  });
-}
-
-/**
- * @description Creates a second block element in the root package previously
- * created in the createRootPackage test
- */
-function createBlock02(done) {
-  // Find root package element created in createRootPackage test
-  Element.Package.findOne({
-    uid: 'avengers:timeloop:0001'
   })
-  .exec((findRootErr, pkg) => {
-    // Check for no error
-    if (findRootErr) {
-      M.log.error(findRootErr);
-      chai.expect(findRootErr).to.equal(null);
-    }
-
-    // Create second new block element object
-    const newBlock = new Element.Block({
-      id: '0003',
-      uid: 'avengers:timeloop:0003',
-      name: 'Going on repeat',
-      project: project._id,
-      parent: pkg._id
-    });
-
-    // Save second block element object to the database
-    newBlock.save((saveErr, createdBlock) => {
-      if (saveErr) {
-        M.log.error(saveErr);
-        chai.expect(saveErr).to.equal(null);
-      }
-
-      // Check second block element object saved correctly
-      chai.expect(createdBlock.uid).to.equal('avengers:timeloop:0003');
-      chai.expect(createdBlock.name).to.equal('Going on repeat');
-      chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
-      // Check second block element has root package as its parent
-      chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
-
-      // Add second block element to root package's contains field
-      pkg.contains.push(createdBlock);
-      pkg.save((packageSaveErr) => {
-        // Expect no error
-        chai.expect(packageSaveErr).to.equal(null);
-        done();
-      });
-    });
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
@@ -344,25 +198,17 @@ function createBlock02(done) {
  */
 function createRelationship(done) {
   // Start by grabbing the root package
-  Element.Package.findOne({
-    uid: 'avengers:timeloop:0001'
-  })
-  .exec((findRootErr, pkg) => {
-    // Make sure no errors occur in lookup
-    if (findRootErr) {
-      M.log.error(findRootErr);
-      chai.expect(findRootErr).to.equal(null);
-    }
-
-    // Expect the package to contain two child elements already
-    chai.expect(pkg.contains.length).to.equal(2);
+  Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
+  .then((pkg) => {
+    // Expect the package to contain one child element already
+    chai.expect(pkg.contains.length).to.equal(1);
     const source = pkg.contains[0];
-    const target = pkg.contains[1];
+    const target = pkg.contains[0];
 
-    // Create the new relationship connecting the two existing blocks
+    // Create the new relationship connecting the existing block
     const newRelationship = new Element.Relationship({
-      id: '0004',
-      uid: 'avengers:timeloop:0004',
+      id: '0003',
+      uid: 'avengers:timeloop:0003',
       name: 'Time looping',
       project: project._id,
       parent: pkg._id,
@@ -376,7 +222,7 @@ function createRelationship(done) {
       chai.expect(saveErr).to.equal(null);
 
       // Make sure it created what we expect and finish
-      chai.expect(createdRelationship.uid).to.equal('avengers:timeloop:0004');
+      chai.expect(createdRelationship.uid).to.equal('avengers:timeloop:0003');
       chai.expect(createdRelationship.name).to.equal('Time looping');
       chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
       chai.expect(createdRelationship.parent.toString()).to.equal(pkg._id.toString());
@@ -393,91 +239,70 @@ function createRelationship(done) {
         done();
       });
     });
-  });
-}
-
-/**
- * @description Delete the previously created blocks and relationships
- */
-function deleteBlocksAndRelationships(done) {
-  // Find and delete the element of type 'relationship'
-  Element.Relationship.findOneAndRemove({
-    uid: 'avengers:timeloop:0004'
   })
-  .exec((relDeleteError) => {
-    // Expect no error
-    chai.expect(relDeleteError).to.equal(null);
-
-    // Find and delete the second block that was created
-    Element.Block.findOneAndRemove({
-      uid: 'avengers:timeloop:0003'
-    })
-    .exec((block02DeleteError) => {
-      // Expect no error
-      chai.expect(block02DeleteError).to.equal(null);
-
-      // Find and delete the first block that was created
-      Element.Block.findOneAndRemove({
-        uid: 'avengers:timeloop:0002'
-      })
-      .exec((block01DeleteError) => {
-        // Expect no error
-        chai.expect(block01DeleteError).to.equal(null);
-        done();
-      });
-    });
-  });
-}
-
-/**
- * @description Soft deletes the previously created root package
- */
-function softDeleteRootPackage(done) {
-  // TODO: Remove LM specific comments (MBX-370)
-  // LM: Changed from findOneAndUpdate to a find and then update
-  // findOneAndUpdate does not call setters, and was causing strange
-  // behavior with the deleted and deletedOn fields.
-  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-  // Find the package based on uid
-  Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
-  .exec((error, elem) => {
+  .catch((error) => {
     // Expect no error
     chai.expect(error).to.equal(null);
-
-    // Set deleted field to true
-    elem.deleted = true;
-
-    // Save the updated package
-    elem.save((saveErr) => {
-      // Expect no error
-      chai.expect(saveErr).to.equal(null);
-
-      // Find updated package
-      Element.Package.findOne({
-        uid: 'avengers:timeloop:0001'
-      })
-      .exec((findErr, foundElem) => {
-        // Expect no error
-        chai.expect(findErr).to.equal(null);
-
-        // Ensure package has been soft-deleted
-        chai.expect(foundElem.deleted).to.equal(true);
-        chai.expect(foundElem.deletedOn).to.not.equal(null);
-        done();
-      });
-    });
+    done();
   });
 }
 
 /**
- * @description Hard delete the previously created root package
+ * @description Find the previously created block
  */
-function deleteRootPackage(done) {
-  // Find and delete the package
-  Element.Package.findOneAndRemove({
-    uid: 'avengers:timeloop:0001'
+function findBlock(done) {
+  // Find the block
+  Element.Element.findOne({ id: '0002' })
+  .then((element) => {
+    // Verify found element is correct
+    chai.expect(element.name).to.equal('In time loop 2');
+    done();
   })
-  .exec((error) => {
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Update the previously created block
+ */
+function updateBlock(done) {
+  // Update the block
+  Element.Element.findOneAndUpdate({ id: '0002' }, { name: 'No more looping' })
+  // Find the updated element
+  .then(() => Element.Element.findOne({ id: '0002' }))
+  .then((element) => {
+    // Verify the found element was update successfully
+    chai.expect(element.name).to.equal('No more looping');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Delete the previously created block, relationship and package
+ */
+function deleteElements(done) {
+  // Find and delete the element of type 'relationship'
+  Element.Relationship.findOneAndRemove({ uid: 'avengers:timeloop:0003' })
+  // Find and delete the element of type 'Block'
+  .then(() => Element.Block.findOneAndRemove({ uid: 'avengers:timeloop:0002' }))
+  // Find and delete the element of type 'Package'
+  .then(() => Element.Package.findOneAndRemove({ uid: 'avengers:timeloop:0001' }))
+  // Attempt to find any elements
+  .then(() => Element.Element.find())
+  .then((elements) => {
+    // Expect no elements to be found
+    chai.expect(elements.length).to.equal(0);
+    done();
+  })
+  .catch((error) => {
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
