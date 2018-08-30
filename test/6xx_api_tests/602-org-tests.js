@@ -100,6 +100,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a POST with an empty name', rejectPostEmptyName);
   it('should reject a POST of an existing org', rejectPostExistingOrg);
   it('should DELETE organization', deleteOrg01);
+  // TODO: Add reject delete test (JIRA MBX-394)
 });
 
 /* --------------------( Tests )-------------------- */
@@ -384,7 +385,7 @@ function rejectPostExistingOrg(done) {
  * @description Verifies DELETE /api/orgs:orgid deletes an organization.
  * NOTE: The provided {soft: false}, which defaults to true if not provided.
  * This option is available to admin users to change the delete behavior from
- * soft-delete to hard delete. For non-admin users, the soft option is ignored.
+ * soft-delete to hard delete.
  */
 function deleteOrg01(done) {
   request({
