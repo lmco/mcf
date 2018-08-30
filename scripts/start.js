@@ -53,10 +53,8 @@ function start(args) {
 
   // Create HTTPS Server
   if (M.config.server.https.enabled) {
-    const keyPath = path.join('certs', `${M.config.server.https.sslCertName}.key`);
-    const crtPath = path.join('certs', `${M.config.server.https.sslCertName}.crt`);
-    const privateKey = fs.readFileSync(path.join(M.root, keyPath), 'utf8');
-    const certificate = fs.readFileSync(path.join(M.root, crtPath), 'utf8');
+    const privateKey = fs.readFileSync(path.join(M.root, M.config.server.https.sslKey), 'utf8');
+    const certificate = fs.readFileSync(path.join(M.root, M.config.server.https.sslCert), 'utf8');
     const credentials = {
       key: privateKey,
       cert: certificate

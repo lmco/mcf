@@ -350,9 +350,7 @@ class ApiController {
       res.header('Content-Type', 'application/json');
       return res.send(ApiController.formatJSON(org));
     })
-    .catch((error) => {
-      return res.status(error.status).send(error);
-    });
+    .catch((error) => res.status(error.status).send(error));
   }
 
   /**
