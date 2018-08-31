@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/603-project-tests
+ * @module  test.603-project-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -20,6 +20,7 @@
  */
 
 // Load node modules
+const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
 
@@ -45,8 +46,9 @@ let adminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
+   * TODO MBX-346
    * Before: Run before all tests.
-   * Find user and evaluate to admin. Create an organization.
+   * Find user and elevate to admin. Create an organization.
    */
   before((done) => {
     db.connect();
@@ -95,7 +97,6 @@ describe(M.getModuleName(module.filename), () => {
           .then((retOrg) => {
             // Set org to global variable
             org = retOrg;
-
             // Verify org was created correctly
             chai.expect(retOrg.id).to.equal('biochemistry');
             chai.expect(retOrg.name).to.equal('Scientist');
@@ -166,6 +167,7 @@ function postProject(done) {
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({
       id: 'hulk',
@@ -196,6 +198,7 @@ function postSecondProject(done) {
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/bettyross`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({
       id: 'bettyross',
@@ -248,6 +251,7 @@ function patchProject(done) {
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
       id: 'hulk',
@@ -295,6 +299,7 @@ function rejectPostOrgIdMismatch(done) {
   request({
     url: `${test.url}/api/orgs/nohulk/projects/actuallyhulk`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({
       id: 'brucebanner',
@@ -324,6 +329,7 @@ function rejectPatchName(done) {
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
       id: 'hulktwopointoh',
@@ -350,6 +356,7 @@ function deleteProject(done) {
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
       soft: false
@@ -372,6 +379,7 @@ function deleteSecondProject(done) {
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/bettyross`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
       soft: false
@@ -388,7 +396,7 @@ function deleteSecondProject(done) {
 
 /* ----------( Helper Functions )----------*/
 /**
- * Produces and returns an object containing common request headers.
+ * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
   const c = `${M.config.test.username}:${M.config.test.password}`;
@@ -397,4 +405,13 @@ function getHeaders() {
     'Content-Type': 'application/json',
     authorization: s
   };
+}
+
+/**
+ * @description Helper function for setting the certificate authorities for each request.
+ */
+function readCaFile() { // eslint-disable-line consistent-return
+  if (test.hasOwnProperty('ca')) {
+    return fs.readFileSync(`${M.root}/${test.ca}`);
+  }
 }

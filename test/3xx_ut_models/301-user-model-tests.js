@@ -22,11 +22,15 @@
  */
 
 // Load node modules
+const path = require('path');
 const chai = require('chai');
 
 // Load MBEE modules
 const User = M.require('models.user');
 const db = M.require('lib.db');
+
+/* --------------------( Test Data )-------------------- */
+const testData = require(path.join(M.root, 'test', 'data.json'));
 
 /* --------------------( Main )-------------------- */
 /**
@@ -59,7 +63,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft delete a user', softDeleteUser);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
-  it('should login an LDAP user', loginLDAPUser);
+  // it('should login an LDAP user', loginLDAPUser);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -68,13 +72,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createUser(done) {
   // Create a new User object
-  const user = new User({
-    username: 'spiderman',
-    password: 'icanshootwebs',
-    fname: 'Peter',
-    preferredName: 'Spidy',
-    lname: 'Parker'
-  });
+  const user = new User(testData.users[0]);
   // Save user object to the database
   user.save((error) => {
     chai.expect(error).to.equal(null);
@@ -89,20 +87,17 @@ function createUser(done) {
 function getUser(done) {
   // Find the created user from the previous createUser test.
   User.findOne({
-    username: 'spiderman',
+    username: testData.users[0].username,
     deletedOn: null
   }, (error, user) => {
-    // Make sure the find action did not fail
+    // Expect no error
     chai.expect(error).to.equal(null);
-
     // Check first, last, and preferred name
-    chai.expect(user.fname).to.equal('Peter');
-    chai.expect(user.lname).to.equal('Parker');
-    chai.expect(user.preferredName).to.equal('Spidy');
-
+    chai.expect(user.fname).to.equal(testData.users[0].fname);
+    chai.expect(user.lname).to.equal(testData.users[0].lname);
+    chai.expect(user.preferredName).to.equal(testData.users[0].preferredName);
     // Check the name
-    chai.expect(user.name).to.equal('Peter Parker');
-
+    chai.expect(user.name).to.equal(`${testData.users[0].fname} ${testData.users[0].lname}`);
     done();
   });
 }
@@ -114,23 +109,23 @@ function getUser(done) {
 function verifyValidPassword(done) {
   // Find the created user from the previous createUser test.
   User.findOne({
-    username: 'spiderman',
+    username: testData.users[0].username,
     deletedOn: null
   })
-  .exec((error, user) => {
-    // Make sure the find action did not fail
-    chai.expect(error).to.equal(null);
+  .exec((findUserErr, user) => {
+    // Expect no error
+    chai.expect(findUserErr).to.equal(null);
 
     // Verify the user's password
-    user.verifyPassword('icanshootwebs')
+    user.verifyPassword(testData.users[0].password)
     .then((result) => {
       // expected - verifyPassword returned true
       chai.expect(result).to.equal(true);
       done();
     })
-    .catch((error2) => {
-      // expected - verifyPassword did NOT throw an error.
-      chai.expect(error2).to.equal(null);
+    .catch((error) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
       done();
     });
   });
@@ -143,22 +138,22 @@ function verifyValidPassword(done) {
 function verifyInvalidPassword(done) {
   // Find the created user from the previous createUser test.
   User.findOne({
-    username: 'spiderman',
+    username: testData.users[0].username,
     deletedOn: null
-  }, (error, user) => {
-    // Make sure the find action did not fail
-    chai.expect(error).to.equal(null);
+  }, (findUserErr, user) => {
+    // Expect no error
+    chai.expect(findUserErr).to.equal(null);
 
     // Attempt to verify the user's incorrect password
-    user.verifyPassword('icantshootwebs')
+    user.verifyPassword('incorrectPassword')
     .then((result) => {
       // expected - verifyPassword returned false
       chai.expect(result).to.equal(false);
       done();
     })
-    .catch((error2) => {
-      // expected - verifyPassword did NOT throw an error.
-      chai.expect(error2).to.equal(null);
+    .catch((error) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
       done();
     });
   });
@@ -169,26 +164,28 @@ function verifyInvalidPassword(done) {
  * in the createUser test.
  */
 function updateUser(done) {
+  // TODO: MBX-399 Change model calls to use promises instead of callbacks
   // Find and updated the user created in the previous createUser test.
   User.findOneAndUpdate({
-    username: 'spiderman'
+    username: testData.users[0].username
   }, {
-    fname: 'Mr.',
-    lname: 'Spiderman'
-  }, (error, user) => {
-    // Make sure there are no errors on the findOneAndUpdate action.
-    chai.expect(error).to.equal(null);
+    fname: `${testData.users[0].fname}edit`,
+    lname: testData.users[0].lname
+  }, (updateUserErr, user) => {
+    // Expect no error
+    chai.expect(updateUserErr).to.equal(null);
 
     // Find the user that was just updated.
     User.findOne({
       username: user.username
-    }, (error2, user2) => {
-      chai.expect(error2).to.equal(null);
+    }, (findUserErr, userUpdated) => {
+      // Expect no error
+      chai.expect(findUserErr).to.equal(null);
       // Check the user has the updated first and last name.
-      chai.expect(user2.username).to.equal('spiderman');
-      chai.expect(user2.fname).to.equal('Mr.');
-      chai.expect(user2.lname).to.equal('Spiderman');
-      chai.expect(user2.name).to.equal('Mr. Spiderman');
+      chai.expect(userUpdated.username).to.equal(testData.users[0].username);
+      chai.expect(userUpdated.fname).to.equal(`${testData.users[0].fname}edit`);
+      chai.expect(userUpdated.lname).to.equal(testData.users[0].lname);
+      chai.expect(userUpdated.name).to.equal(`${testData.users[0].fname}edit ${testData.users[0].lname}`);
       done();
     });
   });
@@ -206,21 +203,24 @@ function softDeleteUser(done) {
 
   // Find the user previously created and updated in createUser and updateUser
   // tests.
-  User.findOne({ username: 'spiderman' })
-  .exec((err, user) => {
+  User.findOne({ username: testData.users[0].username })
+  .exec((findUserErr, user) => {
+    // Expect no Error
+    chai.expect(findUserErr).to.equal(null);
     // Set the User deleted field
     user.deleted = true;
     // Save the updated User object
-    user.save((error) => {
-      // Make sure the save did not fail
-      chai.expect(error).to.equal(null);
+    user.save((saveUserErr) => {
+      // Expect no Error
+      chai.expect(saveUserErr).to.equal(null);
 
       // Find the previously soft deleted user
       User.findOne({
         username: user.username
-      }, (error2, user2) => {
+      }, (findDeletedUserErr, user2) => {
+        // Expect no Error
+        chai.expect(findDeletedUserErr).to.equal(null);
         // Verify the soft delete was successful
-        chai.expect(error2).to.equal(null);
         chai.expect(user2.deletedOn).to.not.equal(null);
         chai.expect(user2.deleted).to.equal(true);
         done();
@@ -235,12 +235,12 @@ function softDeleteUser(done) {
 function getSoftDeletedUser(done) {
   // Finds the user who was previously soft deleted in softDeleteUser
   User.findOne({
-    username: 'spiderman'
-  }, (error, user) => {
-    // Make sure the find action did not fail
-    chai.expect(error).to.equal(null);
+    username: testData.users[0].username
+  }, (findUsererr, user) => {
+    // Expect no Error
+    chai.expect(findUsererr).to.equal(null);
     // Check the correct user was found
-    chai.expect(user.username).to.equal('spiderman');
+    chai.expect(user.username).to.equal(testData.users[0].username);
     done();
   });
 }
@@ -251,14 +251,14 @@ function getSoftDeletedUser(done) {
 function deleteUser(done) {
   // Find the previously created user from the createUser test.
   User.findOne({
-    username: 'spiderman'
-  }, (error, user) => {
-    // Make sure the find action did not fail
-    chai.expect(error).to.equal(null);
+    username: testData.users[0].username
+  }, (findUsererr, user) => {
+    // Expect no error
+    chai.expect(findUsererr).to.equal(null);
     // Hard deleted the user
-    user.remove((error2) => {
-      // Make sure the hard delete action did not fail
-      chai.expect(error2).to.equal(null);
+    user.remove((removeUserErr) => {
+      // Expect no error
+      chai.expect(removeUserErr).to.equal(null);
       done();
     });
   });
@@ -272,20 +272,20 @@ function deleteUser(done) {
  *
  * @description INSERT DESCRIPTION
  */
-function loginLDAPUser(done) {
-  const AuthController = M.require('lib.auth');
-  const u = M.config.test.username;
-  const p = M.config.test.password;
-  AuthController.handleBasicAuth(null, null, u, p)
-  .then(user => {
-    chai.expect(user.username).to.equal(M.config.test.username);
-    User.findOneAndUpdate({ username: u }, { admin: true }, (updateErr, userUpdate) => {
-      chai.expect(updateErr).to.equal(null);
-      done();
-    });
-  })
-  .catch(error => {
-    chai.expect(error).to.equal(null);
-    done();
-  });
-}
+// function loginLDAPUser(done) {
+//   const AuthController = M.require('lib.auth');
+//   const u = M.config.test.username;
+//   const p = M.config.test.password;
+//   AuthController.handleBasicAuth(null, null, u, p)
+//   .then(user => {
+//     chai.expect(user.username).to.equal(M.config.test.username);
+//     User.findOneAndUpdate({ username: u }, { admin: true }, (updateErr, userUpdate) => {
+//       chai.expect(updateErr).to.equal(null);
+//       done();
+//     });
+//   })
+//   .catch(error => {
+//     chai.expect(error).to.equal(null);
+//     done();
+//   });
+// }

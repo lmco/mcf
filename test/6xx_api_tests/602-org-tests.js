@@ -22,6 +22,7 @@
  */
 
 // Load node modules
+const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
 
@@ -111,6 +112,7 @@ function postOrg(done) {
   request({
     url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({
       name: 'SHIELD'
@@ -158,6 +160,7 @@ function patchOrg(done) {
   request({
     url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({ name: 'Hydra' })
   },
@@ -181,6 +184,7 @@ function rejectPatchInvalidName(done) {
   request({
     url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({ name: '%%% INVALID NAME %%%' })
   },
@@ -204,6 +208,7 @@ function rejectPatchIdMismatch(done) {
   request({
     url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({ id: 'mismatched' })
   },
@@ -271,6 +276,7 @@ function rejectPostIdMismatch(done) {
   request({
     url: `${test.url}/api/orgs/xmen`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({
       id: 'shield',
@@ -296,6 +302,7 @@ function rejectPostInvalidId(done) {
   request({
     url: `${test.url}/api/orgs/invalidOrgId`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({ name: 'Invalid Organization' })
   },
@@ -318,6 +325,7 @@ function rejectPostMissingName(done) {
   request({
     url: `${test.url}/api/orgs/pymparticles`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({ id: 'pymparticles' })
   },
@@ -342,6 +350,7 @@ function rejectPostEmptyName(done) {
   request({
     url: `${test.url}/api/orgs/xmen`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({ name: '' })
   },
@@ -366,6 +375,7 @@ function rejectPostExistingOrg(done) {
   request({
     url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({ name: 'SHIELD' })
   },
@@ -391,6 +401,7 @@ function deleteOrg01(done) {
   request({
     url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({ soft: false })
   },
@@ -405,7 +416,7 @@ function deleteOrg01(done) {
 
 /* ----------( Helper Functions )----------*/
 /**
- * Produces and returns an object containing common request headers.
+ * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
   const c = `${M.config.test.username}:${M.config.test.password}`;
@@ -414,4 +425,13 @@ function getHeaders() {
     'Content-Type': 'application/json',
     authorization: s
   };
+}
+
+/**
+ * @description Helper function for setting the certificate authorities for each request.
+ */
+function readCaFile() { // eslint-disable-line consistent-return
+  if (test.hasOwnProperty('ca')) {
+    return fs.readFileSync(`${M.root}/${test.ca}`);
+  }
 }

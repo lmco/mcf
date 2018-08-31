@@ -185,6 +185,11 @@ class UserController {
           return reject(new errors.CustomError('Email is not valid.', 400));
         }
       }
+      if (utils.checkExists(['password'], newUser)) {
+        if (!RegExp(validators.user.password).test(newUser.password)) {
+          return reject(new errors.CustomError('Password is not valid.', 400));
+        }
+      }
 
       User.find({ username: sani.sanitize(newUser.username) })
       .populate()

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/604-element-tests
+ * @module  test.604-element-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,15 +15,12 @@
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests the API controller functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code. These API controller tests are
- * specifically for the Element API tests: posting, patching, getting, and deleting
- * elements.
- * TODO - fix description
+ * @description This tests the project API controller functionality:
+ * GET, POST, PATCH, and DELETE of an element.
  */
 
 // Load node modules
+const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
 
@@ -35,31 +32,34 @@ const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 
-
 /* --------------------( Test Data )-------------------- */
-
+// Variables used across test functions
 let org = null;
 let proj = null;
 let user = null;
-
+const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
-
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * TODO - add description
+   * TODO MBX-346
+   * Before: Run before all tests.
+   * Find user and elevate to admin. Create an organization.
    */
   before((done) => {
     db.connect();
 
     // Creating a Requesting Admin
-    const u = M.config.test.username;
-    const p = M.config.test.password;
     const params = {};
     const body = {
-      username: u,
-      password: p
+      username: M.config.test.username,
+      password: M.config.test.password
     };
 
     const reqObj = mockExpress.getReq(params, body);
@@ -68,7 +68,7 @@ describe(M.getModuleName(module.filename), () => {
       const ldapuser = reqObj.user;
       chai.expect(err).to.equal(null);
       chai.expect(ldapuser.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
+      User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, { new: true },
         (updateErr, userUpdate) => {
           // Setting it equal to global variable
           user = userUpdate;
@@ -141,25 +141,25 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create an element', postElement);
-  it('should get an element', getElement);
-  it('should get all elements for a project', getElements);
-  it('should update an elements name', patchElement);
-  it('should delete an element', deleteElement);
+  it('should POST an element', postElement);
+  it('should GET the previously posted element', getElement);
+  // TODO: MBX-396 add a second post
+  it('should GET all elements for a project', getElements);
+  it('should PATCH an elements name', patchElement);
+  // TODO: MBX-397 Add failure tests
+  it('should DELETE the previously created element', deleteElement);
 });
 
-
 /* --------------------( Tests )-------------------- */
-// TODO - add detailed descriptions to all tests and fix spacing
-
-
 /**
- * Makes a POST request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * creates an element.
  */
 function postElement(done) {
   request({
     url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
     body: JSON.stringify({
       id: '0000',
@@ -174,91 +174,118 @@ function postElement(done) {
     })
   },
   (err, response, body) => {
-    const json = JSON.parse(body);
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
     chai.expect(json.id).to.equal('0000');
     done();
   });
 }
 
 /**
- * Makes a GET request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * finds and returns the previously created element.
  */
 function getElement(done) {
   request({
     url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'GET'
   },
   (err, response, body) => {
-    const json = JSON.parse(body);
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
     chai.expect(json.id).to.equal('0000');
     done();
   });
 }
 
 /**
- * Makes a GET request to /api/orgs/:orgid/projects/:projectid/elements
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/elements finds
+ * and returns all elements in the previously created project.
  */
 function getElements(done) {
   request({
     url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'GET'
   },
   (err, response, body) => {
-    const json = JSON.parse(body);
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
     chai.expect(json.length).to.equal(1);
     done();
   });
 }
 
 /**
- * Makes a PATCH request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * updates name of previously created element.
  */
 function patchElement(done) {
   request({
     url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
       name: 'Captain America'
     })
   },
   (err, response, body) => {
-    const json = JSON.parse(body);
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
     chai.expect(json.name).to.equal('Captain America');
     done();
   });
 }
 
 /**
- * Makes a DELETE request to /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * deletes the previously created element.
  */
 function deleteElement(done) {
   request({
     url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
       soft: false
     })
   },
   (err, response, body) => {
-    const json = JSON.parse(body);
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
     chai.expect(json.id).to.equal('0000');
     done();
   });
 }
 
 /* ----------( Helper Functions )----------*/
-
 /**
- * Produces and returns an object containing common request headers.
+ * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
   const c = `${M.config.test.username}:${M.config.test.password}`;
@@ -267,4 +294,13 @@ function getHeaders() {
     'Content-Type': 'application/json',
     authorization: s
   };
+}
+
+/**
+ * @description Helper function for setting the certificate authorities for each request.
+ */
+function readCaFile() { // eslint-disable-line consistent-return
+  if (test.hasOwnProperty('ca')) {
+    return fs.readFileSync(`${M.root}/${test.ca}`);
+  }
 }
