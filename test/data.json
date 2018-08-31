@@ -69,5 +69,15 @@
       "type": "Package",
       "id": "0001",
       "name": "In time loop"
+    },
+    {
+      "type": "Block",
+      "id": "0002",
+      "name": "In time loop 2"
+    },
+    {
+      "type": "Relationship",
+      "id": "0003",
+      "name": "Time looping"
     }]
 }

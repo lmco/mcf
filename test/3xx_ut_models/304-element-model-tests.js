@@ -127,7 +127,7 @@ describe(M.getModuleName(module.filename), () => {
 function createRootPackage(done) {
   // Create the root package element object
   const newPackage = new Element.Package({
-    id: testData.elements[4].id, // 'avengers:timeloop:0001'
+    id: testData.elements[4].id,
     uid: `${org.id}:${project.id}:${testData.elements[4].id}`,
     name: testData.elements[4].name,
     project: project._id,
@@ -137,11 +137,13 @@ function createRootPackage(done) {
   // Save the root package element to the database
   newPackage.save()
   // Find the root package element
-  .then(() => Element.Package.findOne({ uid: 'avengers:timeloop:0001' }))
+  .then(() => Element.Package.findOne({
+    uid: `${org.id}:${project.id}:${testData.elements[4].id}`}))
   .then((retPackage) => {
     // Check the root package element saved correctly
-    chai.expect(retPackage.uid).to.equal('avengers:timeloop:0001');
-    chai.expect(retPackage.type).to.equal('Package');
+    chai.expect(retPackage.uid).to.equal(
+      `${org.id}:${project.id}:${testData.elements[4].id}`);
+    chai.expect(retPackage.type).to.equal(testData.elements[4].type);
     done();
   })
   .catch((error) => {
@@ -157,13 +159,14 @@ function createRootPackage(done) {
  */
 function createBlock(done) {
   // Find root package element created in createRootPackage test
-  Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
+  Element.Package.findOne({
+    uid: `${org.id}:${project.id}:${testData.elements[4].id}` })
   .then((pkg) => {
     // Create new block element object
     const newBlock = new Element.Block({
-      id: '0002',
-      uid: 'avengers:timeloop:0002',
-      name: 'In time loop 2',
+      id: testData.elements[5].id,
+      uid:`${org.id}:${project.id}:${testData.elements[5].id}`,
+      name: testData.elements[5].name,
       project: project._id,
       parent: pkg._id
     });
@@ -174,8 +177,10 @@ function createBlock(done) {
       chai.expect(saveErr).to.equal(null);
 
       // Check block element object saved correctly
-      chai.expect(createdBlock.uid).to.equal('avengers:timeloop:0002');
-      chai.expect(createdBlock.name).to.equal('In time loop 2');
+      chai.expect(createdBlock.uid).to.equal(
+        `${org.id}:${project.id}:${testData.elements[5].id}`);
+
+      chai.expect(createdBlock.name).to.equal(testData.elements[5].name);
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
       // Check block element has root package as its parent
       chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
@@ -201,7 +206,9 @@ function createBlock(done) {
  */
 function createRelationship(done) {
   // Start by grabbing the root package
-  Element.Package.findOne({ uid: 'avengers:timeloop:0001' })
+  Element.Package.findOne(
+    { uid: `${org.id}:${project.id}:${testData.elements[4].id}` })
+
   .then((pkg) => {
     // Expect the package to contain one child element already
     chai.expect(pkg.contains.length).to.equal(1);
@@ -210,9 +217,9 @@ function createRelationship(done) {
 
     // Create the new relationship connecting the existing block
     const newRelationship = new Element.Relationship({
-      id: '0003',
-      uid: 'avengers:timeloop:0003',
-      name: 'Time looping',
+      id: testData.elements[6].id,
+      uid: `${org.id}:${project.id}:${testData.elements[6].id}`,
+      name: testData.elements[6].name,
       project: project._id,
       parent: pkg._id,
       source: source,
@@ -225,8 +232,10 @@ function createRelationship(done) {
       chai.expect(saveErr).to.equal(null);
 
       // Make sure it created what we expect and finish
-      chai.expect(createdRelationship.uid).to.equal('avengers:timeloop:0003');
-      chai.expect(createdRelationship.name).to.equal('Time looping');
+      chai.expect(createdRelationship.uid).to.equal(
+        `${org.id}:${project.id}:${testData.elements[6].id}`);
+
+      chai.expect(createdRelationship.name).to.equal(testData.elements[6].name);
       chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
       chai.expect(createdRelationship.parent.toString()).to.equal(pkg._id.toString());
       chai.expect(createdRelationship.source.toString()).to.equal(source.toString());
@@ -255,10 +264,10 @@ function createRelationship(done) {
  */
 function findBlock(done) {
   // Find the block
-  Element.Element.findOne({ id: '0002' })
+  Element.Element.findOne({ id: testData.elements[5].id })
   .then((element) => {
     // Verify found element is correct
-    chai.expect(element.name).to.equal('In time loop 2');
+    chai.expect(element.name).to.equal(testData.elements[5].name);
     done();
   })
   .catch((error) => {
@@ -273,9 +282,9 @@ function findBlock(done) {
  */
 function updateBlock(done) {
   // Update the block
-  Element.Element.findOneAndUpdate({ id: '0002' }, { name: 'No more looping' })
+  Element.Element.findOneAndUpdate({ id: testData.elements[5].id }, { name: 'No more looping' })
   // Find the updated element
-  .then(() => Element.Element.findOne({ id: '0002' }))
+  .then(() => Element.Element.findOne({ id: testData.elements[5].id }))
   .then((element) => {
     // Verify the found element was update successfully
     chai.expect(element.name).to.equal('No more looping');
@@ -293,11 +302,17 @@ function updateBlock(done) {
  */
 function deleteElements(done) {
   // Find and delete the element of type 'relationship'
-  Element.Relationship.findOneAndRemove({ uid: 'avengers:timeloop:0003' })
+  Element.Relationship.findOneAndRemove({
+    uid: `${org.id}:${project.id}:${testData.elements[6].id}` })
+
   // Find and delete the element of type 'Block'
-  .then(() => Element.Block.findOneAndRemove({ uid: 'avengers:timeloop:0002' }))
+  .then(() => Element.Block.findOneAndRemove({
+    uid: `${org.id}:${project.id}:${testData.elements[5].id}` }))
+
   // Find and delete the element of type 'Package'
-  .then(() => Element.Package.findOneAndRemove({ uid: 'avengers:timeloop:0001' }))
+  .then(() => Element.Package.findOneAndRemove({
+    uid: `${org.id}:${project.id}:${testData.elements[4].id}` }))
+
   // Attempt to find any elements
   .then(() => Element.Element.find())
   .then((elements) => {
@@ -307,7 +322,6 @@ function deleteElements(done) {
   })
   .catch((error) => {
     // Expect no error
-    console.log(error.stack);
     chai.expect(error).to.equal(null);
     done();
   });
