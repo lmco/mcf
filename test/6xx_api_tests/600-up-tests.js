@@ -84,7 +84,7 @@ function swaggerJSONTest(done) {
 /**
  * @description Helper function for reading ca file.
  */
-function readCaFile() { // eslint-disable-line consistent-return
+function readCaFile() {
   if (test.hasOwnProperty('ca')) {
     return fs.readFileSync(`${M.root}/${test.ca}`);
   }

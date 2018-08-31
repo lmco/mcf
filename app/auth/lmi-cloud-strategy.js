@@ -50,7 +50,7 @@ class LmiCloudStrategy {
         deletedOn: null
       })
       .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
-      .exec((findUserErr, users) => { // eslint-disable-line consistent-return
+      .exec((findUserErr, users) => {
         // Check for errors
         if (findUserErr) {
           return reject(findUserErr);
@@ -102,7 +102,7 @@ class LmiCloudStrategy {
    * @returns Promise The local database User object or an error.
    */
   static handleTokenAuth(req, res, _token) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       LocalStrategy.handleTokenAuth(req, res, _token)
       .then(user => resolve(user))
       .catch(handleTokenAuthErr => reject(handleTokenAuthErr));

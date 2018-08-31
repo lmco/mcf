@@ -1017,7 +1017,7 @@
     // LM: Changed to warning in order to avoid no return error for controller
     // logic.
     // LM: Changed back to warning due to the fact that some API returns cannot be consistent
-    "consistent-return": "warn",
+    "consistent-return": "off",
 
     // specify curly brace conventions for all control statements
     // LM: Not sure ESLint does exactly what we need here.

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/999-wrap-up
+ * @module  test.999-wrap-up
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -16,15 +16,14 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This "test" is used to clean out the database before other
- * tests. It SHOULD NOT be run if testing against production databases. It
- * is intended for use in CI/CD testing to ensure the database is empty and
- * improve CI testing.
+ * @description This "test" is used to clear the database after tests.
+ * SHOULD NOT run against production databases.
+ * Intended use in Continuous Integration/Continuous Delivery(Jenkins)
+ * test to ensure the database is empty and improve CI testing.
  */
 
 // Load node modules
 const chai = require('chai');
-const mongoose = require('mongoose'); // TODO remove need for mongoose
 
 // Load MBEE modules
 const User = M.require('models.user');
@@ -33,10 +32,7 @@ const Project = M.require('models.project');
 const Element = M.require('models.element');
 const db = M.require('lib.db');
 
-
 /* --------------------( Main )-------------------- */
-
-
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
  * or grouping several "it" tests into a single group. In this case, the name of
@@ -48,28 +44,35 @@ describe(M.getModuleName(module.filename), () => {
   before(() => db.connect());
 
   /* Runs after all tests. Close database connection. */
-  after(() => mongoose.connection.close());
+  after(() => db.disconnect());
 
   /* Execute the tests */
   it('clean database', cleanDB);
 });
 
-
 /* --------------------( Tests )-------------------- */
-
-
 /**
- * @description Cleans out the database by removing all items from all MongoDB
- * collections.
+ * @description Cleans out the database by removing all
+ * items from all MongoDB collections.
  */
 function cleanDB(done) {
-  User.remove({}).exec()  // Remove users
+  // TODO: Should not run if production MBX-401
+  // TODO: Allow to run using --force MBX-401
+  // Remove users
+  User.remove({}).exec()
+
   // Remove all orgs except for the 'default' org.
-  .then(() => Organization.remove({ name: { $ne: 'default' } }).exec())  // Remove orgs
-  .then(() => Project.remove({}).exec())  // Remove projects
-  .then(() => Element.Element.remove({}).exec())  // Remove elements
+  .then(() => Organization.remove({
+    name: { $ne: 'default' } }).exec())
+
+  // Remove projects
+  .then(() => Project.remove({}).exec())
+
+  // Remove elements
+  .then(() => Element.Element.remove({}).exec())
   .then(() => done())
   .catch(error => {
+    // Expect no errors
     chai.expect(error).to.equal(null);
     done();
   });

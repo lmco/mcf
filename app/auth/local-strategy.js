@@ -64,7 +64,7 @@ class LocalStrategy {
       User.findOne({
         username: username,
         deletedOn: null
-      }, (findUserErr, user) => { // eslint-disable-line consistent-return
+      }, (findUserErr, user) => {
         // Check for errors
         if (findUserErr) {
           return reject(findUserErr);
@@ -115,7 +115,7 @@ class LocalStrategy {
    * If the callback is called with no parameters, the user is authenticated.
    */
   static handleTokenAuth(req, res, _token) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       // Try to decrypt the token
       let token = null;
       try {

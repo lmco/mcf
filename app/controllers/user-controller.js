@@ -155,7 +155,7 @@ class UserController {
    * @param {User} requestingUser  The object containing the requesting user.
    * @param {Object} newUser  Object containing new user data.
    */
-  static createUser(requestingUser, newUser) { // eslint-disable-line consistent-return
+  static createUser(requestingUser, newUser) {
     return new Promise(((resolve, reject) => {
       try {
         utils.assertAdmin(requestingUser);
@@ -193,7 +193,7 @@ class UserController {
 
       User.find({ username: sani.sanitize(newUser.username) })
       .populate()
-      .exec((findErr, users) => { // eslint-disable-line consistent-return
+      .exec((findErr, users) => {
         if (findErr) {
           return reject(findErr);
         }

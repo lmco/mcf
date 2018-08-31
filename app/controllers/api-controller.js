@@ -246,7 +246,7 @@ class ApiController {
    * A valid orgid consists of only lowercase letters, numbers, and dashes
    * and must begin with a letter.
    */
-  static postOrg(req, res) { // eslint-disable-line consistent-return
+  static postOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -293,7 +293,7 @@ class ApiController {
    * The organization ID cannot be updated and should not be provided in the
    * body.
    */
-  static patchOrg(req, res) { // eslint-disable-line consistent-return
+  static patchOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -336,7 +336,7 @@ class ApiController {
    * deletes the corresponding organization. Returns a success message if
    * successful, otherwise an error message is returned.
    */
-  static deleteOrg(req, res) { // eslint-disable-line consistent-return
+  static deleteOrg(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -359,7 +359,7 @@ class ApiController {
    * @description Takes an orgid and username in the URI and returns
    * an array of roles which the user has within the organization
    */
-  static getOrgRole(req, res) { // eslint-disable-line consistent-return
+  static getOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -383,7 +383,7 @@ class ApiController {
    * @description Takes an orgid and username in the URI and updates a given
    * members role within the organization. Requires a role in the body
    */
-  static postOrgRole(req, res) { // eslint-disable-line consistent-return
+  static postOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -413,7 +413,7 @@ class ApiController {
    * @description Removes user's permission based on orgid and username in the URL.
    *
    */
-  static deleteOrgRole(req, res) { // eslint-disable-line consistent-return
+  static deleteOrgRole(req, res) {
     // If no user in the request
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -436,7 +436,7 @@ class ApiController {
    * @description Returns an array of members and their permission based on orgid
    *
    */
-  static getAllOrgMemRoles(req, res) { // eslint-disable-line consistent-return
+  static getAllOrgMemRoles(req, res) {
     // If no user in the request
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -465,7 +465,7 @@ class ApiController {
    * the project objects for that organization. Returns an error message if
    * organization not found or other error occurs.
    */
-  static getProjects(req, res) { // eslint-disable-line consistent-return
+  static getProjects(req, res) {
     // If no user in the request
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -533,7 +533,7 @@ class ApiController {
    *
    * @description Returns an array of all projects based on orgid and projectid.
    */
-  static getProject(req, res) { // eslint-disable-line consistent-return
+  static getProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -558,7 +558,7 @@ class ApiController {
    * @description Creates a project based on project object in the request body
    *
    */
-  static postProject(req, res) { // eslint-disable-line consistent-return
+  static postProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -604,7 +604,7 @@ class ApiController {
    * encoded project data in the body. Updates the project corresponding to the
    * URI with the data passed in the body.
    */
-  static patchProject(req, res) { // eslint-disable-line consistent-return
+  static patchProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -637,7 +637,7 @@ class ApiController {
    * Takes an organization ID and project ID via URI and deletes the
    * corresponding project.
    */
-  static deleteProject(req, res) { // eslint-disable-line consistent-return
+  static deleteProject(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -656,7 +656,7 @@ class ApiController {
   }
 
 
-  static getProjMemRoles(req, res) { // eslint-disable-line consistent-return
+  static getProjMemRoles(req, res) {
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
       return res.status(error.status).send(error);
@@ -675,7 +675,7 @@ class ApiController {
     .catch((error) => res.status(error.status).send(error));
   }
 
-  static getProjMemRole(req, res) { // eslint-disable-line consistent-return
+  static getProjMemRole(req, res) {
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
       return res.status(error.status).send(error);
@@ -696,7 +696,7 @@ class ApiController {
     .catch((error) => res.status(error.status).send(error));
   }
 
-  static postProjectRole(req, res) { // eslint-disable-line consistent-return
+  static postProjectRole(req, res) {
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
       return res.status(error.status).send(error);
@@ -719,7 +719,7 @@ class ApiController {
     .catch((error) => res.status(error.status).send(error));
   }
 
-  static deleteProjectRole(req, res) { // eslint-disable-line consistent-return
+  static deleteProjectRole(req, res) {
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
       return res.status(error.status).send(error);
@@ -751,7 +751,7 @@ class ApiController {
    *
    * @description Gets and returns all users. Must be an Admin user to perform this.
    */
-  static getUsers(req, res) { // eslint-disable-line consistent-return
+  static getUsers(req, res) {
     // Check if users exist
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');
@@ -783,7 +783,7 @@ class ApiController {
    *
    * @description Gets user based on username and returns its public data.
    */
-  static getUser(req, res) { // eslint-disable-line consistent-return
+  static getUser(req, res) {
     // If for some reason we don't have a user, fail.
     if (!req.user) {
       const error = new errors.CustomError('Request Failed.', 500, 'critical');

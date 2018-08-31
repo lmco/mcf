@@ -410,7 +410,7 @@ function getHeaders() {
 /**
  * @description Helper function for setting the certificate authorities for each request.
  */
-function readCaFile() { // eslint-disable-line consistent-return
+function readCaFile() {
   if (test.hasOwnProperty('ca')) {
     return fs.readFileSync(`${M.root}/${test.ca}`);
   }

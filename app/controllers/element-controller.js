@@ -57,7 +57,7 @@ class ElementController {
    * @param {Boolean} softDeleted   The optional flag to denote searching for deleted elements
    */
   static findElements(reqUser, organizationID, projectID, softDeleted = false) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       try {
         utils.assertType([organizationID, projectID], 'string');
         utils.assertType([softDeleted], 'boolean');
@@ -71,7 +71,7 @@ class ElementController {
 
       // Find the project
       ProjController.findProject(reqUser, orgID, projID, softDeleted)
-      .then((project) => { // eslint-disable-line consistent-return
+      .then((project) => {
         // Ensure user is part of the project
         if (!utils.checkAccess(reqUser, project, 'read')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
@@ -110,7 +110,7 @@ class ElementController {
    * @param {Object} options  Delete options.
    */
   static removeElements(reqUser, organizationID, projectID, options) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       try {
         utils.assertType([organizationID, projectID], 'string');
         utils.assertType([options], 'object');
@@ -145,9 +145,9 @@ class ElementController {
         _projID = project._id;
         return ElementController.findElements(reqUser, orgID, projID, true);
       })
-      .then((elements) => { // eslint-disable-line consistent-return
+      .then((elements) => {
         // Ensure user has permission to delete all elements
-        Object.keys(elements).forEach((element) => { // eslint-disable-line consistent-return
+        Object.keys(elements).forEach((element) => {
           if (!utils.checkAccess(reqUser, elements[element].project, 'admin')) {
             return reject(new errors.CustomError(
               `User does not have permission to delete element ${elements[element].id}.`, 401
@@ -159,7 +159,7 @@ class ElementController {
           for (let i = 0; i < elements.length; i++) {
             // Update the elements deleted fields
             elements[i].deleted = true;
-            elements[i].save((saveErr) => { // eslint-disable-line consistent-return
+            elements[i].save((saveErr) => {
               if (saveErr) {
                 // If error occurs, return it
                 return reject(new errors.CustomError('Save failed.'));
@@ -206,7 +206,7 @@ class ElementController {
    *                   soft deleted projects as well.
    */
   static findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       try {
         utils.assertType([organizationID, projectID, elementID], 'string');
         utils.assertType([softDeleted], 'boolean');
@@ -298,7 +298,7 @@ class ElementController {
    * @param {Object} element  The JSON object containing the element data
    */
   static createElement(reqUser, element) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       // Define variables first, set in the try/catch
       let elemName = null;
       let parentID = null;
@@ -354,7 +354,7 @@ class ElementController {
 
       // Error check - make sure the project exists
       ProjController.findProject(reqUser, orgID, projID)
-      .then((proj) => { // eslint-disable-line consistent-return
+      .then((proj) => {
         // Check Permissions
         if (!utils.checkAccess(reqUser, proj, 'write')) {
           return reject(new errors.CustomError('User does not have permission.', 401));
@@ -364,7 +364,7 @@ class ElementController {
         // Must nest promises since the catch uses proj, returned from findProject.
         ElementController.findElementsQuery({ $or: [{ uid: elemUID }, { uuid: uuid }] })
         .then(() => reject(new errors.CustomError('Element already exists.', 400)))
-        .catch((findError) => { // eslint-disable-line consistent-return
+        .catch((findError) => {
           // This is ok, we dont want the element to already exist.
           if (findError.description === 'No elements found.') {
             // Get the element type
@@ -436,7 +436,7 @@ class ElementController {
    *                  a source and target field.
    */
   static createRelationship(reqUser, elemData, elemInfo) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       try {
         utils.assertExists(['target', 'source'], elemInfo);
         utils.assertType([elemInfo.target, elemInfo.source], 'string');
@@ -604,7 +604,7 @@ class ElementController {
    * @param {Object} elementUpdated  The object of the updated element.
    */
   static updateElement(reqUser, organizationID, projectID, elementID, elementUpdated) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       try {
         utils.assertType([organizationID, projectID, elementID], 'string');
         utils.assertType([elementUpdated], 'object');
@@ -626,7 +626,7 @@ class ElementController {
 
       // Get the element
       ElementController.findElement(reqUser, orgID, projID, elemID)
-      .then((element) => { // eslint-disable-line consistent-return
+      .then((element) => {
         // Check Permissions
         if (!utils.checkAccess(reqUser, element.project, 'admin')) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
@@ -721,14 +721,14 @@ class ElementController {
    * @param {Element} newElement  The new child element.
    */
   static updateParent(reqUser, orgID, projID, elemID, newElement) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       // Handle case where there is no parent element provided
       if (elemID === null) {
         return resolve(null);
       }
       // Find the parent element
       ElementController.findElement(reqUser, orgID, projID, elemID)
-      .then((parentElement) => { // eslint-disable-line consistent-return
+      .then((parentElement) => {
         // To be a parent element, element type must be a package
         if (parentElement.type !== 'Package') {
           return reject(new errors.CustomError('Parent element is not of type Package.', 400));
@@ -772,7 +772,7 @@ class ElementController {
    * @param {Object} options  An object with delete options.
    */
   static removeElement(reqUser, organizationID, projectID, elementID, options) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       try {
         utils.assertType([organizationID, projectID, elementID], 'string');
         utils.assertType([options], 'object');
@@ -803,7 +803,7 @@ class ElementController {
 
       // Find the element, even if it has already been soft deleted
       ElementController.findElement(reqUser, orgID, projID, elemID, true)
-      .then((element) => { // eslint-disable-line consistent-return
+      .then((element) => {
         // Check Permissions
         if (!utils.checkAccess(reqUser, element.project, 'admin')) {
           return reject(new errors.CustomError('User does not have permission.', 401));

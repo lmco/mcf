@@ -105,7 +105,7 @@ class LdapStrategy {
    * @returns Promise The local database User object or an error.
    */
   static handleTokenAuth(req, res, _token) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+    return new Promise((resolve, reject) => {
       LocalStrategy.handleTokenAuth(req, res, _token)
       .then(user => resolve(user))
       .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
@@ -296,7 +296,7 @@ class LdapStrategy {
           return resolve(userSave);
         });
       })
-      .catch(findUserErr => { // eslint-disable-line consistent-return
+      .catch(findUserErr => {
         // if the error message is anything but the user is not found, fail
         if (findUserErr.message !== 'Not Found') {
           return reject(findUserErr);
