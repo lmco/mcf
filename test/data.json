@@ -25,22 +25,27 @@
   "projects": [
     {
       "id": "ultron",
-      "name": "Ultron Analysis",
-      "orgid": "avengers"
+      "name": "Ultron Analysis"
     },
     {
       "id": "jarvis",
-      "name": "Just a Rather Very Intelligent System",
-      "orgid": "stark-industries"
-    }],
+      "name": "Just a Rather Very Intelligent System"
+    },
+    {
+      "id": "thisisaverylongidnamepleaseacceptmeorbreak",
+      "name": "Long Id"
+    },
+    {
+      "id": "timeloop",
+      "name": "Time Gem"
+    }
+  ],
 
   "elements": [
     {
       "type": "Package",
       "id": "nlp",
-      "name": "Natural Language Processing",
-      "org": "stark-industries",
-      "project": "jarvis"
+      "name": "Natural Language Processing"
     },
     {
       "type": "Block",
@@ -48,22 +53,21 @@
       "name": "Speech Recognition",
       "custom": {
         "language": "english"
-      },
-      "org": "stark-industries",
-      "project": "jarvis"
+      }
     },
     {
       "type": "Block",
       "id": "text-parser",
-      "name": "Text Parser",
-      "org": "stark-industries",
-      "project": "jarvis"
+      "name": "Text Parser"
     },
     {
       "type": "Relationship",
       "id": "speech-to-text",
-      "name": "Speech to Text",
-      "org": "stark-industries",
-      "project": "jarvis"
+      "name": "Speech to Text"
+    },
+    {
+      "type": "Package",
+      "id": "0001",
+      "name": "In time loop"
     }]
 }

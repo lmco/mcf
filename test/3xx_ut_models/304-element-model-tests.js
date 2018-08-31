@@ -24,6 +24,7 @@
 
 // Load node modules
 const chai = require('chai');
+const path = require('path');
 
 // Load MBEE modules
 const Element = M.require('models.element');
@@ -33,8 +34,10 @@ const db = M.require('lib/db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
 let org = null;
 let project = null;
+
 
 /* --------------------( Main )-------------------- */
 /**
@@ -52,8 +55,8 @@ describe(M.getModuleName(module.filename), () => {
 
     // Create the organization model object
     const newOrg = new Org({
-      id: 'avengers',
-      name: 'The Avengers'
+      id: testData.orgs[0].id,
+      name: testData.orgs[0].name
     });
 
     // Save the organization model object to the database
@@ -64,10 +67,10 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create the project model object
       const newProject = new Project({
-        id: 'timeloop',
-        name: 'Time Gem',
+        id: testData.projects[3].id,
+        name: testData.projects[3].name,
         org: org._id,
-        uid: `${org.id}:timeloop`
+        uid: `${org.id}:${testData.projects[3].id}`
       });
 
       // Save the project model object to the database
@@ -124,9 +127,9 @@ describe(M.getModuleName(module.filename), () => {
 function createRootPackage(done) {
   // Create the root package element object
   const newPackage = new Element.Package({
-    id: '0001',
-    uid: 'avengers:timeloop:0001',
-    name: 'In time loop',
+    id: testData.elements[4].id, // 'avengers:timeloop:0001'
+    uid: `${org.id}:${project.id}:${testData.elements[4].id}`,
+    name: testData.elements[4].name,
     project: project._id,
     parent: null
   });
@@ -304,6 +307,7 @@ function deleteElements(done) {
   })
   .catch((error) => {
     // Expect no error
+    console.log(error.stack);
     chai.expect(error).to.equal(null);
     done();
   });

@@ -23,6 +23,7 @@
 
 // Load node modules
 const chai = require('chai');
+const path = require('path');
 
 // Load MBEE modules
 const Org = M.require('models.organization');
@@ -32,6 +33,7 @@ const utils = M.require('lib/utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
 let org = null;
 
 /* --------------------( Main )-------------------- */
@@ -51,8 +53,8 @@ describe(M.getModuleName(module.filename), () => {
 
     // Create a parent organization before creating any projects
     org = new Org({
-      id: 'avengers',
-      name: 'Age of Ultron'
+      id: testData.orgs[0].id,
+      name: testData.orgs[0].name
     });
 
     // Save the org via the org model
@@ -105,10 +107,10 @@ describe(M.getModuleName(module.filename), () => {
 function createProject(done) {
   // Create a project model object
   const newProject = new Project({
-    id: 'guardiansofgalaxy',
-    name: 'Guardians of the Galaxy',
+    id: testData.projects[0].id,
+    name: testData.projects[0].name,
     org: org._id,
-    uid: utils.createUID(org.id, 'guardiansofgalaxy')
+    uid: utils.createUID(org.id, testData.projects[0].id)
   });
   // Save project model object to database
   newProject.save((error) => {
@@ -123,10 +125,10 @@ function createProject(done) {
  */
 function findProject(done) {
   // Find the project
-  Project.findOne({ id: 'guardiansofgalaxy' })
+  Project.findOne({ id: testData.projects[0].id })
   .then((proj) => {
     // Ensure project data is correct
-    chai.expect(proj.name).to.equal('Guardians of the Galaxy');
+    chai.expect(proj.name).to.equal(testData.projects[0].name);
     done();
   })
   .catch((error) => {
@@ -142,13 +144,13 @@ function findProject(done) {
 function updateProject(done) {
   // Find and update project previously created in createProject test
   Project.findOneAndUpdate({
-    id: 'guardiansofgalaxy' },
-  { name: 'Guardians of the Galaxy 2' })
+    id: testData.projects[0].id },
+  { name: testData.projects[1].name })
   // Find previously updated project
-  .then(() => Project.findOne({ id: 'guardiansofgalaxy' }))
+  .then(() => Project.findOne({ id: testData.projects[0].id }))
   .then((proj) => {
     // Ensure project name was successfully updated
-    chai.expect(proj.name).to.equal('Guardians of the Galaxy 2');
+    chai.expect(proj.name).to.equal(testData.projects[1].name);
     done();
   })
   .catch((error) => {
@@ -163,8 +165,8 @@ function updateProject(done) {
  */
 function deleteProject(done) {
   // Find and remove the project previously created in createProject test.
-  Project.findOneAndRemove({ id: 'guardiansofgalaxy' })
-  .then(() => Project.find({ id: 'guardiansofgalaxy' }))
+  Project.findOneAndRemove({ id: testData.projects[0].id })
+  .then(() => Project.find({ id: testData.projects[0].id }))
   .then((projects) => {
     // Expect to find no projects
     chai.expect(projects.length).to.equal(0);
@@ -184,8 +186,8 @@ function deleteProject(done) {
 function verifyProjectFieldMaxChar(done) {
   // Create a new model project
   const newProject = new Project({
-    id: 'thisisaverylongidnamepleaseacceptmeorbreak',
-    name: 'Long Id',
+    id: testData.projects[2].id,
+    name: testData.projects[2].name,
     org: org._id
   });
 

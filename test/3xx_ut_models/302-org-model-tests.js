@@ -24,6 +24,7 @@
  */
 
 // Load node modules
+const path = require('path');
 const chai = require('chai');
 
 // Load MBEE modules
@@ -35,6 +36,9 @@ const mockExpress = M.require('lib.mock-express');
 
 // Variables used across test functions
 let userAdmin = null;
+
+/* --------------------( Test Data )-------------------- */
+const testData = require(path.join(M.root, 'test', 'data.json'));
 
 /* --------------------( Main )-------------------- */
 /**
@@ -113,8 +117,8 @@ describe(M.getModuleName(module.filename), () => {
 function createOrg(done) {
   // Create an organization from the Organization model object
   const org = new Org({
-    id: 'avengers',
-    name: 'Avengers Initiative',
+    id: testData.orgs[0].id,
+    name: testData.orgs[0].name,
     permissions: {
       admin: [userAdmin._id],
       write: [userAdmin._id],
@@ -134,15 +138,15 @@ function createOrg(done) {
 function findOrg(done) {
   // Find the created organization from the previous createOrg() test
   Org.findOne({
-    id: 'avengers',
-    name: 'Avengers Initiative'
+    id: testData.orgs[0].id,
+    name: testData.orgs[0].name
   }, (err, retOrg) => {
     // Expect no error
     chai.expect(err).to.equal(null);
 
     // Verify correct org is returned
-    chai.expect(retOrg.id).to.equal('avengers');
-    chai.expect(retOrg.name).to.equal('Avengers Initiative');
+    chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+    chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
 
     done();
   });
@@ -154,9 +158,9 @@ function findOrg(done) {
 function updateOrg(done) {
   // Find and update the org created in the previous createOrg() test
   Org.findOneAndUpdate({
-    id: 'avengers'
+    id: testData.orgs[0].id
   }, {
-    name: 'Avengers'
+    name: testData.orgs[0].name
   }, (err, org) => {
     // Expect no error
     chai.expect(err).to.equal(null);
@@ -169,8 +173,8 @@ function updateOrg(done) {
       chai.expect(err2).to.equal(null);
 
       // Verify org is updated correctly
-      chai.expect(retOrg.id).to.equal('avengers');
-      chai.expect(retOrg.name).to.equal('Avengers');
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
       done();
     });
   });
@@ -182,7 +186,7 @@ function updateOrg(done) {
 function findOrgPermissions(done) {
   // Finds permissions on the org created in the previous createOrg() test
   Org.findOne({
-    id: 'avengers'
+    id: testData.orgs[0].id
   }, (err, retOrg) => {
     // Expect no error
     chai.expect(err).to.equal(null);
@@ -204,7 +208,7 @@ function softDeleteOrg(done) {
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
 
   // Find the previously created organization from createOrg.
-  Org.findOne({ id: 'avengers' })
+  Org.findOne({ id: testData.orgs[0].id })
   .exec((err, org) => {
     // Set the deleted field of the organization to true
     org.deleted = true;
@@ -232,7 +236,7 @@ function softDeleteOrg(done) {
 function deleteOrg(done) {
   // find and remove the organization
   Org.findOneAndRemove({
-    id: 'avengers'
+    id: testData.orgs[0].id
   }, (error) => {
     // Check that the remove action did not fail.
     chai.expect(error).to.equal(null);
