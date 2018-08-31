@@ -138,11 +138,12 @@ function createRootPackage(done) {
   newPackage.save()
   // Find the root package element
   .then(() => Element.Package.findOne({
-    uid: `${org.id}:${project.id}:${testData.elements[4].id}`}))
+    uid: `${org.id}:${project.id}:${testData.elements[4].id}` }))
   .then((retPackage) => {
     // Check the root package element saved correctly
     chai.expect(retPackage.uid).to.equal(
-      `${org.id}:${project.id}:${testData.elements[4].id}`);
+      `${org.id}:${project.id}:${testData.elements[4].id}`
+    );
     chai.expect(retPackage.type).to.equal(testData.elements[4].type);
     done();
   })
@@ -165,7 +166,7 @@ function createBlock(done) {
     // Create new block element object
     const newBlock = new Element.Block({
       id: testData.elements[5].id,
-      uid:`${org.id}:${project.id}:${testData.elements[5].id}`,
+      uid: `${org.id}:${project.id}:${testData.elements[5].id}`,
       name: testData.elements[5].name,
       project: project._id,
       parent: pkg._id
@@ -178,7 +179,8 @@ function createBlock(done) {
 
       // Check block element object saved correctly
       chai.expect(createdBlock.uid).to.equal(
-        `${org.id}:${project.id}:${testData.elements[5].id}`);
+        `${org.id}:${project.id}:${testData.elements[5].id}`
+      );
 
       chai.expect(createdBlock.name).to.equal(testData.elements[5].name);
       chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
@@ -206,9 +208,8 @@ function createBlock(done) {
  */
 function createRelationship(done) {
   // Start by grabbing the root package
-  Element.Package.findOne(
-    { uid: `${org.id}:${project.id}:${testData.elements[4].id}` })
-
+  Element.Package.findOne({
+    uid: `${org.id}:${project.id}:${testData.elements[4].id}` })
   .then((pkg) => {
     // Expect the package to contain one child element already
     chai.expect(pkg.contains.length).to.equal(1);
@@ -233,7 +234,8 @@ function createRelationship(done) {
 
       // Make sure it created what we expect and finish
       chai.expect(createdRelationship.uid).to.equal(
-        `${org.id}:${project.id}:${testData.elements[6].id}`);
+        `${org.id}:${project.id}:${testData.elements[6].id}`
+      );
 
       chai.expect(createdRelationship.name).to.equal(testData.elements[6].name);
       chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
