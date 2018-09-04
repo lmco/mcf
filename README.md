@@ -24,55 +24,88 @@ NPM comes with Node.js, all you need to do is make sure you can install packages
 with NPM and you can get started.
 
 You'll also need an instance MongoDB. If you don't have a database already set
-up, see our section on [setting up MongoDB](#setting-up-mongodb). Once MongoDB
-is set up, you just need to configure MBEE to point to it.
+up, please see the [MongoDB Installation Tutorial](https://docs.mongodb.com/manual/installation/#tutorial-installation)
+and the [MongoDB Getting Started Guide](https://docs.mongodb.com/manual/tutorial/getting-started/)
+for up-to-date documentation on MongoDB.
 
 Finally, you need to clone the MBEE code by running:
 `git clone https://gitlab.lmms.lmco.com/mbee/mbee.git `. And enter the directory
 with `cd mbee`.
 
-
 ### Configuring MBEE
 MBEE stores all it's configuration information in the `config` directory. By
-default, it uses the `dev.json` file, but that can be changed by changing the
-`NODE_ENV` environment variable. On startup, MBEE will load the configuration
-file with a name matching the `NODE_ENV` environment variable. For example,
-if `NODE_ENV=production`, MBEE will look for the file `config/production.json`.
+default, it uses the `default.cfg` file, but that can be changed by setting the
+`MBEE_ENV` environment variable. On startup, MBEE will load the configuration
+file with a name matching the `MBEE_ENV` environment variable. For example,
+if `MBEE_ENV=production`, MBEE will look for the file `config/production.cfg`.
 
-MBEE is designed to be largely parameterized by this config file, you'll find
-options in the config to update the server ports, Docker configurations,
-enabling and disabling components, and swapping out authentication schemes.
+The MBEE config is simply a JSON file that allows comments. MBEE is designed to 
+be largely parameterized by this config file. In it that file you will have 
+options to to alter the server ports, Docker configurations, enabling and 
+disabling components, and swapping out authentication schemes. For a 
+more detailed explanation of the fields supported by the config file, see the
+detailed comments provided [example.cfg](config/example.cfg).
 
-To configure the database enter your database connection information in the `db`
-section of the config. For example:
+To get started, you should edit the [default.cfg](config/default.cfg) to support
+your configuration.
 
-```json
-{
-  "db": {
-    "name": "test",
-    "url": "localhost",
-    "port": "27017",
-    "username": "mbee",
-    "password": "mbee",
-    "ssl": false
-  }
-}
-```
+### Modular Authentication
+MBEE supports modular authentication strategies. These authentication modules
+have well defined interfaces that can by dynamically replaced by one another.
+This allows you to write a custom authentication module to accommodate the needs
+of your company or organization without having to make major changes to MBEE.
+You can then specify which authentication module to use in the MBEE config file.
 
-For more information please see the detailed comments in the provided
-[example.cfg](config/example.cfg).
+By default, MBEE provides strategies for local authentication or LDAP 
+authentication. Local is used by default because it has fewer dependencies and
+is easiest to get started. LDAP can be used by specifying that strategy in the 
+config file and altering the `auth.ldap` section of the config to define your 
+LDAP configuration.
+
+An authentication module has the following requirements:
+
+- It must be located in the `app/auth` directory.
+- It must implement and export the following functions
+    - handleBasicAuth(req, res, username, password) - Returns a Promise
+    - handleTokenAuth(req, res, token) - Returns a Promise
+    - doLogin(req, res, next)
+
+The `handleBasicAuth` and `handleTokenAuth` functions both defines how to 
+authenticate users for their respective input types. Both objects are passed the
+request object, `req`, and response object, `res`. `handleBasicAuth` is 
+passed the username and password which is obtained from either the authorization
+header or form input depending on which is provided (with the former taking 
+precedence). `handleTokenAuth` is passed a token which is retrieved either from
+the authorization header or the `req.session.token` field (with the former 
+taking precedence). Both of these functions must return promise that resolves
+the user object on success or rejects with an error if authentication fails.
+
+The `doLogin` function defines what actions should be done to actually log the 
+user in when authentication succeeds. This function is called for the following 
+routes:
+    - `/api/login`: This function should set the `req.session.token` and call 
+    `next()` when done. Control will then be passed to the API controller with
+    will return the token in the form `{ "token": "yourReqSessionToken" }`
+    -`/login`: This function should perform login actions such as setting the 
+    `req.session.token` value then call `next()` when done which will handle
+    appropriate redirection of the user.
+
+Alter the `auth.strategy` field in the config to use your authentication 
+strategy.
+
 
 ### Building MBEE
 
-The easiest way to build MBEE is to run `node mbee build`. This will install
-dependencies and build MBEE.
+1. Install dependencies by running `NODE_ENV=dev yarn install` or 
+`npm install --dev`.
+2. Build MBEE by running `node mbee build`. This will build the client-side 
+assets by moving dependencies from `node_modules` into build, concatenating and
+minifying client-side JavaScript, processing Sass into CSS, and building JSDoc
+documentation.
 
-> How it works: The build command (which calls the script `scripts/build.js`)
-> first uses NPM to install Yarn, an alternative to NPM, and configures it
-> according to the `yarn` section of the config file. It then runs
-> `yarn install --dev` to install all dependencies. Finally, it runs the build
-> function defined in the build.js script to copy dependencies, build sass and
-> Javascript and similar tasks required for MBEE to run.
+> How it works: The build command ultimately calls the script `scripts/build.js`
+> and the package.json contains a "build" script definition that also points to
+> this script. You can also build by running `npm build` or `yarn run build`.
 
 #### NPM, Yarn, and mbee.js
 
@@ -106,12 +139,9 @@ default). To run with a different configuration (`production` for example), run
 > and creates (if enabled) the HTTP and HTTPS servers and starts the servers.
 
 
-## Setting Up MongoDB
+## Configuration
 
-Please see the [MongoDB Installation Tutorial](https://docs.mongodb.com/manual/installation/#tutorial-installation)
-and the [MongoDB Getting Started Guide](https://docs.mongodb.com/manual/tutorial/getting-started/)
-for up-to-date documentation on MongoDB.
-
+## Modular Authentication
 
 ## Test
 // TODO: Document the 600 tests certs
@@ -153,7 +183,7 @@ as it is seen by Mocha should correspond to the name of the file.
 These test numbers are used both to uniquely identify the tests and to define
 their order of execution.
 
-## Code Conventions and ESLint
+### Code Conventions and ESLint
 While this isn't strictly a testing topic, it is a good practice that relates to
 testing as it helps avoid inconsistencies or problems in the code base. We use
 ESLint to maintain certain standards and conventions in our code.
