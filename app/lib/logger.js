@@ -1,26 +1,29 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module lib.logger
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description Defines the MBEE logger. The logger should be used everywhere
- * instead of using `console.log`.
+ * @description Defines the MBEE logger. The logger should be used instead of
+ * using `console.log`. The logger adds the ability to write to log
+ * files, timestamp errors, include stack trace, and allow for colored text.
  *
- * To use the logger simple require this file (e.g.
- * `const log = require('logger.js')`. You can the use the logger:
+ * To use the logger simply require this file (e.g.
+ * `const log = require('logger.js')`.
+ *
+ * You can the use the logger:
  *   - `log.info('Hello World')`
- *   - `log.error('An error has occured')`
+ *   - `log.error('An error has occurred')`
  */
 
 // Load node modules
@@ -28,7 +31,7 @@ const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
 const { execSync } = require('child_process');
 
-/* This defines our log levels */
+// This defines our log levels
 const levels = {
   critical: 0,
   error: 1,
@@ -38,7 +41,7 @@ const levels = {
   debug: 5
 };
 
-/* This defines the colors for each log level */
+// This defines the colors for each log level
 const colors = {
   critical: 'red underline',
   error: 'red',
@@ -47,6 +50,8 @@ const colors = {
   verbose: 'blue',
   debug: 'green'
 };
+
+// This defines the unicode format for each color
 const fmt = {
   color: {
     grey: '\u001b[30m',
@@ -62,16 +67,19 @@ const fmt = {
 };
 
 /**
- * This is the formatting function for console output. To change how logs
- * appear in the console, edit this function. Note, a separate function is used
- * to define the format for the log files (the fileFormatter function).
+ * @description This is the formatting function for console output. Note, a
+ * separate function is used to define the format for the log files (the
+ * fileFormatter() function).
  */
 const formatter = printf((msg) => {
-  // This allows us to get the file, line, and column
+  // Retrieve the error stack
   const stack = new Error().stack;
   const lines = stack.split('\n');
   const reduced = [];
+
+  // For each line in the stack trace, remove winston specific lines
   for (let i = 0; i < lines.length; i++) {
+    // TODO: CustomError stack trace still printing these lines (MBX-408)
     if (lines[i].includes('node_modules')
          || lines[i].includes('DerivedLogger')
          || lines[i].includes('at doWrite')
@@ -81,12 +89,13 @@ const formatter = printf((msg) => {
     reduced.push(lines[i]);
   }
 
+  // Skip past logger stack lines, and select first useful line
   const index = (reduced.length > 2) ? 2 : 1;
   const tmp = reduced[index].split(`${process.cwd()}/`);
-  // const func = reduced[index].split('at ')[1].split(' ')[0];
+
+  // Get the file and line number of the error
   const file = tmp[tmp.length - 1].split(':')[0].replace(/\//g, '.');
   const line = tmp[tmp.length - 1].split(':')[1];
-  // const col = tmp[tmp.length - 1].split(':')[2].replace(')', '');
 
   // We want to capitalize the log level. You cannot string.toUpperCase here
   // because the string includes the color formatter and toUpperCase will

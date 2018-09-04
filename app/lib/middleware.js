@@ -23,15 +23,6 @@
 const errors = M.require('lib.errors');
 
 /**
- * MiddleWare.js
- *
- * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
- *
- * @description This class Defines middleware functions which can be used by
- * routes in order to implement route logging or other various functionality.
- */
-
-/**
  * @description Log the route and method requested by a user.
  */
 module.exports.logRoute = function logRoute(req, res, next) {
