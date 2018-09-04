@@ -1,50 +1,53 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module  lib.sanitization
+ * Classification: UNCLASSIFIED
+ *
+ * @module lib.sanitization
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines common cryptographic functions.
+ * @description Defines functions to sanitize user input.
  */
-
 
 /**
- * Generates a token from user data.
+ * @description Sanitizes database queries and scripting tags.
  */
-module.exports.sanitize = function(s) {
-  return module.exports.mongo(module.exports.html(s));
+module.exports.sanitize = function(userInput) {
+  return module.exports.mongo(module.exports.html(userInput));
 };
 
 /**
- * Sanitizes for databse queries
+ * @description Sanitizes database queries.
  */
-module.exports.mongo = function(s) {
-  if (s instanceof Object) {
-    Object.keys(s).forEach((k) => {
-      if (/^\$/.test(k)) {
-        delete s[k];
+module.exports.mongo = function(userInput) {
+  if (userInput instanceof Object) {
+    // Check for '$' in each parameter of userInput
+    Object.keys(userInput).forEach((value) => {
+      // If '$' in value, remove value from userInput
+      if (/^\$/.test(value)) {
+        delete userInput[value];
       }
     });
   }
-  return s;
+  // Return modified userInput
+  return userInput;
 };
 
 /**
- * Sanitizes for any scripting in html.
+ * @description Sanitizes HTML input.
  */
-module.exports.html = function(s) {
-  if (typeof s === 'string') {
-    return String(s)
+module.exports.html = function(userInput) {
+  // Replace known HTML characters with HTML escape sequences.
+  if (typeof userInput === 'string') {
+    return String(userInput)
     .replace(/&(?!(amp;)|(lt;)|(gt;)|(quot;)|(#039;)|(nbsp))/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -60,29 +63,25 @@ module.exports.html = function(s) {
     .replace(/\^/g, '&Hat;')
     .replace(/'/g, '&#039;');
   }
-  if ((typeof s === 'undefined') || (typeof s === 'boolean') || (s === null)) {
-    return s;
-  }
 
   // Check if object type
-  if (s instanceof Object) {
+  if (userInput instanceof Object) {
     // Loop through each object
-    Object.keys(s).forEach((k) => {
+    Object.keys(userInput).forEach((value) => {
       // Sanitize value
-      const newVal = module.exports.html(s[k]);
-      s[k] = newVal;
+      userInput[value] = module.exports.html(userInput[value]);
     });
-    return s;
   }
-  return s;
+  return userInput;
 };
 
 /**
- * Sanitizes for any LDAP special characters.
+ * @description Sanitizes LDAP special characters.
  */
-module.exports.ldapFilter = function(s) {
-  if (typeof s === 'string') {
-    return String(s)
+module.exports.ldapFilter = function(userInput) {
+  // If string, replace special characters
+  if (typeof userInput === 'string') {
+    return String(userInput)
     .replace(/\\/g, '\\2A')
     .replace(/\*/g, '\\28')
     .replace(/\(/g, '\\29')
@@ -90,9 +89,11 @@ module.exports.ldapFilter = function(s) {
     .replace(/NUL/g, '\\00');
   }
 
-  if (s === null) {
+  // Return blank string if null
+  if (userInput === null) {
     return '';
   }
 
-  return s;
+  // Return original string
+  return userInput;
 };

@@ -89,7 +89,8 @@ const formatter = printf((msg) => {
     reduced.push(lines[i]);
   }
 
-  // Skip past logger stack lines, and select first useful line
+  // Retrieve the first line of failure
+  // Note: There are some cases which the reduced stack is less than 2 lines
   const index = (reduced.length > 2) ? 2 : 1;
   const tmp = reduced[index].split(`${process.cwd()}/`);
 
@@ -119,8 +120,8 @@ const formatter = printf((msg) => {
     }
     return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msgPrint}`;
   }
-  // If colorize is false, we remove colors from the log level.
 
+  // If colorize is false, we remove colors from the log level, timestamp and file.
   level = level
   .replace('\u001b[30m', '')
   .replace('\u001b[31m', '')
@@ -137,7 +138,6 @@ const formatter = printf((msg) => {
   return `${ts} [${level}] ${f}:${line} -> ${msg.message}`;
 });
 
-
 // Creates the log directory if it doesn't already exist
 const logDir = (M.config.log.dir === undefined) ? 'logs' : M.config.log.dir;
 // TODO: make OS Specific (MBX-358)
@@ -145,11 +145,11 @@ const cmd = `mkdir -p ${logDir}`;
 execSync(cmd);
 
 /**
- * This creates the logger. It defines the log level, as specified in the
- * config. Defines the levels and ordering from the level field above and
- * defines the log format and transports which tell the logger where to send
- * log info. By default we have four log transports: the console, an error
- * file, a combined log, and a debug log.
+ * @description This creates the logger. Defines log level, log formatting and
+ * transports.
+ *
+ * There are four transports (location which the log is written to):
+ * the console, an error file, a combined log, and a debug log.
  */
 const logger = winston.createLogger({
   level: M.config.log.level,
@@ -161,23 +161,20 @@ const logger = winston.createLogger({
     formatter
   ),
   transports: [
-    // This is the console transport. It tells the logger to log things
-    // to the console. It uses the default format defined above.
+    // console transport - logs to the console.
     new winston.transports.Console(),
-    // This is the error log transport. It writes all logs of level error
-    // (and below) to error log file. The file is defined in the config.
+    // error log transport - logs error-level and below to error log file
     new winston.transports.File({
       filename: M.config.log.error_file,
       level: 'error'
     }),
-    // This is the combined log. It logs everything of the default level and
-    // below to a combined log.
+    // combined log transport - logs default-level and below to combined log file
+    // NOTE: Default level specified in config file
     new winston.transports.File({
       filename: M.config.log.file,
       level: M.config.log.level
     }),
-    // This is the combined log. It logs all log levels to the debug file
-    // defined in the config.
+    // debug log transport - logs debug-level and below to debug log file
     new winston.transports.File({
       filename: M.config.log.debug_file,
       level: 'debug'
@@ -186,16 +183,7 @@ const logger = winston.createLogger({
   exitOnError: false
 });
 
-// This seems to be needed for our custom log levels
+// Add defined colors to winston logger
 winston.addColors(colors);
 
-// var testMsg = 'Test 1 2 3'
-// logger.critical(testMsg);
-// logger.error(testMsg);
-// logger.warn(testMsg);
-// logger.info(testMsg);
-// logger.verbose(testMsg);
-// logger.debug(testMsg);
-
-/* Export the logger object */
 module.exports = logger;
