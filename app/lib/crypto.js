@@ -1,6 +1,7 @@
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module  lib.crypto
- * @memberOf lib
  *
  * @copyright  Copyright (c) 2018, Lockheed Martin Corporation
  *

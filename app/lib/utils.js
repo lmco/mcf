@@ -1,31 +1,35 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module lib.utils
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Defines miscellaneous helper functions.
  */
 
-// Load node modules
+// Node modules
 const path = require('path');
 const fs = require('fs');
 
-// Load MBEE modules
+// MBEE modules
 const errors = M.require('lib.errors');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 
+/**
+ * @description Provides time unit conversions.
+ */
 module.exports.timeConversions = {
   MILLISECONDS: 1,
   SECONDS: 1000,
@@ -34,37 +38,55 @@ module.exports.timeConversions = {
   DAYS: 24 * 60 * 60 * 1000
 };
 
-function getPluginNames() {
-  let pluginFiles = null;
-
-  if (M.config.server.plugins.enabled) {
-    // Create a list of available plugins
-    const pluginPath = path.join(__dirname, '..', '..', 'plugins');
-    pluginFiles = fs.readdirSync(pluginPath);
-    for (let i = pluginFiles.length - 1; i >= 0; i--) {
-      // If package.json doesn't exist, skip it
-      const eachPluginPath = path.join(pluginPath, pluginFiles[i]);
-      if (!fs.existsSync(path.join(eachPluginPath, 'package.json'))) {
-        pluginFiles.splice(i, 1);
-      }
-    }
-  }
-  return pluginFiles;
-}
-
+/**
+ * The string used as the UID delimiter.
+ * @type {string}
+ */
+module.exports.UID_DELIMITER = ':';
 
 /**
- * @description Defines a one size fits all render function
- * with built-in defaults
+ * @description Gets and returns an array of the names of all plugins
+ * contained in the MBEE plugins directory. If no plugins are installed,
+ * an empty array is returned.
+ */
+function getPlugins() {
+  const arrPlugins = [];
+  const pluginPath = path.join(__dirname, '..', '..', 'plugins');
+
+  // If plugins are not enabled, return the empty array
+  if (!M.config.server.plugins.enabled) {
+    return arrPlugins;
+  }
+
+  // Loop over plugins defined in config
+  for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
+    // Check that the plugin exists and has a package.json file
+    const plugin = M.config.server.plugins.plugins[i];
+    const pkgPath = path.join(pluginPath, plugin.name, 'package.json');
+
+    // If no package.json skip this plugin
+    if (!fs.existsSync(pkgPath)) {
+      continue;
+    }
+
+    // If plugin exists, append it to the array
+    arrPlugins.push({ name: plugin.name, title: plugin.title });
+  }
+  return arrPlugins;
+}
+
+/**
+ * @description Defines a render utility wrapper for the Express res.render
+ * function to define and pass in default options.
  *
- * @param {Object} req  Request object
- * @param {Object} res  Response object
- * @param {string} name The name of the template to render
+ * @param {Object} req  The Request object
+ * @param {Object} res  The Response object
+ * @param {String} name The name of the template to render
  * @param {Object} params A list of parameters to render
  */
 module.exports.render = function(req, res, name, params) {
   const opts = params || {};
-  opts.pluginNames = getPluginNames();
+  opts.pluginNames = getPlugins();
   opts.ui = opts.ui || M.config.server.ui;
   opts.user = opts.user || (req.user) ? req.user.getPublicData() : '';
   opts.title = opts.title || 'Model-Based Engineering Environment';
@@ -72,40 +94,57 @@ module.exports.render = function(req, res, name, params) {
 };
 
 /**
- * @description Checks an array of arguments for a specified type and throws an error.
- * Note: Possible types: string, object, number, undefined, boolean, symbol
+ * @description Loops over a given array and asserts that each item is of a
+ * specific type. If any item in the array is not of the specified type, an
+ * error is thrown. It is assumed the array should always have items in it, if
+ * the array is empty an error is thrown.
  *
- * EMPTY ARRAY and valid types DO NOT ERROR.
- *
- * @param {Object} params  An array of values to check.
- * @param {String} type    The type to check.
+ * @param {Object} arrItems   An array of values to check.
+ * @param {String} assertType The type to check. Options: ['string', 'object',
+ *                            'number', 'undefined', 'boolean', 'symbol'].
  */
-module.exports.assertType = function(params, type) {
+module.exports.assertType = function(arrItems, assertType) {
+  // An empty array is never expected
+  if (Array.isArray(arrItems)) {
+    const desc = `Array was expected. Got ${typeof arrItems}`;
+    throw new errors.CustomError(desc, 400);
+  }
+
+  // An empty array is never expected
+  if (arrItems.length === 0) {
+    const desc = 'Array is empty. Assertion check failed.';
+    throw new errors.CustomError(desc, 400);
+  }
+
   // Define valid type
   const validType = ['string', 'object', 'number', 'undefined', 'boolean', 'symbol'];
 
   // Check type NOT included in validTypes
-  if (!validType.includes(type)) {
+  if (!validType.includes(assertType)) {
     // Invalid type, throw error
-    throw new errors.CustomError(`${type} is not a valid javascript type.`, 400);
+    const desc = `${assertType} is not a valid javascript type.`;
+    throw new errors.CustomError(desc, 400);
   }
-  Object.keys(params).forEach((param) => {
-    if (typeof params[param] !== type) { // eslint-disable-line valid-typeof
-      throw new errors.CustomError(`Value is not a ${type}.`, 400);
+  Object.keys(arrItems).forEach((item) => {
+    if (typeof arrItems[item] !== assertType) { // eslint-disable-line valid-typeof
+      throw new errors.CustomError(`Value is not a ${assertType}.`, 400);
     }
   });
 };
 
 /**
- * @description Checks an array of arguments to see if
- * they are of a specified type and returns a boolean.
+ * @description Calls assertType to verify that `arrItems` is an array
+ * containing items of type `checkType`. Returns true f all items in the array
+ * of the specified type. Otherwise false is returned. Returns false is
+ * assertType throws an error.
  *
- * @param {Object} params  An array of values to check.
- * @param {String} type  The type to check.
+ * @param {Object} arrItems   An array of values to check.
+ * @param {String} checkType  The type to check. Options: ['string', 'object',
+ *                            'number', 'undefined', 'boolean', 'symbol'].
  */
-module.exports.checkType = function(params, type) {
+module.exports.checkType = function(arrItems, checkType) {
   try {
-    this.assertType(params, type);
+    this.assertType(arrItems, checkType);
     return true;
   }
   catch (error) {
@@ -114,63 +153,45 @@ module.exports.checkType = function(params, type) {
 };
 
 /**
- * @description Checks an array of strings. Throws an error if string keys
- * are NOT within a given object.
+ * @description Given an array of string properties and an object, asserts that
+ * the object has all of those properties.
  *
  * @example
- * assertExists(name.first,[{name:{first:'foo', last:'bar'}}]);
- * Checks 'name.first' exist within object below:
- *  {
- *      name: {
- *          first: 'foo',
- *          last: 'bar'
- *      }
- *  }
+ *  assertExists(['id', 'project.id'], { id: '123', project: {id: '456'} });
  *
- * @param {Object} params  A list of strings denoting keys.
+ * @param {Object} properties  An array of strings denoting keys.
  * @param {Object} obj  The object being searched.
- * @param {String} parent  The parent key, defaults to null.
- *
- * @return {Object} CustomError of 400
  */
-module.exports.assertExists = function(params, obj, parent = null) {
+module.exports.assertExists = function(properties, obj) {
   try {
-    Object.keys(params).forEach((param) => {
-      if (!(params[param] in obj)) {
-        let parentString = parent;
-        if (parent === null) {
-          parentString = 'request';
-        }
-        if (params[param].includes('.')) {
-          const splitString = params[param].split('.', 1)[0];
-          const leftoverString = params[param].split(`${splitString}.`)[1];
-          if (!obj[splitString]) {
-            throw new errors.CustomError(`There is no attribute [${params[param]}] in the ${parentString} body.`, 400);
-          }
-          this.assertExists([leftoverString], obj[splitString], splitString);
-        }
-        else {
-          throw new errors.CustomError(`There is no attribute [${params[param]}] in the ${parentString} body.`, 400);
-        }
+    Object.keys(properties).forEach((prop) => {
+      let ref = obj;
+      // Split property on '.' characters.
+      // Loop over nested object properties, updating ref with each iteration.
+      prop.split('.').forEach(p => { ref = ref[p]; });
+      if (ref === undefined) {
+        throw new errors.CustomError(`Object does not have property ${prop}.`, 400);
       }
     });
   }
   catch (error) {
-    throw new errors.CustomError('There is something wrong with the parameters in the body.', 400);
+    M.log.error(error);
+    throw new errors.CustomError('AssertExists failed. Check log for full details.', 400);
   }
 };
 
 /**
- * @description Checks an array of strings to make
- *  sure that they are keys within a given object and returns a boolean.
+ * @description Given an array of properties and an object, checks that the
+ * object has each of the properties by calling assertExists. Returns true if
+ * the object has all of those properties. If not, or if assertsExists throws
+ * an error, false is returned.
  *
- * @param {Object} params  A list of strings denoting keys.
+ * @param {Object} properties  A list of strings denoting keys.
  * @param {Object} obj  The object being searched.
- * @param {String} parent  The parent key, defaults to null.
  */
-module.exports.checkExists = function(params, obj, parent = null) {
+module.exports.checkExists = function(properties, obj) {
   try {
-    this.assertExists(params, obj, parent);
+    this.assertExists(properties, obj);
     return true;
   }
   catch (error) {
@@ -180,6 +201,7 @@ module.exports.checkExists = function(params, obj, parent = null) {
 
 /**
  * @description Checks whether the user is an admin or not. Throws an error
+ * if user is not an admin.
  *
  * @param {User} user  The user object being checked.
  */
@@ -190,65 +212,29 @@ module.exports.assertAdmin = function(user) {
 };
 
 /**
- * @description Checks whether the user is an admin or not and returns a boolean
- *
- * @param {User} user  The user object being checked.
- */
-module.exports.checkAdmin = function(user) {
-  return user.admin;
-};
-
-/**
  * @description Creates a colon delimited string from any number of arguments.
+ * If any items are not strings or other failure occurs, an error is thrown.
  *
- * @param {String}  args  An infinite number of strings to be appended.
+ * @param {String}  args  An arbitrary number of strings to be appended.
  */
 module.exports.createUID = function(...args) {
-  try {
-    // Ensure all components are strings
-    this.assertType(args, 'string');
-
-    let returnString = '';
-    // Loops through all args
-    for (let i = 0; i < args.length; i++) {
-      returnString += args[i];
-      if (i < args.length - 1) {
-        returnString += ':';
-      }
-    }
-    return returnString;
-  }
-  catch (error) {
-    throw error;
-  }
+  this.assertType(args, 'string');
+  return args.join(this.UID_DELIMITER);
 };
 
 /**
- * @description Splits a uid up and returns an array of elements.
- * Note: optionally returns a specific element if specified index.
+ * @description Splits a UID on the UID delimiter up and returns an array of
+ * UID components.
  *
  * @param {String}  uid  The uid.
- * @param {Number}  OPTIONAL - index that if provided returns
- *         the nth element in the return array.
  */
-module.exports.parseUID = function(uid, index = null) {
-  // No colon in string, invalid UID.
-  if (uid.indexOf(':') === -1) {
-    throw new errors.CustomError('Invalid UID.', 400);
-  }
-  else {
-    const splitUID = uid.split(':');
-    if (!index) {
-      // Returns the entire array
-      return splitUID;
-    }
-    // Returns a specific element
-    return splitUID[index - 1];
-  }
+module.exports.parseUID = function(uid) {
+  return uid.split(this.UID_DELIMITER);
 };
 
 /**
  * @description Checks if a user has permission to see an object
+ * TODO - move this into org/project models
  */
 module.exports.getPermissionStatus = function(user, object) {
   // Ensure the obejct is an org or project
@@ -305,6 +291,7 @@ module.exports.getPermissionStatus = function(user, object) {
 
 /**
  * @description Checks if permission exist
+ * TODO - move this to models
  *
  * @param {User} user - the user object
  * @param {Object} object - project or organization

@@ -1,17 +1,18 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module lib.errors
  *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * <br/>
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Defines the custom error class.
@@ -102,23 +103,5 @@ module.exports.CustomError = class CustomError extends Error {
         M.log.error(this.description);
     }
   }
-
-  /**
-   * @description Returns a JSON Object containing the custom error fields.
-   */
-  toJSON() {
-    return {
-      status: this.status,
-      message: this.message,
-      description: this.description
-    };
-  }
-
-  /**
-   * @description Overrides the console.log output of the CustomError.
-   */
-  // inspect() {
-  //   return `${this.status} ERROR: ${this.description}`;
-  // }
 
 };

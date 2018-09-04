@@ -758,13 +758,9 @@ class ApiController {
       return res.status(error.status).send(error);
     }
 
-    try {
-      // Check if request user is admin
-      utils.assertAdmin(req.user);
-    }
-    catch (error) {
-      // Error: throws 401 'User does not have permissions.'
-      return res.status(error.status).send(error);
+    // Check if request user is admin
+    if (!req.user.admin) {
+      return res.status(401).send('Unauthorized');
     }
 
     UserController.findUsers()
