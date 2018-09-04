@@ -50,7 +50,6 @@ describe(M.getModuleName(module.filename), () => {
   before((done) => {
     // Connect to the database
     db.connect();
-    M.log.info('Running before function ...');
 
     // Create new admin user
     adminUser = new User({
@@ -60,27 +59,22 @@ describe(M.getModuleName(module.filename), () => {
     });
 
     // Save admin user
-    M.log.debug('????????????????????');
     adminUser.save((saveUserErr) => {
       chai.expect(saveUserErr).to.equal(null);
 
       // Create new non-admin user
-      M.log.debug('Adding non-admin user');
       const nonAdminData = {
         username: 'nonadminuser',
-        password: 'password'
+        password: 'Password123'
       };
       UserController.createUser(adminUser, nonAdminData)
       .then((user) => {
-        M.log.debug('Non-admin user created.');
         nonAdminUser = user;
 
         // Creating global org
-        M.log.debug('Creating org ...');
         return OrgController.createOrg(adminUser, { id: 'orgid', name: 'Org Name' });
       })
       .then((retOrg) => {
-        M.log.debug('Org created.');
         org = retOrg;
 
         // Create internal project
@@ -92,11 +86,9 @@ describe(M.getModuleName(module.filename), () => {
           },
           visibility: 'internal'
         };
-        M.log.debug('Creating project ...');
         return ProjectController.createProject(adminUser, intProjData);
       })
       .then((proj) => {
-        M.log.debug('Created project.');
         intProj = proj;
 
         // Create private project
@@ -108,11 +100,9 @@ describe(M.getModuleName(module.filename), () => {
           },
           visibility: 'private'
         };
-        M.log.debug('Creating another project ...');
         return ProjectController.createProject(adminUser, privProjData);
       })
       .then((proj) => {
-        M.log.debug('Created another project.');
         privProj = proj;
         done();
       })
@@ -369,7 +359,7 @@ function parseValidUID(done) {
 function parseInvalidUID(done) {
   try {
     utils.parseUID('not a valid uid');
-    chai.expect(true).to.equal(false);
+    chai.assert(true === false);
     done();
   }
   catch (error) {
@@ -384,7 +374,7 @@ function parseInvalidUID(done) {
 function parseValidUIDSecondElement(done) {
   try {
     const project = utils.parseUID('org:project:element')[2];
-    chai.expect(project).to.equal('project');
+    chai.expect(project).to.equal('element');
     done();
   }
   catch (error) {

@@ -136,7 +136,7 @@ function createNewUser(done) {
   // Create user data
   const userData = {
     username: 'blackpanther',
-    password: 'forwakanda',
+    password: 'Forwakanda123',
     fname: 'Tchalla',
     lname: 'Panther',
     custom: {
@@ -228,7 +228,7 @@ function rejectDuplicateUser(done) {
   // Create user data
   const userData = {
     username: 'blackpanther',
-    password: 'nottherealone',
+    password: 'Nottherealone123',
     fname: 'Tchalla',
     lname: 'Panther'
   };

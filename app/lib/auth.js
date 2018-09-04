@@ -265,8 +265,8 @@ function authenticate(req, res, next) {
       // Set user req object
       req.user = user;
 
-      // Move to the next function
-      next();
+      // Move to the next function. Explicitly set error to null.
+      next(null);
     })
     .catch(err => {
       M.log.error(err.stack);

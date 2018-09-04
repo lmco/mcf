@@ -158,7 +158,7 @@ function postUser(done) {
     // Creates new user data as POST request body
     body: JSON.stringify({
       username: 'deadpool',
-      password: 'babyhands',
+      password: 'Babyhands123',
       fname: 'Wade',
       lname: 'Wilson'
     })
@@ -216,7 +216,7 @@ function rejectInvalidUsernamePost(done) {
     // Create new user data as POST request body
     body: JSON.stringify({
       username: '!babyLegs',
-      password: 'deadpool',
+      password: 'Deadpool123',
       fname: 'Baby',
       lname: 'Legs'
     })
@@ -249,7 +249,7 @@ function rejectNonmatchingUsernames(done) {
     // Create new user data as POST request body
     body: JSON.stringify({
       username: 'deadpoolsbff',
-      password: 'bartender',
+      password: 'Bartender123',
       fname: 'Weasel',
       lname: 'Bff'
     })

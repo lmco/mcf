@@ -74,7 +74,7 @@ describe(M.getModuleName(module.filename), () => {
           // Define non-admin user data
           const nonAdminUserData = {
             username: 'pepperpotts',
-            password: 'gfoftonystark',
+            password: 'Gfoftonystark123',
             fname: 'Pepper',
             lname: 'Potts',
             admin: false

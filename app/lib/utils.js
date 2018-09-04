@@ -105,7 +105,7 @@ module.exports.render = function(req, res, name, params) {
  */
 module.exports.assertType = function(arrItems, assertType) {
   // An empty array is never expected
-  if (Array.isArray(arrItems)) {
+  if (!Array.isArray(arrItems)) {
     const desc = `Array was expected. Got ${typeof arrItems}`;
     throw new errors.CustomError(desc, 400);
   }
@@ -163,21 +163,15 @@ module.exports.checkType = function(arrItems, checkType) {
  * @param {Object} obj  The object being searched.
  */
 module.exports.assertExists = function(properties, obj) {
-  try {
-    Object.keys(properties).forEach((prop) => {
-      let ref = obj;
-      // Split property on '.' characters.
-      // Loop over nested object properties, updating ref with each iteration.
-      prop.split('.').forEach(p => { ref = ref[p]; });
-      if (ref === undefined) {
-        throw new errors.CustomError(`Object does not have property ${prop}.`, 400);
-      }
-    });
-  }
-  catch (error) {
-    M.log.error(error);
-    throw new errors.CustomError('AssertExists failed. Check log for full details.', 400);
-  }
+  properties.forEach((prop) => {
+    let ref = obj;
+    // Split property on '.' characters.
+    // Loop over nested object properties, updating ref with each iteration.
+    prop.split('.').forEach(p => { ref = ref[p]; });
+    if (ref === undefined) {
+      throw new errors.CustomError(`Object does not have property ${prop}.`, 400);
+    }
+  });
 };
 
 /**
@@ -229,6 +223,9 @@ module.exports.createUID = function(...args) {
  * @param {String}  uid  The uid.
  */
 module.exports.parseUID = function(uid) {
+  if (!uid.includes(this.UID_DELIMITER)) {
+    throw new errors.CustomError('Invalid UID.', 400);
+  }
   return uid.split(this.UID_DELIMITER);
 };
 

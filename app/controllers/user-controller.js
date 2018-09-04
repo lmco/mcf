@@ -186,7 +186,7 @@ class UserController {
         }
       }
       if (utils.checkExists(['password'], newUser)) {
-        if (!RegExp(validators.user.password).test(newUser.password)) {
+        if (!validators.user.password(newUser.password)) {
           return reject(new errors.CustomError('Password is not valid.', 400));
         }
       }

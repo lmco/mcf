@@ -83,7 +83,7 @@ describe(M.getModuleName(module.filename), () => {
           // Creating a new non-admin user
           const nonAuserData = {
             username: 'groot',
-            password: 'iamgroot',
+            password: 'Iamgroot123',
             fname: 'Groot',
             lname: 'Tree',
             admin: false
