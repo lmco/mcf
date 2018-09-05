@@ -100,8 +100,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a POST with missing org name', rejectPostMissingName);
   it('should reject a POST with an empty name', rejectPostEmptyName);
   it('should reject a POST of an existing org', rejectPostExistingOrg);
-  it('should DELETE organization', deleteOrg01);
-  // TODO: Add reject delete test (JIRA MBX-394)
+  it('should reject a DELETE of a non-existing org', rejectDeleteNonexistingOrg);
+  it('should DELETE organization', deleteOrg);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -392,12 +392,40 @@ function rejectPostExistingOrg(done) {
 }
 
 /**
+ * @description Verifies DELETE /api/orgs:orgid fails when attempting to delete
+ * a non-existing organization.
+ * NOTE: The provided {soft: false}, which defaults to true if not provided.
+ * This option is available to admin users to change the delete behavior from
+ * soft-delete to hard delete.
+ */
+function rejectDeleteNonexistingOrg(done) {
+  request({
+    url: `${test.url}/api/orgs/fakeshield`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({ soft: false })
+  },
+  function(err, response, body) {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 403 Forbidden
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify error message in response
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
+    done();
+  });
+}
+
+
+/**
  * @description Verifies DELETE /api/orgs:orgid deletes an organization.
  * NOTE: The provided {soft: false}, which defaults to true if not provided.
  * This option is available to admin users to change the delete behavior from
  * soft-delete to hard delete.
  */
-function deleteOrg01(done) {
+function deleteOrg(done) {
   request({
     url: `${test.url}/api/orgs/shield`,
     headers: getHeaders(),

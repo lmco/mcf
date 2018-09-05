@@ -153,9 +153,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET the two projects POSTed previously', getAllProjects);
   it('should reject a POST with two different orgs', rejectPostOrgIdMismatch);
   it('should reject a PATCH to update with invalid name', rejectPatchName);
+  it('should reject a DELETE to a non-exisiting project', rejectDeleteNonexistingProject);
   it('should DELETE the first project to the organization', deleteProject);
   it('should DELETE the second project to the organization', deleteSecondProject);
-  // TODO: Add reject delete test (JIRA MBX-394)
 });
 
 /* --------------------( Tests )-------------------- */
@@ -310,7 +310,7 @@ function rejectPostOrgIdMismatch(done) {
     })
   },
   (err, response, body) => {
-    // Expect no error
+    // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
     // Expect response status: 400 Bad Request
     chai.expect(response.statusCode).to.equal(400);
@@ -337,13 +337,39 @@ function rejectPatchName(done) {
     })
   },
   (err, response, body) => {
-    // Expect no error
+    // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
     // Expect response status: 403 Forbidden
     chai.expect(response.statusCode).to.equal(403);
     // Verify error message in response body
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid fails when
+ * attempting to delete a non-existing project.
+ */
+function rejectDeleteNonexistingProject(done) {
+  request({
+    url: `${test.url}/api/orgs/biochemistry/projects/fakehulk`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 403 Forbidden
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
     done();
   });
 }
