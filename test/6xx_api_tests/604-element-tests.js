@@ -148,6 +148,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should PATCH an elements name', patchElement);
   it('should reject a POST with an invalid name field', rejectPostElement);
   it('should reject a GET to a non-existing element', rejectGetElement);
+  it('should reject a PATCH with an invalid name', rejectPatchElement);
+  it('should reject a DELETE with a non-existing element', rejectDeleteNonexistingElement);
   it('should DELETE the previously created element', deleteElement);
 });
 
@@ -306,9 +308,62 @@ function rejectGetElement(done) {
   (err, response, body) => {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
+    // Expect response status: 404 Not Found
     chai.expect(response.statusCode).to.equal(404);
-    // Verify response body
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * // TODO: Ask Austin about the API call that fails with internal server
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * fails to update an element with an empty/invalid name field.
+ */
+function rejectPatchElement(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      name: ''
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 500 Internal Server Error
+    chai.expect(response.statusCode).to.equal(500);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Internal Server Error');
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * deletes the previously created element.
+ */
+function rejectDeleteNonexistingElement(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/33`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 404 Not Found
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify error message in response body
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Not Found');
     done();
