@@ -269,6 +269,7 @@ function authenticate(req, res, next) {
       next(null);
     })
     .catch(err => {
+      console.log(err);
       M.log.error(err.stack);
       if (err.description === 'Invalid username or password.') {
         req.flash('loginError', err.description);
