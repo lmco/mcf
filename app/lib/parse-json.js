@@ -31,7 +31,7 @@ const utils = M.require('lib.utils');
  *
  * @params {String} filename  The name of the file to parse.
  */
- module.exports.removeComments = function(filename) {
+module.exports.removeComments = function(filename) {
   let configArray = null;
   try {
     // Ensure filename parameter is of type string
@@ -52,4 +52,4 @@ const utils = M.require('lib.utils');
   // Join the array into a single string separated by new line characters
   // Return the now-valid JSON
   return configParsed.join('\n');
-}
+};

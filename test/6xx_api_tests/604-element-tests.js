@@ -141,13 +141,14 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should POST an element', postElement);
+  it('should POST an element', postElement01);
+  it('should POST a second element', postElement02);
   it('should GET the previously posted element', getElement);
-  // TODO: MBX-396 add a second post
   it('should GET all elements for a project', getElements);
   it('should PATCH an elements name', patchElement);
   // TODO: MBX-397 Add failure tests
-  it('should DELETE the previously created element', deleteElement);
+  it('should DELETE the previously created element', deleteElement01);
+  it('should DELETE the second previously created element', deleteElement02);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -155,7 +156,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
  * creates an element.
  */
-function postElement(done) {
+function postElement01(done) {
   request({
     url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
@@ -181,6 +182,40 @@ function postElement(done) {
     // Verify response body
     const json = JSON.parse(body);
     chai.expect(json.id).to.equal('0000');
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * creates a second element.
+ */
+function postElement02(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0001`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify({
+      id: '0001',
+      name: 'Steve Rogers 2',
+      project: {
+        id: proj.id,
+        org: {
+          id: org.id
+        }
+      },
+      type: 'Block'
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.id).to.equal('0001');
     done();
   });
 }
@@ -226,7 +261,7 @@ function getElements(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(1);
+    chai.expect(json.length).to.equal(2);
     done();
   });
 }
@@ -261,7 +296,7 @@ function patchElement(done) {
  * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
  * deletes the previously created element.
  */
-function deleteElement(done) {
+function deleteElement01(done) {
   request({
     url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
     headers: getHeaders(),
@@ -279,6 +314,34 @@ function deleteElement(done) {
     // Verify response body
     const json = JSON.parse(body);
     chai.expect(json.id).to.equal('0000');
+
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * deletes the second previously created element.
+ */
+function deleteElement02(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0001`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.id).to.equal('0001');
+
     done();
   });
 }
