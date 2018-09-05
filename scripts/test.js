@@ -43,7 +43,7 @@ function test(_args) {
   printHeader();
 
   // Check if environment is production and NOT --force
-  if (M.env.toLowerCase === 'production' && !_args.includes('--force')) {
+  if (M.env.toLowerCase() === 'production' && !_args.includes('--force')) {
     // Environment is production and NOT --force, print warning and fail.
     // eslint-disable-next-line no-console
     console.log('\nWARNING! You are attempting to run tests on a production database.\n\n'
