@@ -116,7 +116,7 @@ const formatter = printf((msg) => {
     // Print stack for error and critical logs
     let msgPrint = msg.message;
     if (msg.level.includes('error') || msg.level.includes('critical')) {
-      msgPrint += `\n${msg.stack || stack}`;
+      msgPrint += `\n${msg.stack || reduced.join('\n')}`;
     }
     return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msgPrint}`;
   }
