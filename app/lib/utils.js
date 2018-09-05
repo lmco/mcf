@@ -231,7 +231,7 @@ module.exports.parseUID = function(uid) {
 
 /**
  * @description Checks if a user has permission to see an object
- * TODO - move this into org/project models
+ * TODO: MBX-412 move this into org/project models
  */
 module.exports.getPermissionStatus = function(user, object) {
   // Ensure the obejct is an org or project
@@ -288,7 +288,7 @@ module.exports.getPermissionStatus = function(user, object) {
 
 /**
  * @description Checks if permission exist
- * TODO - move this to models
+ * TODO: MBX-412 move this to models
  *
  * @param {User} user - the user object
  * @param {Object} object - project or organization
