@@ -365,7 +365,7 @@ function rejectDeleteNonexistingProject(done) {
   (err, response, body) => {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
-    // Expect response status: 403 Forbidden
+    // Expect response status: 404 Not Found
     chai.expect(response.statusCode).to.equal(404);
     // Verify error message in response body
     const json = JSON.parse(body);
