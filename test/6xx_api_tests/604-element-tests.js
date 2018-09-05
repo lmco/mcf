@@ -146,7 +146,8 @@ describe(M.getModuleName(module.filename), () => {
   // TODO: MBX-396 add a second post
   it('should GET all elements for a project', getElements);
   it('should PATCH an elements name', patchElement);
-  // TODO: MBX-397 Add failure tests
+  it('should reject a POST with an invalid name field', rejectPostElement);
+  it('should reject a GET to a non-existing element', rejectGetElement);
   it('should DELETE the previously created element', deleteElement);
 });
 
@@ -253,6 +254,63 @@ function patchElement(done) {
     // Verify response body
     const json = JSON.parse(body);
     chai.expect(json.name).to.equal('Captain America');
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * fails to creates an element with an empty/invalid name field.
+ */
+function rejectPostElement(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify({
+      id: '0000',
+      name: '',
+      project: {
+        id: proj.id,
+        org: {
+          id: org.id
+        }
+      },
+      type: 'Block'
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * fails to find a non-existing element.
+ */
+function rejectGetElement(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/33`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
     done();
   });
 }
