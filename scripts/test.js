@@ -42,9 +42,9 @@ if (module.parent == null) {
 function test(_args) {
   printHeader();
 
-  // Check if environment is production and --force NOT used
+  // Check if environment is production and NOT --force
   if (M.env === 'production' && !_args.includes('--force')) {
-    // environment production without --force, print warning and fail.
+    // Environment is production and NOT --force, print warning and fail.
     // eslint-disable-next-line no-console
     console.log('\nWARNING! You are attempting to run tests on a production database.\n\n'
       + 'This operation could ERASE PRODUCTION DATA PERMANENTLY.\n'
@@ -54,7 +54,7 @@ function test(_args) {
     process.exit(-1);
   }
 
-  // Remove --timeout from args
+  // Remove --force from args
   if (_args.includes('--force')) {
     const removeInd = _args.indexOf('--force');
     _args.splice(removeInd, 1);
