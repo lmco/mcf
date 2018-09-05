@@ -77,7 +77,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
       .catch(verifyErr => reject(verifyErr));
     });
   });
-}
+};
 
 /**
  * @description This function implements handleTokenAuth() in lib/auth.js.
@@ -138,7 +138,7 @@ module.exports.handleTokenAuth = function(req, res, token) {
       return reject(new errors.CustomError('Token is expired or session is invalid.', 401));
     }
   });
-}
+};
 
 /**
  * @description This function implements doLogin() in lib/auth.js.
@@ -151,8 +151,8 @@ module.exports.handleTokenAuth = function(req, res, token) {
  */
 module.exports.doLogin = function(req, res, next) {
   // Compute token expiration time
-  const timeDelta = M.config.auth.token.expires *
-             utils.timeConversions[M.config.auth.token.units];
+  const timeDelta = M.config.auth.token.expires
+                  * utils.timeConversions[M.config.auth.token.units];
 
   // Generate the token
   const token = mbeeCrypto.generateToken({
@@ -166,4 +166,4 @@ module.exports.doLogin = function(req, res, next) {
   M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
   // Callback
   next();
-}
+};
