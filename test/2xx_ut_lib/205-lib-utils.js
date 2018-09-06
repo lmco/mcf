@@ -444,13 +444,13 @@ function permissionsPrivateProject(done) {
  * @description Test a valid word is title-cased.
  */
 function validTitleCase(done) {
-  const word = 'hello';
+  const word = 'heLLo156';
 
   // Title-Case the word
   const titleCased = utils.toTitleCase(word);
 
   // Expect word to be title-cased
-  chai.expect(titleCased).to.equal('Hello');
+  chai.expect(titleCased).to.equal('Hello156');
   done();
 }
 
@@ -458,7 +458,7 @@ function validTitleCase(done) {
  * @description Tests an invalid word is NOT title-cased
  */
 function invalidTitleCase(done) {
-  const word = '123Goodbye';
+  const word = '123 Goodbye';
 
   // Title-Case the word
   const titleCased = utils.toTitleCase(word);
