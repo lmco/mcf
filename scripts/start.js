@@ -78,6 +78,34 @@ function start(args) {
     });
   }
 
+  // Create default admin if it doesn't exist
+  const User = M.require('models.user');
+  // Check any admin exist
+  User.findOne({admin: true})
+  .exec((err, user) => {
+    if (err) {
+      throw err;
+    }
+
+    // Check user found
+    if (user === null){
+      // No user found, create local admin
+      const user = new User({
+        username: 'admin',
+        password: 'Admin12345',
+        provider: 'local',
+        admin:true
+      });
+
+      // Save user object to the database
+      user.save((error) => {
+        if (error!=null){
+          throw error;
+        }
+      });
+    }
+  });
+
   // Create default org if it doesn't exist
   const Organization = M.require('models.organization');
   const UserController = M.require('controllers.user-controller');

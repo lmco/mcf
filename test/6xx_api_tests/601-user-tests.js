@@ -32,6 +32,7 @@ const User = M.require('models.user');
 const AuthController = M.require('lib.auth');
 const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
+const testUtils =require('../../test/test-utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -53,6 +54,8 @@ describe(M.getModuleName(module.filename), () => {
     // Connect to the database
     db.connect();
 
+    testUtils.createNonadminUser();
+    testUtils.createAdminUser();
     // Creating a Requesting Admin
     const params = {};
     const body = {
@@ -107,6 +110,8 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   it('should get a username', getUser);
+  /*
+  it('should get a username', getUser);
   it('should create a user', postUser);
   it('should find out the user with the /whoami api tag', whoAmI);
   it('should reject creating a user with invalid username', rejectInvalidUsernamePost);
@@ -116,7 +121,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should update a user', patchUser);
   it('should reject an update a user that does not exist', rejectPatchNonexisting);
   it('should reject deleting a user that doesnt exist', rejectDeleteNonexisting);
-  it('should delete a user', deleteUser);
+  it('should delete a user', deleteUser);*/
 });
 
 /* --------------------( Tests )-------------------- */
