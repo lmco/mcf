@@ -41,19 +41,52 @@ describe(M.getModuleName(module.filename), () => {
  * @description Checks to make sure the file is being properly parsed
  */
 function parseTest(done) {
-  // TODO -  Create an example.cfg file in the config (MBX-369)
-  // directory. This way we provide an example config that aligns with our
-  // expected usage of that file rather than having to change JSON files in the
-  // test directory if we alter the behavior of this module.
+  // Initialize test string
+  const testString = '// This is a test file which is used to check and make sure that all comments\n'
+    + '// are being parsed out of the file and are resolving in the application as\n'
+    + '// valid JSON\n'
+    + '{\n'
+    + '    // In-line comment test 1\n'
+    + '    "key1": null,\n'
+    + '    "key2": 1234567890,\n'
+    + '    "key3": "string1",\n'
+    + '    // In-line comment test 2\n'
+    + '    "key4":\n'
+    + '    {\n'
+    + '        // nested comment test 1\n'
+    + '        "nestedKey1": null,\n'
+    + '        "nestedKey3": "string2"\n'
+    + '        // nested comment test 2\n'
+    + '    },\n'
+    + '    // In-line comment test 3\n'
+    + '    "key5": ["val1", "val2", "val3"]\n'
+    + '}\n'
+    + '// Final comment test';
 
-  // Extract JSON file as a String, removing comments
-  const parseString = parseJSON.removeComments('test/testParse.config');
+  // Initialize expected string after comments removed
+  const confirmString = '{\n'
+    + '    "key1": null,\n'
+    + '    "key2": 1234567890,\n'
+    + '    "key3": "string1",\n'
+    + '    "key4":\n'
+    + '    {\n'
+    + '        "nestedKey1": null,\n'
+    + '        "nestedKey3": "string2"\n'
+    + '    },\n'
+    + '    "key5": ["val1", "val2", "val3"]\n'
+    + '}';
+
+  // Remove comments from test string
+  const parseString = parseJSON.removeComments(testString);
+  // Expect parseString to equal confirmString
+  chai.expect(parseString).to.equal(confirmString);
+
   try {
-    // Convert String back to JSON Object
-    const checkString = JSON.parse(parseString);
-    chai.expect(typeof checkString).to.equal('object');
+    // Try to parse parseString to JSON Object
+    JSON.parse(parseString);
   }
   catch (err) {
+    // Expect no error
     chai.expect(true).to.equal(false);
   }
   done();
