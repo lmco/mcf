@@ -152,8 +152,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should PATCH an update to posted project', patchProject);
   it('should GET the two projects POSTed previously', getAllProjects);
   it('should reject a POST with two different orgs', rejectPostOrgIdMismatch);
-  it('should reject a PATCH to update with invalid name', rejectPatchName);
   it('should reject a DELETE to a non-exisiting project', rejectDeleteNonexistingProject);
+  it('should reject a PATCH to update with invalid name', rejectPatchInvalidField);
   it('should DELETE the first project to the organization', deleteProject);
   it('should DELETE the second project to the organization', deleteSecondProject);
 });
@@ -245,7 +245,6 @@ function getProject(done) {
 /**
  * @description Verifies PATCH api/orgs/:orgid/projects/:projectid updates the
  * projects data on an existing project.
- * // TODO: PATCH does not need id, fix test when API is fixed (JIRA: MBX-395)
  */
 function patchProject(done) {
   request({
@@ -254,7 +253,6 @@ function patchProject(done) {
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
-      id: 'hulk',
       name: 'Anger'
     })
   },
@@ -323,9 +321,9 @@ function rejectPostOrgIdMismatch(done) {
 
 /**
  * @description Verifies PATCH api/orgs/:orgid/projects/:projectid fails to
- * update a projects name because the ids are mismatched.
+ * update a projects id due to it being an immutable field.
  */
-function rejectPatchName(done) {
+function rejectPatchInvalidField(done) {
   request({
     url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
     headers: getHeaders(),
