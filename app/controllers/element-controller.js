@@ -602,7 +602,6 @@ class ElementController {
    * @param {String} projectID  The project ID.
    * @param {String} elementID  The element ID.
    * @param {Object} elementUpdated  The object of the updated element.
-   * // TODO: Check field validators prior to update (JIRA MBX-413)
    */
   static updateElement(reqUser, organizationID, projectID, elementID, elementUpdated) {
     return new Promise((resolve, reject) => {
@@ -637,6 +636,8 @@ class ElementController {
         const elemUpdateFields = Object.keys(elementUpdated);
         // Get list of parameters which can be updated from model
         const validUpdateFields = element.getValidUpdateFields();
+        // Get a list of validators
+        const elementValidators = validators.element;
         // Allocate update val and field before for loop
         let updateVal = '';
         let updateField = '';
@@ -668,6 +669,13 @@ class ElementController {
           if (!utils.checkType([elementUpdated[updateField]], 'string')
             && (Element.Element.schema.obj[updateField].type.schemaName !== 'Mixed')) {
             return reject(new errors.CustomError(`The Element [${updateField}] is not of type String.`, 400));
+          }
+
+          // Error Check - If the field has a validator, ensure the field is valid
+          if (elementValidators[updateField]) {
+            if (!RegExp(elementValidators[updateField]).test(elementUpdated[updateField])) {
+              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
+            }
           }
 
           // Updates each individual tag that was provided.

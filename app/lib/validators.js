@@ -162,7 +162,8 @@ module.exports.user = {
     }
   },
   email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
-  name: '^([a-zA-Z])([-a-zA-Z ]){0,}$'
+  fname: '^([a-zA-Z])([-a-zA-Z ]){0,}$',
+  lname: '^([a-zA-Z])([-a-zA-Z ]){0,}$'
 };
 
 /**

@@ -416,6 +416,8 @@ class ProjectController {
         const projUpdateFields = Object.keys(projectUpdated);
         // Get list of parameters which can be updated from model
         const validUpdateFields = project.getValidUpdateFields();
+        // Get a list of validators
+        const projectValidators = validators.project;
         // Allocate update val and field before for loop
         let updateVal = '';
         let updateField = '';
@@ -447,6 +449,14 @@ class ProjectController {
             && (Project.schema.obj[updateField].type.schemaName !== 'Mixed')) {
             return reject(new errors.CustomError(`The Project [${updateField}] is not of type String.`, 400));
           }
+
+          // Error Check - If the field has a validator, ensure the field is valid
+          if (projectValidators[updateField]) {
+            if (!RegExp(projectValidators[updateField]).test(projectUpdated[updateField])) {
+              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
+            }
+          }
+
           // Updates each individual tag that was provided.
           if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
