@@ -345,7 +345,7 @@ class ElementController {
       const projID = sani.html(element.project.id);
       const orgID = sani.html(element.project.org.id);
       const elemUID = utils.createUID(orgID, projID, elemID);
-      const elementType = sani.html(element.type);
+      const elementType = utils.toTitleCase(sani.html(element.type));
 
       // Error check - make sure element ID and element name are valid
       if (!RegExp(validators.element.id).test(elemID)) {
