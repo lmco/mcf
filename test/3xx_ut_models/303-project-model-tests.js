@@ -134,7 +134,8 @@ function permissionProject(done) {
   // Save user object to the database
   user.save()
   .then((savedUser) => {
-    // Find and update project previously created in createProject test
+
+    // Find and update org previously created in before function
     return Org.findOneAndUpdate({
       id: testData.orgs[0].id
     },
@@ -146,7 +147,13 @@ function permissionProject(done) {
       }
     });
   })
-  .then(() => {
+  .then((updatedOrg) => {
+    // Verify permissions have been set in updated org
+    chai.expect(updatedOrg.permissions.write[0].toString()).to.equal(user._id.toString());
+    chai.expect(updatedOrg.permissions.read[0].toString()).to.equal(user._id.toString());
+    chai.expect(updatedOrg.permissions.admin[0].toString()).to.equal(user._id.toString());
+
+    // Find and update project previously created in createProject test
     return Project.findOneAndUpdate({
       id: testData.projects[0].id
     },
@@ -161,12 +168,15 @@ function permissionProject(done) {
   // Find previously updated project
   .then(() => Project.findOne({ id: testData.projects[0].id }))
   .then((proj) => {
+
+    // Verify permissions have been set in updated project
     chai.expect(proj.permissions.write[0].toString()).to.equal(user._id.toString());
     chai.expect(proj.permissions.read[0].toString()).to.equal(user._id.toString());
     chai.expect(proj.permissions.admin[0].toString()).to.equal(user._id.toString());
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error).to.equal(null);
     done();
   });
