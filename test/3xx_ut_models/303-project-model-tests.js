@@ -26,6 +26,7 @@ const chai = require('chai');
 const path = require('path');
 
 // Load MBEE modules
+const User = M.require('models.user');
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
 const db = M.require('lib/db');
@@ -90,9 +91,12 @@ describe(M.getModuleName(module.filename), () => {
       done();
     });
   });
+  // creates a user adds them to the org and then deletes them to check if it worked.
 
   /* Execute the tests */
   it('should create a project', createProject);
+  it('should create a user and give permissions on existing project', permissionProject);
+  it('should remove a user and their permissions from project', removePermissionProject);
   it('should find a project', findProject);
   it('should update a project', updateProject);
   it('should delete a project', deleteProject);
@@ -115,6 +119,78 @@ function createProject(done) {
   // Save project model object to database
   newProject.save((error) => {
     // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates a user and gives that user permissions on the existing
+ * project.
+ */
+function permissionProject(done) {
+  // Create a new User object
+  const user = new User(testData.users[0]);
+  // Save user object to the database
+  user.save()
+  .then((savedUser) => {
+    // Find and update project previously created in createProject test
+    return Org.findOneAndUpdate({
+      id: testData.orgs[0].id
+    },
+    {
+      permissions: {
+        read: savedUser._id,
+        write: savedUser._id,
+        admin: savedUser._id
+      }
+    });
+  })
+  .then(() => {
+    return Project.findOneAndUpdate({
+      id: testData.projects[0].id
+    },
+    {
+      permissions: {
+        read: user._id,
+        write: user._id,
+        admin: user._id
+      }
+    });
+  })
+  // Find previously updated project
+  .then(() => Project.findOne({ id: testData.projects[0].id }))
+  .then((proj) => {
+    chai.expect(proj.permissions.write[0].toString()).to.equal(user._id.toString());
+    chai.expect(proj.permissions.read[0].toString()).to.equal(user._id.toString());
+    chai.expect(proj.permissions.admin[0].toString()).to.equal(user._id.toString());
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates a user and gives that user permissions on the existing
+ * project.
+ */
+function removePermissionProject(done) {
+  // Find the previously created user from the createUser test.
+  User.findOne({ username: testData.users[0].username })
+  .then((user) => {
+    // Hard deleted the user
+    return user.remove();
+  })
+  .then(() => Project.findOne({ id: testData.projects[0].id }))
+  .then((proj) => {
+    chai.expect(proj.permissions.write).to.be.empty;
+    chai.expect(proj.permissions.read).to.be.empty;
+    chai.expect(proj.permissions.admin).to.be.empty;
+    done();
+  })
+  .catch((error) => {
     chai.expect(error).to.equal(null);
     done();
   });
