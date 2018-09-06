@@ -99,14 +99,18 @@ Object.defineProperty(M, 'root', {
   enumerable: true
 });
 
-// Extract configuration json file and initiate the config object
+// Load the parseJSON library module.
 const parseJSON = M.require('lib.parse-json');
+// Set configuration file path
 const configPath = path.join(M.root, 'config', `${M.env}.cfg`);
+// Read contents of configuration file to string
 const configContent = fs.readFileSync(configPath).toString();
+// Remove comments from configuration string
 const stripComments = parseJSON.removeComments(configContent);
+// Parse configuration string into JSON object
 const config = JSON.parse(stripComments);
 
-// Check if config secret is set to RANDOM
+// Check if config secret is RANDOM
 if (config.server.secret === 'RANDOM') {
   // Config state is RANDOM, generate and set config secret
   const random1 = Math.random().toString(36).substring(2, 15);
