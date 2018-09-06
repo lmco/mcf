@@ -126,7 +126,7 @@ function createProject(done) {
 
 /**
  * @description Creates a user and gives that user permissions on the existing
- * project.
+ * org and project.
  */
 function permissionProject(done) {
   // Create a new User object
@@ -147,6 +147,7 @@ function permissionProject(done) {
       }
     });
   })
+  .then(() => Org.findOne({ id: testData.orgs[0].id }))
   .then((updatedOrg) => {
     // Verify permissions have been set in updated org
     chai.expect(updatedOrg.permissions.write[0].toString()).to.equal(user._id.toString());
@@ -183,8 +184,8 @@ function permissionProject(done) {
 }
 
 /**
- * @description Creates a user and gives that user permissions on the existing
- * project.
+ * @description Verifies removing a user, removes them from the project and
+ * org in which the user had permissions on.
  */
 function removePermissionProject(done) {
   // Find the previously created user from the createUser test.
@@ -192,6 +193,12 @@ function removePermissionProject(done) {
   .then((user) => {
     // Hard deleted the user
     return user.remove();
+  })
+  .then(() => Org.findOne({ id: testData.orgs[0].id }))
+  .then((org) => {
+    chai.expect(org.permissions.write).to.be.empty;
+    chai.expect(org.permissions.read).to.be.empty;
+    chai.expect(org.permissions.admin).to.be.empty;
   })
   .then(() => Project.findOne({ id: testData.projects[0].id }))
   .then((proj) => {
