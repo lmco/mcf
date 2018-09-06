@@ -318,7 +318,6 @@ function rejectGetElement(done) {
 }
 
 /**
- * // TODO: Ask Austin about the API call that fails with internal server
  * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements/:elementid
  * fails to update an element with an empty/invalid name field.
  */
