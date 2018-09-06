@@ -602,6 +602,7 @@ class ElementController {
    * @param {String} projectID  The project ID.
    * @param {String} elementID  The element ID.
    * @param {Object} elementUpdated  The object of the updated element.
+   * // TODO: Check field validators prior to update (JIRA MBX-413)
    */
   static updateElement(reqUser, organizationID, projectID, elementID, elementUpdated) {
     return new Promise((resolve, reject) => {
