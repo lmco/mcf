@@ -674,7 +674,7 @@ class ElementController {
           // Error Check - If the field has a validator, ensure the field is valid
           if (elementValidators[updateField]) {
             if (!RegExp(elementValidators[updateField]).test(elementUpdated[updateField])) {
-              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 400));
+              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
             }
           }
 

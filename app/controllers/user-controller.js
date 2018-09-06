@@ -262,7 +262,7 @@ class UserController {
           // Error Check - If the field has a validator, ensure the field is valid
           if (userValidators[props]) {
             if (!RegExp(userValidators[props]).test(newUserData[props])) {
-              return reject(new errors.CustomError(`The updated ${props} is not valid.`, 400));
+              return reject(new errors.CustomError(`The updated ${props} is not valid.`, 403));
             }
           }
 

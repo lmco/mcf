@@ -341,7 +341,7 @@ class OrganizationController {
           // Error Check - If the field has a validator, ensure the field is valid
           if (orgValidators[updateField]) {
             if (!RegExp(orgValidators[updateField]).test(orgUpdate[updateField])) {
-              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 400));
+              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
             }
           }
 

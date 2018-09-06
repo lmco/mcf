@@ -453,7 +453,7 @@ class ProjectController {
           // Error Check - If the field has a validator, ensure the field is valid
           if (projectValidators[updateField]) {
             if (!RegExp(projectValidators[updateField]).test(projectUpdated[updateField])) {
-              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 400));
+              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
             }
           }
 
