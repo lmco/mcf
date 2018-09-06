@@ -116,21 +116,20 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove the project and org together
     OrgController.removeOrg(adminUser, org.id, { soft: false })
+      // Find admin user
+    .then(() => User.findOne({ username: M.config.test.username }))
+      // Remove admin user
+    .then((foundUser) => foundUser.remove())
     .then(() => {
-      // Once db items are removed, remove reqUser
-      // close the db connection and finish
-      User.findOne({
-        username: M.config.test.username
-      }, (error, foundUser) => {
-        chai.expect(error).to.equal(null);
-        foundUser.remove((error2) => {
-          chai.expect(error2).to.equal(null);
-          db.disconnect();
-          done();
-        });
-      });
+      // Disconnect from database
+      db.disconnect();
+      done();
     })
     .catch((error) => {
+      // Disconnect from database
+      db.disconnect();
+
+      // Expect no error
       chai.expect(error.message).to.equal(null);
       done();
     });
@@ -488,17 +487,17 @@ function softDeleteElement(done) {
     // Find element again
     // NOTE: The 'true' parameter tells the function to include soft-deleted
     // elements in the results
-    ElemController.findElement(adminUser, org.id, proj.id, 'elem0', true)
-    .then((retElem2) => {
-      // Find succeded, verify element properties
-      chai.expect(retElem2.id).to.equal('elem0');
-      done();
-    })
-    .catch((error2) => {
-      // Expect no error
-      chai.expect(error2.message).to.equal(null);
-      done();
-    });
+    return ElemController.findElement(adminUser, org.id, proj.id, 'elem0', true);
+  })
+  .then((retElem) => {
+    // Find succeeded, verify element properties
+    chai.expect(retElem.id).to.equal('elem0');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
   });
 }
 
