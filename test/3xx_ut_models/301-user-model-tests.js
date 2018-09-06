@@ -112,22 +112,17 @@ function verifyValidPassword(done) {
     username: testData.users[0].username,
     deletedOn: null
   })
-  .exec((findUserErr, user) => {
+  // Verify the user's password
+  .then((user) => user.verifyPassword(testData.users[0].password))
+  .then((result) => {
+    // expected - verifyPassword() returned true
+    chai.expect(result).to.equal(true);
+    done();
+  })
+  .catch((error) => {
     // Expect no error
-    chai.expect(findUserErr).to.equal(null);
-
-    // Verify the user's password
-    user.verifyPassword(testData.users[0].password)
-    .then((result) => {
-      // expected - verifyPassword returned true
-      chai.expect(result).to.equal(true);
-      done();
-    })
-    .catch((error) => {
-      // Expect no error
-      chai.expect(error).to.equal(null);
-      done();
-    });
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
@@ -204,28 +199,24 @@ function softDeleteUser(done) {
   // Find the user previously created and updated in createUser and updateUser
   // tests.
   User.findOne({ username: testData.users[0].username })
-  .exec((findUserErr, user) => {
-    // Expect no Error
-    chai.expect(findUserErr).to.equal(null);
+  .then((user) => {
     // Set the User deleted field
     user.deleted = true;
     // Save the updated User object
-    user.save((saveUserErr) => {
-      // Expect no Error
-      chai.expect(saveUserErr).to.equal(null);
-
-      // Find the previously soft deleted user
-      User.findOne({
-        username: user.username
-      }, (findDeletedUserErr, user2) => {
-        // Expect no Error
-        chai.expect(findDeletedUserErr).to.equal(null);
-        // Verify the soft delete was successful
-        chai.expect(user2.deletedOn).to.not.equal(null);
-        chai.expect(user2.deleted).to.equal(true);
-        done();
-      });
-    });
+    return user.save();
+  })
+  // Find the previously soft deleted user
+  .then((user) => User.findOne({ username: user.username }))
+  .then((user) => {
+    // Verify the soft delete was successful
+    chai.expect(user.deletedOn).to.not.equal(null);
+    chai.expect(user.deleted).to.equal(true);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
