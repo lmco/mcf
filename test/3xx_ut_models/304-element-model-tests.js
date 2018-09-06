@@ -159,10 +159,14 @@ function createRootPackage(done) {
  * in the createRootPackage test
  */
 function createBlock(done) {
+  let pkg;
   // Find root package element created in createRootPackage test
   Element.Package.findOne({
     uid: `${org.id}:${project.id}:${testData.elements[4].id}` })
-  .then((pkg) => {
+  .then((_pkg) => {
+    // Set function-global variable
+    pkg = _pkg;
+
     // Create new block element object
     const newBlock = new Element.Block({
       id: testData.elements[5].id,
@@ -173,29 +177,24 @@ function createBlock(done) {
     });
 
     // Save block element object to database
-    newBlock.save((saveErr, createdBlock) => {
-      // Expect no error
-      chai.expect(saveErr).to.equal(null);
-
-      // Check block element object saved correctly
-      chai.expect(createdBlock.uid).to.equal(
-        `${org.id}:${project.id}:${testData.elements[5].id}`
-      );
-
-      chai.expect(createdBlock.name).to.equal(testData.elements[5].name);
-      chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
-      // Check block element has root package as its parent
-      chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
-
-      // Add block element to root package's contains field
-      pkg.contains.push(createdBlock);
-      pkg.save((packageSaveErr) => {
-        // Expect no error
-        chai.expect(packageSaveErr).to.equal(null);
-        done();
-      });
-    });
+    return newBlock.save();
   })
+  .then((createdBlock) => {
+    // Check block element object saved correctly
+    chai.expect(createdBlock.uid).to.equal(
+      `${org.id}:${project.id}:${testData.elements[5].id}`
+    );
+
+    chai.expect(createdBlock.name).to.equal(testData.elements[5].name);
+    chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
+    // Check block element has root package as its parent
+    chai.expect(createdBlock.parent.toString()).to.equal(pkg._id.toString());
+
+    // Add block element to root package's contains field
+    pkg.contains.push(createdBlock);
+    return pkg.save();
+  })
+  .then(() => done())
   .catch((error) => {
     // Expect no error
     chai.expect(error).to.equal(null);
@@ -207,10 +206,15 @@ function createBlock(done) {
  * @description Creates a relationship between the elements in the project's root package
  */
 function createRelationship(done) {
+  let pkg;
+
   // Start by grabbing the root package
   Element.Package.findOne({
     uid: `${org.id}:${project.id}:${testData.elements[4].id}` })
-  .then((pkg) => {
+  .then((_pkg) => {
+    // Set function-global variable
+    pkg = _pkg;
+
     // Expect the package to contain one child element already
     chai.expect(pkg.contains.length).to.equal(1);
     const source = pkg.contains[0];
@@ -228,32 +232,27 @@ function createRelationship(done) {
     });
 
     // Save and verify it was created
-    newRelationship.save((saveErr, createdRelationship) => {
-      // Expect no error
-      chai.expect(saveErr).to.equal(null);
-
-      // Make sure it created what we expect and finish
-      chai.expect(createdRelationship.uid).to.equal(
-        `${org.id}:${project.id}:${testData.elements[6].id}`
-      );
-
-      chai.expect(createdRelationship.name).to.equal(testData.elements[6].name);
-      chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
-      chai.expect(createdRelationship.parent.toString()).to.equal(pkg._id.toString());
-      chai.expect(createdRelationship.source.toString()).to.equal(source.toString());
-      chai.expect(createdRelationship.target.toString()).to.equal(target.toString());
-
-      // Add the relationship to the package.contains field
-      pkg.contains.push(createdRelationship);
-
-      // Save the updated package
-      pkg.save((packageSaveErr) => {
-        // Expect no error
-        chai.expect(packageSaveErr).to.equal(null);
-        done();
-      });
-    });
+    return newRelationship.save();
   })
+  .then((createdRelationship) => {
+    // Make sure it created what we expect and finish
+    chai.expect(createdRelationship.uid).to.equal(
+      `${org.id}:${project.id}:${testData.elements[6].id}`
+    );
+
+    chai.expect(createdRelationship.name).to.equal(testData.elements[6].name);
+    chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
+    chai.expect(createdRelationship.parent.toString()).to.equal(pkg._id.toString());
+    chai.expect(createdRelationship.source.toString()).to.equal(pkg.contains[0].toString());
+    chai.expect(createdRelationship.target.toString()).to.equal(pkg.contains[0].toString());
+
+    // Add the relationship to the package.contains field
+    pkg.contains.push(createdRelationship);
+
+    // Save the updated package
+    return pkg.save();
+  })
+  .then(() => done())
   .catch((error) => {
     // Expect no error
     chai.expect(error).to.equal(null);
