@@ -391,11 +391,16 @@ UserSchema.pre('remove', function(next) {
       Project.find({ org: orgs[i]._id, deleted: false })
       .exec((projectFindErr, projs) => {
         // Loop through projects the user has permissions on
-        for(let j = 0; j < projs.length; j++){
+        for (let j = 0; j < projs.length; j++) {
           // Remove permissions on each project
-          projs[j].permissions.read.splice(projs[j].permissions.read.indexOf(this._id.toString()), 1);
-          projs[j].permissions.write.splice(projs[j].permissions.write.indexOf(this._id.toString()), 1);
-          projs[j].permissions.admin.splice(projs[j].permissions.admin.indexOf(this._id.toString()), 1);
+          projs[j].permissions.read
+          .splice(projs[j].permissions.read.indexOf(this._id.toString()), 1);
+
+          projs[j].permissions.write
+          .splice(projs[j].permissions.write.indexOf(this._id.toString()), 1);
+
+          projs[j].permissions.admin
+          .splice(projs[j].permissions.admin.indexOf(this._id.toString()), 1);
 
           // Save the updated project
           projs[j].save((saveProjsErr) => {

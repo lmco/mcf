@@ -134,7 +134,6 @@ function permissionProject(done) {
   // Save user object to the database
   user.save()
   .then((savedUser) => {
-
     // Find and update org previously created in before function
     return Org.findOneAndUpdate({
       id: testData.orgs[0].id
@@ -169,7 +168,6 @@ function permissionProject(done) {
   // Find previously updated project
   .then(() => Project.findOne({ id: testData.projects[0].id }))
   .then((proj) => {
-
     // Verify permissions have been set in updated project
     chai.expect(proj.permissions.write[0].toString()).to.equal(user._id.toString());
     chai.expect(proj.permissions.read[0].toString()).to.equal(user._id.toString());
@@ -190,24 +188,20 @@ function permissionProject(done) {
 function removePermissionProject(done) {
   // Find the previously created user from permissionProject()
   User.findOne({ username: testData.users[0].username })
-  .then((user) => {
-    // Hard deleted the user
-    return user.remove();
-  })
+  // Hard deleted the user
+  .then((user) => { return user.remove(); })
   // Find the org user had permissions on
   .then(() => Org.findOne({ id: testData.orgs[0].id }))
-  .then((org) => {
-
+  .then((foundOrg) => {
     // Verify org permissions is empty
-    chai.expect(org.permissions.write).to.be.empty;
-    chai.expect(org.permissions.read).to.be.empty;
-    chai.expect(org.permissions.admin).to.be.empty;
+    chai.expect(foundOrg.permissions.write).to.be.empty;
+    chai.expect(foundOrg.permissions.read).to.be.empty;
+    chai.expect(foundOrg.permissions.admin).to.be.empty;
   })
 
   // Find the project user had permissions on
   .then(() => Project.findOne({ id: testData.projects[0].id }))
   .then((proj) => {
-
     // Verify project permissions is empty
     chai.expect(proj.permissions.write).to.be.empty;
     chai.expect(proj.permissions.read).to.be.empty;
