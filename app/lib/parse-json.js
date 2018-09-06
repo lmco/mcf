@@ -28,7 +28,7 @@ const utils = M.require('lib.utils');
  * @params {String} filename  The name of the file to parse.
  */
 module.exports.removeComments = function(inputString) {
-  // initialize
+  // initialize arrStringSep
   let arrStringSep = null;
   try {
     // Ensure inputString is of type string
