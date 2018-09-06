@@ -300,31 +300,27 @@ module.exports.checkAccess = function(user, object, permission) {
 };
 
 /**
- * @description Title cases a string.
+ * @description Title-cases a string.
  *
- * @param {String} word  The word to be title cased
+ * @param {String} word  The word to be title-cased
  */
 module.exports.toTitleCase = function(word) {
-  // If the word is not a string or contains whitespace, return it
+  // Check if word NOT string or contains whitespace
   if (typeof word !== 'string' || RegExp(/\s/).test(word)) {
+    // Cannot be title-cased, return word
     return word;
   }
 
-  // Set first letter to the uppercase version if it's lowercase
-  let titleCasedString = (RegExp(/^[a-z]/).test(word[0]))
-    ? String.fromCharCode(word.charCodeAt(0) - 32)
-    : word[0];
+  // Define title-cased string
+  let titleCasedString;
 
-  // Set the remaining letters to lowercase
+  // Upper-Case the first letter
+  titleCasedString = word[0].toUpperCase();
+
+  // For remaining characters in word
   for (let i = 1; i < word.length; i++) {
-    // If the letter is not capitalized, append it
-    if (!RegExp(/^[A-Z]/).test(word[i])) {
-      titleCasedString += word[i];
-    }
-    else {
-      // If it's an uppercase letter, make it lowercase and append it
-      titleCasedString += String.fromCharCode(word.charCodeAt(i) + 32);
-    }
+    // Lower-case ith character, append to titleCasedString
+    titleCasedString += word[i].toLowerCase();
   }
 
   return titleCasedString;

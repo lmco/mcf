@@ -444,6 +444,7 @@ function permissionsPrivateProject(done) {
  * @description Test a valid word is title-cased.
  */
 function validTitleCase(done) {
+  // Initialize valid word
   const word = 'heLLo156';
 
   // Title-Case the word
@@ -458,6 +459,7 @@ function validTitleCase(done) {
  * @description Tests an invalid word is NOT title-cased
  */
 function invalidTitleCase(done) {
+  // Initialize invalid word
   const word = '123 Goodbye';
 
   // Title-Case the word
