@@ -160,6 +160,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should parse a valid uid and get the second element', parseValidUIDSecondElement);
   it('should return permissions on an internal project', permissionsInternalProject);
   it('should return permissions on a private project', permissionsPrivateProject);
+  it('should title-case a valid word', validTitleCase);
+  it('should NOT title-case an invalid word', invalidTitleCase);
 }); // END: describe()
 
 /* --------------------( Test Data )-------------------- */
@@ -436,4 +438,32 @@ function permissionsPrivateProject(done) {
     chai.expect(error.message).to.equal(null);
     done();
   });
+}
+
+/**
+ * @description Test a valid word is title-cased.
+ */
+function validTitleCase(done) {
+  const word = 'hello';
+
+  // Title-Case the word
+  const titleCased = utils.toTitleCase(word);
+
+  // Expect word to be title-cased
+  chai.expect(titleCased).to.equal('Hello');
+  done();
+}
+
+/**
+ * @description Tests an invalid word is NOT title-cased
+ */
+function invalidTitleCase(done) {
+  const word = '123Goodbye';
+
+  // Title-Case the word
+  const titleCased = utils.toTitleCase(word);
+
+  // Expect the word to NOT have changed
+  chai.expect(titleCased).to.equal(word);
+  done();
 }
