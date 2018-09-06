@@ -18,10 +18,6 @@
  * objects within the application.
  */
 
-// Load node modules
-const fs = require('fs');
-const path = require('path');
-
 // Load MBEE modules
 const utils = M.require('lib.utils');
 
@@ -31,16 +27,13 @@ const utils = M.require('lib.utils');
  *
  * @params {String} filename  The name of the file to parse.
  */
-module.exports.removeComments = function(filename) {
+module.exports.removeComments = function(inputString) {
   let configArray = null;
   try {
     // Ensure filename parameter is of type string
-    utils.assertType([filename], 'string');
-
+    utils.assertType([inputString], 'string');
     // Attempt to read file into array separated by each newline character.
-    configArray = fs.readFileSync(path.join(__dirname, '..', '..', filename))
-    .toString()
-    .split('\n');
+    configArray = inputString.split('\n');
   }
   catch (err) {
     throw err;

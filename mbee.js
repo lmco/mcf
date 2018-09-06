@@ -101,8 +101,9 @@ Object.defineProperty(M, 'root', {
 
 // Extract configuration json file and initiate the config object
 const parseJSON = M.require('lib.parse-json');
-const configPath = path.join('config', `${M.env}.cfg`);
-const stripComments = parseJSON.removeComments(configPath);
+const configPath = path.join(M.root, 'config', `${M.env}.cfg`);
+const configContent = fs.readFileSync(configPath).toString();
+const stripComments = parseJSON.removeComments(configContent);
 const config = JSON.parse(stripComments);
 
 // Check if config secret is set to RANDOM
