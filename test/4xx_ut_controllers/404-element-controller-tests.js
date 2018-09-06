@@ -116,9 +116,9 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove the project and org together
     OrgController.removeOrg(adminUser, org.id, { soft: false })
-      // Find admin user
+    // Find admin user
     .then(() => User.findOne({ username: M.config.test.username }))
-      // Remove admin user
+    // Remove admin user
     .then((foundUser) => foundUser.remove())
     .then(() => {
       // Disconnect from database
