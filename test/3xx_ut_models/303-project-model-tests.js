@@ -188,26 +188,34 @@ function permissionProject(done) {
  * org in which the user had permissions on.
  */
 function removePermissionProject(done) {
-  // Find the previously created user from the createUser test.
+  // Find the previously created user from permissionProject()
   User.findOne({ username: testData.users[0].username })
   .then((user) => {
     // Hard deleted the user
     return user.remove();
   })
+  // Find the org user had permissions on
   .then(() => Org.findOne({ id: testData.orgs[0].id }))
   .then((org) => {
+
+    // Verify org permissions is empty
     chai.expect(org.permissions.write).to.be.empty;
     chai.expect(org.permissions.read).to.be.empty;
     chai.expect(org.permissions.admin).to.be.empty;
   })
+
+  // Find the project user had permissions on
   .then(() => Project.findOne({ id: testData.projects[0].id }))
   .then((proj) => {
+
+    // Verify project permissions is empty
     chai.expect(proj.permissions.write).to.be.empty;
     chai.expect(proj.permissions.read).to.be.empty;
     chai.expect(proj.permissions.admin).to.be.empty;
     done();
   })
   .catch((error) => {
+    // Expect no error
     chai.expect(error).to.equal(null);
     done();
   });
