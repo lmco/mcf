@@ -120,22 +120,19 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Delete the org
     OrgController.removeOrg(user, 'nineteenforty', { soft: false })
-    .then((retOrg) => {
-      chai.expect(retOrg).to.not.equal(null);
-      User.findOne({
-        username: M.config.test.username
-      }, (err, foundUser) => {
-        chai.expect(err).to.equal(null);
-        foundUser.remove((err2) => {
-          chai.expect(err2).to.equal(null);
-          db.disconnect();
-          done();
-        });
-      });
+    // Remove user
+    .then(() => User.remove({ username: M.config.test.username }))
+    .then(() => {
+      // Disconnect from database
+      db.disconnect();
+      done();
     })
     .catch((error) => {
-      chai.expect(error.message).to.equal(null);
+      // Disconnect from database
       db.disconnect();
+
+      // Expect no error
+      chai.expect(error).to.equal(null);
       done();
     });
   });

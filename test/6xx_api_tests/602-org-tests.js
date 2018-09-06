@@ -80,9 +80,13 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests. Delete requesting user.
    */
   after((done) => {
-    User.remove({ username: M.config.test.username }).exec((err, user) => {
-      chai.expect(err).to.equal(null);
+    User.remove({ username: M.config.test.username })
+    .exec((err) => {
+      // Disconnect from database
       db.disconnect();
+
+      // Expect no error
+      chai.expect(err).to.equal(null);
       done();
     });
   });
