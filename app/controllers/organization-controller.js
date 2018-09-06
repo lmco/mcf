@@ -305,6 +305,8 @@ class OrganizationController {
         const orgUpdateFields = Object.keys(orgUpdate);
         // Get list of parameters which can be updated from model
         const validUpdateFields = org.getValidUpdateFields();
+        // Get a list of validators
+        const orgValidators = validators.org;
         // Allocate update val and field before for loop
         let updateVal = '';
         let updateField = '';
@@ -336,10 +338,10 @@ class OrganizationController {
             return reject(new errors.CustomError(`The Organization [${updateField}] is not of type String.`, 400));
           }
 
-          // Handle case where the org name is updated, and is invalid
-          if (updateField === 'name') {
-            if (!RegExp(validators.org.name).test(orgUpdate[updateField])) {
-              return reject(new errors.CustomError('The updated organization name is not valid.', 400));
+          // Error Check - If the field has a validator, ensure the field is valid
+          if (orgValidators[updateField]) {
+            if (!RegExp(orgValidators[updateField]).test(orgUpdate[updateField])) {
+              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
             }
           }
 

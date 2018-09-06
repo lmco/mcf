@@ -217,14 +217,14 @@ function verifyUserEmail(done) {
  */
 function verifyUserName(done) {
   // Valid names
-  chai.expect(RegExp(validators.user.name).test('Jake The Snake')).to.equal(true);
-  chai.expect(RegExp(validators.user.name).test('John-Paul Smith')).to.equal(true);
+  chai.expect(RegExp(validators.user.fname).test('Jake The Snake')).to.equal(true);
+  chai.expect(RegExp(validators.user.lname).test('John-Paul Smith')).to.equal(true);
 
   // Invalid names
-  chai.expect(RegExp(validators.user.name).test('9mike')).to.equal(false);
-  chai.expect(RegExp(validators.user.name).test(' space first')).to.equal(false);
-  chai.expect(RegExp(validators.user.name).test('-first')).to.equal(false);
-  chai.expect(RegExp(validators.user.name).test('')).to.equal(false);
+  chai.expect(RegExp(validators.user.fname).test('9mike')).to.equal(false);
+  chai.expect(RegExp(validators.user.lname).test(' space first')).to.equal(false);
+  chai.expect(RegExp(validators.user.fname).test('-first')).to.equal(false);
+  chai.expect(RegExp(validators.user.lname).test('')).to.equal(false);
   done();
 }
 

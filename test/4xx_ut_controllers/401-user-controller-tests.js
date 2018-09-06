@@ -291,7 +291,7 @@ function rejectInvalidLastNameUpdate(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
