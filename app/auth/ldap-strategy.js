@@ -1,20 +1,22 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
+ * @module lib.mock_express
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
  * @module auth.ldap_strategy
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This file implements our authentication using LDAP Active Directory.
+ * @description This file implements authentication using LDAP Active Directory.
  */
 
 // Load node modules
@@ -33,298 +35,287 @@ const errors = M.require('lib.errors');
 const ldapConfig = M.config.auth.ldap;
 
 /**
- * LdapStrategy
- * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
- * @classdesc  This class defines authentication in the LMI cloud environment.
+ * @description This function implements handleBasicAuth() in lib/auth.js.
+ * Implement authentication via LDAP using username/password and
+ * configuration in config file.
+ *
+ * @example
+ * AuthController.handleBasicAuth(req, res, username, password)
+ *   .then(user => {
+ *   // do something with authenticated user
+ *   })
+ *   .catch(err => {
+ *     console.log(err);
+ *   })
+ *
+ * @param req request express object
+ * @param res response express object
+ * @param {String} username to authenticate via LDAP AD
+ * @param {String} password to authenticate via LDAP AD
+ * @returns Promise authenticated user as the User object or an error.
  */
-class LdapStrategy {
+module.exports.handleBasicAuth = function(req, res, username, password) {
+  // Return a promise
+  return new Promise((resolve, reject) => {
+    // Define LDAP client handler
+    let ldapClient = null;
 
-  /******************************************************************************
-   *  LDAP Authentication Implementations                                       *
-   ******************************************************************************/
+    // Connect to database
+    ldapConnect()
+    .then(_ldapClient => {
+      ldapClient = _ldapClient;
 
-  /**
-   * @description This function implements handleBasicAuth called in the auth.js library file.
-   * The purpose of this function is to implement authentication via LDAP using a
-   * username and password as well as the configuration set up in the config file used.
-   *
-   * @example
-   * AuthController.handleBasicAuth(req, res, username, password)
-   *   .then(user => {
-   *   // do something with authenticated user
-   *   })
-   *   .catch(err => {
-   *     console.log(err);
-   *   })
-   *
-   * @param req The request object from express
-   * @param res The response object from express
-   * @param username A string of the username for who is attempting to authenticate via LDAP AD
-   * @param password A string of the password for who is attempting to authenticate via LDAP AD
-   * @returns Promise The authenticated user as the User object or an error.
-   */
-  static handleBasicAuth(req, res, username, password) {
-    // Run through the LDAP helper functions defined below.
-    return new Promise((resolve, reject) => {
-      // Connect to database
-      LdapStrategy.ldapConnect()
-      .then(ldapClient => {
-        // Search for user
-        LdapStrategy.ldapSearch(ldapClient, username)
-        // Authenticate user
-        .then(userFound => LdapStrategy.ldapAuth(ldapClient, userFound, password))
-        // Sync user with local database
-        .then(userAuth => LdapStrategy.ldapSync(userAuth))
-        // return authenticated user object
-        .then(userSynced => resolve(userSynced))
-        // Return any error that may have occurred in the above functions
-        .catch(handleBasicAuthErr => reject(handleBasicAuthErr));
-      })
-      .catch(ldapConnectErr => reject(ldapConnectErr));
-    });
-  }
+      // Search for user
+      return ldapSearch(ldapClient, username);
+    })
 
-  /**
-   * @description This function implements handleTokenAuth called in the auth.js library file.
-   * The purpose of this function is to implement authentication of a user who has
-   * passed in a session token or bearer token. This particular instance just implements the same
-   * tokenAuth provided by the Local Strategy.
-   *
-   * @example
-   * AuthController.handleTokenAuth(req, res, _token)
-   *   .then(user => {
-   *   // do something with authenticated user
-   *   })
-   *   .catch(err => {
-   *     console.log(err);
-   *   })
-   *
-   * @param req The request object from express
-   * @param res The response object from express
-   * @param _token The token the user is attempting to authenticate with.
-   * @returns Promise The local database User object or an error.
-   */
-  static handleTokenAuth(req, res, _token) {
-    return new Promise((resolve, reject) => {
-      LocalStrategy.handleTokenAuth(req, res, _token)
-      .then(user => resolve(user))
-      .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
-    });
-  }
+    // Authenticate user
+    .then(foundUser => ldapAuth(ldapClient, foundUser, password))
+    // Sync user with local database
+    .then(authUser => ldapSync(authUser))
+    // Return authenticated user object
+    .then(syncedUser => resolve(syncedUser))
+    .catch(ldapConnectErr => reject(ldapConnectErr));
+  });
+};
 
-  /**
-   * @description This function implements doLogin called in the auth.js library file.
-   * The purpose of this function is to preform session or token setup for the node
-   * application so that users can be authorized via token after logging in. This particular
-   * implementation uses the Local Strategy doLogin function.
-   *
-   * @param req The request object from express
-   * @param res The response object from express
-   * @param next The callback to continue in the express authentication flow.
-   */
-  static doLogin(req, res, next) {
-    LocalStrategy.doLogin(req, res, next);
-  }
+/**
+ * @description Authenticates user with passed in token.
+ * Implements handleTokenAuth() provided by the Local Strategy.
+ *
+ * @example
+ * AuthController.handleTokenAuth(req, res, token)
+ *   .then(user => {
+ *   // do something with authenticated user
+ *   })
+ *   .catch(err => {
+ *     console.log(err);
+ *   })
+ *
+ * @param req request express object
+ * @param res response express object
+ * @param token user authentication token, encrypted
+ *
+ * @returns Promise local user object or an error.
+ */
+module.exports.handleTokenAuth = function(req, res, token) {
+  return new Promise((resolve, reject) => {
+    LocalStrategy.handleTokenAuth(req, res, token)
+    .then(user => resolve(user))
+    .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
+  });
+};
 
+/**
+ * @description  This function generates the session token for user login.
+ * Implements the Local Strategy doLogin function.
+ *
+ * @param req request express object
+ * @param res response express object
+ * @param next callback to continue express authentication
+ */
+module.exports.doLogin = function(req, res, next) {
+  LocalStrategy.doLogin(req, res, next);
+};
 
-  /******************************************************************************
-   *  LDAP Helper Functions                                                     *
-   ******************************************************************************/
-
-  /**
-   * @description This is a helper function of the lDAPStrategy class that is used
-   * to set the this.ldapClient variable which is the object capable of binding to
-   * the ldap server.
-   *
-   * @returns Promise Either an error or it sets the ldap connection as a 'this' variable
-   */
-  static ldapConnect() {
-    M.log.debug('Attempting to bind to the LDAP server.');
-    // define promise for function
-    return new Promise((resolve, reject) => {
-      // Import Certs
-      const cacerts = [];
-      const projectRoot = M.root;
-      for (let i = 0; i < ldapConfig.ca.length; i++) {
-        const fname = ldapConfig.ca[i];
-        const file = fs.readFileSync(path.join(projectRoot, fname));
-        cacerts.push(file);
+/* ----------( LDAP Helper Functions )----------*/
+/**
+ * @description Connects to an LDAP server and resolves a client object used
+ * to preform search and bind operations.
+ *
+ * @returns Promise an LDAP client object or an error
+ */
+function ldapConnect() {
+  M.log.debug('Attempting to bind to the LDAP server.');
+  // define and return promise
+  return new Promise((resolve, reject) => {
+    // Initialize arrCaCerts to hold LDAP server certificates
+    const arrCaCerts = [];
+    // Loop  number of certificates in config file
+    for (let i = 0; i < ldapConfig.ca.length; i++) {
+      // Extract certificate filename from config file
+      const certName = ldapConfig.ca[i];
+      // Extract certificate file content
+      const file = fs.readFileSync(path.join(M.root, certName));
+      // Push file content to arrCaCert
+      arrCaCerts.push(file);
+    }
+    // Create ldapClient object with url, credentials, and certificates
+    const ldapClient = ldap.createClient({
+      url: `${ldapConfig.url}:${ldapConfig.port}`,
+      tlsOptions: {
+        ca: arrCaCerts
       }
-      // Create ldapClient object with credentials and certs
-      const ldapClient = ldap.createClient({
-        url: `${ldapConfig.url}:${ldapConfig.port}`,
-        tlsOptions: {
-          ca: cacerts
-        }
-      });
-      // bind object to LDAP server
-      ldapClient.bind(ldapConfig.bind_dn, ldapConfig.bind_dn_pass, (bindErr) => {
-        // Error Check - Return error if LDAP server bind fails
-        if (bindErr) {
-          return reject(bindErr);
-        }
-        // If no error, return ldapClient bound object.
-        return resolve(ldapClient);
-      });
     });
-  }
-
-  /**
-   * @description This is a helper function of the lDAPStrategy class that is used
-   * to search for a user within the specified base and filter from the configuration
-   * file.
-   *
-   * @returns Promise returns the user information from the ldap server or an err.
-   */
-  static ldapSearch(ldapClient, username) {
-    M.log.debug('Attempting to search for LDAP user.');
-    // define promise for function
-    return new Promise((resolve, reject) => {
-      const usernameSani = sani.ldapFilter(username);
-      // set filter for query based on username attribute and the configuration filter
-      const filter = '(&'
-                   + `(${ldapConfig.attributes.username}=${usernameSani})`
-                   + `${ldapConfig.filter.replace('\\', '\\\\')})`; // avoids '\\\\' in JSON
-
-      // log base and filter used for query
-      M.log.debug(`Using LDAP base: ${ldapConfig.base}`);
-      M.log.debug(`Using search filter: ${filter}`);
-      M.log.debug('Executing search ...');
-
-
-      // Set filter, attributes, and scope of the search
-      const opts = {
-        filter: filter,
-        scope: 'sub',
-        attributes: [
-          ldapConfig.attributes.username,
-          ldapConfig.attributes.firstName,
-          ldapConfig.attributes.lastName,
-          ldapConfig.attributes.eMail
-        ]
-      };
-
-      // Check if a preferred name is used or set it to the default of firstName
-      if (!ldapConfig.attributes.hasOwnProperty('preferredName')) {
-        ldapConfig.attributes.preferredName = ldapConfig.attributes.firstName;
+    // Bind ldapClient object to LDAP server
+    ldapClient.bind(ldapConfig.bind_dn, ldapConfig.bind_dn_pass, (bindErr) => {
+      // Check if LDAP server bind fails
+      if (bindErr) {
+        // LDAP serve bind failed, reject bind error
+        return reject(bindErr);
       }
-      else if (ldapConfig.attributes.preferredName === '') {
-        ldapConfig.attributes.preferredName = ldapConfig.attributes.firstName;
-      }
-      else {
-        opts.attributes.push(ldapConfig.attributes.preferredName);
-      }
-
-      // Create person Boolean for proper error handling
-      let person = false;
-      // Execute the search
-      ldapClient.search(ldapConfig.base, opts, (err, result) => {
-        // If entry found, log it and set person to the return object for the callback
-        result.on('searchEntry', (entry) => {
-          M.log.debug('Search complete. Entry found.');
-          person = entry;
-        });
-        // If error returned, reject eh search with an error
-        result.on('error', (searchErr) => reject(searchErr));
-        // On callback, return an error if the user was not found or return the ldap entry.
-        result.on('end', (status) => {
-          M.log.debug(status);
-          if (!person) {
-            ldapClient.destroy(); // Disconnect from ldap server on failure
-            return reject(new errors.CustomError('Invalid username or password.', 401));
-          }
-          // If entry is found, return LDAP object
-          return resolve(person.object);
-        });
-      });
+      // LDAP serve bind successful, resolve ldapClient object
+      return resolve(ldapClient);
     });
-  }
-
-  /**
-   * @description This is a helper function of the lDAPStrategy class that is used
-   * to authenticate an ldap user after being found using their password.
-   *
-   * @returns Promise returns the user information from the ldap server or an err.
-   */
-  static ldapAuth(ldapClient, user, password) {
-    M.log.debug(`Authenticating ${user[ldapConfig.attributes.username]} ...`);
-    // define promise for function
-    return new Promise((resolve, reject) => {
-      ldapClient.bind(user.dn, password, (authErr) => {
-        // If an error occurs, fail.
-        if (authErr) {
-          ldapClient.destroy(); // Disconnect from ldap server on failure
-          M.log.error(authErr);
-          return reject(new errors.CustomError('Invalid username or password.', 401));
-        }
-        // If no error, unbind LDAP server and return the authenticated user object
-        M.log.debug(`User [${user[ldapConfig.attributes.username]
-        }] authenticated successfully via LDAP.`);
-        ldapClient.destroy(); // Disconnect from ldap server after successful authentication
-        return resolve(user);
-      });
-    });
-  }
-
-  /**
-   * @description This is a helper function of the lDAPStrategy class that is used
-   * to sync LDAP information to the local database including first name, last name,
-   * and email.
-   *
-   * @returns Promise returns the saved local user object or an err.
-   */
-  static ldapSync(user) {
-    M.log.debug('Synchronizing LDAP user with local database.');
-    // define promise for function
-    return new Promise((resolve, reject) => {
-      // Search for user in local database
-      UserController.findUser(user[ldapConfig.attributes.username])
-      .then(foundUser => {
-        // if found, update the names and emails of the user and re-save with the local database
-        const userSave = foundUser;
-        // Update user properties
-        userSave.fname = user[ldapConfig.attributes.firstName];
-        userSave.preferredName = user[ldapConfig.attributes.preferredName];
-        userSave.lname = user[ldapConfig.attributes.lastName];
-        userSave.email = user[ldapConfig.attributes.eMail];
-
-        // Save updated user in database
-        userSave.save((saveErr) => {
-          if (saveErr) {
-            return reject(saveErr);
-          }
-          return resolve(userSave);
-        });
-      })
-      .catch(findUserErr => {
-        // if the error message is anything but the user is not found, fail
-        if (findUserErr.message !== 'Not Found') {
-          return reject(findUserErr);
-        }
-        // if findUser failed with user not found, create the user in the local database
-        const initData = {
-          username: user[ldapConfig.attributes.username],
-          password: (Math.random() + 1).toString(36).substring(7),
-          fname: user[ldapConfig.attributes.firstName],
-          preferredName: user[ldapConfig.attributes.preferredName],
-          lname: user[ldapConfig.attributes.lastName],
-          email: user[ldapConfig.attributes.eMail],
-          provider: 'ldap'
-        };
-        // Initialize User object to be saved
-        const userSave = new User(initData);
-        // Save user in database
-        userSave.save((saveErr) => {
-          if (saveErr) {
-            return reject(saveErr);
-          }
-          return resolve(userSave);
-        });
-      });
-    });
-  }
-
+  });
 }
 
-// export module
-module.exports = LdapStrategy;
+/**
+ * @description Searches for and resolve a user from LDAP server.
+ *
+ * @returns Promise LDAP user information or an error.
+ */
+function ldapSearch(ldapClient, username) {
+  M.log.debug('Attempting to search for LDAP user.');
+  // Define and return promise
+  return new Promise((resolve, reject) => {
+    // Sanitize username
+    const usernameSani = sani.ldapFilter(username);
+    // Initialize filter for query based on username attribute and the configuration filter
+    // NOTE: Backslashes will be removed twice from filter due to configuration import.
+    // Replaces the single backslash with two backlashes
+    const filter = '(&'
+                 + `(${ldapConfig.attributes.username}=${usernameSani})`
+                 + `${ldapConfig.filter.replace('\\', '\\\\')})`;
+
+    // log base and filter used for query
+    M.log.debug(`Using LDAP base: ${ldapConfig.base}`);
+    M.log.debug(`Using search filter: ${filter}`);
+    M.log.debug('Executing search ...');
+
+    // Set filter, scope, and attributes of the search
+    const opts = {
+      filter: filter,
+      scope: 'sub',
+      attributes: [
+        ldapConfig.attributes.username,
+        ldapConfig.attributes.firstName,
+        ldapConfig.attributes.lastName,
+        ldapConfig.attributes.eMail
+      ]
+    };
+
+    // Check preferredName is a property of ldapConfig.attributes
+    if (!ldapConfig.attributes.hasOwnProperty('preferredName')) {
+      // NOT a property, use ldapConfig firstName attribute
+      ldapConfig.attributes.preferredName = ldapConfig.attributes.firstName;
+    }
+    // Check preferredName is empty string
+    else if (ldapConfig.attributes.preferredName === '') {
+      // empty string, use ldapConfig firstName attribute
+      ldapConfig.attributes.preferredName = ldapConfig.attributes.firstName;
+    }
+    // Set preferred name as an attribute
+    else {
+      opts.attributes.push(ldapConfig.attributes.preferredName);
+    }
+
+    // Define person
+    let person;
+    // Execute the search
+    ldapClient.search(ldapConfig.base, opts, (err, result) => {
+      // If search fails, reject error
+      result.on('error', (searchErr) => reject(searchErr));
+      // If entry found, set person to entry
+      result.on('searchEntry', (entry) => {
+        M.log.debug('Search complete. Entry found.');
+        person = entry;
+      });
+      // Search complete check results
+      result.on('end', (status) => {
+        M.log.debug(status);
+        // Check person NOT undefined
+        if (!person) {
+          // Person undefined, reject error
+          ldapClient.destroy(); // Disconnect from LDAP server on failure
+          return reject(new errors.CustomError('Invalid username or password.', 401));
+        }
+        // Person defined, return results
+        return resolve(person.object);
+      });
+    });
+  });
+}
+
+/**
+ * @description Validates a users password with LDAP server
+ *
+ * @returns Promise the authenticated user's information or an error
+ */
+function ldapAuth(ldapClient, user, password) {
+  M.log.debug(`Authenticating ${user[ldapConfig.attributes.username]} ...`);
+  // Define and return promise
+  return new Promise((resolve, reject) => {
+    // Validate user password
+    ldapClient.bind(user.dn, password, (authErr) => {
+      // If validation fails, reject error
+      if (authErr) {
+        M.log.error(authErr);
+        ldapClient.destroy(); // Disconnect from LDAP server on failure
+        return reject(new errors.CustomError('Invalid username or password.', 401));
+      }
+      // Validation successful, resolve authenticated user's information
+      M.log.debug(`User [${user[ldapConfig.attributes.username]
+      }] authenticated successfully via LDAP.`);
+      ldapClient.destroy(); // Disconnect from LDAP server after successful authentication
+      return resolve(user);
+    });
+  });
+}
+
+/**
+ * @description Synchronizes authenticated user's LDAP information with database.
+ *
+ * @returns Promise synchronized user model object or an error.
+ */
+function ldapSync(ldapUserObj) {
+  M.log.debug('Synchronizing LDAP user with local database.');
+  // Define and return promise
+  return new Promise((resolve, reject) => {
+    // Search for user in database
+    UserController.findUser(ldapUserObj[ldapConfig.attributes.username])
+    .then(foundUser => {
+      // User exists, update database with LDAP information
+      const userSave = foundUser;
+      userSave.fname = ldapUserObj[ldapConfig.attributes.firstName];
+      userSave.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
+      userSave.lname = ldapUserObj[ldapConfig.attributes.lastName];
+      userSave.email = ldapUserObj[ldapConfig.attributes.eMail];
+
+      // Save updated user to database
+      userSave.save()
+      // Save successful, resolve user model object
+      .then(userSaveUpdate => resolve(userSaveUpdate))
+      // Save failed, reject error
+      .catch(saveErr => reject(saveErr));
+    })
+    .catch(findUserErr => {
+      // Find user failed, check error message NOT 'Not Found'
+      if (findUserErr.message !== 'Not Found') {
+        // Error message NOT 'Not Found', reject error
+        return reject(findUserErr);
+      }
+      // Error message 'Not Found', create user in database
+      // Initialize userData with LDAP information
+      const initData = {
+        username: ldapUserObj[ldapConfig.attributes.username],
+        // TODO: MBX-409 decide how to handle passwords in database for LDAP Strategy
+        password: (Math.random() + 1).toString(36).substring(7),
+        fname: ldapUserObj[ldapConfig.attributes.firstName],
+        preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
+        lname: ldapUserObj[ldapConfig.attributes.lastName],
+        email: ldapUserObj[ldapConfig.attributes.eMail],
+        provider: 'ldap'
+      };
+
+      // Create user model object using initData
+      const userSave = new User(initData);
+      // Save user to database
+      userSave.save()
+      // Save successful, resolve user model object
+      .then(userSaveNew => resolve(userSaveNew))
+      // Save failed, reject error
+      .catch(saveErr => reject(saveErr));
+    });
+  });
+}

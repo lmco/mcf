@@ -42,12 +42,31 @@ if (module.parent == null) {
 function test(_args) {
   printHeader();
 
+  // Check if environment is production and NOT --force
+  if (M.env.toLowerCase() === 'production' && !_args.includes('--force')) {
+    // Environment is production and NOT --force, print warning and fail.
+    // eslint-disable-next-line no-console
+    console.log('\nWARNING! You are attempting to run tests on a production database.\n\n'
+      + 'This operation could ERASE PRODUCTION DATA PERMANENTLY.\n'
+      + 'If you would still like to perform this action, use the\n'
+      + 'optional parameter --force\n\n'
+      + 'node mbee test --grep "[^[1-8]]" --force\n');
+    process.exit(-1);
+  }
+
+  // Remove --force from args
+  if (_args.includes('--force')) {
+    const removeInd = _args.indexOf('--force');
+    _args.splice(removeInd, 1);
+  }
+
   // LM: Default timeout changed to 5000
   // Add default timeout if not provided
   if (!_args.includes('--timeout')) {
     _args.push('--timeout');
     _args.push('5000');
   }
+
   // Add default slow speed if not provided
   if (!_args.includes('--slow')) {
     _args.push('--slow');

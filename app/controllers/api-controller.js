@@ -611,18 +611,10 @@ class ApiController {
       return res.status(error.status).send(error);
     }
 
-    try {
-      utils.assertExists(['id', 'name'], req.body);
-      utils.assertType([req.params.orgid, req.params.projectid, req.body.name], 'string');
-    }
-    catch (error) {
-      return res.status(error.status).send(error);
-    }
+    const projectID = sani.html(req.params.projectid);
+    const orgID = sani.html(req.params.orgid);
 
-    const projectId = sani.html(req.params.projectid);
-    const orgId = sani.html(req.params.orgid);
-
-    ProjectController.updateProject(req.user, orgId, projectId, req.body)
+    ProjectController.updateProject(req.user, orgID, projectID, req.body)
     .then((project) => {
       res.header('Content-Type', 'application/json');
       return res.status(200).send(ApiController.formatJSON(project));

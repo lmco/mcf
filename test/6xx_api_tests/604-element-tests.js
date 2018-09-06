@@ -146,9 +146,12 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET the previously posted element', getElement);
   it('should GET all elements for a project', getElements);
   it('should PATCH an elements name', patchElement);
-  // TODO: MBX-397 Add failure tests
   it('should DELETE the previously created element', deleteElement01);
   it('should DELETE the second previously created element', deleteElement02);
+  it('should reject a POST with an invalid name field', rejectPostElement);
+  it('should reject a GET to a non-existing element', rejectGetElement);
+  it('should reject a PATCH with an invalid name', rejectPatchElement);
+  it('should reject a DELETE with a non-existing element', rejectDeleteNonexistingElement);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -288,6 +291,115 @@ function patchElement(done) {
     // Verify response body
     const json = JSON.parse(body);
     chai.expect(json.name).to.equal('Captain America');
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * fails to creates an element with an empty/invalid name field.
+ */
+function rejectPostElement(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify({
+      id: '0000',
+      name: '',
+      project: {
+        id: proj.id,
+        org: {
+          id: org.id
+        }
+      },
+      type: 'Block'
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * fails to find a non-existing element.
+ */
+function rejectGetElement(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/33`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 404 Not Found
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * fails to update an element with an empty/invalid name field.
+ */
+function rejectPatchElement(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      name: ''
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 500 Internal Server Error
+    chai.expect(response.statusCode).to.equal(500);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Internal Server Error');
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * deletes the previously created element.
+ */
+function rejectDeleteNonexistingElement(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/33`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      soft: false
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 404 Not Found
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
     done();
   });
 }

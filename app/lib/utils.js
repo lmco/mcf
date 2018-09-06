@@ -231,7 +231,7 @@ module.exports.parseUID = function(uid) {
 
 /**
  * @description Checks if a user has permission to see an object
- * TODO - move this into org/project models
+ * TODO: MBX-412 move this into org/project models
  */
 module.exports.getPermissionStatus = function(user, object) {
   // Ensure the obejct is an org or project
@@ -288,7 +288,7 @@ module.exports.getPermissionStatus = function(user, object) {
 
 /**
  * @description Checks if permission exist
- * TODO - move this to models
+ * TODO: MBX-412 move this to models
  *
  * @param {User} user - the user object
  * @param {Object} object - project or organization
@@ -297,4 +297,31 @@ module.exports.getPermissionStatus = function(user, object) {
 module.exports.checkAccess = function(user, object, permission) {
   const permissions = this.getPermissionStatus(user, object);
   return permissions.includes(permission);
+};
+
+/**
+ * @description Title-cases a string.
+ *
+ * @param {String} word  The word to be title-cased
+ */
+module.exports.toTitleCase = function(word) {
+  // Check if word NOT string or contains whitespace
+  if (typeof word !== 'string' || RegExp(/\s/).test(word)) {
+    // Cannot be title-cased, return word
+    return word;
+  }
+
+  // Define title-cased string
+  let titleCasedString;
+
+  // Upper-Case the first letter
+  titleCasedString = word[0].toUpperCase();
+
+  // For remaining characters in word
+  for (let i = 1; i < word.length; i++) {
+    // Lower-case ith character, append to titleCasedString
+    titleCasedString += word[i].toLowerCase();
+  }
+
+  return titleCasedString;
 };
