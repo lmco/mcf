@@ -146,12 +146,12 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET the previously posted element', getElement);
   it('should GET all elements for a project', getElements);
   it('should PATCH an elements name', patchElement);
-  it('should DELETE the previously created element', deleteElement01);
-  it('should DELETE the second previously created element', deleteElement02);
   it('should reject a POST with an invalid name field', rejectPostElement);
   it('should reject a GET to a non-existing element', rejectGetElement);
   it('should reject a PATCH with an invalid name', rejectPatchElement);
   it('should reject a DELETE with a non-existing element', rejectDeleteNonexistingElement);
+  it('should DELETE the previously created element', deleteElement01);
+  it('should DELETE the second previously created element', deleteElement02);
 });
 
 /* --------------------( Tests )-------------------- */
