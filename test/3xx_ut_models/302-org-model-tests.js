@@ -67,7 +67,6 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(err).to.equal(null);
       chai.expect(reqObj.user.username).to.equal(M.config.test.username);
 
-      // TODO - consider using an .exec rather than callback to make this cleaner (MBX-373)
       User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true },
         { new: true },
         (updateErr, userUpdate) => {
@@ -86,18 +85,20 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Find user
-    User.findOne({
-      username: M.config.test.username
-    }, (err, foundUser) => {
-      chai.expect(err).to.equal(null);
-      // Remove user
-      foundUser.remove((err2) => {
-        chai.expect(err2).to.equal(null);
+    User.findOne({ username: M.config.test.username })
+    // Remove user
+    .then((user) => user.remove())
+    .then(() => {
+      // Disconnect from database
+      db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      db.disconnect();
 
-        // Disconnect from database
-        db.disconnect();
-        done();
-      });
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
@@ -127,6 +128,7 @@ function createOrg(done) {
   });
   // Save the Organization model object to the database
   org.save((error) => {
+    // Expect no error
     chai.expect(error).to.equal(null);
     done();
   });
@@ -137,17 +139,16 @@ function createOrg(done) {
  */
 function findOrg(done) {
   // Find the created organization from the previous createOrg() test
-  Org.findOne({
-    id: testData.orgs[0].id,
-    name: testData.orgs[0].name
-  }, (err, retOrg) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-
+  Org.findOne({ id: testData.orgs[0].id, name: testData.orgs[0].name })
+  .then((org) => {
     // Verify correct org is returned
-    chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
-    chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
-
+    chai.expect(org.id).to.equal(testData.orgs[0].id);
+    chai.expect(org.name).to.equal(testData.orgs[0].name);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }
@@ -157,26 +158,19 @@ function findOrg(done) {
  */
 function updateOrg(done) {
   // Find and update the org created in the previous createOrg() test
-  Org.findOneAndUpdate({
-    id: testData.orgs[0].id
-  }, {
-    name: testData.orgs[0].name
-  }, (err, org) => {
+  Org.findOneAndUpdate({ id: testData.orgs[0].id }, { name: testData.orgs[0].name })
+  // Find the updated org
+  .then((org) => Org.findOne({ id: org.id }))
+  .then((org) => {
+    // Verify org is updated correctly
+    chai.expect(org.id).to.equal(testData.orgs[0].id);
+    chai.expect(org.name).to.equal(testData.orgs[0].name);
+    done();
+  })
+  .catch((error) => {
     // Expect no error
-    chai.expect(err).to.equal(null);
-
-    // Find the updated org
-    Org.findOne({
-      id: org.id
-    }, (err2, retOrg) => {
-      // Expect no error
-      chai.expect(err2).to.equal(null);
-
-      // Verify org is updated correctly
-      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
-      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
-      done();
-    });
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
@@ -185,20 +179,21 @@ function updateOrg(done) {
  */
 function findOrgPermissions(done) {
   // Finds permissions on the org created in the previous createOrg() test
-  Org.findOne({
-    id: testData.orgs[0].id
-  }, (err, retOrg) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-
+  Org.findOne({ id: testData.orgs[0].id })
+  .then((org) => {
     // Confirming user permissions are in organization
-    chai.expect(retOrg.permissions.write[0].toString()).to.equal(userAdmin._id.toString());
+    chai.expect(org.permissions.write[0].toString()).to.equal(userAdmin._id.toString());
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.eqaul(null);
     done();
   });
 }
 
 /**
- * @description Soft-deletes the organization previously created in createOrg.
+ * @description Soft-deletes the organization previously created in createOrg().
  */
 function softDeleteOrg(done) {
   // TODO: remove LM specific comments in public (MBX-370)
@@ -209,24 +204,24 @@ function softDeleteOrg(done) {
 
   // Find the previously created organization from createOrg.
   Org.findOne({ id: testData.orgs[0].id })
-  .exec((err, org) => {
+  .then((org) => {
     // Set the deleted field of the organization to true
     org.deleted = true;
     // Save the updated organization object to the database
-    org.save((error) => {
-      // Expect no error
-      chai.expect(error).to.equal(null);
-      // Find the previously updated organization
-      Org.findOne({
-        id: org.id
-      }, (error2, org2) => {
-        // Verify the organization has been soft deleted.
-        chai.expect(error2).to.equal(null);
-        chai.expect(org2.deletedOn).to.not.equal(null);
-        chai.expect(org2.deleted).to.equal(true);
-        done();
-      });
-    });
+    return org.save();
+  })
+  // Find the previously updated organization
+  .then((org) => Org.findOne({ id: org.id }))
+  .then((org) => {
+    // Verify the organization has been soft deleted.
+    chai.expect(org.deletedOn).to.not.equal(null);
+    chai.expect(org.deleted).to.equal(true);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
@@ -235,10 +230,10 @@ function softDeleteOrg(done) {
  */
 function deleteOrg(done) {
   // find and remove the organization
-  Org.findOneAndRemove({
-    id: testData.orgs[0].id
-  }, (error) => {
-    // Check that the remove action did not fail.
+  Org.findOneAndRemove({ id: testData.orgs[0].id })
+  .then(() => done())
+  .catch((error) => {
+    // Expect no error
     chai.expect(error).to.equal(null);
     done();
   });
