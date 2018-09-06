@@ -64,7 +64,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
       }
     });
   });
-}
+};
 
 /**
  * @description This function implements handleTokenAuth called in the auth.js library file.
@@ -92,7 +92,7 @@ module.exports.handleTokenAuth = function(req, res, _token) {
     .then(user => resolve(user))
     .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
   });
-}
+};
 
 /**
  * @description This function implements doLogin called in the auth.js library file.
@@ -106,4 +106,4 @@ module.exports.handleTokenAuth = function(req, res, _token) {
  */
 module.exports.doLogin = function(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
-}
+};

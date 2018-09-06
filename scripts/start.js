@@ -81,26 +81,26 @@ function start(args) {
   // Create default admin if it doesn't exist
   const User = M.require('models.user');
   // Check any admin exist
-  User.findOne({admin: true})
+  User.findOne({ admin: true })
   .exec((err, user) => {
     if (err) {
       throw err;
     }
 
     // Check user found
-    if (user === null){
+    if (user === null) {
       // No user found, create local admin
       const user = new User({
         username: 'admin',
         password: 'Admin12345',
         provider: 'local',
-        admin:true
+        admin: true
       });
 
       // Save user object to the database
-      user.save((error) => {
-        if (error!=null){
-          throw error;
+      user.save((userError) => {
+        if (userError != null) {
+          throw userError;
         }
       });
     }

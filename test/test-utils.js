@@ -35,26 +35,26 @@ const User = M.require('models.user');
 const db = M.require('lib.db');
 
 // check if local-strategy or ldap
-  // check if ldap
-    // check if user in the local database
-      // in database
-        // authenticate()
-      // if not in database
-        // CreateUser()
-        // authenticate()
+// check if ldap
+// check if user in the local database
+// in database
+// authenticate()
+// if not in database
+// CreateUser()
+// authenticate()
 
 // else local strategy
-  // check in database
-    // in database
-      // authenticate()
+// check in database
+// in database
+// authenticate()
 
 
 /**
  * @description Helper function to create non-admin user for
  * MBEE tests.
  */
-module.exports.createNonadminUser = function(username='bob'){
-  console.log("test-utils.js");
+module.exports.createNonadminUser = function(username = 'bob') {
+  console.log('test-utils.js');
   // Create a new User object
   const user = new User({
     username: username,
@@ -62,23 +62,22 @@ module.exports.createNonadminUser = function(username='bob'){
     fname: 'bobFirstname',
     preferredName: 'The Flash',
     lname: 'allen',
-    admin:false
+    admin: false
   });
 
   // Save user object to the database
   user.save((error) => {
-    if (error!=null){
+    if (error != null) {
       throw error;
     }
   });
-
 };
 
 /**
  * @description Helper function to create admin user for
  * MBEE tests.
  */
-module.exports.createAdminUser = function(username='admin'){
+module.exports.createAdminUser = function(username = 'admin') {
   // Create a new User object
   const user = new User({
     username: username,
@@ -86,23 +85,22 @@ module.exports.createAdminUser = function(username='admin'){
     fname: 'adminFirstname',
     preferredName: 'AdminPreferredName',
     lname: 'adminLastname',
-    admin:true
+    admin: true
   });
 
   // Save user object to the database
   user.save((error) => {
-    if (error!=null){
+    if (error != null) {
       throw error;
     }
   });
-
 };
 
 /**
  * @description Helper function to create organization for
  * MBEE tests.
  */
-module.exports.createOrganization = function(adminUser, orgId='avengers'){
+module.exports.createOrganization = function(adminUser, orgId = 'avengers') {
   // Create the new organization
   const newOrg = new Organization({
     id: orgID,
@@ -118,8 +116,7 @@ module.exports.createOrganization = function(adminUser, orgId='avengers'){
 
   // Save user object to the database
   newOrg.save((saveErr) => {
-    if (saveErr!=null){
+    if (saveErr != null) {
     }
   });
-
 };
