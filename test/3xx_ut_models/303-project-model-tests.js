@@ -190,18 +190,18 @@ function removePermissionProject(done) {
   .then(() => Org.findOne({ id: testData.orgs[0].id }))
   .then((foundOrg) => {
     // Verify org permissions is empty
-    chai.expect(foundOrg.permissions.write).to.be.empty;
-    chai.expect(foundOrg.permissions.read).to.be.empty;
-    chai.expect(foundOrg.permissions.admin).to.be.empty;
+    chai.expect(foundOrg.permissions.write.length).to.equal(0);
+    chai.expect(foundOrg.permissions.read.length).to.equal(0);
+    chai.expect(foundOrg.permissions.admin.length).to.equal(0);
   })
 
   // Find the project user had permissions on
   .then(() => Project.findOne({ id: testData.projects[0].id }))
   .then((proj) => {
     // Verify project permissions is empty
-    chai.expect(proj.permissions.write).to.be.empty;
-    chai.expect(proj.permissions.read).to.be.empty;
-    chai.expect(proj.permissions.admin).to.be.empty;
+    chai.expect(proj.permissions.write.length).to.equal(0);
+    chai.expect(proj.permissions.read.length).to.equal(0);
+    chai.expect(proj.permissions.admin.length).to.equal(0);
     done();
   })
   .catch((error) => {
