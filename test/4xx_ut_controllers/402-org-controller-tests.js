@@ -113,29 +113,21 @@ describe(M.getModuleName(module.filename), () => {
     .then((delUser2) => {
       chai.expect(delUser2).to.equal(testData.users[5].username);
       // Find admin user
-      User.findOne({
-        username: M.config.test.username
-      }, (error, foundUser) => {
-        // Expect no error
-        chai.expect(error).to.equal(null);
-
-        // Remove admin user
-        foundUser.remove((error2) => {
-          // Expect no error
-          chai.expect(error2).to.equal(null);
-
-          // Disconnect from the database
-          db.disconnect();
-          done();
-        });
-      });
+      return User.findOne({ username: M.config.test.username });
     })
-    .catch((error) => {
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
-
+    // Remove admin user
+    .then((foundUser) => foundUser.remove())
+    .then(() => {
       // Disconnect from the database
       db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      // Disconnect from the database
+      db.disconnect();
+
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
@@ -458,14 +450,12 @@ function softDeleteProjectAndOrg(done) {
     chai.expect(retOrg.deleted).to.equal(true);
 
     // Find project
-    Project.findOne({ id: testData.projects[4].id })
-    .exec((findProjectErr, foundProj) => {
-      // Expect no error
-      chai.expect(findProjectErr).to.equal(null);
-      // Expect found project's deleted parameter to be true
-      chai.expect(foundProj.deleted).to.equal(true);
-      done();
-    });
+    return Project.findOne({ id: testData.projects[4].id });
+  })
+  .then((foundProj) => {
+    // Expect found project's deleted parameter to be true
+    chai.expect(foundProj.deleted).to.equal(true);
+    done();
   })
   .catch((error) => {
     // Expect no error
@@ -493,14 +483,17 @@ function hardDeleteProjectAndOrg(done) {
     // Expected error thrown: 'Not Found'
     chai.expect(error.message).to.equal('Not Found');
     // Find deleted project
-    Project.findOne({ id: testData.projects[4].id })
-    .exec((error2, proj) => {
-      // Expect no error
-      chai.expect(error2).to.equal(null);
-      // Expect there to be no projects found
-      chai.expect(proj).to.equal(null);
-      done();
-    });
+    return Project.findOne({ id: testData.projects[4].id });
+  })
+  .then((proj) => {
+    // Expect there to be no projects found
+    chai.expect(proj).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 

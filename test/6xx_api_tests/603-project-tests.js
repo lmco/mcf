@@ -129,18 +129,19 @@ describe(M.getModuleName(module.filename), () => {
       // Find the admin user
       return User.findOne({ username: M.config.test.username });
     })
+    // Remove admin user
     .then((foundUser) => foundUser.remove())
     .then(() => {
       // Disconnect from database
       db.disconnect();
       done();
     })
-    .catch((err) => {
-      // Parse body of error
-      const error = JSON.parse(err.message);
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
+    .catch((error) => {
+      // Disconnect from database
       db.disconnect();
+
+      // Expect no error
+      chai.expect(error).to.equal(null);
       done();
     });
   });

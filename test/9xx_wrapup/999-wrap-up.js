@@ -59,20 +59,17 @@ function cleanDB(done) {
   // TODO: Should not run if production MBX-401
   // TODO: Allow to run using --force MBX-401
   // Remove users
-  User.remove({}).exec()
+  User.remove({})
 
   // Remove all orgs except for the 'default' org.
-  .then(() => Organization.remove({
-    name: { $ne: 'default' } }).exec())
-
+  .then(() => Organization.remove({ name: { $ne: 'default' } }))
   // Remove projects
-  .then(() => Project.remove({}).exec())
-
+  .then(() => Project.remove({}))
   // Remove elements
-  .then(() => Element.Element.remove({}).exec())
+  .then(() => Element.Element.remove({}))
   .then(() => done())
   .catch(error => {
-    // Expect no errors
+    // Expect no error
     chai.expect(error).to.equal(null);
     done();
   });

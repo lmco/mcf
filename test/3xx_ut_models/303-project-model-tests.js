@@ -83,10 +83,10 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      db.disconnect();
+
       // Expect no error
       chai.expect(error).to.equal(null);
-
-      db.disconnect();
       done();
     });
   });

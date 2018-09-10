@@ -65,11 +65,11 @@ describe(M.getModuleName(module.filename), function() {
  * collections.
  */
 function cleanDB(done) {
-  User.remove({}).exec()  // Remove users
+  User.remove({}) // Remove users
   // Remove all orgs except for the 'default' org.
-  .then(() => Organization.remove({ name: { $ne: 'default' } }).exec())  // Remove orgs
-  .then(() => Project.remove({}).exec())  // Remove projects
-  .then(() => Element.Element.remove({}).exec())  // Remove elements
+  .then(() => Organization.remove({ name: { $ne: 'default' } }))  // Remove orgs
+  .then(() => Project.remove({}))  // Remove projects
+  .then(() => Element.Element.remove({}))  // Remove elements
   .then(() => done())
   .catch(error => {
     chai.expect(error).to.equal(null);
@@ -102,18 +102,17 @@ function createDefaultOrg(done) {
       .then((users) => {
         const newList = [];
 
-        // Add all existing users to the read list
+        // Add all existing users to the read and write list
         Object.keys(users).forEach((user) => {
           newList.push(users[user]._id);
         });
         org.permissions.read = newList;
+        org.permissions.write = newList;
 
         // Save the updated org
-        org.save((saveOrgErr) => {
-          chai.expect(saveOrgErr).to.equal(null);
-          done();
-        });
+        return org.save();
       })
+      .then(() => done())
       .catch((err2) => {
         chai.expect(err2).to.equal(null);
         done();
