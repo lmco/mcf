@@ -133,19 +133,15 @@ function permissionProject(done) {
   const user = new User(testData.users[0]);
   // Save user object to the database
   user.save()
-  .then((savedUser) => {
-    // Find and update org previously created in before function
-    return Org.findOneAndUpdate({
-      id: testData.orgs[0].id
-    },
+  // Find and update org previously created in before function
+  .then((savedUser) => Org.findOneAndUpdate({ id: testData.orgs[0].id },
     {
       permissions: {
         read: savedUser._id,
         write: savedUser._id,
         admin: savedUser._id
       }
-    });
-  })
+    }))
   .then(() => Org.findOne({ id: testData.orgs[0].id }))
   .then((updatedOrg) => {
     // Verify permissions have been set in updated org
@@ -189,7 +185,7 @@ function removePermissionProject(done) {
   // Find the previously created user from permissionProject()
   User.findOne({ username: testData.users[0].username })
   // Hard deleted the user
-  .then((user) => { return user.remove(); })
+  .then((user) => user.remove())
   // Find the org user had permissions on
   .then(() => Org.findOne({ id: testData.orgs[0].id }))
   .then((foundOrg) => {
