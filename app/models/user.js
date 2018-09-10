@@ -24,6 +24,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const errors = M.require('lib.errors');
 const Organization = M.require('models.organization');
+const Project = M.require('models.project');
 
 // Load MBEE modules
 const validators = M.require('lib.validators');
@@ -382,19 +383,49 @@ UserSchema.pre('save', function(next) {
  * Run our pre-defined setters before delete.
  */
 UserSchema.pre('remove', function(next) {
-  // Remove the user from them default org
-  // Using org model since we don't have a requesting user.
-  Organization.findOne({ id: 'default' })
-  .exec((err, org) => {
-    org.permissions.read.splice(org.permissions.read.indexOf(this._id.toString()), 1);
-    org.permissions.write.splice(org.permissions.write.indexOf(this._id.toString()), 1);
-    org.save((saveErr) => {
-      if (saveErr) {
-        // If error occurs, return it
-        throw new errors.CustomError('Failed to remove user from the default org.');
-      }
-      next();
-    });
+  // Find the organization the user has permissions on
+  Organization.find({ 'permissions.read': this._id, deleted: false })
+  .exec((orgFindErr, orgs) => {
+    // Loop through organizations the user has permissions on
+    for (let i = 0; i < orgs.length; i++) {
+      Project.find({ org: orgs[i]._id, deleted: false })
+      .exec((projectFindErr, projs) => {
+        // Loop through projects the user has permissions on
+        for (let j = 0; j < projs.length; j++) {
+          // Remove permissions on each project
+          projs[j].permissions.read
+          .splice(projs[j].permissions.read.indexOf(this._id.toString()), 1);
+
+          projs[j].permissions.write
+          .splice(projs[j].permissions.write.indexOf(this._id.toString()), 1);
+
+          projs[j].permissions.admin
+          .splice(projs[j].permissions.admin.indexOf(this._id.toString()), 1);
+
+          // Save the updated project
+          projs[j].save((saveProjsErr) => {
+            if (saveProjsErr) {
+              // Throw error if deleting permission on project fail
+              throw new errors.CustomError(`Failed to remove user from project ${projs[j].name}.`);
+            }
+          });
+        }
+      });
+      // Remove permissions on each org
+      orgs[i].permissions.read.splice(orgs[i].permissions.read.indexOf(this._id.toString()), 1);
+      orgs[i].permissions.write.splice(orgs[i].permissions.write.indexOf(this._id.toString()), 1);
+      orgs[i].permissions.admin.splice(orgs[i].permissions.admin.indexOf(this._id.toString()), 1);
+
+      // Save the updated org
+      orgs[i].save((saveOrgsErr) => {
+        if (saveOrgsErr) {
+          // Throw error if deleting permissions on org fail
+          throw new errors.CustomError(`Failed to remove user from org ${orgs[i].name}.`);
+        }
+
+        next();
+      });
+    }
   });
 });
 

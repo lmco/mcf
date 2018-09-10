@@ -26,6 +26,7 @@ const chai = require('chai');
 const path = require('path');
 
 // Load MBEE modules
+const User = M.require('models.user');
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
 const db = M.require('lib/db');
@@ -90,9 +91,12 @@ describe(M.getModuleName(module.filename), () => {
       done();
     });
   });
+  // creates a user adds them to the org and then deletes them to check if it worked.
 
   /* Execute the tests */
   it('should create a project', createProject);
+  it('should create a user and give permissions on existing project', permissionProject);
+  it('should remove a user and their permissions from project', removePermissionProject);
   it('should find a project', findProject);
   it('should update a project', updateProject);
   it('should delete a project', deleteProject);
@@ -114,6 +118,93 @@ function createProject(done) {
   });
   // Save project model object to database
   newProject.save((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates a user and gives that user permissions on the existing
+ * org and project.
+ */
+function permissionProject(done) {
+  // Create a new User object
+  const user = new User(testData.users[0]);
+  // Save user object to the database
+  user.save()
+  // Find and update org previously created in before function
+  .then((savedUser) => Org.findOneAndUpdate({ id: testData.orgs[0].id },
+    {
+      permissions: {
+        read: savedUser._id,
+        write: savedUser._id,
+        admin: savedUser._id
+      }
+    }))
+  .then(() => Org.findOne({ id: testData.orgs[0].id }))
+  .then((updatedOrg) => {
+    // Verify permissions have been set in updated org
+    chai.expect(updatedOrg.permissions.write[0].toString()).to.equal(user._id.toString());
+    chai.expect(updatedOrg.permissions.read[0].toString()).to.equal(user._id.toString());
+    chai.expect(updatedOrg.permissions.admin[0].toString()).to.equal(user._id.toString());
+
+    // Find and update project previously created in createProject test
+    return Project.findOneAndUpdate({
+      id: testData.projects[0].id
+    },
+    {
+      permissions: {
+        read: user._id,
+        write: user._id,
+        admin: user._id
+      }
+    });
+  })
+  // Find previously updated project
+  .then(() => Project.findOne({ id: testData.projects[0].id }))
+  .then((proj) => {
+    // Verify permissions have been set in updated project
+    chai.expect(proj.permissions.write[0].toString()).to.equal(user._id.toString());
+    chai.expect(proj.permissions.read[0].toString()).to.equal(user._id.toString());
+    chai.expect(proj.permissions.admin[0].toString()).to.equal(user._id.toString());
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies removing a user, removes them from the project and
+ * org in which the user had permissions on.
+ */
+function removePermissionProject(done) {
+  // Find the previously created user from permissionProject()
+  User.findOne({ username: testData.users[0].username })
+  // Hard deleted the user
+  .then((user) => user.remove())
+  // Find the org user had permissions on
+  .then(() => Org.findOne({ id: testData.orgs[0].id }))
+  .then((foundOrg) => {
+    // Verify org permissions is empty
+    chai.expect(foundOrg.permissions.write.length).to.equal(0);
+    chai.expect(foundOrg.permissions.read.length).to.equal(0);
+    chai.expect(foundOrg.permissions.admin.length).to.equal(0);
+  })
+
+  // Find the project user had permissions on
+  .then(() => Project.findOne({ id: testData.projects[0].id }))
+  .then((proj) => {
+    // Verify project permissions is empty
+    chai.expect(proj.permissions.write.length).to.equal(0);
+    chai.expect(proj.permissions.read.length).to.equal(0);
+    chai.expect(proj.permissions.admin.length).to.equal(0);
+    done();
+  })
+  .catch((error) => {
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
