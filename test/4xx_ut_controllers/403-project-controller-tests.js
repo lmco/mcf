@@ -127,22 +127,21 @@ describe(M.getModuleName(module.filename), () => {
       const userTwo = 'pepperpotts';
       return UserController.removeUser(adminUser, userTwo);
     })
-    .then((delUser2) => {
-      chai.expect(delUser2).to.equal('pepperpotts');
-      User.findOne({
-        username: M.config.test.username
-      }, (error, user) => {
-        chai.expect(error).to.equal(null);
-        user.remove((error2) => {
-          chai.expect(error2).to.equal(null);
-          db.disconnect();
-          done();
-        });
-      });
+    // Find the admin user
+    .then(() => User.findOne({ username: M.config.test.username }))
+    // Remove the admin user
+    .then((user) => user.remove())
+    .then(() => {
+      // Disconnect from database
+      db.disconnect();
+      done();
     })
     .catch((error) => {
-      chai.expect(error.message).to.equal(null);
+      // Disconnect from database
       db.disconnect();
+
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
@@ -217,7 +216,7 @@ function createProject(done) {
 function rejectImmutableField(done) {
   // Update project
   ProjController.updateProject(adminUser, org.id, 'ironman', { id: 'shouldnotchange' })
-  .then((proj) => {
+  .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
@@ -237,7 +236,7 @@ function rejectImmutableField(done) {
 function updateTypeError(done) {
   // Update project
   ProjController.updateProject(adminUser, org.id, 'ironman', { name: [] })
-  .then((proj) => {
+  .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
@@ -642,7 +641,7 @@ function rejectNonAdminProjectUpdate(done) {
 }
 
 /**
- * @decription Verifies correct permissions found on project.
+ * @description Verifies correct permissions found on project.
  */
 function findPerm(done) {
   // Find permissions
@@ -665,8 +664,7 @@ function findPerm(done) {
  * @description Admin user sets then verifies non-admin has write/read
  * permissions on project.
  */
-// TODO: If keeping function, remove the eslint-disable-line below
-function setPerm(done) { // eslint-disable-line no-unused-vars
+function setPerm(done) {
   // Admin sets permissions for non-admin
   ProjController.setPermissions(adminUser, 'starkhq', project.id.toString(), nonAdminUser, 'write')
   .then(() => ProjController.findProject(adminUser, 'starkhq', project.id.toString()))
@@ -735,12 +733,17 @@ function deleteProject(done) {
 
     // Check if elements still exist
     // Note: Elements are deleted with projects
-    Element.Element.findOne({ id: '0000' })
-    .exec((findElementError, element) => {
-      // Expect no element
-      chai.expect(element).to.equal(null);
-      done();
-    });
+    return Element.Element.findOne({ id: '0000' });
+  })
+  .then((element) => {
+    // Expect no element
+    chai.expect(element).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 

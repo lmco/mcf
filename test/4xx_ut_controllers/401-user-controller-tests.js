@@ -88,28 +88,20 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Find the admin user
-    User.findOne({
-      username: M.config.test.username
-    }, (error, user) => {
-      // Expect no error
-      chai.expect(error).to.equal(null);
-
-      // Delete admin user
-      user.remove((error2) => {
-        // Expect no error
-        chai.expect(error2).to.equal(null);
-
-        // Disconnect from the database
-        db.disconnect();
-        done();
-      });
-    })
-    .catch((error) => {
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
-
+    User.findOne({ username: M.config.test.username })
+    // Delete admin user
+    .then((user) => user.remove())
+    .then(() => {
       // Disconnect from the database
       db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      // Disconnect from the database
+      db.disconnect();
+
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });

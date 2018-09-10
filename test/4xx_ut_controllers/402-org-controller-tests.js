@@ -116,29 +116,21 @@ describe(M.getModuleName(module.filename), () => {
     .then((delUser2) => {
       chai.expect(delUser2).to.equal('groot');
       // Find admin user
-      User.findOne({
-        username: M.config.test.username
-      }, (error, foundUser) => {
-        // Expect no error
-        chai.expect(error).to.equal(null);
-
-        // Remove admin user
-        foundUser.remove((error2) => {
-          // Expect no error
-          chai.expect(error2).to.equal(null);
-
-          // Disconnect from the database
-          db.disconnect();
-          done();
-        });
-      });
+      return User.findOne({ username: M.config.test.username });
     })
-    .catch((error) => {
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
-
+    // Remove admin user
+    .then((foundUser) => foundUser.remove())
+    .then(() => {
       // Disconnect from the database
       db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      // Disconnect from the database
+      db.disconnect();
+
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
@@ -267,7 +259,7 @@ function findExistingOrg(done) {
 function updateOrgFieldErr(done) {
   // Update organization
   OrgController.updateOrg(adminUser, 'boombox', { permissions: 'shouldNotChange' })
-  .then((retOrg) => {
+  .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
@@ -287,7 +279,7 @@ function updateOrgFieldErr(done) {
 function updateOrgTypeErr(done) {
   // Update organization
   OrgController.updateOrg(adminUser, 'boombox', { name: [] })
-  .then((retOrg) => {
+  .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
@@ -482,14 +474,12 @@ function softDeleteProjectAndOrg(done) {
     chai.expect(retOrg.deleted).to.equal(true);
 
     // Find project
-    Project.findOne({ id: 'godslayer' })
-    .exec((findProjectErr, foundProj) => {
-      // Expect no error
-      chai.expect(findProjectErr).to.equal(null);
-      // Expect found project's deleted parameter to be true
-      chai.expect(foundProj.deleted).to.equal(true);
-      done();
-    });
+    return Project.findOne({ id: 'godslayer' });
+  })
+  .then((foundProj) => {
+    // Expect found project's deleted parameter to be true
+    chai.expect(foundProj.deleted).to.equal(true);
+    done();
   })
   .catch((error) => {
     // Expect no error
@@ -518,14 +508,17 @@ function hardDeleteProjectAndOrg(done) {
     chai.expect(error.message).to.equal('Not Found');
 
     // Find deleted project
-    Project.findOne({ id: 'godslayer' })
-    .exec((error2, proj) => {
-      // Expect no error
-      chai.expect(error2).to.equal(null);
-      // Expect there to be no projects found
-      chai.expect(proj).to.equal(null);
-      done();
-    });
+    return Project.findOne({ id: 'godslayer' });
+  })
+  .then((proj) => {
+    // Expect there to be no projects found
+    chai.expect(proj).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 

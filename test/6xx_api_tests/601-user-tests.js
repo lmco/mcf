@@ -86,22 +86,22 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests. Delete user.
    */
   after((done) => {
-    // Find requesting user
-    User.findOne({
-      username: M.config.test.username
-    }, (err, foundUser) => {
+    // Find user
+    User.findOne({ username: M.config.test.username })
+    // Remove user
+    .then((foundUser) => foundUser.remove())
+    .then(() => {
+      // Disconnect from database
+      db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      // Disconnect from database
+      db.disconnect();
+
       // Expect no error
-      chai.expect(err).to.equal(null);
-
-      // Remove requestin user
-      foundUser.remove((err2) => {
-        // Expect no error
-        chai.expect(err2).to.equal(null);
-
-        // Disconnect from the database
-        db.disconnect();
-        done();
-      });
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
