@@ -127,7 +127,9 @@ function createOrg(done) {
     }
   });
   // Save the Organization model object to the database
-  org.save((error) => {
+  org.save()
+  .then(() => done())
+  .catch((error) => {
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

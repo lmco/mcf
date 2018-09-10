@@ -206,6 +206,7 @@ function createBlock(done) {
  * @description Creates a relationship between the elements in the project's root package
  */
 function createRelationship(done) {
+  // Set function-global variable
   let pkg;
 
   // Start by grabbing the root package

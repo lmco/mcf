@@ -109,10 +109,7 @@ function getUser(done) {
  */
 function verifyValidPassword(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({
-    username: testData.users[0].username,
-    deletedOn: null
-  })
+  User.findOne({ username: testData.users[0].username, deletedOn: null })
   // Verify the user's password
   .then((user) => user.verifyPassword(testData.users[0].password))
   .then((result) => {
