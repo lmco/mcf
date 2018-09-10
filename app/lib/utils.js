@@ -298,3 +298,30 @@ module.exports.checkAccess = function(user, object, permission) {
   const permissions = this.getPermissionStatus(user, object);
   return permissions.includes(permission);
 };
+
+/**
+ * @description Title-cases a string.
+ *
+ * @param {String} word  The word to be title-cased
+ */
+module.exports.toTitleCase = function(word) {
+  // Check if word NOT string or contains whitespace
+  if (typeof word !== 'string' || RegExp(/\s/).test(word)) {
+    // Cannot be title-cased, return word
+    return word;
+  }
+
+  // Define title-cased string
+  let titleCasedString;
+
+  // Upper-Case the first letter
+  titleCasedString = word[0].toUpperCase();
+
+  // For remaining characters in word
+  for (let i = 1; i < word.length; i++) {
+    // Lower-case ith character, append to titleCasedString
+    titleCasedString += word[i].toLowerCase();
+  }
+
+  return titleCasedString;
+};

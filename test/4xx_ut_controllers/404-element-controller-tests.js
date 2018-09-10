@@ -227,7 +227,7 @@ function createChildElement(done) {
         id: org.id
       }
     },
-    type: 'Block',
+    type: 'block',
     parent: 'elem0'
   };
 
@@ -269,7 +269,7 @@ function rejectElementInvalidParentType(done) {
         id: org.id
       }
     },
-    type: 'Block',
+    type: 'BLOCK',
     parent: 'elem1'
   };
 
