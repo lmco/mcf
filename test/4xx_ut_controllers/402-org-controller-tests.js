@@ -113,9 +113,9 @@ describe(M.getModuleName(module.filename), () => {
     .then((delUser2) => {
       chai.expect(delUser2).to.equal(testData.users[5].username);
       // Find admin user
-      return User.findOne({username: M.config.test.username})
+      return User.findOne({ username: M.config.test.username });
     })
-      // Remove admin user
+    // Remove admin user
     .then((foundUser) => foundUser.remove())
     .then(() => {
       // Disconnect from the database
