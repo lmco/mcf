@@ -9,6 +9,33 @@
       "email": "tony.stark@starkindustries.com",
       "provider": "local",
       "admin": false
+    },
+    {
+      "username": "blackpanther",
+      "password": "Forwakanda123",
+      "fname": "Tchalla",
+      "lname": "Panther",
+      "custom": {
+        "location": "Wakanda"
+      }
+    },
+    {
+      "username": "njobu",
+      "password": "fatheroferik",
+      "fname": "NJobi",
+      "lname": "Panther Dad"
+    },
+    {
+      "username": "",
+      "password": "iamnotblackpanther",
+      "fname": "Not",
+      "lname": "Black Panther"
+    },
+    {
+      "username": "blackpanther",
+      "password": "Nottherealone123",
+      "fname": "Tchalla",
+      "lname": "Panther"
     }
   ],
 
@@ -79,5 +106,21 @@
       "type": "Relationship",
       "id": "0003",
       "name": "Time looping"
+    }],
+
+  "invalidNames": [
+    {
+      "lname": "KLAW@#$"
+    },
+    {
+      "lname": "Faker"
+    }],
+
+  "invalidUsername": [
+    {
+      "username": "goldpanther"
+    },
+    {
+      "username": "nopanther"
     }]
 }
