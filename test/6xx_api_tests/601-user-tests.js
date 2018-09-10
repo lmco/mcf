@@ -51,37 +51,16 @@ describe(M.getModuleName(module.filename), () => {
    * non-admin user and elevate to admin user.
    */
   before((done) => {
-    // Connect to the database
-    db.connect();
+  // Connect to the database
+  db.connect();
 
-    testUtils.createNonadminUser();
-    testUtils.createAdminUser();
-    // Creating a Requesting Admin
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
-
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-
-    // Authenticate User
-    // Note: non-admin user is created during authenticate if NOT exist.(ldap only)
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      const ldapuser = reqObj.user;
-      // Expect no error
-      chai.expect(err).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-
-      // Find the user and update admin status
-      User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
-          // Expect no error
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-          done();
-        });
+  // Create test admin
+  testUtils.createAdminUser()
+    .then((user) => {
+      done();
+    })
+    .catch((error) => {
+      done();
     });
   });
 
@@ -89,28 +68,19 @@ describe(M.getModuleName(module.filename), () => {
    * After: run after all tests. Delete user.
    */
   after((done) => {
-    // Find requesting user
-    User.findOne({
-      username: M.config.test.username
-    }, (err, foundUser) => {
-      // Expect no error
-      chai.expect(err).to.equal(null);
-
-      // Remove requestin user
-      foundUser.remove((err2) => {
-        // Expect no error
-        chai.expect(err2).to.equal(null);
-
-        // Disconnect from the database
+    testUtils.deleteAdminUser()
+    .then(() => {
         db.disconnect();
         done();
-      });
+      })
+    .catch((error) => {
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
   /* Execute tests */
   it('should get a username', getUser);
-  /*
   it('should get a username', getUser);
   it('should create a user', postUser);
   it('should find out the user with the /whoami api tag', whoAmI);
@@ -121,7 +91,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should update a user', patchUser);
   it('should reject an update a user that does not exist', rejectPatchNonexisting);
   it('should reject deleting a user that doesnt exist', rejectDeleteNonexisting);
-  it('should delete a user', deleteUser); */
+  it('should delete a user', deleteUser);
+
 });
 
 /* --------------------( Tests )-------------------- */
@@ -132,7 +103,7 @@ describe(M.getModuleName(module.filename), () => {
 function getUser(done) {
   // Make a user API GET request
   request({
-    url: `${test.url}/api/users/${M.config.test.username}`,
+    url: `${test.url}/api/users/${M.config.test.adminUsername}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -144,7 +115,7 @@ function getUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct username
-    chai.expect(json.username).to.equal(M.config.test.username);
+    chai.expect(json.username).to.equal(M.config.test.adminUsername);
     done();
   });
 }
@@ -201,7 +172,7 @@ function whoAmI(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal(M.config.test.username);
+    chai.expect(json.username).to.equal(M.config.test.adminUsername);
     done();
   });
 }
@@ -289,7 +260,7 @@ function getUsers(done) {
     // Verifies status 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verifies users exist
-    chai.expect(body).to.include(M.config.test.username);
+    chai.expect(body).to.include(M.config.test.adminUsername);
     chai.expect(body).to.include('deadpool');
     done();
   });
@@ -444,7 +415,7 @@ function deleteUser(done) {
  * @description Helper function for setting the request header.
  */
 function getHeaders() {
-  const formattedCreds = `${M.config.test.username}:${M.config.test.password}`;
+  const formattedCreds = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

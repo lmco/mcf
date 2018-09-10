@@ -50,18 +50,18 @@ const db = M.require('lib.db');
 
 
 /**
- * @description Helper function to create non-admin user for
+ * @description Helper function to create test non-admin user for
  * MBEE tests.
  */
-module.exports.createNonadminUser = function(username = 'bob') {
+module.exports.createNonadminUser = function() {
   console.log('test-utils.js');
   // Create a new User object
   const user = new User({
-    username: username,
-    password: 'password',
-    fname: 'bobFirstname',
-    preferredName: 'The Flash',
-    lname: 'allen',
+    username: 'nonadminUser',
+    password: 'password123',
+    fname: 'userFirstname',
+    preferredName: 'nonadmin user',
+    lname: 'userLastname',
     admin: false
   });
 
@@ -74,27 +74,54 @@ module.exports.createNonadminUser = function(username = 'bob') {
 };
 
 /**
- * @description Helper function to create admin user for
+ * @description Helper function to create test admin user for
  * MBEE tests.
  */
-module.exports.createAdminUser = function(username = 'admin') {
-  // Create a new User object
-  const user = new User({
-    username: username,
-    password: 'admin',
-    fname: 'adminFirstname',
-    preferredName: 'AdminPreferredName',
-    lname: 'adminLastname',
-    admin: true
-  });
+module.exports.createAdminUser = function() {
+  return new Promise((resolve, reject) => {
+    // Check any admin exist
+    User.findOne({ username: M.config.test.adminUsername })
+    .then((foundUser) => {
+      // Check user found
+      if (foundUser !== null) {
+        // User found, return it
+        return resolve(foundUser);
+      }
 
-  // Save user object to the database
-  user.save((error) => {
-    if (error != null) {
-      throw error;
-    }
+      // User not found, create new user
+      const user = new User({
+        username: M.config.test.adminUsername,
+        password: M.config.test.adminPassword,
+        provider: 'local',
+        admin: true
+      });
+
+      // Save user object to the database
+      return user.save();
+    })
+    .then((user) => resolve(user))
+    .catch((error) => reject(error));
+
   });
 };
+
+/**
+ * @description Helper function to delete test admin user for
+ * MBEE tests.
+ */
+module.exports.deleteAdminUser = function() {
+  return new Promise((resolve, reject) => {
+    // Find admin user
+    User.findOne({username: M.config.test.adminUsername})
+    .then((foundUser) => foundUser.remove())
+    .then(() => resolve())
+    .catch((error) => reject(error));
+  });
+}
+
+
+
+
 
 /**
  * @description Helper function to create organization for

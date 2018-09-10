@@ -90,7 +90,7 @@ function start(args) {
     // Check user found
     if (user === null) {
       // No user found, create local admin
-      const user = new User({
+      const adminUser = new User({
         username: 'admin',
         password: 'Admin12345',
         provider: 'local',
@@ -98,7 +98,7 @@ function start(args) {
       });
 
       // Save user object to the database
-      user.save((userError) => {
+      adminUser.save((userError) => {
         if (userError != null) {
           throw userError;
         }
