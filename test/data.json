@@ -36,6 +36,13 @@
       "password": "Nottherealone123",
       "fname": "Tchalla",
       "lname": "Panther"
+    },
+    {
+      "username": "groot",
+      "password": "Iamgroot123",
+      "fname": "Groot",
+      "lname": "Tree",
+      "admin": false
     }
   ],
 
@@ -47,7 +54,44 @@
     {
         "id": "stark-industries",
         "name": "Stark Industries"
-    }],
+    },
+    {
+      "id": "boombox",
+      "name": "Star Lords Boombox",
+      "custom": {
+        "leader": "Star Lord"
+      }
+    },
+    {
+      "id": "gaurdians",
+      "name": "Gaurdians of Galaxy",
+      "permissions": {
+        "admin": "[adminUser._id]",
+        "write": "[adminUser._id]",
+        "read": "[adminUser._id]"
+      }
+    },
+    {
+      "id": "boombox",
+      "name": "Stolen boombox",
+      "custom": {
+        "leader": "Groot",
+        "musicType": "I am Groot"
+      }
+    },
+    {
+      "id": "boombox",
+      "name": "Back to Star Lord",
+      "custom": {
+        "leader": "Groot",
+        "musicType": "I am Groot"
+      }
+    },
+    {
+      "id": "boombox",
+      "name": "Star Lord Walkman"
+    }
+  ],
 
   "projects": [
     {
@@ -65,6 +109,10 @@
     {
       "id": "timeloop",
       "name": "Time Gem"
+    },
+    {
+      "id": "godslayer",
+      "name": "God Slayer"
     }
   ],
 
@@ -114,7 +162,17 @@
     },
     {
       "lname": "Faker"
-    }],
+    },
+    {
+      "name": []
+    },
+    {
+      "name": "betterreject"
+    },
+    {
+      "name": "New Name"
+    }
+  ],
 
   "invalidUsername": [
     {
@@ -122,5 +180,14 @@
     },
     {
       "username": "nopanther"
-    }]
+    }],
+
+  "invalidPermissions": [
+    {
+      "permissions": "shouldNotChange"
+    },
+    {
+      "permissions": "overlord"
+    }
+  ]
 }
