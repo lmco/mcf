@@ -1,34 +1,30 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module models.project
  *
- * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @description
- * The ProjectModel.js file creates a mongoose model to interact with the
- * MongoDB Database in order to find, save, update, and delete projects.
+ * @license LMPI
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ *
+ * @description Defines the project MongoDB database model.
+ *
  */
 
-// Load node modules
+// Load Node modules
 const mongoose = require('mongoose');
 
 // Load MBEE modules
 const validators = M.require('lib.validators');
 
-/******************************************************************************
- * Project Model
- ******************************************************************************/
-
+/* --------------------( Project Model )-------------------- */
 /**
  * @class Project
  *
@@ -36,12 +32,13 @@ const validators = M.require('lib.validators');
  */
 const ProjectSchema = new mongoose.Schema({
   /**
-    * @memberOf  Project
-    * @property  id
-    * @type {String}
-    *
-    * @description The 'id' holds a non-unique project id.
-  */
+   * @description The 'id' contains a non-unique project id.
+   *
+   * @property  id
+   * @type {String}
+   * @memberOf  Project
+   *
+   */
   id: {
     type: String,
     required: true,
@@ -51,12 +48,13 @@ const ProjectSchema = new mongoose.Schema({
   },
 
   /**
-    * @memberOf  Project
-    * @property  org
-    * @type {Organization}
-    *
-    * @description The 'org' holds a reference to the organization which it belongs t0.
-    */
+   * @description 'org' contains a reference to a project's organization.
+   *
+   * @property org
+   * @type {Organization}
+   * @memberOf  Project
+   *
+   */
   org: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
@@ -64,26 +62,27 @@ const ProjectSchema = new mongoose.Schema({
   },
 
   /**
-    * @memberOf  Project
-    * @property  uid
-    * @type {String}
-    *
-    * @description The 'uid' holds a unique project id which is the concatonation of the projects
-    * org id and it's own id. example uid = 'starkIndustries:arcReactor'.
-    */
+   * @description 'uid' contains a unique project id namespaced using a project's
+   * organization.
+   *
+   * @property  uid
+   * @type {String}
+   * @memberOf  Project
+   *
+   */
   uid: {
     type: String,
     unique: true
   },
 
   /**
-    * @memberOf  Project
-    * @property  name
-    * @type {String}
-    *
-    * @description The 'name' holds a project name to be displayed for an
-    * project.
-    */
+   * @description 'name' contains a non-unique project name.
+   *
+   * @property  name
+   * @type {String}
+   * @memberOf  Project
+   *
+   */
   name: {
     type: String,
     required: true,
@@ -91,13 +90,16 @@ const ProjectSchema = new mongoose.Schema({
   },
 
   /**
-    * @memberOf  Project
-    * @property  permissions
-    *
-    * @description Permissions includes lists of users with certain permission levels
-    * or "roles" within project.
-    */
+   * @description 'permissions' is an object whose keys identify a project's
+   * roles. The key values are an array of references to users who hold those roles.
+   *
+   * @property  permissions
+   * @type {Object}
+   * @memberOf  Project
+   *
+   */
   permissions: {
+    // TODO: MBX-143 Evaluate how this renders in JSDOC and see if we need to alter this
     /**
      * @description Contains the list of users with read access to the project.
      * @type {Array}
@@ -127,25 +129,27 @@ const ProjectSchema = new mongoose.Schema({
   },
 
   /**
-    * @memberOf  Project
-    * @property  deletedOn
-    * @type {Date}
-    *
-    * @description The date the project was soft-deleted on.
-    */
+   * @description 'deletedOn' contains the date a project was soft deleted.
+   *
+   * @property  deletedOn
+   * @type {Date}
+   * @memberOf  Project
+   *
+   */
   deletedOn: {
     type: Date,
     default: null
   },
 
   /**
-    * @memberOf  Project
-    * @property  deleted
-    * @type {Boolean}
-    *
-    * @description A boolean value displaying whether or not the project
-    * has been soft deleted.
-    */
+   * @description 'deleted' contains a boolean value defining if an project
+   * has been soft deleted.
+   *
+   * @property deleted
+   * @type {Boolean}
+   * @memberOf Project
+   *
+   */
   deleted: {
     type: Boolean,
     default: false,
@@ -158,23 +162,26 @@ const ProjectSchema = new mongoose.Schema({
   },
 
   /**
-   * @memberOf  Project
-   * @property  custom
-   * @type {Schema.Types.Mixed}
+   * @description 'custom' contains arbitrary JSON data used to store additional
+   * data.
    *
-   * @description The projects's custom tags. This contains arbitrary key-value pairs of strings
-   * used to represent additional model data.
+   * @property custom
+   * @type {Schema.Types.Mixed}
+   * @memberOf Project
+   *
    */
   custom: {
     type: mongoose.Schema.Types.Mixed
   },
 
   /**
-   * @memberOf  Project
-   * @property  visibility
-   * @type String
+   * @description 'visibility' contains the visibility level of a project defining
+   * its permissions behaviour.
    *
-   * @description The visibility level of the project. Can be internal or private.
+   * @property custom
+   * @type {String}
+   * @memberOf Project
+   *
    */
   visibility: {
     type: String,
@@ -182,42 +189,45 @@ const ProjectSchema = new mongoose.Schema({
   }
 });
 
+/* --------------------( Project Methods )-------------------- */
 /**
- * Returns the project's Public data.
+ * @description Returns a project's public data.
  */
 ProjectSchema.methods.getPublicData = function() {
+  // Map read, write, and admin refrences to only contain user public data
   this.permissions.read = this.permissions.read.map(u => u.getPublicData());
   this.permissions.write = this.permissions.write.map(u => u.getPublicData());
   this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
-
+  // Return the project with only user public data
   return this;
 };
 
 /**
-  * Returns the permission levels in order of inheritance for projects.
-  */
+ * @description Returns supported permission levels
+ */
 ProjectSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
 
 /**
-  * Returns the fields which users are allowed to update on a project.
-  */
+ * @description Returns project fields that can be changed
+ */
 ProjectSchema.methods.getValidUpdateFields = function() {
   return ['name', 'delete', 'deletedOn', 'custom'];
 };
 
 /**
- * Returns a list of valid visibility levels.
+ * @description Returns supported visibility levels
  */
 ProjectSchema.methods.getVisibilityLevels = function() {
   return ['internal', 'private'];
 };
 
-
+/* --------------------( Project Properties )-------------------- */
 // Required for virtual getters
 ProjectSchema.set('toJSON', { virtuals: true });
 ProjectSchema.set('toObject', { virtuals: true });
 
+/* --------------------( Project Schema Export )-------------------- */
 // Export mongoose model as "Project"
 module.exports = mongoose.model('Project', ProjectSchema);

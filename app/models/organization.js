@@ -1,33 +1,31 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module models.organization
+ * Classification: UNCLASSIFIED
+ *
+ * @module lib.auth
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * The OrganizationModel.js file creates a mongoose model to interact with the
- * MongoDB Database in order to find, save, update, and delete organizations.
+ * @description Defines the organization MongoDB database model.
+ *
  */
 
-// Load node modules
+
+// Load Node modules
 const mongoose = require('mongoose');
 
 // Load MBEE modules
 const validators = M.require('lib.validators');
 
-/******************************************************************************
- * Organization Model
- ******************************************************************************/
-
+/* --------------------( Organization Model )-------------------- */
 /**
  * @class Organization
  *
@@ -35,29 +33,29 @@ const validators = M.require('lib.validators');
  */
 const OrganizationSchema = new mongoose.Schema({
   /**
-    * @memberOf Organization
-    * @property id
-    * @type {String}
-    *
-    * @description 'id' holds a unique organization id for reference from the database.
-    */
+   * @description 'id' contains a unique organization id.
+   *
+   * @property id
+   * @type {String}
+   * @memberOf Organization
+   */
   id: {
     type: String,
     required: true,
     index: true,
     unique: true,
     match: RegExp(validators.org.id),
-    maxlength: [36, 'Too many characters in username']
+    maxlength: [64, 'Too many characters in ID']
   },
 
   /**
-    * @memberOf Organization
-    * @property name
-    * @type {String}
-    *
-    * @description The 'name' holds a unique organization name to be displayed for an
-    * organization.
-    */
+   * @description 'name' contains a unique organization name
+   *
+   * @property name
+   * @type {String}
+   * @memberOf Organization
+   *
+   */
   name: {
     type: String,
     required: true,
@@ -66,16 +64,18 @@ const OrganizationSchema = new mongoose.Schema({
   },
 
   /**
-    * @memberOf Organization
-    * @property permissions
-    *
-    *
-    * @description Permissions includes lists of users with certain permission levels
-    * or "roles" within an organization.
-    */
+   * @description 'permissions' is an object whose keys identify an organization's
+   * roles. The key values are an array of references to users who hold those roles.
+   *
+   * @property permissions
+   * @type {Object}
+   * @memberOf Organization
+   *
+   */
   permissions: {
+    // TODO: MBX-143 Evaluate how this renders in JSDOC and see if we need to alter this
     /**
-     * Contains the list of users with read access to the organization.
+     * A list of users with read access to an organization.
      * @type {Array}
      */
     read: [{
@@ -84,7 +84,7 @@ const OrganizationSchema = new mongoose.Schema({
     }],
 
     /**
-     * Contains the list of users with write access to the organization.
+     * A list of users with write access to an organization.
      * @type {Array}
      */
     write: [{
@@ -103,25 +103,27 @@ const OrganizationSchema = new mongoose.Schema({
   },
 
   /**
-    * @memberOf Organization
-    * @property deletedOn
-    * @type {Date}
-    *
-    * @description The date the project was soft-deleted on.
-    */
+   * @description 'deletedOn' contains the date an Organization was soft deleted.
+   *
+   * @property deletedOn
+   * @type {Date}
+   * @memberOf Organization
+   *
+   */
   deletedOn: {
     type: Date,
     default: null
   },
 
   /**
-    * @memberOf Organization
-    * @property deleted
-    * @type {Boolean}
-    *
-    * @description A boolean value displaying whether or not the project
-    * has been soft deleted.
-    */
+   * @description 'deleted' contains a boolean value defining if an organization
+   * has been soft deleted.
+   *
+   * @property deleted
+   * @type {Boolean}
+   * @memberOf Organization
+   *
+   */
   deleted: {
     type: Boolean,
     default: false,
@@ -134,12 +136,13 @@ const OrganizationSchema = new mongoose.Schema({
   },
 
   /**
-   * @memberOf Organization
+   * @description 'custom' contains arbitrary JSON data used to store additional
+   * data.
+   *
    * @property custom
    * @type {Schema.Types.Mixed}
+   * @memberOf Organization
    *
-   * @description The org's custom tags. This contains arbitrary key-value pairs of strings
-   * used to represent additional model data.
    */
   custom: {
     type: mongoose.Schema.Types.Mixed
@@ -147,13 +150,13 @@ const OrganizationSchema = new mongoose.Schema({
 });
 
 /**
-  * @memberOf Organization
-  * @property projects
-  * @type {Project}
-  *
-  * @description The 'project' holds a list of references to projects which belong to
-  * the organzation
-  */
+ * @description 'project' contains a list of references to an organization's projects.
+ *
+ * @property projects
+ * @type {Project}
+ * @memberOf Organization
+ *
+ */
 OrganizationSchema.virtual('projects', {
   ref: 'Project',
   localField: '_id',
@@ -161,34 +164,39 @@ OrganizationSchema.virtual('projects', {
   justOne: false
 });
 
+
+/* --------------------( Organization Methods )-------------------- */
 /**
-  * Returns the orgs's Public data.
-  */
+ * @description Returns an organization's public data.
+ */
 OrganizationSchema.methods.getPublicData = function() {
+  // Map read, write, and admin refrences to only contain user public data
   this.permissions.read = this.permissions.read.map(u => u.getPublicData());
   this.permissions.write = this.permissions.write.map(u => u.getPublicData());
   this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
-
+  // Return the organization with only user public data
   return this;
 };
 
 /**
-  * Returns the permission levels in order of inheritance for an organization.
-  */
+ * @description Returns supported permission levels
+ */
 OrganizationSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
 
 /**
-  * Returns the fields which users are allowed to update on an organization.
-  */
+ * @description Returns  organization fields that can be changed
+ */
 OrganizationSchema.methods.getValidUpdateFields = function() {
   return ['name', 'custom'];
 };
 
-// Required for virtual getters
+/* --------------------( Organization Properties )-------------------- */
+// Required for virtual getters to return JSON object information
 OrganizationSchema.set('toJSON', { virtuals: true });
 OrganizationSchema.set('toObject', { virtuals: true });
 
+/* --------------------( Organization Schema Export )-------------------- */
 // Export mongoose model as "Organization"
 module.exports = mongoose.model('Organization', OrganizationSchema);

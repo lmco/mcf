@@ -1,24 +1,24 @@
-/******************************************************************************
- * Classification: UNCLASSIFIED                                               *
- *                                                                            *
- * Copyright (C) 2018, Lockheed Martin Corporation                            *
- *                                                                            *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
- * It is not approved for public release or redistribution.                   *
- *                                                                            *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
- * control laws. Contact legal and export compliance prior to distribution.   *
- ******************************************************************************/
 /**
- * @module models.element
+ * Classification: UNCLASSIFIED
+ *
+ * @module models.elements
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description
  *
- * <p>This file defines the data model and schema for Elements. Using
+ * <p>Defines the element MongoDB database model. Using
  * <a href="http://mongoosejs.com/docs/discriminators.html">Mongoose discriminators</a>,
- * a variety of 'types' of elements are defined that each inherit the base
+ * different 'types' of elements are defined that each inherit the base
  * schema definition from the more generic 'Element'.</p>
  *
  * <p>The following element types are defined: Block, Relationship, and Package.
@@ -41,7 +41,6 @@
  * be null. All other elements will have a parent that should be a package (
  * either the root package or some other package in the hierarchy).</p>
  *
- * @tutorial  elements
  */
 
 // Load node modules
