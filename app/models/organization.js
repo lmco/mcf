@@ -186,6 +186,43 @@ OrganizationSchema.methods.getValidUpdateFields = function() {
   return ['name', 'custom'];
 };
 
+/**
+ * @description Returns the permissions a user has on the org
+ *
+ * @param {User} user  The user whose permissions are being returned
+ *
+ * @returns {Object} A json object with keys being the permission levels
+ *  and values being booleans
+ */
+OrganizationSchema.methods.getPermissionStatus = function(user) {
+  // Initialize permissions object
+  const permissions = {
+    read: false,
+    write: false,
+    admin: false
+  };
+
+  // If user is a system admin, they have all permissions
+  if (user.admin) {
+    permissions.read = true;
+    permissions.write = true;
+    permissions.admin = true;
+    return permissions;
+  }
+
+  // See if the user has permissions on the organization
+  const read = this.permissions.read.map(u => u._id.toString());
+  const write = this.permissions.write.map(u => u._id.toString());
+  const admin = this.permissions.admin.map(u => u._id.toString());
+
+  // If user exists in any of the list, set the permission to true
+  permissions.read = read.includes(user._id.toString());
+  permissions.write = write.includes(user._id.toString());
+  permissions.admin = admin.includes(user._id.toString());
+
+  return permissions;
+};
+
 // Required for virtual getters
 OrganizationSchema.set('toJSON', { virtuals: true });
 OrganizationSchema.set('toObject', { virtuals: true });
