@@ -139,6 +139,36 @@
       "custom": {
         "builtFor": "Tony"
       }
+    },
+    {
+      "id": "ironman",
+      "name": "Iron Man"
+    },
+    {
+      "id": "ironman",
+      "name": "Iron Man Two"
+    },
+    {
+      "id": "arcreactor",
+      "name": "Arc Reactor",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "iamnoadmin",
+      "name": "dontmakeme",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "ironman",
+      "name": "Tony Stark",
+      "custom": {
+        "builtFor": "Rhodey",
+        "version": 2.0
+      }
     }
   ],
 
@@ -180,7 +210,49 @@
       "type": "Relationship",
       "id": "0003",
       "name": "Time looping"
+    },
+    {
+      "type": "Block",
+      "id": "0000"
     }],
+
+  "invalidProjects": [
+    {
+      "id": "period",
+      "name": "This is just to see if a period works....",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "arcreactor",
+      "name": "Small Arc Reactor",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "",
+      "name": "denyme",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "imfake",
+      "name": "",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "imfake",
+      "name": "starkhq",
+      "org": {
+        "id": ""
+      }
+    }
+  ],
 
   "invalidNames": [
     {
@@ -197,6 +269,9 @@
     },
     {
       "name": "New Name"
+    },
+    {
+      "name": "Baby Arc Reactor"
     }
   ],
 
@@ -211,6 +286,12 @@
   "invalidId": [
     {
       "id": "shouldnotchange"
+    },
+    {
+      "id": "fakeproj"
+    },
+    {
+      "id" : "newironman"
     }
   ],
 
