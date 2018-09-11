@@ -13,6 +13,7 @@
 
 // Load NPM modules
 const chai = require('chai');
+const path = require('path');
 
 // Load MBEE modules
 const UserController = M.require('controllers.user-controller');
@@ -27,6 +28,7 @@ const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
 let nonAdminUser = null;
 let adminUser = null;
 let org = null;
@@ -72,37 +74,23 @@ describe(M.getModuleName(module.filename), () => {
           chai.expect(userUpdate).to.not.equal(null);
 
           // Define non-admin user data
-          const nonAdminUserData = {
-            username: 'pepperpotts',
-            password: 'Gfoftonystark123',
-            fname: 'Pepper',
-            lname: 'Potts',
-            admin: false
-          };
+          const nonAdminUserData = testData.users[6];
           // Admin creates a non admin user
           UserController.createUser(adminUser, nonAdminUserData)
           .then((nonAu) => {
             nonAdminUser = nonAu;
-            chai.expect(nonAu.username).to.equal('pepperpotts');
-            chai.expect(nonAu.fname).to.equal('Pepper');
-            chai.expect(nonAu.lname).to.equal('Potts');
+            chai.expect(nonAu.username).to.equal(testData.users[6].username);
+            chai.expect(nonAu.fname).to.equal(testData.users[6].fname);
+            chai.expect(nonAu.lname).to.equal(testData.users[6].lname);
 
             // Creating organization used in tests
-            const orgData = {
-              id: 'starkhq',
-              name: 'Stark Headquarts',
-              permissions: {
-                admin: [adminUser._id],
-                write: [adminUser._id],
-                read: [adminUser._id]
-              }
-            };
+            const orgData = testData.orgs[7];
             return OrgController.createOrg(adminUser, orgData);
           })
           .then((retOrg) => {
             org = retOrg;
-            chai.expect(retOrg.id).to.equal('starkhq');
-            chai.expect(retOrg.name).to.equal('Stark Headquarts');
+            chai.expect(retOrg.id).to.equal(testData.orgs[7].id);
+            chai.expect(retOrg.name).to.equal(testData.orgs[7].name);
             chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
             chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
             chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
@@ -121,10 +109,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    OrgController.removeOrg(adminUser, 'starkhq', { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[7].id, { soft: false })
     .then(() => {
       // Removing the non-admin user
-      const userTwo = 'pepperpotts';
+      const userTwo = testData.users[6].id;
       return UserController.removeUser(adminUser, userTwo);
     })
     // Find the admin user
@@ -179,27 +167,27 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createProject(done) {
   const projData = {
-    id: 'ironman',
-    name: 'Iron man Suite',
+    id: testData.projects[5].id,
+    name: testData.projects[5].name,
     org: {
-      id: 'starkhq'
+      id: testData.orgs[7].id
     },
     custom: {
-      builtFor: 'Tony'
+      builtFor: testData.projects[7].custom.builtFor
     }
   };
 
   // Create the project via project controller
   ProjController.createProject(adminUser, projData)
-  .then((retProj) => ProjController.findProject(adminUser, 'starkhq', retProj.id))
+  .then((retProj) => ProjController.findProject(adminUser, testData.projects[5].id, retProj.id))
   .then((proj) => {
     // Set the file-global project
     project = proj;
 
     // Verify project was created successfully
-    chai.expect(proj.id).to.equal('ironman');
-    chai.expect(proj.name).to.equal('Iron man Suite');
-    chai.expect(proj.custom.builtFor).to.equal('Tony');
+    chai.expect(proj.id).to.equal(testData.projects[5].id);
+    chai.expect(proj.name).to.equal(testData.projects[5].name);
+    chai.expect(proj.custom.builtFor).to.equal(testData.orgs[7].custom.buildFor);
     done();
   })
   .catch((error) => {
@@ -215,7 +203,7 @@ function createProject(done) {
  */
 function rejectImmutableField(done) {
   // Update project
-  ProjController.updateProject(adminUser, org.id, 'ironman', { id: 'shouldnotchange' })
+  ProjController.updateProject(adminUser, org.id, testData.projects[5].id, testData.incalidId[0])
   .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail

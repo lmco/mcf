@@ -43,6 +43,13 @@
       "fname": "Groot",
       "lname": "Tree",
       "admin": false
+    },
+    {
+      "username": "pepperpotts",
+      "password": "Gfoftonystark123",
+      "fname": "Pepper",
+      "lname": "Potts",
+      "admin": false
     }
   ],
 
@@ -90,6 +97,15 @@
     {
       "id": "boombox",
       "name": "Star Lord Walkman"
+    },
+    {
+      "id": "starkhq",
+      "name": "Stark Headquarts",
+      "permissions": {
+        "admin": "[adminUser._id]",
+        "write": "[adminUser._id]",
+        "read": "[adminUser._id]"
+      }
     }
   ],
 
@@ -113,6 +129,16 @@
     {
       "id": "godslayer",
       "name": "God Slayer"
+    },
+    {
+      "id": "ironman",
+      "name": "Iron man Suite",
+      "org": {
+        "id": "starkhq"
+      },
+      "custom": {
+        "builtFor": "Tony"
+      }
     }
   ],
 
@@ -181,6 +207,12 @@
     {
       "username": "nopanther"
     }],
+
+  "invalidId": [
+    {
+      "id": "shouldnotchange"
+    }
+  ],
 
   "invalidPermissions": [
     {
