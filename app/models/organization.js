@@ -14,13 +14,13 @@
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description Defines the organization MongoDB database model.
+ * @description Defines the organization data model.
  */
 
-// Load Node modules
+// NPM modules
 const mongoose = require('mongoose');
 
-// Load MBEE modules
+// MBEE modules
 const validators = M.require('lib.validators');
 
 /* --------------------( Organization Model )-------------------- */
