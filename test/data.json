@@ -58,6 +58,22 @@
       "fname": "Pepper",
       "lname": "Potts",
       "admin": false
+    },
+    {
+      "username": "deadpool",
+      "password": "Babyhands123",
+      "fname": "Wade",
+      "lname": "Wilson"
+    },
+    {
+      "username": "deadpoolsbff",
+      "password": "Bartender123",
+      "fname": "Weasel",
+      "lname": "Bff"
+    },
+    {
+      "username": "deadpool",
+      "fname": "Mr Wade"
     }
   ],
 
@@ -299,6 +315,15 @@
     }
   ],
 
+  "invalidUsers": [
+    {
+      "username": "!babyLegs",
+      "password": "Deadpool123",
+      "fname": "Baby",
+      "lname": "Legs"
+    }
+  ],
+
   "invalidProjects": [
     {
       "id": "period",
@@ -383,6 +408,9 @@
     },
     {
       "name": "Baby Arc Reactor"
+    },
+    {
+      "fname": "Weapon X"
     }
   ],
 
@@ -392,6 +420,15 @@
     },
     {
       "username": "nopanther"
+    },
+    {
+      "username": "weasel"
+    },
+    {
+      "username": "pool"
+    },
+    {
+      "username": "francis"
     }],
 
   "invalidId": [
