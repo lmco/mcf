@@ -59,6 +59,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
   return new Promise((resolve, reject) => {
     // Define LDAP client handler
     let ldapClient = null;
+    console.log("First")
 
     // Connect to database
     ldapConnect()
@@ -283,7 +284,7 @@ function ldapSync(ldapUserObj) {
       userSave.email = ldapUserObj[ldapConfig.attributes.eMail];
 
       // Save updated user to database
-      userSave.save()
+      UserController.createUser({ admin: true }, userSave)
       // Save successful, resolve user model object
       .then(userSaveUpdate => resolve(userSaveUpdate))
       // Save failed, reject error
@@ -299,8 +300,6 @@ function ldapSync(ldapUserObj) {
       // Initialize userData with LDAP information
       const initData = {
         username: ldapUserObj[ldapConfig.attributes.username],
-        // TODO: MBX-409 decide how to handle passwords in database for LDAP Strategy
-        password: (Math.random() + 1).toString(36).substring(7),
         fname: ldapUserObj[ldapConfig.attributes.firstName],
         preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
         lname: ldapUserObj[ldapConfig.attributes.lastName],
@@ -308,10 +307,7 @@ function ldapSync(ldapUserObj) {
         provider: 'ldap'
       };
 
-      // Create user model object using initData
-      const userSave = new User(initData);
-      // Save user to database
-      userSave.save()
+     UserController.createUser({ admin: true }, initData)
       // Save successful, resolve user model object
       .then(userSaveNew => resolve(userSaveNew))
       // Save failed, reject error
