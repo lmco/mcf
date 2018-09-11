@@ -106,6 +106,10 @@
         "write": "[adminUser._id]",
         "read": "[adminUser._id]"
       }
+    },
+    {
+      "id": "asgard",
+      "name": "Asgard"
     }
   ],
 
@@ -169,6 +173,13 @@
         "builtFor": "Rhodey",
         "version": 2.0
       }
+    },
+    {
+      "id": "thor",
+      "name": "Thor Odinson",
+      "org": {
+        "id": "asgard"
+      }
     }
   ],
 
@@ -214,7 +225,71 @@
     {
       "type": "Block",
       "id": "0000"
-    }],
+    },
+    {
+      "id": "elem0",
+      "name": "Mjolnir",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "Package",
+      "custom": {
+        "location": "Earth",
+        "real": true
+      },
+      "documentation": "This is some documentation."
+    },
+    {
+      "id": "elem1",
+      "name": "Heimdall the Gatekeeper",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "block",
+      "parent": "elem0"
+    },
+    {
+      "id": "elem2",
+      "name": "Loki brother of Thor",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "Block",
+      "parent": "elem0",
+      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
+    },
+    {
+      "id": "rel1",
+      "name": "Hate Relationship",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "Relationship",
+      "source": "elem1",
+      "target": "elem2"
+    },
+    {
+      "id": "elem0",
+      "name": "Thors Hammer",
+      "documentation": "This is some different documentation",
+      "custom": {
+        "real": false,
+        "marvel": false
+      }
+    }
+  ],
 
   "invalidProjects": [
     {
@@ -251,6 +326,34 @@
       "org": {
         "id": ""
       }
+    }
+  ],
+
+  "invalidElements": [
+    {
+      "id": "elem2",
+      "name": "Frigg wife of Odin",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "BLOCK",
+      "parent": "elem1"
+    },
+    {
+      "id": "elem5",
+      "name": "Loki brother of Thor",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "Block",
+      "parent": "elem0",
+      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
     }
   ],
 
