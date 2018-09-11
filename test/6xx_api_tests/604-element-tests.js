@@ -27,16 +27,14 @@ const request = require('request');
 // Load MBEE modules
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
+const testUtils = require('../../test/test-utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 let org = null;
 let proj = null;
-let user = null;
+let adminUser = null;
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
@@ -48,90 +46,75 @@ const test = M.config.test;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * TODO MBX-346
-   * Before: Run before all tests.
-   * Find user and elevate to admin. Create an organization.
+   * Before: Create admin, organization, and project.
    */
   before((done) => {
+    // Connect db
     db.connect();
 
-    // Creating a Requesting Admin
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((user) => {
+      // Set admin global user
+      adminUser = user;
 
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      const ldapuser = reqObj.user;
-      chai.expect(err).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
-          // Setting it equal to global variable
-          user = userUpdate;
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-          // Creating an organization used in the tests
-          const orgData = {
-            id: 'nineteenforty',
-            name: 'World War Two'
-          };
+      // Define org data
+      const orgData = {
+        id: 'nineteenforty',
+        name: 'World War Two'
+      };
 
-          OrgController.createOrg(user, orgData)
-          .then((retOrg) => {
-            org = retOrg;
-            chai.expect(retOrg.id).to.equal('nineteenforty');
-            chai.expect(retOrg.name).to.equal('World War Two');
-            chai.expect(retOrg.permissions.read).to.include(user._id.toString());
-            chai.expect(retOrg.permissions.write).to.include(user._id.toString());
-            chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
+      // Create org
+      return testUtils.createOrganization(adminUser, orgData);
 
-            // Creating a project used in the tests
-            const projData = {
-              id: 'rebirth',
-              name: 'Super Soldier Serum',
-              org: {
-                id: 'nineteenforty'
-              }
-            };
+    })
+    .then((retOrg) => {
+      org = retOrg;
+      chai.expect(retOrg.id).to.equal('nineteenforty');
+      chai.expect(retOrg.name).to.equal('World War Two');
+      chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
 
-            return ProjController.createProject(user, projData);
-          })
-          .then((retProj) => {
-            proj = retProj;
-            chai.expect(retProj.id).to.equal('rebirth');
-            chai.expect(retProj.name).to.equal('Super Soldier Serum');
-            done();
-          })
-          .catch((error) => {
-            chai.expect(error.message).to.equal(null);
-            done();
-          });
-        });
+      // Define project data
+      const projData = {
+        id: 'rebirth',
+        name: 'Super Soldier Serum',
+        org: {
+          id: 'nineteenforty'
+        }
+      };
+
+      // Create project
+      return ProjController.createProject(adminUser, projData);
+    })
+    .then((retProj) => {
+      proj = retProj;
+      chai.expect(retProj.id).to.equal('rebirth');
+      chai.expect(retProj.name).to.equal('Super Soldier Serum');
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error.message).to.equal(null);
+      done();
     });
   });
 
   /**
-   * TODO - Add detailed description
+   * After: Delete organization and admin user
    */
   after((done) => {
-    // Delete the org
-    OrgController.removeOrg(user, 'nineteenforty', { soft: false })
+    // Delete organization
+    OrgController.removeOrg(adminUser, 'nineteenforty', { soft: false })
     .then((retOrg) => {
       chai.expect(retOrg).to.not.equal(null);
-      User.findOne({
-        username: M.config.test.username
-      }, (err, foundUser) => {
-        chai.expect(err).to.equal(null);
-        foundUser.remove((err2) => {
-          chai.expect(err2).to.equal(null);
-          db.disconnect();
-          done();
-        });
-      });
+      // Delete admin user
+      return testUtils.removeAdminUser();
+    })
+    .then((user) => {
+      chai.expect(user).to.equal(null);
+      db.disconnect();
+      done();
     })
     .catch((error) => {
       chai.expect(error.message).to.equal(null);
@@ -288,7 +271,7 @@ function deleteElement(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

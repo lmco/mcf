@@ -28,9 +28,6 @@ const chai = require('chai');
 const request = require('request');
 
 // Load MBEE modules
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 const testUtils = require('../../test/test-utils');
 
@@ -60,21 +57,25 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      chai.expect(error).to.equal(null);
       done();
     });
   });
 
   /**
-   * After: run after all tests. Delete user.
+   * After: Delete admin user.
    */
   after((done) => {
-    testUtils.deleteAdminUser()
+    // Delete test admin
+    testUtils.removeAdminUser()
     .then(() => {
-        db.disconnect();
-        done();
+      // Disconnect db
+      db.disconnect();
+      done();
       })
     .catch((error) => {
       chai.expect(error).to.equal(null);
+      db.disconnect();
       done();
     });
   });

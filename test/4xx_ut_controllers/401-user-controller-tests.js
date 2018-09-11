@@ -26,9 +26,8 @@ const chai = require('chai');
 // Load MBEE modules
 const UserController = M.require('controllers.user-controller');
 const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
 const db = M.require('lib.db');
-const mockExpress = M.require('lib.mock-express');
+const testUtils = require('../../test/test-utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -44,50 +43,32 @@ let nonAdminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests. Create admin user.
-   * Set admin user globally.
+   * Before: Create admin user.
    */
   before((done) => {
     // Connect to the database
     db.connect();
 
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
-
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-
-    // Authenticate user
-    AuthController.authenticate(reqObj, resObj, (error) => {
-      const ldapuser = reqObj.user;
-      // Expect no error
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((user) => {
+      // Set global admin user
+      adminUser = user;
+      done();
+    })
+    .catch((error) => {
       chai.expect(error).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-
-      // Find the user and update admin status
-      User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
-        (updateErr, updatedUser) => {
-          // Setting it equal to global variable
-          adminUser = updatedUser;
-          // Expect no error
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(updatedUser).to.not.equal(null);
-          done();
-        });
+      done();
     });
   });
 
   /**
-   * After: run after all tests. Delete admin user,
-   * non-admin user.
+   * After: Delete admin user.
    */
   after((done) => {
     // Find the admin user
     User.findOne({
-      username: M.config.test.username
+      username: M.config.test.adminUsername
     }, (error, user) => {
       // Expect no error
       chai.expect(error).to.equal(null);
@@ -158,6 +139,7 @@ function createNewUser(done) {
     done();
   })
   .catch((error) => {
+    console.log(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -419,7 +401,7 @@ function rejectDeleteByNonAdmin(done) {
  */
 function rejectDeleteSelf(done) {
   // Create user data
-  const username = M.config.test.username;
+  const username = M.config.test.adminUsername;
 
   // Remove user via controller
   UserController.removeUser(adminUser, username)

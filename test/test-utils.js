@@ -34,42 +34,53 @@ const Project = M.require('models.project');
 const User = M.require('models.user');
 const db = M.require('lib.db');
 
-// check if local-strategy or ldap
-// check if ldap
-// check if user in the local database
-// in database
-// authenticate()
-// if not in database
-// CreateUser()
-// authenticate()
-
-// else local strategy
-// check in database
-// in database
-// authenticate()
-
-
 /**
  * @description Helper function to create test non-admin user for
  * MBEE tests.
  */
-module.exports.createNonadminUser = function() {
-  console.log('test-utils.js');
-  // Create a new User object
-  const user = new User({
-    username: 'nonadminUser',
-    password: 'password123',
-    fname: 'userFirstname',
-    preferredName: 'nonadmin user',
-    lname: 'userLastname',
-    admin: false
-  });
+module.exports.createNonadminUser = function(userData=null) {
+  return new Promise((resolve, reject) => {
+    // Check any admin exist
+    User.findOne({ username: userData.username })
+    .then((foundUser) => {
+      // Check user found
+      if (foundUser !== null) {
+        // User found, return it
+        return resolve(foundUser);
+      }
 
-  // Save user object to the database
-  user.save((error) => {
-    if (error != null) {
-      throw error;
-    }
+      // Define user to be created
+      let user;
+
+      // Check passed in user data
+      if (userData === null){
+        // No data, create default user
+        user = new User({
+          username: 'nonadminUser',
+          password: 'password123',
+          fname: 'userFirstname',
+          preferredName: 'nonadmin user',
+          lname: 'userLastname',
+          admin: false
+        });
+      }
+      else{
+        // User data present, create user
+        user = new User({
+          username: userData.username,
+          password: userData.password,
+          fname: userData.fname,
+          lname: userData.lname,
+          admin: false
+        });
+      }
+
+      // Save user object to the database
+      return user.save();
+    })
+    .then((user) => resolve(user))
+    .catch((error) => reject(error));
+
   });
 };
 
@@ -109,41 +120,36 @@ module.exports.createAdminUser = function() {
  * @description Helper function to delete test admin user for
  * MBEE tests.
  */
-module.exports.deleteAdminUser = function() {
+module.exports.removeAdminUser = function() {
   return new Promise((resolve, reject) => {
     // Find admin user
     User.findOne({username: M.config.test.adminUsername})
     .then((foundUser) => foundUser.remove())
-    .then(() => resolve())
+    .then(() => resolve(null))
     .catch((error) => reject(error));
   });
 }
-
-
-
-
 
 /**
  * @description Helper function to create organization for
  * MBEE tests.
  */
-module.exports.createOrganization = function(adminUser, orgId = 'avengers') {
-  // Create the new organization
-  const newOrg = new Organization({
-    id: orgID,
-    name: orgName,
-    permissions: {
-      admin: [user._id],
-      write: [user._id],
-      read: [user._id]
-    },
-    custom: null,
-    visibility: 'private'
+module.exports.createOrganization = function(adminUser, orgData) {
+  return new Promise((resolve, reject) => {
+    // Create the new organization
+    const newOrg = new Organization({
+      id: orgData.id,
+      name: orgData.name,
+      permissions: {
+        admin: [adminUser._id],
+        write: [adminUser._id],
+        read: [adminUser._id]
+      },
+      custom: null,
+      visibility: 'private'
+    });
+    newOrg.save()
+    .then((newOrg) => resolve(newOrg))
+    .catch((error) => reject(error));
   });
-
-  // Save user object to the database
-  newOrg.save((saveErr) => {
-    if (saveErr != null) {
-    }
-  });
-};
+}
