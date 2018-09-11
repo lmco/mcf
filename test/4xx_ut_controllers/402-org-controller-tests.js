@@ -84,13 +84,13 @@ describe(M.getModuleName(module.filename), () => {
           chai.expect(userUpdate).to.not.equal(null);
 
           // Creating a new non-admin user
-          const nonAuserData = testData.users[5];
+          const nonAuserData = testData.users[7];
           UserController.createUser(adminUser, nonAuserData)
           .then((nonAu) => {
             newUser = nonAu;
-            chai.expect(nonAu.username).to.equal(testData.users[5].username);
-            chai.expect(nonAu.fname).to.equal(testData.users[5].fname);
-            chai.expect(nonAu.lname).to.equal(testData.users[5].lname);
+            chai.expect(nonAu.username).to.equal(testData.users[7].username);
+            chai.expect(nonAu.fname).to.equal(testData.users[7].fname);
+            chai.expect(nonAu.lname).to.equal(testData.users[7].lname);
             done();
           })
           .catch((error2) => {
@@ -111,7 +111,7 @@ describe(M.getModuleName(module.filename), () => {
     // Removing non-admin user
     .then(() => UserController.removeUser(adminUser, newUser.username))
     .then((delUser2) => {
-      chai.expect(delUser2).to.equal(testData.users[5].username);
+      chai.expect(delUser2).to.equal(testData.users[7].username);
       // Find admin user
       return User.findOne({ username: M.config.test.username });
     })

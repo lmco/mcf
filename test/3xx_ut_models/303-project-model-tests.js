@@ -130,7 +130,7 @@ function createProject(done) {
  */
 function permissionProject(done) {
   // Create a new User object
-  const user = new User(testData.users[0]);
+  const user = new User(testData.users[2]);
   // Save user object to the database
   user.save()
   // Find and update org previously created in before function
@@ -183,7 +183,7 @@ function permissionProject(done) {
  */
 function removePermissionProject(done) {
   // Find the previously created user from permissionProject()
-  User.findOne({ username: testData.users[0].username })
+  User.findOne({ username: testData.users[2].username })
   // Hard deleted the user
   .then((user) => user.remove())
   // Find the org user had permissions on

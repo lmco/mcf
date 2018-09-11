@@ -1,6 +1,14 @@
 {
   "users": [
     {
+      "adminUsername": "test_admin",
+      "adminPassword": "test12345"
+    },
+    {
+      "username": "mbee",
+      "password": "t1QAx&hICyQSg)|"
+    },
+    {
       "username": "ironman",
       "password": "JaRvIs100",
       "fname": "Tony",

@@ -74,14 +74,14 @@ describe(M.getModuleName(module.filename), () => {
           chai.expect(userUpdate).to.not.equal(null);
 
           // Define non-admin user data
-          const nonAdminUserData = testData.users[6];
+          const nonAdminUserData = testData.users[8];
           // Admin creates a non admin user
           UserController.createUser(adminUser, nonAdminUserData)
           .then((nonAu) => {
             nonAdminUser = nonAu;
-            chai.expect(nonAu.username).to.equal(testData.users[6].username);
-            chai.expect(nonAu.fname).to.equal(testData.users[6].fname);
-            chai.expect(nonAu.lname).to.equal(testData.users[6].lname);
+            chai.expect(nonAu.username).to.equal(testData.users[8].username);
+            chai.expect(nonAu.fname).to.equal(testData.users[8].fname);
+            chai.expect(nonAu.lname).to.equal(testData.users[8].lname);
 
             // Creating organization used in tests
             const orgData = testData.orgs[7];
@@ -112,7 +112,7 @@ describe(M.getModuleName(module.filename), () => {
     OrgController.removeOrg(adminUser, testData.orgs[7].id, { soft: false })
     .then(() => {
       // Removing the non-admin user
-      const userTwo = testData.users[6].username;
+      const userTwo = testData.users[8].username;
       return UserController.removeUser(adminUser, userTwo);
     })
     // Find the admin user
