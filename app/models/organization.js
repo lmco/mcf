@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module lib.auth
+ * @module models.organization
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,9 +15,7 @@
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
  * @description Defines the organization MongoDB database model.
- *
  */
-
 
 // Load Node modules
 const mongoose = require('mongoose');
@@ -27,18 +25,31 @@ const validators = M.require('lib.validators');
 
 /* --------------------( Organization Model )-------------------- */
 /**
- * @class Organization
+ * @namespace
  *
- * @classdesc Defines the Organization Schema
+ * @description Defines the Organization Schema
+ *
+ * @property {String} id    - The organization's unique ID.
+ * @property {String} name  - The organization's name.
+ * @property {String} permissions - An object whose keys identify an
+ * organization's roles. The key values are an array of references to users
+ * who hold those roles.
+ * @property {String} permissions.read - An array of references to Users who
+ * have read access.
+ * @property {String} permissions.write - An array of references to Users who
+ * have write access.
+ * @property {String} permissions.admin - An array of references to Users who
+ * have admin access.
+ * @property {Date} deletedOn - The date an Organization was soft
+ * deleted or null if not deleted.
+ * @property delete - A boolean value defining if an organization
+ * has been soft deleted.
+ * @property {Schema.Types.Mixed} custom - JSON data used to store additional
+ * data.
+ * @property {virtual} project - A virtual field containing an array of Project
+ * objects.
  */
 const OrganizationSchema = new mongoose.Schema({
-  /**
-   * @description 'id' contains a unique organization id.
-   *
-   * @property id
-   * @type {String}
-   * @memberOf Organization
-   */
   id: {
     type: String,
     required: true,
@@ -47,83 +58,30 @@ const OrganizationSchema = new mongoose.Schema({
     match: RegExp(validators.org.id),
     maxlength: [64, 'Too many characters in ID']
   },
-
-  /**
-   * @description 'name' contains a unique organization name
-   *
-   * @property name
-   * @type {String}
-   * @memberOf Organization
-   *
-   */
   name: {
     type: String,
     required: true,
     unique: true,
     match: RegExp(validators.org.name)
   },
-
-  /**
-   * @description 'permissions' is an object whose keys identify an organization's
-   * roles. The key values are an array of references to users who hold those roles.
-   *
-   * @property permissions
-   * @type {Object}
-   * @memberOf Organization
-   *
-   */
   permissions: {
-    // TODO: MBX-143 Evaluate how this renders in JSDOC and see if we need to alter this
-    /**
-     * A list of users with read access to an organization.
-     * @type {Array}
-     */
     read: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
-
-    /**
-     * A list of users with write access to an organization.
-     * @type {Array}
-     */
     write: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
-
-    /**
-     * Contains the list of users with admin rights to the organization.
-     * @type {Array}
-     */
     admin: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }]
   },
-
-  /**
-   * @description 'deletedOn' contains the date an Organization was soft deleted.
-   *
-   * @property deletedOn
-   * @type {Date}
-   * @memberOf Organization
-   *
-   */
   deletedOn: {
     type: Date,
     default: null
   },
-
-  /**
-   * @description 'deleted' contains a boolean value defining if an organization
-   * has been soft deleted.
-   *
-   * @property deleted
-   * @type {Boolean}
-   * @memberOf Organization
-   *
-   */
   deleted: {
     type: Boolean,
     default: false,
@@ -134,29 +92,11 @@ const OrganizationSchema = new mongoose.Schema({
       return v;
     }
   },
-
-  /**
-   * @description 'custom' contains arbitrary JSON data used to store additional
-   * data.
-   *
-   * @property custom
-   * @type {Schema.Types.Mixed}
-   * @memberOf Organization
-   *
-   */
   custom: {
     type: mongoose.Schema.Types.Mixed
   }
 });
 
-/**
- * @description 'project' contains a list of references to an organization's projects.
- *
- * @property projects
- * @type {Project}
- * @memberOf Organization
- *
- */
 OrganizationSchema.virtual('projects', {
   ref: 'Project',
   localField: '_id',
@@ -167,18 +107,20 @@ OrganizationSchema.virtual('projects', {
 
 /* --------------------( Organization Methods )-------------------- */
 /**
+ * @memberof OrganizationSchema
  * @description Returns an organization's public data.
  */
 OrganizationSchema.methods.getPublicData = function() {
-  // Map read, write, and admin refrences to only contain user public data
+  // Map read, write, and admin references to only contain user public data
   this.permissions.read = this.permissions.read.map(u => u.getPublicData());
   this.permissions.write = this.permissions.write.map(u => u.getPublicData());
   this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
-  // Return the organization with only user public data
+  // Return the organization
   return this;
 };
 
 /**
+ * @memberof OrganizationSchema
  * @description Returns supported permission levels
  */
 OrganizationSchema.methods.getPermissionLevels = function() {
@@ -186,7 +128,8 @@ OrganizationSchema.methods.getPermissionLevels = function() {
 };
 
 /**
- * @description Returns  organization fields that can be changed
+ * @memberof OrganizationSchema
+ * @description Returns organization fields that can be changed
  */
 OrganizationSchema.methods.getValidUpdateFields = function() {
   return ['name', 'custom'];
@@ -199,35 +142,20 @@ OrganizationSchema.methods.getValidUpdateFields = function() {
  * @param {User} user  The user whose permissions are being returned
  *
  * @returns {Object} A json object with keys being the permission levels
- *  and values being booleans
+ * and values being booleans
  */
-OrganizationSchema.methods.getPermissionStatus = function(user) {
-  // Initialize permissions object
-  const permissions = {
-    read: false,
-    write: false,
-    admin: false
-  };
-
-  // If user is a system admin, they have all permissions
-  if (user.admin) {
-    permissions.read = true;
-    permissions.write = true;
-    permissions.admin = true;
-    return permissions;
-  }
-
-  // See if the user has permissions on the organization
+OrganizationSchema.methods.getPermissions = function(user) {
+  // Map org permissions lists user._ids to strings
   const read = this.permissions.read.map(u => u._id.toString());
   const write = this.permissions.write.map(u => u._id.toString());
   const admin = this.permissions.admin.map(u => u._id.toString());
 
-  // If user exists in any of the list, set the permission to true
-  permissions.read = read.includes(user._id.toString());
-  permissions.write = write.includes(user._id.toString());
-  permissions.admin = admin.includes(user._id.toString());
-
-  return permissions;
+  // Return an object containing user permissions
+  return {
+    read: read.includes(user._id.toString()),
+    write: write.includes(user._id.toString()),
+    admin: admin.includes(user._id.toString())
+  };
 };
 
 /* --------------------( Organization Properties )-------------------- */

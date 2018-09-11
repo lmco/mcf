@@ -73,7 +73,7 @@ class ElementController {
       ProjController.findProject(reqUser, orgID, projID, softDeleted)
       .then((project) => {
         // Ensure user is part of the project
-        if (!project.getPermissionStatus(reqUser).read) {
+        if (!project.getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -148,7 +148,7 @@ class ElementController {
       .then((elements) => {
         // Ensure user has permission to delete all elements
         Object.keys(elements).forEach((element) => {
-          if (!elements[element].project.getPermissionStatus(reqUser).admin) {
+          if (!elements[element].project.getPermissions(reqUser).admin && !reqUser.admin) {
             return reject(new errors.CustomError(
               `User does not have permission to delete element ${elements[element].id}.`, 401
             ));
@@ -235,7 +235,7 @@ class ElementController {
           return reject(new errors.CustomError('More than one element found.', 400));
         }
 
-        if (!elements[0].project.getPermissionStatus(reqUser).read) {
+        if (!elements[0].project.getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -356,7 +356,7 @@ class ElementController {
       ProjController.findProject(reqUser, orgID, projID)
       .then((proj) => {
         // Check Permissions
-        if (!proj.getPermissionStatus(reqUser).write) {
+        if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -628,7 +628,7 @@ class ElementController {
       ElementController.findElement(reqUser, orgID, projID, elemID)
       .then((element) => {
         // Check Permissions
-        if (!element.project.getPermissionStatus(reqUser).admin) {
+        if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -814,7 +814,7 @@ class ElementController {
       ElementController.findElement(reqUser, orgID, projID, elemID, true)
       .then((element) => {
         // Check Permissions
-        if (!element.project.getPermissionStatus(reqUser).admin) {
+        if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 

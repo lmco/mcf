@@ -74,7 +74,7 @@ class ProjectController {
       OrgController.findOrg(reqUser, orgID, softDeleted)
       .then((org) => {
         // Error Check - See if user has read permissions on org
-        if (!org.getPermissionStatus(reqUser).read) {
+        if (!org.getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -143,7 +143,7 @@ class ProjectController {
 
         // Ensure user has permission to delete all projects
         Object.keys(projects).forEach((project) => {
-          if (!projects[project].getPermissionStatus(reqUser).admin) {
+          if (!projects[project].getPermissions(reqUser).admin && !reqUser.admin) {
             return reject(new errors.CustomError(
               `User does not have permission to delete project ${projects[project].id}.`, 401
             ));
@@ -218,7 +218,7 @@ class ProjectController {
         }
 
         // Check Permissions
-        if (!projects[0].getPermissionStatus(reqUser).read) {
+        if (!projects[0].getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -321,7 +321,7 @@ class ProjectController {
       OrgController.findOrg(reqUser, orgID)
       .then((org) => {
         // Check Permissions
-        if (!org.getPermissionStatus(reqUser).write) {
+        if (!org.getPermissions(reqUser).write && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -408,7 +408,7 @@ class ProjectController {
       ProjectController.findProject(reqUser, orgID, projID)
       .then((project) => {
         // Check Permissions
-        if (!project.getPermissionStatus(reqUser).admin) {
+        if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -660,7 +660,7 @@ class ProjectController {
         let permissionsList = [];
 
         // Check permissions
-        if (!project.getPermissionStatus(reqUser).read) {
+        if (!project.getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -757,7 +757,7 @@ class ProjectController {
       ProjectController.findProject(reqUser, organizationID, projectID)
       .then((project) => {
         // Check permissions
-        if (!project.getPermissionStatus(reqUser).admin) {
+        if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 

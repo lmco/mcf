@@ -15,7 +15,6 @@
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
  * @description Defines the project MongoDB database model.
- *
  */
 
 // Load Node modules
@@ -26,6 +25,7 @@ const validators = M.require('lib.validators');
 
 /* --------------------( Project Model )-------------------- */
 /**
+ * TODO: MBX-417, Clean up JSDoc documentation to align with org model
  * @class Project
  *
  * @classdesc Defines the Project Schema
@@ -62,8 +62,8 @@ const ProjectSchema = new mongoose.Schema({
   },
 
   /**
-   * @description 'uid' contains a unique project id namespaced using a project's
-   * organization.
+   * @description 'uid' contains a unique project id namespaced using a
+   * project's organization.
    *
    * @property  uid
    * @type {String}
@@ -231,42 +231,26 @@ ProjectSchema.methods.getVisibilityLevels = function() {
  * @returns {Object} A json object with keys being the permission levels
  *  and values being booleans
  */
-ProjectSchema.methods.getPermissionStatus = function(user) {
-  // Initialize permissions object
-  const permissions = {
-    read: false,
-    write: false,
-    admin: false
-  };
-
-  // If user is a system admin, they have all permissions
-  if (user.admin) {
-    permissions.read = true;
-    permissions.write = true;
-    permissions.admin = true;
-    return permissions;
-  }
-
-  // See if the user has permissions on the organization
+ProjectSchema.methods.getPermissions = function(user) {
+  // Map project.permissions user._ids to strings
   const read = this.permissions.read.map(u => u._id.toString());
   const write = this.permissions.write.map(u => u._id.toString());
   const admin = this.permissions.admin.map(u => u._id.toString());
 
   // If user exists in any of the list, set the permission to true
-  permissions.read = read.includes(user._id.toString());
-  permissions.write = write.includes(user._id.toString());
-  permissions.admin = admin.includes(user._id.toString());
+  const permissions = {
+    read: read.includes(user._id.toString()),
+    write: write.includes(user._id.toString()),
+    admin: admin.includes(user._id.toString())
+  };
 
   // If projects visibility is internal
   if (this.visibility === 'internal') {
     // Get all orgs which user has read permissions on
     const orgs = user.orgs.read.map(o => o._id.toString());
-
-    // See if the user has read permissions on the project's org
-    if (orgs.includes(this.org.toString())) {
-      // If internal and user has read perm on org, user has read perm on project
-      permissions.read = true;
-    }
+    // See if the user has read permissions on the project's org,
+    // they have read permissions on the project
+    permissions.read = orgs.includes(this.org.toString());
   }
   return permissions;
 };
