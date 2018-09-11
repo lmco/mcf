@@ -62,7 +62,7 @@ describe(M.getModuleName(module.filename), () => {
         name: 'Asgard'
       };
       // Create organization
-      return testUtils.createOrganization(adminUser,orgData);
+      return testUtils.createOrganization(adminUser, orgData);
     })
     .then((retOrg) => {
       // Set global organization

@@ -66,7 +66,6 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create org
       return testUtils.createOrganization(adminUser, orgData);
-
     })
     .then((retOrg) => {
       org = retOrg;

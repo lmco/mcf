@@ -49,10 +49,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   before((done) => {
   // Connect to the database
-  db.connect();
+    db.connect();
 
-  // Create test admin
-  testUtils.createAdminUser()
+    // Create test admin
+    testUtils.createAdminUser()
     .then((user) => {
       done();
     })
@@ -72,7 +72,7 @@ describe(M.getModuleName(module.filename), () => {
       // Disconnect db
       db.disconnect();
       done();
-      })
+    })
     .catch((error) => {
       chai.expect(error).to.equal(null);
       db.disconnect();
@@ -93,7 +93,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject an update a user that does not exist', rejectPatchNonexisting);
   it('should reject deleting a user that doesnt exist', rejectDeleteNonexisting);
   it('should delete a user', deleteUser);
-
 });
 
 /* --------------------( Tests )-------------------- */

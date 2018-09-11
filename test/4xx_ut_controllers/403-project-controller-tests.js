@@ -69,17 +69,15 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(nonAdminUser.username).to.equal('pepperpotts');
       chai.expect(nonAdminUser.fname).to.equal('Pepper');
       chai.expect(nonAdminUser.lname).to.equal('Potts');
-
     })
     .then(() => {
       // Define organization data
       const orgData = {
         id: 'starkhq',
-        name: 'Stark Headquarts',
-      }
+        name: 'Stark Headquarts'
+      };
       // Create organization
-      return testUtils.createOrganization(adminUser,orgData);
-
+      return testUtils.createOrganization(adminUser, orgData);
     })
     .then((retOrg) => {
       org = retOrg;

@@ -139,7 +139,6 @@ function createNewUser(done) {
     done();
   })
   .catch((error) => {
-    console.log(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();

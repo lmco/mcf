@@ -78,10 +78,8 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(newUser.fname).to.equal('Groot');
       chai.expect(newUser.lname).to.equal('Tree');
       done();
-
     })
     .catch((error) => {
-      console.log(error);
       chai.expect(error).to.equal(null);
       done();
     });

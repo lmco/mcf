@@ -70,8 +70,7 @@ describe(M.getModuleName(module.filename), () => {
       };
 
       // Create org
-      return testUtils.createOrganization(user,orgData);
-
+      return testUtils.createOrganization(user, orgData);
     })
     .then((retOrg) => {
       // Set global org
@@ -84,12 +83,10 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
       done();
-
     })
     .catch((error) => {
       chai.expect(error).to.equal(null);
       done();
-
     });
   });
 

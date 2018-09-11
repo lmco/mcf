@@ -23,22 +23,16 @@
  * making MBEE tests easier to read and run.
  *
  */
-// Load node modules
-const path = require('path');
-const fs = require('fs');
 
 // Load MBEE modules
 const Organization = M.require('models.organization');
-const Project = M.require('models.project');
-
 const User = M.require('models.user');
-const db = M.require('lib.db');
 
 /**
  * @description Helper function to create test non-admin user for
  * MBEE tests.
  */
-module.exports.createNonadminUser = function(userData=null) {
+module.exports.createNonadminUser = function(userData = null) {
   return new Promise((resolve, reject) => {
     // Check any admin exist
     User.findOne({ username: userData.username })
@@ -53,7 +47,7 @@ module.exports.createNonadminUser = function(userData=null) {
       let user;
 
       // Check passed in user data
-      if (userData === null){
+      if (userData === null) {
         // No data, create default user
         user = new User({
           username: 'nonadminUser',
@@ -64,7 +58,7 @@ module.exports.createNonadminUser = function(userData=null) {
           admin: false
         });
       }
-      else{
+      else {
         // User data present, create user
         user = new User({
           username: userData.username,
@@ -80,7 +74,6 @@ module.exports.createNonadminUser = function(userData=null) {
     })
     .then((user) => resolve(user))
     .catch((error) => reject(error));
-
   });
 };
 
@@ -112,7 +105,6 @@ module.exports.createAdminUser = function() {
     })
     .then((user) => resolve(user))
     .catch((error) => reject(error));
-
   });
 };
 
@@ -123,12 +115,12 @@ module.exports.createAdminUser = function() {
 module.exports.removeAdminUser = function() {
   return new Promise((resolve, reject) => {
     // Find admin user
-    User.findOne({username: M.config.test.adminUsername})
+    User.findOne({ username: M.config.test.adminUsername })
     .then((foundUser) => foundUser.remove())
     .then(() => resolve(null))
     .catch((error) => reject(error));
   });
-}
+};
 
 /**
  * @description Helper function to create organization for
@@ -149,7 +141,7 @@ module.exports.createOrganization = function(adminUser, orgData) {
       visibility: 'private'
     });
     newOrg.save()
-    .then((newOrg) => resolve(newOrg))
+    .then((_newOrg) => resolve(_newOrg))
     .catch((error) => reject(error));
   });
-}
+};
