@@ -49,7 +49,6 @@ class LmiCloudStrategy {
         username: username,
         deletedOn: null
       })
-      .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
       .exec((findUserErr, users) => {
         // Check for errors
         if (findUserErr) {

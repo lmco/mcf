@@ -341,6 +341,25 @@ UserSchema.virtual('proj.admin', {
 
 /* eslint-enable prefer-arrow-callback */
 
+/**
+ * @memberOf  User
+ * Run our pre-defined setters on find
+ */
+UserSchema.pre('find', function(next) {
+  // Populate virtual fields prior to find
+  this.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin');
+  next();
+});
+
+/**
+ * @memberOf  User
+ * Run our pre-defined setters on findOne
+ */
+UserSchema.pre('findOne', function(next) {
+  // Populate virtual fields prior to findOne
+  this.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin');
+  next();
+});
 
 /**
  * @memberOf  User
@@ -375,6 +394,19 @@ UserSchema.pre('save', function(next) {
         next();
       });
     });
+  });
+});
+
+/**
+ * @memberOf  User
+ * Run our post-defined setters on save
+ */
+UserSchema.post('save', function(doc, next) {
+  // Populate virtual fields, and return populated document
+  doc.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
+  .execPopulate()
+  .then(function() {
+    next();
   });
 });
 
