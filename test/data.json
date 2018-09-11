@@ -134,6 +134,14 @@
     {
       "id": "asgard",
       "name": "Asgard"
+    },
+    {
+      "id": "shield",
+      "name": "SHIELD"
+    },
+    {
+      "id": "shield",
+      "name": "Hydra"
     }
   ],
 
@@ -324,6 +332,16 @@
     }
   ],
 
+  "invalidOrgs": [
+    {
+      "id": "pymparticles"
+    },
+    {
+      "id": "xmen",
+      "name": ""
+    }
+  ],
+
   "invalidProjects": [
     {
       "id": "period",
@@ -411,6 +429,12 @@
     },
     {
       "fname": "Weapon X"
+    },
+    {
+      "name": "%%% INVALID NAME %%%"
+    },
+    {
+      "name": "Invalid Organization"
     }
   ],
 
@@ -440,6 +464,18 @@
     },
     {
       "id" : "newironman"
+    },
+    {
+      "id": "mismatched"
+    },
+    {
+      "id":"xmen"
+    },
+    {
+      "id": "invalidOrgId"
+    },
+    {
+      "id": "fakshield"
     }
   ],
 
