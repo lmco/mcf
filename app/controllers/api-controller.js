@@ -34,9 +34,50 @@ const errors = M.require('lib.errors');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
-
+// Expose `ElementController`
+module.exports = {
+  notImplemented,
+  swaggerJSON,
+  login,
+  test,
+  version,
+  getOrgs,
+  postOrgs,
+  patchOrgs,
+  deleteOrgs,
+  getOrg,
+  postOrg,
+  patchOrg,
+  deleteOrg,
+  getOrgRole,
+  postOrgRole,
+  deleteOrgRole,
+  getAllOrgMemRoles,
+  getProjects,
+  postProjects,
+  patchProjects,
+  deleteProjects,
+  getProject,
+  postProject,
+  patchProject,
+  deleteProject,
+  getAllProjMemRoles,
+  getProjMemRole,
+  postProjectRole,
+  deleteProjectRole,
+  getUsers,
+  getUser,
+  postUser,
+  patchUser,
+  deleteUser,
+  whoami,
+  getElements,
+  getElement,
+  postElement,
+  patchElement,
+  deleteElement
+};
 /* ------------------------( API Helper Function )--------------------------- */
-
 /**
  * @description This is a utility function that formats an object as JSON.
  * This function is used for formatting all API responses.
@@ -54,7 +95,6 @@ function formatJSON(obj) {
 function notImplemented(req, res) {
   return res.status(501).send('Not Implemented.');
 }
-
 
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc
@@ -74,9 +114,7 @@ function swaggerSpec() {
   });
 }
 
-
 /* -------------------------( General API Endpoints )------------------------ */
-
 // TODO: Evaluate route mapping for all functions
 /**
  * GET /api/doc/swagger.json
@@ -84,14 +122,10 @@ function swaggerSpec() {
  * @description Returns the swagger JSON specification.
  */
 function swaggerJSON(req, res) {
-  // Get swagger specification
-  const swaggerSpec = swaggerSpec();
-
   // Return swagger specification
   res.header('Content-Type', 'application/json');
-  return res.status(200).send(formatJSON(swaggerSpec));
+  return res.status(200).send(formatJSON(swaggerSpec()));
 }
-
 
 /**
  * POST /api/login
@@ -103,7 +137,6 @@ function login(req, res) {
   return res.status(200).send(formatJSON({ token: req.session.token }));
 }
 
-
 /**
  * GET /api/test
  *
@@ -113,7 +146,6 @@ function test(req, res) {
   res.header('Content-Type', 'application/json');
   return res.status(200).send('');
 }
-
 
 /**
  * GET /api/version
@@ -133,9 +165,7 @@ function version(req, res) {
   return res.status(200).send(formatJSON(obj));
 }
 
-
 /* ----------------------( Organization API Endpoints )---------------------- */
-
 /**
  * GET /api/orgs
  *
@@ -170,7 +200,6 @@ function getOrgs(req, res) {
   .catch((error) => res.status(error.status).send(error));
 }
 
-
 /**
  * TODO: Remove function prior to public release
  * POST /api/orgs
@@ -186,7 +215,6 @@ function postOrgs(req, res) {
   // We may need to look into using transactions with mongo to make this work.
   res.status(501).send('Not Implemented.');
 }
-
 
 /**
  * TODO: Remove function prior to public release
@@ -205,7 +233,6 @@ function patchOrgs(req, res) {
   res.status(501).send('Not Implemented.');
 }
 
-
 /**
  * TODO: Remove function prior to public release
  * DELETE /api/orgs
@@ -219,7 +246,6 @@ function deleteOrgs(req, res) {
   // or if it is necessary.
   res.status(501).send('Not Implemented.');
 }
-
 
 /**
  * GET /api/orgs/:orgid
@@ -245,7 +271,6 @@ function getOrg(req, res) {
   .catch((error) => res.status(error.status).send(error));
 }
 
-
 /**
  * POST /api/orgs/:orgid
  *
@@ -268,11 +293,11 @@ function postOrg(req, res) {
   // Create the organization with provided parameters
   // NOTE: createOrg() sanitizes req.params.org.id and req.body.name
   OrgController.createOrg(req.user, {
-    id: req.params.org.id,
+    id: req.params.orgid,
     name: req.body.name
   })
   .then((org) => {
-    // Return 200: OK and the created org
+    // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(org));
   })
@@ -280,12 +305,11 @@ function postOrg(req, res) {
   .catch((error) => res.status(error.status).send(error));
 }
 
-
 /**
  * PATCH /api/orgs/:orgid
  *
- * @description Takes an id in the URI and updated properties of the org in the
- * request body. Updates the org specified in the URI.
+ * @description Updates the org specified in the URI. Takes an id in the URI and
+ * updated properties of the org in the request body.
  */
 function patchOrg(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -311,7 +335,6 @@ function patchOrg(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
-
 
 /**
  * DELETE /api/orgs/:orgid
@@ -353,7 +376,7 @@ function getOrgRole(req, res) {
 
   // Find the permissions the foundUser has within the organization
   // NOTE: findPermissions() sanitizes req.params.orgid
-  OrgController.findPermissions(req.user, req.params.username, req.params.orgID)
+  OrgController.findPermissions(req.user, req.params.username, req.params.orgid)
   .then((roles) => {
     // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
@@ -409,10 +432,10 @@ function deleteOrgRole(req, res) {
   }
 
   // TODO: Move findUser to setPermissions() in the org-controller (MBX-426)
-  UserController.findUser(sani.sanitize(req.params.username))
+  UserController.findUser(req.params.username)
   // Remove permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid
-  .then((user) => OrgController.setPermissions(req.user, orgID, user, 'REMOVE_ALL'))
+  .then((user) => OrgController.setPermissions(req.user, req.params.orgid, user, 'REMOVE_ALL'))
   .then((org) => {
     // Return 200: OK and updated org
     res.header('Content-Type', 'application/json');
@@ -425,7 +448,7 @@ function deleteOrgRole(req, res) {
 /**
  * GET /orgs/:orgid/members/
  *
- * @description Takes an orgid in the URI and returns all member of the given
+ * @description Takes an orgid in the URI and returns all members of the given
  * org and their permissions.
  */
 function getAllOrgMemRoles(req, res) {
@@ -447,61 +470,61 @@ function getAllOrgMemRoles(req, res) {
   .catch((error) => res.status(error.status).send(error));
 }
 
-
 /* -----------------------( Project API Endpoints )-------------------------- */
-
 /**
  * GET /api/org/:orgid/projects
  *
- * @description Takes an orgid in the request params and returns an array of
- * the project objects for that organization. Returns an error message if
- * organization not found or other error occurs.
+ * @description Gets an array of all projects that a user has access to.
+ * Returns an empty array if the user has access to none.
  */
 function getProjects(req, res) {
-  // If no user in the request
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Sanitize input
-  const orgid = sani.html(req.params.orgid);
-
-  // Call project find with user and organization ID
-  ProjectController.findProjects(req.user, orgid)
+  // Get all projects the requesting user has access to
+  // NOTE: findProjects() sanitizes req.user and org.id.
+  ProjectController.findProjects(req.user, req.params.orgid)
   .then((projects) => {
+    // Return only public project data
     const projectPublicData = [];
     for (let i = 0; i < projects.length; i++) {
       projectPublicData.push(projects[i].getPublicData());
     }
-    // Return project
+    // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(projectPublicData));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
-
 
 /**
  * TODO: Remove function prior to public release
  * POST /api/org/:orgid/projects
  *
- * @description It is defined here so that calls to the corresponding route
- * can be caught and error messages returned rather than throwing a 500
- * server error.
+ * @description Accepts an array of JSON objects containing project data.
+ * Attempts to create each of the projects. If any of the projects
+ * fail, the entire request fails and none of the projects are created.
+ *
+ * This method is not yet implemented.
  */
 function postProjects(req, res) {
   return res.status(501).send('Not Implemented.');
 }
 
-
 /**
  * TODO: Remove function prior to public release
  * PATCH /api/org/:orgid/projects
  *
- * @description This function is not intented to be implemented. It is
- * defined here so that calls to the corresponding route can be caught and
- * error messages returned rather than throwing a 500 server error.
+ * @description Accepts an array of JSON objects containing project data.
+ * This function expects each of the projects to already exist (this
+ * should be updating them). If any of the project updates fail, the
+ * entire request fails.
+ *
+ * This method is not yet implemented.
  *
  * TODO (jk) - Implement batchPatch Multiple batch to projects in a single operation. (MBX-356)
  */
@@ -509,275 +532,301 @@ function patchProjects(req, res) {
   return res.status(501).send('Not Implemented.');
 }
 
-
 /**
  * TODO: Remove function prior to public release
  * DELETE /api/org/:orgid/projects
  *
- * @description This function is not intended to be implemented. It is
- * defined here so that calls to the corresponding route can be caught and
- * error messages returned rather than throwing a 500 server error.
+ * @description This function will soft-delete all projects.
+ *
+ * This method is not yet implemented.
  */
 function deleteProjects(req, res) {
   return res.status(501).send('Not Implemented.');
 }
 
-
 /**
  * GET /api/org/:orgid/projects/:projectid
  *
- * @description Returns an array of all projects based on orgid and projectid.
+ * @description Gets a project by its project.id, and org.id.
  */
 function getProject(req, res) {
-  // If for some reason we don't have a user, fail.
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  const orgid = sani.html(req.params.orgid);
-  const projectid = sani.html(req.params.projectid);
-
-  ProjectController.findProject(req.user, orgid, projectid, true)
+  // Find the project from it's project.id and org.id
+  // NOTE: findProject() sanitizes req.params.projectid and req.params.orgid
+  ProjectController.findProject(req.user, req.params.orgid, req.params.projectid, true)
   .then((project) => {
+    // Return a 200: OK and the project's public data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(project.getPublicData()));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
-
 
 /**
  * POST /api/orgs/:orgid/projects/:projectid
  *
- * @description Creates a project based on project object in the request body
- *
+ * @description Takes an organization ID and project ID in the URI along with
+ * the request body to create the project.
  */
 function postProject(req, res) {
-  // If for some reason we don't have a user, fail.
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  try {
-    utils.assertExists(['id', 'name', 'org.id'], req.body);
-    utils.assertType([req.params.orgid, req.params.projectid, req.body.name], 'string');
-  }
-  catch (error) {
+  // If org ID was provided in the body, ensure it matches org ID in params
+  if (utils.checkExists(['org.id'], req.body) && (req.params.orgid !== req.body.org.id)) {
+    const error = new errors.CustomError('Org ID in the body does not match ID in the params.', 400);
     return res.status(error.status).send(error);
   }
 
-  if (req.params.projectid !== req.body.id) {
+  // If project ID was provided in the body, ensure it matches project ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
     const error = new errors.CustomError('Project ID in the body does not match ID in the params.', 400);
     return res.status(error.status).send(error);
   }
 
-  const projectId = sani.html(req.params.projectid);
-  const projectName = sani.html(req.body.name);
-  const orgId = sani.html(req.params.orgid);
-
+  // Create project with provided parameters
+  // NOTE: createProject() sanitizes req.params.projectid, req.params.org.id and req.body.name
   ProjectController.createProject(req.user, {
-    id: projectId,
-    name: projectName,
+    id: req.params.projectid,
+    name: req.body.name,
     org: {
-      id: orgId
+      id: req.params.orgid
     }
   })
   .then((project) => {
+    // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(project));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
-
 
 /**
  * PATCH /api/orgs/:orgid/projects/:projectid
  *
- * @description Takes an organization ID and project ID via URI and JSON
- * encoded project data in the body. Updates the project corresponding to the
- * URI with the data passed in the body.
+ * @description Updates the project specified in the URI. Takes an org id and
+ * project id in the URI and updated properties of the project in the request body.
  */
 function patchProject(req, res) {
-  // If for some reason we don't have a user, fail.
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  const projectID = sani.html(req.params.projectid);
-  const orgID = sani.html(req.params.orgid);
-
-  ProjectController.updateProject(req.user, orgID, projectID, req.body)
+  // Update the specified project
+  // NOTE: updateProject() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.updateProject(req.user, req.params.orgid, req.params.projectid, req.body)
   .then((project) => {
+    // Return 200: OK and the updated project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(project));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
-
 
 /**
  * DELETE /api/orgs/:orgid/projects:projectid
  *
- * Takes an organization ID and project ID via URI and deletes the
- * corresponding project.
+ * @description Takes an orgid and projectid in the URI along with delete
+ * options in the body and deletes the corresponding project.
  */
 function deleteProject(req, res) {
-  // If for some reason we don't have a user, fail.
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  const orgId = sani.html(req.params.orgid);
-  const projectId = sani.html(req.params.projectid);
-
-  ProjectController.removeProject(req.user, orgId, projectId, req.body)
+  // Remove the specified project
+  // NOTE: removeProject() sanitizes req.params.orgid and req.params.projecid
+  ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid, req.body)
   .then((project) => {
+    // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(project));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
-
-function getProjMemRoles(req, res) {
+/**
+ * GET /orgs/:orgid/members/
+ *
+ * @description Takes an orgid in the URI and returns all
+ * members of a given project and their permissions.
+ */
+function getAllProjMemRoles(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Sanitize Inputs
-  const orgID = sani.html(req.params.orgid);
-  const projectID = sani.html(req.params.projectid);
-
-  // Find Project
-  ProjectController.findAllPermissions(req.user, orgID, projectID)
+  // Get permissions of all users in given org
+  // NOTE: findAllPermissions() sanitizes req.params.orgid
+  ProjectController.findAllPermissions(req.user, req.params.orgid, req.params.projectid)
   .then((permissions) => {
+    // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(permissions));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/members/:username
+ *
+ * @description Takes an orgid, projectid and username in the URI and returns
+ * an object specifying which roles the user has within the project.
+ * // TODO: Move findUser to setPermissions() in the project-controller (MBX-426)
+ */
 function getProjMemRole(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Sanitize Inputs
-  const orgID = sani.html(req.params.orgid);
-  const projectID = sani.html(req.params.projectid);
-  const username = sani.html(req.params.username);
-
-  // Find User
-  UserController.findUser(username)
-  .then((user) => ProjectController.findPermissions(req.user, user, orgID, projectID))
+  // Find the permissions the foundUser has within the project
+  // NOTE: findPermissions() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.findPermissions(req.user, req.params.username,
+    req.params.orgid, req.params.projectid)
   .then((permissions) => {
+    // Return 200: OK and updated org
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(permissions));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
+/**
+ * POST /api/orgs/:orgid/projects/:project/members/:username
+ * PATCH /api/orgs/:orgid/projects/:project/members/:username
+ *
+ * @description Takes an orgid, projectid, and username in the URI and updates a
+ * given members role within the project. Requires a role in the body.
+ *
+ * NOTE: In the case of setPermissions(), setting a users role does the same
+ * thing as updating a users role, thus both POST and PATCH map to this
+ * function.
+ */
 function postProjectRole(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Sanitize Inputs
-  const orgID = sani.html(req.params.orgid);
-  const projectID = sani.html(req.params.projectid);
-  const username = sani.html(req.params.username);
-  const permType = sani.html(req.body.role);
-
-  // Find User to be set
-  UserController.findUser(username)
-  .then((user) => ProjectController.setPermissions(req.user, orgID, projectID, user, permType))
+  // TODO: Move findUser to setPermissions() in the project-controller (MBX-426)
+  UserController.findUser(req.params.username)
+  // Set permissions of given user
+  // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
+  .then((user) => ProjectController.setPermissions(req.user, req.params.orgid,
+    req.params.projectid, user, req.body.role))
   .then((project) => {
+    // Return 200: Ok and updated project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(project));
   })
-  // Return and log error if caught
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
+/**
+ * DELETE /api/orgs/:orgid/projects/:project/members/:username
+ *
+ * @description Takes a projectid, orgid and username in the URI and removes a
+ * user from the given project.
+ */
 function deleteProjectRole(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Sanitize Inputs
-  const orgID = sani.html(req.params.orgid);
-  const projectID = sani.html(req.params.projectid);
-  const username = sani.html(req.params.username);
-  const permType = 'REMOVE_ALL';
-
-  // Find User to be set
-  UserController.findUser(username)
-  .then((user) => ProjectController.setPermissions(req.user, orgID, projectID, user, permType))
+  // TODO: Move findUser to setPermissions() in the project-controller (MBX-426)
+  UserController.findUser(req.params.username)
+  // Remove permissions of given user
+  // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
+  .then((user) => ProjectController.setPermissions(req.user, req.params.orgid,
+    req.params.projectid, user, req.body.role))
   .then((project) => {
+    // Return 200: OK and updated org
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(project));
   })
-  // Return and log error if caught
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
-/****************************************************************************
- * User API Endpoints
- ****************************************************************************/
-
+/* -----------------------( User API Endpoints )------------------------------*/
 /**
  * GET /api/users
  *
- * @description Gets and returns all users. Must be an Admin user to perform this.
+ * @description Gets an array of all users in MBEE.
+ * NOTE: Admin only.
  */
 function getUsers(req, res) {
-  // Check if users exist
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Check if request user is admin
+  // Verify request user is admin
   if (!req.user.admin) {
     return res.status(401).send('Unauthorized');
   }
 
+  // Get all users in MBEE
   UserController.findUsers()
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
-    // Return only the public data
+    // Return 200: OK and public user data
     const publicUsers = users.map(u => u.getPublicData());
     return res.status(200).send(formatJSON(publicUsers));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
 /**
  * GET /api/users/:username
  *
- * @description Gets user based on username and returns its public data.
+ * @description Gets user by its username.
  */
 function getUser(req, res) {
-  // If for some reason we don't have a user, fail.
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  UserController.findUser(sani.sanitize(req.params.username))
+  // Find the member from it's username
+  // NOTE: findUser() sanitizes req.params.username
+  UserController.findUser(req.params.username)
   .then((user) => {
+    // Return a 200: OK and the project's public data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(user.getPublicData()));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
@@ -786,45 +835,46 @@ function getUser(req, res) {
  *
  * @description Creates a new user.
  */
-function postUser(req, res) { // eslint-disable-line consistent-return
-  // If for some reason we don't have a user, fail.
+function postUser(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  try {
-    utils.assertExists(['username'], req.body);
-  }
-  catch (error) {
-    return res.status(error.status).send(error);
-  }
-
-  if (req.body.username !== req.params.username) {
+  // If username was provided in the body, ensure it matches username in params
+  if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
     const error = new errors.CustomError('Username in body does not match username in params.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
+  // Create user with provided parameters
+  // NOTE: createUser() sanitizes req.body
   UserController.createUser(req.user, req.body)
   .then((user) => {
+    // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(user.getPublicData()));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
 /**
  * PATCH /api/users/:username
  *
- * @description Updates a user.
+ * @description Updates the user specified in the URI. Takes a username in the
+ * URI and updated properties of the user in the request body.
  */
-function patchUser(req, res) { // eslint-disable-line consistent-return
-  // If for some reason we don't have a user, fail.
+function patchUser(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
+  // Update the specified user
+  // NOTE: updateUser() sanitizes req.params.username and req.body
   UserController.updateUser(req.user, req.params.username, req.body)
   .then((user) => {
     res.header('Content-Type', 'application/json');
@@ -836,20 +886,25 @@ function patchUser(req, res) { // eslint-disable-line consistent-return
 /**
  * DELERE /api/users/:username
  *
- * @description Deletes a user.
+ * @description Takes a username in the URI along with delete options in the
+ * body and deletes the corresponding user.
  */
-function deleteUser(req, res) { // eslint-disable-line consistent-return
-  // If for some reason we don't have a user, fail.
+function deleteUser(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
+  // Remove the specified user
+  // NOTE: removeUser() sanitizes req.params.username
   UserController.removeUser(req.user, req.params.username)
   .then((user) => {
+    // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(user));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
@@ -859,163 +914,139 @@ function deleteUser(req, res) { // eslint-disable-line consistent-return
  * @description Returns the public information of the currently logged in user.
  */
 function whoami(req, res) {
-  // Sanity check - make sure we have user with a username
+  // Sanity check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Otherwise return 200 and the user's public JSON
+  // Returns 200: OK and the users public data
   res.header('Content-Type', 'application/json');
   return res.status(200).send(formatJSON(req.user.getPublicData()));
 }
 
-
-/****************************************************************************
- * Element API Endpoints
- ****************************************************************************/
-
-
+/* -----------------------( Elements API Endpoints )------------------------- */
 /**
  * GET /api/orgs/:orgid/projects/:projectid/elements/
  *
- * @description Gets all elements for a given project
+ * @description Takes an orgid and projectid in the URI and returns all elements
+ * of the project.
  */
-function getElements(req, res) {  // eslint-disable-line consistent-return
-  // If for some reason we don't have a user, fail
+function getElements(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  try {
-    utils.assertType([req.params.orgid, req.params.projectid], 'string');
-  }
-  catch (error) {
-    return res.status(error.status).send(error);
-  }
-
-  const orgid = sani.sanitize(req.params.orgid);
-  const projid = sani.sanitize(req.params.projectid);
-
-  ElementController.findElements(req.user, orgid, projid)
+  // Find all elements from it's org.id and project.id
+  // NOTE: findElements() sanitizes req.params.orgid and req.params.projectid
+  ElementController.findElements(req.user, req.params.orgid, req.params.projectid)
   .then((elements) => {
+    // Return a 200: OK and the project's public data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(elements));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
 /**
  * GET /api/orgs/:orgid/projects/:projectid/elements/:elementid
  *
- * @description Gets element based on ID 'elementid' and returns the
- * element's public data as JSON.
+ * @description Gets an element by its element.id, project.id, and org.id.
  */
-function getElement(req, res) { // eslint-disable-line consistent-return
-  // If for some reason we don't have a user, fail
+function getElement(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  try {
-    utils.assertType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
-  }
-  catch (error) {
-    return res.status(error.status).send(error);
-  }
-
-  const orgid = sani.sanitize(req.params.orgid);
-  const projid = sani.sanitize(req.params.projectid);
-  const elemid = sani.sanitize(req.params.elementid);
-
-  ElementController.findElement(req.user, orgid, projid, elemid)
+  // Find the element from it's element.id, project.id, and org.id
+  // NOTE: findElement() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
+  ElementController.findElement(req.user, req.params.orgid,
+    req.params.projectid, req.params.elementid)
   .then((element) => {
+    // Return a 200: OK and the project's public data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(element));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
 /**
  * POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
  *
- * @description Creates an element with 'elementid' and returns the
- * element's public data as a JSON.
+ * @description Takes an organization ID, project ID, and element ID in the URI
+ * along with the request body to create the elements.
  */
-function postElement(req, res) { // eslint-disable-line consistent-return
-  // If for some reason we don't have a user, fail.
+function postElement(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
+  // Create element with provided parameters
+  // NOTE: createElement() sanitizes req.body.name
   ElementController.createElement(req.user, req.body)
   .then((element) => {
+    // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(element));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
 /**
  * PATCH /api/orgs/:orgid/projects/:projectid/elements/:elementid
  *
- * @description Updates an element with 'elementid' and returns the
- * element's public data as JSON.
+ * @description Updates the element specified in the URI. Takes an org id,
+ * project id, and element id in the URI and updated properties of the element
+ * in the request body.
  */
-function patchElement(req, res) { // eslint-disable-line consistent-return
-  // If for some reason we don't have a user, fail.
+function patchElement(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  try {
-    utils.assertType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
-  }
-  catch (error) {
-    return res.status(error.status).send(error);
-  }
-
-  const orgid = sani.sanitize(req.params.orgid);
-  const projid = sani.sanitize(req.params.projectid);
-  const elemid = sani.sanitize(req.params.elementid);
-
-  ElementController.updateElement(req.user, orgid, projid, elemid, req.body)
+  // Update the specified element
+  // NOTE: updateElement() sanitizes req.params.orgid, req.params.projectid,
+  // and req.params.elementid
+  ElementController.updateElement(req.user, req.params.orgid,
+    req.params.projectid, req.params.elementid, req.body)
   .then((element) => {
+    // Return 200: OK and the updated project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(element));
   })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
  *
- * @description Deletes an element with 'elementid' and returns the
- * element's public data as JSON.
+ * @description Takes an orgid, projectid, elementid in the URI along with delete
+ * options in the body and deletes the corresponding element.
  */
-function deleteElement(req, res) { // eslint-disable-line consistent-return
-  // If for some reason we don't have a user, fail.
+function deleteElement(req, res) {
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new errors.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  try {
-    utils.assertType([req.params.orgid, req.params.projectid, req.params.elementid], 'string');
-  }
-  catch (error) {
-    return res.status(error.status).send(error);
-  }
-
-  const orgid = sani.sanitize(req.params.orgid);
-  const projid = sani.sanitize(req.params.projectid);
-  const elemid = sani.sanitize(req.params.elementid);
-
-  ElementController.removeElement(req.user, orgid, projid, elemid, req.body)
+  // Remove the specified project
+  // NOTE: removeProject() sanitizes req.params.orgid, req.params.projecid, and
+  // req.params.elementid
+  ElementController.removeElement(req.user, req.params.orgid,
+    req.params.projectid, req.params.elementid, req.body)
   .then((element) => {
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(element));

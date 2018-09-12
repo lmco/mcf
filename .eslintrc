@@ -110,7 +110,7 @@
     // require method and property shorthand syntax for object literals
     // "https"://eslint.org/docs/rules/object-shorthand
     // LM: Turning off to allow long form way because it is more explicit and easier to read.
-    "object-shorthand": ["error", "never"],
+    "object-shorthand": ["error", "consistent"],
 
     // suggest using arrow functions as callbacks
     // LM: Turning off because the arrow function does not work with some models using the "this"

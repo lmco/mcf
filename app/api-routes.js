@@ -847,7 +847,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjMemRoles
+  APIController.getAllProjMemRoles
 );
 
 /**
