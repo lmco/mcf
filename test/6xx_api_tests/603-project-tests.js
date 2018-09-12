@@ -397,7 +397,7 @@ function deleteSecondProject(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const c = `${testData.users[1].username}:${testData.users[1].password}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

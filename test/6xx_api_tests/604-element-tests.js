@@ -22,6 +22,7 @@
 // Load node modules
 const fs = require('fs');
 const chai = require('chai');
+const path = require('path');
 const request = require('request');
 
 // Load MBEE modules
@@ -34,6 +35,7 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
 let org = null;
 let proj = null;
 let user = null;
@@ -75,35 +77,26 @@ describe(M.getModuleName(module.filename), () => {
           chai.expect(updateErr).to.equal(null);
           chai.expect(userUpdate).to.not.equal(null);
           // Creating an organization used in the tests
-          const orgData = {
-            id: 'nineteenforty',
-            name: 'World War Two'
-          };
+          const orgData = testData.orgs[12];
 
           OrgController.createOrg(user, orgData)
           .then((retOrg) => {
             org = retOrg;
-            chai.expect(retOrg.id).to.equal('nineteenforty');
-            chai.expect(retOrg.name).to.equal('World War Two');
+            chai.expect(retOrg.id).to.equal(testData.orgs[12].id);
+            chai.expect(retOrg.name).to.equal(testData.orgs[12].name);
             chai.expect(retOrg.permissions.read).to.include(user._id.toString());
             chai.expect(retOrg.permissions.write).to.include(user._id.toString());
             chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
 
             // Creating a project used in the tests
-            const projData = {
-              id: 'rebirth',
-              name: 'Super Soldier Serum',
-              org: {
-                id: 'nineteenforty'
-              }
-            };
+            const projData = testData.projects[16];
 
             return ProjController.createProject(user, projData);
           })
           .then((retProj) => {
             proj = retProj;
-            chai.expect(retProj.id).to.equal('rebirth');
-            chai.expect(retProj.name).to.equal('Super Soldier Serum');
+            chai.expect(retProj.id).to.equal(testData.projects[16].id);
+            chai.expect(retProj.name).to.equal(testData.projects[16].name);
             done();
           })
           .catch((error) => {
@@ -119,7 +112,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Delete the org
-    OrgController.removeOrg(user, 'nineteenforty', { soft: false })
+    OrgController.removeOrg(user, org.id, { soft: false })
     // Remove user
     .then(() => User.remove({ username: M.config.test.username }))
     .then(() => {
@@ -158,7 +151,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postElement01(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${testData.projects[16].id}/elements/${testData.elements[12].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
