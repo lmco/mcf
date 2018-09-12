@@ -260,6 +260,10 @@
       "org": {
         "id": "nineteenforty"
       }
+    },
+    {
+      "id": "hulktwopointoh",
+      "name": "New Hulk"
     }
   ],
 
@@ -455,10 +459,6 @@
       "org": {
         "id": ""
       }
-    },
-    {
-      "id": "hulktwopointoh",
-      "name": "New Hulk"
     }
   ],
 

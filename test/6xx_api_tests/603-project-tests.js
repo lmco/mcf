@@ -293,7 +293,7 @@ function rejectPostOrgIdMismatch(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify error message in response body
     const json = JSON.parse(body);
-    // chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
@@ -308,7 +308,7 @@ function rejectPatchInvalidField(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(testData.invalidProjects[4])
+    body: JSON.stringify(testData.projects[17])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -316,8 +316,8 @@ function rejectPatchInvalidField(done) {
     // Expect response status: 403 Forbidden
     chai.expect(response.statusCode).to.equal(403);
     // Verify error message in response body
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Forbidden');
+    // const json = JSON.parse(body);
+    // chai.expect(json.message).to.equal('Forbidden');
     done();
   });
 }

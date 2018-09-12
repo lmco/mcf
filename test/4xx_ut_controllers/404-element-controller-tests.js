@@ -423,9 +423,12 @@ function softDeleteElement(done) {
  */
 function hardDeleteElement(done) {
   // Hard delete the element
-  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[12].id, { soft: false })
+  ElemController.removeElement(adminUser, org.id, proj.id,
+    testData.elements[12].id, { soft: false })
   // Then search for the element (including soft-deleted elements)
-  .then(() => ElemController.findElement(adminUser, org.id, proj.id, testData.elements[12].id, true))
+  .then(() => ElemController
+  .findElement(adminUser, org.id, proj.id,
+    testData.elements[12].id, true))
   .then(() => {
     // Expect no element found
     // Element was found, force test to fail
