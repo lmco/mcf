@@ -261,7 +261,7 @@ function updateOrgFieldErr(done) {
  */
 function updateOrgTypeErr(done) {
   // Update organization
-  OrgController.updateOrg(adminUser, testData.orgs[2].id, testData.invalidNames[2])
+  OrgController.updateOrg(adminUser, testData.orgs[2].id, testData.names[2])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
@@ -281,7 +281,7 @@ function updateOrgTypeErr(done) {
  */
 function rejectNonAdminUpdate(done) {
   // Update org
-  OrgController.updateOrg(newUser, testData.orgs[2].id, testData.invalidNames[3])
+  OrgController.updateOrg(newUser, testData.orgs[2].id, testData.names[3])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
@@ -503,7 +503,7 @@ function hardDeleteProjectAndOrg(done) {
  */
 function updateDefaultOrg(done) {
   // Update default org
-  OrgController.updateOrg(adminUser, 'default', testData.invalidNames[4])
+  OrgController.updateOrg(adminUser, 'default', testData.names[4])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail

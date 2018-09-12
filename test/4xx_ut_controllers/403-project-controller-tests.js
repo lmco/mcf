@@ -194,7 +194,7 @@ function createProject(done) {
  */
 function rejectImmutableField(done) {
   // Update project
-  ProjController.updateProject(adminUser, org.id, testData.projects[5].id, testData.invalidId[0])
+  ProjController.updateProject(adminUser, org.id, testData.projects[5].id, testData.ids[0])
   .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail
@@ -214,7 +214,7 @@ function rejectImmutableField(done) {
  */
 function updateTypeError(done) {
   // Update project
-  ProjController.updateProject(adminUser, org.id, testData.projects[5].id, testData.invalidNames[2])
+  ProjController.updateProject(adminUser, org.id, testData.projects[5].id, testData.names[2])
   .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail
@@ -449,7 +449,7 @@ function findProj(done) {
  */
 function rejectFindNonexistentProject(done) {
   const orgId = org.id;
-  const projId = testData.invalidId[1].id;
+  const projId = testData.ids[1].id;
 
   // Find project
   ProjController.findProject(adminUser, orgId, projId)
@@ -524,7 +524,7 @@ function updateProj(done) {
 function rejectProjectId(done) {
   const orgId = org.id;
   const projId = testData.projects[10].id;
-  const updateData = testData.invalidId[2];
+  const updateData = testData.ids[2];
 
   // Update project
   ProjController.updateProject(adminUser, orgId, projId, updateData)
@@ -550,7 +550,7 @@ function rejectProjectId(done) {
 function rejectNonAdminProjectUpdate(done) {
   const orgId = org.id;
   const projId = testData.projects[10].id;
-  const updateData = testData.invalidNames[5];
+  const updateData = testData.names[5];
 
   // Update project
   ProjController.updateProject(nonAdminUser, orgId, projId, updateData)

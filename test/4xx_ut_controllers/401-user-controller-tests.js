@@ -250,7 +250,7 @@ function updateFirstName(done) {
 function rejectInvalidLastNameUpdate(done) {
   // Create user data
   const username = testData.users[3].username;
-  const userData = testData.invalidNames[0]; // TODO: MBX-376 Add this style to style guide
+  const userData = testData.names[0]; // TODO: MBX-376 Add this style to style guide
   // Update user via controller
   UserController.updateUser(adminUser, username, userData)
   .then(() => {
@@ -273,7 +273,7 @@ function rejectInvalidLastNameUpdate(done) {
 function rejectUsernameUpdate(done) {
   // Create user data
   const username = testData.users[3].username;
-  const userData = testData.invalidUsername[0];
+  const userData = testData.usernames[0];
 
   // Update user via controller
   UserController.updateUser(adminUser, username, userData)
@@ -297,7 +297,7 @@ function rejectUsernameUpdate(done) {
 function rejectUserUpdateByNonAdmin(done) {
   // Create user data
   const username = testData.users[3].username;
-  const userData = testData.invalidNames[3];
+  const userData = testData.names[3];
 
   // Update user via controller
   UserController.updateUser(nonAdminUser, username, userData)
@@ -343,7 +343,7 @@ function findExistingUser(done) {
  */
 function rejectFindNonExistentUser(done) {
   // Create user data
-  const username = testData.invalidUsername[1].username;
+  const username = testData.usernames[1].username;
 
   // Find user via controller
   UserController.findUser(username)
