@@ -810,7 +810,7 @@ class ProjectController {
               return reject(new errors.CustomError('Save failed.'));
             }
             // Check if user has org read permissions
-            OrgController.findPermissions(reqUser, setUser, orgID)
+            OrgController.findPermissions(reqUser, setUser.username, orgID)
             .then((userOrgPermissions) => {
               if (userOrgPermissions.read) {
                 return resolve(projectSaved);

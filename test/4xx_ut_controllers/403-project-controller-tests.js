@@ -645,7 +645,7 @@ function rejectNonAdminProjectUpdate(done) {
  */
 function findPerm(done) {
   // Find permissions
-  ProjController.findPermissions(adminUser, adminUser, org.id, 'ironman')
+  ProjController.findPermissions(adminUser, adminUser.username, org.id, 'ironman')
   .then((perm) => {
     // Verfy permissions
     chai.expect(perm.read).to.equal(true);

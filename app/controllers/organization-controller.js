@@ -38,7 +38,8 @@ class OrganizationController {
 
   /**
    * @description This function takes a user objects and returns a list of
-   * orgs that the user has at least read access too.
+   * orgs that the user has at least read access too. Sanitizes the
+   * parameter user._id.
    *
    * @example
    * OrganizationController.findOrgs(username)
@@ -64,7 +65,7 @@ class OrganizationController {
 
   /**
    * @description This function takes a user and orgID and resolves the
-   *   organization.
+   * organization. Sanitizes the parameter organizationID.
    *
    * @example
    * OrganizationController.findOrg('josh', 'mbee-sw')
@@ -519,17 +520,17 @@ class OrganizationController {
    *
    *
    * @param {User} reqUser  The object containing the requesting user.
-   * @param {User} findUser  The object containing the user whose info is being returned
+   * @param {User} searchedUsername  The object containing the user whose info is being returned
    * @param {string} organizationID  The ID of the organization
    */
-  static findPermissions(reqUser, findUser, organizationID) {
+  static findPermissions(reqUser, searchedUsername, organizationID) {
     return new Promise((resolve, reject) => {
       OrganizationController.findAllPermissions(reqUser, organizationID)
       .then(permissionList => {
-        if (!permissionList.hasOwnProperty(findUser.username)) {
+        if (!permissionList.hasOwnProperty(searchedUsername)) {
           return resolve({});
         }
-        return resolve(permissionList[findUser.username]);
+        return resolve(permissionList[searchedUsername]);
       })
       .catch(error => reject(error));
     });
@@ -563,7 +564,7 @@ class OrganizationController {
       }
 
       try {
-        utils.assertType([organizationID], 'string');
+        utils.assertType([organizationID, role], 'string');
       }
       catch (error) {
         return reject(error);
