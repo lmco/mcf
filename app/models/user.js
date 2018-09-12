@@ -402,24 +402,8 @@ UserSchema.methods.verifyPassword = function(pass) {
 /**
  * An object containing what is allowed on an update to a user.
  */
-// TODO: Change to an array to be consistent with other models, update in controller (MBX-421)
-UserSchema.methods.isUpdateAllowed = function(field) {
-  const allowedMap = {
-    username: false,
-    fname: true,
-    preferredName: true,
-    lname: true,
-    email: true,
-    name: false,
-    createOn: false,
-    deletedOn: true,
-    deleted: false,
-    updatedOn: false,
-    isLDAPUser: false,
-    admin: false,
-    custom: true
-  };
-  return allowedMap[field];
+UserSchema.methods.getValidUpdateFields = function() {
+  return ['fname', 'preferredName', 'lname', 'email', 'deletedOn', 'custom'];
 };
 
 /**

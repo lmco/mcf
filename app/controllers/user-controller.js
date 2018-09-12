@@ -257,10 +257,12 @@ class UserController {
         const props = Object.keys(newUserData);
         // Get a list of validators
         const userValidators = validators.user;
+        // Get list of parameters which can be updated from model
+        const validUpdateFields = user.getValidUpdateFields();
 
         for (let i = 0; i < props.length; i++) {
           // Error check - make sure the properties exist and can be changed
-          if (!user.isUpdateAllowed(props[i])) {
+          if (!validUpdateFields.includes(props[i])) {
             return reject(new errors.CustomError(`User property [${props[i]}] cannot be changed.`, 403));
           }
 
