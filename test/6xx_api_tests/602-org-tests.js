@@ -190,7 +190,7 @@ function rejectPatchInvalidName(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({ name: testData.invalidNames[7].name })
+    body: JSON.stringify({ name: testData.names[7].name })
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -214,7 +214,7 @@ function rejectPatchIdMismatch(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(testData.invalidId[3])
+    body: JSON.stringify(testData.ids[3])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -278,7 +278,7 @@ function getOrgs(done) {
  */
 function rejectPostIdMismatch(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.invalidId[4]}`,
+    url: `${test.url}/api/orgs/${testData.ids[4].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -301,11 +301,11 @@ function rejectPostIdMismatch(done) {
  */
 function rejectPostInvalidId(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.invalidId[5].id}`,
+    url: `${test.url}/api/orgs/${testData.ids[5].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.invalidNames[8])
+    body: JSON.stringify(testData.names[8])
   },
   (err, response, body) => {
     // Expect no error
@@ -401,7 +401,7 @@ function rejectPostExistingOrg(done) {
  */
 function rejectDeleteNonexistingOrg(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.invalidId[6].id}`,
+    url: `${test.url}/api/orgs/${testData.ids[6].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',

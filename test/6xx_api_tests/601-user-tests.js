@@ -234,7 +234,7 @@ function rejectInvalidUsernamePost(done) {
 function rejectNonmatchingUsernames(done) {
   // Make POST API request
   request({
-    url: `${test.url}/api/users/${testData.invalidUsername[2]}`,
+    url: `${test.url}/api/users/${testData.usernames[2]}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -285,7 +285,7 @@ function getUsers(done) {
 function rejectGetNonexisting(done) {
   // Make GET API request
   request({
-    url: `${test.url}/api/users/${testData.invalidUsername[3].username}`,
+    url: `${test.url}/api/users/${testData.usernames[3].username}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -340,12 +340,12 @@ function patchUser(done) {
 function rejectPatchNonexisting(done) {
   // Make a PATCH API request
   request({
-    url: `${test.url}/api/users/${testData.invalidUsername[4].username}`,
+    url: `${test.url}/api/users/${testData.usernames[4].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     // Set update parameter in request body
-    body: JSON.stringify(testData.invalidNames[6])
+    body: JSON.stringify(testData.names[6])
   },
   (err, response, body) => {
     // Expect no error
@@ -368,7 +368,7 @@ function rejectPatchNonexisting(done) {
 function rejectDeleteNonexisting(done) {
   // Make a DELETE request
   request({
-    url: `${test.url}/api/users/${testData.invalidUsername[4].username}`,
+    url: `${test.url}/api/users/${testData.usernames[4].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',

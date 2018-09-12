@@ -328,7 +328,7 @@ function rejectPatchInvalidField(done) {
  */
 function rejectDeleteNonexistingProject(done) {
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${testData.invalidId[7].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.ids[7].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',

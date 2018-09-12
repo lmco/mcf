@@ -497,7 +497,7 @@
     }
   ],
 
-  "invalidNames": [
+  "names": [
     {
       "lname": "KLAW@#$"
     },
@@ -530,7 +530,7 @@
     }
   ],
 
-  "invalidUsername": [
+  "usernames": [
     {
       "username": "goldpanther"
     },
@@ -547,7 +547,7 @@
       "username": "francis"
     }],
 
-  "invalidId": [
+  "ids": [
     {
       "id": "shouldnotchange"
     },
