@@ -13,21 +13,19 @@
 
 // Load NPM modules
 const chai = require('chai');
+const path = require('path');
 
 // Load MBEE modules
 const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
-const testUtils = require('../../test/test-utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let nonAdminUser = null;
 let adminUser = null;
 let org = null;

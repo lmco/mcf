@@ -27,13 +27,12 @@ const chai = require('chai');
 // Load MBEE modules
 const UserController = M.require('controllers.user-controller');
 const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
 const db = M.require('lib.db');
-const testUtils = require(`${M.root}/test/test-utils`);
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
 let nonAdminUser = null;
 
@@ -379,7 +378,7 @@ function rejectDeleteByNonAdmin(done) {
  */
 function rejectDeleteSelf(done) {
   // Create user data
-  const username = M.config.test.username;
+  const username = M.config.test.adminUsername;
 
   // Remove user via controller
   UserController.removeUser(adminUser, username)

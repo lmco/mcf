@@ -23,18 +23,16 @@
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
+const path = require('path');
 
 // Load MBEE modules
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
-const testUtils = require('../../test/test-utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let org = null;
 let proj = null;
 let adminUser = null;
@@ -448,7 +446,7 @@ function deleteElement02(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

@@ -23,15 +23,16 @@
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
+const path = require('path');
 
 // Load MBEE modules
 const OrgController = M.require('controllers.organization-controller');
 const User = M.require('models.user');
 const db = M.require('lib.db');
-const testUtils = require('../../test/test-utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 let org = null;
 let adminUser = null;

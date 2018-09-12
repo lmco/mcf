@@ -20,18 +20,17 @@
 
 // Load NPM modules
 const chai = require('chai');
+const path = require('path');
 
 // Load MBEE modules
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const ElemController = M.require('controllers.element-controller');
 const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
-const testUtils = require('../../test/test-utils');
 
 /* --------------------( Test Data )-------------------- */
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
 let org = null;
 let proj = null;

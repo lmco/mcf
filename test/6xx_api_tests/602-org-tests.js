@@ -25,16 +25,14 @@
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
+const path = require('path');
 
 // Load MBEE modules
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
-const testUtils = require('../../test/test-utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
@@ -223,7 +221,7 @@ function rejectPatchIdMismatch(done) {
  */
 function getMemberRoles(done) {
   request({
-    url: `${test.url}/api/orgs/shield/members/${M.config.test.username}`,
+    url: `${test.url}/api/orgs/shield/members/${M.config.test.adminUsername}`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -440,7 +438,7 @@ function deleteOrg(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

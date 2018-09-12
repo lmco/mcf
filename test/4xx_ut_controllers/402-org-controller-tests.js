@@ -17,9 +17,8 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Tests the organization controller functionality: create,
- * delete, update, and find organizations. As well as setting and updating
+ * delete, update, find organizations, and setting and updating
  * permissions of organizations.
- * // TODO : MBX-325 change description to summarize "it" functions
  */
 
 // Load NPM modules
@@ -32,12 +31,12 @@ const OrgController = M.require('controllers.organization-controller');
 const Project = M.require('models.project');
 const User = M.require('models.user');
 const db = M.require('lib.db');
-const testUtils = require('../../test/test-utils');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
 let newUser = null;
 let org = null;

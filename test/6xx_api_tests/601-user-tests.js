@@ -26,16 +26,14 @@
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
+const path = require('path');
 
 // Load MBEE modules
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
-const testUtils = require('../../test/test-utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
@@ -105,7 +103,7 @@ describe(M.getModuleName(module.filename), () => {
 function getUser(done) {
   // Make a user API GET request
   request({
-    url: `${test.url}/api/users/${M.config.test.username}`,
+    url: `${test.url}/api/users/${M.config.test.adminUsername}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -117,7 +115,7 @@ function getUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct username
-    chai.expect(json.username).to.equal(M.config.test.username);
+    chai.expect(json.username).to.equal(M.config.test.adminUsername);
     done();
   });
 }
@@ -174,7 +172,7 @@ function whoAmI(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal(M.config.test.username);
+    chai.expect(json.username).to.equal(M.config.test.adminUsername);
     done();
   });
 }
@@ -262,7 +260,7 @@ function getUsers(done) {
     // Verifies status 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verifies users exist
-    chai.expect(body).to.include(M.config.test.username);
+    chai.expect(body).to.include(M.config.test.adminUsername);
     chai.expect(body).to.include('deadpool');
     done();
   });
@@ -417,7 +415,7 @@ function deleteUser(done) {
  * @description Helper function for setting the request header.
  */
 function getHeaders() {
-  const formattedCreds = `${M.config.test.username}:${M.config.test.password}`;
+  const formattedCreds = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',
