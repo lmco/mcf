@@ -20,6 +20,8 @@
 
 // Load MBEE modules
 const User = M.require('models.user');
+const OrgController = M.require('controllers.organization-controller');
+const ProjController = M.require('controllers.project-controller');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
@@ -155,7 +157,7 @@ class UserController {
    * @param {Object} newUser  Object containing new user data.
    */
   static createUser(requestingUser, newUser) {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       try {
         utils.assertAdmin(requestingUser);
         utils.assertExists(['username'], newUser);
@@ -184,35 +186,39 @@ class UserController {
           return reject(new errors.CustomError('Email is not valid.', 400));
         }
       }
-      if (utils.checkExists(['password'], newUser)) {
-        if (!validators.user.password(newUser.password)) {
-          return reject(new errors.CustomError('Password is not valid.', 400));
-        }
-      }
 
-      User.find({ username: sani.sanitize(newUser.username) })
-      .populate()
-      .exec((findErr, users) => {
-        if (findErr) {
-          return reject(findErr);
-        }
+      // Define function-global user
+      let createdUser;
 
+      UserController.findUsersQuery({ username: sani.sanitize(newUser.username) })
+      .then((users) => {
         // Make sure user doesn't already exist
         if (users.length >= 1) {
           return reject(new errors.CustomError('A user with a matching username already exists.', 403));
         }
+
         // Create the new user
         // We should just need to sanitize the input, the model should handle
         // data validation
         const user = new User(sani.sanitize(newUser));
-        user.save((saveErr) => {
-          if (saveErr) {
-            return reject(new errors.CustomError('Save failed.'));
-          }
-          return resolve(user);
-        });
-      });
-    }));
+        return user.save();
+      })
+      // Find the default
+      .then((user) => {
+        createdUser = user;
+        return OrgController.findOrgsQuery({ id: 'default' });
+      })
+      .then((orgs) => {
+        // Add user to default org read/write permissions
+        orgs[0].permissions.read.push(createdUser._id.toString());
+        orgs[0].permissions.write.push(createdUser._id.toString());
+
+        // Save the updated org
+        return orgs[0].save();
+      })
+      .then(() => resolve(createdUser))
+      .catch((error) => reject(error));
+    });
   }
 
 
@@ -251,10 +257,12 @@ class UserController {
         const props = Object.keys(newUserData);
         // Get a list of validators
         const userValidators = validators.user;
+        // Get list of parameters which can be updated from model
+        const validUpdateFields = user.getValidUpdateFields();
 
         for (let i = 0; i < props.length; i++) {
           // Error check - make sure the properties exist and can be changed
-          if (!user.isUpdateAllowed(props[i])) {
+          if (!validUpdateFields.includes(props[i])) {
             return reject(new errors.CustomError(`User property [${props[i]}] cannot be changed.`, 403));
           }
 
@@ -312,7 +320,7 @@ class UserController {
    * @param {String} usernameToDelete  The username of the user to be deleted.
    */
   static removeUser(requestingUser, usernameToDelete) {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       try {
         utils.assertAdmin(requestingUser);
       }
@@ -326,20 +334,71 @@ class UserController {
       }
 
       const username = sani.sanitize(usernameToDelete);
+      let foundUser;
 
-      // Find the user first to ensure their existence
+      // Get user object
       UserController.findUser(username)
       .then((user) => {
-        // Do the deletion
-        user.remove((err) => {
-          if (err) {
-            return reject(new errors.CustomError('Find and delete failed.'));
-          }
-          return resolve(usernameToDelete);
-        });
+        // Set function-global user
+        foundUser = user;
+
+        // Find orgs which the user has read access on
+        return OrgController.findOrgsQuery(
+          { 'permissions.read': user._id, deleted: false }
+        );
       })
+      /* eslint-disable no-loop-func */
+      .then((orgs) => {
+        for (let i = 0; i < orgs.length; i++) {
+          // Remove user from permissions list in each org
+          orgs[i].permissions.read = orgs[i].permissions.read
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+          orgs[i].permissions.write = orgs[i].permissions.write
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+          orgs[i].permissions.admin = orgs[i].permissions.admin
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+
+          // Save updated org
+          orgs[i].save((error) => {
+            // If error, log it
+            if (error) {
+              M.log.critical(`${foundUser} was not removed from org ${orgs[i].id}.`);
+            }
+          });
+        }
+
+
+        // Find projects the user has read permissions on
+        return ProjController.findProjectsQuery(
+          { 'permissions.read': foundUser._id, deleted: false }
+        );
+      })
+      .then((projects) => {
+        for (let i = 0; i < projects.length; i++) {
+          // Remove user from permissions list in each project
+          projects[i].permissions.read = projects[i].permissions.read
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+          projects[i].permissions.write = projects[i].permissions.write
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+          projects[i].permissions.admin = projects[i].permissions.admin
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+
+          // Save updated project
+          projects[i].save((error) => {
+            // If error, log it
+            if (error) {
+              M.log.critical(`${foundUser} was not removed from project ${projects[i].id}.`);
+            }
+          });
+        }
+
+        // Remove the user
+        return foundUser.remove();
+      })
+      /* eslint-enable no-loop-func */
+      .then((user) => resolve(user.username))
       .catch((error) => reject(error));
-    }));
+    });
   }
 
 }
