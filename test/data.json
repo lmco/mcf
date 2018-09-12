@@ -436,13 +436,6 @@
       }
     },
     {
-      "id": "arcreactor",
-      "name": "Small Arc Reactor",
-      "org": {
-        "id": "starkhq"
-      }
-    },
-    {
       "id": "",
       "name": "denyme",
       "org": {

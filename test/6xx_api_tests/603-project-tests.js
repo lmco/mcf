@@ -308,7 +308,7 @@ function rejectPatchInvalidField(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(testData.invalidProjects[5])
+    body: JSON.stringify(testData.invalidProjects[4])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)

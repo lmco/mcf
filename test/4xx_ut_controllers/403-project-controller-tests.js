@@ -314,7 +314,7 @@ function createPeriodName(done) {
  * Expected error thrown: 'Bad Request'
  */
 function rejectDuplicateProjectId(done) {
-  const projData = testData.invalidProjects[1];
+  const projData = testData.projects[8];
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -336,7 +336,7 @@ function rejectDuplicateProjectId(done) {
  * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectId(done) {
-  const projData = testData.invalidProjects[2];
+  const projData = testData.invalidProjects[1];
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -358,7 +358,7 @@ function rejectInvalidProjectId(done) {
  * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectName(done) {
-  const projData = testData.invalidProjects[3];
+  const projData = testData.invalidProjects[2];
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -380,7 +380,7 @@ function rejectInvalidProjectName(done) {
  * Expected error thrown: 'Not Found'
  */
 function rejectInvalidOrgId(done) {
-  const projData = testData.invalidProjects[4];
+  const projData = testData.invalidProjects[3];
 
   // Create project
   ProjController.createProject(adminUser, projData)
