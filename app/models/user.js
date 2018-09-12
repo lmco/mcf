@@ -387,13 +387,10 @@ UserSchema.post('save', function(doc, next) {
  */
 UserSchema.methods.verifyPassword = function(pass) {
   return new Promise((resolve, reject) => {
-    console.log('Lets verify');
     // Hash the input plaintext password
     crypto.pbkdf2(pass, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
       // If err, reject it
       if (err) reject(err);
-      console.log(derivedKey.toString('hex'));
-      console.log(this.password);
 
       // Compare the hashed input password with the stored hashed password
       // and return it.

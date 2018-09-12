@@ -118,7 +118,6 @@ function verifyValidPassword(done) {
     done();
   })
   .catch((error) => {
-    console.log(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

@@ -202,11 +202,11 @@ class UserController {
         // data validation
         const user = new User(sani.sanitize(newUser));
         return user.save();
-        })
+      })
       // Find the default
       .then((user) => {
-        createdUser =  user;
-        return OrgController.findOrgsQuery({ id: 'default' })
+        createdUser = user;
+        return OrgController.findOrgsQuery({ id: 'default' });
       })
       .then((orgs) => {
         // Add user to default org read/write permissions
@@ -345,15 +345,16 @@ class UserController {
           { 'permissions.read': user._id, deleted: false }
         );
       })
+      /* eslint-disable no-loop-func */
       .then((orgs) => {
         for (let i = 0; i < orgs.length; i++) {
           // Remove user from permissions list in each org
-          // eslint-disable no-loop-func
-          orgs[i].permissions.read = orgs[i].permissions.read.filter(user =>
-            user._id.toString() !== foundUser._id.toString());
-          orgs[i].permissions.write = orgs[i].permissions.write.filter(user => user._id.toString() !== foundUser._id.toString());
-          orgs[i].permissions.admin = orgs[i].permissions.admin.filter(user => user._id.toString() !== foundUser._id.toString());
-          // eslint-enable no-loop-func
+          orgs[i].permissions.read = orgs[i].permissions.read
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+          orgs[i].permissions.write = orgs[i].permissions.write
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+          orgs[i].permissions.admin = orgs[i].permissions.admin
+          .filter(user => user._id.toString() !== foundUser._id.toString());
 
           // Save updated org
           orgs[i].save((error) => {
@@ -364,6 +365,7 @@ class UserController {
           });
         }
 
+
         // Find projects the user has read permissions on
         return ProjController.findProjectsQuery(
           { 'permissions.read': foundUser._id, deleted: false }
@@ -372,11 +374,12 @@ class UserController {
       .then((projects) => {
         for (let i = 0; i < projects.length; i++) {
           // Remove user from permissions list in each project
-          // eslint-disable no-loop-func
-          projects[i].permissions.read = projects[i].permissions.read.filter(user => user._id.toString() !== foundUser._id.toString());
-          projects[i].permissions.write = projects[i].permissions.write.filter(user => user._id.toString() !== foundUser._id.toString());
-          projects[i].permissions.admin = projects[i].permissions.admin.filter(user => user._id.toString() !== foundUser._id.toString());
-          // eslint-enable no-loop-func
+          projects[i].permissions.read = projects[i].permissions.read
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+          projects[i].permissions.write = projects[i].permissions.write
+          .filter(user => user._id.toString() !== foundUser._id.toString());
+          projects[i].permissions.admin = projects[i].permissions.admin
+          .filter(user => user._id.toString() !== foundUser._id.toString());
 
           // Save updated project
           projects[i].save((error) => {
@@ -390,6 +393,7 @@ class UserController {
         // Remove the user
         return foundUser.remove();
       })
+      /* eslint-enable no-loop-func */
       .then((user) => resolve(user.username))
       .catch((error) => reject(error));
     });

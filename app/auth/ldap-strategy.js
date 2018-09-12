@@ -27,7 +27,6 @@ const ldap = require('ldapjs');
 // Load MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
 const UserController = M.require('controllers.user-controller');
-const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
 
@@ -59,7 +58,6 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
   return new Promise((resolve, reject) => {
     // Define LDAP client handler
     let ldapClient = null;
-    console.log("First")
 
     // Connect to database
     ldapConnect()
@@ -284,7 +282,7 @@ function ldapSync(ldapUserObj) {
       userSave.email = ldapUserObj[ldapConfig.attributes.eMail];
 
       // Save updated user to database
-      UserController.createUser({ admin: true }, userSave)
+      foundUser.save()
       // Save successful, resolve user model object
       .then(userSaveUpdate => resolve(userSaveUpdate))
       // Save failed, reject error
@@ -307,7 +305,7 @@ function ldapSync(ldapUserObj) {
         provider: 'ldap'
       };
 
-     UserController.createUser({ admin: true }, initData)
+      UserController.createUser({ admin: true }, initData)
       // Save successful, resolve user model object
       .then(userSaveNew => resolve(userSaveNew))
       // Save failed, reject error
