@@ -111,7 +111,7 @@ class OrganizationController {
         }
 
         // Ensure user has read permissions on the org
-        if (!utils.checkAccess(user, orgs[0], 'read')) {
+        if (!orgs[0].getPermissions(user).read && !user.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -297,7 +297,7 @@ class OrganizationController {
       OrganizationController.findOrg(user, orgID)
       .then((org) => { // eslint-disable-line consistent-return
         // Error check - Make sure user is an org admin or system admin
-        if (!utils.checkAccess(user, org, 'admin')) {
+        if (!org.getPermissions(user).admin && !user.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -305,6 +305,8 @@ class OrganizationController {
         const orgUpdateFields = Object.keys(orgUpdate);
         // Get list of parameters which can be updated from model
         const validUpdateFields = org.getValidUpdateFields();
+        // Get a list of validators
+        const orgValidators = validators.org;
         // Allocate update val and field before for loop
         let updateVal = '';
         let updateField = '';
@@ -336,10 +338,10 @@ class OrganizationController {
             return reject(new errors.CustomError(`The Organization [${updateField}] is not of type String.`, 400));
           }
 
-          // Handle case where the org name is updated, and is invalid
-          if (updateField === 'name') {
-            if (!RegExp(validators.org.name).test(orgUpdate[updateField])) {
-              return reject(new errors.CustomError('The updated organization name is not valid.', 400));
+          // Error Check - If the field has a validator, ensure the field is valid
+          if (orgValidators[updateField]) {
+            if (!RegExp(orgValidators[updateField]).test(orgUpdate[updateField])) {
+              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
             }
           }
 
@@ -576,7 +578,7 @@ class OrganizationController {
       OrganizationController.findOrg(reqUser, orgID)
       .then((org) => { // eslint-disable-line consistent-return
         // Ensure user is an admin within the organization or system admin
-        if (!utils.checkAccess(reqUser, org, 'admin')) {
+        if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User cannot change organization permissions.', 401));
         }
 

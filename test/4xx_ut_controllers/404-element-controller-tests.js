@@ -26,6 +26,8 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const ElemController = M.require('controllers.element-controller');
 const User = M.require('models.user');
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 const testUtils = require('../../test/test-utils');
 
@@ -44,6 +46,7 @@ let proj = null;
 describe(M.getModuleName(module.filename), () => {
   /**
    * After: Connect to database. Create an admin user, organization, and project
+   * TODO: MBX-384 What does this function do?
    */
 
   before((done) => {
@@ -87,7 +90,7 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(error).to.equal(null);
       done();
     });
-  });
+  }); // END: before()
 
   /**
    * After: Remove Organization and project.
@@ -209,7 +212,7 @@ function createChildElement(done) {
         id: org.id
       }
     },
-    type: 'Block',
+    type: 'block',
     parent: 'elem0'
   };
 
@@ -251,7 +254,7 @@ function rejectElementInvalidParentType(done) {
         id: org.id
       }
     },
-    type: 'Block',
+    type: 'BLOCK',
     parent: 'elem1'
   };
 
@@ -469,17 +472,17 @@ function softDeleteElement(done) {
     // Find element again
     // NOTE: The 'true' parameter tells the function to include soft-deleted
     // elements in the results
-    ElemController.findElement(adminUser, org.id, proj.id, 'elem0', true)
-    .then((retElem2) => {
-      // Find succeded, verify element properties
-      chai.expect(retElem2.id).to.equal('elem0');
-      done();
-    })
-    .catch((error2) => {
-      // Expect no error
-      chai.expect(error2.message).to.equal(null);
-      done();
-    });
+    return ElemController.findElement(adminUser, org.id, proj.id, 'elem0', true);
+  })
+  .then((retElem) => {
+    // Find succeeded, verify element properties
+    chai.expect(retElem.id).to.equal('elem0');
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
   });
 }
 

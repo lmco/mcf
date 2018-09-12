@@ -74,7 +74,7 @@ class ProjectController {
       OrgController.findOrg(reqUser, orgID, softDeleted)
       .then((org) => {
         // Error Check - See if user has read permissions on org
-        if (!utils.checkAccess(reqUser, org, 'read')) {
+        if (!org.getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -143,7 +143,7 @@ class ProjectController {
 
         // Ensure user has permission to delete all projects
         Object.keys(projects).forEach((project) => {
-          if (!utils.checkAccess(reqUser, projects[project], 'admin')) {
+          if (!projects[project].getPermissions(reqUser).admin && !reqUser.admin) {
             return reject(new errors.CustomError(
               `User does not have permission to delete project ${projects[project].id}.`, 401
             ));
@@ -218,7 +218,7 @@ class ProjectController {
         }
 
         // Check Permissions
-        if (!utils.checkAccess(reqUser, projects[0], 'read')) {
+        if (!projects[0].getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -321,7 +321,7 @@ class ProjectController {
       OrgController.findOrg(reqUser, orgID)
       .then((org) => {
         // Check Permissions
-        if (!utils.checkAccess(reqUser, org, 'write')) {
+        if (!org.getPermissions(reqUser).write && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -408,7 +408,7 @@ class ProjectController {
       ProjectController.findProject(reqUser, orgID, projID)
       .then((project) => {
         // Check Permissions
-        if (!utils.checkAccess(reqUser, project, 'admin')) {
+        if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -416,6 +416,8 @@ class ProjectController {
         const projUpdateFields = Object.keys(projectUpdated);
         // Get list of parameters which can be updated from model
         const validUpdateFields = project.getValidUpdateFields();
+        // Get a list of validators
+        const projectValidators = validators.project;
         // Allocate update val and field before for loop
         let updateVal = '';
         let updateField = '';
@@ -447,6 +449,14 @@ class ProjectController {
             && (Project.schema.obj[updateField].type.schemaName !== 'Mixed')) {
             return reject(new errors.CustomError(`The Project [${updateField}] is not of type String.`, 400));
           }
+
+          // Error Check - If the field has a validator, ensure the field is valid
+          if (projectValidators[updateField]) {
+            if (!RegExp(projectValidators[updateField]).test(projectUpdated[updateField])) {
+              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
+            }
+          }
+
           // Updates each individual tag that was provided.
           if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
             // eslint-disable-next-line no-loop-func
@@ -650,7 +660,7 @@ class ProjectController {
         let permissionsList = [];
 
         // Check permissions
-        if (!utils.checkAccess(reqUser, project, 'read')) {
+        if (!project.getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -747,7 +757,7 @@ class ProjectController {
       ProjectController.findProject(reqUser, organizationID, projectID)
       .then((project) => {
         // Check permissions
-        if (!utils.checkAccess(reqUser, project, 'admin')) {
+        if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 

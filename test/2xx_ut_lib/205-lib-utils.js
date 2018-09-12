@@ -22,19 +22,7 @@
 const chai = require('chai');
 
 // Load MBEE modules
-const OrgController = M.require('controllers.organization-controller');
-const ProjectController = M.require('controllers.project-controller');
-const UserController = M.require('controllers.user-controller');
-const User = M.require('models.user');
-const db = M.require('lib.db');
 const utils = M.require('lib.utils');
-
-// Define global variables
-let adminUser = null;
-let nonAdminUser = null;
-let org = null;
-let intProj = null;
-let privProj = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -44,107 +32,6 @@ let privProj = null;
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  /**
-   * Before: Connect to database, Create admin and non-admin user, projects, orgs
-   */
-  before((done) => {
-    // Connect to the database
-    db.connect();
-
-    // Create new admin user
-    adminUser = new User({
-      username: 'adminuser',
-      password: 'password',
-      admin: true
-    });
-
-    // Save admin user
-    adminUser.save((saveUserErr) => {
-      chai.expect(saveUserErr).to.equal(null);
-
-      // Create new non-admin user
-      const nonAdminData = {
-        username: 'nonadminuser',
-        password: 'Password123'
-      };
-      UserController.createUser(adminUser, nonAdminData)
-      .then((user) => {
-        nonAdminUser = user;
-
-        // Creating global org
-        return OrgController.createOrg(adminUser, { id: 'orgid', name: 'Org Name' });
-      })
-      .then((retOrg) => {
-        org = retOrg;
-
-        // Create internal project
-        const intProjData = {
-          id: 'intproj',
-          name: 'Internal Project',
-          org: {
-            id: org.id
-          },
-          visibility: 'internal'
-        };
-        return ProjectController.createProject(adminUser, intProjData);
-      })
-      .then((proj) => {
-        intProj = proj;
-
-        // Create private project
-        const privProjData = {
-          id: 'privproj',
-          name: 'Private Project',
-          org: {
-            id: org.id
-          },
-          visibility: 'private'
-        };
-        return ProjectController.createProject(adminUser, privProjData);
-      })
-      .then((proj) => {
-        privProj = proj;
-        done();
-      })
-      .catch((error) => {
-        chai.expect(error.message).to.equal(null);
-        done();
-      });
-    });
-  });
-
-  /**
-   * After: Close database connection, deletes module level users, projects, orgs
-   */
-  after((done) => {
-    // Remove org
-    OrgController.removeOrg(adminUser, 'orgid', { soft: false })
-
-    // Remove non-admin user
-    .then(() => UserController.removeUser(adminUser, 'nonadminuser'))
-    .then(() => {
-      // Remove admin user
-      User.findOne({
-        username: 'adminuser'
-      }, (err, foundUser) => {
-        chai.expect(err).to.equal(null);
-        foundUser.remove((err2) => {
-          chai.expect(err2).to.equal(null);
-
-          // Disconnect database
-          db.disconnect();
-          done();
-        });
-      });
-    })
-    .catch((error) => {
-      chai.expect(error.message).to.equal(null);
-      // Disconnect database
-      db.disconnect();
-      done();
-    });
-  });
-
   it('should check that a string is a string and succeed', stringIsString);
   it('should check that a number is a string and fail', numberIsString);
   it('should check that an object is an object and succeed', objectIsObject);
@@ -158,8 +45,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should parse a valid uid', parseValidUID);
   it('should try to parse an invalid uid and fail', parseInvalidUID);
   it('should parse a valid uid and get the second element', parseValidUIDSecondElement);
-  it('should return permissions on an internal project', permissionsInternalProject);
-  it('should return permissions on a private project', permissionsPrivateProject);
+  it('should title-case a valid word', validTitleCase);
+  it('should NOT title-case an invalid word', invalidTitleCase);
 }); // END: describe()
 
 /* --------------------( Test Data )-------------------- */
@@ -384,56 +271,31 @@ function parseValidUIDSecondElement(done) {
 }
 
 /**
- * @description Test internal project visibility. Gives non-admin user within the same organization
- * read access to an 'internal' project.
+ * @description Test a valid word is title-cased.
  */
-function permissionsInternalProject(done) {
-  // Admin sets read permission for non-admin user
-  OrgController.setPermissions(adminUser, org.id, nonAdminUser, 'read')
-  // Find the project
-  .then(() => ProjectController.findProject(adminUser, org.id, intProj.id))
-  .then((proj) => {
-    // Get non-admin permission from current
-    const intProjPerm = utils.getPermissionStatus(nonAdminUser, proj);
-    // Check that the non-admin user now has read permission
-    chai.expect(intProjPerm).to.include('read');
+function validTitleCase(done) {
+  // Initialize valid word
+  const word = 'heLLo156';
 
-    // Checks non-admin has read permission
-    const intProjRead = utils.checkAccess(nonAdminUser, proj, 'read');
-    chai.expect(intProjRead).to.equal(true);
+  // Title-Case the word
+  const titleCased = utils.toTitleCase(word);
 
-    // Checks non-admin has write permission, expected to be false
-    const intProjWrite = utils.checkAccess(nonAdminUser, proj, 'write');
-    chai.expect(intProjWrite).to.equal(false);
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.message).to.equal(null);
-    done();
-  });
+  // Expect word to be title-cased
+  chai.expect(titleCased).to.equal('Hello156');
+  done();
 }
 
 /**
- * @description Test user permissions on a private project
- * when the user is not part of the project within the same organization.
+ * @description Tests an invalid word is NOT title-cased
  */
-function permissionsPrivateProject(done) {
-  // Find project
-  ProjectController.findProject(adminUser, org.id, privProj.id)
-  .then((proj) => {
-    // Get project's permission for non-admin user
-    const privProjPerm = utils.getPermissionStatus(nonAdminUser, proj);
+function invalidTitleCase(done) {
+  // Initialize invalid word
+  const word = '123 Goodbye';
 
-    // Test permission to be empty
-    chai.expect(privProjPerm).to.be.empty; // eslint-disable-line no-unused-expressions
+  // Title-Case the word
+  const titleCased = utils.toTitleCase(word);
 
-    // Check if non-admin user has read access
-    const privProjRead = utils.checkAccess(nonAdminUser, proj, 'read');
-    chai.expect(privProjRead).to.equal(false);
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.message).to.equal(null);
-    done();
-  });
+  // Expect the word to NOT have changed
+  chai.expect(titleCased).to.equal(word);
+  done();
 }

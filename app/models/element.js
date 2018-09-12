@@ -1,80 +1,72 @@
-/******************************************************************************
- * Classification: UNCLASSIFIED                                               *
- *                                                                            *
- * Copyright (C) 2018, Lockheed Martin Corporation                            *
- *                                                                            *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.        *
- * It is not approved for public release or redistribution.                   *
- *                                                                            *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export  *
- * control laws. Contact legal and export compliance prior to distribution.   *
- ******************************************************************************/
 /**
- * @module models.element
+ * Classification: UNCLASSIFIED
+ *
+ * @module models.elements
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description
- *
- * <p>This file defines the data model and schema for Elements. Using
- * <a href="http://mongoosejs.com/docs/discriminators.html">Mongoose discriminators</a>,
- * a variety of 'types' of elements are defined that each inherit the base
- * schema definition from the more generic 'Element'.</p>
+ * <p>Defines the element data model. Using
+ * <a href="http://mongoosejs.com/docs/discriminators.html">
+ * Mongoose discriminators</a>, different 'types' of elements are defined such
+ * that each inherit the base schema from the generic 'Element'.</p>
  *
  * <p>The following element types are defined: Block, Relationship, and Package.
+ * </p>
  *
- * Element:
- *   Block Element:
- *     Currently, a block does not extend the Element schema other than applying
- *     adding the 'type' of 'Block'.
+ * <p><b>Block</b> does not extend the Element schema other
+ * than adding the 'type' of 'Block'.</p>
  *
- *   Relationship Element:
- *     Relationships add 'source' and 'target' fields
- *     that reference other elements, allowing relationships to represent a link
- *     between other elements.
+ * <p><b>Relationship</b> adds 'source' and 'target' fields that reference
+ * other elements, allowing relationships to represent a link between other
+ * elements.</p>
  *
- *   Package Element:
- *     A package adds a 'contains' field which references
- *     other elements, allowing packages to be used to structure the model.</p>
+ * <p><b>Package</b> adds a 'contains' field which references other elements,
+ * allowing packages to be used to structure the model.</p>
  *
  * <p>A project will have one root element whose "parent" field will
  * be null. All other elements will have a parent that should be a package (
  * either the root package or some other package in the hierarchy).</p>
- *
- * @tutorial  elements
  */
 
-// Load node modules
+// NPM modules
 const mongoose = require('mongoose');
 const uuidv4 = require('uuid/v4');
 
-// Load MBEE modules
+// MBEE modules
 const validators = M.require('lib.validators');
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };
 
-/******************************************************************************
- * Element Model
- ******************************************************************************/
+
+/* --------------------------( Schema Definitions )-------------------------- */
 
 /**
- * @class  Element
- *
- * @classdesc Defines the schema for an Element
+ * @description The base schema definition inherited by all other element types.
  */
+// TODO: MBX-418, Document element Schema in alignment with organization model
 const ElementSchema = new mongoose.Schema({
-
   /**
-   * @memberOf Element
-   * @property {String} uid
-   *
    * @description Automatically generated ID. The concatenation of organization
    * id, project id, and element id, separated by colon.
-   * Limits betwwen 2 to 128 characters.
+   * Limits between 2 to 128 characters.
    *
    *   Ex: <organization id>:<project id,>:<element id>
    *       OrganizationA:ProjectX:ModelElementA
+   *
+   * @memberOf Element
+   * @property {String} uid
+   * @type String
    */
   uid: {
     type: String,
@@ -82,7 +74,7 @@ const ElementSchema = new mongoose.Schema({
     index: true,
     unique: true,
     match: RegExp(validators.element.uid),
-    maxlength: [128, 'Element UID is too long'],
+    maxlength: [255, 'Element UID is too long'],
     minlength: [2, 'Element UID is too short']
   },
 
@@ -99,7 +91,7 @@ const ElementSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: RegExp(validators.element.id),
-    maxlength: [36, 'Element ID is too long'],
+    maxlength: [64, 'Element ID is too long'],
     minlength: [2, 'Element ID is too short']
   },
 
@@ -120,7 +112,8 @@ const ElementSchema = new mongoose.Schema({
     unique: true,
     set: function(v) {
       return v;
-    }
+    },
+    match: RegExp(validators.element.uuid)
   },
 
   /**
@@ -187,7 +180,6 @@ const ElementSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed
   },
 
-
   /**
    * @memberOf Element
    * @property {Date} createdOn
@@ -229,7 +221,6 @@ const ElementSchema = new mongoose.Schema({
     default: null
   },
 
-
   /**
    * @memberOf Element
    * @property {Boolean} deleted
@@ -248,20 +239,20 @@ const ElementSchema = new mongoose.Schema({
       return v;
     }
   }
-
 }, options); // end of ElementSchema
 
 // Add text indexing some of the element fields
 ElementSchema.index({ name: 'text', documentation: 'text' });
 
 /**
- * Run our pre-defined setters on save.
+ * Pre-save actions.
  */
 ElementSchema.pre('save', function(next) {
   // Run our defined setters
   this.updatedOn = '';
 
-  // Only set uuid if it hasn't already been set
+  // If UUID is not yet defined, we auto-generate when the element is saved.
+  // This allows UUID to be optionally specified on element creation.
   if (this.uuid === undefined || this.uuid === '') {
     this.uuid = uuidv4();
   }
@@ -269,57 +260,29 @@ ElementSchema.pre('save', function(next) {
 });
 
 /**
-  * Returns the fields which users are allowed to update on a element.
-  */
+ * Returns the fields which users are allowed to update on a element.
+ */
 ElementSchema.methods.getValidUpdateFields = function() {
   return ['name', 'delete', 'deletedOn', 'documentation', 'custom'];
 };
 
 /**
- * The Element Model
- * @type {Element}
+ * @description Defines the schema for a Block. A Block is an Element
+ * discriminator, meaning a Block inherits the schema from ElementSchema.
+ * Currently, block does not add any new properties to the schema.
  */
-const Element = mongoose.model('Element', ElementSchema);
-
-/******************************************************************************
- * Block Model
- ******************************************************************************/
+const BlockSchema = new mongoose.Schema({}, options);
 
 /**
- * Defines the schema for a Block. A Block is an Element discriminator, meaning
- * a Block is a type of Element. This means a Block inherits the schema
- * definition of an Element and may optionally extend it.
- */
-const BlockSchema = new mongoose.Schema({
-  // This space intentionally left blank
-}, options);
-
-/**
- * The Block model is an Element discriminator. That is to say a Block is a
- * type of Element. It shares the element's schema and may extend it.
- * @type {Block}
- */
-const Block = Element.discriminator('Block', BlockSchema);
-
-
-/******************************************************************************
- * Relationship Model
- ******************************************************************************/
-
-/**
- * Defines the schema for a Relationship. A Relationship is an Element
- * discriminator, meaning a Relationship is a type of Element. This means a
- * Relationship inherits the schema definition of an Element and may optionally
- * extend it.
- *
- * Specifically, a relationship extends elements by adding "source" and "target"
- * fields that reference other elements. Thus a relationship describes a
- * relationship or a one-way link between two elements.
+ * @description Defines the schema for a Relationship. A Relationship is an Element
+ * discriminator, meaning Relationship inherits the schema from ElementSchema.
+ * Relationship extends elements by adding "source" and "target" fields that
+ * reference other elements. A relationship should be used to describe a
+ * connection, link, etc. between two elements.
  */
 const RelationshipSchema = new mongoose.Schema({
-
   /**
-   * @memberOf Relationship
+   * @memberOf RelationshipSchema
    * @property {Schema.Types.ObjectId} source
    *
    * @description The relationship's source contains an ObjectId that references
@@ -346,28 +309,11 @@ const RelationshipSchema = new mongoose.Schema({
   }
 }, options);
 
-
 /**
- * The Relationship model is an Element discriminator. That is to say a
- * Relationship is a type of Element. It shares the element's schema and may
- * extend it.
- * @type {Relationship}
- */
-const Relationship = Element.discriminator('Relationship', RelationshipSchema);
-
-/******************************************************************************
- * Package Model
- ******************************************************************************/
-
-/**
- * Defines the schema for a Package. A Package is an Element
- * discriminator, meaning a Package is a type of Element. This means a
- * Package inherits the schema definition of an Element and may optionally
- * extend it.
- *
- * Specifically, a Package extends an Element by adding "contains" field that
- * reference other elements. Thus a Package, like its name indicates, provides
- * a way of packaging or grouping elements.
+ * @description Defines the schema for a Package. A Package is an Element
+ * discriminator, meaning Package inherits the schema from ElementSchema.
+ * Package extends an Element by adding a "contains" field that references
+ * other elements. A Package is used to structure the model and group elements.
  */
 const PackageSchema = new mongoose.Schema({
   /**
@@ -383,15 +329,17 @@ const PackageSchema = new mongoose.Schema({
   }]
 }, options);
 
-/**
- * The Relationship model is an Element discriminator. That is to say a
- * Relationship is a type of Element. It shares the element's schema and may
- * extend it.
- * @type {Relationship}
- */
+
+/* ------------------------------( Models )---------------------------------- */
+
+const Element = mongoose.model('Element', ElementSchema);
+const Block = Element.discriminator('Block', BlockSchema);
+const Relationship = Element.discriminator('Relationship', RelationshipSchema);
 const Package = Element.discriminator('Package', PackageSchema);
 
-// Expose models
+
+/* ----------------------------( Expose Models )----------------------------- */
+
 module.exports.Element = Element;
 module.exports.Block = Block;
 module.exports.Relationship = Relationship;

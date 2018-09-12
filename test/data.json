@@ -9,6 +9,40 @@
       "email": "tony.stark@starkindustries.com",
       "provider": "local",
       "admin": false
+    },
+    {
+      "username": "blackpanther",
+      "password": "Forwakanda123",
+      "fname": "Tchalla",
+      "lname": "Panther",
+      "custom": {
+        "location": "Wakanda"
+      }
+    },
+    {
+      "username": "njobu",
+      "password": "fatheroferik",
+      "fname": "NJobi",
+      "lname": "Panther Dad"
+    },
+    {
+      "username": "",
+      "password": "iamnotblackpanther",
+      "fname": "Not",
+      "lname": "Black Panther"
+    },
+    {
+      "username": "blackpanther",
+      "password": "Nottherealone123",
+      "fname": "Tchalla",
+      "lname": "Panther"
+    },
+    {
+      "username": "groot",
+      "password": "Iamgroot123",
+      "fname": "Groot",
+      "lname": "Tree",
+      "admin": false
     }
   ],
 
@@ -20,7 +54,44 @@
     {
         "id": "stark-industries",
         "name": "Stark Industries"
-    }],
+    },
+    {
+      "id": "boombox",
+      "name": "Star Lords Boombox",
+      "custom": {
+        "leader": "Star Lord"
+      }
+    },
+    {
+      "id": "gaurdians",
+      "name": "Gaurdians of Galaxy",
+      "permissions": {
+        "admin": "[adminUser._id]",
+        "write": "[adminUser._id]",
+        "read": "[adminUser._id]"
+      }
+    },
+    {
+      "id": "boombox",
+      "name": "Stolen boombox",
+      "custom": {
+        "leader": "Groot",
+        "musicType": "I am Groot"
+      }
+    },
+    {
+      "id": "boombox",
+      "name": "Back to Star Lord",
+      "custom": {
+        "leader": "Groot",
+        "musicType": "I am Groot"
+      }
+    },
+    {
+      "id": "boombox",
+      "name": "Star Lord Walkman"
+    }
+  ],
 
   "projects": [
     {
@@ -38,6 +109,10 @@
     {
       "id": "timeloop",
       "name": "Time Gem"
+    },
+    {
+      "id": "godslayer",
+      "name": "God Slayer"
     }
   ],
 
@@ -79,5 +154,40 @@
       "type": "Relationship",
       "id": "0003",
       "name": "Time looping"
-    }]
+    }],
+
+  "invalidNames": [
+    {
+      "lname": "KLAW@#$"
+    },
+    {
+      "lname": "Faker"
+    },
+    {
+      "name": []
+    },
+    {
+      "name": "betterreject"
+    },
+    {
+      "name": "New Name"
+    }
+  ],
+
+  "invalidUsername": [
+    {
+      "username": "goldpanther"
+    },
+    {
+      "username": "nopanther"
+    }],
+
+  "invalidPermissions": [
+    {
+      "permissions": "shouldNotChange"
+    },
+    {
+      "permissions": "overlord"
+    }
+  ]
 }

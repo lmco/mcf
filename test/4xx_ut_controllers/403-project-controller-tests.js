@@ -19,6 +19,9 @@ const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
+const User = M.require('models.user');
+const AuthController = M.require('lib.auth');
+const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const testUtils = require('../../test/test-utils');
@@ -190,7 +193,7 @@ function createProject(done) {
 function rejectImmutableField(done) {
   // Update project
   ProjController.updateProject(adminUser, org.id, 'ironman', { id: 'shouldnotchange' })
-  .then((proj) => {
+  .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
@@ -210,7 +213,7 @@ function rejectImmutableField(done) {
 function updateTypeError(done) {
   // Update project
   ProjController.updateProject(adminUser, org.id, 'ironman', { name: [] })
-  .then((proj) => {
+  .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
@@ -615,7 +618,7 @@ function rejectNonAdminProjectUpdate(done) {
 }
 
 /**
- * @decription Verifies correct permissions found on project.
+ * @description Verifies correct permissions found on project.
  */
 function findPerm(done) {
   // Find permissions
@@ -638,8 +641,7 @@ function findPerm(done) {
  * @description Admin user sets then verifies non-admin has write/read
  * permissions on project.
  */
-// TODO: If keeping function, remove the eslint-disable-line below
-function setPerm(done) { // eslint-disable-line no-unused-vars
+function setPerm(done) {
   // Admin sets permissions for non-admin
   ProjController.setPermissions(adminUser, 'starkhq', project.id.toString(), nonAdminUser, 'write')
   .then(() => ProjController.findProject(adminUser, 'starkhq', project.id.toString()))
@@ -708,12 +710,17 @@ function deleteProject(done) {
 
     // Check if elements still exist
     // Note: Elements are deleted with projects
-    Element.Element.findOne({ id: '0000' })
-    .exec((findElementError, element) => {
-      // Expect no element
-      chai.expect(element).to.equal(null);
-      done();
-    });
+    return Element.Element.findOne({ id: '0000' });
+  })
+  .then((element) => {
+    // Expect no element
+    chai.expect(element).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 

@@ -73,7 +73,7 @@ class ElementController {
       ProjController.findProject(reqUser, orgID, projID, softDeleted)
       .then((project) => {
         // Ensure user is part of the project
-        if (!utils.checkAccess(reqUser, project, 'read')) {
+        if (!project.getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -148,7 +148,7 @@ class ElementController {
       .then((elements) => {
         // Ensure user has permission to delete all elements
         Object.keys(elements).forEach((element) => {
-          if (!utils.checkAccess(reqUser, elements[element].project, 'admin')) {
+          if (!elements[element].project.getPermissions(reqUser).admin && !reqUser.admin) {
             return reject(new errors.CustomError(
               `User does not have permission to delete element ${elements[element].id}.`, 401
             ));
@@ -235,7 +235,7 @@ class ElementController {
           return reject(new errors.CustomError('More than one element found.', 400));
         }
 
-        if (!utils.checkAccess(reqUser, elements[0].project, 'read')) {
+        if (!elements[0].project.getPermissions(reqUser).read && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -345,7 +345,7 @@ class ElementController {
       const projID = sani.html(element.project.id);
       const orgID = sani.html(element.project.org.id);
       const elemUID = utils.createUID(orgID, projID, elemID);
-      const elementType = sani.html(element.type);
+      const elementType = utils.toTitleCase(sani.html(element.type));
 
       // Error check - make sure element ID and element name are valid
       if (!RegExp(validators.element.id).test(elemID)) {
@@ -356,7 +356,7 @@ class ElementController {
       ProjController.findProject(reqUser, orgID, projID)
       .then((proj) => {
         // Check Permissions
-        if (!utils.checkAccess(reqUser, proj, 'write')) {
+        if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
@@ -628,7 +628,7 @@ class ElementController {
       ElementController.findElement(reqUser, orgID, projID, elemID)
       .then((element) => {
         // Check Permissions
-        if (!utils.checkAccess(reqUser, element.project, 'admin')) {
+        if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -636,6 +636,8 @@ class ElementController {
         const elemUpdateFields = Object.keys(elementUpdated);
         // Get list of parameters which can be updated from model
         const validUpdateFields = element.getValidUpdateFields();
+        // Get a list of validators
+        const elementValidators = validators.element;
         // Allocate update val and field before for loop
         let updateVal = '';
         let updateField = '';
@@ -667,6 +669,13 @@ class ElementController {
           if (!utils.checkType([elementUpdated[updateField]], 'string')
             && (Element.Element.schema.obj[updateField].type.schemaName !== 'Mixed')) {
             return reject(new errors.CustomError(`The Element [${updateField}] is not of type String.`, 400));
+          }
+
+          // Error Check - If the field has a validator, ensure the field is valid
+          if (elementValidators[updateField]) {
+            if (!RegExp(elementValidators[updateField]).test(elementUpdated[updateField])) {
+              return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
+            }
           }
 
           // Updates each individual tag that was provided.
@@ -805,7 +814,7 @@ class ElementController {
       ElementController.findElement(reqUser, orgID, projID, elemID, true)
       .then((element) => {
         // Check Permissions
-        if (!utils.checkAccess(reqUser, element.project, 'admin')) {
+        if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 

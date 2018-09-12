@@ -124,7 +124,6 @@ class UserController {
       const query = sani.sanitize(usersQuery);
 
       User.find(query)
-      .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
       .exec((err, users) => {
         // Check if error occurred
         if (err) {
@@ -250,16 +249,19 @@ class UserController {
       .then((user) => {
         // Update user with properties found in newUserData
         const props = Object.keys(newUserData);
+        // Get a list of validators
+        const userValidators = validators.user;
+
         for (let i = 0; i < props.length; i++) {
           // Error check - make sure the properties exist and can be changed
           if (!user.isUpdateAllowed(props[i])) {
             return reject(new errors.CustomError(`User property [${props[i]}] cannot be changed.`, 403));
           }
 
-          // If updating name, making sure it is valid
-          if (props[i] === 'fname' || props[i] === 'lname') {
-            if (!RegExp(validators.user.name).test(newUserData[props[i]])) {
-              return reject(new errors.CustomError('Name is not valid.', 400));
+          // Error Check - If the field has a validator, ensure the field is valid
+          if (userValidators[props]) {
+            if (!RegExp(userValidators[props]).test(newUserData[props])) {
+              return reject(new errors.CustomError(`The updated ${props} is not valid.`, 403));
             }
           }
 
