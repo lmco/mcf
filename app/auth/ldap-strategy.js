@@ -27,7 +27,6 @@ const ldap = require('ldapjs');
 // Load MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
 const UserController = M.require('controllers.user-controller');
-const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
 
@@ -283,7 +282,7 @@ function ldapSync(ldapUserObj) {
       userSave.email = ldapUserObj[ldapConfig.attributes.eMail];
 
       // Save updated user to database
-      userSave.save()
+      foundUser.save()
       // Save successful, resolve user model object
       .then(userSaveUpdate => resolve(userSaveUpdate))
       // Save failed, reject error
@@ -299,8 +298,6 @@ function ldapSync(ldapUserObj) {
       // Initialize userData with LDAP information
       const initData = {
         username: ldapUserObj[ldapConfig.attributes.username],
-        // TODO: MBX-409 decide how to handle passwords in database for LDAP Strategy
-        password: (Math.random() + 1).toString(36).substring(7),
         fname: ldapUserObj[ldapConfig.attributes.firstName],
         preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
         lname: ldapUserObj[ldapConfig.attributes.lastName],
@@ -308,10 +305,7 @@ function ldapSync(ldapUserObj) {
         provider: 'ldap'
       };
 
-      // Create user model object using initData
-      const userSave = new User(initData);
-      // Save user to database
-      userSave.save()
+      UserController.createUser({ admin: true }, initData)
       // Save successful, resolve user model object
       .then(userSaveNew => resolve(userSaveNew))
       // Save failed, reject error

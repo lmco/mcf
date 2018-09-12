@@ -25,9 +25,6 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 
 // MBEE Modules
-const Organization = M.require('models.organization');
-const Project = M.require('models.project');
-const errors = M.require('lib.errors');
 const validators = M.require('lib.validators');
 
 /* ----------------------------( Element Model )----------------------------- */
@@ -60,7 +57,7 @@ const UserSchema = new mongoose.Schema({
      */
   password: {
     type: String,
-    required: true
+    required: false
   },
 
   /**
@@ -352,40 +349,19 @@ UserSchema.pre('save', function(next) {
   this.updatedOn = '';
 
   // Hash plaintext password
-  crypto.pbkdf2(this.password, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
-    // If an error occurred, throw it
-    if (err) throw err;
+  if (this.password) {
+    crypto.pbkdf2(this.password, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
+      // If an error occurred, throw it
+      if (err) throw err;
 
-    // Set user password to hashed password
-    this.password = derivedKey.toString('hex');
-
-    // Find default org
-    Organization.findOne({ id: 'default' })
-    .then((org) => {
-      // Map org read and write permissions to arrays
-      const membersRead = org.permissions.read.map(u => u._id.toString());
-      const membersWrite = org.permissions.write.map(u => u._id.toString());
-
-      // If user is not in org read/write permissions, add them
-      if (!membersRead.includes(this._id.toString())) {
-        org.permissions.read.push(this._id.toString());
-      }
-      if (!membersWrite.includes(this._id.toString())) {
-        org.permissions.write.push(this._id.toString());
-      }
-
-      // Save the updated org
-      return org.save();
-    })
-    .then(() => next())
-    .catch((error) => {
-      // If error occurs log it
-      M.log.error(error);
-
-      // Throw a more specific error
-      throw new errors.CustomError('Failed to add user to the default org.');
+      // Set user password to hashed password
+      this.password = derivedKey.toString('hex');
+      next();
     });
-  });
+  }
+  else {
+    next();
+  }
 });
 
 /**
@@ -401,57 +377,6 @@ UserSchema.post('save', function(doc, next) {
   });
 });
 
-/**
- * @memberOf  User
- * Run our pre-defined setters before delete.
- */
-// TODO: Move this code over to the User Controller (MBX-420)
-UserSchema.pre('remove', function(next) {
-  // Find the organization the user has permissions on
-  Organization.find({ 'permissions.read': this._id, deleted: false })
-  .exec((orgFindErr, orgs) => {
-    // Loop through organizations the user has permissions on
-    for (let i = 0; i < orgs.length; i++) {
-      Project.find({ org: orgs[i]._id, deleted: false })
-      .exec((projectFindErr, projs) => {
-        // Loop through projects the user has permissions on
-        for (let j = 0; j < projs.length; j++) {
-          // Remove permissions on each project
-          projs[j].permissions.read
-          .splice(projs[j].permissions.read.indexOf(this._id.toString()), 1);
-
-          projs[j].permissions.write
-          .splice(projs[j].permissions.write.indexOf(this._id.toString()), 1);
-
-          projs[j].permissions.admin
-          .splice(projs[j].permissions.admin.indexOf(this._id.toString()), 1);
-
-          // Save the updated project
-          projs[j].save((saveProjsErr) => {
-            if (saveProjsErr) {
-              // Throw error if deleting permission on project fail
-              throw new errors.CustomError(`Failed to remove user from project ${projs[j].name}.`);
-            }
-          });
-        }
-      });
-      // Remove permissions on each org
-      orgs[i].permissions.read.splice(orgs[i].permissions.read.indexOf(this._id.toString()), 1);
-      orgs[i].permissions.write.splice(orgs[i].permissions.write.indexOf(this._id.toString()), 1);
-      orgs[i].permissions.admin.splice(orgs[i].permissions.admin.indexOf(this._id.toString()), 1);
-
-      // Save the updated org
-      orgs[i].save((saveOrgsErr) => {
-        if (saveOrgsErr) {
-          // Throw error if deleting permissions on org fail
-          throw new errors.CustomError(`Failed to remove user from org ${orgs[i].name}.`);
-        }
-
-        next();
-      });
-    }
-  });
-});
 
 /* -----------------------------( User Methods )----------------------------- */
 
