@@ -22,6 +22,7 @@
 // Load node modules
 const fs = require('fs');
 const chai = require('chai');
+const path = require('path');
 const request = require('request');
 
 // Load MBEE modules
@@ -33,6 +34,7 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
 const test = M.config.test;
 let org = null;
 let adminUser = null;
@@ -82,15 +84,7 @@ describe(M.getModuleName(module.filename), () => {
           chai.expect(updatedUser).to.not.equal(null);
 
           // Create org data
-          const orgData = {
-            id: 'biochemistry',
-            name: 'Scientist',
-            permissions: {
-              admin: [updatedUser._id],
-              write: [updatedUser._id],
-              read: [updatedUser._id]
-            }
-          };
+          const orgData = testData.orgs[11];
 
           // Create organization via org controller
           OrgController.createOrg(updatedUser, orgData)
@@ -98,8 +92,8 @@ describe(M.getModuleName(module.filename), () => {
             // Set org to global variable
             org = retOrg;
             // Verify org was created correctly
-            chai.expect(retOrg.id).to.equal('biochemistry');
-            chai.expect(retOrg.name).to.equal('Scientist');
+            chai.expect(retOrg.id).to.equal(testData.orgs[11].id);
+            chai.expect(retOrg.name).to.equal(testData.orgs[11].name);
             chai.expect(retOrg.permissions.read).to.include(updatedUser._id.toString());
             chai.expect(retOrg.permissions.write).to.include(updatedUser._id.toString());
             chai.expect(retOrg.permissions.admin).to.include(updatedUser._id.toString());
@@ -121,10 +115,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the Organization
-    OrgController.removeOrg(adminUser, 'biochemistry', { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[11].id, { soft: false })
     .then((retOrg) => {
       // Verify deleted org
-      chai.expect(retOrg.id).to.equal('biochemistry');
+      chai.expect(retOrg.id).to.equal(testData.orgs[11].id);
 
       // Find the admin user
       return User.findOne({ username: M.config.test.username });
@@ -166,17 +160,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
+    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[12].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: 'hulk',
-      name: 'Bruce Banner',
-      org: {
-        id: org.id
-      }
-    })
+    body: JSON.stringify(testData.projects[12])
   },
   (err, response, body) => {
     // Expect no error
@@ -185,8 +173,8 @@ function postProject(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal('hulk');
-    chai.expect(json.name).to.equal('Bruce Banner');
+    chai.expect(json.id).to.equal(testData.projects[12].id);
+    chai.expect(json.name).to.equal(testData.projects[12].name);
     done();
   });
 }
@@ -197,17 +185,11 @@ function postProject(done) {
  */
 function postSecondProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/bettyross`,
+    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[13].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: 'bettyross',
-      name: 'Hulks GF',
-      org: {
-        id: org.id
-      }
-    })
+    body: JSON.stringify(testData.projects[13])
   },
   (err, response, body) => {
     // Expect no error
@@ -216,8 +198,8 @@ function postSecondProject(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal('bettyross');
-    chai.expect(json.name).to.equal('Hulks GF');
+    chai.expect(json.id).to.equal(testData.projects[13].id);
+    chai.expect(json.name).to.equal(testData.projects[13].name);
     done();
   });
 }
@@ -228,7 +210,7 @@ function postSecondProject(done) {
  */
 function getProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
+    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[12].id}`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -238,7 +220,7 @@ function getProject(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('Bruce Banner');
+    chai.expect(json.name).to.equal(testData.projects[12].name);
     done();
   });
 }
@@ -249,12 +231,12 @@ function getProject(done) {
  */
 function patchProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
+    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[14].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
-      name: 'Anger'
+      name: testData.projects[14].name
     })
   },
   (err, response, body) => {
@@ -264,7 +246,7 @@ function patchProject(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('Anger');
+    chai.expect(json.name).to.equal(testData.projects[14].name);
     done();
   });
 }
@@ -275,7 +257,7 @@ function patchProject(done) {
  */
 function getAllProjects(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects`,
+    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -296,17 +278,11 @@ function getAllProjects(done) {
  */
 function rejectPostOrgIdMismatch(done) {
   request({
-    url: `${test.url}/api/orgs/nohulk/projects/actuallyhulk`,
+    url: `${test.url}/api/orgs/${testData.invalidId[7].id}/projects/${testData.projects[15].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: 'brucebanner',
-      name: 'Bruce Banner',
-      org: {
-        id: org.id
-      }
-    })
+    body: JSON.stringify(testData.projects[15])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -326,14 +302,11 @@ function rejectPostOrgIdMismatch(done) {
  */
 function rejectPatchInvalidField(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
+    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[14].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({
-      id: 'hulktwopointoh',
-      name: 'New Hulk'
-    })
+    body: JSON.stringify(testData.invalidProjects[5])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -353,7 +326,7 @@ function rejectPatchInvalidField(done) {
  */
 function rejectDeleteNonexistingProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/fakehulk`,
+    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.invalidId[7].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -379,7 +352,7 @@ function rejectDeleteNonexistingProject(done) {
  */
 function deleteProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
+    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[14].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -402,7 +375,7 @@ function deleteProject(done) {
  */
 function deleteSecondProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/bettyross`,
+    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[14].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
