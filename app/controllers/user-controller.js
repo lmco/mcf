@@ -124,7 +124,6 @@ class UserController {
       const query = sani.sanitize(usersQuery);
 
       User.find(query)
-      .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
       .exec((err, users) => {
         // Check if error occurred
         if (err) {

@@ -1,54 +1,46 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module  models.user
+ * Classification: UNCLASSIFIED
+ *
+ * @module models.user
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This file creates a mongoose model to interact with the
- * MongoDB Database in order to find, save, update, and delete organizations.
+ * @description Defines the user data model.
  */
 
-// Load node modules
+// Node Modules
 const crypto = require('crypto');
+
+// NPM modules
 const mongoose = require('mongoose');
-const errors = M.require('lib.errors');
+
+// MBEE Modules
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
-
-// Load MBEE modules
+const errors = M.require('lib.errors');
 const validators = M.require('lib.validators');
 
-/******************************************************************************
- * Element Model
- ******************************************************************************/
+/* ----------------------------( Element Model )----------------------------- */
 
 /**
- * @class  User
+ * @namespace
  *
- * @classdesc Defines the User Schema
+ * @description Defines the User Schema
+ *
+ * @property {String} username - The users unique name
+ * // TODO: MBX-418, Document user Schema in alignment with organization model
  */
 const UserSchema = new mongoose.Schema({
-
-  /**
-     * @memberOf  User
-     * @property  username
-     * @type {String}
-     *
-     * @description The `username` property is the user's unique name.
-     * It is indexed for faster lookup.
-     * A username must be between 3 and 36 characters inclusive.
-     */
   username: {
     type: String,
     required: true,
@@ -94,6 +86,7 @@ const UserSchema = new mongoose.Schema({
   fname: {
     type: String,
     default: '',
+    match: RegExp(validators.user.fname),
     maxlength: [36, 'Too many characters in first name']
   },
 
@@ -108,7 +101,8 @@ const UserSchema = new mongoose.Schema({
   preferredName: {
     type: String,
     default: '',
-    maxlength: [36, 'Too many characters in first name']
+    match: RegExp(validators.user.fname),
+    maxlength: [36, 'Too many characters in preferred name']
   },
 
   /**
@@ -122,32 +116,9 @@ const UserSchema = new mongoose.Schema({
   lname: {
     type: String,
     default: '',
+    match: RegExp(validators.user.lname),
     maxlength: [36, 'Too many characters in last name']
   },
-
-  /**
-     * @memberOf  User
-     * @property  name
-     * @type  {String}
-     *
-     * @description The `name` property stores the user's full name.
-     * It it set based on the fname and lname properties.
-     */
-  name: {
-    type: String,
-    maxlength: [72, 'Name too long'],
-    trim: true,
-    default: function() {
-      return (`${this.fname} ${this.lname}`).trim();
-    },
-    set: function() {
-      return (`${this.fname} ${this.lname}`).trim();
-    },
-    get: function() {
-      return (`${this.fname} ${this.lname}`).trim();
-    }
-  },
-
 
   /**
      * @memberOf  User
@@ -164,11 +135,11 @@ const UserSchema = new mongoose.Schema({
 
   /**
      * @memberOf  User
-     * @property  isLDAPUser
-     * @type  {Boolean}
+     * @property  provider
+     * @type  {String}
      *
-     * @description The `isLDAPUser` property defines whether or not the user is an LDAP
-     * user. This impacts how the user is authenticated
+     * @description The `provider` property defines the authentication provider
+     * for the user.
      */
   provider: {
     type: String,
@@ -188,6 +159,7 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
     set: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
+      // Prevents this field from being altered
       return this.createdOn;
     }
   },
@@ -199,7 +171,8 @@ const UserSchema = new mongoose.Schema({
      * @type  {Date}
      *
      * @description The date on which the user object was last updated.
-     * The setter is run using pre-save middleware.
+     * The setter is run using pre-save middleware, and does not need manually
+     * set.
      */
   updatedOn: {
     type: Date,
@@ -212,14 +185,13 @@ const UserSchema = new mongoose.Schema({
      * @property  deletedOn
      * @type  {Date}
      *
-     * @description The date on which the user was deleted.
-     * This is used to provide soft-delete functionality.
+     * @description The date on which the user was deleted. This is used to
+     * provide soft-delete functionality and does not need to be manually set.
      */
   deletedOn: {
     type: Date,
     default: null
   },
-
 
   /**
      * @memberOf  User
@@ -234,6 +206,7 @@ const UserSchema = new mongoose.Schema({
     default: false,
     set: function(v) {
       if (v) {
+        // Set the deletedOn date
         this.deletedOn = Date.now();
       }
       return v;
@@ -245,14 +218,13 @@ const UserSchema = new mongoose.Schema({
    * @property  custom
    * @type  {Schema.Types.Mixed}
    *
-   * @description The user's custom tags. This contains arbitrary key-value pairs of strings
-   * used to represent additional model data.
+   * @description The user's custom tags. This contains arbitrary key-value
+   * pairs of strings used to represent additional model data.
    */
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
   }
-
 });
 
 /**
@@ -339,42 +311,93 @@ UserSchema.virtual('proj.admin', {
   justOne: false
 });
 
-/* eslint-enable prefer-arrow-callback */
+/**
+ *
+ * @description Returns the full name of the user
+ */
+UserSchema.virtual('name')
+.get(function() {
+  return `${this.fname} ${this.lname}`;
+});
 
+
+/* ---------------------------( User Middleware )---------------------------- */
+
+/**
+ * @memberOf  User
+ * Run our pre-defined setters on find
+ */
+UserSchema.pre('find', function(next) {
+  // Populate virtual fields prior to find
+  this.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin');
+  next();
+});
+
+/**
+ * @memberOf  User
+ * Run our pre-defined setters on findOne
+ */
+UserSchema.pre('findOne', function(next) {
+  // Populate virtual fields prior to findOne
+  this.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin');
+  next();
+});
 
 /**
  * @memberOf  User
  * Run our pre-defined setters on save.
  */
 UserSchema.pre('save', function(next) {
-  // Run our defined setters
-  this.name = '';
+  // Run updatedOn setter
   this.updatedOn = '';
-  this.deleted = '';
+
+  // Hash plaintext password
   crypto.pbkdf2(this.password, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
+    // If an error occurred, throw it
     if (err) throw err;
+
+    // Set user password to hashed password
     this.password = derivedKey.toString('hex');
-    // Add the user to default org
-    // Using org model since we don't have a requesting user.
+
+    // Find default org
     Organization.findOne({ id: 'default' })
-    .exec((err2, org) => {
-      if (err2) throw err2;
+    .then((org) => {
+      // Map org read and write permissions to arrays
       const membersRead = org.permissions.read.map(u => u._id.toString());
       const membersWrite = org.permissions.write.map(u => u._id.toString());
+
+      // If user is not in org read/write permissions, add them
       if (!membersRead.includes(this._id.toString())) {
         org.permissions.read.push(this._id.toString());
       }
       if (!membersWrite.includes(this._id.toString())) {
         org.permissions.write.push(this._id.toString());
       }
-      org.save((saveErr) => {
-        if (saveErr) {
-          // If error occurs, return it
-          throw new errors.CustomError('Failed to add user to the default org.');
-        }
-        next();
-      });
+
+      // Save the updated org
+      return org.save();
+    })
+    .then(() => next())
+    .catch((error) => {
+      // If error occurs log it
+      M.log.error(error);
+
+      // Throw a more specific error
+      throw new errors.CustomError('Failed to add user to the default org.');
     });
+  });
+});
+
+/**
+ * @memberOf  User
+ * Run our pre-defined post save setters
+ */
+UserSchema.post('save', function(doc, next) {
+  // Populate virtual fields, and return populated document
+  doc.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
+  .execPopulate()
+  .then(function() {
+    next();
   });
 });
 
@@ -382,6 +405,7 @@ UserSchema.pre('save', function(next) {
  * @memberOf  User
  * Run our pre-defined setters before delete.
  */
+// TODO: Move this code over to the User Controller (MBX-420)
 UserSchema.pre('remove', function(next) {
   // Find the organization the user has permissions on
   Organization.find({ 'permissions.read': this._id, deleted: false })
@@ -429,21 +453,31 @@ UserSchema.pre('remove', function(next) {
   });
 });
 
+/* -----------------------------( User Methods )----------------------------- */
+
+/**
+ * @description Verifies a password matches the stored hashed password.
+ *
+ * @param {String} pass  The password to be compared with the stored password.
+ */
 UserSchema.methods.verifyPassword = function(pass) {
   return new Promise((resolve, reject) => {
+    // Hash the input plaintext password
     crypto.pbkdf2(pass, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
+      // If err, reject it
       if (err) reject(err);
-      if (derivedKey.toString('hex') === this.password) {
-        return resolve(true);
-      }
-      return resolve(false);
+
+      // Compare the hashed input password with the stored hashed password
+      // and return it.
+      return resolve(derivedKey.toString('hex') === this.password);
     });
   });
 };
 
 /**
- * An object contining what is allowed on an update to a user.
+ * An object containing what is allowed on an update to a user.
  */
+// TODO: Change to an array to be consistent with other models, update in controller (MBX-421)
 UserSchema.methods.isUpdateAllowed = function(field) {
   const allowedMap = {
     username: false,
@@ -463,16 +497,8 @@ UserSchema.methods.isUpdateAllowed = function(field) {
   return allowedMap[field];
 };
 
-
 /**
- * Get the user's full name. This should be identical to user.name
- */
-UserSchema.methods.getFullName = function() {
-  return `${this.fname} ${this.lname}`;
-};
-
-/**
- * Returns the user's public data.
+ * @description Returns the user's public data.
  */
 UserSchema.methods.getPublicData = function() {
   return {
@@ -488,9 +514,14 @@ UserSchema.methods.getPublicData = function() {
 };
 
 
+/* ---------------------------( User Properties )---------------------------- */
+
 // Necessary for virtual getters to be executed.
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });
 
-// Export mongoose model as "Organization"
+
+/* -------------------------( User Schema Export )--------------------------- */
+
+// Export mongoose model as 'User'
 module.exports = mongoose.model('User', UserSchema);

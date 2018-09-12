@@ -224,7 +224,6 @@ function verifyUserName(done) {
   chai.expect(RegExp(validators.user.fname).test('9mike')).to.equal(false);
   chai.expect(RegExp(validators.user.lname).test(' space first')).to.equal(false);
   chai.expect(RegExp(validators.user.fname).test('-first')).to.equal(false);
-  chai.expect(RegExp(validators.user.lname).test('')).to.equal(false);
   done();
 }
 

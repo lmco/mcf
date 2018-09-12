@@ -111,7 +111,7 @@ class OrganizationController {
         }
 
         // Ensure user has read permissions on the org
-        if (!utils.checkAccess(user, orgs[0], 'read')) {
+        if (!orgs[0].getPermissions(user).read && !user.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -297,7 +297,7 @@ class OrganizationController {
       OrganizationController.findOrg(user, orgID)
       .then((org) => { // eslint-disable-line consistent-return
         // Error check - Make sure user is an org admin or system admin
-        if (!utils.checkAccess(user, org, 'admin')) {
+        if (!org.getPermissions(user).admin && !user.admin) {
           return reject(new errors.CustomError('User does not have permissions.', 401));
         }
 
@@ -578,7 +578,7 @@ class OrganizationController {
       OrganizationController.findOrg(reqUser, orgID)
       .then((org) => { // eslint-disable-line consistent-return
         // Ensure user is an admin within the organization or system admin
-        if (!utils.checkAccess(reqUser, org, 'admin')) {
+        if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new errors.CustomError('User cannot change organization permissions.', 401));
         }
 
