@@ -160,7 +160,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postProject(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[12].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[12].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -185,7 +185,7 @@ function postProject(done) {
  */
 function postSecondProject(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[13].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[13].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -210,7 +210,7 @@ function postSecondProject(done) {
  */
 function getProject(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[12].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[12].id}`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -231,7 +231,7 @@ function getProject(done) {
  */
 function patchProject(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[14].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[14].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -257,7 +257,7 @@ function patchProject(done) {
  */
 function getAllProjects(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects`,
+    url: `${test.url}/api/orgs/${org.id}/projects`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -280,7 +280,7 @@ function getAllProjects(done) {
  */
 function rejectPostOrgIdMismatch(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[16].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[16].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -304,7 +304,7 @@ function rejectPostOrgIdMismatch(done) {
  */
 function rejectPatchInvalidField(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[14].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[14].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -328,7 +328,7 @@ function rejectPatchInvalidField(done) {
  */
 function rejectDeleteNonexistingProject(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.invalidId[7].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.invalidId[7].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -354,7 +354,7 @@ function rejectDeleteNonexistingProject(done) {
  */
 function deleteProject(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[14].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[14].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -377,7 +377,7 @@ function deleteProject(done) {
  */
 function deleteSecondProject(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[11].id}/projects/${testData.projects[13].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[13].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -399,7 +399,7 @@ function deleteSecondProject(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${testData.users[1].username}:${testData.users[1].password}`;
+  const c = `${M.config.test.username}:${M.config.test.password}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

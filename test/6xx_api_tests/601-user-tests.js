@@ -424,7 +424,7 @@ function deleteUser(done) {
  * @description Helper function for setting the request header.
  */
 function getHeaders() {
-  const formattedCreds = `${testData.users[1].username}:${testData.users[1].password}`;
+  const formattedCreds = `${M.config.test.username}:${M.config.test.password}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',
