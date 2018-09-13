@@ -816,7 +816,7 @@ class ProjectController {
                 return resolve(projectSaved);
               }
               // Update org read permissions if needed
-              return OrgController.setPermissions(reqUser, orgID, setUser, 'read');
+              return OrgController.setPermissions(reqUser, orgID, setUser.username, 'read');
             })
             .then(() => resolve(projectSaved))
             .catch((findOrgPermErr) => reject(findOrgPermErr)); // Closing find org permissions

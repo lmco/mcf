@@ -192,11 +192,11 @@ function rejectInvalidUsernamePost(done) {
     // Expect request to succeed
     chai.expect(err).to.equal(null);
     // Expect status 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(response.statusCode).to.equal(500);
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Expected response error: 'Bad Request'
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -389,7 +389,7 @@ function deleteUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json).to.equal(testData.users[9].username);
+    chai.expect(json.username).to.equal(testData.users[9].username);
     done();
   });
 }

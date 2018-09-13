@@ -23,31 +23,32 @@ const mongoose = require('mongoose');
 // MBEE modules
 const validators = M.require('lib.validators');
 
-/* --------------------( Organization Model )-------------------- */
+
+/* -------------------------( Organization Schema )-------------------------- */
+
 /**
  * @namespace
  *
  * @description Defines the Organization Schema
  *
- * @property {String} id    - The organization's unique ID.
- * @property {String} name  - The organization's name.
+ * @property {String} id - The organization's unique ID.
+ * @property {String} name - The organization's name.
  * @property {String} permissions - An object whose keys identify an
  * organization's roles. The key values are an array of references to users
  * who hold those roles.
- * @property {String} permissions.read - An array of references to Users who
+ * @property {User} permissions.read - An array of references to Users who
  * have read access.
- * @property {String} permissions.write - An array of references to Users who
+ * @property {User} permissions.write - An array of references to Users who
  * have write access.
- * @property {String} permissions.admin - An array of references to Users who
+ * @property {User} permissions.admin - An array of references to Users who
  * have admin access.
- * @property {Date} deletedOn - The date an Organization was soft
- * deleted or null if not deleted.
- * @property delete - A boolean value defining if an organization
- * has been soft deleted.
- * @property {Schema.Types.Mixed} custom - JSON data used to store additional
- * data.
+ * @property {Date} deletedOn - The date the Organization was soft deleted or
+ * null if not deleted.
+ * @property {Boolean} deleted - Indicates if an organization has been soft deleted.
+ * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
  * @property {virtual} project - A virtual field containing an array of Project
  * objects.
+ *
  */
 const OrganizationSchema = new mongoose.Schema({
   id: {
@@ -105,10 +106,11 @@ OrganizationSchema.virtual('projects', {
 });
 
 
-/* --------------------( Organization Methods )-------------------- */
+/* -------------------------( Organization Methods )------------------------- */
+
 /**
- * @memberof OrganizationSchema
  * @description Returns an organization's public data.
+ * @memberof OrganizationSchema
  */
 OrganizationSchema.methods.getPublicData = function() {
   // Map read, write, and admin references to only contain user public data
@@ -120,26 +122,26 @@ OrganizationSchema.methods.getPublicData = function() {
 };
 
 /**
- * @memberof OrganizationSchema
  * @description Returns supported permission levels
+ * @memberof OrganizationSchema
  */
 OrganizationSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
 
 /**
- * @memberof OrganizationSchema
  * @description Returns organization fields that can be changed
+ * @memberof OrganizationSchema
  */
 OrganizationSchema.methods.getValidUpdateFields = function() {
   return ['name', 'custom'];
 };
 
-
 /**
  * @description Returns the permissions a user has on the org
  *
  * @param {User} user  The user whose permissions are being returned
+ * @memberof OrganizationSchema
  *
  * @returns {Object} A json object with keys being the permission levels
  * and values being booleans
@@ -158,11 +160,15 @@ OrganizationSchema.methods.getPermissions = function(user) {
   };
 };
 
-/* --------------------( Organization Properties )-------------------- */
+
+/* -----------------------( Organization Properties )------------------------ */
+
 // Required for virtual getters to return JSON object information
 OrganizationSchema.set('toJSON', { virtuals: true });
 OrganizationSchema.set('toObject', { virtuals: true });
 
-/* --------------------( Organization Schema Export )-------------------- */
+
+/* ----------------------( Organization Schema Export )---------------------- */
+
 // Export mongoose model as "Organization"
 module.exports = mongoose.model('Organization', OrganizationSchema);

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module controllers.api_controller
+ * @module controllers.user-controller
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -60,6 +60,7 @@ module.exports = {
 // TODO: add options param and discuss it(search options) MBX-427
 function findUsers() {
   return new Promise((resolve, reject) => {
+    // Find NOT soft deleted users
     findUsersQuery({ deletedOn: null })
     .then((users) => resolve(users))
     .catch((error) => reject(error));
@@ -96,8 +97,9 @@ function findUser(searchedUsername) {
         return reject(new errors.CustomError('User not found.', 404));
       }
 
-      // Ensure only one user was found
+      // Check if more than one user found
       if (arrUsers.length > 1) {
+        // More than 1 user found, reject error
         return reject(new errors.CustomError('More than one user found.', 400));
       }
 
@@ -121,7 +123,7 @@ function findUser(searchedUsername) {
  * });
  *
  *
- * @param {Object} usersQuery The query to be made to the database.
+ * @param {Object} usersQuery - The query to be made to the database.
  */
 function findUsersQuery(usersQuery) {
   return new Promise((resolve, reject) => {
@@ -130,9 +132,9 @@ function findUsersQuery(usersQuery) {
 
     // Find the user
     User.find(query)
-    // Return the found users
+    // Resolve  found users
     .then((users) => resolve(users))
-    // Check if error occurred
+    // Reject error
     .catch(() => reject(new errors.CustomError('Find failed.')));
   });
 }
@@ -151,12 +153,12 @@ function findUsersQuery(usersQuery) {
  * });
  *
  *
- * @param {User} reqUser The requesting user.
- * @param {Object} newUserData Object containing new user data.
+ * @param {User} reqUser - The requesting user.
+ * @param {Object} newUserData - Object containing new user data.
  */
 function createUser(reqUser, newUserData) {
   return new Promise((resolve, reject) => {
-    // Check valid user data and admin
+    // Check admin and valid user data
     try {
       utils.assertAdmin(reqUser);
       utils.assertExists(['username'], newUserData);
@@ -183,6 +185,8 @@ function createUser(reqUser, newUserData) {
       // Sanitize the input, the model should handle
       // data validation
       const user = new User(sani.sanitize(newUserData));
+
+      // Save new user
       return user.save();
     })
     // Find the default
@@ -199,7 +203,13 @@ function createUser(reqUser, newUserData) {
       return orgs[0].save();
     })
     .then(() => resolve(createdUser))
-    .catch((error) => reject(error));
+    .catch((error) => {
+      // If the error is not a custom error
+      if (error instanceof errors.CustomError) {
+        return reject(error);
+      }
+      return reject(new errors.CustomError(error.message));
+    });
   });
 }
 
@@ -217,9 +227,9 @@ function createUser(reqUser, newUserData) {
  * });
  *
  *
- * @param {User} reqUser The requesting user.
- * @param {String} usernameToUpdate The username of the user to be updated.
- * @param {Object} newUserData Object containing new user data.
+ * @param {User} reqUser - The requesting user.
+ * @param {String} usernameToUpdate - The username of the user to be updated.
+ * @param {Object} newUserData - An object containing updated User data
  */
 function updateUser(reqUser, usernameToUpdate, newUserData) {
   return new Promise((resolve, reject) => {
@@ -295,14 +305,15 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
  * });
  *
  *
- * @param {User} reqUser The requesting user.
- * @param {String} usernameToDelete The username of the user to be deleted.
+ * @param {User} reqUser - The requesting user.
+ * @param {String} usernameToDelete - The username of the user to be deleted.
  */
 function removeUser(reqUser, usernameToDelete) {
   return new Promise((resolve, reject) => {
-    // Check admin user
+    // Check admin user and parameter is valid
     try {
       utils.assertAdmin(reqUser);
+      utils.assertType([usernameToDelete], 'string');
     }
     catch (error) {
       return reject(error);
