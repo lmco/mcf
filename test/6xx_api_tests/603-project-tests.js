@@ -290,10 +290,10 @@ function rejectPostOrgIdMismatch(done) {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
     // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(response.statusCode).to.equal(400);
     // Verify error message in response body
-    // const json = JSON.parse(body);
-    // chai.expect(json.message).to.equal('Bad Request');
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
