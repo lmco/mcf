@@ -542,7 +542,7 @@ function rejectDefaultOrgDelete(done) {
  */
 function setUserOrgRole(done) {
   // Set user permissions via controller
-  OrgController.setPermissions(adminUser, org.id.toString(), newUser, 'write')
+  OrgController.setPermissions(adminUser, org.id.toString(), newUser.username, 'write')
   // Find org
   .then(() => OrgController.findOrg(adminUser, org.id.toString()))
   .then((retOrg2) => {
@@ -565,7 +565,7 @@ function setUserOrgRole(done) {
  */
 function rejectUserRole(done) {
   // Set permissions via controller
-  OrgController.setPermissions(adminUser, testData.orgs[6].id, adminUser, 'REMOVE_ALL')
+  OrgController.setPermissions(adminUser, testData.orgs[6].id, adminUser.username, 'REMOVE_ALL')
   .then(() => {
     // Expected setPermissions() to fail
     // Should not execute, force test to fail
@@ -628,7 +628,7 @@ function getMembers(done) {
  */
 function rejectNonAdminSetPermissions(done) {
   // Set permissions via controller
-  OrgController.setPermissions(newUser, org.id.toString(), adminUser, 'REMOVE_ALL')
+  OrgController.setPermissions(newUser, org.id.toString(), adminUser.username, 'REMOVE_ALL')
   .then(() => {
     // Expected setPermissions() to fail
     // Should not execute, force test to fail
@@ -647,7 +647,7 @@ function rejectNonAdminSetPermissions(done) {
  */
 function removeUserRole(done) {
   // Set permissions via controller
-  OrgController.setPermissions(adminUser, org.id.toString(), newUser, 'REMOVE_ALL')
+  OrgController.setPermissions(adminUser, org.id.toString(), newUser.username, 'REMOVE_ALL')
   .then(() => {
     // Verify user permissions are correct
     chai.expect(org.permissions.write).to.not.include(newUser._id.toString());
@@ -688,7 +688,7 @@ function rejectGetUserRoles(done) {
  */
 function rejectInvalidPermission(done) {
   // Set permissions via controller
-  OrgController.setPermissions(adminUser, testData.orgs[3].id, newUser,
+  OrgController.setPermissions(adminUser, testData.orgs[3].id, newUser.username,
     testData.invalidPermissions[1].permissions)
   .then(() => {
     // Expected setPermissions() to fail

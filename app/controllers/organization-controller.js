@@ -552,17 +552,14 @@ class OrganizationController {
    *
    * @param {User} reqUser  The object containing the requesting user.
    * @param {String} organizationID  The ID of the org being deleted.
-   * @param {User} setUser  The object containing the user whose roles are to be changed.
+   * @param {User} searchedUsername  The object containing the user whose roles are to be changed.
    * @param {String} role  The new role for the user.
    */
   // TODO: Check if the user who's permissions is being set exists
-  static setPermissions(reqUser, organizationID, setUser, role) {
-    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
-      // Stop a user from changing their own permissions
-      if (reqUser._id.toString() === setUser._id.toString()) {
-        return reject(new errors.CustomError('User cannot change their own permissions.', 403));
-      }
+  static setPermissions(reqUser, organizationID, searchedUsername, role) {
+    const UserController = M.require('controllers.user-controller');
 
+    return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
       try {
         utils.assertType([organizationID, role], 'string');
       }
@@ -576,7 +573,21 @@ class OrganizationController {
       }
 
       const orgID = sani.sanitize(organizationID);
-      OrganizationController.findOrg(reqUser, orgID)
+      const searchedUser = sani.sanitize(searchedUsername);
+      let foundUser;
+
+      UserController.findUser(searchedUser)
+      .then((user) => {
+        foundUser = user;
+
+        // Stop a user from changing their own permissions
+        if (reqUser._id.toString() === foundUser._id.toString()) {
+          return reject(new errors.CustomError('User cannot change their own permissions.', 403));
+        }
+
+        return OrganizationController.findOrg(reqUser, orgID);
+      })
+
       .then((org) => { // eslint-disable-line consistent-return
         // Ensure user is an admin within the organization or system admin
         if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
@@ -590,25 +601,25 @@ class OrganizationController {
         Object.keys(perm).forEach((r) => {
           if (permLevels.includes(r)) {
             const permVals = perm[r].map(u => u._id.toString());
-            if (permVals.includes(setUser._id.toString())) {
-              perm[r].splice(perm[r].indexOf(setUser._id), 1);
+            if (permVals.includes(foundUser._id.toString())) {
+              perm[r].splice(perm[r].indexOf(foundUser._id), 1);
             }
           }
         });
 
         // Add user to admin array
         if (role === 'admin') {
-          perm.admin.push(setUser._id);
+          perm.admin.push(foundUser._id);
         }
 
         // Add user to write array if admin or write
         if (role === 'admin' || role === 'write') {
-          perm.write.push(setUser._id);
+          perm.write.push(foundUser._id);
         }
 
         // Add user to read array if admin, write or read
         if (role === 'admin' || role === 'write' || role === 'read') {
-          perm.read.push(setUser._id);
+          perm.read.push(foundUser._id);
         }
 
         // Save the modified organization
