@@ -26,15 +26,14 @@
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
+const path = require('path');
 
 // Load MBEE modules
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
@@ -50,57 +49,34 @@ describe(M.getModuleName(module.filename), () => {
    * non-admin user and elevate to admin user.
    */
   before((done) => {
-    // Connect to the database
+  // Connect to the database
     db.connect();
 
-    // Creating a Requesting Admin
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
-
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-
-    // Authenticate User
-    // Note: non-admin user is created during authenticate if NOT exist.(ldap only)
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      const ldapuser = reqObj.user;
-      // Expect no error
-      chai.expect(err).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-
-      // Find the user and update admin status
-      User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
-          // Expect no error
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-          done();
-        });
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((user) => {
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
   /**
-   * After: run after all tests. Delete user.
+   * After: Delete admin user.
    */
   after((done) => {
-    // Find user
-    User.findOne({ username: M.config.test.username })
-    // Remove user
-    .then((foundUser) => foundUser.remove())
+    // Delete test admin
+    testUtils.removeAdminUser()
     .then(() => {
-      // Disconnect from database
+      // Disconnect db
       db.disconnect();
       done();
     })
     .catch((error) => {
-      // Disconnect from database
-      db.disconnect();
-
-      // Expect no error
       chai.expect(error).to.equal(null);
+      db.disconnect();
       done();
     });
   });
@@ -127,7 +103,7 @@ describe(M.getModuleName(module.filename), () => {
 function getUser(done) {
   // Make a user API GET request
   request({
-    url: `${test.url}/api/users/${M.config.test.username}`,
+    url: `${test.url}/api/users/${M.config.test.adminUsername}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -139,7 +115,7 @@ function getUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct username
-    chai.expect(json.username).to.equal(M.config.test.username);
+    chai.expect(json.username).to.equal(M.config.test.adminUsername);
     done();
   });
 }
@@ -196,7 +172,7 @@ function whoAmI(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal(M.config.test.username);
+    chai.expect(json.username).to.equal(M.config.test.adminUsername);
     done();
   });
 }
@@ -284,7 +260,7 @@ function getUsers(done) {
     // Verifies status 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verifies users exist
-    chai.expect(body).to.include(M.config.test.username);
+    chai.expect(body).to.include(M.config.test.adminUsername);
     chai.expect(body).to.include('deadpool');
     done();
   });
@@ -439,7 +415,7 @@ function deleteUser(done) {
  * @description Helper function for setting the request header.
  */
 function getHeaders() {
-  const formattedCreds = `${M.config.test.username}:${M.config.test.password}`;
+  const formattedCreds = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',
