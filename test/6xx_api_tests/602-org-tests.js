@@ -26,16 +26,15 @@ const fs = require('fs');
 const chai = require('chai');
 const path = require('path');
 const request = require('request');
+const path = require('path');
 
 // Load MBEE modules
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
@@ -47,48 +46,36 @@ const test = M.config.test;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests.
-   * Find user and evaluate to admin.
+   * Before: Create admin user.
    */
   before((done) => {
     db.connect();
 
-    // Creating a Requesting Admin
-    const reqObj = mockExpress.getReq({}, {
-      username: M.config.test.username,
-      password: M.config.test.password
-    });
-    const resObj = mockExpress.getRes();
-
-    // Creates a the test user
-    // TODO: MBX-346
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      // Expect no error
-      chai.expect(err).to.equal(null);
-      chai.expect(reqObj.user.username).to.equal(M.config.test.username);
-
-      // Find the user and update the admin status
-      User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
-          // Setting it equal to global variable
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-          done();
-        });
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((user) => {
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
   /**
-   * After: run after all tests. Delete requesting user.
+   * After: Delete admin user.
    */
   after((done) => {
-    User.remove({ username: M.config.test.username })
-    .exec((err) => {
-      // Disconnect from database
+    // Delete test admin
+    testUtils.removeAdminUser()
+    .then(() => {
+      // Disconnect db
       db.disconnect();
-
-      // Expect no error
-      chai.expect(err).to.equal(null);
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error).to.equal(null);
+      db.disconnect();
       done();
     });
   });
@@ -448,7 +435,7 @@ function deleteOrg(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

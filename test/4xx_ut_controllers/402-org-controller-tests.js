@@ -17,9 +17,8 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Tests the organization controller functionality: create,
- * delete, update, and find organizations. As well as setting and updating
+ * delete, update, find organizations, and setting and updating
  * permissions of organizations.
- * // TODO : MBX-325 change description to summarize "it" functions
  */
 
 // Load NPM modules
@@ -31,14 +30,13 @@ const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const Project = M.require('models.project');
 const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
 let newUser = null;
 let org = null;
@@ -52,58 +50,45 @@ let org = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests. Create admin and
-   * non-admin user. Set admin user globally.
+   * Before: Create admin and non-admin user.
    */
   before((done) => {
     // Connect to the database
     db.connect();
 
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((user) => {
+      // Set global admin user
+      adminUser = user;
 
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
+      // Define non-admin user data
+      const nonAdminUserData = {
+        username: 'groot',
+        password: 'Iamgroot123',
+        fname: 'Groot',
+        lname: 'Tree',
+        admin: false
+      };
 
-    AuthController.authenticate(reqObj, resObj, (error) => {
-      const ldapuser = reqObj.user;
-      // Expect no error
+      // Create non-admin user
+      return testUtils.createNonadminUser(nonAdminUserData);
+    })
+    .then((nonadminUser) => {
+      newUser = nonadminUser;
+      chai.expect(newUser.username).to.equal('groot');
+      chai.expect(newUser.fname).to.equal('Groot');
+      chai.expect(newUser.lname).to.equal('Tree');
+      done();
+    })
+    .catch((error) => {
       chai.expect(error).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-
-      // Find the user and update admin status
-      User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
-          // Setting it equal to global variable
-          adminUser = userUpdate;
-          // Expect no error
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-
-          // Creating a new non-admin user
-          const nonAuserData = testData.users[7];
-          UserController.createUser(adminUser, nonAuserData)
-          .then((nonAu) => {
-            newUser = nonAu;
-            chai.expect(nonAu.username).to.equal(testData.users[7].username);
-            chai.expect(nonAu.fname).to.equal(testData.users[7].fname);
-            chai.expect(nonAu.lname).to.equal(testData.users[7].lname);
-            done();
-          })
-          .catch((error2) => {
-            chai.expect(error2.message).to.equal(null);
-            done();
-          });
-        });
+      done();
     });
   });
 
   /**
-   * After: Run after all tests. Delete admin user,
-   * non-admin user, and organization.
+   * After: Delete admin user, non-admin user, and organization.
    */
   after((done) => {
     // Removing organization
@@ -113,21 +98,29 @@ describe(M.getModuleName(module.filename), () => {
     .then((delUser2) => {
       chai.expect(delUser2).to.equal(testData.users[7].username);
       // Find admin user
-      return User.findOne({ username: M.config.test.username });
-    })
-    // Remove admin user
-    .then((foundUser) => foundUser.remove())
-    .then(() => {
-      // Disconnect from the database
-      db.disconnect();
-      done();
+      User.findOne({
+        username: M.config.test.adminUsername
+      }, (error, foundUser) => {
+        // Expect no error
+        chai.expect(error).to.equal(null);
+
+        // Remove admin user
+        foundUser.remove((error2) => {
+          // Expect no error
+          chai.expect(error2).to.equal(null);
+
+          // Disconnect from the database
+          db.disconnect();
+          done();
+        });
+      });
     })
     .catch((error) => {
-      // Disconnect from the database
-      db.disconnect();
-
       // Expect no error
       chai.expect(error.message).to.equal(null);
+
+      // Disconnect from the database
+      db.disconnect();
       done();
     });
   });
@@ -482,6 +475,7 @@ function hardDeleteProjectAndOrg(done) {
   .catch((error) => {
     // Expected error thrown: 'Not Found'
     chai.expect(error.message).to.equal('Not Found');
+
     // Find deleted project
     return Project.findOne({ id: testData.projects[4].id });
   })

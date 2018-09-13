@@ -27,12 +27,11 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const ElemController = M.require('controllers.element-controller');
 const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -49,82 +48,73 @@ describe(M.getModuleName(module.filename), () => {
    * After: Connect to database. Create an admin user, organization, and project
    * TODO: MBX-384 What does this function do?
    */
-  // TODO: MBX-346 Create a common before function
+
   before((done) => {
     // Open the database connection
     db.connect();
 
-    // Creating a Requesting Admin
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((_adminUser) => {
+      // Set global admin user
+      adminUser = _adminUser;
 
-    // TODO: MBX-385 Change user creation approach
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
+      // Define organization data
+      const orgData = {
+        id: 'asgard',
+        name: 'Asgard'
+      };
+      // Create organization
+      return testUtils.createOrganization(adminUser, orgData);
+    })
+    .then((retOrg) => {
+      // Set global organization
+      org = retOrg;
 
-    // Authenicate user
-    // Note: non-admin user is created during authenticate if NOT exist.(ldap only)
-    AuthController.authenticate(reqObj, resObj, (error) => {
-      const ldapuser = reqObj.user; // TODO: MBX-385 not LDAP user
+      // Define project data
+      const proData = {
+        id: 'thor',
+        name: 'Thor Odinson',
+        org: { id: org.id }
+      };
+
+      // Create project
+      return ProjController.createProject(adminUser, proData);
+    })
+    .then((retProj) => {
+      // Set global project
+      proj = retProj;
+      done();
+    })
+    .catch((error) => {
       chai.expect(error).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-
-      // Make the test user admin
-      User.findOneAndUpdate({
-        username: M.config.test.username
-      }, {
-        admin: true
-      }, {
-        new: true
-      },
-      (updateErr, updatedUser) => {
-        // Set global user to updated user
-        adminUser = updatedUser;
-        chai.expect(updateErr).to.equal(null);
-        chai.expect(updatedUser).to.not.equal(null);
-        // Create an organization
-        const orgData = testData.orgs[8];
-        OrgController.createOrg(adminUser, orgData)
-        .then((retOrg) => {
-          org = retOrg;
-          return ProjController.createProject(adminUser, testData.projects[11]);
-        })
-        .then((retProj) => {
-          proj = retProj;
-          done();
-        })
-        .catch((orgError) => {
-          chai.expect(orgError.message).to.equal(null);
-          done();
-        });
-      });
+      done();
     });
   }); // END: before()
 
   /**
-   * After: Remove Organization, including its projects.
+   * After: Remove Organization and project.
    * Close database connection.
    */
   after((done) => {
-    // Remove the project and org together
+    // Remove organization
+    // Note: Projects under organization will also be removed
     OrgController.removeOrg(adminUser, org.id, { soft: false })
-    // Find admin user
-    .then(() => User.findOne({ username: M.config.test.username }))
-    // Remove admin user
-    .then((foundUser) => foundUser.remove())
     .then(() => {
-      // Disconnect from database
-      db.disconnect();
-      done();
+      // Once db items are removed, remove reqUser
+      // close the db connection and finish
+      User.findOne({
+        username: M.config.test.adminUsername
+      }, (error, foundUser) => {
+        chai.expect(error).to.equal(null);
+        foundUser.remove((error2) => {
+          chai.expect(error2).to.equal(null);
+          db.disconnect();
+          done();
+        });
+      });
     })
     .catch((error) => {
-      // Disconnect from database
-      db.disconnect();
-
-      // Expect no error
       chai.expect(error.message).to.equal(null);
       done();
     });

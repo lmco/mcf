@@ -20,14 +20,12 @@ const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
-const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let nonAdminUser = null;
 let adminUser = null;
 let org = null;
@@ -43,68 +41,62 @@ let project = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests. Create admin and
-   * non-admin user. Set admin user globally. Create organization.
+   * Before: Create admin and non-admin user. Create organization.
    */
   before((done) => {
+    // Connect db
     db.connect();
 
-    // Creating a Requesting Admin
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((_adminUser) => {
+      // Set global admin user
+      adminUser = _adminUser;
 
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
+      // Define non-admin user data
+      const nonAdminUserData = {
+        username: 'pepperpotts',
+        password: 'Gfoftonystark123',
+        fname: 'Pepper',
+        lname: 'Potts',
+        admin: false
+      };
 
-    AuthController.authenticate(reqObj, resObj, (error) => {
-      const ldapuser = reqObj.user;
+      // Create non-admin user
+      return testUtils.createNonadminUser(nonAdminUserData);
+    })
+    .then((_nonadminUser) => {
+      nonAdminUser = _nonadminUser;
+      chai.expect(nonAdminUser.username).to.equal('pepperpotts');
+      chai.expect(nonAdminUser.fname).to.equal('Pepper');
+      chai.expect(nonAdminUser.lname).to.equal('Potts');
+    })
+    .then(() => {
+      // Define organization data
+      const orgData = {
+        id: 'starkhq',
+        name: 'Stark Headquarts'
+      };
+      // Create organization
+      return testUtils.createOrganization(adminUser, orgData);
+    })
+    .then((retOrg) => {
+      org = retOrg;
+      chai.expect(retOrg.id).to.equal('starkhq');
+      chai.expect(retOrg.name).to.equal('Stark Headquarts');
+      chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
+      done();
+    })
+    .catch((error) => {
       chai.expect(error).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-
-      // Find the user and update admin status
-      User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
-          // Setting it equal to global variable
-          adminUser = userUpdate;
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-
-          // Define non-admin user data
-          const nonAdminUserData = testData.users[8];
-          // Admin creates a non admin user
-          UserController.createUser(adminUser, nonAdminUserData)
-          .then((nonAu) => {
-            nonAdminUser = nonAu;
-            chai.expect(nonAu.username).to.equal(testData.users[8].username);
-            chai.expect(nonAu.fname).to.equal(testData.users[8].fname);
-            chai.expect(nonAu.lname).to.equal(testData.users[8].lname);
-
-            // Creating organization used in tests
-            const orgData = testData.orgs[7];
-            return OrgController.createOrg(adminUser, orgData);
-          })
-          .then((retOrg) => {
-            org = retOrg;
-            chai.expect(retOrg.id).to.equal(testData.orgs[7].id);
-            chai.expect(retOrg.name).to.equal(testData.orgs[7].name);
-            chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
-            chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
-            chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
-            done();
-          })
-          .catch((error2) => {
-            chai.expect(error2.message).to.equal(null);
-            done();
-          });
-        });
+      done();
     });
   });
 
   /**
-   * After: Run after all tests. Remove non-admin user and organization.
+   * After: Remove non-admin user and organization.
    */
   after((done) => {
     // Removing the organization created
@@ -114,21 +106,17 @@ describe(M.getModuleName(module.filename), () => {
       const userTwo = testData.users[8].username;
       return UserController.removeUser(adminUser, userTwo);
     })
-    // Find the admin user
-    .then(() => User.findOne({ username: M.config.test.username }))
-    // Remove the admin user
-    .then((user) => user.remove())
-    .then(() => {
-      // Disconnect from database
-      db.disconnect();
+    .then((delUser2) => {
+      chai.expect(delUser2).to.equal('pepperpotts');
+      return testUtils.removeAdminUser();
+    })
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(null);
       done();
     })
     .catch((error) => {
-      // Disconnect from database
-      db.disconnect();
-
-      // Expect no error
       chai.expect(error.message).to.equal(null);
+      db.disconnect();
       done();
     });
   });
