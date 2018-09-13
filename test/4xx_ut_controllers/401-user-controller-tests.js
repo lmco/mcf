@@ -180,7 +180,8 @@ function rejectInvalidCreate(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal(
+      'User validation failed: username: Path \`username\` is required.');
     done();
   });
 }

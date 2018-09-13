@@ -902,7 +902,7 @@ function deleteUser(req, res) {
   .then((user) => {
     // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user));
+    return res.status(200).send(formatJSON(user.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));

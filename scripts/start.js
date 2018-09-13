@@ -90,18 +90,17 @@ function start(args) {
     // Check user found
     if (user === null) {
       // No user found, create local admin
-      const adminUser = new User({
+      const adminUserData = {
         username: 'admin',
         password: 'Admin12345',
         provider: 'local',
         admin: true
-      });
+      };
 
-      // Save user object to the database
-      adminUser.save((userError) => {
-        if (userError != null) {
-          throw userError;
-        }
+      // Create user via controller
+      UserController.createUser({admin: true}, adminUserData)
+      .catch((err) => {
+        throw(err);
       });
     }
   });
