@@ -183,7 +183,7 @@ function createUser(reqUser, newUserData) {
       // Sanitize the input, the model should handle
       // data validation
       const user = new User(sani.sanitize(newUserData));
-      //console.log(user);
+      // console.log(user);
       return user.save();
     })
     // Find the default
@@ -200,7 +200,13 @@ function createUser(reqUser, newUserData) {
       return orgs[0].save();
     })
     .then(() => resolve(createdUser))
-    .catch((error) => reject(error));
+    .catch((error) => {
+      // If the error is not a custom error
+      if (!error.status) {
+        return reject(new errors.CustomError(error.message));
+      }
+      return reject(error);
+    });
   });
 }
 

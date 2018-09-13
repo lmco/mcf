@@ -18,6 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
+const UserController = M.require('controllers.user-controller');
 
 // If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
@@ -98,16 +99,15 @@ function start(args) {
       };
 
       // Create user via controller
-      UserController.createUser({admin: true}, adminUserData)
-      .catch((err) => {
-        throw(err);
+      UserController.createUser({ admin: true }, adminUserData)
+      .catch((err2) => {
+        throw (err2);
       });
     }
   });
 
   // Create default org if it doesn't exist
   const Organization = M.require('models.organization');
-  const UserController = M.require('controllers.user-controller');
   Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     if (err) {

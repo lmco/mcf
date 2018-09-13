@@ -101,7 +101,7 @@ module.exports.createAdminUser = function() {
       };
 
       // Create user via controller
-      return UserController.createUser({admin: true}, adminUserData);
+      return UserController.createUser({ admin: true }, adminUserData);
     })
     .then((user) => resolve(user))
     .catch((error) => reject(error));

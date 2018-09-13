@@ -57,9 +57,7 @@ class OrganizationController {
       const userID = sani.sanitize(user._id);
 
       OrganizationController.findOrgsQuery({ 'permissions.read': userID, deleted: false })
-      .then((orgs) => {
-        return resolve(orgs);
-      })
+      .then((orgs) => resolve(orgs))
 
       .catch((error) => reject(error));
     });

@@ -96,24 +96,16 @@ describe(M.getModuleName(module.filename), () => {
     // Removing non-admin user
     .then(() => UserController.removeUser(adminUser, newUser.username))
     .then((delUser2) => {
-      chai.expect(delUser2).to.equal(testData.users[5].username);
+      chai.expect(delUser2.username).to.equal(testData.users[5].username);
       // Find admin user
-      User.findOne({
-        username: M.config.test.adminUsername
-      }, (error, foundUser) => {
-        // Expect no error
-        chai.expect(error).to.equal(null);
-
-        // Remove admin user
-        foundUser.remove((error2) => {
-          // Expect no error
-          chai.expect(error2).to.equal(null);
-
-          // Disconnect from the database
-          db.disconnect();
-          done();
-        });
-      });
+      return User.findOne({ username: M.config.test.adminUsername });
+    })
+    // Remove admin user
+    .then((foundUser) => foundUser.remove())
+    .then(() => {
+      // Disconnect from the database
+      db.disconnect();
+      done();
     })
     .catch((error) => {
       // Expect no error
