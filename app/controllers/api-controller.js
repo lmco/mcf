@@ -32,7 +32,6 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const errors = M.require('lib.errors');
-const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 // Expose `ElementController`
@@ -405,11 +404,10 @@ function postOrgRole(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // TODO: Move findUser to setPermissions() in the org-controller (MBX-426)
-  UserController.findUser(sani.sanitize(req.params.username))
   // Set permissions of given user
-  // NOTE: setPermissions() sanitizes req.params.orgid
-  .then((user) => OrgController.setPermissions(req.user, req.params.orgid, user, req.body.role))
+  // NOTE: setPermissions() sanitizes req.params.orgid and req.params.username
+  OrgController.setPermissions(req.user, req.params.orgid,
+    req.params.username, req.body.role)
   .then((org) => {
     // Return 200: Ok and updated org
     res.header('Content-Type', 'application/json');
@@ -432,11 +430,10 @@ function deleteOrgRole(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // TODO: Move findUser to setPermissions() in the org-controller (MBX-426)
-  UserController.findUser(req.params.username)
   // Remove permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid
-  .then((user) => OrgController.setPermissions(req.user, req.params.orgid, user, 'REMOVE_ALL'))
+  OrgController.setPermissions(req.user, req.params.orgid,
+    req.params.username, 'REMOVE_ALL')
   .then((org) => {
     // Return 200: OK and updated org
     res.header('Content-Type', 'application/json');
@@ -903,7 +900,7 @@ function deleteUser(req, res) {
   .then((user) => {
     // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user));
+    return res.status(200).send(formatJSON(user.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));

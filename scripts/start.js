@@ -18,6 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
+const UserController = M.require('controllers.user-controller');
 
 // If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
@@ -90,25 +91,23 @@ function start(args) {
     // Check user found
     if (user === null) {
       // No user found, create local admin
-      const adminUser = new User({
+      const adminUserData = {
         username: 'admin',
         password: 'Admin12345',
         provider: 'local',
         admin: true
-      });
+      };
 
-      // Save user object to the database
-      adminUser.save((userError) => {
-        if (userError != null) {
-          throw userError;
-        }
+      // Create user via controller
+      UserController.createUser({ admin: true }, adminUserData)
+      .catch((err2) => {
+        throw (err2);
       });
     }
   });
 
   // Create default org if it doesn't exist
   const Organization = M.require('models.organization');
-  const UserController = M.require('controllers.user-controller');
   Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     if (err) {

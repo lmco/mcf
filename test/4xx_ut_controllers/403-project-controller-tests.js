@@ -107,7 +107,7 @@ describe(M.getModuleName(module.filename), () => {
       return UserController.removeUser(adminUser, userTwo);
     })
     .then((delUser2) => {
-      chai.expect(delUser2).to.equal('pepperpotts');
+      chai.expect(delUser2.username).to.equal('pepperpotts');
       return testUtils.removeAdminUser();
     })
     .then((delAdminUser) => {

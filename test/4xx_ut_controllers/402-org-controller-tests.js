@@ -96,24 +96,16 @@ describe(M.getModuleName(module.filename), () => {
     // Removing non-admin user
     .then(() => UserController.removeUser(adminUser, newUser.username))
     .then((delUser2) => {
-      chai.expect(delUser2).to.equal(testData.users[5].username);
+      chai.expect(delUser2.username).to.equal(testData.users[5].username);
       // Find admin user
-      User.findOne({
-        username: M.config.test.adminUsername
-      }, (error, foundUser) => {
-        // Expect no error
-        chai.expect(error).to.equal(null);
-
-        // Remove admin user
-        foundUser.remove((error2) => {
-          // Expect no error
-          chai.expect(error2).to.equal(null);
-
-          // Disconnect from the database
-          db.disconnect();
-          done();
-        });
-      });
+      return User.findOne({ username: M.config.test.adminUsername });
+    })
+    // Remove admin user
+    .then((foundUser) => foundUser.remove())
+    .then(() => {
+      // Disconnect from the database
+      db.disconnect();
+      done();
     })
     .catch((error) => {
       // Expect no error
@@ -536,7 +528,7 @@ function rejectDefaultOrgDelete(done) {
  */
 function setUserOrgRole(done) {
   // Set user permissions via controller
-  OrgController.setPermissions(adminUser, org.id.toString(), newUser, 'write')
+  OrgController.setPermissions(adminUser, org.id.toString(), newUser.username, 'write')
   // Find org
   .then(() => OrgController.findOrg(adminUser, org.id.toString()))
   .then((retOrg2) => {
@@ -559,7 +551,7 @@ function setUserOrgRole(done) {
  */
 function rejectUserRole(done) {
   // Set permissions via controller
-  OrgController.setPermissions(adminUser, testData.orgs[6].id, adminUser, 'REMOVE_ALL')
+  OrgController.setPermissions(adminUser, testData.orgs[6].id, adminUser.username, 'REMOVE_ALL')
   .then(() => {
     // Expected setPermissions() to fail
     // Should not execute, force test to fail
@@ -622,7 +614,7 @@ function getMembers(done) {
  */
 function rejectNonAdminSetPermissions(done) {
   // Set permissions via controller
-  OrgController.setPermissions(newUser, org.id.toString(), adminUser, 'REMOVE_ALL')
+  OrgController.setPermissions(newUser, org.id.toString(), adminUser.username, 'REMOVE_ALL')
   .then(() => {
     // Expected setPermissions() to fail
     // Should not execute, force test to fail
@@ -641,7 +633,7 @@ function rejectNonAdminSetPermissions(done) {
  */
 function removeUserRole(done) {
   // Set permissions via controller
-  OrgController.setPermissions(adminUser, org.id.toString(), newUser, 'REMOVE_ALL')
+  OrgController.setPermissions(adminUser, org.id.toString(), newUser.username, 'REMOVE_ALL')
   .then(() => {
     // Verify user permissions are correct
     chai.expect(org.permissions.write).to.not.include(newUser._id.toString());
@@ -682,7 +674,7 @@ function rejectGetUserRoles(done) {
  */
 function rejectInvalidPermission(done) {
   // Set permissions via controller
-  OrgController.setPermissions(adminUser, testData.orgs[3].id, newUser,
+  OrgController.setPermissions(adminUser, testData.orgs[3].id, newUser.username,
     testData.invalidPermissions[1].permissions)
   .then(() => {
     // Expected setPermissions() to fail

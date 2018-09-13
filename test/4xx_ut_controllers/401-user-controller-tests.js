@@ -169,7 +169,6 @@ function rejectUserCreateByNonAdmin(done) {
 function rejectInvalidCreate(done) {
   // Create user data
   const userData = testData.users[3];
-
   // Create user via controller
   UserController.createUser(adminUser, userData)
   .then(() => {
@@ -180,7 +179,7 @@ function rejectInvalidCreate(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }

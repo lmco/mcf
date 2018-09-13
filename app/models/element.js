@@ -49,25 +49,38 @@ const validators = M.require('lib.validators');
 const options = { discriminatorKey: 'type' };
 
 
-/* --------------------------( Schema Definitions )-------------------------- */
+/* ---------------------------( Element Schemas )---------------------------- */
 
 /**
+ * @namespace
+ *
  * @description The base schema definition inherited by all other element types.
+ *
+ * @property {String} id - The elements non-unique element ID.
+ * @property {String} uid - The elements unique id namespaced by its project
+ * and organization.
+ * @property {String} uuid - The elements RFC 4122 id, automatically generated
+ * or taken from another source if imported.
+ * @property {String} name - THe elements non-unique name.
+ * @property {Project} project - A reference to an element's project.
+ * @property {Element} parent - The parent element which contains the element
+ * NOTE: Only package elements have a parent, root element parents are null.
+ * @property {String} documentation - The element documentation.
+ * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
+ * @property {Date} createdOn - The date which an element was created.
+ * @property {Date} updatedOn - The date which an element was updated.
+ * @property {Date} createdOn - The date the element was soft deleted or null
+ * @property {Boolean} deleted - Indicates if a element has been soft deleted.
+ *
  */
-// TODO: MBX-418, Document element Schema in alignment with organization model
 const ElementSchema = new mongoose.Schema({
-  /**
-   * @description Automatically generated ID. The concatenation of organization
-   * id, project id, and element id, separated by colon.
-   * Limits between 2 to 128 characters.
-   *
-   *   Ex: <organization id>:<project id,>:<element id>
-   *       OrganizationA:ProjectX:ModelElementA
-   *
-   * @memberOf Element
-   * @property {String} uid
-   * @type String
-   */
+  id: {
+    type: String,
+    required: true,
+    match: RegExp(validators.element.id),
+    maxlength: [64, 'Element ID is too long'],
+    minlength: [2, 'Element ID is too short']
+  },
   uid: {
     type: String,
     required: true,
@@ -77,35 +90,6 @@ const ElementSchema = new mongoose.Schema({
     maxlength: [255, 'Element UID is too long'],
     minlength: [2, 'Element UID is too short']
   },
-
-  /**
-   * @memberOf Element
-   * @property {String} id
-   *
-   * @description A unique element ID. Limits betwwen 2 to 36 characters.
-   * - MUST ONLY include lowercase letters, numbers, or '-'
-   *
-   *   Ex: ModelAElement
-   */
-  id: {
-    type: String,
-    required: true,
-    match: RegExp(validators.element.id),
-    maxlength: [64, 'Element ID is too long'],
-    minlength: [2, 'Element ID is too short']
-  },
-
-  /**
-   * @memberOf Element
-   * @property {String} uuid
-   *
-   * @description The UUID of an element. Automatically generated ID or taken
-   * from aother database. Based on RFC 4122
-   * - MUST follow the following format: xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-   *     where x is a number or a lowercase letter from a-f
-   *
-   *   Ex: f81d4fae-7dec-11d0-a765-00a0c91e6bf6
-   */
   uuid: {
     type: String,
     required: false,
@@ -115,15 +99,6 @@ const ElementSchema = new mongoose.Schema({
     },
     match: RegExp(validators.element.uuid)
   },
-
-  /**
-   * @memberOf Element
-   * @property {String} name
-   *
-   * @description The element name. Used for a more descriptive name.
-   *
-   *   Ex: Model A Elements In Sub System B
-   */
   name: {
     type: String,
     required: false,
@@ -131,63 +106,23 @@ const ElementSchema = new mongoose.Schema({
     maxlength: [64, 'Element name is too long'],
     minlength: [2, 'Element name is too short']
   },
-
-  /**
-   * @memberOf Element
-   * @property {Schema.Types.ObjectId} project
-   *
-   * @description The project this element belongs to.
-   */
   project: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'Project'
   },
-
-  /**
-   * @memberOf Element
-   * @property {Schema.Types.ObjectId} parent
-   *
-   * @description The parent element containing this element.
-   * Note: only package elements will have a parent
-   * Root will have a parent of null.
-   */
   parent: {
     type: mongoose.Schema.Types.ObjectId,
     required: false,
     default: null,
     ref: 'Package'
   },
-
-  /**
-   * @memberOf Element
-   * @property {String} documentation
-   *
-   * @description The element documentation
-   */
   documentation: {
     type: String
   },
-
-  /**
-   * @memberOf Element
-   * @property {Schema.Types.Mixed} custom
-   *
-   * @description The element's custom tags. This contains arbitrary key-value pairs of strings
-   * used to represent additional model data.
-   */
   custom: {
     type: mongoose.Schema.Types.Mixed
   },
-
-  /**
-   * @memberOf Element
-   * @property {Date} createdOn
-   *
-   * @description The date on which the element was created.
-   * The setter is defined to only ever re-set to the current value.
-   * This should prevent the created field from being overwritten.
-   */
   createdOn: {
     type: Date,
     default: Date.now,
@@ -195,40 +130,15 @@ const ElementSchema = new mongoose.Schema({
       return this.createdOn;
     }
   },
-
-  /**
-   * @memberOf Element
-   * @property {Date} updatedOn
-   *
-   * @description The date on which the element was last updated.
-   * The setter is run using pre-save middleware.
-   */
   updatedOn: {
     type: Date,
     default: Date.now,
     set: Date.now
   },
-
-  /**
-   * @memberOf Element
-   * @property {Date} deletedOn
-   *
-   * @description The date on which the element was deleted.
-   * This is used to provide soft-delete functionality.
-   */
   deletedOn: {
     type: Date,
     default: null
   },
-
-  /**
-   * @memberOf Element
-   * @property {Boolean} deleted
-   *
-   * @description This Boolean indicates whether or not the element has been
-   * deleted. It is indented to provide and easier way to check deletion status
-   * over the deletedOn date comparison.
-   */
   deleted: {
     type: Boolean,
     default: false,
@@ -241,11 +151,64 @@ const ElementSchema = new mongoose.Schema({
   }
 }, options); // end of ElementSchema
 
-// Add text indexing some of the element fields
-ElementSchema.index({ name: 'text', documentation: 'text' });
+/**
+ * @namespace
+ *
+ * @description The Block schema is an Element discriminator which does not add
+ * any additional functionality to the Element schema.
+ *
+ */
+const BlockSchema = new mongoose.Schema({}, options);
 
 /**
- * Pre-save actions.
+ * @namespace
+ *
+ * @description The Relationship schema is an Element discriminator which
+ * extends elements by adding source and target fields used to describe a
+ * connection, link, etc. between two elements.
+ *
+ * @property {Element} source - Defines the origin of a relationship.
+ * @property {Element} target - Defines the end of a relationship.
+ *
+ */
+const RelationshipSchema = new mongoose.Schema({
+  source: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Element',
+    required: true
+  },
+  target: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Element',
+    required: true
+  }
+}, options);
+
+/**
+ * @namespace
+ *
+ * @description The Package schema is an Element discriminator which
+ * extends elements by adding a contains field used to provide structure and
+ * to group elements.
+ *
+ * @property {Element} source - Defines the origin of a relationship.
+ * @property {Element} target - Defines the end of a relationship.
+ *
+ */
+const PackageSchema = new mongoose.Schema({
+  contains: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Element',
+    required: false
+  }]
+}, options);
+
+
+/* --------------------------( Element Middleware )-------------------------- */
+
+/**
+ * @description Pre-save actions.
+ * @memberof ElementSchema
  */
 ElementSchema.pre('save', function(next) {
   // Run our defined setters
@@ -259,75 +222,16 @@ ElementSchema.pre('save', function(next) {
   next();
 });
 
+
+/* ---------------------------( Element Methods )---------------------------- */
+
 /**
- * Returns the fields which users are allowed to update on a element.
+ * @description Returns the fields which users are allowed to update on a element.
+ * @memberof ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
   return ['name', 'delete', 'deletedOn', 'documentation', 'custom'];
 };
-
-/**
- * @description Defines the schema for a Block. A Block is an Element
- * discriminator, meaning a Block inherits the schema from ElementSchema.
- * Currently, block does not add any new properties to the schema.
- */
-const BlockSchema = new mongoose.Schema({}, options);
-
-/**
- * @description Defines the schema for a Relationship. A Relationship is an Element
- * discriminator, meaning Relationship inherits the schema from ElementSchema.
- * Relationship extends elements by adding "source" and "target" fields that
- * reference other elements. A relationship should be used to describe a
- * connection, link, etc. between two elements.
- */
-const RelationshipSchema = new mongoose.Schema({
-  /**
-   * @memberOf RelationshipSchema
-   * @property {Schema.Types.ObjectId} source
-   *
-   * @description The relationship's source contains an ObjectId that references
-   * another Element object. This defines the source or origin of a
-   * relationship.
-   */
-  source: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Element',
-    required: true
-  },
-
-  /**
-   * @memberOf Relationship
-   * @property {Schema.Types.ObjectId} target
-   *
-   * @description The relationship's target contains an ObjectId that references
-   * another Element object. This defines the target or end of a relationship.
-   */
-  target: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Element',
-    required: true
-  }
-}, options);
-
-/**
- * @description Defines the schema for a Package. A Package is an Element
- * discriminator, meaning Package inherits the schema from ElementSchema.
- * Package extends an Element by adding a "contains" field that references
- * other elements. A Package is used to structure the model and group elements.
- */
-const PackageSchema = new mongoose.Schema({
-  /**
-   * @memberOf Package
-   * @property {Schema.Types.ObjectId[]} contains
-   *
-   * @description An array of ObjectId's referencing other
-   */
-  contains: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Element',
-    required: false
-  }]
-}, options);
 
 
 /* ------------------------------( Models )---------------------------------- */
