@@ -23,16 +23,16 @@
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
+const path = require('path');
 
 // Load MBEE modules
 const OrgController = M.require('controllers.organization-controller');
-const AuthController = M.require('lib.auth');
 const User = M.require('models.user');
-const mockExpress = M.require('lib.mock-express');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 let org = null;
 let adminUser = null;
@@ -46,78 +46,53 @@ let adminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * TODO MBX-346
    * Before: Run before all tests.
-   * Find user and elevate to admin. Create an organization.
+   * Create admin user. Create an organization.
    */
   before((done) => {
+    // Connect db
     db.connect();
 
-    // Creating a Requesting Admin
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((user) => {
+      // Set to global admin
+      adminUser = user;
 
-    // Creates a the test user
-    // TODO: MBX-346
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
+      // Define org data
+      const orgData = {
+        id: 'biochemistry',
+        name: 'Scientist',
+        permissions: {
+          admin: [user._id],
+          write: [user._id],
+          read: [user._id]
+        }
+      };
 
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      const ldapuser = reqObj.user;
-      // Expect no error
-      chai.expect(err).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
+      // Create org
+      return testUtils.createOrganization(user, orgData);
+    })
+    .then((retOrg) => {
+      // Set global org
+      org = retOrg;
 
-      // Find the user and update the admin status
-      User.findOneAndUpdate({ username: M.config.test.username }, { admin: true }, { new: true },
-        (updateErr, updatedUser) => {
-          // Setting equal to global variable
-          adminUser = updatedUser;
-
-          // Expect no error
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(updatedUser).to.not.equal(null);
-
-          // Create org data
-          const orgData = {
-            id: 'biochemistry',
-            name: 'Scientist',
-            permissions: {
-              admin: [updatedUser._id],
-              write: [updatedUser._id],
-              read: [updatedUser._id]
-            }
-          };
-
-          // Create organization via org controller
-          OrgController.createOrg(updatedUser, orgData)
-          .then((retOrg) => {
-            // Set org to global variable
-            org = retOrg;
-            // Verify org was created correctly
-            chai.expect(retOrg.id).to.equal('biochemistry');
-            chai.expect(retOrg.name).to.equal('Scientist');
-            chai.expect(retOrg.permissions.read).to.include(updatedUser._id.toString());
-            chai.expect(retOrg.permissions.write).to.include(updatedUser._id.toString());
-            chai.expect(retOrg.permissions.admin).to.include(updatedUser._id.toString());
-            done();
-          })
-          .catch((firsterr) => {
-            // Parse body of error
-            const error1 = JSON.parse(firsterr.message);
-            // Expect no error
-            chai.expect(error1.message).to.equal(null);
-            done();
-          });
-        });
+      // Verify org was created correctly
+      chai.expect(retOrg.id).to.equal('biochemistry');
+      chai.expect(retOrg.name).to.equal('Scientist');
+      chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
+      done();
+    })
+    .catch((error) => {
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
   /**
-   * After: run after all tests. Delete the org and requesting user.
+   * After: Delete the organization and admin user.
    */
   after((done) => {
     // Remove the Organization
@@ -127,7 +102,7 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(retOrg.id).to.equal('biochemistry');
 
       // Find the admin user
-      return User.findOne({ username: M.config.test.username });
+      return User.findOne({ username: M.config.test.adminUsername });
     })
     // Remove admin user
     .then((foundUser) => foundUser.remove())
@@ -424,7 +399,7 @@ function deleteSecondProject(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

@@ -27,13 +27,12 @@ const chai = require('chai');
 // Load MBEE modules
 const UserController = M.require('controllers.user-controller');
 const User = M.require('models.user');
-const AuthController = M.require('lib.auth');
 const db = M.require('lib.db');
-const mockExpress = M.require('lib.mock-express');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
 let nonAdminUser = null;
 
@@ -46,62 +45,52 @@ let nonAdminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests. Create admin user.
-   * Set admin user globally.
+   * Before: Create admin user.
    */
   before((done) => {
     // Connect to the database
     db.connect();
 
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
-
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-
-    // Authenticate user
-    AuthController.authenticate(reqObj, resObj, (error) => {
-      const ldapuser = reqObj.user;
-      // Expect no error
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((user) => {
+      // Set global admin user
+      adminUser = user;
+      done();
+    })
+    .catch((error) => {
       chai.expect(error).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-
-      // Find the user and update admin status
-      User.findOneAndUpdate({ username: ldapuser.username }, { admin: true }, { new: true },
-        (updateErr, updatedUser) => {
-          // Setting it equal to global variable
-          adminUser = updatedUser;
-          // Expect no error
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(updatedUser).to.not.equal(null);
-          done();
-        });
+      done();
     });
   });
 
   /**
-   * After: run after all tests. Delete admin user,
-   * non-admin user.
+   * After: Delete admin user.
    */
   after((done) => {
     // Find the admin user
-    User.findOne({ username: M.config.test.username })
-    // Delete admin user
-    .then((user) => user.remove())
-    .then(() => {
-      // Disconnect from the database
-      db.disconnect();
-      done();
+    User.findOne({
+      username: M.config.test.adminUsername
+    }, (error, user) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
+
+      // Delete admin user
+      user.remove((error2) => {
+        // Expect no error
+        chai.expect(error2).to.equal(null);
+
+        // Disconnect from the database
+        db.disconnect();
+        done();
+      });
     })
     .catch((error) => {
-      // Disconnect from the database
-      db.disconnect();
-
       // Expect no error
       chai.expect(error.message).to.equal(null);
+
+      // Disconnect from the database
+      db.disconnect();
       done();
     });
   });
@@ -389,7 +378,7 @@ function rejectDeleteByNonAdmin(done) {
  */
 function rejectDeleteSelf(done) {
   // Create user data
-  const username = M.config.test.username;
+  const username = M.config.test.adminUsername;
 
   // Remove user via controller
   UserController.removeUser(adminUser, username)
