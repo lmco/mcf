@@ -55,7 +55,7 @@ describe(M.getModuleName(module.filename), () => {
 
     // Create test admin
     testUtils.createAdminUser()
-    .then((user) => {
+    .then(() => {
       done();
     })
     .catch((error) => {
@@ -104,7 +104,7 @@ describe(M.getModuleName(module.filename), () => {
 function getUser(done) {
   // Make a user API GET request
   request({
-    url: `${test.url}/api/users/${testData.users[1].username}`,
+    url: `${test.url}/api/users/${testData.users[0].adminUsername}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -116,7 +116,7 @@ function getUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct username
-    chai.expect(json.username).to.equal(testData.users[1].username);
+    chai.expect(json.username).to.equal(testData.users[0].adminUsername);
     done();
   });
 }
@@ -168,7 +168,7 @@ function whoAmI(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal(testData.users[1].username);
+    chai.expect(json.username).to.equal(testData.users[0].adminUsername);
     done();
   });
 }
@@ -246,7 +246,7 @@ function getUsers(done) {
     // Verifies status 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verifies users exist
-    chai.expect(body).to.include(testData.users[1].username);
+    chai.expect(body).to.include(testData.users[0].adminUsername);
     chai.expect(body).to.include(testData.users[9].username);
     done();
   });
@@ -399,7 +399,7 @@ function deleteUser(done) {
  * @description Helper function for setting the request header.
  */
 function getHeaders() {
-  const formattedCreds = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
+  const formattedCreds = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

@@ -60,38 +60,29 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = user;
 
       // Define org data
-      const orgData = {
-        id: 'nineteenforty',
-        name: 'World War Two'
-      };
+      const orgData = testData.orgs[12];
 
       // Create org
       return testUtils.createOrganization(adminUser, orgData);
     })
     .then((retOrg) => {
       org = retOrg;
-      chai.expect(retOrg.id).to.equal('nineteenforty');
-      chai.expect(retOrg.name).to.equal('World War Two');
+      chai.expect(retOrg.id).to.equal(testData.orgs[12].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[12].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
 
       // Define project data
-      const projData = {
-        id: 'rebirth',
-        name: 'Super Soldier Serum',
-        org: {
-          id: 'nineteenforty'
-        }
-      };
+      const projData = testData.projects[16];
 
       // Create project
       return ProjController.createProject(adminUser, projData);
     })
     .then((retProj) => {
       proj = retProj;
-      chai.expect(retProj.id).to.equal('rebirth');
-      chai.expect(retProj.name).to.equal('Super Soldier Serum');
+      chai.expect(retProj.id).to.equal(testData.projects[16].id);
+      chai.expect(retProj.name).to.equal(testData.projects[16].name);
       done();
     })
     .catch((error) => {
@@ -105,9 +96,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Delete organization
-    OrgController.removeOrg(adminUser, 'nineteenforty', { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[12].id, { soft: false })
     .then((retOrg) => {
-      chai.expect(retOrg).to.not.equal(null);
+      console.log(retOrg);
+      chai.expect(retOrg.id).to.equal(testData.orgs[12].id);
       // Delete admin user
       return testUtils.removeAdminUser();
     })
@@ -415,7 +407,7 @@ function deleteElement02(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
+  const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

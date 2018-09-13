@@ -52,7 +52,7 @@ describe(M.getModuleName(module.filename), () => {
 
     // Create test admin
     testUtils.createAdminUser()
-    .then((user) => {
+    .then(() => {
       done();
     })
     .catch((error) => {
@@ -220,7 +220,7 @@ function rejectPatchIdMismatch(done) {
  */
 function getMemberRoles(done) {
   request({
-    url: `${test.url}/api/orgs/shield/members/${testData.users[1].username}`,
+    url: `${test.url}/api/orgs/shield/members/${testData.users[0].adminUsername}`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -253,7 +253,7 @@ function getOrgs(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verifies length of response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(1);
     done();
   });
 }
@@ -434,7 +434,7 @@ function deleteOrg(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
+  const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

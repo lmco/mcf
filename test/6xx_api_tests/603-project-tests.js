@@ -61,15 +61,7 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = user;
 
       // Define org data
-      const orgData = {
-        id: 'biochemistry',
-        name: 'Scientist',
-        permissions: {
-          admin: [user._id],
-          write: [user._id],
-          read: [user._id]
-        }
-      };
+      const orgData = testData.orgs[11];
 
       // Create org
       return testUtils.createOrganization(user, orgData);
@@ -79,8 +71,8 @@ describe(M.getModuleName(module.filename), () => {
       org = retOrg;
 
       // Verify org was created correctly
-      chai.expect(retOrg.id).to.equal('biochemistry');
-      chai.expect(retOrg.name).to.equal('Scientist');
+      chai.expect(retOrg.id).to.equal(testData.orgs[11].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[11].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
@@ -103,7 +95,7 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(retOrg.id).to.equal(testData.orgs[11].id);
 
       // Find the admin user
-      return User.findOne({ username: M.config.test.adminUsername });
+      return User.findOne({ username: adminUser.username });
     })
     // Remove admin user
     .then((foundUser) => foundUser.remove())
@@ -381,7 +373,7 @@ function deleteSecondProject(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
+  const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',
