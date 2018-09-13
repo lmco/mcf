@@ -23,22 +23,37 @@ const mongoose = require('mongoose');
 // MBEE modules
 const validators = M.require('lib.validators');
 
-/* --------------------( Project Model )-------------------- */
+
+/* ----------------------------( Project Model )----------------------------- */
+
 /**
- * TODO: MBX-417, Clean up JSDoc documentation to align with org model
- * @class Project
+ * @namespace
  *
- * @classdesc Defines the Project Schema
+ * @description Defines the Project Schema
+ *
+ * @property {String} id - The project's non-unique id.
+ * @property {Organization} org - A reference to the project's organization.
+ * @property {String} uid - The projects unique id namespaced using a
+ * project's organization.
+ * @property {String} name - The project's non-unique project name.
+ * @property {User} permissions - An object whose keys identify a projects's
+ * roles. The key values are an array of references to users who hold those
+ * roles.
+ * @property {User} permissions.read - An array of refrences to Users who have
+ * read access
+ * @property {User} permissions.write - An array of refrences to Users who have
+ * write access
+ * @property {User} permissions.admin - An array of refrences to Users who have
+ * admin access
+ * @property {Date} deletedOn - The date a project was soft deleted or null if
+ * not soft deleted
+ * @property {Boolean} deleted - Indicates if a project has been soft deleted.
+ * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
+ * @property {String} visibility - The visibility level of a project defining
+ * its permissions behaviour.
+ *
  */
 const ProjectSchema = new mongoose.Schema({
-  /**
-   * @description The 'id' contains a non-unique project id.
-   *
-   * @property  id
-   * @type {String}
-   * @memberOf  Project
-   *
-   */
   id: {
     type: String,
     required: true,
@@ -46,110 +61,38 @@ const ProjectSchema = new mongoose.Schema({
     match: RegExp(validators.project.id),
     maxlength: [36, 'Too many characters in username']
   },
-
-  /**
-   * @description 'org' contains a reference to a project's organization.
-   *
-   * @property org
-   * @type {Organization}
-   * @memberOf  Project
-   *
-   */
   org: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
     required: true
   },
-
-  /**
-   * @description 'uid' contains a unique project id namespaced using a
-   * project's organization.
-   *
-   * @property  uid
-   * @type {String}
-   * @memberOf  Project
-   *
-   */
   uid: {
     type: String,
     unique: true
   },
-
-  /**
-   * @description 'name' contains a non-unique project name.
-   *
-   * @property  name
-   * @type {String}
-   * @memberOf  Project
-   *
-   */
   name: {
     type: String,
     required: true,
     match: RegExp(validators.project.name)
   },
-
-  /**
-   * @description 'permissions' is an object whose keys identify a project's
-   * roles. The key values are an array of references to users who hold those roles.
-   *
-   * @property  permissions
-   * @type {Object}
-   * @memberOf  Project
-   *
-   */
   permissions: {
-    // TODO: MBX-143 Evaluate how this renders in JSDOC and see if we need to alter this
-    /**
-     * @description Contains the list of users with read access to the project.
-     * @type {Array}
-     */
     read: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
-
-    /**
-     * @description  Contains the list of users with write access to the project.
-     * @type  {Array}
-     */
     write: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
-
-    /**
-     * @description Contains the list of users with admin access to the project.
-     * @type {Array}
-     */
     admin: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }]
   },
-
-  /**
-   * @description 'deletedOn' contains the date a project was soft deleted.
-   *
-   * @property  deletedOn
-   * @type {Date}
-   * @memberOf  Project
-   *
-   */
   deletedOn: {
     type: Date,
     default: null
   },
-
-  /**
-   * @description 'deleted' contains a boolean value defining if an project
-   * has been soft deleted.
-   *
-   * @property deleted
-   * @type {Boolean}
-   * @memberOf Project
-   *
-   */
   deleted: {
     type: Boolean,
     default: false,
@@ -160,38 +103,21 @@ const ProjectSchema = new mongoose.Schema({
       return v;
     }
   },
-
-  /**
-   * @description 'custom' contains arbitrary JSON data used to store additional
-   * data.
-   *
-   * @property custom
-   * @type {Schema.Types.Mixed}
-   * @memberOf Project
-   *
-   */
   custom: {
     type: mongoose.Schema.Types.Mixed
   },
-
-  /**
-   * @description 'visibility' contains the visibility level of a project defining
-   * its permissions behaviour.
-   *
-   * @property custom
-   * @type {String}
-   * @memberOf Project
-   *
-   */
   visibility: {
     type: String,
     default: 'private'
   }
 });
 
-/* --------------------( Project Methods )-------------------- */
+
+/* ---------------------------( Project Methods )---------------------------- */
+
 /**
  * @description Returns a project's public data.
+ * @memberof ProjectSchema
  */
 ProjectSchema.methods.getPublicData = function() {
   // Map read, write, and admin refrences to only contain user public data
@@ -204,6 +130,7 @@ ProjectSchema.methods.getPublicData = function() {
 
 /**
  * @description Returns supported permission levels
+ * @memberof ProjectSchema
  */
 ProjectSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
@@ -211,6 +138,7 @@ ProjectSchema.methods.getPermissionLevels = function() {
 
 /**
  * @description Returns project fields that can be changed
+ * @memberof ProjectSchema
  */
 ProjectSchema.methods.getValidUpdateFields = function() {
   return ['name', 'delete', 'deletedOn', 'custom'];
@@ -218,6 +146,7 @@ ProjectSchema.methods.getValidUpdateFields = function() {
 
 /**
  * @description Returns supported visibility levels
+ * @memberof ProjectSchema
  */
 ProjectSchema.methods.getVisibilityLevels = function() {
   return ['internal', 'private'];
@@ -227,6 +156,7 @@ ProjectSchema.methods.getVisibilityLevels = function() {
  * @description Returns the permissions of the user has on the project
  *
  * @param {User} user  The user whose permissions are being returned
+ * @memberof ProjectSchema
  *
  * @returns {Object} A json object with keys being the permission levels
  *  and values being booleans
@@ -255,11 +185,15 @@ ProjectSchema.methods.getPermissions = function(user) {
   return permissions;
 };
 
-/* --------------------( Project Properties )-------------------- */
+
+/* --------------------------( Project Properties )-------------------------- */
+
 // Required for virtual getters
 ProjectSchema.set('toJSON', { virtuals: true });
 ProjectSchema.set('toObject', { virtuals: true });
 
-/* --------------------( Project Schema Export )-------------------- */
+
+/* ------------------------( Project Schema Export )------------------------- */
+
 // Export mongoose model as "Project"
 module.exports = mongoose.model('Project', ProjectSchema);
