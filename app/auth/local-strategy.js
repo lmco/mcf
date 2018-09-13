@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module lib.mock_express
+ * @module lib.local_strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,8 +11,6 @@
  *
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
- *
- * @module auth.local_strategy
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
