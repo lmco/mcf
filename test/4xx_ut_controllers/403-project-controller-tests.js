@@ -54,36 +54,27 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = _adminUser;
 
       // Define non-admin user data
-      const nonAdminUserData = {
-        username: 'pepperpotts',
-        password: 'Gfoftonystark123',
-        fname: 'Pepper',
-        lname: 'Potts',
-        admin: false
-      };
+      const nonAdminUserData = testData.users[8];
 
       // Create non-admin user
       return testUtils.createNonadminUser(nonAdminUserData);
     })
     .then((_nonadminUser) => {
       nonAdminUser = _nonadminUser;
-      chai.expect(nonAdminUser.username).to.equal('pepperpotts');
-      chai.expect(nonAdminUser.fname).to.equal('Pepper');
-      chai.expect(nonAdminUser.lname).to.equal('Potts');
+      chai.expect(nonAdminUser.username).to.equal(testData.users[8].username);
+      chai.expect(nonAdminUser.fname).to.equal(testData.users[8].fname);
+      chai.expect(nonAdminUser.lname).to.equal(testData.users[8].lname);
     })
     .then(() => {
       // Define organization data
-      const orgData = {
-        id: 'starkhq',
-        name: 'Stark Headquarts'
-      };
+      const orgData = testData.orgs[7];
       // Create organization
       return testUtils.createOrganization(adminUser, orgData);
     })
     .then((retOrg) => {
       org = retOrg;
-      chai.expect(retOrg.id).to.equal('starkhq');
-      chai.expect(retOrg.name).to.equal('Stark Headquarts');
+      chai.expect(retOrg.id).to.equal(testData.orgs[7].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[7].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
@@ -107,7 +98,7 @@ describe(M.getModuleName(module.filename), () => {
       return UserController.removeUser(adminUser, userTwo);
     })
     .then((delUser2) => {
-      chai.expect(delUser2).to.equal('pepperpotts');
+      chai.expect(delUser2).to.equal(testData.users[8].username);
       return testUtils.removeAdminUser();
     })
     .then((delAdminUser) => {

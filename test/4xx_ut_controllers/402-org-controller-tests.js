@@ -63,22 +63,16 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = user;
 
       // Define non-admin user data
-      const nonAdminUserData = {
-        username: 'groot',
-        password: 'Iamgroot123',
-        fname: 'Groot',
-        lname: 'Tree',
-        admin: false
-      };
+      const nonAdminUserData = testData.users[7];
 
       // Create non-admin user
       return testUtils.createNonadminUser(nonAdminUserData);
     })
     .then((nonadminUser) => {
       newUser = nonadminUser;
-      chai.expect(newUser.username).to.equal('groot');
-      chai.expect(newUser.fname).to.equal('Groot');
-      chai.expect(newUser.lname).to.equal('Tree');
+      chai.expect(newUser.username).to.equal(testData.users[7].username);
+      chai.expect(newUser.fname).to.equal(testData.users[7].fname);
+      chai.expect(newUser.lname).to.equal(testData.users[7].lname);
       done();
     })
     .catch((error) => {
@@ -99,7 +93,7 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(delUser2).to.equal(testData.users[7].username);
       // Find admin user
       User.findOne({
-        username: M.config.test.adminUsername
+        username: testData.users[0].adminUsername
       }, (error, foundUser) => {
         // Expect no error
         chai.expect(error).to.equal(null);
@@ -345,7 +339,7 @@ function findAllExistingOrgs(done) {
   OrgController.findOrgs(adminUser)
   .then((orgs) => {
     // Verify correct number of orgs was returned
-    chai.expect(orgs.length).to.equal(3);
+    chai.expect(orgs.length).to.equal(2);
     done();
   })
   .catch((error) => {

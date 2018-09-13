@@ -60,10 +60,7 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = _adminUser;
 
       // Define organization data
-      const orgData = {
-        id: 'asgard',
-        name: 'Asgard'
-      };
+      const orgData = testData.orgs[8];
       // Create organization
       return testUtils.createOrganization(adminUser, orgData);
     })
@@ -72,11 +69,7 @@ describe(M.getModuleName(module.filename), () => {
       org = retOrg;
 
       // Define project data
-      const proData = {
-        id: 'thor',
-        name: 'Thor Odinson',
-        org: { id: org.id }
-      };
+      const proData = testData.projects[11];
 
       // Create project
       return ProjController.createProject(adminUser, proData);
@@ -104,7 +97,7 @@ describe(M.getModuleName(module.filename), () => {
       // Once db items are removed, remove reqUser
       // close the db connection and finish
       User.findOne({
-        username: M.config.test.adminUsername
+        username: adminUser.username
       }, (error, foundUser) => {
         chai.expect(error).to.equal(null);
         foundUser.remove((error2) => {

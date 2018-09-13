@@ -5,8 +5,12 @@
       "adminPassword": "test12345"
     },
     {
-      "username": "mbee",
-      "password": "t1QAx&hICyQSg)|"
+      "username": "nonadminUser",
+      "password": "password123",
+      "fname": "userFirstname",
+      "preferredName": "nonadmin user",
+      "lname": "userLastname",
+      "admin": false
     },
     {
       "username": "ironman",
@@ -124,12 +128,7 @@
     },
     {
       "id": "starkhq",
-      "name": "Stark Headquarts",
-      "permissions": {
-        "admin": "[adminUser._id]",
-        "write": "[adminUser._id]",
-        "read": "[adminUser._id]"
-      }
+      "name": "Stark Headquarts"
     },
     {
       "id": "asgard",

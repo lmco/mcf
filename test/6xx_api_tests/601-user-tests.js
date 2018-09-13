@@ -25,7 +25,6 @@
 // Load node modules
 const fs = require('fs');
 const chai = require('chai');
-const path = require('path');
 const request = require('request');
 const path = require('path');
 

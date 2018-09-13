@@ -70,7 +70,7 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Find the admin user
     User.findOne({
-      username: M.config.test.adminUsername
+      username: testData.users[0].adminUsername
     }, (error, user) => {
       // Expect no error
       chai.expect(error).to.equal(null);
@@ -378,7 +378,7 @@ function rejectDeleteByNonAdmin(done) {
  */
 function rejectDeleteSelf(done) {
   // Create user data
-  const username = M.config.test.adminUsername;
+  const username = testData.users[0].adminUsername;
 
   // Remove user via controller
   UserController.removeUser(adminUser, username)

@@ -27,6 +27,8 @@
 // Load MBEE modules
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
+const path = require('path');
+const testData = require(path.join(M.root, 'test', 'data.json'));
 
 /**
  * @description Helper function to create test non-admin user for
@@ -49,14 +51,7 @@ module.exports.createNonadminUser = function(userData = null) {
       // Check passed in user data
       if (userData === null) {
         // No data, create default user
-        user = new User({
-          username: 'nonadminUser',
-          password: 'password123',
-          fname: 'userFirstname',
-          preferredName: 'nonadmin user',
-          lname: 'userLastname',
-          admin: false
-        });
+        user = new User(testData.users[1]);
       }
       else {
         // User data present, create user
@@ -84,7 +79,7 @@ module.exports.createNonadminUser = function(userData = null) {
 module.exports.createAdminUser = function() {
   return new Promise((resolve, reject) => {
     // Check any admin exist
-    User.findOne({ username: M.config.test.adminUsername })
+    User.findOne({ username: testData.users[0].adminUsername })
     .then((foundUser) => {
       // Check user found
       if (foundUser !== null) {
@@ -94,8 +89,8 @@ module.exports.createAdminUser = function() {
 
       // User not found, create new user
       const user = new User({
-        username: M.config.test.adminUsername,
-        password: M.config.test.adminPassword,
+        username: testData.users[0].adminUsername,
+        password: testData.users[0].adminPassword,
         provider: 'local',
         admin: true
       });
@@ -115,7 +110,7 @@ module.exports.createAdminUser = function() {
 module.exports.removeAdminUser = function() {
   return new Promise((resolve, reject) => {
     // Find admin user
-    User.findOne({ username: M.config.test.adminUsername })
+    User.findOne({ username: testData.users[0].adminUsername })
     .then((foundUser) => foundUser.remove())
     .then(() => resolve(null))
     .catch((error) => reject(error));
