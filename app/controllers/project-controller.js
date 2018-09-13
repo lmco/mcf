@@ -694,11 +694,11 @@ class ProjectController {
    *
    *
    * @param {User} reqUser  The object containing the requesting user.
-   * @param {User} findUser The object containing the user to be searched for.
+   * @param {String} searchedUsername The string containing the username to be searched for.
    * @param {String} organizationID  The organization ID for the org the project belongs to.
    * @param {String} projectID  The project ID of the Project which is being deleted.
    */
-  static findPermissions(reqUser, findUser, organizationID, projectID) {
+  static findPermissions(reqUser, searchedUsername, organizationID, projectID) {
     return new Promise((resolve, reject) => {
       const orgID = sani.html(organizationID);
       const projID = sani.html(projectID);
@@ -706,11 +706,11 @@ class ProjectController {
       // Find Project
       ProjectController.findAllPermissions(reqUser, orgID, projID)
       .then(permissionList => {
-        if (!permissionList.hasOwnProperty(findUser.username)) {
+        if (!permissionList.hasOwnProperty(searchedUsername)) {
           return resolve({});
         }
 
-        return resolve(permissionList[findUser.username]);
+        return resolve(permissionList[searchedUsername]);
       })
       .catch((findPermissionsErr) => reject(findPermissionsErr));
     });
@@ -810,7 +810,7 @@ class ProjectController {
               return reject(new errors.CustomError('Save failed.'));
             }
             // Check if user has org read permissions
-            OrgController.findPermissions(reqUser, setUser, orgID)
+            OrgController.findPermissions(reqUser, setUser.username, orgID)
             .then((userOrgPermissions) => {
               if (userOrgPermissions.read) {
                 return resolve(projectSaved);

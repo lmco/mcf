@@ -584,7 +584,7 @@ function rejectUserRole(done) {
  */
 function getUserRoles(done) {
   // Find permissions via controller
-  OrgController.findPermissions(adminUser, newUser, org.id.toString())
+  OrgController.findPermissions(adminUser, newUser.username, org.id.toString())
   .then((roles) => {
     // Verifies user permissions
     chai.expect(roles.read).to.equal(true);
@@ -667,7 +667,7 @@ function removeUserRole(done) {
  */
 function rejectGetUserRoles(done) {
   // Find permissions via controller
-  OrgController.findPermissions(adminUser, newUser, org.id.toString())
+  OrgController.findPermissions(adminUser, newUser.username, org.id.toString())
   .then((roles) => {
     // Expected findPermissions() to succeed with user having no permissions
     // expect the object to be empty
