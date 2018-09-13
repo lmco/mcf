@@ -169,7 +169,7 @@ const BlockSchema = new mongoose.Schema({}, options);
  *
  * @property {Element} source - Defines the origin of a relationship.
  * @property {Element} target - Defines the end of a relationship.
- * 
+ *
  */
 const RelationshipSchema = new mongoose.Schema({
   source: {
