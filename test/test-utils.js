@@ -27,7 +27,7 @@
 // Load MBEE modules
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
-
+const UserController = M.require('controllers.user-controller');
 /**
  * @description Helper function to create test non-admin user for
  * MBEE tests.
@@ -93,15 +93,15 @@ module.exports.createAdminUser = function() {
       }
 
       // User not found, create new user
-      const user = new User({
+      const adminUserData = {
         username: M.config.test.adminUsername,
         password: M.config.test.adminPassword,
         provider: 'local',
         admin: true
-      });
+      };
 
-      // Save user object to the database
-      return user.save();
+      // Create user via controller
+      UserController.createUser({admin: true}, adminUserData);
     })
     .then((user) => resolve(user))
     .catch((error) => reject(error));

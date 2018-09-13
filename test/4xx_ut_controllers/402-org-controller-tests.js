@@ -116,6 +116,7 @@ describe(M.getModuleName(module.filename), () => {
       });
     })
     .catch((error) => {
+      console.log(error);
       // Expect no error
       chai.expect(error.message).to.equal(null);
 
