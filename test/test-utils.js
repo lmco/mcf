@@ -23,11 +23,14 @@
  * making MBEE tests easier to read and run.
  *
  */
+//Load node modules
+const path = require('path');
 
 // Load MBEE modules
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const UserController = M.require('controllers.user-controller');
+const testData = require(path.join(M.root, 'test', 'data.json'));
 /**
  * @description Helper function to create test non-admin user for
  * MBEE tests.
