@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module lib.ldap_strategy
+ * @module auth.ldap_strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

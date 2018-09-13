@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module lib.local_strategy
+ * @module auth.local_strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
