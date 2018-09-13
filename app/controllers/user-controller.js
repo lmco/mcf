@@ -183,6 +183,7 @@ function createUser(reqUser, newUserData) {
       // Sanitize the input, the model should handle
       // data validation
       const user = new User(sani.sanitize(newUserData));
+      //console.log(user);
       return user.save();
     })
     // Find the default

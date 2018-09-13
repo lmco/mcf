@@ -51,7 +51,7 @@ module.exports.createNonadminUser = function(userData = null) {
         // No data, create default user
         user = new User({
           username: 'nonadminUser',
-          password: 'password123',
+          password: 'Password123',
           fname: 'userFirstname',
           preferredName: 'nonadmin user',
           lname: 'userLastname',
@@ -101,7 +101,7 @@ module.exports.createAdminUser = function() {
       };
 
       // Create user via controller
-      UserController.createUser({admin: true}, adminUserData);
+      return UserController.createUser({admin: true}, adminUserData);
     })
     .then((user) => resolve(user))
     .catch((error) => reject(error));
