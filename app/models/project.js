@@ -70,6 +70,7 @@ const ProjectSchema = new mongoose.Schema({
   uid: {
     type: String,
     unique: true
+    // TODO: FIXME: required = true?
   },
   name: {
     type: String,
@@ -194,7 +195,14 @@ ProjectSchema.set('toJSON', { virtuals: true });
 ProjectSchema.set('toObject', { virtuals: true });
 
 
+/* ---------------------------( Project Model ) ----------------------------- */
+
+const Project = mongoose.model('Project', ProjectSchema);
+Project.statics.getVisibilityLevels = function() {
+  return Project.schema.methods.getVisibilityLevels();
+}
+
 /* ------------------------( Project Schema Export )------------------------- */
 
 // Export mongoose model as "Project"
-module.exports = mongoose.model('Project', ProjectSchema);
+module.exports = Project;

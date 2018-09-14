@@ -18,8 +18,8 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
  *
- * @description This implements the behavior and logic for an organization and
- * provides functions for interacting with organizations.
+ * @description Provides an abstraction layer on top of the Organization model
+ * that provides functions implementing controller logic and behavior.
  */
 
 // Load MBEE modules
@@ -27,7 +27,6 @@ const Organization = M.require('models.organization');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
-const validators = M.require('lib.validators');
 
 // eslint consistent-return rule is disabled for this file.
 // The rule may not fit controller-related functions as
@@ -48,19 +47,19 @@ module.exports = {
 };
 
 /**
-   * @description This function finds all organizations a user belongs to.
-   *
-   * @example
-   * findOrgs(username)
-   * .then(orgs => {
-   *   console.log(orgs);
-   * })
-   * .catch(err => {
-   *   console.log(err);
-   * })
-   *
-   * @param {User} user - The user whose organizations to find
-   */
+ * @description This function finds all organizations a user belongs to.
+ *
+ * @example
+ * findOrgs(username)
+ * .then(orgs => {
+ *   console.log(orgs);
+ * })
+ * .catch(err => {
+ *   console.log(err);
+ * })
+ *
+ * @param {User} user - The user whose organizations to find
+ */
 function findOrgs(user) {
   return new Promise((resolve, reject) => {
     const userID = sani.sanitize(user._id);
@@ -70,7 +69,6 @@ function findOrgs(user) {
     .catch((error) => reject(error));
   });
 }
-
 
 /**
  * @description This function takes a user object and orgID and returns the
@@ -143,20 +141,20 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
 }
 
 /**
-   * @description Find orgs by a database query.
-   *
-   * @example
-   * findOrgsQuery({ id: 'org' })
-   * .then(function(org) {
-   *   // do something with the found orgs.
-   * })
-   * .catch(function(error) {
-   *   M.log.error(error);
-   * });
-   *
-   *
-   * @param {Object} orgQuery - The query to be made to the database
-   */
+ * @description Find orgs by a database query.
+ *
+ * @example
+ * findOrgsQuery({ id: 'org' })
+ * .then(function(org) {
+ *   // do something with the found orgs.
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ *
+ *
+ * @param {Object} orgQuery - The query to be made to the database
+ */
 function findOrgsQuery(orgQuery) {
   return new Promise((resolve, reject) => {
     // Sanitize query
@@ -173,24 +171,23 @@ function findOrgsQuery(orgQuery) {
   });
 }
 
-
 /**
-   * @description This function takes a user and dictionary containing
-   *   the org data creates a new organization.
-   *
-   * @example
-   * createOrg('josh', {mbee-sw})
-   * .then(function(org) {
-   *   // do something with the newly created org
-   * })
-   * .catch(function(error) {
-   *   M.log.error(error);
-   * });
-   *
-   *
-   * @param {User} reqUser - The object containing the user of the requesting user.
-   * @param {Object} newOrgData - Object containing new org data..
-   */
+ * @description This function takes a user and dictionary containing
+ *   the org data creates a new organization.
+ *
+ * @example
+ * createOrg('josh', {mbee-sw})
+ * .then(function(org) {
+ *   // do something with the newly created org
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ *
+ *
+ * @param {User} reqUser - The object containing the user of the requesting user.
+ * @param {Object} newOrgData - Object containing new org data..
+ */
 function createOrg(reqUser, newOrgData) {
   return new Promise((resolve, reject) => {
     // Initialize optional fields with a default
@@ -264,7 +261,6 @@ function createOrg(reqUser, newOrgData) {
     });
   });
 }
-
 
 /**
  * @description This function takes a user object, organization ID, and an
@@ -385,7 +381,6 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
   });
 }
 
-
 /**
  * @description This function takes a user object, organization ID, and an
  * optional flag for soft or hard delete and deletes an organization.
@@ -472,23 +467,23 @@ function removeOrg(reqUser, organizationID, options) {
 // TODO: MBX-434 Come back and review function following Austin and Phill working out
 // Project and Element removal.
 /**
-   * @description This function does the actual deletion or updating on an org.
-   *   It was written to help clean up some code in the removeOrg function.
-   *
-   * @example
-   * removeOrgHelper(Josh, 'mbee', true)
-   * .then(function(org) {
-   *  // Get the users roles
-   * })
-   * .catch(function(error) {
-   *  M.log.error(error);
-   * });
-   *
-   *
-   * @param {User} user  The object containing the requesting user.
-   * @param {String} orgID  The organization ID.
-   * @param {Boolean} softDelete  The flag indicating whether or not to soft delete.
-   */
+ * @description This function does the actual deletion or updating on an org.
+ *   It was written to help clean up some code in the removeOrg function.
+ *
+ * @example
+ * removeOrgHelper(Josh, 'mbee', true)
+ * .then(function(org) {
+ *  // Get the users roles
+ * })
+ * .catch(function(error) {
+ *  M.log.error(error);
+ * });
+ *
+ *
+ * @param {User} user  The object containing the requesting user.
+ * @param {String} orgID  The organization ID.
+ * @param {Boolean} softDelete  The flag indicating whether or not to soft delete.
+ */
 function removeOrgHelper(user, orgID, softDelete) {
   return new Promise((resolve, reject) => {
     if (softDelete) {

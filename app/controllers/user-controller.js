@@ -6,7 +6,7 @@
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI
- * 
+ *
  * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
  * It is not approved for public release or redistribution.
  *
@@ -17,8 +17,8 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This implements the behavior and logic for interfacing
- *  the user model.
+ * @description Provides an abstraction layer on top of the User model that
+ * implements controller logic and behavior for Users.
  */
 
 // Load MBEE modules
