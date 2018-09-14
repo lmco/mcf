@@ -524,72 +524,55 @@ class ProjectController {
    * @param {User} reqUser  The object containing the requesting user.
    * @param {String} organizationID  The organization ID for the org the project belongs to.
    * @param {String} projectID  he project ID of the Project which is being deleted.
-   * @param {Object} options  Contains the list of delete options.
+   * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
    */
-  static removeProject(reqUser, organizationID, projectID, options) {
+  static removeProject(reqUser, organizationID, projectID, hardDelete=false) {
     // Loading controller function wide since the element controller loads
     // the project controller globally. Both files cannot load each other globally.
     const ElemController = M.require('controllers.element-controller');
 
     return new Promise((resolve, reject) => {
+      // Check valid param type
       try {
         utils.assertType([organizationID, projectID], 'string');
-        utils.assertType([options], 'object');
+        utils.assertType([hardDelete], 'boolean');
       }
       catch (error) {
         return reject(error);
       }
 
-      let softDelete = true;
-      if (utils.checkExists(['soft'], options)) {
-        if (options.soft === false && reqUser.admin) {
-          softDelete = false;
-        }
-        else if (options.soft === false && !reqUser.admin) {
-          return reject(new errors.CustomError('User does not have permission to permanently delete a project.', 401));
-        }
-        else if (options.soft !== false && options.soft !== true) {
-          return reject(new errors.CustomError('Invalid argument for the soft delete field.', 400));
-        }
+      // If hard deleting, ensure user is a site-wide admin
+      if (hardDelete && !reqUser.admin) {
+        return reject(new errors.CustomError(
+          'User does not have permission to permanently delete a project.', 401));
       }
 
-      // Sanitize project properties
-      const orgID = sani.html(organizationID);
-      const projID = sani.html(projectID);
-
-      // Make sure the project exists first, even if it has already been soft deleted
-      ProjectController.findProject(reqUser, orgID, projID, true)
-      .then((project) => new Promise((res, rej) => { // eslint-disable-line consistent-return
-        // Check if we want to hard delete the project and if so,
-        // ensure that the project has been soft deleted first.
-        if (!softDelete && !project.deleted) {
-          // Call the remove project function to soft delete it first
-          ProjectController.removeProject(reqUser, orgID, projID, { soft: true })
-          .then((retProj) => res(retProj))
-          .catch((softDeleteError) => rej(softDeleteError));
+      // Find project
+      ProjectController.findProject(reqUser, organizationID, projectID, true)
+      .then((project) => {
+        // Check for hard delete
+        if (hardDelete) {
+          Project.deleteOne({id: project.id})
+          // Delete elements in project
+          .then(() => ElemController.removeElements(reqUser, [project], hardDelete))
+          .then(() => resolve(project))
+          .catch((error) => reject(error));
         }
-        else {
-          // Either the project was already soft deleted or we only want it soft deleted.
-          return res();
+        else{
+          // Soft delete
+          Project.updateOne({ id: project.id }, { deleted: true })
+          // Delete all elements in project
+          .then(() => ElemController.removeElements(reqUser, [project], hardDelete))
+          .then(() => {
+            // Set project returned deleted field to true
+            // since updateOne() returns a query not org.
+            project.deleted = true;
+            return resolve(project);
+          })
+          .catch((error) => reject(error));
         }
-      }))
-      // Remove the elements first
-      .then(() => ElemController.removeElements(reqUser, orgID, projID, options))
-      // Actually remove the project
-      .then(() => ProjectController.removeProjectHelper(reqUser, orgID, projID, softDelete))
-      .then((deletedProject) => resolve(deletedProject))
-      .catch((removeElementsError) => {
-        // There are simply no elements associated with this project to delete
-        if (removeElementsError.description === 'No elements found.') {
-          ProjectController.removeProjectHelper(reqUser, orgID, projID, softDelete)
-          .then((deletedProject) => resolve(deletedProject))
-          .catch((deleteProjectError) => reject(deleteProjectError));
-        }
-        else {
-          // Some other error when deleting the elements
-          return reject(removeElementsError);
-        }
-      });
+      })
+      .catch((error) => reject(error));
     });
   }
 

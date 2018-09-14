@@ -406,16 +406,17 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  */
 // TODO: MBX-434 discuss if options should become a boolean for soft or hard delete.
 // And do appropriate checks for either implementations.
-function removeOrg(reqUser, organizationID, hardDelete) {
+function removeOrg(reqUser, organizationID, hardDelete=false) {
   // Loading ProjController function wide because the project controller loads
   // the org controller globally. Both files cannot load each other globally.
   const ProjController = M.require('controllers.project-controller');
 
   return new Promise((resolve, reject) => {
-    // Check admin and parameters are valid
+    // Check valid param type
     try {
       utils.assertAdmin(reqUser);
       utils.assertType([organizationID], 'string');
+      utils.assertType([hardDelete], 'boolean');
     }
     catch (error) {
       return reject(error);
@@ -444,8 +445,8 @@ function removeOrg(reqUser, organizationID, hardDelete) {
         // Delete all projects in that org
         .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
         .then(() => {
-          // Set the returned org deleted field to true since updateOne()
-          // returns a query not org.
+          // Set the returned org deleted field to true
+          // since updateOne() returns a query not org.
           org.deleted = true;
           return resolve(org);
         })
@@ -453,53 +454,6 @@ function removeOrg(reqUser, organizationID, hardDelete) {
       }
     })
     .catch((error) => reject(error));
-  });
-}
-
-/**
-   * @description This function does the actual deletion or updating on an org.
-   *   It was written to help clean up some code in the removeOrg function.
-   *
-   * @example
-   * removeOrgHelper(Josh, 'mbee', true)
-   * .then(function(org) {
-   *  // Get the users roles
-   * })
-   * .catch(function(error) {
-   *  M.log.error(error);
-   * });
-   *
-   *
-   * @param {User} user  The object containing the requesting user.
-   * @param {String} orgID  The organization ID.
-   * @param {Boolean} softDelete  The flag indicating whether or not to soft delete.
-   */
-function removeOrgHelper(user, orgID, softDelete) {
-  return new Promise((resolve, reject) => {
-    if (softDelete) {
-      findOrg(user, orgID)
-      .then((org) => {
-        org.deleted = true;
-        org.save((saveErr) => {
-          if (saveErr) {
-            // If error occurs, return it
-            return reject(new errors.CustomError('Save failed.'));
-          }
-          return resolve(org);
-        });
-      })
-      .catch(error => reject(error));
-    }
-    else {
-      Organization.findOneAndRemove({ id: orgID })
-      .populate()
-      .exec((err, org) => {
-        if (err) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
-        return resolve(org);
-      });
-    }
   });
 }
 
