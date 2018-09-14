@@ -218,7 +218,7 @@ function createOrg(reqUser, newOrgData) {
     .then((foundOrg) => {
       // If org already exists, reject
       if (foundOrg.length > 0) {
-        reject(new errors.CustomError('An organization with the same ID already exists.', 403));
+        return reject(new errors.CustomError('An organization with the same ID already exists.', 403));
       }
 
       // Create the new org
