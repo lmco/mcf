@@ -701,4 +701,4 @@ function findAllPermissions(user, organizationID) {
 }
 
 // Expose `OrganizationController`
-//module.exports = OrganizationController;
+module.exports = OrganizationController;
