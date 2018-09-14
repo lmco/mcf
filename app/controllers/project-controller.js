@@ -437,19 +437,14 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       const projUpdateFields = Object.keys(projectUpdated);
       // Get list of parameters which can be updated from model
       const validUpdateFields = project.getValidUpdateFields();
-      // Get a list of validators
-      const projectValidators = validators.project;
-      // Allocate update val and field before for loop
-      let updateVal = '';
-      let updateField = '';
 
       // Check if passed in object contains fields to be updated
       for (let i = 0; i < projUpdateFields.length; i++) {
-        updateField = projUpdateFields[i];
+        const updateField = projUpdateFields[i];
 
         // if parameter is of type object, stringify and compare
         if (utils.deepEqual(project[updateField], projectUpdated[updateField])) {
-            continue;
+          continue;
         }
 
         // Error Check: Check if field can be updated
@@ -457,18 +452,16 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
           return reject(new errors.CustomError(`Project property [${updateField}] cannot be changed.`, 403));
         }
 
-        // Error Check - If the field has a validator, ensure the field is valid
-        if (projectValidators[updateField]) {
-          if (!RegExp(projectValidators[updateField]).test(projectUpdated[updateField])) {
-            return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
-          }
-        }
-
         // Updates each individual tag that was provided.
         if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
+          // Only objects should be passed into mixed data
+          if (typeof projectUpdated[updateField] === 'object') {
+            return reject(new errors.CustomError(`${updateField} must be an object`, 400));
+          }
+
           // eslint-disable-next-line no-loop-func
           Object.keys(projectUpdated[updateField]).forEach((key) => {
-            project.custom[key] = sani.sanitize(projectUpdated[updateField][key]);
+            project[updateField][key] = sani.sanitize(projectUpdated[updateField][key]);
           });
 
           // Special thing for mixed fields in Mongoose
@@ -476,10 +469,9 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
           project.markModified(updateField);
         }
         else {
-          // sanitize field
-          updateVal = sani.sanitize(projectUpdated[updateField]);
-          // Update field in project object
-          project[updateField] = updateVal;
+          // Schema type is not mixed
+          // Sanitize field and update field in project object
+          project[updateField] = sani.sanitize(projectUpdated[updateField]);
         }
       }
 
@@ -488,7 +480,6 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
         if (saveProjErr) {
           return reject(new errors.CustomError('Save failed.'));
         }
-
         // Return the updated project object
         return resolve(project);
       });
@@ -638,6 +629,7 @@ function removeProjectHelper(reqUser, orgID, projID, softDelete) {
 }
 
 /**
+ * TODO: Code Review 9/14 - We left off here.
  * @description The function finds a projects permissions.
  *
  * @example
