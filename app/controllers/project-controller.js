@@ -115,59 +115,70 @@ class ProjectController {
    *
    *
    * @param {User} reqUser  The object containing the requesting user.
-   * @param {String} organizationID  The organization ID for the org the project belongs to.
+   * @param {Object} arrOrganizations  The organization ID for the org the project belongs to.
    * @param {Boolean} hardDelete  A boolean value indicating whether to hard delete or not.
    */
-  static removeProjects(reqUser, organizationID, hardDelete = false) {
+  static removeProjects(reqUser, arrOrganizations, hardDelete = false) {
+    // TODO: Ifdef exists in JS?
+    const ElementController = M.require('controllers.element-controller');
+
     return new Promise((resolve, reject) => {
+      // Ensure parameters of correctly formatted
       try {
-        utils.assertType([organizationID], 'string');
+        utils.assertType([arrOrganizations], 'object');
         utils.assertType([hardDelete], 'boolean');
       }
       catch (error) {
         return reject(error);
       }
 
-      // Ensure the org exists
-      // TODO - Use populates rather than nested queries when possible (MBX-357)
-      // Doing findOrgs() then findProj(), Instead we should reduces the number of queries below
-      // Not sure if removeProjects() should remove all projects. Instead remove a list of projects
-      OrgController.findOrg(reqUser, organizationID, true)
-      .then((org) => ProjectController.findProjects(reqUser, org.id, true))
-      .then((projects) => {
-        // If we didn't find any projects
-        if (projects.length === 0) {
-          return resolve(projects);
+      // If hard deleting, ensure user is a site-wide admin
+      if (hardDelete && !reqUser.admin) {
+        return reject(new errors.CustomError('User does not have permission to permanently'
+          + ' delete a project.', 401));
+      }
+
+      // Initialize the query object
+      const deleteQuery = { $or: [] };
+      let arrDeletedProjects = []
+
+      // Loop through each org
+      for (const org in arrOrganizations) {
+        // Ensure user has permissions to delete projects on each org
+        if (!arrOrganizations[org].getPermissions(reqUser).admin && !reqUser.admin) {
+          return reject(new errors.CustomError(
+            `User does not have permission to delete projects in the organization 
+            ${arrOrganizations[org].name}.`, 401));
         }
+        deleteQuery.$or.push({ org: arrOrganizations[org]._id });
+        arrDeletedProjects = arrDeletedProjects.concat(arrOrganizations[org].projects);
+      }
 
-        // Ensure user has permission to delete all projects
-        Object.keys(projects).forEach((project) => {
-          if (!projects[project].getPermissions(reqUser).admin && !reqUser.admin) {
-            return reject(new errors.CustomError(
-              `User does not have permission to delete project ${projects[project].id}.`, 401
-            ));
-          }
-        });
+      // If there are no elements to delete
+      if (deleteQuery.$or.length === 0) {
+        return resolve();
+      }
 
-        for (let i = 0; i < projects.length; i++) {
-          ElementController.removeElements(reqUser, organizationID, projects[i].id, hardDelete)
-          Element.Element.deleteMany({ project: projects[i]._id })
-
-          or
-
-          Element.Element.deleteMany({ 'project.org' : org._id})
-          // ElementController.removeElement(proj.id)
-          // Must nest promise since it uses a return
-          // ProjectController.removeProject(reqUser, organizationID, projects[i].id, options)
-          // .then(() => {
-          //   if (i === projects.length - 1) {
-          //     return resolve(projects);
-          //   }
-          // })
-          // .catch((deleteProjError) => reject(deleteProjError));
-        }
-      })
-      .catch((findOrgError) => reject(findOrgError));
+      // Hard delete projects
+      if (hardDelete) {
+        Project.deleteMany(deleteQuery)
+        // Delete elements in associated projects
+        .then((projects) => {
+          return ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete);
+        })
+        .then(() => resolve(arrDeletedProjects))
+        .catch((error) => reject(error));
+      }
+      // Soft delete projects
+      else {
+        Project.updateMany(deleteQuery, { deleted: true })
+        // Delete elements in associated projects
+        .then((projects) => {
+          return ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete);
+        })
+        .then(() => resolve(arrDeletedProjects))
+        .catch((error) => reject(error));
+      }
     });
   }
 

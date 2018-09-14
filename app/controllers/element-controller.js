@@ -106,24 +106,14 @@ class ElementController {
    *
    *
    * @param {User} reqUser  The user object of the requesting user.
-   * @param {Object} searchQuery  The search parameters for deletion.
+   * @param {Object} arrProjects  The list of projects whose elements will be deleted.
    * @param {Boolean} hardDelete  Flag dictating hard or soft delete.
    */
-  // static removeElements(reqUser, query, hardDelete) {
-  //   if (hardDelete) {
-  //     Element.Element.deleteMany(query);
-  //   }
-  //   else {
-  //     Element.Element.updateMany(query, { delete: true })
-  //   }
-  // }
-
-
-  static removeElements(reqUser, searchQuery, hardDelete = false) {
+  static removeElements(reqUser, arrProjects, hardDelete = false) {
     return new Promise((resolve, reject) => {
       // Ensure parameters are correctly formatted
       try {
-        utils.assertType([searchQuery], 'object');
+        utils.assertType([arrProjects], 'object');
         utils.assertType([hardDelete], 'boolean');
       }
       catch (error) {
@@ -132,23 +122,42 @@ class ElementController {
 
       // If hard deleting, ensure user is a site-wide admin
       if (hardDelete && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission to permanently' +
-          ' delete a element.', 401));
+        return reject(new errors.CustomError('User does not have permission to permanently'
+          + ' delete a element.', 401));
       }
 
-      // Sanitize the query
-      const query = sani.mongo(searchQuery);
+      // Initialize the query object
+      const deleteQuery = { $or: [] };
 
-      // If hard deleting
+      // Ensure user is an admin on all projects
+      // TODO: Return an error if not admin on one project, or discard that project?
+      for (const project in arrProjects) {
+        // Check that user has admin permission on project
+        // TODO: Should user have write permissions to delete an element?
+        if (!arrProjects[project].getPermissions(reqUser).admin && !reqUser.admin) {
+          // User does not have admin permission on project, reject
+          return reject(new errors.CustomError('User does not have permission to delete elements'
+            + ` on the project ${arrProjects[project].name}`));
+        }
+        // Add project to deleteQuery
+        deleteQuery.$or.push({ project: arrProjects[project]._id });
+      }
+
+      // If there are no elements to delete
+      if (deleteQuery.$or.length === 0) {
+        return resolve();
+      }
+
+      // Hard delete elements
       if (hardDelete) {
-        Element.Element.deleteMany(query)
+        Element.Element.deleteMany(deleteQuery)
         .then((elements) => resolve(elements))
         .catch((error) => reject(error));
       }
       // Soft delete elements
       else {
         // Set deleted field to true
-        Element.Element.updateMany(query, { deleted: true })
+        Element.Element.updateMany(deleteQuery, { deleted: true })
         .then((elements) => resolve(elements))
         .catch((error) => reject(error));
       }

@@ -6,7 +6,7 @@
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI
- * 
+ *
  * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
  * It is not approved for public release or redistribution.
  *
@@ -402,18 +402,16 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  *
  * @param {User} reqUser - The object containing the  requesting user.
  * @param {String} organizationID - The ID of the org being deleted.
- * @param {Object} options - Contains the list of delete options.
+ * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
  */
 // TODO: MBX-434 discuss if options should become a boolean for soft or hard delete.
 // And do appropriate checks for either implementations.
-function removeOrg(reqUser, organizationID, options) {
+function removeOrg(reqUser, organizationID, hardDelete) {
   // Loading ProjController function wide because the project controller loads
   // the org controller globally. Both files cannot load each other globally.
   const ProjController = M.require('controllers.project-controller');
 
   return new Promise((resolve, reject) => {
-    // Initalize softDelete to default true
-    const softDelete = true;
     // Check admin and parameters are valid
     try {
       utils.assertAdmin(reqUser);
@@ -423,48 +421,38 @@ function removeOrg(reqUser, organizationID, options) {
       return reject(error);
     }
 
-    // Sanitize organizationID
-    const orgID = sani.html(organizationID);
-
     // Check if orgID is default
-    if (orgID === 'default') {
+    if (organizationID === 'default') {
       // orgID is default, reject error.
       return reject(new errors.CustomError('The default organization cannot be deleted.', 403));
     }
 
-    // Find organization
-    findOrg(reqUser, orgID, true)
-    .then((foundOrg) => new Promise((res, rej) => { // eslint-disable-line consistent-return
-      // TODO: Leaving off here Sep 13, 2018.
-      // Check if NOT softDelete and org NOT soft deleted
-      if (!softDelete && !foundOrg.deleted) {
-        // Remove the org
-        removeOrg(reqUser, orgID, { soft: true })
-        .then((retOrg) => res(retOrg))
-        .catch((softDeleteError) => rej(softDeleteError));
+    // Find organization to ensure it exists
+    findOrg(reqUser, organizationID, true)
+    .then((org) => {
+      // Hard delete
+      if (hardDelete) {
+        Organization.deleteOne({ id: org.id })
+        // Delete all projects in that org
+        .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
+        .then(() => resolve(org))
+        .catch((error) => reject(error));
       }
+      // Soft delete
       else {
-        // Either the org was already soft deleted or we only want it soft deleted.
-        return res();
+        Organization.updateOne({ id: org.id }, { deleted: true })
+        // Delete all projects in that org
+        .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
+        .then(() => {
+          // Set the returned org deleted field to true since updateOne()
+          // returns a query not org.
+          org.deleted = true;
+          return resolve(org);
+        })
+        .catch((error) => reject(error));
       }
-    }))
-    // Remove the project and elements first
-    .then(() => ProjController.removeProjects(reqUser, orgID, options))
-    // Actually remove the org
-    .then(() => removeOrgHelper(reqUser, orgID, softDelete))
-    .then((retOrg) => resolve(retOrg))
-    .catch((deleteErr) => { // eslint-disable-line consistent-return
-      // There are simply no projects associated with this org to delete
-      if (deleteErr.description === 'No projects found.') {
-        removeOrgHelper(reqUser, orgID, softDelete)
-        .then((retOrg) => resolve(retOrg))
-        .catch((err) => reject(err));
-      }
-      else {
-        // If there is some other issue in deleting the projects.
-        return reject(deleteErr);
-      }
-    });
+    })
+    .catch((error) => reject(error));
   });
 }
 
@@ -699,6 +687,3 @@ function findAllPermissions(user, organizationID) {
     .catch(error => reject(error));
   });
 }
-
-// Expose `OrganizationController`
-module.exports = OrganizationController;
