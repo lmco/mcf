@@ -1,6 +1,18 @@
 {
   "users": [
     {
+      "adminUsername": "test_admin",
+      "adminPassword": "test12345"
+    },
+    {
+      "username": "nonadminUser",
+      "password": "password123",
+      "fname": "userFirstname",
+      "preferredName": "nonadmin user",
+      "lname": "userLastname",
+      "admin": false
+    },
+    {
       "username": "ironman",
       "password": "JaRvIs100",
       "fname": "Tony",
@@ -43,6 +55,29 @@
       "fname": "Groot",
       "lname": "Tree",
       "admin": false
+    },
+    {
+      "username": "pepperpotts",
+      "password": "Gfoftonystark123",
+      "fname": "Pepper",
+      "lname": "Potts",
+      "admin": false
+    },
+    {
+      "username": "deadpool",
+      "password": "Babyhands123",
+      "fname": "Wade",
+      "lname": "Wilson"
+    },
+    {
+      "username": "deadpoolsbff",
+      "password": "Bartender123",
+      "fname": "Weasel",
+      "lname": "Bff"
+    },
+    {
+      "username": "deadpool",
+      "fname": "Mr Wade"
     }
   ],
 
@@ -90,6 +125,35 @@
     {
       "id": "boombox",
       "name": "Star Lord Walkman"
+    },
+    {
+      "id": "starkhq",
+      "name": "Stark Headquarts"
+    },
+    {
+      "id": "asgard",
+      "name": "Asgard"
+    },
+    {
+      "id": "shield",
+      "name": "SHIELD"
+    },
+    {
+      "id": "shield",
+      "name": "Hydra"
+    },
+    {
+      "id": "biochemistry",
+      "name": "Scientist",
+      "permissions": {
+        "admin": "[updatedUser._id]",
+        "write": "[updatedUser._id]",
+        "read": "[updatedUser._id]"
+      }
+    },
+    {
+      "id": "nineteenforty",
+      "name": "World War Two"
     }
   ],
 
@@ -113,6 +177,92 @@
     {
       "id": "godslayer",
       "name": "God Slayer"
+    },
+    {
+      "id": "ironman",
+      "name": "Iron man Suite",
+      "org": {
+        "id": "starkhq"
+      },
+      "custom": {
+        "builtFor": "Tony"
+      }
+    },
+    {
+      "id": "ironman",
+      "name": "Iron Man"
+    },
+    {
+      "id": "ironman",
+      "name": "Iron Man Two"
+    },
+    {
+      "id": "arcreactor",
+      "name": "Arc Reactor",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "iamnoadmin",
+      "name": "dontmakeme",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "ironman",
+      "name": "Tony Stark",
+      "custom": {
+        "builtFor": "Rhodey",
+        "version": 2.0
+      }
+    },
+    {
+      "id": "thor",
+      "name": "Thor Odinson",
+      "org": {
+        "id": "asgard"
+      }
+    },
+    {
+      "id": "hulk",
+      "name": "Bruce Banner",
+      "org": {
+        "id": "biochemistry"
+      }
+    },
+    {
+      "id": "bettyross",
+      "name": "Hulks GF",
+      "org": {
+        "id": "biochemistry"
+      }
+    },
+    {
+      "id": "hulk",
+      "name": "Anger",
+      "org": {
+        "id": "biochemistry"
+      }
+    },
+    {
+      "id": "brucebanner",
+      "name": "Bruce Banner",
+      "org": {
+        "id": "biochemistry"
+      }
+    },
+    {
+      "id": "rebirth",
+      "name": "Super Soldier Serum",
+      "org": {
+        "id": "nineteenforty"
+      }
+    },
+    {
+      "id": "hulktwopointoh",
+      "name": "New Hulk"
     }
   ],
 
@@ -154,9 +304,192 @@
       "type": "Relationship",
       "id": "0003",
       "name": "Time looping"
-    }],
+    },
+    {
+      "type": "Block",
+      "id": "0000"
+    },
+    {
+      "id": "elem0",
+      "name": "Mjolnir",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "Package",
+      "custom": {
+        "location": "Earth",
+        "real": true
+      },
+      "documentation": "This is some documentation."
+    },
+    {
+      "id": "elem1",
+      "name": "Heimdall the Gatekeeper",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "block",
+      "parent": "elem0"
+    },
+    {
+      "id": "elem2",
+      "name": "Loki brother of Thor",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "Block",
+      "parent": "elem0",
+      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
+    },
+    {
+      "id": "rel1",
+      "name": "Hate Relationship",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "Relationship",
+      "source": "elem1",
+      "target": "elem2"
+    },
+    {
+      "id": "elem0",
+      "name": "Thors Hammer",
+      "documentation": "This is some different documentation",
+      "custom": {
+        "real": false,
+        "marvel": false
+      }
+    },
+    {
+      "id": "0000",
+      "name": "Steve Rogers",
+      "project": {
+        "id": "rebirth",
+        "org": {
+          "id": "nineteenforty"
+        }
+      },
+      "type": "Block"
+    },
+    {
+      "id": "0001",
+      "name": "Steve Rogers 2",
+      "project": {
+        "id": "rebirth",
+        "org": {
+          "id": "nineteenforty"
+        }
+      },
+      "type": "Block"
+    },
+    {
+      "id": "0000",
+      "name": "Captain America"
+    },
+    {
+      "id": "0003",
+      "name": "",
+      "project": {
+        "id": "rebirth",
+        "org": {
+          "id": "nineteenforty"
+        }
+      },
+      "type": "Block"
+    }
+  ],
 
-  "invalidNames": [
+  "invalidUsers": [
+    {
+      "username": "!babyLegs",
+      "password": "Deadpool123",
+      "fname": "Baby",
+      "lname": "Legs"
+    }
+  ],
+
+  "invalidOrgs": [
+    {
+      "id": "pymparticles"
+    },
+    {
+      "id": "xmen",
+      "name": ""
+    }
+  ],
+
+  "invalidProjects": [
+    {
+      "id": "period",
+      "name": "This is just to see if a period works....",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "",
+      "name": "denyme",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "imfake",
+      "name": "",
+      "org": {
+        "id": "starkhq"
+      }
+    },
+    {
+      "id": "imfake",
+      "name": "starkhq",
+      "org": {
+        "id": ""
+      }
+    }
+  ],
+
+  "invalidElements": [
+    {
+      "id": "elem2",
+      "name": "Frigg wife of Odin",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "BLOCK",
+      "parent": "elem1"
+    },
+    {
+      "id": "elem5",
+      "name": "Loki brother of Thor",
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "asgard"
+        }
+      },
+      "type": "Block",
+      "parent": "elem0",
+      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
+    }
+  ],
+
+  "names": [
     {
       "lname": "KLAW@#$"
     },
@@ -171,16 +504,70 @@
     },
     {
       "name": "New Name"
+    },
+    {
+      "name": "Baby Arc Reactor"
+    },
+    {
+      "fname": "Weapon X"
+    },
+    {
+      "name": "%%% INVALID NAME %%%"
+    },
+    {
+      "name": "Invalid Organization"
+    },
+    {
+      "name": ""
     }
   ],
 
-  "invalidUsername": [
+  "usernames": [
     {
       "username": "goldpanther"
     },
     {
       "username": "nopanther"
+    },
+    {
+      "username": "weasel"
+    },
+    {
+      "username": "pool"
+    },
+    {
+      "username": "francis"
     }],
+
+  "ids": [
+    {
+      "id": "shouldnotchange"
+    },
+    {
+      "id": "fakeproj"
+    },
+    {
+      "id" : "newironman"
+    },
+    {
+      "id": "mismatched"
+    },
+    {
+      "id":"xmen"
+    },
+    {
+      "id": "invalidOrgId"
+    },
+    {
+      "id": "fakshield"
+    },
+    {
+      "id": "nohulk"
+    },
+    {
+      "id": "33"
+    }
+  ],
 
   "invalidPermissions": [
     {

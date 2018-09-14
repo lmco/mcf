@@ -21,10 +21,10 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
 const db = M.require('lib.db');
-const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
 const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let nonAdminUser = null;
 let adminUser = null;
@@ -54,36 +54,27 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = _adminUser;
 
       // Define non-admin user data
-      const nonAdminUserData = {
-        username: 'pepperpotts',
-        password: 'Gfoftonystark123',
-        fname: 'Pepper',
-        lname: 'Potts',
-        admin: false
-      };
+      const nonAdminUserData = testData.users[8];
 
       // Create non-admin user
       return testUtils.createNonadminUser(nonAdminUserData);
     })
     .then((_nonadminUser) => {
       nonAdminUser = _nonadminUser;
-      chai.expect(nonAdminUser.username).to.equal('pepperpotts');
-      chai.expect(nonAdminUser.fname).to.equal('Pepper');
-      chai.expect(nonAdminUser.lname).to.equal('Potts');
+      chai.expect(nonAdminUser.username).to.equal(testData.users[8].username);
+      chai.expect(nonAdminUser.fname).to.equal(testData.users[8].fname);
+      chai.expect(nonAdminUser.lname).to.equal(testData.users[8].lname);
     })
     .then(() => {
       // Define organization data
-      const orgData = {
-        id: 'starkhq',
-        name: 'Stark Headquarts'
-      };
+      const orgData = testData.orgs[7];
       // Create organization
       return testUtils.createOrganization(adminUser, orgData);
     })
     .then((retOrg) => {
       org = retOrg;
-      chai.expect(retOrg.id).to.equal('starkhq');
-      chai.expect(retOrg.name).to.equal('Stark Headquarts');
+      chai.expect(retOrg.id).to.equal(testData.orgs[7].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[7].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
@@ -100,14 +91,14 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    OrgController.removeOrg(adminUser, 'starkhq', { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[7].id, { soft: false })
     .then(() => {
       // Removing the non-admin user
-      const userTwo = 'pepperpotts';
+      const userTwo = testData.users[8].username;
       return UserController.removeUser(adminUser, userTwo);
     })
     .then((delUser2) => {
-      chai.expect(delUser2.username).to.equal('pepperpotts');
+      chai.expect(delUser2.username).to.equal(testData.users[8].username);
       return testUtils.removeAdminUser();
     })
     .then((delAdminUser) => {
@@ -153,28 +144,19 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies project is created.
  */
 function createProject(done) {
-  const projData = {
-    id: 'ironman',
-    name: 'Iron man Suite',
-    org: {
-      id: 'starkhq'
-    },
-    custom: {
-      builtFor: 'Tony'
-    }
-  };
+  const projData = testData.projects[5];
 
   // Create the project via project controller
   ProjController.createProject(adminUser, projData)
-  .then((retProj) => ProjController.findProject(adminUser, 'starkhq', retProj.id))
+  .then((retProj) => ProjController.findProject(adminUser, org.id, retProj.id))
   .then((proj) => {
     // Set the file-global project
     project = proj;
 
     // Verify project was created successfully
-    chai.expect(proj.id).to.equal('ironman');
-    chai.expect(proj.name).to.equal('Iron man Suite');
-    chai.expect(proj.custom.builtFor).to.equal('Tony');
+    chai.expect(proj.id).to.equal(testData.projects[5].id);
+    chai.expect(proj.name).to.equal(testData.projects[5].name);
+    chai.expect(proj.custom.builtFor).to.equal(testData.projects[5].custom.builtFor);
     done();
   })
   .catch((error) => {
@@ -190,7 +172,7 @@ function createProject(done) {
  */
 function rejectImmutableField(done) {
   // Update project
-  ProjController.updateProject(adminUser, org.id, 'ironman', { id: 'shouldnotchange' })
+  ProjController.updateProject(adminUser, org.id, testData.projects[5].id, testData.ids[0])
   .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail
@@ -210,7 +192,7 @@ function rejectImmutableField(done) {
  */
 function updateTypeError(done) {
   // Update project
-  ProjController.updateProject(adminUser, org.id, 'ironman', { name: [] })
+  ProjController.updateProject(adminUser, org.id, testData.projects[5].id, testData.names[2])
   .then(() => {
     // Expected updateProject() to fail
     // Should not execute, force test to fail
@@ -229,10 +211,10 @@ function updateTypeError(done) {
  */
 function updateProjectName(done) {
   // Update project
-  ProjController.updateProject(adminUser, org.id, 'ironman', { id: 'ironman', name: 'Iron Man' })
+  ProjController.updateProject(adminUser, org.id, testData.projects[5].id, testData.projects[6])
   .then((proj) => {
     // Verify project name
-    chai.expect(proj.name).to.equal('Iron Man');
+    chai.expect(proj.name).to.equal(testData.projects[6].name);
     done();
   })
   .catch((error) => {
@@ -247,14 +229,14 @@ function updateProjectName(done) {
  */
 function updateProjectObject(done) {
   // Find project
-  ProjController.findProject(adminUser, org.id, 'ironman')
+  ProjController.findProject(adminUser, org.id, testData.projects[6].id)
   .then((projectFound) => {
-    projectFound.name = 'Iron Man Two';
-    return ProjController.updateProject(adminUser, org.id, 'ironman', projectFound);
+    projectFound.name = testData.projects[7].name;
+    return ProjController.updateProject(adminUser, org.id, testData.projects[7].id, projectFound);
   })
   .then((projectUpdated) => {
     // Verify project updated
-    chai.expect(projectUpdated.name).to.equal('Iron Man Two');
+    chai.expect(projectUpdated.name).to.equal(testData.projects[7].name);
     done();
   })
   .catch((error) => {
@@ -268,19 +250,13 @@ function updateProjectObject(done) {
  * @description Verifies second project is create.
  */
 function createProject02(done) {
-  const projData = {
-    id: 'arcreactor',
-    name: 'Arc Reactor',
-    org: {
-      id: 'starkhq'
-    }
-  };
+  const projData = testData.projects[8];
   // Create project
   ProjController.createProject(adminUser, projData)
   .then((proj) => {
     // Verfy project fields
-    chai.expect(proj.id).to.equal('arcreactor');
-    chai.expect(proj.name).to.equal('Arc Reactor');
+    chai.expect(proj.id).to.equal(testData.projects[8].id);
+    chai.expect(proj.name).to.equal(testData.projects[8].name);
     done();
   })
   .catch((error) => {
@@ -295,13 +271,7 @@ function createProject02(done) {
  * Expected error thrown: 'Bad Request'
  */
 function createPeriodName(done) {
-  const projData = {
-    id: 'period',
-    name: 'This is just to see if a period works....',
-    org: {
-      id: 'starkhq'
-    }
-  };
+  const projData = testData.invalidProjects[0];
   // Create project
   ProjController.createProject(adminUser, projData)
   .then(() => {
@@ -322,13 +292,7 @@ function createPeriodName(done) {
  * Expected error thrown: 'Bad Request'
  */
 function rejectDuplicateProjectId(done) {
-  const projData = {
-    id: 'arcreactor',
-    name: 'Small Arc Reactor',
-    org: {
-      id: 'starkhq'
-    }
-  };
+  const projData = testData.projects[8];
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -350,13 +314,7 @@ function rejectDuplicateProjectId(done) {
  * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectId(done) {
-  const projData = {
-    id: '',
-    name: 'denyme',
-    org: {
-      id: 'starkhq'
-    }
-  };
+  const projData = testData.invalidProjects[1];
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -378,13 +336,7 @@ function rejectInvalidProjectId(done) {
  * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectName(done) {
-  const projData = {
-    id: 'imfake',
-    name: '',
-    org: {
-      id: 'starkhq'
-    }
-  };
+  const projData = testData.invalidProjects[2];
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -406,13 +358,7 @@ function rejectInvalidProjectName(done) {
  * Expected error thrown: 'Not Found'
  */
 function rejectInvalidOrgId(done) {
-  const projData = {
-    id: 'imfake',
-    name: 'starkhq',
-    org: {
-      id: ''
-    }
-  };
+  const projData = testData.invalidProjects[3];
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -436,13 +382,7 @@ function rejectInvalidOrgId(done) {
  * Expected error thrown: 'Unauthorized'
  */
 function rejectNonAdminCreateProject(done) {
-  const projData = {
-    id: 'iamnoadmin',
-    name: 'dontmakeme',
-    org: {
-      id: 'starkhq'
-    }
-  };
+  const projData = testData.projects[9];
 
   // Create project
   ProjController.createProject(nonAdminUser, projData)
@@ -463,15 +403,15 @@ function rejectNonAdminCreateProject(done) {
  * @description Verify project created in createProject() is found.
  */
 function findProj(done) {
-  const orgId = 'starkhq';
-  const projId = 'ironman';
+  const orgId = org.id;
+  const projId = testData.projects[7].id;
 
   // Find project
   ProjController.findProject(adminUser, orgId, projId)
   .then((proj) => {
     // Verify project fields
-    chai.expect(proj.id).to.equal('ironman');
-    chai.expect(proj.name).to.equal('Iron Man Two');
+    chai.expect(proj.id).to.equal(testData.projects[7].id);
+    chai.expect(proj.name).to.equal(testData.projects[7].name);
     done();
   })
   .catch((error) => {
@@ -486,8 +426,8 @@ function findProj(done) {
  * Expected error thrown: 'Not Found'
  */
 function rejectFindNonexistentProject(done) {
-  const orgId = 'starkhq';
-  const projId = 'fakeproj';
+  const orgId = org.id;
+  const projId = testData.ids[1].id;
 
   // Find project
   ProjController.findProject(adminUser, orgId, projId)
@@ -511,8 +451,8 @@ function rejectFindNonexistentProject(done) {
  * Expected error thrown: 'Unauthorized'
  */
 function nonAUser(done) {
-  const orgId = 'starkhq';
-  const projId = 'ironman';
+  const orgId = org.id;
+  const projId = testData.projects[7].id;
 
   // Find project
   ProjController.findProject(nonAdminUser, orgId, projId)
@@ -533,25 +473,19 @@ function nonAUser(done) {
  * @description Verifies project updates.
  */
 function updateProj(done) {
-  const orgId = 'starkhq';
-  const projId = 'ironman';
-  const updateData = {
-    name: 'Tony Stark',
-    custom: {
-      builtFor: 'Rhodey',
-      version: 2.0
-    }
-  };
+  const orgId = org.id;
+  const projId = testData.projects[7].id;
+  const updateData = testData.projects[10];
 
   // Update project
   ProjController.updateProject(adminUser, orgId, projId, updateData)
   .then(() => ProjController.findProject(adminUser, orgId, projId))
   .then((proj) => {
     // Verify project fields
-    chai.expect(proj.id).to.equal('ironman');
-    chai.expect(proj.name).to.equal('Tony Stark');
-    chai.expect(proj.custom.builtFor).to.equal('Rhodey');
-    chai.expect(proj.custom.version).to.equal(2.0);
+    chai.expect(proj.id).to.equal(testData.projects[10].id);
+    chai.expect(proj.name).to.equal(testData.projects[10].name);
+    chai.expect(proj.custom.builtFor).to.equal(testData.projects[10].custom.builtFor);
+    chai.expect(proj.custom.version).to.equal(testData.projects[10].custom.version);
     done();
   })
   .catch((error) => {
@@ -566,11 +500,9 @@ function updateProj(done) {
  * Expected error thrown: 'Bad Request'
  */
 function rejectProjectId(done) {
-  const orgId = 'starkhq';
-  const projId = 'ironman';
-  const updateData = {
-    id: 'newironman'
-  };
+  const orgId = org.id;
+  const projId = testData.projects[10].id;
+  const updateData = testData.ids[2];
 
   // Update project
   ProjController.updateProject(adminUser, orgId, projId, updateData)
@@ -594,11 +526,9 @@ function rejectProjectId(done) {
  * Expected error thrown: 'Unauthorized'
  */
 function rejectNonAdminProjectUpdate(done) {
-  const orgId = 'starkhq';
-  const projId = 'arcreactor';
-  const updateData = {
-    name: 'Baby Arc Reactor'
-  };
+  const orgId = org.id;
+  const projId = testData.projects[10].id;
+  const updateData = testData.names[5];
 
   // Update project
   ProjController.updateProject(nonAdminUser, orgId, projId, updateData)
@@ -620,7 +550,7 @@ function rejectNonAdminProjectUpdate(done) {
  */
 function findPerm(done) {
   // Find permissions
-  ProjController.findPermissions(adminUser, adminUser.username, org.id, 'ironman')
+  ProjController.findPermissions(adminUser, adminUser.username, org.id, testData.projects[10].id)
   .then((perm) => {
     // Verfy permissions
     chai.expect(perm.read).to.equal(true);
@@ -641,8 +571,8 @@ function findPerm(done) {
  */
 function setPerm(done) {
   // Admin sets permissions for non-admin
-  ProjController.setPermissions(adminUser, 'starkhq', project.id.toString(), nonAdminUser, 'write')
-  .then(() => ProjController.findProject(adminUser, 'starkhq', project.id.toString()))
+  ProjController.setPermissions(adminUser, org.id, project.id.toString(), nonAdminUser, 'write')
+  .then(() => ProjController.findProject(adminUser, org.id, project.id.toString()))
   .then((retProj) => {
     // Verify permissions for non-admin
     chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAdminUser._id.toString());
@@ -664,17 +594,17 @@ function setPerm(done) {
 function softDeleteProject(done) {
   // Create an element via the Element model
   const elem = new Element.Block({
-    id: '0000',
-    uid: utils.createUID(org.id, project.id, '0000'),
+    id: testData.elements[7].id,
+    uid: `${org.id}:${testData.projects[10].id}:${testData.elements[5].id}`,
     project: project._id
   });
 
   // Save the element
   elem.save()
   // Soft-delete the project
-  .then(() => ProjController.removeProject(adminUser, org.id, 'ironman', { soft: true }))
+  .then(() => ProjController.removeProject(adminUser, org.id, project.id, { soft: true }))
   // Find project
-  .then(() => ProjController.findProject(adminUser, org.id, 'ironman'))
+  .then(() => ProjController.findProject(adminUser, org.id, project.id))
   .then(() => {
     // Expected findProject() to fail
     // Should not execute, force test to fail
@@ -694,8 +624,8 @@ function softDeleteProject(done) {
  */
 function deleteProject(done) {
   // Hard-delete the project
-  ProjController.removeProject(adminUser, org.id, 'ironman', { soft: false })
-  .then(() => ProjController.findProject(adminUser, org.id, 'ironman'))
+  ProjController.removeProject(adminUser, org.id, project.id, { soft: false })
+  .then(() => ProjController.findProject(adminUser, org.id, project.id))
   .then(() => {
     // Expected findProject() to fail
     // Should not execute, force test to fail
@@ -708,7 +638,7 @@ function deleteProject(done) {
 
     // Check if elements still exist
     // Note: Elements are deleted with projects
-    return Element.Element.findOne({ id: '0000' });
+    return Element.Element.findOne({ id: testData.elements[7].id });
   })
   .then((element) => {
     // Expect no element
@@ -728,8 +658,8 @@ function deleteProject(done) {
  */
 function deleteProject02(done) {
   // Remove project
-  ProjController.removeProject(adminUser, org.id, 'arcreactor', { soft: false })
-  .then(() => ProjController.findProject(adminUser, org.id, 'arcreactor'))
+  ProjController.removeProject(adminUser, org.id, testData.projects[8].id, { soft: false })
+  .then(() => ProjController.findProject(adminUser, org.id, testData.projects[8].id))
   .then(() => {
     // Expected findProject() to fail
     // Should not execute, force test to fail

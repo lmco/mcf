@@ -33,6 +33,7 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
 const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 
@@ -54,7 +55,7 @@ describe(M.getModuleName(module.filename), () => {
 
     // Create test admin
     testUtils.createAdminUser()
-    .then((user) => {
+    .then(() => {
       done();
     })
     .catch((error) => {
@@ -103,7 +104,7 @@ describe(M.getModuleName(module.filename), () => {
 function getUser(done) {
   // Make a user API GET request
   request({
-    url: `${test.url}/api/users/${M.config.test.adminUsername}`,
+    url: `${test.url}/api/users/${testData.users[0].adminUsername}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -115,7 +116,7 @@ function getUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct username
-    chai.expect(json.username).to.equal(M.config.test.adminUsername);
+    chai.expect(json.username).to.equal(testData.users[0].adminUsername);
     done();
   });
 }
@@ -127,17 +128,12 @@ function getUser(done) {
 function postUser(done) {
   // Make a user API POST request
   request({
-    url: `${test.url}/api/users/deadpool`,
+    url: `${test.url}/api/users/${testData.users[9].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
     // Creates new user data as POST request body
-    body: JSON.stringify({
-      username: 'deadpool',
-      password: 'Babyhands123',
-      fname: 'Wade',
-      lname: 'Wilson'
-    })
+    body: JSON.stringify(testData.users[9])
   },
   (err, response, body) => {
     // Expect no error
@@ -147,8 +143,8 @@ function postUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal('deadpool');
-    chai.expect(json.fname).to.equal('Wade');
+    chai.expect(json.username).to.equal(testData.users[9].username);
+    chai.expect(json.fname).to.equal(testData.users[9].fname);
     done();
   });
 }
@@ -172,7 +168,7 @@ function whoAmI(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal(M.config.test.adminUsername);
+    chai.expect(json.username).to.equal(testData.users[0].adminUsername);
     done();
   });
 }
@@ -185,17 +181,12 @@ function whoAmI(done) {
 function rejectInvalidUsernamePost(done) {
   // Make POST API request
   request({
-    url: `${test.url}/api/users/!babyLegs`,
+    url: `${test.url}/api/users/${testData.invalidUsers[0].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
     // Create new user data as POST request body
-    body: JSON.stringify({
-      username: '!babyLegs',
-      password: 'Deadpool123',
-      fname: 'Baby',
-      lname: 'Legs'
-    })
+    body: JSON.stringify(testData.invalidUsers[0])
   },
   (err, response, body) => {
     // Expect request to succeed
@@ -218,17 +209,12 @@ function rejectInvalidUsernamePost(done) {
 function rejectNonmatchingUsernames(done) {
   // Make POST API request
   request({
-    url: `${test.url}/api/users/weasel`,
+    url: `${test.url}/api/users/${testData.usernames[2]}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
     // Create new user data as POST request body
-    body: JSON.stringify({
-      username: 'deadpoolsbff',
-      password: 'Bartender123',
-      fname: 'Weasel',
-      lname: 'Bff'
-    })
+    body: JSON.stringify(testData.users[10])
   },
   (err, response, body) => {
     // Expect request to succeed
@@ -260,8 +246,8 @@ function getUsers(done) {
     // Verifies status 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verifies users exist
-    chai.expect(body).to.include(M.config.test.adminUsername);
-    chai.expect(body).to.include('deadpool');
+    chai.expect(body).to.include(testData.users[0].adminUsername);
+    chai.expect(body).to.include(testData.users[9].username);
     done();
   });
 }
@@ -274,7 +260,7 @@ function getUsers(done) {
 function rejectGetNonexisting(done) {
   // Make GET API request
   request({
-    url: `${test.url}/api/users/pool`,
+    url: `${test.url}/api/users/${testData.usernames[3].username}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -298,13 +284,13 @@ function rejectGetNonexisting(done) {
 function patchUser(done) {
   // Make a PATCH API request
   request({
-    url: `${test.url}/api/users/deadpool`,
+    url: `${test.url}/api/users/${testData.users[9].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     // Set update parameter in request body
     body: JSON.stringify({
-      fname: 'Mr Wade'
+      fname: testData.users[11].fname
     })
   },
   (err, response, body) => {
@@ -315,8 +301,8 @@ function patchUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal('deadpool');
-    chai.expect(json.fname).to.equal('Mr Wade');
+    chai.expect(json.username).to.equal(testData.users[11].username);
+    chai.expect(json.fname).to.equal(testData.users[11].fname);
     done();
   });
 }
@@ -329,14 +315,12 @@ function patchUser(done) {
 function rejectPatchNonexisting(done) {
   // Make a PATCH API request
   request({
-    url: `${test.url}/api/users/francis`,
+    url: `${test.url}/api/users/${testData.usernames[4].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     // Set update parameter in request body
-    body: JSON.stringify({
-      fname: 'Weapon X'
-    })
+    body: JSON.stringify(testData.names[6])
   },
   (err, response, body) => {
     // Expect no error
@@ -359,7 +343,7 @@ function rejectPatchNonexisting(done) {
 function rejectDeleteNonexisting(done) {
   // Make a DELETE request
   request({
-    url: `${test.url}/api/users/francis`,
+    url: `${test.url}/api/users/${testData.usernames[4].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -388,7 +372,7 @@ function rejectDeleteNonexisting(done) {
 function deleteUser(done) {
   // Make a DELETE request
   request({
-    url: `${test.url}/api/users/deadpool`,
+    url: `${test.url}/api/users/${testData.users[9].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -405,7 +389,7 @@ function deleteUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal('deadpool');
+    chai.expect(json.username).to.equal(testData.users[9].username);
     done();
   });
 }
@@ -415,7 +399,7 @@ function deleteUser(done) {
  * @description Helper function for setting the request header.
  */
 function getHeaders() {
-  const formattedCreds = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
+  const formattedCreds = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',
