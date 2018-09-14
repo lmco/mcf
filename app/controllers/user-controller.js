@@ -204,10 +204,11 @@ function createUser(reqUser, newUserData) {
     })
     .then(() => resolve(createdUser))
     .catch((error) => {
-      // If the error is not a custom error
+      // If error is a CustomError, reject it
       if (error instanceof errors.CustomError) {
         return reject(error);
       }
+      // If it's not a CustomError, create one and reject
       return reject(new errors.CustomError(error.message));
     });
   });
