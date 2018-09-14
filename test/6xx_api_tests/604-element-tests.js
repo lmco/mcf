@@ -32,6 +32,7 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
 const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let org = null;
 let proj = null;
@@ -59,38 +60,29 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = user;
 
       // Define org data
-      const orgData = {
-        id: 'nineteenforty',
-        name: 'World War Two'
-      };
+      const orgData = testData.orgs[12];
 
       // Create org
       return testUtils.createOrganization(adminUser, orgData);
     })
     .then((retOrg) => {
       org = retOrg;
-      chai.expect(retOrg.id).to.equal('nineteenforty');
-      chai.expect(retOrg.name).to.equal('World War Two');
+      chai.expect(retOrg.id).to.equal(testData.orgs[12].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[12].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
 
       // Define project data
-      const projData = {
-        id: 'rebirth',
-        name: 'Super Soldier Serum',
-        org: {
-          id: 'nineteenforty'
-        }
-      };
+      const projData = testData.projects[16];
 
       // Create project
       return ProjController.createProject(adminUser, projData);
     })
     .then((retProj) => {
       proj = retProj;
-      chai.expect(retProj.id).to.equal('rebirth');
-      chai.expect(retProj.name).to.equal('Super Soldier Serum');
+      chai.expect(retProj.id).to.equal(testData.projects[16].id);
+      chai.expect(retProj.name).to.equal(testData.projects[16].name);
       done();
     })
     .catch((error) => {
@@ -104,9 +96,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Delete organization
-    OrgController.removeOrg(adminUser, 'nineteenforty', { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[12].id, { soft: false })
     .then((retOrg) => {
-      chai.expect(retOrg).to.not.equal(null);
+      console.log(retOrg);
+      chai.expect(retOrg.id).to.equal(testData.orgs[12].id);
       // Delete admin user
       return testUtils.removeAdminUser();
     })
@@ -144,21 +137,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postElement01(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: '0000',
-      name: 'Steve Rogers',
-      project: {
-        id: proj.id,
-        org: {
-          id: org.id
-        }
-      },
-      type: 'Block'
-    })
+    body: JSON.stringify(testData.elements[13])
   },
   (err, response, body) => {
     // Expect no error
@@ -167,7 +150,7 @@ function postElement01(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal('0000');
+    chai.expect(json.id).to.equal(testData.elements[13].id);
     done();
   });
 }
@@ -178,21 +161,11 @@ function postElement01(done) {
  */
 function postElement02(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0001`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[14].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: '0001',
-      name: 'Steve Rogers 2',
-      project: {
-        id: proj.id,
-        org: {
-          id: org.id
-        }
-      },
-      type: 'Block'
-    })
+    body: JSON.stringify(testData.elements[14])
   },
   (err, response, body) => {
     // Expect no error
@@ -201,7 +174,7 @@ function postElement02(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal('0001');
+    chai.expect(json.id).to.equal(testData.elements[14].id);
     done();
   });
 }
@@ -212,7 +185,7 @@ function postElement02(done) {
  */
 function getElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -224,7 +197,7 @@ function getElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal('0000');
+    chai.expect(json.id).to.equal(testData.elements[13].id);
     done();
   });
 }
@@ -235,7 +208,7 @@ function getElement(done) {
  */
 function getElements(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -258,12 +231,12 @@ function getElements(done) {
  */
 function patchElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
-      name: 'Captain America'
+      name: testData.elements[15].name
     })
   },
   (err, response, body) => {
@@ -273,7 +246,7 @@ function patchElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('Captain America');
+    chai.expect(json.name).to.equal(testData.elements[15].name);
     done();
   });
 }
@@ -284,21 +257,11 @@ function patchElement(done) {
  */
 function rejectPostElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[16].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: '0000',
-      name: '',
-      project: {
-        id: proj.id,
-        org: {
-          id: org.id
-        }
-      },
-      type: 'Block'
-    })
+    body: JSON.stringify(testData.elements[16])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -318,7 +281,7 @@ function rejectPostElement(done) {
  */
 function rejectGetElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/33`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[8].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -341,13 +304,11 @@ function rejectGetElement(done) {
  */
 function rejectPatchElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({
-      name: ''
-    })
+    body: JSON.stringify(testData.names[9])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -367,7 +328,7 @@ function rejectPatchElement(done) {
  */
 function rejectDeleteNonexistingElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/33`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[8].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -393,7 +354,7 @@ function rejectDeleteNonexistingElement(done) {
  */
 function deleteElement01(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0000`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -408,7 +369,7 @@ function deleteElement01(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal('0000');
+    chai.expect(json.id).to.equal(testData.elements[13].id);
 
     done();
   });
@@ -420,7 +381,7 @@ function deleteElement01(done) {
  */
 function deleteElement02(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/nineteenforty/projects/rebirth/elements/0001`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[14].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -435,7 +396,7 @@ function deleteElement02(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal('0001');
+    chai.expect(json.id).to.equal(testData.elements[14].id);
 
     done();
   });
@@ -446,7 +407,7 @@ function deleteElement02(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
+  const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

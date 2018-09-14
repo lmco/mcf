@@ -32,6 +32,7 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
 const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 
@@ -51,7 +52,7 @@ describe(M.getModuleName(module.filename), () => {
 
     // Create test admin
     testUtils.createAdminUser()
-    .then((user) => {
+    .then(() => {
       done();
     })
     .catch((error) => {
@@ -101,13 +102,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postOrg(done) {
   request({
-    url: `${test.url}/api/orgs/shield`,
+    url: `${test.url}/api/orgs/${testData.orgs[9].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      name: 'SHIELD'
-    })
+    body: JSON.stringify(testData.orgs[9])
   },
   (err, response, body) => {
     // Expect no error
@@ -116,8 +115,8 @@ function postOrg(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal('shield');
-    chai.expect(json.name).to.equal('SHIELD');
+    chai.expect(json.id).to.equal(testData.orgs[9].id);
+    chai.expect(json.name).to.equal(testData.orgs[9].name);
     done();
   });
 }
@@ -128,7 +127,7 @@ function postOrg(done) {
  */
 function getOrg(done) {
   request({
-    url: `${test.url}/api/orgs/shield`,
+    url: `${test.url}/api/orgs/${testData.orgs[9].id}`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -138,7 +137,7 @@ function getOrg(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('SHIELD');
+    chai.expect(json.name).to.equal(testData.orgs[9].name);
     done();
   });
 }
@@ -149,11 +148,11 @@ function getOrg(done) {
  */
 function patchOrg(done) {
   request({
-    url: `${test.url}/api/orgs/shield`,
+    url: `${test.url}/api/orgs/${testData.orgs[10].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({ name: 'Hydra' })
+    body: JSON.stringify({ name: testData.orgs[10].name })
   },
   (err, response, body) => {
     // Expect no error
@@ -162,8 +161,8 @@ function patchOrg(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal('shield');
-    chai.expect(json.name).to.equal('Hydra');
+    chai.expect(json.id).to.equal(testData.orgs[10].id);
+    chai.expect(json.name).to.equal(testData.orgs[10].name);
     done();
   });
 }
@@ -173,11 +172,11 @@ function patchOrg(done) {
  */
 function rejectPatchInvalidName(done) {
   request({
-    url: `${test.url}/api/orgs/shield`,
+    url: `${test.url}/api/orgs/${testData.orgs[10].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({ name: '%%% INVALID NAME %%%' })
+    body: JSON.stringify({ name: testData.names[7].name })
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -197,11 +196,11 @@ function rejectPatchInvalidName(done) {
  */
 function rejectPatchIdMismatch(done) {
   request({
-    url: `${test.url}/api/orgs/shield`,
+    url: `${test.url}/api/orgs/${testData.orgs[10].name}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({ id: 'mismatched' })
+    body: JSON.stringify(testData.ids[3])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -221,7 +220,7 @@ function rejectPatchIdMismatch(done) {
  */
 function getMemberRoles(done) {
   request({
-    url: `${test.url}/api/orgs/shield/members/${M.config.test.adminUsername}`,
+    url: `${test.url}/api/orgs/shield/members/${testData.users[0].adminUsername}`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -254,7 +253,7 @@ function getOrgs(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verifies length of response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(1);
     done();
   });
 }
@@ -265,14 +264,11 @@ function getOrgs(done) {
  */
 function rejectPostIdMismatch(done) {
   request({
-    url: `${test.url}/api/orgs/xmen`,
+    url: `${test.url}/api/orgs/${testData.ids[4].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: 'shield',
-      name: 'SHIELD'
-    })
+    body: JSON.stringify(testData.orgs[9])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -291,11 +287,11 @@ function rejectPostIdMismatch(done) {
  */
 function rejectPostInvalidId(done) {
   request({
-    url: `${test.url}/api/orgs/invalidOrgId`,
+    url: `${test.url}/api/orgs/${testData.ids[5].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({ name: 'Invalid Organization' })
+    body: JSON.stringify(testData.names[8])
   },
   (err, response, body) => {
     // Expect no error
@@ -314,11 +310,11 @@ function rejectPostInvalidId(done) {
  */
 function rejectPostMissingName(done) {
   request({
-    url: `${test.url}/api/orgs/pymparticles`,
+    url: `${test.url}/api/orgs/${testData.invalidOrgs[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({ id: 'pymparticles' })
+    body: JSON.stringify(testData.invalidOrgs[0])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -339,11 +335,11 @@ function rejectPostMissingName(done) {
  */
 function rejectPostEmptyName(done) {
   request({
-    url: `${test.url}/api/orgs/xmen`,
+    url: `${test.url}/api/orgs/${testData.invalidOrgs[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({ name: '' })
+    body: JSON.stringify(testData.invalidOrgs[1])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -364,11 +360,11 @@ function rejectPostEmptyName(done) {
  */
 function rejectPostExistingOrg(done) {
   request({
-    url: `${test.url}/api/orgs/shield`,
+    url: `${test.url}/api/orgs/${testData.orgs[9].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({ name: 'SHIELD' })
+    body: JSON.stringify({ name: testData.orgs[9].name })
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -391,7 +387,7 @@ function rejectPostExistingOrg(done) {
  */
 function rejectDeleteNonexistingOrg(done) {
   request({
-    url: `${test.url}/api/orgs/fakeshield`,
+    url: `${test.url}/api/orgs/${testData.ids[6].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -418,7 +414,7 @@ function rejectDeleteNonexistingOrg(done) {
  */
 function deleteOrg(done) {
   request({
-    url: `${test.url}/api/orgs/shield`,
+    url: `${test.url}/api/orgs/${testData.orgs[9].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -438,7 +434,7 @@ function deleteOrg(done) {
  * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.adminUsername}:${M.config.test.adminPassword}`;
+  const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',

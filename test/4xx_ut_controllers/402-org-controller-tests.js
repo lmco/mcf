@@ -63,22 +63,16 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = user;
 
       // Define non-admin user data
-      const nonAdminUserData = {
-        username: 'groot',
-        password: 'Iamgroot123',
-        fname: 'Groot',
-        lname: 'Tree',
-        admin: false
-      };
+      const nonAdminUserData = testData.users[7];
 
       // Create non-admin user
       return testUtils.createNonadminUser(nonAdminUserData);
     })
     .then((nonadminUser) => {
       newUser = nonadminUser;
-      chai.expect(newUser.username).to.equal('groot');
-      chai.expect(newUser.fname).to.equal('Groot');
-      chai.expect(newUser.lname).to.equal('Tree');
+      chai.expect(newUser.username).to.equal(testData.users[7].username);
+      chai.expect(newUser.fname).to.equal(testData.users[7].fname);
+      chai.expect(newUser.lname).to.equal(testData.users[7].lname);
       done();
     })
     .catch((error) => {
@@ -96,9 +90,9 @@ describe(M.getModuleName(module.filename), () => {
     // Removing non-admin user
     .then(() => UserController.removeUser(adminUser, newUser.username))
     .then((delUser2) => {
-      chai.expect(delUser2.username).to.equal(testData.users[5].username);
+      chai.expect(delUser2.username).to.equal(testData.users[7].username);
       // Find admin user
-      return User.findOne({ username: M.config.test.adminUsername });
+      return User.findOne({ username: M.config.testData.users[0].adminUsername });
     })
     // Remove admin user
     .then((foundUser) => foundUser.remove())
@@ -246,7 +240,7 @@ function updateOrgFieldErr(done) {
  */
 function updateOrgTypeErr(done) {
   // Update organization
-  OrgController.updateOrg(adminUser, testData.orgs[2].id, testData.invalidNames[2])
+  OrgController.updateOrg(adminUser, testData.orgs[2].id, testData.names[2])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
@@ -266,7 +260,7 @@ function updateOrgTypeErr(done) {
  */
 function rejectNonAdminUpdate(done) {
   // Update org
-  OrgController.updateOrg(newUser, 'boombox', { name: 'betterreject' })
+  OrgController.updateOrg(newUser, testData.orgs[2].id, testData.names[3])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
@@ -337,7 +331,7 @@ function findAllExistingOrgs(done) {
   OrgController.findOrgs(adminUser)
   .then((orgs) => {
     // Verify correct number of orgs was returned
-    chai.expect(orgs.length).to.equal(3);
+    chai.expect(orgs.length).to.equal(2);
     done();
   })
   .catch((error) => {
@@ -489,7 +483,7 @@ function hardDeleteProjectAndOrg(done) {
  */
 function updateDefaultOrg(done) {
   // Update default org
-  OrgController.updateOrg(adminUser, 'default', testData.invalidNames[4])
+  OrgController.updateOrg(adminUser, 'default', testData.names[4])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
