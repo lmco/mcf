@@ -448,24 +448,13 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
         updateField = projUpdateFields[i];
 
         // if parameter is of type object, stringify and compare
-        if (utils.checkType([projectUpdated[updateField]], 'object')) {
-          if (JSON.stringify(project[updateField])
-            === JSON.stringify(projectUpdated[updateField])) {
+        if (utils.deepEqual(project[updateField], projectUpdated[updateField])) {
             continue;
-          }
         }
-        // if parameter is the same don't bother updating it
-        if (project[updateField] === projectUpdated[updateField]) {
-          continue;
-        }
-        // Error Check - Check if field can be updated
+
+        // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
           return reject(new errors.CustomError(`Project property [${updateField}] cannot be changed.`, 403));
-        }
-        // Error Check - Check if updated field is of type string
-        if (!utils.checkType([projectUpdated[updateField]], 'string')
-          && (Project.schema.obj[updateField].type.schemaName !== 'Mixed')) {
-          return reject(new errors.CustomError(`The Project [${updateField}] is not of type String.`, 400));
         }
 
         // Error Check - If the field has a validator, ensure the field is valid

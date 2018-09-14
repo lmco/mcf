@@ -19,6 +19,7 @@
  */
 
 // Node modules
+const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 
@@ -252,4 +253,22 @@ module.exports.toTitleCase = function(word) {
   }
 
   return titleCasedString;
+};
+
+
+/**
+ * @description Checks that two objects are equal by stringifying them and
+ * comparing the resulting strings.
+ *
+ * @param a
+ * @param b
+ */
+module.exports.deepEqual = function(a, b) {
+  try {
+    assert.deepEqual(a, b, 'The objects are not equal');
+    return true;
+  }
+  catch (error) {
+    return false;
+  }
 };
