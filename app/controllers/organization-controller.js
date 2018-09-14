@@ -6,7 +6,7 @@
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI
- * 
+ *
  * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
  * It is not approved for public release or redistribution.
  *
@@ -230,7 +230,7 @@ function createOrg(reqUser, newOrgData) {
     findOrg(reqUser, orgID)
     // Org already exists
     .then(() => reject(new errors.CustomError('An organization with the same ID already exists.', 403)))
-    .catch((findOrgError) => { // eslint-disable-line consistent-return
+    .catch((findOrgError) => {
       // Org not found is what we want, so proceed when this error
       // occurs since we aim to create a new org.
       if (findOrgError.description === 'Org not found.') {
@@ -247,7 +247,7 @@ function createOrg(reqUser, newOrgData) {
           visibility: visibility
         });
           // Save new org
-        newOrg.save((saveOrgErr) => { // eslint-disable-line consistent-return
+        newOrg.save((saveOrgErr) => {
           if (saveOrgErr) {
             return reject(new errors.CustomError('Save failed.'));
           }
@@ -405,6 +405,8 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  * @param {Object} options - Contains the list of delete options.
  */
 // TODO: MBX-434 discuss if options should become a boolean for soft or hard delete.
+// TODO: MBX-434 Come back and review function following Austin and Phill working out
+// Project and Element removal.
 // And do appropriate checks for either implementations.
 function removeOrg(reqUser, organizationID, options) {
   // Loading ProjController function wide because the project controller loads
@@ -412,9 +414,9 @@ function removeOrg(reqUser, organizationID, options) {
   const ProjController = M.require('controllers.project-controller');
 
   return new Promise((resolve, reject) => {
-    // Initalize softDelete to default true
+    // Initialize softDelete to default true
     const softDelete = true;
-    // Check admin and parameters are valid
+    // Check admin and parameter is valid
     try {
       utils.assertAdmin(reqUser);
       utils.assertType([organizationID], 'string');
@@ -434,8 +436,7 @@ function removeOrg(reqUser, organizationID, options) {
 
     // Find organization
     findOrg(reqUser, orgID, true)
-    .then((foundOrg) => new Promise((res, rej) => { // eslint-disable-line consistent-return
-      // TODO: Leaving off here Sep 13, 2018.
+    .then((foundOrg) => new Promise((res, rej) => {
       // Check if NOT softDelete and org NOT soft deleted
       if (!softDelete && !foundOrg.deleted) {
         // Remove the org
@@ -453,7 +454,7 @@ function removeOrg(reqUser, organizationID, options) {
     // Actually remove the org
     .then(() => removeOrgHelper(reqUser, orgID, softDelete))
     .then((retOrg) => resolve(retOrg))
-    .catch((deleteErr) => { // eslint-disable-line consistent-return
+    .catch((deleteErr) => {
       // There are simply no projects associated with this org to delete
       if (deleteErr.description === 'No projects found.') {
         removeOrgHelper(reqUser, orgID, softDelete)
@@ -468,6 +469,8 @@ function removeOrg(reqUser, organizationID, options) {
   });
 }
 
+// TODO: MBX-434 Come back and review function following Austin and Phill working out
+// Project and Element removal.
 /**
    * @description This function does the actual deletion or updating on an org.
    *   It was written to help clean up some code in the removeOrg function.
@@ -515,31 +518,44 @@ function removeOrgHelper(user, orgID, softDelete) {
   });
 }
 
+// TODO: MBX-436  Change all function headers to match the following, including an
+// example of an expected return.
 /**
-   * @description This function takes a user, second user and orgID and returns the
-   *   permissions the second user has within the org
-   *
-   * @example
-   * findPermissions(Josh, Austin, 'mbee')
-   * .then(function(org) {
-   *  // Get the users roles
-   * })
-   * .catch(function(error) {
-   *  M.log.error(error);
-   * });
-   *
-   *
-   * @param {User} reqUser  The object containing the requesting user.
-   * @param {User} searchedUsername  The object containing the user whose info is being returned
-   * @param {string} organizationID  The ID of the organization
-   */
+ * @description This function returns a users permission on an org.
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} searchedUsername - The username to find permissions for.
+ * @param {string} organizationID - The ID of the organization
+ *
+ * @returns
+ * {
+ *   username: {
+ *     read: boolean,
+ *     write: boolean,
+ *     admin: boolean,
+ *   }
+ * }
+ *
+ * @example
+ * findPermissions(Josh, Austin, 'mbee')
+ * .then(function(org) {
+ *  // Get the users roles
+ * })
+ * .catch(function(error) {
+ *  M.log.error(error);
+ * });
+ */
 function findPermissions(reqUser, searchedUsername, organizationID) {
   return new Promise((resolve, reject) => {
+    // Find all user permissions on org
     findAllPermissions(reqUser, organizationID)
     .then(permissionList => {
+      // Check if user NOT in permissionsList
       if (!permissionList.hasOwnProperty(searchedUsername)) {
+        // User NOT in permissionList, return empty object
         return resolve({});
       }
+      // Return users permissions
       return resolve(permissionList[searchedUsername]);
     })
     .catch(error => reject(error));
@@ -547,158 +563,195 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
 }
 
 /**
-   * @description This function takes a user, second user, orgID and role and updates a
-   *   users permissions within an organization
-   *
-   * @example
-   * setPermissions(Josh, Austin, 'mbee', 'write')
-   * .then(function(org) {
-   *   // Change the users role
-   * })
-   * .catch(function(error) {
-   *   M.log.error(error);
-   * });
-   *
-   *
-   * @param {User} reqUser  The object containing the requesting user.
-   * @param {String} organizationID  The ID of the org being deleted.
-   * @param {User} searchedUsername  The object containing the user whose roles are to be changed.
-   * @param {String} role  The new role for the user.
-   */
-// TODO: Check if the user who's permissions is being set exists
+ * @description This function sets permissions for a user on an org
+ *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {String} organizationID  The ID of the org being deleted.
+ * @param {User} searchedUsername  The object containing the user whose roles are to be changed.
+ * @param {String} role  The new role for the user.
+ *
+ * @returns The updated Organization object
+ *
+ * @example
+ * setPermissions(Josh, Austin, 'mbee', 'write')
+ * .then(function(org) {
+ *   // Change the users role
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ *
+ */
 function setPermissions(reqUser, organizationID, searchedUsername, role) {
   const UserController = M.require('controllers.user-controller');
 
-  return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+  return new Promise((resolve, reject) => {
+    // Check parameters ar valid
     try {
-      utils.assertType([organizationID, role], 'string');
+      utils.assertType([organizationID, role, searchedUsername], 'string');
     }
     catch (error) {
       return reject(error);
     }
 
-    // Ensure the role is a valid role
+    // Check if role parameter NOT a valid role
     if (!['admin', 'write', 'read', 'REMOVE_ALL'].includes(role)) {
+      // Role parameter NOT a valid role, reject error
       return reject(new errors.CustomError('The permission entered is not a valid permission.', 400));
     }
 
+    // Sanitize parameters
     const orgID = sani.sanitize(organizationID);
     const searchedUser = sani.sanitize(searchedUsername);
+
+    // Initialize foundUser
     let foundUser;
 
+    // Find searchedUser
     UserController.findUser(searchedUser)
     .then((user) => {
+      // set foundUser
       foundUser = user;
 
-      // Stop a user from changing their own permissions
+      // Check if requesting user is found user
       if (reqUser._id.toString() === foundUser._id.toString()) {
+        // Requesting user is found user, reject error
         return reject(new errors.CustomError('User cannot change their own permissions.', 403));
       }
-
+      // Find org
       return findOrg(reqUser, orgID);
     })
-
-    .then((org) => { // eslint-disable-line consistent-return
-      // Ensure user is an admin within the organization or system admin
+    .then((org) => {
+      // Check requesting user NOT org admin and NOT global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
+        // Requesting user NOT org admin and NOT global admin, reject error
         return reject(new errors.CustomError('User cannot change organization permissions.', 401));
       }
 
+      // Initialize permissions and get permissions levels
       const perm = org.permissions;
       const permLevels = org.getPermissionLevels();
 
-      // Remove all current roles for the selected user
-      Object.keys(perm).forEach((r) => {
-        if (permLevels.includes(r)) {
-          const permVals = perm[r].map(u => u._id.toString());
+      // Loop through each org permission
+      Object.keys(perm)
+      .forEach((orgRole) => {
+        // Check if orgRole is a valid permission level
+        if (permLevels.includes(orgRole)) {
+          // orgRole is a valid permission level, map the username to permVals
+          const permVals = perm[orgRole].map(u => u._id.toString());
+          // Check if foundUser is in permVals
           if (permVals.includes(foundUser._id.toString())) {
-            perm[r].splice(perm[r].indexOf(foundUser._id), 1);
+            // Check if foundUser is in permVals, remove the user from the permissions list
+            perm[orgRole].splice(perm[orgRole].indexOf(foundUser._id), 1);
           }
         }
       });
 
-      // Add user to admin array
+      // Check if role is admin
       if (role === 'admin') {
+        // Role is admin, add foundUser to admin permission list
         perm.admin.push(foundUser._id);
       }
 
-      // Add user to write array if admin or write
+      // Check if role is admin or write
       if (role === 'admin' || role === 'write') {
+        // Role is admin or write, add foundUser to write permission list
         perm.write.push(foundUser._id);
       }
 
-      // Add user to read array if admin, write or read
+      // Check if role is admin write, or read
       if (role === 'admin' || role === 'write' || role === 'read') {
+        // Role is admin, write, or read, add foundUser to read permission list
         perm.read.push(foundUser._id);
       }
 
-      // Save the modified organization
-      org.save((saveErr) => {
-        if (saveErr) {
-          // If error occurs, return it
-          return reject(new errors.CustomError('Save failed.'));
-        }
-        // Return updated org
-        return resolve(org);
-      });
+      // Save the updated organization
+      return org.save();
     })
-    .catch((error) => reject(error));
+    .then((savedOrg) => resolve(savedOrg))
+    .catch((error) => {
+      // If the error is not a custom error
+      if (error instanceof errors.CustomError) {
+        return reject(error);
+      }
+      return reject(new errors.CustomError(error.message));
+    });
   });
 }
 
 /**
-   * @description This function takes a user and ordID and returns the permissions
-   *   object, displaying the users who have those permissions
-   *
-   * @example
-   * findAllPermissions(Austin, 'mbee')
-   * .then(function(org) {
-   *   // Retrieve the members
-   * })
-   * .catch(function(error) {
-   *   M.log.error(error);
-   * });
-   *
-   *
-   * @param {User} user  The object containing the requesting user.
-   * @param {String} organizationID  The ID of the org being deleted.
-   */
-function findAllPermissions(user, organizationID) {
-  return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
+ * @description This function returns all user permissions of an org.
+ *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {String} organizationID  The ID of the org being deleted.
+ *
+ * @return An object containing users permissions
+ * {
+ *   username1: {
+ *     read: boolean,
+ *     write: boolean,
+ *     admin: boolean,
+ *   },
+ *   username2: {
+ *     read: boolean,
+ *     write: boolean,
+ *     admin: boolean,
+ *   }
+ * }
+ *
+ * @example
+ * findAllPermissions(Austin, 'mbee')
+ * .then(function(org) {
+ *   // Retrieve the members
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ *
+ */
+function findAllPermissions(reqUser, organizationID) {
+  return new Promise((resolve, reject) => {
+    // Check reqUser is Admin and parameters are valid.
     try {
-      utils.assertAdmin(user);
+      // TODO: MBX-435 This should also include organization admins, not just site wide admin
+      utils.assertAdmin(reqUser);
       utils.assertType([organizationID], 'string');
     }
     catch (error) {
       return reject(error);
     }
 
+    // Sanitize organizationID
     const orgID = sani.sanitize(organizationID);
+
+    // Initialize returnDict
     const returnDict = {};
 
     // Find the org
-    findOrg(user, orgID)
+    findOrg(reqUser, orgID)
     .then((org) => {
+      // Set users to read permissions list
       const users = org.permissions.read;
 
       // Loop through each user in the org
       users.forEach((u) => {
+        // Add a field for each username to returnDict
         returnDict[u.username] = {};
 
         // Loop through each type of permission for each user
         org.getPermissionLevels().forEach((role) => {
+          // Check if role is NOT 'REMOVE_ALL'
           if (role !== 'REMOVE_ALL') {
-            // Store whether each permission is given to the user or not in a dictionary
+            // role is NOT 'REMOVE_ALL', map boolean value of permission to permVals
             const permVals = org.permissions[role].map(v => v._id.toString());
+            // Set returnDict username role to boolean
             returnDict[u.username][role] = permVals.includes(u._id.toString());
           }
         });
       });
+      // Resolve returnDict
       return resolve(returnDict);
     })
     .catch(error => reject(error));
   });
 }
-
-// Expose `OrganizationController`
-module.exports = OrganizationController;
