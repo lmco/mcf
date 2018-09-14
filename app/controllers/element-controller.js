@@ -106,82 +106,52 @@ class ElementController {
    *
    *
    * @param {User} reqUser  The user object of the requesting user.
-   * @param {String} organizationID  The organization ID.
-   * @param {String} projectID  The project ID.
-   * @param {Object} options  Delete options.
+   * @param {Object} searchQuery  The search parameters for deletion.
+   * @param {Boolean} hardDelete  Flag dictating hard or soft delete.
    */
-  static removeElements(reqUser, organizationID, projectID, options) {
+  // static removeElements(reqUser, query, hardDelete) {
+  //   if (hardDelete) {
+  //     Element.Element.deleteMany(query);
+  //   }
+  //   else {
+  //     Element.Element.updateMany(query, { delete: true })
+  //   }
+  // }
+
+
+  static removeElements(reqUser, searchQuery, hardDelete = false) {
     return new Promise((resolve, reject) => {
+      // Ensure parameters are correctly formatted
       try {
-        utils.assertType([organizationID, projectID], 'string');
-        utils.assertType([options], 'object');
+        utils.assertType([searchQuery], 'object');
+        utils.assertType([hardDelete], 'boolean');
       }
       catch (error) {
         return reject(error);
       }
 
-      // Set the soft delete flag
-      let softDelete = true;
-      if (utils.checkExists(['soft'], options)) {
-        if (options.soft === false && reqUser.admin) {
-          softDelete = false;
-        }
-        else if (options.soft === false && !reqUser.admin) {
-          return reject(new errors.CustomError('User does not have permission to permanently delete a project.', 401));
-        }
-        else if (options.soft !== false && options.soft !== true) {
-          return reject(new errors.CustomError('Invalid argument for the soft delete field.', 400));
-        }
+      // If hard deleting, ensure user is a site-wide admin
+      if (hardDelete && !reqUser.admin) {
+        return reject(new errors.CustomError('User does not have permission to permanently' +
+          ' delete a element.', 401));
       }
 
-      // Sanitize the parameters
-      const orgID = sani.sanitize(organizationID);
-      const projID = sani.sanitize(projectID);
-      let _projID = null;
+      // Sanitize the query
+      const query = sani.mongo(searchQuery);
 
-      // Ensure the project still exists
-      // TODO: Contemplate removing findProject. If removed, changed how hard-delete works.
-      ProjController.findProject(reqUser, orgID, projID, true)
-      .then((project) => {
-        _projID = project._id;
-        return ElementController.findElements(reqUser, orgID, projID, true);
-      })
-      .then((elements) => {
-        // Ensure user has permission to delete all elements
-        Object.keys(elements).forEach((element) => {
-          if (!elements[element].project.getPermissions(reqUser).admin && !reqUser.admin) {
-            return reject(new errors.CustomError(
-              `User does not have permission to delete element ${elements[element].id}.`, 401
-            ));
-          }
-        });
-
-        if (softDelete) {
-          for (let i = 0; i < elements.length; i++) {
-            // Update the elements deleted fields
-            elements[i].deleted = true;
-            elements[i].save((saveErr) => {
-              if (saveErr) {
-                // If error occurs, return it
-                return reject(new errors.CustomError('Save failed.'));
-              }
-            });
-          }
-
-          // Return the updated elements
-          return resolve(elements);
-        }
-
-        // Hard delete the elements
-        Element.Element.deleteMany({ project: _projID }, (deleteError, elementsDeleted) => {
-          if (deleteError) {
-            return reject(new errors.CustomError('Delete failed.'));
-          }
-
-          return resolve(elementsDeleted);
-        });
-      })
-      .catch((findProjectError) => reject(findProjectError));
+      // If hard deleting
+      if (hardDelete) {
+        Element.Element.deleteMany(query)
+        .then((elements) => resolve(elements))
+        .catch((error) => reject(error));
+      }
+      // Soft delete elements
+      else {
+        // Set deleted field to true
+        Element.Element.updateMany(query, { deleted: true })
+        .then((elements) => resolve(elements))
+        .catch((error) => reject(error));
+      }
     });
   }
 

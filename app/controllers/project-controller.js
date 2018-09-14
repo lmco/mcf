@@ -116,25 +116,23 @@ class ProjectController {
    *
    * @param {User} reqUser  The object containing the requesting user.
    * @param {String} organizationID  The organization ID for the org the project belongs to.
-   * @param {Object} options  Contains a list of delete options.
+   * @param {Boolean} hardDelete  A boolean value indicating whether to hard delete or not.
    */
-  static removeProjects(reqUser, organizationID, options) {
+  static removeProjects(reqUser, organizationID, hardDelete = false) {
     return new Promise((resolve, reject) => {
       try {
         utils.assertType([organizationID], 'string');
+        utils.assertType([hardDelete], 'boolean');
       }
       catch (error) {
         return reject(error);
       }
 
-      // Sanitize the orgid
-      const orgID = sani.html(organizationID);
-
       // Ensure the org exists
       // TODO - Use populates rather than nested queries when possible (MBX-357)
       // Doing findOrgs() then findProj(), Instead we should reduces the number of queries below
       // Not sure if removeProjects() should remove all projects. Instead remove a list of projects
-      OrgController.findOrg(reqUser, orgID, true)
+      OrgController.findOrg(reqUser, organizationID, true)
       .then((org) => ProjectController.findProjects(reqUser, org.id, true))
       .then((projects) => {
         // If we didn't find any projects
@@ -152,14 +150,21 @@ class ProjectController {
         });
 
         for (let i = 0; i < projects.length; i++) {
+          ElementController.removeElements(reqUser, organizationID, projects[i].id, hardDelete)
+          Element.Element.deleteMany({ project: projects[i]._id })
+
+          or
+
+          Element.Element.deleteMany({ 'project.org' : org._id})
+          // ElementController.removeElement(proj.id)
           // Must nest promise since it uses a return
-          ProjectController.removeProject(reqUser, orgID, projects[i].id, options)
-          .then(() => {
-            if (i === projects.length - 1) {
-              return resolve(projects);
-            }
-          })
-          .catch((deleteProjError) => reject(deleteProjError));
+          // ProjectController.removeProject(reqUser, organizationID, projects[i].id, options)
+          // .then(() => {
+          //   if (i === projects.length - 1) {
+          //     return resolve(projects);
+          //   }
+          // })
+          // .catch((deleteProjError) => reject(deleteProjError));
         }
       })
       .catch((findOrgError) => reject(findOrgError));
