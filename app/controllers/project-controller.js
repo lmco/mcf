@@ -446,10 +446,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       // Check if passed in object contains fields to be updated
       for (let i = 0; i < projUpdateFields.length; i++) {
         updateField = projUpdateFields[i];
-        // Error Check - Check if updated field also exists in the original project.
-        if (!project.toJSON().hasOwnProperty(updateField)) {
-          return reject(new errors.CustomError(`Project does not contain field ${updateField}.`, 400));
-        }
+
         // if parameter is of type object, stringify and compare
         if (utils.checkType([projectUpdated[updateField]], 'object')) {
           if (JSON.stringify(project[updateField])
