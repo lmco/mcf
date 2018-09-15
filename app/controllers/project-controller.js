@@ -680,7 +680,7 @@ function findAllPermissions(reqUser, organizationID, projectID) {
 
 
 /**
- * @descriptio  The function finds a projects permissions.
+ * @description  The function finds a projects permissions.
  *
  * @example
  * findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
