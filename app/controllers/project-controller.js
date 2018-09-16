@@ -21,23 +21,6 @@
  * implements controller logic and behavior for Projects.
  */
 
-// Node.js modules
-const assert = require('assert');
-
-// MBEE modules
-const OrgController = M.require('controllers.organization-controller');
-const Project = M.require('models.project');
-const utils = M.require('lib.utils');
-const sani = M.require('lib.sanitization');
-const validators = M.require('lib.validators');
-const errors = M.require('lib.errors');
-
-// We are disabling the eslint consistent-return rule for this file.
-// The rule doesn't work well for many controller-related functions and
-// throws the warning in cases where it doesn't apply. For this reason, the
-// rule is disabled for this file. Be careful to avoid the issue.
-/* eslint-disable consistent-return */
-
 // Expose project controller functions
 module.exports = {
   createProject,
@@ -50,7 +33,24 @@ module.exports = {
   removeProjects,
   setPermissions,
   updateProject
-}
+};
+
+// Node.js modules
+const assert = require('assert');
+
+// MBEE modules
+const UserController = M.require('controllers.user-controller');
+const OrgController = M.require('controllers.organization-controller');
+const Project = M.require('models.project');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
+
+// We are disabling the eslint consistent-return rule for this file.
+// The rule doesn't work well for many controller-related functions and
+// throws the warning in cases where it doesn't apply. For this reason, the
+// rule is disabled for this file. Be careful to avoid the issue.
+/* eslint-disable consistent-return */
 
 /**
  * @description The function finds all projects for a given orgID.
@@ -82,7 +82,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     // Sanitize the organization ID
     const orgID = sani.html(organizationID);
 
-    const searchParams = { "org.id": orgID, deleted: false };
+    const searchParams = { 'org.id': orgID, deleted: false };
 
     // Check softDeleted flag true and User Admin true
     if (softDeleted && reqUser.admin) {
@@ -93,9 +93,9 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     findProjectsQuery(searchParams)
     .then((projects) => {
       // Filter results to only projects in the org requested
-      //let results = projects.filter(project => {
+      // let results = projects.filter(project => {
       //  return project.org.id === orgID;
-      //});
+      // });
 
       // Filter results to only the projects on which user has read access
       let results = projects.filter(project => {
@@ -729,16 +729,16 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  * });
  *
  *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The organization ID for the org the project belongs to.
- * @param {String} projectID  The project ID of the Project which is being deleted.
- * @param {User} setUser  The object containing the user which permissions are being set for.
- * @param {String} permissionType  The permission level or type being set for the user.
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The organization ID for the org the project belongs to.
+ * @param {String} projectID - The project ID of the Project which is being deleted.
+ * @param {String} setUsername - The username of the user who's permissions are being set.
+ * @param {String} permissionType - The permission level or type being set for the user.
  *
  * TODO: Adopt consistent interfaces between similar functions in orgs,
  * specifically, the same function in OrgController. Talk to Josh.
  */
-function setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
+function setPermissions(reqUser, organizationID, projectID, setUsername, permissionType) {
   return new Promise((resolve, reject) => {
     try {
       utils.assertType([organizationID, projectID, permissionType], 'string');
@@ -751,9 +751,17 @@ function setPermissions(reqUser, organizationID, projectID, setUser, permissionT
     const orgID = sani.html(organizationID);
     const projID = sani.html(projectID);
     const permType = sani.html(permissionType);
+    const searchUsername = sani.html(setUsername);
+
+    // Initialize setUser
+    let setUser;
 
     // Check if project exists
-    findProject(reqUser, organizationID, projectID)
+    UserController.findUser(searchUsername)
+    .then(foundUser => {
+      setUser = foundUser;
+      return findProject(reqUser, organizationID, projectID);
+    })
     .then((project) => {
       // Check permissions
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
@@ -825,4 +833,3 @@ function setPermissions(reqUser, organizationID, projectID, setUser, permissionT
     .catch((findProjErr) => reject(findProjErr)); // Closing projectFind
   }); // Closing promise
 } // Closing function
-

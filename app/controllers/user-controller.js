@@ -21,6 +21,16 @@
  * implements controller logic and behavior for Users.
  */
 
+// Expose `user controller`
+module.exports = {
+  findUsers,
+  findUser,
+  findUsersQuery,
+  createUser,
+  updateUser,
+  removeUser
+};
+
 // Load MBEE modules
 const User = M.require('models.user');
 const OrgController = M.require('controllers.organization-controller');
@@ -34,16 +44,6 @@ const validators = M.require('lib.validators');
 // The rule may not fit controller-related functions as
 // returns are inconsistent.
 /* eslint-disable consistent-return */
-
-// Expose `user controller`
-module.exports = {
-  findUsers,
-  findUser,
-  findUsersQuery,
-  createUser,
-  updateUser,
-  removeUser
-};
 
 /**
  * @description This function finds all users.
