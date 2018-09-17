@@ -198,9 +198,6 @@ ProjectSchema.set('toObject', { virtuals: true });
 /* ---------------------------( Project Model ) ----------------------------- */
 
 const Project = mongoose.model('Project', ProjectSchema);
-Project.statics.getVisibilityLevels = function() {
-  return Project.schema.methods.getVisibilityLevels();
-}
 
 /* ------------------------( Project Schema Export )------------------------- */
 

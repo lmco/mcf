@@ -758,75 +758,51 @@ class ElementController {
    * @param {String} organizationID  The organization ID.
    * @param {String} projectID  The project ID.
    * @param {String} elementID  The element ID.
-   * @param {Object} options  An object with delete options.
+   * @param {Object} hardDelete  Flag denoting whether to hard or soft delete.
    */
-  static removeElement(reqUser, organizationID, projectID, elementID, options) {
+  static removeElement(reqUser, organizationID, projectID, elementID, hardDelete) {
     return new Promise((resolve, reject) => {
+      // Check parameters are valid
       try {
         utils.assertType([organizationID, projectID, elementID], 'string');
-        utils.assertType([options], 'object');
+        utils.assertType([hardDelete], 'boolean');
       }
       catch (error) {
         return reject(error);
       }
 
-      // Set the soft delete flag
-      let softDelete = true;
-      if (utils.checkExists(['soft'], options)) {
-        if (options.soft === false && reqUser.admin) {
-          softDelete = false;
-        }
-        // TODO: change to custom error
-        else if (options.soft === false && !reqUser.admin) {
-          return reject(new errors.CustomError('User does not have permission to hard delete an'
-            + ' element.', 401));
-        }
-        else if (options.soft !== false && options.soft !== true) {
-          return reject(new errors.CustomError('Invalid argument for the soft delete field.', 400));
-        }
+      // If user tries to hard-delete and is not a system admin, reject
+      if (hardDelete && !reqUser.admin) {
+        return reject(new errors.CustomError('User does not have permission to hard delete an'
+          + ' element.', 401));
       }
-      // Sanitize inputs
-      const orgID = sani.html(organizationID);
-      const projID = sani.html(projectID);
-      const elemID = sani.html(elementID);
 
-      // Find the element, even if it has already been soft deleted
-      ElementController.findElement(reqUser, orgID, projID, elemID, true)
+      // Find the element
+      ElementController.findElement(reqUser, organizationID, projectID, elementID, true)
       .then((element) => {
-        // Check Permissions
-        if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
+        // Verify user has permissions to delete element
+        if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
           return reject(new errors.CustomError('User does not have permission.', 401));
         }
 
-        if (softDelete) {
-          if (!element.deleted) {
-            element.deleted = true;
-            element.save((saveErr) => {
-              if (saveErr) {
-                // If error occurs, return it
-                return reject(new errors.CustomError('Save failed.'));
-              }
-
-              // Return updated element
-              return resolve(element);
-            });
-          }
-          else {
-            return reject(new errors.CustomError('Element not found.', 404));
-          }
+        // Hard delete
+        if (hardDelete) {
+          Element.Element.deleteOne({ uid: element.uid })
+          .then(() => resolve(element))
+          .catch((error) => reject(error));
         }
         else {
-          // Remove the Element
-          Element.Element.findByIdAndRemove(element._id, (removeElemErr, elementRemoved) => {
-            if (removeElemErr) {
-              return reject(new errors.CustomError('Delete failed.'));
-            }
-
-            return resolve(elementRemoved);
-          });
+          Element.Element.updateOne({ uid: element.uid }, { deleted: true })
+          .then(() => {
+            // Set the returned element deleted field to true since updateOne()
+            // returns a query not the updated element.
+            element.deleted = true;
+            return resolve(element);
+          })
+          .catch((error) => reject(error));
         }
       })
-      .catch((findElemError) => reject(findElemError));
+      .catch((error) => reject(error));
     });
   }
 

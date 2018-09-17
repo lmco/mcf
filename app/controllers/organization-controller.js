@@ -438,11 +438,11 @@ function removeOrg(reqUser, organizationID, hardDelete) {
       // Soft delete
       else {
         Organization.updateOne({ id: org.id }, { deleted: true })
-        // Delete all projects in that org
+        // Soft-delete all projects in that org
         .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
         .then(() => {
           // Set the returned org deleted field to true since updateOne()
-          // returns a query not org.
+          // returns a query not the updated org.
           org.deleted = true;
           return resolve(org);
         })

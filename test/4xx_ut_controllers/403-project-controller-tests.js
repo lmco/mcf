@@ -91,7 +91,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    OrgController.removeOrg(adminUser, testData.orgs[7].id, { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[7].id, true)
     .then(() => {
       // Removing the non-admin user
       const userTwo = testData.users[8].username;
@@ -188,7 +188,7 @@ function rejectImmutableField(done) {
 
 /**
  * @description Verifies user CANNOT update project with invalid project name.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Internal Server Error'
  */
 function updateTypeError(done) {
   // Update project
@@ -200,8 +200,8 @@ function updateTypeError(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -602,7 +602,7 @@ function softDeleteProject(done) {
   // Save the element
   elem.save()
   // Soft-delete the project
-  .then(() => ProjController.removeProject(adminUser, org.id, project.id, { soft: true }))
+  .then(() => ProjController.removeProject(adminUser, org.id, project.id, false))
   // Find project
   .then(() => ProjController.findProject(adminUser, org.id, project.id))
   .then(() => {
@@ -624,7 +624,7 @@ function softDeleteProject(done) {
  */
 function deleteProject(done) {
   // Hard-delete the project
-  ProjController.removeProject(adminUser, org.id, project.id, { soft: false })
+  ProjController.removeProject(adminUser, org.id, project.id, true)
   .then(() => ProjController.findProject(adminUser, org.id, project.id))
   .then(() => {
     // Expected findProject() to fail
@@ -658,7 +658,7 @@ function deleteProject(done) {
  */
 function deleteProject02(done) {
   // Remove project
-  ProjController.removeProject(adminUser, org.id, testData.projects[8].id, { soft: false })
+  ProjController.removeProject(adminUser, org.id, testData.projects[8].id, true)
   .then(() => ProjController.findProject(adminUser, org.id, testData.projects[8].id))
   .then(() => {
     // Expected findProject() to fail
