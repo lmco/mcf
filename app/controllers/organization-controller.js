@@ -403,7 +403,7 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
 // TODO: MBX-434 Come back and review function following Austin and Phill working out
 // Project and Element removal.
 // And do appropriate checks for either implementations.
-function removeOrg(reqUser, organizationID, hardDelete=false) {
+function removeOrg(reqUser, organizationID, hardDelete = false) {
   // Loading ProjController function wide because the project controller loads
   // the org controller globally. Both files cannot load each other globally.
   const ProjController = M.require('controllers.project-controller');

@@ -123,7 +123,8 @@ class ElementController {
       // If hard deleting, ensure user is a site-wide admin
       if (hardDelete && !reqUser.admin) {
         return reject(new errors.CustomError(
-          'User does not have permission to permanently delete a element.', 401));
+          'User does not have permission to permanently delete a element.', 401
+        ));
       }
 
       // Initialize the query object
