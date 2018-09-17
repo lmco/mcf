@@ -497,7 +497,6 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
   });
 }
 
-
 /**
  * @description The function deletes a project.
  *

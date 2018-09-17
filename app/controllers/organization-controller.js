@@ -403,16 +403,17 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
 // TODO: MBX-434 Come back and review function following Austin and Phill working out
 // Project and Element removal.
 // And do appropriate checks for either implementations.
-function removeOrg(reqUser, organizationID, hardDelete) {
+function removeOrg(reqUser, organizationID, hardDelete=false) {
   // Loading ProjController function wide because the project controller loads
   // the org controller globally. Both files cannot load each other globally.
   const ProjController = M.require('controllers.project-controller');
 
   return new Promise((resolve, reject) => {
-    // Check admin and parameters are valid
+    // Check valid param type
     try {
       utils.assertAdmin(reqUser);
       utils.assertType([organizationID], 'string');
+      utils.assertType([hardDelete], 'boolean');
     }
     catch (error) {
       return reject(error);
