@@ -17,8 +17,8 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This implements the behavior and logic for interfacing
- *  the user model.
+ * @description Provides an abstraction layer on top of the User model that
+ * implements controller logic and behavior for Users.
  */
 
 // Load MBEE modules
