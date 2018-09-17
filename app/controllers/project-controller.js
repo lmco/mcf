@@ -29,7 +29,6 @@ const OrgController = M.require('controllers.organization-controller');
 const Project = M.require('models.project');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
-const validators = M.require('lib.validators');
 const errors = M.require('lib.errors');
 
 // We are disabling the eslint consistent-return rule for this file.
@@ -50,7 +49,7 @@ module.exports = {
   removeProjects,
   setPermissions,
   updateProject
-}
+};
 
 /**
  * @description The function finds all projects for a given orgID.
@@ -82,7 +81,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     // Sanitize the organization ID
     const orgID = sani.html(organizationID);
 
-    const searchParams = { "org.id": orgID, deleted: false };
+    const searchParams = { 'org.id': orgID, deleted: false };
 
     // Check softDeleted flag true and User Admin true
     if (softDeleted && reqUser.admin) {
@@ -93,26 +92,24 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     findProjectsQuery(searchParams)
     .then((projects) => {
       // Filter results to only projects in the org requested
-      //let results = projects.filter(project => {
+      // let results = projects.filter(project => {
       //  return project.org.id === orgID;
-      //});
+      // });
 
       // Filter results to only the projects on which user has read access
-      let results = projects.filter(project => {
-        return project.getPermissions(reqUser).read || reqUser.admin;
-      });
+      let res = projects.filter(project => project.getPermissions(reqUser).read || reqUser.admin);
 
       // Map project public data to results
-      results = results.map(project => project.getPublicData());
+      res = res.map(project => project.getPublicData());
 
       // Return resulting project
-      return resolve(results);
+      return resolve(res);
     })
     .catch((orgFindErr) => reject(orgFindErr));
   });
 }
 
-  /**
+/**
    * @description The function deletes all projects for an org.
    *
    * @example
@@ -129,69 +126,65 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
    * @param {Object} arrOrganizations  The organization ID for the org the project belongs to.
    * @param {Boolean} hardDelete  A boolean value indicating whether to hard delete or not.
    */
-  function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
-    // TODO: Ifdef exists in JS?
-    const ElementController = M.require('controllers.element-controller');
+function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
+  // TODO: Ifdef exists in JS?
+  const ElementController = M.require('controllers.element-controller');
 
-    return new Promise((resolve, reject) => {
-      // Ensure parameters of correctly formatted
-      try {
-        utils.assertType([arrOrganizations], 'object');
-        utils.assertType([hardDelete], 'boolean');
-      }
-      catch (error) {
-        return reject(error);
-      }
+  return new Promise((resolve, reject) => {
+    // Ensure parameters of correctly formatted
+    try {
+      utils.assertType([arrOrganizations], 'object');
+      utils.assertType([hardDelete], 'boolean');
+    }
+    catch (error) {
+      return reject(error);
+    }
 
-      // If hard deleting, ensure user is a site-wide admin
-      if (hardDelete && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission to permanently'
+    // If hard deleting, ensure user is a site-wide admin
+    if (hardDelete && !reqUser.admin) {
+      return reject(new errors.CustomError('User does not have permission to permanently'
           + ' delete a project.', 401));
-      }
+    }
 
-      // Initialize the query object
-      const deleteQuery = { $or: [] };
-      let arrDeletedProjects = []
+    // Initialize the query object
+    const deleteQuery = { $or: [] };
+    let arrDeletedProjects = [];
 
-      // Loop through each org
-      for (const org in arrOrganizations) {
-        // Ensure user has permissions to delete projects on each org
-        if (!arrOrganizations[org].getPermissions(reqUser).admin && !reqUser.admin) {
-          return reject(new errors.CustomError(
-            `User does not have permission to delete projects in the organization 
-            ${arrOrganizations[org].name}.`, 401));
-        }
-        deleteQuery.$or.push({ org: arrOrganizations[org]._id });
-        arrDeletedProjects = arrDeletedProjects.concat(arrOrganizations[org].projects);
+    // Loop through each org
+    Object(arrOrganizations).forEach((org) => {
+      // Ensure user has permissions to delete projects on each org
+      if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
+        return reject(new errors.CustomError(
+          `User does not have permission to delete projects in the org ${org.name}.`, 401
+        ));
       }
-
-      // If there are no elements to delete
-      if (deleteQuery.$or.length === 0) {
-        return resolve();
-      }
-
-      // Hard delete projects
-      if (hardDelete) {
-        Project.deleteMany(deleteQuery)
-        // Delete elements in associated projects
-        .then(() => {
-          return ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete);
-        })
-        .then(() => resolve(arrDeletedProjects))
-        .catch((error) => reject(error));
-      }
-      // Soft delete projects
-      else {
-        Project.updateMany(deleteQuery, { deleted: true })
-        // Delete elements in associated projects
-        .then(() => {
-          return ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete);
-        })
-        .then(() => resolve(arrDeletedProjects))
-        .catch((error) => reject(error));
-      }
+      deleteQuery.$or.push({ org: org._id });
+      arrDeletedProjects = arrDeletedProjects.concat(org.projects);
     });
-  }
+
+    // If there are no elements to delete
+    if (deleteQuery.$or.length === 0) {
+      return resolve();
+    }
+
+    // Hard delete projects
+    if (hardDelete) {
+      Project.deleteMany(deleteQuery)
+      // Delete elements in associated projects
+      .then(() => ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete))
+      .then(() => resolve(arrDeletedProjects))
+      .catch((error) => reject(error));
+    }
+    // Soft delete projects
+    else {
+      Project.updateMany(deleteQuery, { deleted: true })
+      // Delete elements in associated projects
+      .then(() => ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete))
+      .then(() => resolve(arrDeletedProjects))
+      .catch((error) => reject(error));
+    }
+  });
+}
 
 
 /**
@@ -774,4 +767,3 @@ function setPermissions(reqUser, organizationID, projectID, setUser, permissionT
     .catch((findProjErr) => reject(findProjErr)); // Closing projectFind
   }); // Closing promise
 } // Closing function
-

@@ -349,9 +349,16 @@ function deleteOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  if (req.body.hasOwnProperty('hardDelete') && utils.checkType([req.body.hardDelete], 'boolean')) {
+    hardDelete = req.body.hardDelete;
+  }
+
   // Remove the specified organization
   // NOTE: removeOrg() sanitizes req.params.orgid
-  OrgController.removeOrg(req.user, req.params.orgid, req.body)
+  OrgController.removeOrg(req.user, req.params.orgid, hardDelete)
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');

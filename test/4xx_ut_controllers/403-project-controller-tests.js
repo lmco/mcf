@@ -119,10 +119,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should update a project', updateProjectName);
   it('should update a project using the Project object', updateProjectObject);
   it('should create a second project', createProject02);
-  it('should reject attempt to create a project with a period in name', createPeriodName);
+  it('should reject attempt to create a project with a period in name', rejectCreatePeriodName);
   it('should reject creation of a project already made', rejectDuplicateProjectId);
   it('should reject creation of project with invalid ID', rejectInvalidProjectId);
-  it('should reject creation of project with invalid Name', rejectInvalidProjectName);
+  it('should reject creation of project with invalid name', rejectInvalidProjectName);
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
   it('should reject creation of project with non-A user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
@@ -268,9 +268,9 @@ function createProject02(done) {
 
 /**
  * @description Verifies project name does not contain periods.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Internal Server Error'
  */
-function createPeriodName(done) {
+function rejectCreatePeriodName(done) {
   const projData = testData.invalidProjects[0];
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -281,8 +281,8 @@ function createPeriodName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -310,8 +310,8 @@ function rejectDuplicateProjectId(done) {
 }
 
 /**
- * @description Verfies user CANNOT create project with invalid ID.
- * Expected error thrown: 'Bad Request'
+ * @description Verifies user CANNOT create project with invalid ID.
+ * Expected error thrown: 'Internal Server Error'
  */
 function rejectInvalidProjectId(done) {
   const projData = testData.invalidProjects[1];
@@ -325,15 +325,15 @@ function rejectInvalidProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project ID is not valid.'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
 
 /**
  * @description Verifies user CANNOT create a project without name input.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Internal Server Error'
  */
 function rejectInvalidProjectName(done) {
   const projData = testData.invalidProjects[2];
@@ -347,8 +347,8 @@ function rejectInvalidProjectName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
