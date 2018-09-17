@@ -102,7 +102,6 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
-      console.log(error);
       // Expect no error
       chai.expect(error.message).to.equal(null);
 
@@ -354,7 +353,6 @@ function softDeleteExistingOrg(done) {
     done();
   })
   .catch((error) => {
-    console.log(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();

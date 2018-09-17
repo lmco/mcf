@@ -98,7 +98,6 @@ describe(M.getModuleName(module.filename), () => {
     // Delete organization
     OrgController.removeOrg(adminUser, testData.orgs[12].id, { soft: false })
     .then((retOrg) => {
-      console.log(retOrg);
       chai.expect(retOrg.id).to.equal(testData.orgs[12].id);
       // Delete admin user
       return testUtils.removeAdminUser();

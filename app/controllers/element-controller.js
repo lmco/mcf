@@ -131,17 +131,17 @@ class ElementController {
 
       // Ensure user is an admin on all projects
       // TODO: Return an error if not admin on one project, or discard that project?
-      for (const project in arrProjects) {
+      Object(arrProjects).forEach((project) => {
         // Check that user has admin permission on project
         // TODO: Should user have write permissions to delete an element?
-        if (!arrProjects[project].getPermissions(reqUser).admin && !reqUser.admin) {
+        if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
           // User does not have admin permission on project, reject
           return reject(new errors.CustomError('User does not have permission to delete elements'
-            + ` on the project ${arrProjects[project].name}`));
+            + ` on the project ${project.name}`));
         }
         // Add project to deleteQuery
-        deleteQuery.$or.push({ project: arrProjects[project]._id });
-      }
+        deleteQuery.$or.push({ project: project._id });
+      });
 
       // If there are no elements to delete
       if (deleteQuery.$or.length === 0) {
