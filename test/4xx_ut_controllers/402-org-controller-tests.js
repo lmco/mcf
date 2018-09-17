@@ -137,7 +137,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should remove a users role within an org', removeUserRole);
   it('should throw an error saying the user is not in the org', rejectGetUserRoles);
   it('should throw an error the permission is not valid', rejectInvalidPermission);
-  it('should throw an error saying the user is not an admin', rejectNonAdminGetPermissions);
 });
 
 /* --------------------( Tests )-------------------- */
