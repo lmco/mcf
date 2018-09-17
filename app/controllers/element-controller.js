@@ -134,8 +134,7 @@ class ElementController {
       // TODO: Return an error if not admin on one project, or discard that project?
       Object(arrProjects).forEach((project) => {
         // Check that user has admin permission on project
-        // TODO: Should user have write permissions to delete an element?
-        if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
+        if (!project.getPermissions(reqUser).write && !reqUser.admin) {
           // User does not have admin permission on project, reject
           return reject(new errors.CustomError('User does not have permission to delete elements'
             + ` on the project ${project.name}`));
