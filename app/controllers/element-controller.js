@@ -131,7 +131,6 @@ class ElementController {
       const deleteQuery = { $or: [] };
 
       // Ensure user is an admin on all projects
-      // TODO: Return an error if not admin on one project, or discard that project?
       Object(arrProjects).forEach((project) => {
         // Check that user has admin permission on project
         if (!project.getPermissions(reqUser).write && !reqUser.admin) {
