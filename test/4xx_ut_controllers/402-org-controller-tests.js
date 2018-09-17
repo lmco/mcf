@@ -681,23 +681,3 @@ function rejectInvalidPermission(done) {
     done();
   });
 }
-
-/**
- * @description Verifies non-admin CANNOT retrieve permissions.
- * Expected error thrown: 'Unauthorized'
- */
-function rejectNonAdminGetPermissions(done) {
-  // Find permissions via controller
-  OrgController.findAllPermissions(newUser, testData.orgs[3].id)
-  .then(() => {
-    // Expected findAllPermissions() to fail
-    // Should not execute, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
-    done();
-  });
-}
