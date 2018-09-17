@@ -49,6 +49,9 @@ module.exports = {
 /**
  * @description This function finds all organizations a user belongs to.
  *
+ * @param {User} user - The user whose organizations to find
+ * @return an array of found organization objects
+ *
  * @example
  * findOrgs(username)
  * .then(orgs => {
@@ -58,7 +61,6 @@ module.exports = {
  *   console.log(err);
  * })
  *
- * @param {User} user - The user whose organizations to find
  */
 function findOrgs(user) {
   return new Promise((resolve, reject) => {
@@ -74,7 +76,13 @@ function findOrgs(user) {
  * @description This function takes a user object and orgID and returns the
  * organization data.
  *
- * @example
+ * @param {User} reqUser - The requesting user object.
+ * @param {String} organizationID - The string of the org ID.
+ * @param {Boolean} softDeleted - An optional flag that allows users to
+ *  search for soft deleted projects as well.
+ *  @return the searched organization object
+ *
+ *  @example
  * findOrg('josh', 'mbee-sw')
  * .then(function(org) {
  *   // do something with the org
@@ -82,12 +90,6 @@ function findOrgs(user) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The requesting user object.
- * @param {String} organizationID - The string of the org ID.
- * @param {Boolean} softDeleted - An optional flag that allows users to
- *  search for soft deleted projects as well.
  */
 function findOrg(reqUser, organizationID, softDeleted = false) {
   return new Promise((resolve, reject) => {
@@ -154,6 +156,7 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
  *
  *
  * @param {Object} orgQuery - The query to be made to the database
+ * @return the organization object
  */
 function findOrgsQuery(orgQuery) {
   return new Promise((resolve, reject) => {
@@ -186,7 +189,8 @@ function findOrgsQuery(orgQuery) {
  *
  *
  * @param {User} reqUser - The object containing the user of the requesting user.
- * @param {Object} newOrgData - Object containing new org data..
+ * @param {Object} newOrgData - Object containing new org data.
+ * @return the created organization object
  */
 function createOrg(reqUser, newOrgData) {
   return new Promise((resolve, reject) => {
@@ -266,6 +270,11 @@ function createOrg(reqUser, newOrgData) {
  * @description This function takes a user object, organization ID, and an
  * object containing updated fields and updates an existing organization.
  *
+ * @param {User} reqUser - The object containing the  requesting user.
+ * @param {String} organizationID - The organization ID.
+ * @param {Object} orgUpdate - An object containing updated Organization data
+ * @return the updated organization object
+ *
  * @example
  * updateOrg('josh', {mbee-sw})
  * .then(function(org) {
@@ -274,11 +283,6 @@ function createOrg(reqUser, newOrgData) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The object containing the  requesting user.
- * @param {String} organizationID - The organization ID.
- * @param {Object} orgUpdate - An object containing updated Organization data
  */
 function updateOrg(reqUser, organizationID, orgUpdate) {
   return new Promise((resolve, reject) => {
@@ -385,6 +389,11 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  * @description This function takes a user object, organization ID, and an
  * optional flag for soft or hard delete and deletes an organization.
  *
+ * @param {User} reqUser - The object containing the  requesting user.
+ * @param {String} organizationID - The ID of the org being deleted.
+ * @param {Object} options - Contains the list of delete options.
+ * @return the removed organization object
+ *
  * @example
  * removeOrg('josh', {mbee-sw}, {soft: false})
  * .then(function(org) {
@@ -393,11 +402,6 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The object containing the  requesting user.
- * @param {String} organizationID - The ID of the org being deleted.
- * @param {Object} options - Contains the list of delete options.
  */
 // TODO: MBX-434 discuss if options should become a boolean for soft or hard delete.
 // TODO: MBX-434 Come back and review function following Austin and Phill working out
@@ -470,6 +474,11 @@ function removeOrg(reqUser, organizationID, options) {
  * @description This function does the actual deletion or updating on an org.
  *   It was written to help clean up some code in the removeOrg function.
  *
+ * @param {User} user  The object containing the requesting user.
+ * @param {String} orgID  The organization ID.
+ * @param {Boolean} softDelete  The flag indicating whether or not to soft delete.
+ * @return the organization object
+ *
  * @example
  * removeOrgHelper(Josh, 'mbee', true)
  * .then(function(org) {
@@ -478,11 +487,6 @@ function removeOrg(reqUser, organizationID, options) {
  * .catch(function(error) {
  *  M.log.error(error);
  * });
- *
- *
- * @param {User} user  The object containing the requesting user.
- * @param {String} orgID  The organization ID.
- * @param {Boolean} softDelete  The flag indicating whether or not to soft delete.
  */
 function removeOrgHelper(user, orgID, softDelete) {
   return new Promise((resolve, reject) => {
@@ -522,12 +526,12 @@ function removeOrgHelper(user, orgID, softDelete) {
  * @param {String} searchedUsername - The username to find permissions for.
  * @param {string} organizationID - The ID of the organization
  *
- * @returns
+ * @returns member permissions object of on org
  * {
  *   username: {
  *     read: boolean,
  *     write: boolean,
- *     admin: boolean,
+ *     admin: boolean
  *   }
  * }
  *
@@ -565,7 +569,7 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
  * @param {User} searchedUsername  The object containing the user whose roles are to be changed.
  * @param {String} role  The new role for the user.
  *
- * @returns The updated Organization object
+ * @returns The updated organization object
  *
  * @example
  * setPermissions(Josh, Austin, 'mbee', 'write')

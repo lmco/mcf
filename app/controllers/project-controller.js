@@ -67,6 +67,7 @@ module.exports = {
  * @param {User} reqUser  The object containing the requesting user.
  * @param {String} organizationID  The organization ID for the org the project belongs to.
  * @param {Boolean} softDeleted  The optional flag to denote searching for deleted projects
+ * @return an array of found project objects
  *
  * TODO: MBX-438 - This function was doing double queries when it doesn't need
  * to, we need to determine the best way to handle this and write a test in 403
@@ -115,6 +116,11 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
 /**
  * @description The function deletes all projects for an org.
  *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {String} organizationID  The organization ID for the org the project belongs to.
+ * @param {Object} options  Contains a list of delete options.
+ * @return the removed project object
+ *
  * @example
  * removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
  * .then(function(projects) {
@@ -123,11 +129,6 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The organization ID for the org the project belongs to.
- * @param {Object} options  Contains a list of delete options.
  */
 function removeProjects(reqUser, organizationID, options) {
   return new Promise((resolve, reject) => {
@@ -182,6 +183,12 @@ function removeProjects(reqUser, organizationID, options) {
  * @description The function finds a project. Sanitizes the provided fields
  * and uses findProjectsQuery to perform the lookup
  *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {String} organizationID  The organization ID for the org the project belongs to.
+ * @param {String} projectID  The project ID of the Project which is being searched for.
+ * @param {Boolean} softDeleted  The flag to control whether or not to find softDeleted projects.
+ * @return the searched project object
+ *
  * @example
  * findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
  * .then(function(project) {
@@ -190,12 +197,6 @@ function removeProjects(reqUser, organizationID, options) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The organization ID for the org the project belongs to.
- * @param {String} projectID  The project ID of the Project which is being searched for.
- * @param {Boolean} softDeleted  The flag to control whether or not to find softDeleted projects.
  */
 function findProject(reqUser, organizationID, projectID, softDeleted = false) {
   return new Promise((resolve, reject) => {
@@ -246,6 +247,9 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
  * permissions.read, permissions.write, and permissions.admin fields are
  * populated. The query is sanitized before being executed.
  *
+ * @param {Object} query  The query to be made to the database
+ * @return the project object
+ *
  * @example
  * findProjectsQuery({ uid: 'org:proj' })
  * .then(function(projects) {
@@ -254,9 +258,6 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {Object} query  The query to be made to the database
  */
 function findProjectsQuery(query) {
   return new Promise((resolve, reject) => {
@@ -278,6 +279,10 @@ function findProjectsQuery(query) {
  * @description The function creates a project. Project data is sanitized
  * before use.
  *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {Object} project  The object of the project being created.
+ * @return the created project object
+ *
  * @example
  * createProject({Tony Stark}, {Arc Reactor 1})
  * .then(function(project) {
@@ -286,10 +291,6 @@ function findProjectsQuery(query) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {Object} project  The object of the project being created.
  */
 function createProject(reqUser, project) {
   return new Promise((resolve, reject) => {
@@ -385,6 +386,12 @@ function createProject(reqUser, project) {
 /**
  * @description The function updates a project.
  *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {String} organizationID  The organization ID of the project.
+ * @param {String} projectID  The project ID.
+ * @param {Object} projectUpdated  The object of the updated project.
+ * @return the updated project object
+ *
  * @example
  * updateProject({Tony Stark}, {Arc Reactor 1})
  * .then(function(project) {
@@ -393,12 +400,6 @@ function createProject(reqUser, project) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The organization ID of the project.
- * @param {String} projectID  The project ID.
- * @param {Object} projectUpdated  The object of the updated project.
  */
 function updateProject(reqUser, organizationID, projectID, projectUpdated) {
   return new Promise((resolve, reject) => {
@@ -492,6 +493,12 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
 /**
  * @description The function deletes a project.
  *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {String} organizationID  The organization ID for the org the project belongs to.
+ * @param {String} projectID  he project ID of the Project which is being deleted.
+ * @param {Object} options  Contains the list of delete options.
+ * @return the deleted project object
+ *
  * @example
  * removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
  * .then(function(project) {
@@ -500,12 +507,6 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The organization ID for the org the project belongs to.
- * @param {String} projectID  he project ID of the Project which is being deleted.
- * @param {Object} options  Contains the list of delete options.
  */
 function removeProject(reqUser, organizationID, projectID, options) {
   // Loading controller function wide since the element controller loads
@@ -577,6 +578,12 @@ function removeProject(reqUser, organizationID, projectID, options) {
 /**
  * @description The function actually deletes the project.
  *
+ * @param {User} reqUser  The requesting user.
+ * @param {String} orgID  The ID of the organization in question.
+ * @param {String} projID  The ID of project to delete.
+ * @param {Boolean} softDelete  Flag denoting whether to soft delete or not.
+ * @return the organization object
+ *
  * @example
  * removeProjectHelper({Arc}, true)
  * .then(function(project) {
@@ -585,12 +592,6 @@ function removeProject(reqUser, organizationID, projectID, options) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The requesting user.
- * @param {String} orgID  The ID of the organization in question.
- * @param {String} projID  The ID of project to delete.
- * @param {Boolean} softDelete  Flag denoting whether to soft delete or not.
  */
 function removeProjectHelper(reqUser, orgID, projID, softDelete) {
   return new Promise((resolve, reject) => {
@@ -632,6 +633,18 @@ function removeProjectHelper(reqUser, orgID, projID, softDelete) {
  * TODO: Code Review 9/14 - We left off here.
  * @description The function finds a projects permissions.
  *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {String} organizationID  The organization ID for the org the project belongs to.
+ * @param {String} projectID  The project ID of the Project which is being deleted.
+ * @return array of all member permission objects of on org
+ * {
+ *   username: {
+ *     read: boolean,
+ *     write: boolean,
+ *     admin: boolean
+ *   }
+ * }
+ *
  * @example
  * findAllPermissions({Tony Stark}, 'stark', 'arc')
  * .then(function(permissions) {
@@ -641,10 +654,6 @@ function removeProjectHelper(reqUser, orgID, projID, softDelete) {
  *   M.log.error(error);
  * });
  *
- *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The organization ID for the org the project belongs to.
- * @param {String} projectID  The project ID of the Project which is being deleted.
  */
 function findAllPermissions(reqUser, organizationID, projectID) {
   return new Promise((resolve, reject) => {
@@ -682,6 +691,19 @@ function findAllPermissions(reqUser, organizationID, projectID) {
 /**
  * @descriptio  The function finds a projects permissions.
  *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {String} searchedUsername The string containing the username to be searched for.
+ * @param {String} organizationID  The organization ID for the org the project belongs to.
+ * @param {String} projectID  The project ID of the Project which is being deleted.
+ * @return member permissions object of on org
+ * {
+ *   username: {
+ *     read: boolean,
+ *     write: boolean,
+ *     admin: boolean
+ *   }
+ * }
+ *
  * @example
  * findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
  * .then(function(permissions) {
@@ -690,12 +712,6 @@ function findAllPermissions(reqUser, organizationID, projectID) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} searchedUsername The string containing the username to be searched for.
- * @param {String} organizationID  The organization ID for the org the project belongs to.
- * @param {String} projectID  The project ID of the Project which is being deleted.
  */
 function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
   return new Promise((resolve, reject) => {
@@ -719,6 +735,13 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
 /**
  * @description The function sets a user's permissions for a project.
  *
+ * @param {User} reqUser  The object containing the requesting user.
+ * @param {String} organizationID  The organization ID for the org the project belongs to.
+ * @param {String} projectID  The project ID of the Project which is being deleted.
+ * @param {User} setUser  The object containing the user which permissions are being set for.
+ * @param {String} permissionType  The permission level or type being set for the use
+ * @return the updated organization object
+ *
  * @example
  * setPermissions({Tony}, 'stark_industries', 'arc_reactor', {Jarvis}, 'write')
  * .then(function(project) {
@@ -727,13 +750,6 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The organization ID for the org the project belongs to.
- * @param {String} projectID  The project ID of the Project which is being deleted.
- * @param {User} setUser  The object containing the user which permissions are being set for.
- * @param {String} permissionType  The permission level or type being set for the user.
  *
  * TODO: Adopt consistent interfaces between similar functions in orgs,
  * specifically, the same function in OrgController. Talk to Josh.
