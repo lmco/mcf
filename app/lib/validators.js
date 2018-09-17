@@ -19,8 +19,6 @@
  * helper functions - used to validate data within MBEE.
  */
 
-// TODO: include examples for each REGEXP (MBX-360)
-
 // This ID is used as the common regex for other ID fields in this module
 const id = '([a-z0-9])([a-z0-9-]){0,}';
 
@@ -150,11 +148,14 @@ module.exports.user = {
       const lowercaseValidator = (p.match(/[a-z]/g).length >= 1);
       // At least 1 uppercase letter
       const uppercaseValidator = (p.match(/[A-Z]/g).length >= 1);
+      // At least 1 special character
+      const specialCharValidator = (p.match(/[-`~!@#$%^&*()_+={}\[\]:;'",.<>?/|\\]/g).length >= 1);
       // Validate the password
       return (lengthValidator
                 && digitsValidator
                 && lowercaseValidator
-                && uppercaseValidator);
+                && uppercaseValidator
+                && specialCharValidator);
     }
     catch (error) {
       // Explicitly NOT logging error to avoid password logging
