@@ -28,6 +28,12 @@ const errors = M.require('lib.errors');
  * @description Handles basic-style authentication. This function gets called both for
  * the case of a basic auth header or for login form input. Either way
  * the username and password is provided to this function for auth.
+ *
+ * @param req request express object
+ * @param res response express object
+ * @param {String} username to authenticate via locally or LDAP AD
+ * @param {String} password to authenticate via locally or LDAP AD
+ * @returns Promise authenticated user as the User object or an error.
  */
 module.exports.handleBasicAuth = function(req, res, username, password) {
   return new Promise((resolve, reject) => {

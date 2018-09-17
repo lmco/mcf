@@ -147,6 +147,7 @@ module.exports.handleTokenAuth = function(req, res, token) {
  * @param req request express object
  * @param res response express object
  * @param next callback to continue express authentication
+ * @return next callback to continue in the express authentication flow
  */
 module.exports.doLogin = function(req, res, next) {
   // Compute token expiration time
