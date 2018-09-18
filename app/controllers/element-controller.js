@@ -77,12 +77,11 @@ const errors = M.require('lib.errors');
  *
  * @return {promise} resolve: element
  *                   reject: error
- * // TODO: Remove project-controller:findProject() its not needed MBX-445
  */
 function findElements(reqUser, organizationID, projectID, softDeleted = false) {
   return new Promise((resolve, reject) => {
     try {
-      // Check input parms are valid type
+      // Check input params are valid type
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
@@ -94,24 +93,25 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     // Sanitize input
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
+    const projectUID = utils.createUID(orgID, projID);
 
-    // Find the project
-    ProjController.findProject(reqUser, orgID, projID, softDeleted)
-    .then((project) => {
+    // Create the list of search parameters
+    let searchParams = { uid: { $regex: `^${projectUID}` }, deleted: false };
+    // User must be sys admin to view soft deleted fields
+    if (softDeleted && reqUser.admin) {
+      delete searchParams.deleted;
+    }
+
+    // Find the elements
+    findElementsQuery(searchParams)
+    .then((elements) => {
       // Ensure user is part of the project
-      if (!project.getPermissions(reqUser).read && !reqUser.admin) {
+      if (!elements[0].project.getPermissions(reqUser).read && !reqUser.admin) {
         return reject(new errors.CustomError('User does not have permissions.', 401));
       }
 
-      // Create the list of search parameters
-      let searchParams = { project: project._id, deleted: softDeleted };
-      if (softDeleted) {
-        searchParams = { project: project._id };
-      }
-
-      return findElementsQuery(searchParams);
+      return resolve(elements);
     })
-    .then((elements) => resolve(elements))
     .catch((error) => reject(error));
   });
 }
@@ -142,7 +142,7 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
     try {
       // Check input parms are valid type
       assert.ok(Array.isArray(arrProjects) , 'Project Array is not an array.');
-      assert.ok(typeof hardDeleted === 'boolean', 'Hard deleted flag is not a boolean.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
       return reject(new errors.CustomError(error.message, 400, 'error'));
