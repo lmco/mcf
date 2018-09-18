@@ -27,6 +27,9 @@ const errors = M.require('lib.errors');
 /**
  * @description Encrypts data with AES-256 using the app secret and returns the
  * encrypted data as a base64 encoded string.
+ *
+ * @params data to be encrypted
+ * @return encrypted data
  */
 module.exports.encrypt = function(data) {
   const secret = M.config.server.secret;
@@ -44,6 +47,9 @@ module.exports.encrypt = function(data) {
 /**
  * @description Decrypts data with AES-256. It expects data to be in the same
  * base64 encoded string format returned by encrypt().
+ *
+ * @params data to be decrypted
+ * @return decrypted data
  */
 module.exports.decrypt = function(data) {
   if (data === undefined || data.toString() === '') {
@@ -75,6 +81,9 @@ module.exports.decrypt = function(data) {
 
 /**
  * @description Generates token from user data.
+ *
+ * @params data to generate token
+ * @return encrypted token
  */
 module.exports.generateToken = function(data) {
   // Return encrypted input
@@ -83,6 +92,9 @@ module.exports.generateToken = function(data) {
 
 /**
  * @description Inspects user token.
+ *
+ * @params data to inspect token
+ * @return decrypted token
  */
 module.exports.inspectToken = function(token) {
   // Decrypt input and return parsed data

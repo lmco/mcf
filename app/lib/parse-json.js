@@ -27,6 +27,7 @@ const utils = M.require('lib.utils');
  * line characters to convert commented JSON to valid JSON.
  *
  * @params {String} filename  The name of the file to parse.
+ * @return valid JSON
  */
 module.exports.removeComments = function(inputString) {
   // initialize arrStringSep

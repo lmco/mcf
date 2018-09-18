@@ -20,6 +20,8 @@
 
 /**
  * @description Sanitizes database queries and scripting tags.
+ *
+ * @return sanitized user input
  */
 module.exports.sanitize = function(userInput) {
   return module.exports.mongo(module.exports.html(userInput));
@@ -27,6 +29,8 @@ module.exports.sanitize = function(userInput) {
 
 /**
  * @description Sanitizes database queries.
+ *
+ * @return sanitized user input
  */
 module.exports.mongo = function(userInput) {
   if (userInput instanceof Object) {
@@ -44,6 +48,8 @@ module.exports.mongo = function(userInput) {
 
 /**
  * @description Sanitizes HTML input.
+ *
+ * @return sanitized user input
  */
 module.exports.html = function(userInput) {
   // Replace known HTML characters with HTML escape sequences.
@@ -78,6 +84,8 @@ module.exports.html = function(userInput) {
 
 /**
  * @description Sanitizes LDAP special characters.
+ *
+ * @return sanitized user input
  */
 module.exports.ldapFilter = function(userInput) {
   // If string, replace special characters

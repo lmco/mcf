@@ -47,6 +47,8 @@ module.exports.UID_DELIMITER = ':';
  * @description Gets and returns an array of the names of all plugins
  * contained in the MBEE plugins directory. If no plugins are installed,
  * an empty array is returned.
+ *
+ * @return an array of MBEE plugins
  */
 function getPlugins() {
   const arrPlugins = [];

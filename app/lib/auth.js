@@ -48,6 +48,7 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  * @param req  Express request object
  * @param res  Express response object
  * @param next Callback used to continue the express authentication flow.
+ * @return next callback to continue in the express authentication flow
  */
 function authenticate(req, res, next) {
   // Extract authorization metadata

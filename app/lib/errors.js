@@ -44,6 +44,8 @@ module.exports.CustomError = class CustomError extends Error {
 
   /**
    * @description Returns a HTTP message based on the status code.
+   *
+   * @return message based on status code
    */
   getMessage() {
     switch (this.status) {
