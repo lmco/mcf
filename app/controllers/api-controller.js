@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module controllers.api_controller
+ * @module controllers.api-controller
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
