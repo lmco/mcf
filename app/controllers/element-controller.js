@@ -364,7 +364,7 @@ function createElement(reqUser, element) {
       findElementsQuery({ $or: [{ uid: elemUID }, { uuid: uuid }] })
       .then(() => reject(new errors.CustomError('Element already exists.', 400)))
       .catch((findError) => {
-        // This is ok, we dont want the element to already exist.
+        // This is ok, we don't want the element to already exist.
         if (findError.description === 'No elements found.') {
           // Error Check - NOT included element type
           if (!Element.Element.getValidTypes().includes(elementType)) {
@@ -448,44 +448,42 @@ function createRelationship(reqUser, elemData, elemInfo) {
     const targetElementId = sani.html(elemInfo.target);
     const sourceElementId = sani.html(elemInfo.source);
 
+    // Initialize function variables
+    let foundTarget = null;
+    let newElement = null;
+
     // Find the target to make sure it exists
     findElement(reqUser, elemData.orgID, elemData.project.id, targetElementId)
     .then((targetElement) => {
+      // Set foundTarget
+      foundTarget = targetElement;
       // Find the source Element
-      findElement(reqUser, elemData.orgID, elemData.project.id, sourceElementId)
-      .then((sourceElement) => {
-        const newElement = new Element.Relationship({
-          id: elemData.elemID,
-          name: elemData.elemName,
-          project: elemData.project._id,
-          uid: elemData.elemUID,
-          target: targetElement._id,
-          source: sourceElement._id,
-          custom: elemData.custom,
-          documentation: elemData.documentation,
-          uuid: elemData.uuid
-        });
-
-        updateParent(reqUser, elemData.orgID,
-          elemData.project.id, elemData.parentID, newElement)
-        .then((parentElementID) => {
-          newElement.parent = parentElementID;
-
-          // Save the new element
-          newElement.save((saveErr, elemUpdate) => {
-            if (saveErr) {
-              return reject(new errors.CustomError('Save failed.'));
-            }
-
-            // Return the element if succesful
-            return resolve(elemUpdate);
-          });
-        })
-        .catch((updateParentError) => reject(updateParentError));
-      })
-      .catch((findSourceError) => reject(findSourceError));
+      return findElement(reqUser, elemData.orgID, elemData.project.id, sourceElementId);
     })
-    .catch((findTargetError) => reject(findTargetError));
+    .then((foundSource) => {
+      newElement = new Element.Relationship({
+        id: elemData.elemID,
+        name: elemData.elemName,
+        project: elemData.project._id,
+        uid: elemData.elemUID,
+        target: foundTarget._id,
+        source: foundSource._id,
+        custom: elemData.custom,
+        documentation: elemData.documentation,
+        uuid: elemData.uuid
+      });
+
+      return updateParent(reqUser, elemData.orgID,
+        elemData.project.id, elemData.parentID, newElement);
+    })
+    .then((parentElementID) => {
+      newElement.parent = parentElementID;
+
+      // Save the new element
+      return newElement.save();
+    })
+    .then(() => resolve(newElement))
+    .catch((error) => reject(error));
   });
 }
 
@@ -523,16 +521,10 @@ function createPackage(reqUser, elemData) {
       newElement.parent = parentElementID;
 
       // Save the new element
-      newElement.save((saveErr, elemUpdate) => {
-        if (saveErr) {
-          return reject(new errors.CustomError('Save failed.'));
-        }
-
-        // Return the element if succesful
-        return resolve(elemUpdate);
-      });
+      return newElement.save();
     })
-    .catch((updateParentError) => reject(updateParentError));
+    .then(() => resolve(newElement))
+    .catch((error) => reject(error));
   });
 }
 
@@ -570,16 +562,10 @@ function createBlock(reqUser, elemData) {
       newElement.parent = parentElementID;
 
       // Save the new element
-      newElement.save((saveErr, elemUpdate) => {
-        if (saveErr) {
-          return reject(new errors.CustomError('Save failed.'));
-        }
-
-        // Return the element if succesful
-        return resolve(elemUpdate);
-      });
+      return newElement.save();
     })
-    .catch((updateParentError) => reject(updateParentError));
+    .then(() => resolve(newElement))
+    .catch((error) => reject(error));
   });
 }
 
@@ -746,16 +732,10 @@ function updateParent(reqUser, orgID, projID, elemID, newElement) {
       parentElement.contains.push(newElement._id);
 
       // Save the updated parentElement
-      parentElement.save((saveElemErr) => {
-        if (saveElemErr) {
-          return reject(new errors.CustomError('Save failed.'));
-        }
-
-        // Return the updated element object _id
-        return resolve(parentElement._id);
-      });
+      return parentElement.save();
     })
-    .catch((findParentError) => reject(findParentError));
+    .then((updatedElement) => resolve(updatedElement._id))
+    .catch((error) => reject(error));
   });
 }
 
