@@ -33,6 +33,9 @@ const flash = require('express-flash');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
+const UserController = M.require('controllers.user-controller');
+const Organization = M.require('models.organization');
+const User = M.require('models.user');
 
 // Connect to database, then initialize application
 db.connect()
@@ -103,6 +106,77 @@ function initApp() {
   if (M.config.server.ui.enabled) {
     app.use('/', M.require('routes'));
   }
+
+  // Create default admin if it doesn't exist
+  // Check any admin exist
+  User.findOne({ admin: true })
+  .exec((err, user) => {
+    if (err) {
+      throw err;
+    }
+
+    // Check user found
+    if (user === null) {
+      // No user found, create local admin
+      const adminUserData = {
+        username: 'admin',
+        password: 'Admin12345',
+        provider: 'local',
+        admin: true
+      };
+
+      // Create user via controller
+      UserController.createUser({ admin: true }, adminUserData)
+      .catch((err2) => {
+        throw (err2);
+      });
+    }
+  });
+
+  // Create default org if it doesn't exist
+  Organization.findOne({ id: 'default' })
+  .exec((err, org) => {
+    if (err) {
+      throw err;
+    }
+
+    // If the default org does not exist, create it
+    if (org === null) {
+      const defaultOrg = new Organization({
+        id: 'default',
+        name: 'default'
+      });
+      defaultOrg.save((saveOrgErr) => {
+        if (saveOrgErr) {
+          throw saveOrgErr;
+        }
+      });
+    }
+    else {
+      // Prune current users to ensure no deleted
+      // users are still part of the org
+      UserController.findUsers()
+      .then((users) => {
+        const newList = [];
+
+        // Add all existing users to the read list
+        Object.keys(users).forEach((user) => {
+          newList.push(users[user]._id);
+        });
+        org.permissions.read = newList;
+
+        // Save the updated org
+        org.save((saveOrgErr) => {
+          if (saveOrgErr) {
+            throw saveOrgErr;
+          }
+        });
+      })
+      .catch((err2) => {
+        throw err2;
+      });
+    }
+  });
 
   // Export the app
   module.exports = app;
