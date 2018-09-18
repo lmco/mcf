@@ -126,6 +126,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
   it('should reject creation of project with non-A user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
+  it('should find all projects which user has permissions on', findProjects);
   it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
   it('should reject update to the id name', rejectProjectId);
@@ -403,6 +404,38 @@ function rejectNonAdminCreateProject(done) {
  * @description Verify project created in createProject() is found.
  */
 function findProj(done) {
+  const orgId = org.id;
+  const projId = testData.projects[7].id;
+
+  // Find project
+  ProjController.findProject(adminUser, orgId, projId)
+  .then((proj) => {
+    // Verify project fields
+    chai.expect(proj.id).to.equal(testData.projects[7].id);
+    chai.expect(proj.name).to.equal(testData.projects[7].name);
+    done();
+  })
+  .catch((error) => {
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verify projects the user has access to findProjects() is found.
+ */
+function findProjects(done) {
+  userData = testData.users[];
+  UserController.createUser(adminUser, userData)
+  .then((newUser) => {
+
+  })
+  .catch((err) => {
+
+  });
+  const orgData2 = testData.orgs[];
+  OrgController.createOrg(, orgData2);
   const orgId = org.id;
   const projId = testData.projects[7].id;
 
