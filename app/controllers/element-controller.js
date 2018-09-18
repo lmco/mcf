@@ -19,6 +19,9 @@
  * It also provides function for interacting with elements.
  */
 
+// Node Modules
+const assert = require('assert');
+
 // Load MBEE modules
 const ProjController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
@@ -113,11 +116,11 @@ class ElementController {
     return new Promise((resolve, reject) => {
       // Ensure parameters are correctly formatted
       try {
-        utils.assertType([arrProjects], 'object');
-        utils.assertType([hardDelete], 'boolean');
+        assert.equal(typeof arrProjects, 'object', 'arrProjects is not an object.');
+        assert.equal(typeof hardDelete, 'boolean', 'hardDelete is not a boolean.');
       }
       catch (error) {
-        return reject(error);
+        return reject(new errors.CustomError(error.message, 400));
       }
 
       // If hard deleting, ensure user is a site-wide admin
@@ -130,11 +133,11 @@ class ElementController {
       // Initialize the query object
       const deleteQuery = { $or: [] };
 
-      // Ensure user is an admin on all projects
+      // Loop through each project
       Object(arrProjects).forEach((project) => {
-        // Check that user has admin permission on project
+        // Check that user has write permission on project
         if (!project.getPermissions(reqUser).write && !reqUser.admin) {
-          // User does not have admin permission on project, reject
+          // User does not have write permissions on project, reject
           return reject(new errors.CustomError('User does not have permission to delete elements'
             + ` on the project ${project.name}`));
         }

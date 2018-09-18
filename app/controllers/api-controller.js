@@ -352,7 +352,7 @@ function deleteOrg(req, res) {
   // Initialize hardDelete variable
   let hardDelete = false;
 
-  if (req.body.hasOwnProperty('hardDelete') && utils.checkType([req.body.hardDelete], 'boolean')) {
+  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
     hardDelete = req.body.hardDelete;
   }
 
@@ -657,7 +657,7 @@ function deleteProject(req, res) {
   // Initialize hardDelete variable
   let hardDelete = false;
 
-  if (req.body.hasOwnProperty('hardDelete') && utils.checkType([req.body.hardDelete], 'boolean')) {
+  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
     hardDelete = req.body.hardDelete;
   }
 
@@ -1057,7 +1057,7 @@ function deleteElement(req, res) {
   // Initialize hardDelete variable
   let hardDelete = false;
 
-  if (req.body.hasOwnProperty('hardDelete') && utils.checkType([req.body.hardDelete], 'boolean')) {
+  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
     hardDelete = req.body.hardDelete;
   }
 
