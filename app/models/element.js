@@ -197,20 +197,20 @@ const RelationshipSchema = new mongoose.Schema({
  *
  */
 const PackageSchema = new mongoose.Schema({
-  /* contains: [{
+  contains: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Element',
     required: false
-  }] */
+  }]
 }, options);
 
 
-PackageSchema.virtual('contains', {
-  ref: 'Element',
-  localField: '_id',
-  foreignField: 'parent',
-  justOne: false
-});
+// PackageSchema.virtual('contains', {
+//   ref: 'Element',
+//   localField: '_id',
+//   foreignField: 'parent',
+//   justOne: false
+// });
 
 
 /* --------------------------( Element Middleware )-------------------------- */
