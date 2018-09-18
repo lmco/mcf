@@ -45,9 +45,9 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  * This function implements different types of authentication according to
  * the strategy set up in the configuration file.
  *
- * @param req  Express request object
- * @param res  Express response object
- * @param next Callback used to continue the express authentication flow.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {callback} next - Callback to express authentication
  */
 function authenticate(req, res, next) {
   // Extract authorization metadata

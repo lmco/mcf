@@ -82,8 +82,8 @@ module.exports = {
  * @description This is a utility function that formats an object as JSON.
  * This function is used for formatting all API responses.
  *
- * @param {Object} obj An object to convert to JSON-formatted string.
- * @return JSON string of object parameter
+ * @param {Object} obj - An object to convert to JSON-formatted string.
+ * @return {String} JSON string of object parameter
  */
 function formatJSON(obj) {
   return JSON.stringify(obj, null, M.config.server.api.json.indent);
@@ -93,9 +93,9 @@ function formatJSON(obj) {
  * @description This function is used for routes that are not yet implemented.
  * It returns a 501: Not Implemented response.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with no implemented status
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res - Response object with no implemented status
  */
 function notImplemented(req, res) {
   return res.status(501).send('Not Implemented.');

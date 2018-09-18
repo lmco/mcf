@@ -48,7 +48,7 @@ module.exports.UID_DELIMITER = ':';
  * contained in the MBEE plugins directory. If no plugins are installed,
  * an empty array is returned.
  *
- * @return an array of MBEE plugins
+ * @return {Array} Array of MBEE plugins
  */
 function getPlugins() {
   const arrPlugins = [];
@@ -80,10 +80,10 @@ function getPlugins() {
  * @description Defines a render utility wrapper for the Express res.render
  * function to define and pass in default options.
  *
- * @param {Object} req  The Request object
- * @param {Object} res  The Response object
- * @param {String} name The name of the template to render
- * @param {Object} params A list of parameters to render
+ * @param {Object} req - Request object
+ * @param {Object} res - Response object
+ * @param {String} name - Name of the template to render
+ * @param {Object} params - List of parameters to render
  */
 module.exports.render = function(req, res, name, params) {
   const opts = params || {};
@@ -100,8 +100,8 @@ module.exports.render = function(req, res, name, params) {
  * error is thrown. It is assumed the array should always have items in it, if
  * the array is empty an error is thrown.
  *
- * @param {Object} arrItems   An array of values to check.
- * @param {String} assertType The type to check. Options: ['string', 'object',
+ * @param {Object} arrItems - An array of values to check.
+ * @param {String} assertType - The type to check. Options: ['string', 'object',
  *                            'number', 'undefined', 'boolean', 'symbol'].
  */
 module.exports.assertType = function(arrItems, assertType) {
@@ -139,9 +139,11 @@ module.exports.assertType = function(arrItems, assertType) {
  * of the specified type. Otherwise false is returned. Returns false is
  * assertType throws an error.
  *
- * @param {Object} arrItems   An array of values to check.
- * @param {String} checkType  The type to check. Options: ['string', 'object',
+ * @param {Object} arrItems - An array of values to check.
+ * @param {String} checkType - The type to check. Options: ['string', 'object',
  *                            'number', 'undefined', 'boolean', 'symbol'].
+ * @return {Boolean} true - type is correct
+ *                   false - error
  */
 module.exports.checkType = function(arrItems, checkType) {
   try {
@@ -160,8 +162,8 @@ module.exports.checkType = function(arrItems, checkType) {
  * @example
  *  assertExists(['id', 'project.id'], { id: '123', project: {id: '456'} });
  *
- * @param {Object} properties  An array of strings denoting keys.
- * @param {Object} obj  The object being searched.
+ * @param {Object} properties - An array of strings denoting keys.
+ * @param {Object} obj - The object being searched.
  */
 module.exports.assertExists = function(properties, obj) {
   properties.forEach((prop) => {
@@ -181,8 +183,10 @@ module.exports.assertExists = function(properties, obj) {
  * the object has all of those properties. If not, or if assertsExists throws
  * an error, false is returned.
  *
- * @param {Object} properties  A list of strings denoting keys.
- * @param {Object} obj  The object being searched.
+ * @param {Object} properties - A list of strings denoting keys.
+ * @param {Object} obj - The object being searched.
+ * @return {Boolean} true - property exists
+ *                   false - error
  */
 module.exports.checkExists = function(properties, obj) {
   try {
@@ -198,7 +202,7 @@ module.exports.checkExists = function(properties, obj) {
  * @description Checks whether the user is an admin or not. Throws an error
  * if user is not an admin.
  *
- * @param {User} user  The user object being checked.
+ * @param {User} user - The user object being checked.
  */
 module.exports.assertAdmin = function(user) {
   if (!user.admin) {
@@ -210,7 +214,8 @@ module.exports.assertAdmin = function(user) {
  * @description Creates a colon delimited string from any number of arguments.
  * If any items are not strings or other failure occurs, an error is thrown.
  *
- * @param {String}  args  An arbitrary number of strings to be appended.
+ * @param {String} args - An arbitrary number of strings to be appended.
+ * @return {String} args with uid delimiter
  */
 module.exports.createUID = function(...args) {
   this.assertType(args, 'string');
@@ -221,7 +226,8 @@ module.exports.createUID = function(...args) {
  * @description Splits a UID on the UID delimiter up and returns an array of
  * UID components.
  *
- * @param {String}  uid  The uid.
+ * @param {String} uid - The uid.
+ * @return {String} uid with delimiter
  */
 module.exports.parseUID = function(uid) {
   if (!uid.includes(this.UID_DELIMITER)) {
@@ -233,7 +239,8 @@ module.exports.parseUID = function(uid) {
 /**
  * @description Title-cases a string.
  *
- * @param {String} word  The word to be title-cased
+ * @param {String} word - The word to be title-cased
+ * @return {String} the word with upper case
  */
 module.exports.toTitleCase = function(word) {
   // Check if word NOT string or contains whitespace

@@ -26,7 +26,8 @@ const mongoose = require('mongoose');
 /**
  * @description Create connection to database.
  *
- * @return Promise database connected
+ * @return {Promise} resolve - database connected
+ *                    reject - an error
  */
 module.exports.connect = function() {
   return new Promise((resolve, reject) => {
