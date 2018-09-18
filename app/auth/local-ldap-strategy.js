@@ -29,11 +29,12 @@ const errors = M.require('lib.errors');
  * the case of a basic auth header or for login form input. Either way
  * the username and password is provided to this function for auth.
  *
- * @param req request express object
- * @param res response express object
- * @param {String} username to authenticate via locally or LDAP AD
- * @param {String} password to authenticate via locally or LDAP AD
- * @returns Promise authenticated user as the User object or an error.
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @param {String} username - Username authenticate via locally or LDAP AD
+ * @param {String} password - Password to authenticate via locally or LDAP AD
+ * @return {Promise} resolve - authenticated user object
+ *                   reject - an error
  */
 module.exports.handleBasicAuth = function(req, res, username, password) {
   return new Promise((resolve, reject) => {
@@ -78,6 +79,12 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  * passed in a session token or bearer token. This particular instance just implements the same
  * tokenAuth provided by the Local Strategy.
  *
+ * @param {Object} req - Request object from express
+ * @param {Object} res - Response object from express
+ * @param {String} _token -  Token user is attempting to authenticate with.
+ * @returns {Promise} resolve - token authenticated user object
+ *                    reject - an error
+ *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
  *   .then(user => {
@@ -86,11 +93,6 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  *   .catch(err => {
  *     console.log(err);
  *   })
- *
- * @param req The request object from express
- * @param res The response object from express
- * @param _token The token the user is attempting to authenticate with.
- * @returns Promise The local database User object or an error.
  */
 module.exports.handleTokenAuth = function(req, res, _token) {
   return new Promise((resolve, reject) => {
@@ -106,9 +108,9 @@ module.exports.handleTokenAuth = function(req, res, _token) {
  * application so that users can be authorized via token after logging in. This particular
  * implementation uses the Local Strategy doLogin function.
  *
- * @param req The request object from express
- * @param res The response object from express
- * @param next The callback to continue in the express authentication flow.
+ * @param {Object} req - Request object from express
+ * @param {Object} res - Response object from express
+ * @param {callback} next - Callback to express authentication flow.
  */
 module.exports.doLogin = function(req, res, next) {
   LocalStrategy.doLogin(req, res, next);

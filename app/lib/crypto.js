@@ -28,8 +28,8 @@ const errors = M.require('lib.errors');
  * @description Encrypts data with AES-256 using the app secret and returns the
  * encrypted data as a base64 encoded string.
  *
- * @params data to be encrypted
- * @return encrypted data
+ * @params {Object} data to be encrypted
+ * @return {String} encrypted data
  */
 module.exports.encrypt = function(data) {
   const secret = M.config.server.secret;
