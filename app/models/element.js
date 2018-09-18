@@ -197,11 +197,11 @@ const RelationshipSchema = new mongoose.Schema({
  *
  */
 const PackageSchema = new mongoose.Schema({
-  /*contains: [{
+  /* contains: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Element',
     required: false
-  }]*/
+  }] */
 }, options);
 
 

@@ -78,20 +78,20 @@ module.exports.html = function(userInput) {
   // Replace known HTML characters with HTML escape sequences.
   if (typeof userInput === 'string') {
     return String(userInput)
-      .replace(/&(?!(amp;)|(lt;)|(gt;)|(quot;)|(#039;)|(nbsp))/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/`/g, '&grave;')
-      .replace(/=/g, '&equals;')
-      .replace(/\//g, '&sol;')
-      .replace(/\\/g, '&bsol;')
-      .replace(/%/g, '&percnt;')
-      .replace(/\(/g, '&lpar;')
-      .replace(/\)/g, '&rpar;')
-      .replace(/#/g, '&num;')
-      .replace(/\^/g, '&Hat;')
-      .replace(/'/g, '&#039;');
+    .replace(/&(?!(amp;)|(lt;)|(gt;)|(quot;)|(#039;)|(nbsp))/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/`/g, '&grave;')
+    .replace(/=/g, '&equals;')
+    .replace(/\//g, '&sol;')
+    .replace(/\\/g, '&bsol;')
+    .replace(/%/g, '&percnt;')
+    .replace(/\(/g, '&lpar;')
+    .replace(/\)/g, '&rpar;')
+    .replace(/#/g, '&num;')
+    .replace(/\^/g, '&Hat;')
+    .replace(/'/g, '&#039;');
   }
 
   // Check if object type
@@ -124,11 +124,11 @@ module.exports.ldapFilter = function(userInput) {
   // If string, replace special characters
   if (typeof userInput === 'string') {
     return String(userInput)
-      .replace(/\\/g, '\\2A')
-      .replace(/\*/g, '\\28')
-      .replace(/\(/g, '\\29')
-      .replace(/\)/g, '\\5C')
-      .replace(/NUL/g, '\\00');
+    .replace(/\\/g, '\\2A')
+    .replace(/\*/g, '\\28')
+    .replace(/\(/g, '\\29')
+    .replace(/\)/g, '\\5C')
+    .replace(/NUL/g, '\\00');
   }
 
   // Return blank string if null

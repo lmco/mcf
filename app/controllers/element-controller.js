@@ -811,4 +811,3 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
     .catch((error) => reject(error));
   });
 }
-
