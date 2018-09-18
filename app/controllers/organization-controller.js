@@ -22,18 +22,9 @@
  * that provides functions implementing controller logic and behavior.
  */
 
-// Load MBEE modules
-const Organization = M.require('models.organization');
-const utils = M.require('lib.utils');
-const sani = M.require('lib.sanitization');
-const errors = M.require('lib.errors');
-
-// eslint consistent-return rule is disabled for this file.
-// The rule may not fit controller-related functions as
-// returns are inconsistent.
-/* eslint-disable consistent-return */
-
 // Expose `organization controller`
+// Note: The export is being done before the import to solve the issues of
+// circular refrences between controllers.
 module.exports = {
   findOrgs,
   findOrg,
@@ -45,6 +36,18 @@ module.exports = {
   setPermissions,
   findAllPermissions
 };
+
+// Load MBEE modules
+const ProjController = M.require('controllers.project-controller');
+const Organization = M.require('models.organization');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
+
+// eslint consistent-return rule is disabled for this file.
+// The rule may not fit controller-related functions as
+// returns are inconsistent.
+/* eslint-disable consistent-return */
 
 /**
  * @description This function finds all organizations a user belongs to.
@@ -387,10 +390,6 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
 // Project and Element removal.
 // And do appropriate checks for either implementations.
 function removeOrg(reqUser, organizationID, hardDelete = false) {
-  // Loading ProjController function wide because the project controller loads
-  // the org controller globally. Both files cannot load each other globally.
-  const ProjController = M.require('controllers.project-controller');
-
   return new Promise((resolve, reject) => {
     // Check valid param type
     try {

@@ -21,23 +21,9 @@
  * implements controller logic and behavior for Projects.
  */
 
-// Node.js modules
-const assert = require('assert');
-
-// MBEE modules
-const OrgController = M.require('controllers.organization-controller');
-const Project = M.require('models.project');
-const utils = M.require('lib.utils');
-const sani = M.require('lib.sanitization');
-const errors = M.require('lib.errors');
-
-// We are disabling the eslint consistent-return rule for this file.
-// The rule doesn't work well for many controller-related functions and
-// throws the warning in cases where it doesn't apply. For this reason, the
-// rule is disabled for this file. Be careful to avoid the issue.
-/* eslint-disable consistent-return */
-
 // Expose project controller functions
+// Note: The export is being done before the import to solve the issues of
+// circular references between controllers.
 module.exports = {
   createProject,
   findAllPermissions,
@@ -50,6 +36,23 @@ module.exports = {
   setPermissions,
   updateProject
 };
+
+// Node.js modules
+const assert = require('assert');
+
+// MBEE modules
+const UserController = M.require('controllers.user-controller');
+const OrgController = M.require('controllers.organization-controller');
+const Project = M.require('models.project');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
+
+// We are disabling the eslint consistent-return rule for this file.
+// The rule doesn't work well for many controller-related functions and
+// throws the warning in cases where it doesn't apply. For this reason, the
+// rule is disabled for this file. Be careful to avoid the issue.
+/* eslint-disable consistent-return */
 
 /**
  * @description The function finds all projects for a given orgID.
@@ -621,7 +624,7 @@ function findAllPermissions(reqUser, organizationID, projectID) {
 
 
 /**
- * @descriptio  The function finds a projects permissions.
+ * @description  The function finds a projects permissions.
  *
  * @example
  * findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
@@ -670,16 +673,16 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  * });
  *
  *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The organization ID for the org the project belongs to.
- * @param {String} projectID  The project ID of the Project which is being deleted.
- * @param {User} setUser  The object containing the user which permissions are being set for.
- * @param {String} permissionType  The permission level or type being set for the user.
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The organization ID for the org the project belongs to.
+ * @param {String} projectID - The project ID of the Project which is being deleted.
+ * @param {String} setUsername - The username of the user who's permissions are being set.
+ * @param {String} permissionType - The permission level or type being set for the user.
  *
  * TODO: Adopt consistent interfaces between similar functions in orgs,
  * specifically, the same function in OrgController. Talk to Josh.
  */
-function setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
+function setPermissions(reqUser, organizationID, projectID, setUsername, permissionType) {
   return new Promise((resolve, reject) => {
     try {
       utils.assertType([organizationID, projectID, permissionType], 'string');
@@ -692,9 +695,17 @@ function setPermissions(reqUser, organizationID, projectID, setUser, permissionT
     const orgID = sani.html(organizationID);
     const projID = sani.html(projectID);
     const permType = sani.html(permissionType);
+    const searchUsername = sani.html(setUsername);
+
+    // Initialize setUser
+    let setUser;
 
     // Check if project exists
-    findProject(reqUser, organizationID, projectID)
+    UserController.findUser(searchUsername)
+    .then(foundUser => {
+      setUser = foundUser;
+      return findProject(reqUser, organizationID, projectID);
+    })
     .then((project) => {
       // Check permissions
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {

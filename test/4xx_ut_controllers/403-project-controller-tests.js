@@ -571,7 +571,8 @@ function findPerm(done) {
  */
 function setPerm(done) {
   // Admin sets permissions for non-admin
-  ProjController.setPermissions(adminUser, org.id, project.id.toString(), nonAdminUser, 'write')
+  ProjController.setPermissions(adminUser, org.id, project.id.toString(),
+    nonAdminUser.username, 'write')
   .then(() => ProjController.findProject(adminUser, org.id, project.id.toString()))
   .then((retProj) => {
     // Verify permissions for non-admin

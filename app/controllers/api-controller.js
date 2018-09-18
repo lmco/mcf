@@ -743,12 +743,10 @@ function postProjectRole(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // TODO: Move findUser to setPermissions() in the project-controller (MBX-426)
-  UserController.findUser(req.params.username)
   // Set permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
-  .then((user) => ProjectController.setPermissions(req.user, req.params.orgid,
-    req.params.projectid, user, req.body.role))
+  ProjectController.setPermissions(req.user, req.params.orgid,
+    req.params.projectid, req.params.username, req.body.role)
   .then((project) => {
     // Return 200: Ok and updated project
     res.header('Content-Type', 'application/json');
@@ -771,12 +769,10 @@ function deleteProjectRole(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // TODO: Move findUser to setPermissions() in the project-controller (MBX-426)
-  UserController.findUser(req.params.username)
   // Remove permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
-  .then((user) => ProjectController.setPermissions(req.user, req.params.orgid,
-    req.params.projectid, user, req.body.role))
+  ProjectController.setPermissions(req.user, req.params.orgid,
+    req.params.projectid, req.params.username, req.body.role)
   .then((project) => {
     // Return 200: OK and updated org
     res.header('Content-Type', 'application/json');
