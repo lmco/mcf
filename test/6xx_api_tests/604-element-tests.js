@@ -96,9 +96,8 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Delete organization
-    OrgController.removeOrg(adminUser, testData.orgs[12].id, { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[12].id, true)
     .then((retOrg) => {
-      console.log(retOrg);
       chai.expect(retOrg.id).to.equal(testData.orgs[12].id);
       // Delete admin user
       return testUtils.removeAdminUser();
@@ -333,7 +332,7 @@ function rejectDeleteNonexistingElement(done) {
     ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      soft: false
+      hardDelete: true
     })
   },
   (err, response, body) => {
@@ -359,7 +358,7 @@ function deleteElement01(done) {
     ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      soft: false
+      hardDelete: true
     })
   },
   (err, response, body) => {
@@ -386,7 +385,7 @@ function deleteElement02(done) {
     ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      soft: false
+      hardDelete: true
     })
   },
   (err, response, body) => {

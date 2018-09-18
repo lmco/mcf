@@ -23,7 +23,7 @@
  * making MBEE tests easier to read and run.
  *
  */
-//Load node modules
+// Load node modules
 const path = require('path');
 
 // Load MBEE modules

@@ -349,9 +349,16 @@ function deleteOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+    hardDelete = req.body.hardDelete;
+  }
+
   // Remove the specified organization
   // NOTE: removeOrg() sanitizes req.params.orgid
-  OrgController.removeOrg(req.user, req.params.orgid, req.body)
+  OrgController.removeOrg(req.user, req.params.orgid, hardDelete)
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');
@@ -647,9 +654,16 @@ function deleteProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+    hardDelete = req.body.hardDelete;
+  }
+
   // Remove the specified project
   // NOTE: removeProject() sanitizes req.params.orgid and req.params.projecid
-  ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid, req.body)
+  ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid, hardDelete)
   .then((project) => {
     // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
@@ -1036,11 +1050,18 @@ function deleteElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+    hardDelete = req.body.hardDelete;
+  }
+
   // Remove the specified project
   // NOTE: removeProject() sanitizes req.params.orgid, req.params.projecid, and
   // req.params.elementid
   ElementController.removeElement(req.user, req.params.orgid,
-    req.params.projectid, req.params.elementid, req.body)
+    req.params.projectid, req.params.elementid, hardDelete)
   .then((element) => {
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(element));

@@ -86,13 +86,13 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing organization
-    OrgController.removeOrg(adminUser, testData.orgs[3].id, { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[3].id, true)
     // Removing non-admin user
     .then(() => UserController.removeUser(adminUser, newUser.username))
     .then((delUser2) => {
       chai.expect(delUser2.username).to.equal(testData.users[7].username);
       // Find admin user
-      return User.findOne({ username: M.config.testData.users[0].adminUsername });
+      return User.findOne({ username: adminUser.username });
     })
     // Remove admin user
     .then((foundUser) => foundUser.remove())
@@ -235,7 +235,7 @@ function updateOrgFieldErr(done) {
 
 /**
  * @description Verifies updateOrg fails given invalid data.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Internal Server Error'
  */
 function updateOrgTypeErr(done) {
   // Update organization
@@ -247,8 +247,8 @@ function updateOrgTypeErr(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -330,7 +330,7 @@ function findAllExistingOrgs(done) {
   OrgController.findOrgs(adminUser)
   .then((orgs) => {
     // Verify correct number of orgs was returned
-    chai.expect(orgs.length).to.equal(2);
+    chai.expect(orgs.length).to.equal(3);
     done();
   })
   .catch((error) => {
@@ -345,7 +345,7 @@ function findAllExistingOrgs(done) {
  */
 function softDeleteExistingOrg(done) {
   // Soft delete an org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[5].id, { soft: true })
+  OrgController.removeOrg(adminUser, testData.orgs[5].id, false)
   .then((retOrg) => {
     // Expect the deleted flag on the returned org to be set to true
     chai.expect(retOrg.deleted).to.equal(true);
@@ -383,7 +383,7 @@ function rejectFindSoftDelOrg(done) {
  */
 function deleteExistingOrg(done) {
   // Deletes org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[5].id, { soft: false })
+  OrgController.removeOrg(adminUser, testData.orgs[5].id, true)
   // Find deleted org
   .then(() => OrgController.findOrg(adminUser, testData.orgs[5].id))
   .then(() => {
@@ -420,7 +420,7 @@ function softDeleteProjectAndOrg(done) {
     return proj.save();
   })
   // Soft delete org via controller
-  .then(() => OrgController.removeOrg(adminUser, testData.orgs[6].id, { soft: true }))
+  .then(() => OrgController.removeOrg(adminUser, testData.orgs[6].id, false))
   // Find org via controller
   .then(() => OrgController.findOrg(adminUser, testData.orgs[6].id, true))
   .then((retOrg) => {
@@ -448,7 +448,7 @@ function softDeleteProjectAndOrg(done) {
  */
 function hardDeleteProjectAndOrg(done) {
   // Delete an org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[6].id, { soft: false })
+  OrgController.removeOrg(adminUser, testData.orgs[6].id, true)
   // Find deleted org
   .then(() => OrgController.findOrg(adminUser, testData.orgs[6].id))
   .then(() => {
@@ -502,7 +502,7 @@ function updateDefaultOrg(done) {
  */
 function rejectDefaultOrgDelete(done) {
   // Delete default org
-  OrgController.removeOrg(adminUser, 'default', { soft: false })
+  OrgController.removeOrg(adminUser, 'default', true)
   .then(() => {
     // Expected removeOrg() to fail
     // Should not execute, force test to fail

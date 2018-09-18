@@ -92,7 +92,7 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
-    OrgController.removeOrg(adminUser, org.id, { soft: false })
+    OrgController.removeOrg(adminUser, org.id, true)
     .then(() => {
       // Once db items are removed, remove reqUser
       // close the db connection and finish
@@ -366,7 +366,7 @@ function updateElement(done) {
  */
 function softDeleteElement(done) {
   // Soft delete the element
-  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[12].id, { soft: true })
+  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[12].id, false)
   .then((retElem) => {
     // Verify that the element's deleted field is now true
     chai.expect(retElem.deleted).to.equal(true);
@@ -406,8 +406,7 @@ function softDeleteElement(done) {
  */
 function hardDeleteElement(done) {
   // Hard delete the element
-  ElemController.removeElement(adminUser, org.id, proj.id,
-    testData.elements[12].id, { soft: false })
+  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[12].id, true)
   // Then search for the element (including soft-deleted elements)
   .then(() => ElemController
   .findElement(adminUser, org.id, proj.id,
@@ -431,7 +430,7 @@ function hardDeleteElement(done) {
  */
 function softDeleteAllElements(done) {
   // Delete all elements in project
-  ElemController.removeElements(adminUser, org.id, proj.id, { soft: true })
+  ElemController.removeElements(adminUser, [proj], false)
   // Find all existing elements in project, including soft-deleted elements
   .then(() => ElemController.findElements(adminUser, org.id, proj.id, true))
   .then((retElems) => {
@@ -475,7 +474,7 @@ function verifyFindNonSoftDelElem(done) {
  */
 function hardDeleteAllElements(done) {
   // Delete all elements in project
-  ElemController.removeElements(adminUser, org.id, proj.id, { soft: false })
+  ElemController.removeElements(adminUser, [proj], true)
   .then(() => ElemController.findElements(adminUser, org.id, proj.id))
   .then(() => {
     // Expect no elements found
