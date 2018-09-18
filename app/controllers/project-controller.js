@@ -573,11 +573,11 @@ function removeProject(reqUser, organizationID, projectID, hardDelete) {
 }
 
 /**
- * TODO: Code Review 9/14 - We left off here.
  * @description The function finds a projects permissions.
  *
- * @example
- * findAllPermissions({Tony Stark}, 'stark', 'arc')
+ * @example <caption>Calling example</caption>
+ *
+ * findAllPermissions(myUser, 'stark', 'arc')
  * .then(function(permissions) {
  *   // do something with the list of user permissions
  * })
@@ -589,24 +589,31 @@ function removeProject(reqUser, organizationID, projectID, hardDelete) {
  * @param {User} reqUser  The object containing the requesting user.
  * @param {String} organizationID  The organization ID for the org the project belongs to.
  * @param {String} projectID  The project ID of the Project which is being deleted.
+ *
+ * @returns {Promise} Returns a promise that resolves an object where the keys
+ * are usernames and the values are permissions objects. The returned object
+ * is of the form:
+ *
+ * <pre>
+ * <code>
+ * {
+ *    userA: { read: true, write: true, admin: true }
+ *    userB: { read true, write: false, admin: false }
+ * }
+ * </code>
+ * </pre>
+ *
  */
 function findAllPermissions(reqUser, organizationID, projectID) {
   return new Promise((resolve, reject) => {
-    const orgID = sani.html(organizationID);
-    const projID = sani.html(projectID);
-
-    // Find Project
-    findProject(reqUser, orgID, projID)
+    // Find Project - the findProject() function sanitizes the org and project
+    // ID inputs. It also checks that the user has read permissions on the
+    // project.
+    findProject(reqUser, organizationID, projectID)
     .then((project) => {
       const permissionLevels = project.getPermissionLevels();
       const memberList = project.permissions[permissionLevels[1]].map(u => u.username);
       let permissionsList = [];
-
-      // Check permissions
-      if (!project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission.', 401));
-      }
-
       const roleList = {};
 
       for (let i = 0; i < memberList.length; i++) {
@@ -624,7 +631,8 @@ function findAllPermissions(reqUser, organizationID, projectID) {
 
 
 /**
- * @description  The function finds a projects permissions.
+ * @description  The function finds a the permissions on the project for a
+ * specific user.
  *
  * @example
  * findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
@@ -640,19 +648,28 @@ function findAllPermissions(reqUser, organizationID, projectID) {
  * @param {String} searchedUsername The string containing the username to be searched for.
  * @param {String} organizationID  The organization ID for the org the project belongs to.
  * @param {String} projectID  The project ID of the Project which is being deleted.
+ *
+ * @returns {Promise} Returns a promise that resolves an Object containing the
+ * searched user's permissions on the project. This is returned in the form:
+ *
+ * <pre><code>
+ *   {
+ *    read: true,
+ *    write: false,
+ *    admin: false
+ *   }
+ * </code></pre>
  */
 function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
   return new Promise((resolve, reject) => {
-    const orgID = sani.html(organizationID);
-    const projID = sani.html(projectID);
-
-    // Find Project
-    findAllPermissions(reqUser, orgID, projID)
+    // Find Project - input is sanitized by findAllPermissions
+    findAllPermissions(reqUser, organizationID, projectID)
     .then(permissionList => {
+      // If user does not have permissions on the project an empty object is
+      // resolved.
       if (!permissionList.hasOwnProperty(searchedUsername)) {
         return resolve({});
       }
-
       return resolve(permissionList[searchedUsername]);
     })
     .catch((findPermissionsErr) => reject(findPermissionsErr));
@@ -681,14 +698,19 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  *
  * TODO: Adopt consistent interfaces between similar functions in orgs,
  * specifically, the same function in OrgController. Talk to Josh.
+ *
+ * TODO: (Jake) Clean up this code
  */
 function setPermissions(reqUser, organizationID, projectID, setUsername, permissionType) {
   return new Promise((resolve, reject) => {
     try {
-      utils.assertType([organizationID, projectID, permissionType], 'string');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof setUsername === 'string', 'Search username is not a string.');
+      assert.ok(typeof permissionType === 'string', 'Permission type is not a string.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new errors.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize input
@@ -698,9 +720,9 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, permiss
     const searchUsername = sani.html(setUsername);
 
     // Initialize setUser
-    let setUser;
+    let setUser = null;
 
-    // Check if project exists
+    // Lookup the user
     UserController.findUser(searchUsername)
     .then(foundUser => {
       setUser = foundUser;
@@ -720,8 +742,8 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, permiss
         return reject(new errors.CustomError('Permission type not found.', 404));
       }
 
-      // Error Check - Do not allow admin user to downgrade their permissions
-      if (reqUser.username === setUser.username && permType !== permissionLevels[-1]) {
+      // Error Check - Do not user to change their own permissions
+      if (reqUser.username === setUser.username) {
         return reject(new errors.CustomError('User cannot change their own permissions.', 403));
       }
 
