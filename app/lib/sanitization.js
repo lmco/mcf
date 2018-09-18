@@ -30,7 +30,17 @@ module.exports.sanitize = function(userInput) {
 /**
  * @description Sanitizes database queries.
  *
+<<<<<<< HEAD
  * @return sanitized user input
+=======
+ * +-------+-----------------+
+ * | Input | Sanitized Output|
+ * +-------+-----------------+
+ * |   $   |                 |
+ * +-------+-----------------+
+ *
+ * @param {Object} userInput - User object data to be sanitized.
+>>>>>>> prc-001
  */
 module.exports.mongo = function(userInput) {
   if (userInput instanceof Object) {
@@ -49,7 +59,30 @@ module.exports.mongo = function(userInput) {
 /**
  * @description Sanitizes HTML input.
  *
+<<<<<<< HEAD
  * @return sanitized user input
+=======
+ * +-------+-----------------+
+ * | Input | Sanitized Output|
+ * +-------+-----------------+
+ * |   &   | &amp            |
+ * |   <   | &lt             |
+ * |   >   | &gt             |
+ * |   "   | &quot           |
+ * |   `   | &grave          |
+ * |   =   | &equals         |
+ * |   /   | &sol            |
+ * |   \   | &bsol           |
+ * |   %   | &percnt         |
+ * |   (   | &lpar           |
+ * |   )   | &rpar           |
+ * |   #   | &num            |
+ * |   ^   | &Hat            |
+ * |   '   | &#039           |
+ * +-------+-----------------+
+ *
+ * @param {Object} userInput - User object data to be sanitized.
+>>>>>>> prc-001
  */
 module.exports.html = function(userInput) {
   // Replace known HTML characters with HTML escape sequences.
@@ -85,7 +118,21 @@ module.exports.html = function(userInput) {
 /**
  * @description Sanitizes LDAP special characters.
  *
+<<<<<<< HEAD
  * @return sanitized user input
+=======
+ * +-------+-----------------+
+ * | Input | Sanitized Output|
+ * +-------+-----------------+
+ * |   \   | \2A             |
+ * |   *   | \28             |
+ * |   (   | \29             |
+ * |   )   | \5C             |
+ * |   NUL | \00             |
+ * +-------+-----------------+
+ *
+ * @param {Object} userInput - User object data to be sanitized.
+>>>>>>> prc-001
  */
 module.exports.ldapFilter = function(userInput) {
   // If string, replace special characters

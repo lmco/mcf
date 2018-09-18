@@ -205,6 +205,14 @@ const PackageSchema = new mongoose.Schema({
 }, options);
 
 
+// PackageSchema.virtual('contains', {
+//   ref: 'Element',
+//   localField: '_id',
+//   foreignField: 'parent',
+//   justOne: false
+// });
+
+
 /* --------------------------( Element Middleware )-------------------------- */
 
 /**

@@ -21,24 +21,9 @@
  * implements controller logic and behavior for Projects.
  */
 
-// Node.js modules
-const assert = require('assert');
-
-// MBEE modules
-const OrgController = M.require('controllers.organization-controller');
-const Project = M.require('models.project');
-const utils = M.require('lib.utils');
-const sani = M.require('lib.sanitization');
-const validators = M.require('lib.validators');
-const errors = M.require('lib.errors');
-
-// We are disabling the eslint consistent-return rule for this file.
-// The rule doesn't work well for many controller-related functions and
-// throws the warning in cases where it doesn't apply. For this reason, the
-// rule is disabled for this file. Be careful to avoid the issue.
-/* eslint-disable consistent-return */
-
 // Expose project controller functions
+// Note: The export is being done before the import to solve the issues of
+// circular references between controllers.
 module.exports = {
   createProject,
   findAllPermissions,
@@ -50,7 +35,24 @@ module.exports = {
   removeProjects,
   setPermissions,
   updateProject
-}
+};
+
+// Node.js modules
+const assert = require('assert');
+
+// MBEE modules
+const UserController = M.require('controllers.user-controller');
+const OrgController = M.require('controllers.organization-controller');
+const Project = M.require('models.project');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
+
+// We are disabling the eslint consistent-return rule for this file.
+// The rule doesn't work well for many controller-related functions and
+// throws the warning in cases where it doesn't apply. For this reason, the
+// rule is disabled for this file. Be careful to avoid the issue.
+/* eslint-disable consistent-return */
 
 /**
  * @description The function finds all projects for a given orgID.
@@ -58,8 +60,8 @@ module.exports = {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {Boolean} softDeleted - The optional flag to denote searching for deleted projects
- * @return {Promise} resolve - an array of found project objects
- *                   reject - error
+ * 
+ * @return {Array} array of found project objects
  *
  * @example
  * findProjects({Tony Stark}, 'StarkIndustries')
@@ -84,7 +86,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     // Sanitize the organization ID
     const orgID = sani.html(organizationID);
 
-    const searchParams = { "org.id": orgID, deleted: false };
+    const searchParams = { 'org.id': orgID, deleted: false };
 
     // Check softDeleted flag true and User Admin true
     if (softDeleted && reqUser.admin) {
@@ -95,20 +97,18 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     findProjectsQuery(searchParams)
     .then((projects) => {
       // Filter results to only projects in the org requested
-      //let results = projects.filter(project => {
+      // let results = projects.filter(project => {
       //  return project.org.id === orgID;
-      //});
+      // });
 
       // Filter results to only the projects on which user has read access
-      let results = projects.filter(project => {
-        return project.getPermissions(reqUser).read || reqUser.admin;
-      });
+      let res = projects.filter(project => project.getPermissions(reqUser).read || reqUser.admin);
 
       // Map project public data to results
-      results = results.map(project => project.getPublicData());
+      res = res.map(project => project.getPublicData());
 
       // Return resulting project
-      return resolve(results);
+      return resolve(res);
     })
     .catch((orgFindErr) => reject(orgFindErr));
   });
@@ -118,10 +118,10 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  * @description The function deletes all projects for an org.
  *
  * @param {User} reqUser - The object containing the requesting user.
- * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {Object} options - Contains a list of delete options.
- * @return {Promise} resolve - the removed project object
- *                   reject - error
+ * @param {Object} arrOrganizations - The organization ID for the org the project belongs to.
+ * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
+ * 
+ * @return {Array} array of deleted projects 
  *
  * @example
  * removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
@@ -134,49 +134,58 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  */
 function removeProjects(reqUser, organizationID, options) {
   return new Promise((resolve, reject) => {
+    // Ensure parameters of correctly formatted
     try {
-      utils.assertType([organizationID], 'string');
+      utils.assertType([arrOrganizations], 'object');
+      utils.assertType([hardDelete], 'boolean');
     }
     catch (error) {
       return reject(error);
     }
 
-    // Sanitize the orgid
-    const orgID = sani.html(organizationID);
+    // If hard deleting, ensure user is a site-wide admin
+    if (hardDelete && !reqUser.admin) {
+      return reject(new errors.CustomError('User does not have permission to permanently'
+          + ' delete a project.', 401));
+    }
 
-    // Ensure the org exists
-    // TODO - Use populates rather than nested queries when possible (MBX-357)
-    // Doing findOrgs() then findProj(), Instead we should reduces the number of queries below
-    // Not sure if removeProjects() should remove all projects. Instead remove a list of projects
-    OrgController.findOrg(reqUser, orgID, true)
-    .then((org) => findProjects(reqUser, org.id, true))
-    .then((projects) => {
-      // If we didn't find any projects
-      if (projects.length === 0) {
-        return resolve(projects);
+    // Initialize the query object
+    const deleteQuery = { $or: [] };
+    let arrDeletedProjects = [];
+
+    // Loop through each org
+    Object(arrOrganizations).forEach((org) => {
+      // Ensure user has permissions to delete projects on each org
+      if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
+        return reject(new errors.CustomError(
+          `User does not have permission to delete projects in the org ${org.name}.`, 401
+        ));
       }
+      deleteQuery.$or.push({ org: org._id });
+      arrDeletedProjects = arrDeletedProjects.concat(org.projects);
+    });
 
-      // Ensure user has permission to delete all projects
-      Object.keys(projects).forEach((project) => {
-        if (!projects[project].getPermissions(reqUser).admin && !reqUser.admin) {
-          return reject(new errors.CustomError(
-            `User does not have permission to delete project ${projects[project].id}.`, 401
-          ));
-        }
-      });
+    // If there are no elements to delete
+    if (deleteQuery.$or.length === 0) {
+      return resolve();
+    }
 
-      for (let i = 0; i < projects.length; i++) {
-        // Must nest promise since it uses a return
-        removeProject(reqUser, orgID, projects[i].id, options)
-        .then(() => {
-          if (i === projects.length - 1) {
-            return resolve(projects);
-          }
-        })
-        .catch((deleteProjError) => reject(deleteProjError));
-      }
-    })
-    .catch((findOrgError) => reject(findOrgError));
+    // Hard delete projects
+    if (hardDelete) {
+      Project.deleteMany(deleteQuery)
+      // Delete elements in associated projects
+      .then(() => ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete))
+      .then(() => resolve(arrDeletedProjects))
+      .catch((error) => reject(error));
+    }
+    // Soft delete projects
+    else {
+      Project.updateMany(deleteQuery, { deleted: true })
+      // Delete elements in associated projects
+      .then(() => ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete))
+      .then(() => resolve(arrDeletedProjects))
+      .catch((error) => reject(error));
+    }
   });
 }
 
@@ -189,8 +198,7 @@ function removeProjects(reqUser, organizationID, options) {
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being searched for.
  * @param {Boolean} softDeleted - The flag to control whether or not to find softDeleted projects.
- * @return {Promise} resolve - searched project object
- *                   reject - error
+ * @return {Object} search project object
  *
  * @example
  * findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
@@ -251,8 +259,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
  * populated. The query is sanitized before being executed.
  *
  * @param {Object} query - The query to be made to the database
- * @return {Promise} resolve - project object
- *                   reject - error
+ * @return {Object} project object
  *
  * @example
  * findProjectsQuery({ uid: 'org:proj' })
@@ -285,8 +292,7 @@ function findProjectsQuery(query) {
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {Object} project - The object of the project being created.
- * @return {Promise} resolve - created project object
- *                   reject - error
+ * @return {Object} created project object
  *
  * @example
  * createProject({Tony Stark}, {Arc Reactor 1})
@@ -395,8 +401,7 @@ function createProject(reqUser, project) {
  * @param {String} organizationID - The organization ID of the project.
  * @param {String} projectID - The project ID.
  * @param {Object} projectUpdated - The object of the updated project.
- * @return {Promise} resolve - updated project object
- *                   reject - error
+ * @return {Object} updated project object
  *
  * @example
  * updateProject({Tony Stark}, {Arc Reactor 1})
@@ -495,16 +500,15 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
   });
 }
 
-
 /**
  * @description The function deletes a project.
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {String} projectID - he project ID of the Project which is being deleted.
- * @param {Object} options - Contains the list of delete options.
- * @return {Promise} resolve - deleted project object
- *                   reject - error
+ * @param {String} projectID - The project ID of the Project which is being deleted.
+ * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
+ * 
+ * @return {Object} deleted project object
  *
  * @example
  * removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
@@ -515,147 +519,83 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
  *   M.log.error(error);
  * });
  */
-function removeProject(reqUser, organizationID, projectID, options) {
+function removeProject(reqUser, organizationID, projectID, hardDelete) {
   // Loading controller function wide since the element controller loads
   // the project controller globally. Both files cannot load each other globally.
   const ElemController = M.require('controllers.element-controller');
 
   return new Promise((resolve, reject) => {
+    // Check parameters are valid
     try {
       utils.assertType([organizationID, projectID], 'string');
-      utils.assertType([options], 'object');
+      utils.assertType([hardDelete], 'boolean');
     }
     catch (error) {
       return reject(error);
     }
 
-    let softDelete = true;
-    if (utils.checkExists(['soft'], options)) {
-      if (options.soft === false && reqUser.admin) {
-        softDelete = false;
-      }
-      else if (options.soft === false && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission to permanently delete a project.', 401));
-      }
-      else if (options.soft !== false && options.soft !== true) {
-        return reject(new errors.CustomError('Invalid argument for the soft delete field.', 400));
-      }
+    // If user tries to hard-delete and is not a system admin, reject
+    if (hardDelete && !reqUser.admin) {
+      return reject(new errors.CustomError('User does not have permission to permanently delete a project.', 401));
     }
 
-    // Sanitize project properties
-    const orgID = sani.html(organizationID);
-    const projID = sani.html(projectID);
+    // Find the project
+    findProject(reqUser, organizationID, projectID, true)
+    .then((project) => {
+      // Verify user has permissions to delete project
+      if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
+        return reject(new errors.CustomError('User does not have permission.', 401));
+      }
 
-    // Make sure the project exists first, even if it has already been soft deleted
-    findProject(reqUser, orgID, projID, true)
-    .then((project) => new Promise((res, rej) => { // eslint-disable-line consistent-return
-      // Check if we want to hard delete the project and if so,
-      // ensure that the project has been soft deleted first.
-      if (!softDelete && !project.deleted) {
-        // Call the remove project function to soft delete it first
-        removeProject(reqUser, orgID, projID, { soft: true })
-        .then((retProj) => res(retProj))
-        .catch((softDeleteError) => rej(softDeleteError));
+      // Hard delete
+      if (hardDelete) {
+        Project.deleteOne({ id: project.id })
+        // Delete all elements in that project
+        .then(() => ElemController.removeElements(reqUser, [project], hardDelete))
+        .then(() => resolve(project))
+        .catch((error) => reject(error));
       }
+      // Soft delete
       else {
-        // Either the project was already soft deleted or we only want it soft deleted.
-        return res();
-      }
-    }))
-    // Remove the elements first
-    .then(() => ElemController.removeElements(reqUser, orgID, projID, options))
-    // Actually remove the project
-    .then(() => removeProjectHelper(reqUser, orgID, projID, softDelete))
-    .then((deletedProject) => resolve(deletedProject))
-    .catch((removeElementsError) => {
-      // There are simply no elements associated with this project to delete
-      if (removeElementsError.description === 'No elements found.') {
-        removeProjectHelper(reqUser, orgID, projID, softDelete)
-        .then((deletedProject) => resolve(deletedProject))
-        .catch((deleteProjectError) => reject(deleteProjectError));
-      }
-      else {
-        // Some other error when deleting the elements
-        return reject(removeElementsError);
-      }
-    });
-  });
-}
-
-/**
- * @description The function actually deletes the project.
- *
- * @param {User} reqUser - The requesting user.
- * @param {String} orgID - The ID of the organization in question.
- * @param {String} projID - The ID of project to delete.
- * @param {Boolean} softDelete - Flag denoting whether to soft delete or not.
- * @return {Promise} resolve - updated project object
- *                   reject - error
- *
- * @example
- * removeProjectHelper({Arc}, true)
- * .then(function(project) {
- *   // do something with the deleted project.
- * })
- * .catch(function(error) {
- *   M.log.error(error);
- * });
- */
-function removeProjectHelper(reqUser, orgID, projID, softDelete) {
-  return new Promise((resolve, reject) => {
-    if (softDelete) {
-      findProject(reqUser, orgID, projID, true)
-      .then((project) => {
-        if (!project.deleted) {
+        Project.updateOne({ id: project.id }, { deleted: true })
+        // Soft-delete all elements in the project
+        .then(() => ElemController.removeElements(reqUser, [project], hardDelete))
+        .then(() => {
+          // Set the returned project deleted field to true since updateOne()
+          // returns a query not the updated project.
           project.deleted = true;
-          project.save((saveErr) => {
-            if (saveErr) {
-              // If error occurs, return it
-              return reject(new errors.CustomError('Save failed.'));
-            }
-
-            // Return updated project
-            return resolve(project);
-          });
-        }
-        else {
-          return reject(new errors.CustomError('Project no longer exists.', 404));
-        }
-      })
-      .catch((findProjError) => reject(findProjError));
-    }
-    else {
-      // Remove the Project
-      Project.findOneAndRemove({ uid: utils.createUID(orgID, projID) })
-      .exec((removeProjErr, projectRemoved) => {
-        if (removeProjErr) {
-          return reject(new errors.CustomError('Delete failed.'));
-        }
-        return resolve(projectRemoved);
-      });
-    }
+          return resolve(project);
+        })
+        .catch((error) => reject(error));
+      }
+    })
+    .catch((error) => reject(error));
   });
 }
 
 /**
- * TODO: Code Review 9/14 - We left off here.
  * @description The function finds a projects permissions.
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being deleted.
- * @return {Promise} resolve - array of all member permission objects on a project
- *                   reject - error
- * {
- *   username: {
- *     read: boolean,
- *     write: boolean,
- *     admin: boolean
- *   }
- * }
+ * 
+ * @return {Promise} Returns a promise that resolves an object where the keys
+ * are usernames and the values are permissions objects. The returned object
+ * is of the form:
  *
- * @example
- * findAllPermissions({Tony Stark}, 'stark', 'arc')
+ * <pre>
+ * <code>
+ * {
+ *    userA: { read: true, write: true, admin: true }
+ *    userB: { read true, write: false, admin: false }
+ * }
+ * </code>
+ * </pre>
+ *
+ * @example <caption>Calling example</caption>
+ *
+ * findAllPermissions(myUser, 'stark', 'arc')
  * .then(function(permissions) {
  *   // do something with the list of user permissions
  * })
@@ -666,21 +606,14 @@ function removeProjectHelper(reqUser, orgID, projID, softDelete) {
  */
 function findAllPermissions(reqUser, organizationID, projectID) {
   return new Promise((resolve, reject) => {
-    const orgID = sani.html(organizationID);
-    const projID = sani.html(projectID);
-
-    // Find Project
-    findProject(reqUser, orgID, projID)
+    // Find Project - the findProject() function sanitizes the org and project
+    // ID inputs. It also checks that the user has read permissions on the
+    // project.
+    findProject(reqUser, organizationID, projectID)
     .then((project) => {
       const permissionLevels = project.getPermissionLevels();
       const memberList = project.permissions[permissionLevels[1]].map(u => u.username);
       let permissionsList = [];
-
-      // Check permissions
-      if (!project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission.', 401));
-      }
-
       const roleList = {};
 
       for (let i = 0; i < memberList.length; i++) {
@@ -698,21 +631,24 @@ function findAllPermissions(reqUser, organizationID, projectID) {
 
 
 /**
- * @descriptio  The function finds a projects permissions.
+ * @description  The function finds a the permissions on the project for a
+ * specific user.
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} searchedUsername - The string containing the username to be searched for.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being deleted.
- * @return {Promise} resolve - member permissions object on project
- *                   reject - error
- * {
- *   username: {
- *     read: boolean,
- *     write: boolean,
- *     admin: boolean
+ * 
+ * @return {Promise} Returns a promise that resolves an Object containing the
+ * searched user's permissions on the project. This is returned in the form:
+ *
+ * <pre><code>
+ *   {
+ *    read: true,
+ *    write: false,
+ *    admin: false
  *   }
- * }
+ * </code></pre>
  *
  * @example
  * findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
@@ -725,16 +661,14 @@ function findAllPermissions(reqUser, organizationID, projectID) {
  */
 function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
   return new Promise((resolve, reject) => {
-    const orgID = sani.html(organizationID);
-    const projID = sani.html(projectID);
-
-    // Find Project
-    findAllPermissions(reqUser, orgID, projID)
+    // Find Project - input is sanitized by findAllPermissions
+    findAllPermissions(reqUser, organizationID, projectID)
     .then(permissionList => {
+      // If user does not have permissions on the project an empty object is
+      // resolved.
       if (!permissionList.hasOwnProperty(searchedUsername)) {
         return resolve({});
       }
-
       return resolve(permissionList[searchedUsername]);
     })
     .catch((findPermissionsErr) => reject(findPermissionsErr));
@@ -748,8 +682,9 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being deleted.
- * @param {User} setUser - The object containing the user which permissions are being set for.
+ * @param {String} setUsername - The username of the user who's permissions are being set.
  * @param {String} permissionType - The permission level or type being set for the use
+ * 
  * @return {Promise} resolve - updated organization object
  *                   reject - error
  *
@@ -764,23 +699,36 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  *
  * TODO: Adopt consistent interfaces between similar functions in orgs,
  * specifically, the same function in OrgController. Talk to Josh.
+ *
+ * TODO: (Jake) Clean up this code
  */
-function setPermissions(reqUser, organizationID, projectID, setUser, permissionType) {
+function setPermissions(reqUser, organizationID, projectID, setUsername, permissionType) {
   return new Promise((resolve, reject) => {
     try {
-      utils.assertType([organizationID, projectID, permissionType], 'string');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof setUsername === 'string', 'Search username is not a string.');
+      assert.ok(typeof permissionType === 'string', 'Permission type is not a string.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new errors.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize input
     const orgID = sani.html(organizationID);
     const projID = sani.html(projectID);
     const permType = sani.html(permissionType);
+    const searchUsername = sani.html(setUsername);
 
-    // Check if project exists
-    findProject(reqUser, organizationID, projectID)
+    // Initialize setUser
+    let setUser = null;
+
+    // Lookup the user
+    UserController.findUser(searchUsername)
+    .then(foundUser => {
+      setUser = foundUser;
+      return findProject(reqUser, organizationID, projectID);
+    })
     .then((project) => {
       // Check permissions
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
@@ -795,8 +743,8 @@ function setPermissions(reqUser, organizationID, projectID, setUser, permissionT
         return reject(new errors.CustomError('Permission type not found.', 404));
       }
 
-      // Error Check - Do not allow admin user to downgrade their permissions
-      if (reqUser.username === setUser.username && permType !== permissionLevels[-1]) {
+      // Error Check - Do not user to change their own permissions
+      if (reqUser.username === setUser.username) {
         return reject(new errors.CustomError('User cannot change their own permissions.', 403));
       }
 

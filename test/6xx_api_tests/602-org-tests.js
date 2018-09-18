@@ -181,11 +181,11 @@ function rejectPatchInvalidName(done) {
   (err, response, body) => {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(403);
+    // Expect response status: 500 Internal Server Error
+    chai.expect(response.statusCode).to.equal(500);
     // Verify error message in response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Forbidden');
+    chai.expect(json.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -253,7 +253,7 @@ function getOrgs(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verifies length of response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(1);
+    chai.expect(json.length).to.equal(2);
     done();
   });
 }
@@ -296,11 +296,11 @@ function rejectPostInvalidId(done) {
   (err, response, body) => {
     // Expect no error
     chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
+    // Expect response status: 500 Internal Server Error
+    chai.expect(response.statusCode).to.equal(500);
     // Verify error message in response
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -344,11 +344,11 @@ function rejectPostEmptyName(done) {
   (err, response, body) => {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
+    // Expect response status: 500 Internal Server Error
+    chai.expect(response.statusCode).to.equal(500);
     // Verify error message in response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -418,7 +418,7 @@ function deleteOrg(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
-    body: JSON.stringify({ soft: false })
+    body: JSON.stringify({ hardDelete: true })
   },
   function(err, response) {
     // Expect no error

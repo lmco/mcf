@@ -91,7 +91,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    OrgController.removeOrg(adminUser, testData.orgs[7].id, { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[7].id, true)
     .then(() => {
       // Removing the non-admin user
       const userTwo = testData.users[8].username;
@@ -119,10 +119,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should update a project', updateProjectName);
   it('should update a project using the Project object', updateProjectObject);
   it('should create a second project', createProject02);
-  it('should reject attempt to create a project with a period in name', createPeriodName);
+  it('should reject attempt to create a project with a period in name', rejectCreatePeriodName);
   it('should reject creation of a project already made', rejectDuplicateProjectId);
   it('should reject creation of project with invalid ID', rejectInvalidProjectId);
-  it('should reject creation of project with invalid Name', rejectInvalidProjectName);
+  it('should reject creation of project with invalid name', rejectInvalidProjectName);
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
   it('should reject creation of project with non-A user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
@@ -188,7 +188,7 @@ function rejectImmutableField(done) {
 
 /**
  * @description Verifies user CANNOT update project with invalid project name.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Internal Server Error'
  */
 function updateTypeError(done) {
   // Update project
@@ -200,8 +200,8 @@ function updateTypeError(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -268,9 +268,9 @@ function createProject02(done) {
 
 /**
  * @description Verifies project name does not contain periods.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Internal Server Error'
  */
-function createPeriodName(done) {
+function rejectCreatePeriodName(done) {
   const projData = testData.invalidProjects[0];
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -281,8 +281,8 @@ function createPeriodName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -310,8 +310,8 @@ function rejectDuplicateProjectId(done) {
 }
 
 /**
- * @description Verfies user CANNOT create project with invalid ID.
- * Expected error thrown: 'Bad Request'
+ * @description Verifies user CANNOT create project with invalid ID.
+ * Expected error thrown: 'Internal Server Error'
  */
 function rejectInvalidProjectId(done) {
   const projData = testData.invalidProjects[1];
@@ -325,15 +325,15 @@ function rejectInvalidProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project ID is not valid.'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
 
 /**
  * @description Verifies user CANNOT create a project without name input.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Internal Server Error'
  */
 function rejectInvalidProjectName(done) {
   const projData = testData.invalidProjects[2];
@@ -347,8 +347,8 @@ function rejectInvalidProjectName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
@@ -571,7 +571,8 @@ function findPerm(done) {
  */
 function setPerm(done) {
   // Admin sets permissions for non-admin
-  ProjController.setPermissions(adminUser, org.id, project.id.toString(), nonAdminUser, 'write')
+  ProjController.setPermissions(adminUser, org.id, project.id.toString(),
+    nonAdminUser.username, 'write')
   .then(() => ProjController.findProject(adminUser, org.id, project.id.toString()))
   .then((retProj) => {
     // Verify permissions for non-admin
@@ -602,7 +603,7 @@ function softDeleteProject(done) {
   // Save the element
   elem.save()
   // Soft-delete the project
-  .then(() => ProjController.removeProject(adminUser, org.id, project.id, { soft: true }))
+  .then(() => ProjController.removeProject(adminUser, org.id, project.id, false))
   // Find project
   .then(() => ProjController.findProject(adminUser, org.id, project.id))
   .then(() => {
@@ -624,7 +625,7 @@ function softDeleteProject(done) {
  */
 function deleteProject(done) {
   // Hard-delete the project
-  ProjController.removeProject(adminUser, org.id, project.id, { soft: false })
+  ProjController.removeProject(adminUser, org.id, project.id, true)
   .then(() => ProjController.findProject(adminUser, org.id, project.id))
   .then(() => {
     // Expected findProject() to fail
@@ -658,7 +659,7 @@ function deleteProject(done) {
  */
 function deleteProject02(done) {
   // Remove project
-  ProjController.removeProject(adminUser, org.id, testData.projects[8].id, { soft: false })
+  ProjController.removeProject(adminUser, org.id, testData.projects[8].id, true)
   .then(() => ProjController.findProject(adminUser, org.id, testData.projects[8].id))
   .then(() => {
     // Expected findProject() to fail
