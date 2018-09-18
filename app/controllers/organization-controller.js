@@ -196,7 +196,6 @@ function createOrg(reqUser, newOrgData) {
   return new Promise((resolve, reject) => {
     // Initialize optional fields with a default
     let custom = null;
-    let visibility = 'private';
 
     // Check admin and valid org data
     try {
@@ -207,15 +206,6 @@ function createOrg(reqUser, newOrgData) {
         utils.assertType([newOrgData.custom], 'object');
         custom = sani.html(newOrgData.custom);
       }
-      if (utils.checkExists(['visibility'], newOrgData)) {
-        utils.assertType([newOrgData.visibility], 'string');
-        visibility = newOrgData.visibility;
-        // Check if invalid visibility level
-        if (!Organization.schema.methods.getVisibilityLevels().includes(visibility)) {
-          // Invalid visibility level, reject error
-          return reject(new errors.CustomError('Invalid visibility type.', 400));
-        }
-      }
     }
     catch (error) {
       return reject(error);
@@ -225,43 +215,36 @@ function createOrg(reqUser, newOrgData) {
     const orgID = sani.html(newOrgData.id);
     const orgName = sani.html(newOrgData.name);
 
-    // TODO: MBX-433  Use findQuery instead of findOrg to remove error check and change
-    // save() to use a promise
     // Check if org already exists
-    findOrg(reqUser, orgID)
-    // Org already exists
-    .then(() => reject(new errors.CustomError('An organization with the same ID already exists.', 403)))
-    .catch((findOrgError) => {
-      // Org not found is what we want, so proceed when this error
-      // occurs since we aim to create a new org.
-      if (findOrgError.description === 'Org not found.') {
-        // Create the new org
-        const newOrg = new Organization({
-          id: orgID,
-          name: orgName,
-          permissions: {
-            admin: [reqUser._id],
-            write: [reqUser._id],
-            read: [reqUser._id]
-          },
-          custom: custom,
-          visibility: visibility
-        });
-          // Save new org
-        newOrg.save((saveOrgErr) => {
-          if (saveOrgErr) {
-            return reject(new errors.CustomError('Save failed.'));
-          }
-          return resolve(newOrg);
-        });
+    findOrgsQuery({ id: orgID})
+    .then((foundOrg) => {
+      // If org already exists, reject
+      if (foundOrg.length > 0) {
+        return reject(new errors.CustomError('An organization with the same ID already exists.', 403));
       }
-      else {
-        if (findOrgError.description === 'User does not have permissions.') {
-          return reject(new errors.CustomError('An organization with the same ID already exists.', 403));
-        }
-        // There was some other error, return it.
-        return reject(findOrgError);
+
+      // Create the new org
+      const newOrg = new Organization({
+        id: orgID,
+        name: orgName,
+        permissions: {
+          admin: [reqUser._id],
+          write: [reqUser._id],
+          read: [reqUser._id]
+        },
+        custom: custom
+      });
+      // Save new org
+      return newOrg.save();
+    })
+    .then((createdOrg) => resolve(createdOrg))
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof errors.CustomError) {
+        return reject(error);
       }
+      // If it's not a CustomError, create one and reject
+      return reject(new errors.CustomError(error.message));
     });
   });
 }
