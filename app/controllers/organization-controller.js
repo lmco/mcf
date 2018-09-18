@@ -212,7 +212,7 @@ function createOrg(reqUser, newOrgData) {
     const orgName = sani.html(newOrgData.name);
 
     // Check if org already exists
-    findOrgsQuery({ id: orgID})
+    findOrgsQuery({ id: orgID })
     .then((foundOrg) => {
       // If org already exists, reject
       if (foundOrg.length > 0) {
