@@ -426,16 +426,15 @@ function findProj(done) {
  * @description Verify projects the user has access to findProjects() is found.
  */
 function findProjects(done) {
-  userData = testData.users[];
-  UserController.createUser(adminUser, userData)
+  userData = testData.users[12];
+  UserController.createUser(adminUser, userData);
   .then((newUser) => {
-
+    const orgData2 = testData.orgs[];
+    OrgController.createOrg(newUser, orgData2);
   })
   .catch((err) => {
 
   });
-  const orgData2 = testData.orgs[];
-  OrgController.createOrg(, orgData2);
   const orgId = org.id;
   const projId = testData.projects[7].id;
 

@@ -78,6 +78,14 @@
     {
       "username": "deadpool",
       "fname": "Mr Wade"
+    },
+    {
+      "username": "secondAdminUser",
+      "password": "password!123",
+      "fname": "Second",
+      "preferredName": "Admin User",
+      "lname": "AdminUser",
+      "admin": true
     }
   ],
 
