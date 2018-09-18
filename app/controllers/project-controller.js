@@ -22,6 +22,8 @@
  */
 
 // Expose project controller functions
+// Note: The export is being done before the import to solve the issues of
+// circular refrences between controllers.
 module.exports = {
   createProject,
   findAllPermissions,
