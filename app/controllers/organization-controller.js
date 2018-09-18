@@ -446,7 +446,7 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
  * @param {String} searchedUsername - The username to find permissions for.
  * @param {string} organizationID - The ID of the organization
  *
- * @returns
+ * @returns {Object}
  * {
  *   username: {
  *     read: boolean,
@@ -489,7 +489,7 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
  * @param {User} searchedUsername  The object containing the user whose roles are to be changed.
  * @param {String} role  The new role for the user.
  *
- * @returns The updated Organization object
+ * @returns {Object} The updated Organization object
  *
  * @example
  * setPermissions(Josh, Austin, 'mbee', 'write')
@@ -604,7 +604,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
  * @param {User} reqUser  The object containing the requesting user.
  * @param {String} organizationID  The ID of the org being deleted.
  *
- * @return An object containing users permissions
+ * @returns {Object} An object containing users permissions
  * {
  *   username1: {
  *     read: boolean,
