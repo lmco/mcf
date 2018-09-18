@@ -188,8 +188,8 @@ ProjectSchema.methods.getPermissions = function(user) {
 };
 
 ProjectSchema.statics.getVisibilityLevels = function() {
-  return Project.schema.methods.getVisibilityLevels();
-}
+  return ProjectSchema.methods.getVisibilityLevels();
+};
 
 
 /* --------------------------( Project Properties )-------------------------- */
@@ -202,4 +202,4 @@ ProjectSchema.set('toObject', { virtuals: true });
 /* ------------------------( Project Schema Export )------------------------- */
 
 // Export mongoose model as "Project"
-module.exports = mongoose.model('Project', ProjectSchema);;
+module.exports = mongoose.model('Project', ProjectSchema);
