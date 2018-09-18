@@ -83,6 +83,7 @@ module.exports = {
  * This function is used for formatting all API responses.
  *
  * @param {Object} obj - An object to convert to JSON-formatted string.
+ *
  * @return {String} JSON string of object parameter
  */
 function formatJSON(obj) {
@@ -95,6 +96,7 @@ function formatJSON(obj) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res - Response object with no implemented status
  */
 function notImplemented(req, res) {
@@ -130,6 +132,7 @@ function swaggerSpec() {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with swagger JSON
  */
 function swaggerJSON(req, res) {
@@ -145,6 +148,7 @@ function swaggerJSON(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with session token
  */
 function login(req, res) {
@@ -159,6 +163,7 @@ function login(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with 200 status code
  */
 function test(req, res) {
@@ -173,6 +178,7 @@ function test(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with version
  */
 function version(req, res) {
@@ -197,6 +203,7 @@ function version(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res - Response object with orgs' public data
  *
  * NOTE: All users are members of the 'default' org, should always have
@@ -281,6 +288,7 @@ function deleteOrgs(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with search org's public data
  */
 function getOrg(req, res) {
@@ -310,6 +318,7 @@ function getOrg(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with created org
  */
 function postOrg(req, res) {
@@ -348,6 +357,7 @@ function postOrg(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with updated org
  */
 function patchOrg(req, res) {
@@ -383,6 +393,7 @@ function patchOrg(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with deleted org
  */
 function deleteOrg(req, res) {
@@ -419,6 +430,7 @@ function deleteOrg(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with searched org and roles
  */
 function getOrgRole(req, res) {
@@ -449,6 +461,7 @@ function getOrgRole(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with updated org
  *
  * NOTE: In the case of setPermissions(), setting a users role does the same
@@ -483,6 +496,7 @@ function postOrgRole(req, res) {
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
+ *
  * @return {Object} res response object with updated org
  */
 function deleteOrgRole(req, res) {
@@ -513,6 +527,7 @@ function deleteOrgRole(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with roles of members on search org
  */
 function getAllOrgMemRoles(req, res) {
@@ -543,6 +558,7 @@ function getAllOrgMemRoles(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res - Response object with projects' public data
  */
 function getProjects(req, res) {
@@ -619,6 +635,7 @@ function deleteProjects(req, res) {
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
+ *
  * @return {Object} res response object with search project
  */
 function getProject(req, res) {
@@ -648,6 +665,7 @@ function getProject(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with created project
  */
 function postProject(req, res) {
@@ -695,6 +713,7 @@ function postProject(req, res) {
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
+ *
  * @return {Object} res response object with updated project
  */
 function patchProject(req, res) {
@@ -724,6 +743,7 @@ function patchProject(req, res) {
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
+ *
  * @return {Object} res response object with deleted project
  */
 function deleteProject(req, res) {
@@ -760,6 +780,7 @@ function deleteProject(req, res) {
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
+ *
  * @return {Object} res response object with roles of members in a project
  */
 function getAllProjMemRoles(req, res) {
@@ -790,6 +811,7 @@ function getAllProjMemRoles(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with project member roles
  */
 function getProjMemRole(req, res) {
@@ -821,6 +843,7 @@ function getProjMemRole(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with updated project
  *
  * NOTE: In the case of setPermissions(), setting a users role does the same
@@ -855,6 +878,7 @@ function postProjectRole(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with updated project
  */
 function deleteProjectRole(req, res) {
@@ -886,6 +910,7 @@ function deleteProjectRole(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with users' public data
  */
 function getUsers(req, res) {
@@ -920,6 +945,7 @@ function getUsers(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with search user's public data
  */
 function getUser(req, res) {
@@ -948,6 +974,7 @@ function getUser(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with created user
  */
 function postUser(req, res) {
@@ -983,6 +1010,7 @@ function postUser(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with updated user
  */
 function patchUser(req, res) {
@@ -1011,6 +1039,7 @@ function patchUser(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with deleted user
  */
 function deleteUser(req, res) {
@@ -1039,6 +1068,7 @@ function deleteUser(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return res response object with user's public data
  */
 function whoami(req, res) {
@@ -1062,6 +1092,7 @@ function whoami(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with elements
  */
 function getElements(req, res) {
@@ -1090,6 +1121,7 @@ function getElements(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with searched element
  */
 function getElement(req, res) {
@@ -1120,6 +1152,7 @@ function getElement(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with created element
  */
 function postElement(req, res) {
@@ -1150,6 +1183,7 @@ function postElement(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with updated element
  */
 function patchElement(req, res) {
@@ -1181,6 +1215,7 @@ function patchElement(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ *
  * @return {Object} res response object with deleted element
  */
 function deleteElement(req, res) {

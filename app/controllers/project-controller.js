@@ -60,7 +60,7 @@ const errors = M.require('lib.errors');
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {Boolean} softDeleted - The optional flag to denote searching for deleted projects
- * 
+ *
  * @return {Array} array of found project objects
  *
  * @example
@@ -120,8 +120,8 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {Object} arrOrganizations - The organization ID for the org the project belongs to.
  * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
- * 
- * @return {Array} array of deleted projects 
+ *
+ * @return {Array} array of deleted projects
  *
  * @example
  * removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
@@ -198,6 +198,7 @@ function removeProjects(reqUser, organizationID, options) {
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being searched for.
  * @param {Boolean} softDeleted - The flag to control whether or not to find softDeleted projects.
+ *
  * @return {Object} search project object
  *
  * @example
@@ -259,6 +260,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
  * populated. The query is sanitized before being executed.
  *
  * @param {Object} query - The query to be made to the database
+ *
  * @return {Object} project object
  *
  * @example
@@ -292,6 +294,7 @@ function findProjectsQuery(query) {
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {Object} project - The object of the project being created.
+ *
  * @return {Object} created project object
  *
  * @example
@@ -401,6 +404,7 @@ function createProject(reqUser, project) {
  * @param {String} organizationID - The organization ID of the project.
  * @param {String} projectID - The project ID.
  * @param {Object} projectUpdated - The object of the updated project.
+ *
  * @return {Object} updated project object
  *
  * @example
@@ -507,7 +511,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being deleted.
  * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
- * 
+ *
  * @return {Object} deleted project object
  *
  * @example
@@ -579,7 +583,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being deleted.
- * 
+ *
  * @return {Promise} Returns a promise that resolves an object where the keys
  * are usernames and the values are permissions objects. The returned object
  * is of the form:
@@ -638,7 +642,7 @@ function findAllPermissions(reqUser, organizationID, projectID) {
  * @param {String} searchedUsername - The string containing the username to be searched for.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being deleted.
- * 
+ *
  * @return {Promise} Returns a promise that resolves an Object containing the
  * searched user's permissions on the project. This is returned in the form:
  *
@@ -684,7 +688,7 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  * @param {String} projectID - The project ID of the Project which is being deleted.
  * @param {String} setUsername - The username of the user who's permissions are being set.
  * @param {String} permissionType - The permission level or type being set for the use
- * 
+ *
  * @return {Promise} resolve - updated organization object
  *                   reject - error
  *
