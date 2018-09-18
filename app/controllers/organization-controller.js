@@ -50,7 +50,8 @@ module.exports = {
  * @description This function finds all organizations a user belongs to.
  *
  * @param {User} user - The user whose organizations to find
- * @return an array of found organization objects
+ * @return {Promise} resolve - Array of found organization objects
+ *                    reject - error
  *
  * @example
  * findOrgs(username)
@@ -80,7 +81,8 @@ function findOrgs(user) {
  * @param {String} organizationID - The string of the org ID.
  * @param {Boolean} softDeleted - An optional flag that allows users to
  *  search for soft deleted projects as well.
- *  @return the searched organization object
+ * @return {Promise} resolve - searched organization object
+ *                    reject - error
  *
  *  @example
  * findOrg('josh', 'mbee-sw')
@@ -145,6 +147,10 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
 /**
  * @description Find orgs by a database query.
  *
+ * @param {Object} orgQuery - The query to be made to the database
+ * @return {Promise} resolve - organization object
+ *                   reject - error
+ *
  * @example
  * findOrgsQuery({ id: 'org' })
  * .then(function(org) {
@@ -153,10 +159,6 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {Object} orgQuery - The query to be made to the database
- * @return the organization object
  */
 function findOrgsQuery(orgQuery) {
   return new Promise((resolve, reject) => {
@@ -178,6 +180,11 @@ function findOrgsQuery(orgQuery) {
  * @description This function takes a user and dictionary containing
  *   the org data creates a new organization.
  *
+ * @param {User} reqUser - The object containing the user of the requesting user.
+ * @param {Object} newOrgData - Object containing new org data.
+ * @return {Promise} resolve - created organization object
+ *                    reject - error
+ *
  * @example
  * createOrg('josh', {mbee-sw})
  * .then(function(org) {
@@ -186,11 +193,6 @@ function findOrgsQuery(orgQuery) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The object containing the user of the requesting user.
- * @param {Object} newOrgData - Object containing new org data.
- * @return the created organization object
  */
 function createOrg(reqUser, newOrgData) {
   return new Promise((resolve, reject) => {
@@ -256,7 +258,8 @@ function createOrg(reqUser, newOrgData) {
  * @param {User} reqUser - The object containing the  requesting user.
  * @param {String} organizationID - The organization ID.
  * @param {Object} orgUpdate - An object containing updated Organization data
- * @return the updated organization object
+ * @return {Promise} resolve - updated organization object
+ *                    reject - error
  *
  * @example
  * updateOrg('josh', {mbee-sw})
@@ -375,7 +378,8 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  * @param {User} reqUser - The object containing the  requesting user.
  * @param {String} organizationID - The ID of the org being deleted.
  * @param {Object} options - Contains the list of delete options.
- * @return the removed organization object
+ * @return {Promise} resolve - removed organization object
+ *                    reject - error
  *
  * @example
  * removeOrg('josh', {mbee-sw}, {soft: false})
@@ -457,10 +461,11 @@ function removeOrg(reqUser, organizationID, options) {
  * @description This function does the actual deletion or updating on an org.
  *   It was written to help clean up some code in the removeOrg function.
  *
- * @param {User} user  The object containing the requesting user.
- * @param {String} orgID  The organization ID.
- * @param {Boolean} softDelete  The flag indicating whether or not to soft delete.
- * @return the organization object
+ * @param {User} user - The object containing the requesting user.
+ * @param {String} orgID - The organization ID.
+ * @param {Boolean} softDelete - The flag indicating whether or not to soft delete.
+ * @return {Promise} resolve - organization object
+ *                    reject - error
  *
  * @example
  * removeOrgHelper(Josh, 'mbee', true)
@@ -508,8 +513,8 @@ function removeOrgHelper(user, orgID, softDelete) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} searchedUsername - The username to find permissions for.
  * @param {string} organizationID - The ID of the organization
- *
- * @returns member permissions object of on org
+ * @returns {Promise} resolve - member permissions object of on org
+ *                    reject - error
  * {
  *   username: {
  *     read: boolean,
@@ -547,12 +552,12 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
 /**
  * @description This function sets permissions for a user on an org
  *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The ID of the org being deleted.
- * @param {User} searchedUsername  The object containing the user whose roles are to be changed.
- * @param {String} role  The new role for the user.
- *
- * @returns The updated organization object
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The ID of the org being deleted.
+ * @param {User} searchedUsername - The object containing the user whose roles are to be changed.
+ * @param {String} role - The new role for the user.
+ * @returns {Promise} resolve - updated organization object
+ *                    reject - error
  *
  * @example
  * setPermissions(Josh, Austin, 'mbee', 'write')
@@ -664,10 +669,10 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
 /**
  * @description This function returns all user permissions of an org.
  *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The ID of the org being deleted.
- *
- * @return An object containing users permissions
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The ID of the org being deleted.
+ * @return {Promise} resolve - object containing users permissions
+ *                    reject - an error
  * {
  *   username1: {
  *     read: boolean,

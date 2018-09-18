@@ -105,7 +105,7 @@ function notImplemented(req, res) {
  * @description Generates the Swagger specification based on the Swagger JSDoc
  * in the API routes file.
  *
- * @return swaggerJS object
+ * @return {Object} swaggerJS object
  */
 function swaggerSpec() {
   return swaggerJSDoc({
@@ -128,9 +128,9 @@ function swaggerSpec() {
  *
  * @description Returns the swagger JSON specification.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with swagger JSON
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with swagger JSON
  */
 function swaggerJSON(req, res) {
   // Return swagger specification
@@ -143,9 +143,9 @@ function swaggerJSON(req, res) {
  *
  * @description Returns the login token after AuthController.doLogin().
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with session token
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with session token
  */
 function login(req, res) {
   res.header('Content-Type', 'application/json');
@@ -157,9 +157,9 @@ function login(req, res) {
  *
  * @description Returns 200 status. Used to confirm API is up and running.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with 200 status code
  */
 function test(req, res) {
   res.header('Content-Type', 'application/json');
@@ -171,9 +171,9 @@ function test(req, res) {
  *
  * @description Returns the version number as JSON.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with version
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with version
  */
 function version(req, res) {
   // Create version object
@@ -195,9 +195,9 @@ function version(req, res) {
  * @description Gets an array of all organizations that a user has access to.
  * Returns an empty array if the user has access to none.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with orgs' public data
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res - Response object with orgs' public data
  *
  * NOTE: All users are members of the 'default' org, should always have
  * access to at least this organization.
@@ -279,9 +279,9 @@ function deleteOrgs(req, res) {
  *
  * @description Gets an organization by its id.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with search org's public data
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with search org's public data
  */
 function getOrg(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -308,9 +308,9 @@ function getOrg(req, res) {
  * @description Takes an organization in the request body and an
  * organization ID in the URI and creates the organization.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with created org
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with created org
  */
 function postOrg(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -346,9 +346,9 @@ function postOrg(req, res) {
  * @description Updates the org specified in the URI. Takes an id in the URI and
  * updated properties of the org in the request body.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with updated org
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with updated org
  */
 function patchOrg(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -381,9 +381,9 @@ function patchOrg(req, res) {
  * @description Takes an orgid in the URI and delete options in the body and
  * deletes the corresponding organization.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with deleted org
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with deleted org
  */
 function deleteOrg(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -410,9 +410,9 @@ function deleteOrg(req, res) {
  * @description Takes an orgid and username in the URI and returns
  * an object specifying which roles the user has within the organization.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with searched org and roles
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with searched org and roles
  */
 function getOrgRole(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -440,9 +440,9 @@ function getOrgRole(req, res) {
  * @description Takes an orgid and username in the URI and updates a given
  * members role within the organization. Requires a role in the body
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with updated org
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with updated org
  *
  * NOTE: In the case of setPermissions(), setting a users role does the same
  * thing as updating a users role, thus both POST and PATCH map to this
@@ -474,9 +474,9 @@ function postOrgRole(req, res) {
  * @description Takes an orgid and username in the URI and removes a user
  * from the given org.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with updated org
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ * @return {Object} res response object with updated org
  */
 function deleteOrgRole(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -504,9 +504,9 @@ function deleteOrgRole(req, res) {
  * @description Takes an orgid in the URI and returns all members of the given
  * org and their permissions.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with roles of members on search org
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with roles of members on search org
  */
 function getAllOrgMemRoles(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -534,9 +534,9 @@ function getAllOrgMemRoles(req, res) {
  * @description Gets an array of all projects that a user has access to.
  * Returns an empty array if the user has access to none.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with projects' public data
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res - Response object with projects' public data
  */
 function getProjects(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -610,9 +610,9 @@ function deleteProjects(req, res) {
  *
  * @description Gets a project by its project.id, and org.id.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with search project
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ * @return {Object} res response object with search project
  */
 function getProject(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -639,9 +639,9 @@ function getProject(req, res) {
  * @description Takes an organization ID and project ID in the URI along with
  * the request body to create the project.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with created project
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with created project
  */
 function postProject(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -686,9 +686,9 @@ function postProject(req, res) {
  * @description Updates the project specified in the URI. Takes an org id and
  * project id in the URI and updated properties of the project in the request body.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with updated project
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ * @return {Object} res response object with updated project
  */
 function patchProject(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -715,9 +715,9 @@ function patchProject(req, res) {
  * @description Takes an orgid and projectid in the URI along with delete
  * options in the body and deletes the corresponding project.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with deleted project
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ * @return {Object} res response object with deleted project
  */
 function deleteProject(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -744,9 +744,9 @@ function deleteProject(req, res) {
  * @description Takes an orgid in the URI and returns all
  * members of a given project and their permissions.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with roles of members in a project
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ * @return {Object} res response object with roles of members in a project
  */
 function getAllProjMemRoles(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -774,9 +774,9 @@ function getAllProjMemRoles(req, res) {
  * an object specifying which roles the user has within the project.
  * // TODO: Move findUser to setPermissions() in the project-controller (MBX-426)
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with project member roles
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with project member roles
  */
 function getProjMemRole(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -805,9 +805,9 @@ function getProjMemRole(req, res) {
  * @description Takes an orgid, projectid, and username in the URI and updates a
  * given members role within the project. Requires a role in the body.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with updated project
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with updated project
  *
  * NOTE: In the case of setPermissions(), setting a users role does the same
  * thing as updating a users role, thus both POST and PATCH map to this
@@ -841,9 +841,9 @@ function postProjectRole(req, res) {
  * @description Takes a projectid, orgid and username in the URI and removes a
  * user from the given project.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with updated project
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with updated project
  */
 function deleteProjectRole(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -874,9 +874,9 @@ function deleteProjectRole(req, res) {
  * @description Gets an array of all users in MBEE.
  * NOTE: Admin only.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with users' public data
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with users' public data
  */
 function getUsers(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -908,9 +908,9 @@ function getUsers(req, res) {
  *
  * @description Gets user by its username.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with search user's public data
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with search user's public data
  */
 function getUser(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -936,9 +936,9 @@ function getUser(req, res) {
  *
  * @description Creates a new user.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with created user
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with created user
  */
 function postUser(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -971,9 +971,9 @@ function postUser(req, res) {
  * @description Updates the user specified in the URI. Takes a username in the
  * URI and updated properties of the user in the request body.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with updated user
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with updated user
  */
 function patchUser(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -999,9 +999,9 @@ function patchUser(req, res) {
  * @description Takes a username in the URI along with delete options in the
  * body and deletes the corresponding user.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with deleted user
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with deleted user
  */
 function deleteUser(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1027,8 +1027,8 @@ function deleteUser(req, res) {
  *
  * @description Returns the public information of the currently logged in user.
  *
- * @param req request express object
- * @param res response express object
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
  * @return res response object with user's public data
  */
 function whoami(req, res) {
@@ -1050,9 +1050,9 @@ function whoami(req, res) {
  * @description Takes an orgid and projectid in the URI and returns all elements
  * of the project.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with elements
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with elements
  */
 function getElements(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1078,9 +1078,9 @@ function getElements(req, res) {
  *
  * @description Gets an element by its element.id, project.id, and org.id.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with searched element
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with searched element
  */
 function getElement(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1108,9 +1108,9 @@ function getElement(req, res) {
  * @description Takes an organization ID, project ID, and element ID in the URI
  * along with the request body to create the elements.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with created element
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with created element
  */
 function postElement(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1138,9 +1138,9 @@ function postElement(req, res) {
  * project id, and element id in the URI and updated properties of the element
  * in the request body.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with updated element
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with updated element
  */
 function patchElement(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1169,9 +1169,9 @@ function patchElement(req, res) {
  * @description Takes an orgid, projectid, elementid in the URI along with delete
  * options in the body and deletes the corresponding element.
  *
- * @param req request express object
- * @param res response express object
- * @return res response object with deleted element
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with deleted element
  */
 function deleteElement(req, res) {
   // Sanity Check: there should always be a user in the request
