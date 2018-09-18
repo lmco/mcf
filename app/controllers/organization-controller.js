@@ -632,8 +632,6 @@ function findAllPermissions(reqUser, organizationID) {
   return new Promise((resolve, reject) => {
     // Check reqUser is Admin and parameters are valid.
     try {
-      // TODO: MBX-435 This should also include organization admins, not just site wide admin
-      utils.assertAdmin(reqUser);
       utils.assertType([organizationID], 'string');
     }
     catch (error) {
