@@ -222,7 +222,7 @@ const PackageSchema = new mongoose.Schema({
 ElementSchema.pre('find', function(next) {
   this.populate('project');
   next();
-})
+});
 
 /**
  * @description Pre-save actions.
@@ -262,7 +262,7 @@ ElementSchema.methods.getValidTypes = function() {
 
 ElementSchema.statics.getValidTypes = function() {
   return ElementSchema.methods.getValidTypes();
-}
+};
 /* ------------------------------( Models )---------------------------------- */
 
 const Element = mongoose.model('Element', ElementSchema);
