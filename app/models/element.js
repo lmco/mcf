@@ -217,6 +217,15 @@ const PackageSchema = new mongoose.Schema({
 /* --------------------------( Element Middleware )-------------------------- */
 
 /**
+ * @description Pre-find actions
+ * @memberOf ElementSchema
+ */
+ElementSchema.pre('find', function(next) {
+  this.populate('project');
+  next();
+});
+
+/**
  * @description Pre-save actions.
  * @memberof ElementSchema
  */
