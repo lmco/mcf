@@ -185,7 +185,7 @@ function findOrgsQuery(orgQuery) {
  *
  * @param {User} reqUser - The object containing the user of the requesting user.
  * @param {Object} newOrgData - Object containing new org data.
- * 
+ *
  * @return {Object} created organization object
  *
  * @example
@@ -261,7 +261,7 @@ function createOrg(reqUser, newOrgData) {
  * @param {User} reqUser - The object containing the  requesting user.
  * @param {String} organizationID - The organization ID.
  * @param {Object} orgUpdate - An object containing updated Organization data
- * 
+ *
  * @return {Object} updated org
  *
  * @example
@@ -381,7 +381,7 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  * @param {User} reqUser - The object containing the  requesting user.
  * @param {String} organizationID - The ID of the org being deleted.
  * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
- * 
+ *
  * @return {Object} removed organization object
  *
  * @example
@@ -495,7 +495,7 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
  * @param {String} organizationID - The ID of the org being deleted.
  * @param {User} searchedUsername - The object containing the user whose roles are to be changed.
  * @param {String} role - The new role for the user.
- * 
+ *
  * @returns {Object} The updated Organization object
  *
  * @example
@@ -610,7 +610,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The ID of the org being deleted.
- * 
+ *
  * @return {Object} An object containing users permissions
  * {
  *   username1: {

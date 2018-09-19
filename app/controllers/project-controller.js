@@ -43,6 +43,7 @@ const assert = require('assert');
 // MBEE modules
 const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
+const ElementController = M.require('controllers.element-controller');
 const Project = M.require('models.project');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
@@ -132,7 +133,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  *   M.log.error(error);
  * });
  */
-function removeProjects(reqUser, organizationID, options) {
+function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Ensure parameters of correctly formatted
     try {
