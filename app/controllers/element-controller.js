@@ -140,9 +140,9 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Ensure parameters are correctly formatted
     try {
-      // Check input parms are valid type
+      // Check input params are valid type
       assert.ok(Array.isArray(arrProjects) , 'Project Array is not an array.');
-      assert.ok(typeof hardDeleted === 'boolean', 'Hard deleted flag is not a boolean.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
       return reject(new errors.CustomError(error.message, 400, 'error'));
