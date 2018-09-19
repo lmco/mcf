@@ -56,8 +56,13 @@ function loadPlugins() {
   const pluginName = M.config.server.plugins.plugins.map(plugin => plugin.name);
 
   files.forEach((f) => {
+    // Skip routes.js
+    if (protectedFileNames.includes(f)) {
+      continue;
+    }
+
     // Removes old plugins
-    if (!protectedFileNames.includes(f) && !pluginName.includes(f)) {
+    if (!pluginName.includes(f)) {
       M.log.info(`Removing plugin '${f}' ...`);
       const c = `rm -rf ${__dirname}/${f}`;
       const stdout = execSync(c);
@@ -65,7 +70,7 @@ function loadPlugins() {
     }
     // If package.json doesn't exist, it is not a valid plugin. Skip it.
     const pluginPath = path.join(__dirname, f);
-    if (!protectedFileNames.includes(f) && !fs.existsSync(path.join(pluginPath, 'package.json'))) {
+    if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
       M.log.info(`Removing invalid plugin '${f}' ...`);
       const c = `rm -rf ${__dirname}/${f}`;
       const stdout = execSync(c);
