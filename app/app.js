@@ -137,7 +137,8 @@ function initApp() {
   });
 
   // Create default org if it doesn't exist
-  // TODO: Convert everything into promise with create admin and create org. Potential async problem MBX-452
+  // TODO: Convert everything into promise with create admin
+  // TODO: and create org. Potential async problem MBX-452
   Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     if (err) {
