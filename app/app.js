@@ -15,12 +15,14 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description Defines the MBEE App. This allows the app to be imported by other modules.
- * The app is imported by the mbee.js script which then runs the server.
+ * @description Defines the MBEE App. Allows MBEE app to be imported by other modules.
+ * This app is imported by start.js script which then runs the server.
  */
 
-// Load node modules
+// Node modules
 const path = require('path');
+
+// NPM modules
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const session = require('express-session');
@@ -29,7 +31,7 @@ const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
 const flash = require('express-flash');
 
-// Load MBEE modules
+// MBEE modules
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
@@ -47,34 +49,32 @@ db.connect()
   process.exit(1);
 });
 
-// Initialize express() as app and export the object
+// Initialize express app and export the object
 const app = express();
 module.exports = app;
 
 /**
- * Initializes the application and exports the app.js
+ * @description Initializes the application and exports app.js
  */
 function initApp() {
   // Configure the static/public directory
-  const staticDir = path.join(__dirname, '..', 'build/public');
+  const staticDir = path.join(__dirname, '..', 'build', 'public');
   app.use(express.static(staticDir));
 
   // Allows receiving JSON in the request body
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
-  // Allow full trace of IP address using LM Proxy
+  // Trust proxy for IP logging
   app.enable('trust proxy');
 
-  // Configures views/templates
+  // Configures ejs views/templates
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
   app.use(expressLayouts);
 
-  /* Configure sessions */
-  // Convenient conversions from ms to other times units
+  // Configure sessions
   const units = utils.timeConversions[M.config.auth.session.units];
-  // Defines session behavior
   app.use(session({
     name: 'SESSION_ID',
     secret: M.config.server.secret,
@@ -119,14 +119,17 @@ function initApp() {
     if (user === null) {
       // No user found, create local admin
       const adminUserData = {
-        username: 'admin',
-        password: 'Admin12345',
+        username: M.config.server.defaultAdminUsername,
+        password: M.config.server.defaultAdminPassword,
         provider: 'local',
         admin: true
       };
 
       // Create user via controller
       UserController.createUser({ admin: true }, adminUserData)
+      .then(() => {
+        M.log.info('Default admin created');
+      })
       .catch((err2) => {
         throw (err2);
       });
@@ -134,6 +137,7 @@ function initApp() {
   });
 
   // Create default org if it doesn't exist
+  // TODO: Convert everything into promise with create admin and create org. Potential async problem MBX-452
   Organization.findOne({ id: 'default' })
   .exec((err, org) => {
     if (err) {
@@ -143,8 +147,8 @@ function initApp() {
     // If the default org does not exist, create it
     if (org === null) {
       const defaultOrg = new Organization({
-        id: 'default',
-        name: 'default'
+        id: M.config.server.defaultOrganizationId,
+        name: M.config.server.defaultOrganizationName
       });
       defaultOrg.save((saveOrgErr) => {
         if (saveOrgErr) {
@@ -163,7 +167,10 @@ function initApp() {
         Object.keys(users).forEach((user) => {
           newList.push(users[user]._id);
         });
+
+        // Give users read/write access
         org.permissions.read = newList;
+        org.permissions.write = newList;
 
         // Save the updated org
         org.save((saveOrgErr) => {
