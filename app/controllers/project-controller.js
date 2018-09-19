@@ -457,8 +457,8 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       for (let i = 0; i < projUpdateFields.length; i++) {
         const updateField = projUpdateFields[i];
 
-        // if parameter is of type object, stringify and compare
-        if (utils.deepEqual(project[updateField], projectUpdated[updateField])) {
+        // Check if updated field is equal to the original field
+        if (utils.deepEqual(project.toJSON()[updateField], projectUpdated[updateField])) {
           continue;
         }
 
@@ -470,7 +470,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
         // Updates each individual tag that was provided.
         if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
-          if (typeof projectUpdated[updateField] === 'object') {
+          if (typeof projectUpdated[updateField] !== 'object') {
             return reject(new errors.CustomError(`${updateField} must be an object`, 400));
           }
 

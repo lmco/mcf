@@ -106,7 +106,8 @@ const ProjectSchema = new mongoose.Schema({
     }
   },
   custom: {
-    type: mongoose.Schema.Types.Mixed
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   },
   visibility: {
     type: String,

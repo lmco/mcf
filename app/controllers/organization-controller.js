@@ -322,19 +322,12 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
           return reject(new errors.CustomError(`Organization does not contain field ${updateField}.`, 400));
         }
 
-        // Check if updated value contains object
-        if (utils.checkType([orgUpdate[updateField]], 'object')) {
-          // updated field contains object, check if updated value matches existing value
-          if (utils.deepEqual((org[updateField]), orgUpdate[updateField])) {
-            // Updated value matches existing value, continue to next loop iteration
-            continue;
-          }
-        }
-        // Check if update value matches existing value
-        if (org[updateField] === orgUpdate[updateField]) {
-          // Update value matches existing value, continue to next loop iteration
+        // Check if updated field is equal to the original field
+        if (utils.deepEqual(org.toJSON()[updateField], orgUpdate[updateField])) {
+          // Updated value matches existing value, continue to next loop iteration
           continue;
         }
+
         // Check if updateField is invalid
         if (!validUpdateFields.includes(updateField)) {
           // updateField is invalid, reject error

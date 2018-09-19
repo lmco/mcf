@@ -141,7 +141,7 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
     // Ensure parameters are correctly formatted
     try {
       // Check input params are valid type
-      assert.ok(Array.isArray(arrProjects) , 'Project Array is not an array.');
+      assert.ok(Array.isArray(arrProjects), 'Project Array is not an array.');
       assert.ok(typeof hardDelete === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
@@ -638,7 +638,6 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       // Get a list of validators
       const elementValidators = validators.element;
       // Allocate update val and field before for loop
-      let updateVal = '';
       let updateField = '';
 
       // Check if passed in object contains fields to be updated
@@ -649,16 +648,11 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
           // Original project does NOT contain updatedField, reject error
           return reject(new errors.CustomError(`Element does not contain field ${updateField}.`, 400));
         }
-        // if parameter is of type object, stringify and compare
-        if (utils.checkType([elementUpdate[updateField]], 'object')) {
-          if (utils.deepEqual(element[updateField], elementUpdate[updateField])) {
-            continue;
-          }
-        }
-        // if parameter is the same don't bother updating it
-        if (element[updateField] === elementUpdate[updateField]) {
+        // Check if updated field is equal to the original field
+        if (utils.deepEqual(element.toJSON()[updateField], elementUpdate[updateField])) {
           continue;
         }
+
         // Error Check - Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
           return reject(new errors.CustomError(`Element property [${updateField}] cannot be changed.`, 403));

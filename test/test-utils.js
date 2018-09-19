@@ -35,6 +35,7 @@ const testData = require(path.join(M.root, 'test', 'data.json'));
  * @description Helper function to create test non-admin user for
  * MBEE tests.
  */
+// TODO: Add user to default org via org model, and use user model to create user (MBX-449)
 module.exports.createNonadminUser = function(userData = null) {
   return new Promise((resolve, reject) => {
     // Check any admin exist
@@ -77,6 +78,7 @@ module.exports.createNonadminUser = function(userData = null) {
  * @description Helper function to create test admin user for
  * MBEE tests.
  */
+// TODO: Add user to default org via org model, and use user model to create user (MBX-449)
 module.exports.createAdminUser = function() {
   return new Promise((resolve, reject) => {
     // Check any admin exist

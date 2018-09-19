@@ -122,7 +122,8 @@ const ElementSchema = new mongoose.Schema({
     type: String
   },
   custom: {
-    type: mongoose.Schema.Types.Mixed
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   },
   createdOn: {
     type: Date,
