@@ -33,6 +33,13 @@ const utils = M.require('lib.utils');
  *
  * Note: Uses username/password and configuration in config file.
  *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @param {String} username - Username to authenticate
+ * @param {String} password - Password to authenticate
+ * @returns {Promise} resolve - authenticated user object
+ *                    reject - an error
+ *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
  *   .then(user => {
@@ -41,12 +48,6 @@ const utils = M.require('lib.utils');
  *   .catch(err => {
  *     console.log(err);
  *   })
- *
- * @param req request express object
- * @param res response express object
- * @param {String} username to authenticate
- * @param {String} password to authenticate
- * @returns Promise authenticated user as the User object or an error.
  */
 module.exports.handleBasicAuth = function(req, res, username, password) {
   return new Promise((resolve, reject) => {
@@ -82,6 +83,12 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  * @description This function implements handleTokenAuth() in lib/auth.js.
  * Authenticates user with passed in token.
  *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @param {String} token - User authentication token, encrypted
+ * @returns {Promise} resolve - local user object
+ *                    reject - an error
+ *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
  *   .then(user => {
@@ -90,11 +97,6 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  *   .catch(err => {
  *     console.log(err);
  *   })
- *
- * @param req request express object
- * @param res response express object
- * @param token user authentication token, encrypted
- * @returns Promise local user object or an error.
  */
 module.exports.handleTokenAuth = function(req, res, token) {
   return new Promise((resolve, reject) => {
@@ -144,9 +146,9 @@ module.exports.handleTokenAuth = function(req, res, token) {
  * This function generates the session token for user login.
  * Upon successful login, generate token and set to session
  *
- * @param req request express object
- * @param res response express object
- * @param next callback to continue express authentication
+ * @param {Object} req - Request express object
+ * @param {Object} res - response express object
+ * @param {callback} next - Callback to express authentication
  */
 module.exports.doLogin = function(req, res, next) {
   // Compute token expiration time

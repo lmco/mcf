@@ -22,18 +22,9 @@
  * that provides functions implementing controller logic and behavior.
  */
 
-// Load MBEE modules
-const Organization = M.require('models.organization');
-const utils = M.require('lib.utils');
-const sani = M.require('lib.sanitization');
-const errors = M.require('lib.errors');
-
-// eslint consistent-return rule is disabled for this file.
-// The rule may not fit controller-related functions as
-// returns are inconsistent.
-/* eslint-disable consistent-return */
-
 // Expose `organization controller`
+// Note: The export is being done before the import to solve the issues of
+// circular refrences between controllers.
 module.exports = {
   findOrgs,
   findOrg,
@@ -46,8 +37,24 @@ module.exports = {
   findAllPermissions
 };
 
+// Load MBEE modules
+const ProjController = M.require('controllers.project-controller');
+const Organization = M.require('models.organization');
+const utils = M.require('lib.utils');
+const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
+
+// eslint consistent-return rule is disabled for this file.
+// The rule may not fit controller-related functions as
+// returns are inconsistent.
+/* eslint-disable consistent-return */
+
 /**
  * @description This function finds all organizations a user belongs to.
+ *
+ * @param {User} user - The user whose organizations to find
+ * @return {Promise} resolve - Array of found organization objects
+ *                    reject - error
  *
  * @example
  * findOrgs(username)
@@ -58,7 +65,6 @@ module.exports = {
  *   console.log(err);
  * })
  *
- * @param {User} user - The user whose organizations to find
  */
 function findOrgs(user) {
   return new Promise((resolve, reject) => {
@@ -74,7 +80,14 @@ function findOrgs(user) {
  * @description This function takes a user object and orgID and returns the
  * organization data.
  *
- * @example
+ * @param {User} reqUser - The requesting user object.
+ * @param {String} organizationID - The string of the org ID.
+ * @param {Boolean} softDeleted - An optional flag that allows users to
+ *  search for soft deleted projects as well.
+ * @return {Promise} resolve - searched organization object
+ *                    reject - error
+ *
+ *  @example
  * findOrg('josh', 'mbee-sw')
  * .then(function(org) {
  *   // do something with the org
@@ -82,12 +95,6 @@ function findOrgs(user) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The requesting user object.
- * @param {String} organizationID - The string of the org ID.
- * @param {Boolean} softDeleted - An optional flag that allows users to
- *  search for soft deleted projects as well.
  */
 function findOrg(reqUser, organizationID, softDeleted = false) {
   return new Promise((resolve, reject) => {
@@ -143,6 +150,10 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
 /**
  * @description Find orgs by a database query.
  *
+ * @param {Object} orgQuery - The query to be made to the database
+ * @return {Promise} resolve - organization object
+ *                   reject - error
+ *
  * @example
  * findOrgsQuery({ id: 'org' })
  * .then(function(org) {
@@ -151,9 +162,6 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {Object} orgQuery - The query to be made to the database
  */
 function findOrgsQuery(orgQuery) {
   return new Promise((resolve, reject) => {
@@ -175,6 +183,11 @@ function findOrgsQuery(orgQuery) {
  * @description This function takes a user and dictionary containing
  *   the org data creates a new organization.
  *
+ * @param {User} reqUser - The object containing the user of the requesting user.
+ * @param {Object} newOrgData - Object containing new org data.
+ *
+ * @return {Object} created organization object
+ *
  * @example
  * createOrg('josh', {mbee-sw})
  * .then(function(org) {
@@ -183,10 +196,6 @@ function findOrgsQuery(orgQuery) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The object containing the user of the requesting user.
- * @param {Object} newOrgData - Object containing new org data..
  */
 function createOrg(reqUser, newOrgData) {
   return new Promise((resolve, reject) => {
@@ -212,7 +221,7 @@ function createOrg(reqUser, newOrgData) {
     const orgName = sani.html(newOrgData.name);
 
     // Check if org already exists
-    findOrgsQuery({ id: orgID})
+    findOrgsQuery({ id: orgID })
     .then((foundOrg) => {
       // If org already exists, reject
       if (foundOrg.length > 0) {
@@ -249,6 +258,12 @@ function createOrg(reqUser, newOrgData) {
  * @description This function takes a user object, organization ID, and an
  * object containing updated fields and updates an existing organization.
  *
+ * @param {User} reqUser - The object containing the  requesting user.
+ * @param {String} organizationID - The organization ID.
+ * @param {Object} orgUpdate - An object containing updated Organization data
+ *
+ * @return {Object} updated org
+ *
  * @example
  * updateOrg('josh', {mbee-sw})
  * .then(function(org) {
@@ -257,11 +272,6 @@ function createOrg(reqUser, newOrgData) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The object containing the  requesting user.
- * @param {String} organizationID - The organization ID.
- * @param {Object} orgUpdate - An object containing updated Organization data
  */
 function updateOrg(reqUser, organizationID, orgUpdate) {
   return new Promise((resolve, reject) => {
@@ -281,21 +291,19 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
       orgUpdate = orgUpdate.toJSON(); // eslint-disable-line no-param-reassign
     }
 
-    // Sanitize input argument
-    const orgID = sani.html(organizationID);
-
     // Check if orgID is default
-    if (orgID === 'default') {
+    if (organizationID === 'default') {
       // orgID is default, reject error
       return reject(new errors.CustomError('Cannot update the default org.', 403));
     }
 
     // Find organization
-    findOrg(reqUser, orgID)
+    // Note: organizationID is sanitized in findOrg()
+    findOrg(reqUser, organizationID)
     .then((org) => {
-      // Check reqUser does NOT have read permissions or NOT global admin
+      // Check reqUser does NOT admin permissions or NOT global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
-        // reqUser does NOT have read permissions or NOT global admin, reject error
+        // reqUser does NOT have admin permissions or NOT global admin, reject error
         return reject(new errors.CustomError('User does not have permissions.', 401));
       }
 
@@ -314,19 +322,12 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
           return reject(new errors.CustomError(`Organization does not contain field ${updateField}.`, 400));
         }
 
-        // Check if updated value contains object
-        if (utils.checkType([orgUpdate[updateField]], 'object')) {
-          // updated field contains object, check if updated value matches existing value
-          if (JSON.stringify(org[updateField]) === JSON.stringify(orgUpdate[updateField])) {
-            // Updated value matches existing value, continue to next loop iteration
-            continue;
-          }
-        }
-        // Check if update value matches existing value
-        if (org[updateField] === orgUpdate[updateField]) {
-          // Update value matches existing value, continue to next loop iteration
+        // Check if updated field is equal to the original field
+        if (utils.deepEqual(org.toJSON()[updateField], orgUpdate[updateField])) {
+          // Updated value matches existing value, continue to next loop iteration
           continue;
         }
+
         // Check if updateField is invalid
         if (!validUpdateFields.includes(updateField)) {
           // updateField is invalid, reject error
@@ -351,7 +352,7 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
       }
 
       // Save updated org
-      return org.save(org);
+      return org.save();
     })
     .then(updatedOrg => resolve(updatedOrg))
     .catch((error) => {
@@ -368,6 +369,12 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  * @description This function takes a user object, organization ID, and an
  * optional flag for soft or hard delete and deletes an organization.
  *
+ * @param {User} reqUser - The object containing the  requesting user.
+ * @param {String} organizationID - The ID of the org being deleted.
+ * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
+ *
+ * @return {Object} removed organization object
+ *
  * @example
  * removeOrg('josh', {mbee-sw}, {soft: false})
  * .then(function(org) {
@@ -376,123 +383,55 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The object containing the  requesting user.
- * @param {String} organizationID - The ID of the org being deleted.
- * @param {Object} options - Contains the list of delete options.
  */
 // TODO: MBX-434 discuss if options should become a boolean for soft or hard delete.
 // TODO: MBX-434 Come back and review function following Austin and Phill working out
 // Project and Element removal.
 // And do appropriate checks for either implementations.
-function removeOrg(reqUser, organizationID, options) {
-  // Loading ProjController function wide because the project controller loads
-  // the org controller globally. Both files cannot load each other globally.
-  const ProjController = M.require('controllers.project-controller');
-
+function removeOrg(reqUser, organizationID, hardDelete = false) {
   return new Promise((resolve, reject) => {
-    // Initialize softDelete to default true
-    const softDelete = true;
-    // Check admin and parameter is valid
+    // Check valid param type
     try {
       utils.assertAdmin(reqUser);
       utils.assertType([organizationID], 'string');
+      utils.assertType([hardDelete], 'boolean');
     }
     catch (error) {
       return reject(error);
     }
 
-    // Sanitize organizationID
-    const orgID = sani.html(organizationID);
-
     // Check if orgID is default
-    if (orgID === 'default') {
+    if (organizationID === 'default') {
       // orgID is default, reject error.
       return reject(new errors.CustomError('The default organization cannot be deleted.', 403));
     }
 
-    // Find organization
-    findOrg(reqUser, orgID, true)
-    .then((foundOrg) => new Promise((res, rej) => {
-      // Check if NOT softDelete and org NOT soft deleted
-      if (!softDelete && !foundOrg.deleted) {
-        // Remove the org
-        removeOrg(reqUser, orgID, { soft: true })
-        .then((retOrg) => res(retOrg))
-        .catch((softDeleteError) => rej(softDeleteError));
+    // Find organization to ensure it exists
+    findOrg(reqUser, organizationID, true)
+    .then((org) => {
+      // Hard delete
+      if (hardDelete) {
+        Organization.deleteOne({ id: org.id })
+        // Delete all projects in that org
+        .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
+        .then(() => resolve(org))
+        .catch((error) => reject(error));
       }
+      // Soft delete
       else {
-        // Either the org was already soft deleted or we only want it soft deleted.
-        return res();
-      }
-    }))
-    // Remove the project and elements first
-    .then(() => ProjController.removeProjects(reqUser, orgID, options))
-    // Actually remove the org
-    .then(() => removeOrgHelper(reqUser, orgID, softDelete))
-    .then((retOrg) => resolve(retOrg))
-    .catch((deleteErr) => {
-      // There are simply no projects associated with this org to delete
-      if (deleteErr.description === 'No projects found.') {
-        removeOrgHelper(reqUser, orgID, softDelete)
-        .then((retOrg) => resolve(retOrg))
-        .catch((err) => reject(err));
-      }
-      else {
-        // If there is some other issue in deleting the projects.
-        return reject(deleteErr);
-      }
-    });
-  });
-}
-
-// TODO: MBX-434 Come back and review function following Austin and Phill working out
-// Project and Element removal.
-/**
- * @description This function does the actual deletion or updating on an org.
- *   It was written to help clean up some code in the removeOrg function.
- *
- * @example
- * removeOrgHelper(Josh, 'mbee', true)
- * .then(function(org) {
- *  // Get the users roles
- * })
- * .catch(function(error) {
- *  M.log.error(error);
- * });
- *
- *
- * @param {User} user  The object containing the requesting user.
- * @param {String} orgID  The organization ID.
- * @param {Boolean} softDelete  The flag indicating whether or not to soft delete.
- */
-function removeOrgHelper(user, orgID, softDelete) {
-  return new Promise((resolve, reject) => {
-    if (softDelete) {
-      findOrg(user, orgID)
-      .then((org) => {
-        org.deleted = true;
-        org.save((saveErr) => {
-          if (saveErr) {
-            // If error occurs, return it
-            return reject(new errors.CustomError('Save failed.'));
-          }
+        Organization.updateOne({ id: org.id }, { deleted: true })
+        // Soft-delete all projects in that org
+        .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
+        .then(() => {
+          // Set the returned org deleted field to true since updateOne()
+          // returns a query not the updated org.
+          org.deleted = true;
           return resolve(org);
-        });
-      })
-      .catch(error => reject(error));
-    }
-    else {
-      Organization.findOneAndRemove({ id: orgID })
-      .populate()
-      .exec((err, org) => {
-        if (err) {
-          return reject(new errors.CustomError('Find failed.'));
-        }
-        return resolve(org);
-      });
-    }
+        })
+        .catch((error) => reject(error));
+      }
+    })
+    .catch((error) => reject(error));
   });
 }
 
@@ -505,12 +444,12 @@ function removeOrgHelper(user, orgID, softDelete) {
  * @param {String} searchedUsername - The username to find permissions for.
  * @param {string} organizationID - The ID of the organization
  *
- * @returns
+ * @returns {Object}
  * {
  *   username: {
  *     read: boolean,
  *     write: boolean,
- *     admin: boolean,
+ *     admin: boolean
  *   }
  * }
  *
@@ -543,12 +482,12 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
 /**
  * @description This function sets permissions for a user on an org
  *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The ID of the org being deleted.
- * @param {User} searchedUsername  The object containing the user whose roles are to be changed.
- * @param {String} role  The new role for the user.
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The ID of the org being deleted.
+ * @param {User} searchedUsername - The object containing the user whose roles are to be changed.
+ * @param {String} role - The new role for the user.
  *
- * @returns The updated Organization object
+ * @returns {Object} The updated Organization object
  *
  * @example
  * setPermissions(Josh, Austin, 'mbee', 'write')
@@ -660,10 +599,10 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
 /**
  * @description This function returns all user permissions of an org.
  *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The ID of the org being deleted.
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The ID of the org being deleted.
  *
- * @return An object containing users permissions
+ * @return {Object} An object containing users permissions
  * {
  *   username1: {
  *     read: boolean,
@@ -691,8 +630,6 @@ function findAllPermissions(reqUser, organizationID) {
   return new Promise((resolve, reject) => {
     // Check reqUser is Admin and parameters are valid.
     try {
-      // TODO: MBX-435 This should also include organization admins, not just site wide admin
-      utils.assertAdmin(reqUser);
       utils.assertType([organizationID], 'string');
     }
     catch (error) {
