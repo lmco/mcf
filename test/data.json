@@ -80,7 +80,7 @@
       "fname": "Mr Wade"
     },
     {
-      "username": "secondAdminUser",
+      "username": "secondadminuser",
       "password": "password!123",
       "fname": "Second",
       "preferredName": "Admin User",

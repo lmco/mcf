@@ -434,8 +434,8 @@ function findProjects(done) {
     const orgData2 = testData.orgs[9];
     OrgController.createOrg(newUser, orgData2)
     .then(() => {
-      const projData3 = testData.project[18];
-      const projData4 = testData.project[19];
+      const projData3 = testData.projects[18];
+      const projData4 = testData.projects[19];
       ProjController.createProject(adminUser2, projData3);
       ProjController.createProject(adminUser2, projData4)
       .then(() => {
@@ -446,7 +446,8 @@ function findProjects(done) {
         .then((projs) => {
           // Verify project fields
           chai.expect(projs.length).to.equal(2);
-          console.log(projs);
+          OrgController.removeOrg(adminUser2, testData.orgs[9].id, true);
+          UserController.removeUser(adminUser, testData.users[12].username);
           done();
         })
         .catch((err) => {
@@ -467,9 +468,9 @@ function findProjects(done) {
       done();
     });
   })
-  .catch((err) => {
+  .catch((error4) => {
     // Expect no error
-    chai.expect(error.message).to.equal(null);
+    chai.expect(error4.message).to.equal(null);
     done();
   });
 }
