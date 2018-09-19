@@ -253,7 +253,7 @@ ElementSchema.methods.getValidTypes = function() {
 
 ElementSchema.statics.getValidTypes = function() {
   return ElementSchema.methods.getValidTypes();
-}
+};
 /* ------------------------------( Models )---------------------------------- */
 
 const Element = mongoose.model('Element', ElementSchema);

@@ -519,7 +519,6 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
     }
 
     // Sanitize parameters
-    const orgID = sani.sanitize(organizationID);
     const searchedUser = sani.sanitize(searchedUsername);
 
     // Initialize foundUser
@@ -537,7 +536,8 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
         return reject(new errors.CustomError('User cannot change their own permissions.', 403));
       }
       // Find org
-      return findOrg(reqUser, orgID);
+      // Note: organizationID is satitized in findORg
+      return findOrg(reqUser, organizationID);
     })
     .then((org) => {
       // Check requesting user NOT org admin and NOT global admin

@@ -714,88 +714,86 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, permiss
     }
 
     // Sanitize input
-    const orgID = sani.html(organizationID);
-    const projID = sani.html(projectID);
     const permType = sani.html(permissionType);
-    const searchUsername = sani.html(setUsername);
 
     // Initialize setUser
     let setUser = null;
+    let updatedProject = null;
 
     // Lookup the user
-    UserController.findUser(searchUsername)
+    // Note: setUsername is sanitized in findUser()
+    UserController.findUser(setUsername)
     .then(foundUser => {
       setUser = foundUser;
+
+      // Error Check - Do not allow user to change their own permission
+      if (reqUser.username === setUser.username) {
+        return reject(new errors.CustomError('User cannot change their own permissions.', 403));
+      }
+      // Find project to set permissions on
+      // Note: organizationID and projectID are sanitized in findProject()
       return findProject(reqUser, organizationID, projectID);
     })
     .then((project) => {
-      // Check permissions
+      // Error Check - User must be admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
         return reject(new errors.CustomError('User does not have permission.', 401));
       }
 
-      // Grab permissions levels from Project schema method
+      // Get permission levels from Project schema method
       const permissionLevels = project.getPermissionLevels();
 
-      // Error Check - Make sure that a valid permissions type was passed
+      // Error Check - Make sure that a valid permission type was passed
       if (!permissionLevels.includes(permType)) {
         return reject(new errors.CustomError('Permission type not found.', 404));
       }
 
-      // Error Check - Do not user to change their own permissions
-      if (reqUser.username === setUser.username) {
-        return reject(new errors.CustomError('User cannot change their own permissions.', 403));
-      }
-
-      // Grab the index of the permission type
+      // Get index of the permission type
       const permissionLevel = permissionLevels.indexOf(permType);
-
-      // Allocate variables to be used in for loop
-      let permissionList = [];
-      const pushPullRoles = {};
 
       // loop through project permissions list to add and remove the correct permissions.
       for (let i = 1; i < permissionLevels.length; i++) {
-        // Map permission list for easy access
-        permissionList = project.permissions[permissionLevels[i]].map(u => u._id.toString());
-        // Check for push vals
+        // Initialize projectPermission list
+        let projectPermission = project.permissions[permissionLevels[i]];
+
+        // Check if i is less than permissionLevel
         if (i <= permissionLevel) {
-          if (!permissionList.includes(setUser._id.toString())) {
-            // required because mongoose does not allow a 'push' with empty parameters
-            pushPullRoles.$push = pushPullRoles.$push || {};
-            pushPullRoles.$push[`permissions.${permissionLevels[i]}`] = setUser._id.toString();
+          // Check if projectPermission does NOT contains user
+          // eslint-disable-next-line no-loop-func
+          if (!projectPermission.some(user => user.id === setUser.id)) {
+            // Add setUser to projectPermission
+            projectPermission.push(setUser);
           }
         }
-        // Check for pull vals
-        else if (permissionList.includes(setUser._id.toString())) {
-          // required because mongoose does not allow a 'pull' with empty parameters
-          pushPullRoles.$pull = pushPullRoles.$pull || {};
-          pushPullRoles.$pull[`permissions.${permissionLevels[i]}`] = setUser._id.toString();
+        else {
+          // Remove user from projectPermission
+          projectPermission = projectPermission
+          // eslint-disable-next-line no-loop-func
+          .filter(user => setUser.username === user.username);
         }
       }
 
-      // Update project
-      Project.findOneAndUpdate(
-        { uid: utils.createUID(orgID, projID) },
-        pushPullRoles,
-        (saveProjErr, projectSaved) => {
-          if (saveProjErr) {
-            return reject(new errors.CustomError('Save failed.'));
-          }
-          // Check if user has org read permissions
-          OrgController.findPermissions(reqUser, setUser.username, orgID)
-          .then((userOrgPermissions) => {
-            if (userOrgPermissions.read) {
-              return resolve(projectSaved);
-            }
-            // Update org read permissions if needed
-            return OrgController.setPermissions(reqUser, orgID, setUser.username, 'read');
-          })
-          .then(() => resolve(projectSaved))
-          .catch((findOrgPermErr) => reject(findOrgPermErr)); // Closing find org permissions
-        }
-      ); // Closing Project Update
+      // Save updated project
+      return project.save();
     })
-    .catch((findProjErr) => reject(findProjErr)); // Closing projectFind
-  }); // Closing promise
+    .then((savedProject) => {
+      // Set updatedProject for later resolve
+      updatedProject = savedProject;
+      // Check if user has org read permissions
+      return OrgController.findPermissions(reqUser, setUser.username, organizationID);
+    })
+    .then((userOrgPermissions) => {
+      // Check if user has read permissions on org
+      if (userOrgPermissions.read) {
+        // User has read permissions on org, resolve updated Project
+        return resolve(updatedProject);
+      }
+      // User does not have read permissions on org, give them read permissions
+      return OrgController.setPermissions(reqUser, organizationID, setUser.username, 'read');
+    })
+    // Resolve updated project
+    .then(() => resolve(updatedProject))
+    // Reject  error
+    .catch((error) => reject(error));
+  });
 } // Closing function

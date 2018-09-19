@@ -29,9 +29,9 @@ module.exports = {
   findElements,
   removeElement,
   removeElements,
-  updateElement,
+  updateElement
 };
-  /*
+/*
   // TODO: internal use, remove at end
   updateParent,
   findElementsQuery,
@@ -141,7 +141,7 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
     // Ensure parameters are correctly formatted
     try {
       // Check input parms are valid type
-      assert.ok(Array.isArray(arrProjects) , 'Project Array is not an array.');
+      assert.ok(Array.isArray(arrProjects), 'Project Array is not an array.');
       assert.ok(typeof hardDeleted === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
@@ -608,7 +608,6 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementDat
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
       assert.ok(typeof elementData === 'object', 'Element Data is not a object.');
-
     } // TODO: Code review stopped here 09/18/2018
     catch (error) {
       return reject(error);
