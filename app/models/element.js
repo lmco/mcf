@@ -243,6 +243,17 @@ ElementSchema.methods.getValidUpdateFields = function() {
 };
 
 
+/**
+ * @description Returns a valid element type
+ * @memberof ElementSchema
+ */
+ElementSchema.methods.getValidTypes = function() {
+  return ['Relationship', 'Block', 'Package'];
+};
+
+ElementSchema.statics.getValidTypes = function() {
+  return ElementSchema.methods.getValidTypes();
+}
 /* ------------------------------( Models )---------------------------------- */
 
 const Element = mongoose.model('Element', ElementSchema);

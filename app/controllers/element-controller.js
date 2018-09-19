@@ -19,24 +19,32 @@
  * It also provides function for interacting with elements.
  */
 
+// Expose element controller functions
+// Note: The export is being done before the import to solve the issues of
+// circular references between controllers.
 module.exports = {
-  createBlock,
+
   createElement,
-  createPackage,
-  createRelationship,
   findElement,
   findElements,
-  findElementsQuery,
   removeElement,
   removeElements,
   updateElement,
-  updateParent
 };
+  /*
+  // TODO: internal use, remove at end
+  updateParent,
+  findElementsQuery,
+  createPackage,
+  createRelationship,
+  createBlock
+*/
+
 
 // Node Modules
 const assert = require('assert');
 
-// Load MBEE modules
+// MBEE modules
 const ProjController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
 const utils = M.require('lib.utils');
@@ -44,10 +52,14 @@ const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
 const errors = M.require('lib.errors');
 
+// We are disabling the eslint consistent-return rule for this file.
+// The rule doesn't work well for many controller-related functions and
+// throws the warning in cases where it doesn't apply. For this reason, the
+// rule is disabled for this file. Be careful to avoid the issue.
+/* eslint-disable consistent-return */
 
 /**
- * @description This function takes a user, orgID, projID and optional type
- * and returns all elements attached to the project.
+ * @description This function returns all elements attached to the project.
  *
  * @example
  * findElements({Austin}, 'lockheed', 'mbee')
@@ -58,22 +70,28 @@ const errors = M.require('lib.errors');
  *   M.log.error(error);
  * });
  *
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {String} organizationID - The organization ID.
+ * @param {String} projectID - The project ID.
+ * @param {Boolean} softDeleted - A boolean value indicating whether to soft delete.
  *
- * @param {User} reqUser   The user object of the requesting user.
- * @param {String} organizationID   The organization ID.
- * @param {String} projectID   The project ID.
- * @param {Boolean} softDeleted   The optional flag to denote searching for deleted elements
+ * @return {Promise} resolve - element
+ *                   reject - error
+ * // TODO: Remove project-controller:findProject() its not needed MBX-445
  */
 function findElements(reqUser, organizationID, projectID, softDeleted = false) {
   return new Promise((resolve, reject) => {
     try {
-      utils.assertType([organizationID, projectID], 'string');
-      utils.assertType([softDeleted], 'boolean');
+      // Check input parms are valid type
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return resolve(error);
+      return reject(new errors.CustomError(error.message, 400, 'error'));
     }
 
+    // Sanitize input
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
 
@@ -99,8 +117,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
 }
 
 /**
- * @description This function takes a user, orgID, projID and a
- * list of options all removes all elements  attatched to a project.
+ * @description This function removes all elements attached to a project.
  *
  * @example
  * removeElements({Austin}, 'lockheed', 'mbee', {soft: false})
@@ -112,19 +129,23 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
  * });
  *
  *
- * @param {User} reqUser  The user object of the requesting user.
- * @param {Object} arrProjects  The list of projects whose elements will be deleted.
- * @param {Boolean} hardDelete  Flag dictating hard or soft delete.
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {Object} arrProjects - Array of projects whose elements will be deleted.
+ * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete.
+ *
+ * @return {Promise} resolve - query: { "acknowledged" : XXXX, "deletedCount" : X }
+ *                   reject -  error
  */
 function removeElements(reqUser, arrProjects, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Ensure parameters are correctly formatted
     try {
-      assert.equal(typeof arrProjects, 'object', 'arrProjects is not an object.');
-      assert.equal(typeof hardDelete, 'boolean', 'hardDelete is not a boolean.');
+      // Check input parms are valid type
+      assert.ok(Array.isArray(arrProjects) , 'Project Array is not an array.');
+      assert.ok(typeof hardDeleted === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new errors.CustomError(error.message, 400));
+      return reject(new errors.CustomError(error.message, 400, 'error'));
     }
 
     // If hard deleting, ensure user is a site-wide admin
@@ -171,8 +192,7 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
 }
 
 /**
- * @description This function takes a user, orgID, projID, elementID
- * and optional boolean flag and returns the element if it's found.
+ * @description This function returns element if found.
  *
  * @example
  * findElement({Austin}, 'lockheed', 'mbee', 'elem1', false)
@@ -184,21 +204,26 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
  * });
  *
  *
- * @param {User} reqUser  The user object of the requesting user.
- * @param {String} organizationID  The organization ID.
- * @param {String} projectID  The project ID.
- * @param {String} elementID  The element ID.
- * @param {Boolean} softDeleted  An optional flag that allows users to search for
- *                   soft deleted projects as well.
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {String} organizationID - The organization ID.
+ * @param {String} projectID - The project ID.
+ * @param {String} elementID - The element ID.
+ * @param {Boolean} softDeleted - A boolean value indicating whether to soft delete.
+ *
+ * @return {Promise} resolve - element
+ *                   reject - error
  */
 function findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
   return new Promise((resolve, reject) => {
     try {
-      utils.assertType([organizationID, projectID, elementID], 'string');
-      utils.assertType([softDeleted], 'boolean');
+      // Check input parms are valid type
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new errors.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize the parameters
@@ -210,10 +235,13 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
     // Search for an element that matches the uid or uuid
     let searchParams = { $and: [{ $or: [{ uid: elemUID },
       { uuid: elemID }] }, { deleted: false }] };
+    // Check Soft Deleted and Admin user
+    // Note: Only Admin can find soft deleted element
     if (softDeleted && reqUser.admin) {
       searchParams = { $or: [{ uid: elemUID }, { uuid: elemID }] };
     }
 
+    // Find element
     findElementsQuery(searchParams)
     .then((elements) => {
       // Ensure more than one element was not returned.
@@ -245,30 +273,28 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
  *
  *
  * @param {Object} elementQuery  The query to be used to find the element.
+ *
+ * @return {Promise} resolve - array of elements
+ *                   reject - error
  */
 function findElementsQuery(elementQuery) {
   return new Promise((resolve, reject) => {
     Element.Element.find(elementQuery)
     .populate('parent project source target contains')
-    .exec((findElementError, elements) => {
-      if (findElementError) {
-        return reject(new errors.CustomError('Find failed.'));
-      }
-
+    .then((arrElements) => {
       // No elements found
-      if (elements.length === 0) {
+      if (arrElements.length === 0) {
         return reject(new errors.CustomError('No elements found.', 404));
       }
-
       // Return resulting element
-      return resolve(elements);
-    });
+      return resolve(arrElements);
+    })
+    .catch((error) => reject(error));
   });
 }
 
-
 /**
- * @description This function takes a user and element data, and creates a project.
+ * @description This function creates an element.
  *
  * @example
  * createElement({Austin}, {Element 1})
@@ -279,9 +305,11 @@ function findElementsQuery(elementQuery) {
  *   M.log.error(error);
  * });
  *
- *
  * @param {User} reqUser  The user object of the requesting user.
  * @param {Object} element  The JSON object containing the element data
+ *
+ * @return {Promise} resolve - new Element
+ *                   reject - error
  */
 function createElement(reqUser, element) {
   return new Promise((resolve, reject) => {
@@ -296,47 +324,32 @@ function createElement(reqUser, element) {
     try {
       utils.assertExists(['id', 'project.id', 'project.org.id', 'type'], element);
       utils.assertType([element.id, element.project.id, element.project.org.id, element.type], 'string');
-      if (utils.checkExists(['name'], element)) {
-        utils.assertType([element.name], 'string');
+      if (typeof element.name === 'string') {
         elemName = sani.html(element.name);
-        if (!RegExp(validators.element.name).test(elemName)) {
-          return reject(new errors.CustomError('Element Name is not valid.', 400));
-        }
       }
-      if (utils.checkExists(['parent'], element)) {
-        utils.assertType([element.parent], 'string');
+      if (typeof element.parent === 'string') {
         parentID = sani.html(element.parent);
       }
-      if (utils.checkExists(['custom'], element)) {
-        utils.assertType([element.custom], 'object');
+      if (typeof element.custom === 'object') {
         custom = sani.html(element.custom);
       }
-      if (utils.checkExists(['documentation'], element)) {
-        utils.assertType([element.documentation], 'string');
+      if (typeof element.documentation === 'string') {
         documentation = sani.html(element.documentation);
       }
-      if (utils.checkExists(['uuid'], element)) {
-        utils.assertType([element.uuid], 'string');
+      if (typeof element.uuid === 'string') {
         uuid = sani.html(element.uuid);
-        if (!RegExp(validators.element.uuid).test(uuid)) {
-          return reject(new errors.CustomError('UUID is not valid.', 400));
-        }
       }
     }
     catch (error) {
       return reject(error);
     }
 
+    // Sanitize required fields
     const elemID = sani.html(element.id);
     const projID = sani.html(element.project.id);
     const orgID = sani.html(element.project.org.id);
     const elemUID = utils.createUID(orgID, projID, elemID);
     const elementType = utils.toTitleCase(sani.html(element.type));
-
-    // Error check - make sure element ID and element name are valid
-    if (!RegExp(validators.element.id).test(elemID)) {
-      return reject(new errors.CustomError('Element ID is not valid.', 400));
-    }
 
     // Error check - make sure the project exists
     ProjController.findProject(reqUser, orgID, projID)
@@ -351,16 +364,14 @@ function createElement(reqUser, element) {
       findElementsQuery({ $or: [{ uid: elemUID }, { uuid: uuid }] })
       .then(() => reject(new errors.CustomError('Element already exists.', 400)))
       .catch((findError) => {
-        // This is ok, we dont want the element to already exist.
+        // This is ok, we don't want the element to already exist.
         if (findError.description === 'No elements found.') {
-          // Get the element type
-          let type = null;
-          Object.keys(Element).forEach((k) => {
-            if ((elementType === Element[k].modelName) && (elementType !== 'Element')) {
-              type = k;
-            }
-          });
+          // Error Check - NOT included element type
+          if (!Element.Element.getValidTypes().includes(elementType)) {
+            return reject(new errors.CustomError('Invalid element type.', 400));
+          }
 
+          // Define element data
           const elemData = {
             orgID: orgID,
             elemID: elemID,
@@ -373,16 +384,13 @@ function createElement(reqUser, element) {
             uuid: uuid
           };
 
-          // If the given type is not a type we specified
-          if (type === null) {
-            return reject(new errors.CustomError('Invalid element type.', 400));
-          }
-          if (type === 'Relationship') {
+          // Check element type
+          if (elementType === 'Relationship') {
             createRelationship(reqUser, elemData, element)
             .then((newElement) => resolve(newElement))
             .catch((createRelationshipError) => reject(createRelationshipError));
           }
-          else if (type === 'Package') {
+          else if (elementType === 'Package') {
             createPackage(reqUser, elemData)
             .then((newElement) => resolve(newElement))
             .catch((createRelationshipError) => reject(createRelationshipError));
@@ -404,7 +412,7 @@ function createElement(reqUser, element) {
 }
 
 /**
- * @description Handles additional step of creating a relationship
+ * @description Handles additional steps of creating a relationship element.
  *
  * @example
  * createRelationship({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null, {})
@@ -416,68 +424,73 @@ function createElement(reqUser, element) {
  * });
  *
  *
- * @param {User} reqUser  The user object of the requesting user.
- * @param {Object} elemData  The object containing the sanitized element data.
- * @param {Object} elemInfo  The JSON object containing the element data. Should contain
- *                  a source and target field.
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {Object} elemData - The object containing the sanitized element data.
+ * @param {Object} elemInfo - The JSON object containing the element data. Should contain
+ *                            a source and target field.
+ *
+ * @return {Promise} resolve - new relationship element
+ *                   reject -  error
  */
 function createRelationship(reqUser, elemData, elemInfo) {
   return new Promise((resolve, reject) => {
+    // Check for valid params
     try {
       utils.assertExists(['target', 'source'], elemInfo);
-      utils.assertType([elemInfo.target, elemInfo.source], 'string');
+      assert.ok(typeof elemInfo.target === 'string', 'Element target is not a string.');
+      assert.ok(typeof elemInfo.source === 'string', 'Element source is not a string');
     }
     catch (error) {
       return reject(error);
     }
 
     // Sanitize
-    const target = sani.html(elemInfo.target);
-    const source = sani.html(elemInfo.source);
+    const targetElementId = sani.html(elemInfo.target);
+    const sourceElementId = sani.html(elemInfo.source);
+
+    // Initialize function variables
+    let foundTarget = null;
+    let newElement = null;
 
     // Find the target to make sure it exists
-    findElement(reqUser, elemData.orgID, elemData.project.id, target)
+    findElement(reqUser, elemData.orgID, elemData.project.id, targetElementId)
     .then((targetElement) => {
+      // Set foundTarget
+      foundTarget = targetElement;
       // Find the source Element
-      findElement(reqUser, elemData.orgID, elemData.project.id, source)
-      .then((sourceElement) => {
-        const newElement = new Element.Relationship({
-          id: elemData.elemID,
-          name: elemData.elemName,
-          project: elemData.project._id,
-          uid: elemData.elemUID,
-          target: targetElement._id,
-          source: sourceElement._id,
-          custom: elemData.custom,
-          documentation: elemData.documentation,
-          uuid: elemData.uuid
-        });
-
-        updateParent(reqUser, elemData.orgID,
-          elemData.project.id, elemData.parentID, newElement)
-        .then((parentElementID) => {
-          newElement.parent = parentElementID;
-
-          // Save the new element
-          newElement.save((saveErr, elemUpdate) => {
-            if (saveErr) {
-              return reject(new errors.CustomError('Save failed.'));
-            }
-
-            // Return the element if succesful
-            return resolve(elemUpdate);
-          });
-        })
-        .catch((updateParentError) => reject(updateParentError));
-      })
-      .catch((findSourceError) => reject(findSourceError));
+      return findElement(reqUser, elemData.orgID, elemData.project.id, sourceElementId);
     })
-    .catch((findTargetError) => reject(findTargetError));
+    .then((foundSource) => {
+      // Create a new relationship
+      newElement = new Element.Relationship({
+        id: elemData.elemID,
+        name: elemData.elemName,
+        project: elemData.project._id,
+        uid: elemData.elemUID,
+        target: foundTarget._id,
+        source: foundSource._id,
+        custom: elemData.custom,
+        documentation: elemData.documentation,
+        uuid: elemData.uuid
+      });
+
+      return updateParent(reqUser, elemData.orgID,
+        elemData.project.id, elemData.parentID, newElement);
+    })
+    .then((parentElementID) => {
+      newElement.parent = parentElementID;
+
+      // Save the new element
+      return newElement.save();
+    })
+    .then(() => resolve(newElement))
+    .catch((error) => reject(error));
   });
 }
 
 /**
- * @description Handles additional step of creating a package.
+ * @description Handles additional steps of creating an element package.
+ *  Note: CreateElement() already sanitizes input. This function is private.
  *
  * @example
  * createPackage({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null)
@@ -489,8 +502,11 @@ function createRelationship(reqUser, elemData, elemInfo) {
  * });
  *
  *
- * @param {User} reqUser  The user object of the requesting user.
- * @param {Object} elemData  The object containing the sanitized element data.
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {Object} elemData - The object containing the sanitized element data.
+ *
+ * @return {Promise} resolve - new package element
+ *                   reject -  error
  */
 function createPackage(reqUser, elemData) {
   return new Promise((resolve, reject) => {
@@ -504,27 +520,23 @@ function createPackage(reqUser, elemData) {
       uuid: elemData.uuid
     });
 
+    // Update parent element
     updateParent(reqUser, elemData.orgID,
       elemData.project.id, elemData.parentID, newElement)
     .then((parentElementID) => {
       newElement.parent = parentElementID;
 
       // Save the new element
-      newElement.save((saveErr, elemUpdate) => {
-        if (saveErr) {
-          return reject(new errors.CustomError('Save failed.'));
-        }
-
-        // Return the element if succesful
-        return resolve(elemUpdate);
-      });
+      return newElement.save();
     })
-    .catch((updateParentError) => reject(updateParentError));
+    .then(() => resolve(newElement))
+    .catch((error) => reject(error));
   });
 }
 
 /**
- * @description Handles additional step of creating a block.
+ * @description Handles additional steps of creating a element block.
+ * Note: CreateElement() already sanitizes input. This function is private.
  *
  * @example
  * createBlock({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null)
@@ -536,8 +548,11 @@ function createPackage(reqUser, elemData) {
  * });
  *
  *
- * @param {User} reqUser  The user object of the requesting user.
- * @param {Object} elemData  The object containing the sanitized element data.
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {Object} elemData - The object containing the sanitized element data.
+ *
+ * @return {Promise} resolve - new block element
+ *                   reject -  error
  */
 function createBlock(reqUser, elemData) {
   return new Promise((resolve, reject) => {
@@ -557,21 +572,15 @@ function createBlock(reqUser, elemData) {
       newElement.parent = parentElementID;
 
       // Save the new element
-      newElement.save((saveErr, elemUpdate) => {
-        if (saveErr) {
-          return reject(new errors.CustomError('Save failed.'));
-        }
-
-        // Return the element if succesful
-        return resolve(elemUpdate);
-      });
+      return newElement.save();
     })
-    .catch((updateParentError) => reject(updateParentError));
+    .then(() => resolve(newElement))
+    .catch((error) => reject(error));
   });
 }
 
 /**
- * @description The function updates an element.
+ * @description This function updates an element.
  *
  * @example
  * updateElement('austin', 'lockheed', 'mbee', 'elem1', { name: 'New Name'} )
@@ -583,26 +592,32 @@ function createBlock(reqUser, elemData) {
  * });
  *
  *
- * @param {User} reqUser  The object containing the requesting user.
- * @param {String} organizationID  The organization ID of the project.
- * @param {String} projectID  The project ID.
- * @param {String} elementID  The element ID.
- * @param {Object} elementUpdated  The object of the updated element.
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The organization ID of the project.
+ * @param {String} projectID - The project ID.
+ * @param {String} elementID - The element ID.
+ * @param {Object} elementData - Update data object OR element to be updated
+ *
+ * @return {Promise} resolve - new block element
+ *                   reject -  error
  */
-function updateElement(reqUser, organizationID, projectID, elementID, elementUpdated) {
+function updateElement(reqUser, organizationID, projectID, elementID, elementData) {
   return new Promise((resolve, reject) => {
     try {
-      utils.assertType([organizationID, projectID, elementID], 'string');
-      utils.assertType([elementUpdated], 'object');
-    }
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
+      assert.ok(typeof elementData === 'object', 'Element Data is not a object.');
+
+    } // TODO: Code review stopped here 09/18/2018
     catch (error) {
       return reject(error);
     }
 
     // If mongoose model, convert to plain JSON
-    if (elementUpdated instanceof Element.Element) {
+    if (elementData instanceof Element.Element) {
       // Disabling linter because the reasign is needed to convert the object to JSON
-      elementUpdated = elementUpdated.toJSON(); // eslint-disable-line no-param-reassign
+      elementData = elementData.toJSON(); // eslint-disable-line no-param-reassign
     }
 
     // Sanitize inputs
@@ -619,7 +634,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       }
 
       // get list of keys the user is trying to update
-      const elemUpdateFields = Object.keys(elementUpdated);
+      const elemUpdateFields = Object.keys(elementData);
       // Get list of parameters which can be updated from model
       const validUpdateFields = element.getValidUpdateFields();
       // Get a list of validators
@@ -636,14 +651,14 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
           return reject(new errors.CustomError(`Element does not contain field ${updateField}.`, 400));
         }
         // if parameter is of type object, stringify and compare
-        if (utils.checkType([elementUpdated[updateField]], 'object')) {
+        if (utils.checkType([elementData[updateField]], 'object')) {
           if (JSON.stringify(element[updateField])
-            === JSON.stringify(elementUpdated[updateField])) {
+            === JSON.stringify(elementData[updateField])) {
             continue;
           }
         }
         // if parameter is the same don't bother updating it
-        if (element[updateField] === elementUpdated[updateField]) {
+        if (element[updateField] === elementData[updateField]) {
           continue;
         }
         // Error Check - Check if field can be updated
@@ -652,14 +667,14 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         }
 
         // Error Check - Check if updated field is of type string
-        if (!utils.checkType([elementUpdated[updateField]], 'string')
+        if (!utils.checkType([elementData[updateField]], 'string')
           && (Element.Element.schema.obj[updateField].type.schemaName !== 'Mixed')) {
           return reject(new errors.CustomError(`The Element [${updateField}] is not of type String.`, 400));
         }
 
         // Error Check - If the field has a validator, ensure the field is valid
         if (elementValidators[updateField]) {
-          if (!RegExp(elementValidators[updateField]).test(elementUpdated[updateField])) {
+          if (!RegExp(elementValidators[updateField]).test(elementData[updateField])) {
             return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
           }
         }
@@ -667,8 +682,8 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         // Updates each individual tag that was provided.
         if (Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
           // eslint-disable-next-line no-loop-func
-          Object.keys(elementUpdated[updateField]).forEach((key) => {
-            element.custom[key] = sani.sanitize(elementUpdated[updateField][key]);
+          Object.keys(elementData[updateField]).forEach((key) => {
+            element.custom[key] = sani.sanitize(elementData[updateField][key]);
           });
 
           // Special thing for mixed fields in Mongoose
@@ -677,7 +692,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         }
         else {
           // sanitize field
-          updateVal = sani.sanitize(elementUpdated[updateField]);
+          updateVal = sani.sanitize(elementData[updateField]);
           // Update field in element object
           element[updateField] = updateVal;
         }
@@ -714,6 +729,9 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
  * @param {String} projID  The project ID.
  * @param {String} elemID  The element ID.
  * @param {Element} newElement  The new child element.
+ *
+ * @return {Promise} resolve - Updated element id
+ *                   reject -  error
  */
 function updateParent(reqUser, orgID, projID, elemID, newElement) {
   return new Promise((resolve, reject) => {
@@ -733,16 +751,10 @@ function updateParent(reqUser, orgID, projID, elemID, newElement) {
       parentElement.contains.push(newElement._id);
 
       // Save the updated parentElement
-      parentElement.save((saveElemErr) => {
-        if (saveElemErr) {
-          return reject(new errors.CustomError('Save failed.'));
-        }
-
-        // Return the updated element object _id
-        return resolve(parentElement._id);
-      });
+      return parentElement.save();
     })
-    .catch((findParentError) => reject(findParentError));
+    .then((updatedElement) => resolve(updatedElement._id))
+    .catch((error) => reject(error));
   });
 }
 
