@@ -132,7 +132,6 @@ module.exports.element = {
  */
 module.exports.user = {
   username: '^([a-z])([a-z0-9_]){0,}$',
-  // TODO: enforce use of special characters (MBX-360)
   password: function(p) {
     // Error check - Make sure password is a string
     if (typeof (p) !== typeof ('')) {
@@ -149,7 +148,7 @@ module.exports.user = {
       // At least 1 uppercase letter
       const uppercaseValidator = (p.match(/[A-Z]/g).length >= 1);
       // At least 1 special character
-      const specialCharValidator = (p.match(/[-`~!@#$%^&*()_+={}\[\]:;'",.<>?/|\\]/g).length >= 1);
+      const specialCharValidator = (p.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
       // Validate the password
       return (lengthValidator
                 && digitsValidator
