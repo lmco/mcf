@@ -284,21 +284,19 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
       orgUpdate = orgUpdate.toJSON(); // eslint-disable-line no-param-reassign
     }
 
-    // Sanitize input argument
-    const orgID = sani.html(organizationID);
-
     // Check if orgID is default
-    if (orgID === 'default') {
+    if (organizationID === 'default') {
       // orgID is default, reject error
       return reject(new errors.CustomError('Cannot update the default org.', 403));
     }
 
     // Find organization
-    findOrg(reqUser, orgID)
+    // Note: organizationID is sanitized in findOrg()
+    findOrg(reqUser, organizationID)
     .then((org) => {
-      // Check reqUser does NOT have read permissions or NOT global admin
+      // Check reqUser does NOT admin permissions or NOT global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
-        // reqUser does NOT have read permissions or NOT global admin, reject error
+        // reqUser does NOT have admin permissions or NOT global admin, reject error
         return reject(new errors.CustomError('User does not have permissions.', 401));
       }
 
@@ -320,7 +318,7 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
         // Check if updated value contains object
         if (utils.checkType([orgUpdate[updateField]], 'object')) {
           // updated field contains object, check if updated value matches existing value
-          if (JSON.stringify(org[updateField]) === JSON.stringify(orgUpdate[updateField])) {
+          if (utils.deepEqual((org[updateField]), orgUpdate[updateField])) {
             // Updated value matches existing value, continue to next loop iteration
             continue;
           }
@@ -354,7 +352,7 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
       }
 
       // Save updated org
-      return org.save(org);
+      return org.save();
     })
     .then(updatedOrg => resolve(updatedOrg))
     .catch((error) => {

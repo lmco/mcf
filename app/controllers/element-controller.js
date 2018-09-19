@@ -596,45 +596,44 @@ function createBlock(reqUser, elemData) {
  * @param {String} organizationID - The organization ID of the project.
  * @param {String} projectID - The project ID.
  * @param {String} elementID - The element ID.
- * @param {Object} elementData - Update data object OR element to be updated
+ * @param {Object} elementUpdate - Update data object OR element to be updated
  *
  * @return {Promise} resolve - new block element
  *                   reject -  error
  */
-function updateElement(reqUser, organizationID, projectID, elementID, elementData) {
+function updateElement(reqUser, organizationID, projectID, elementID, elementUpdate) {
   return new Promise((resolve, reject) => {
+    // Check valid param type
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
-      assert.ok(typeof elementData === 'object', 'Element Data is not a object.');
+      assert.ok(typeof elementUpdate === 'object', 'Element Data is not a object.');
 
-    } // TODO: Code review stopped here 09/18/2018
+    }
     catch (error) {
       return reject(error);
     }
 
-    // If mongoose model, convert to plain JSON
-    if (elementData instanceof Element.Element) {
-      // Disabling linter because the reasign is needed to convert the object to JSON
-      elementData = elementData.toJSON(); // eslint-disable-line no-param-reassign
+    // Check if elementUpdate is instance of Element model
+    if (elementUpdate instanceof Element.Element) {
+      // Disabling linter because the reassign is needed to convert the object to JSON
+      // elementUpdate is instance of Element model, convert to JSON
+      elementUpdate = elementUpdate.toJSON(); // eslint-disable-line no-param-reassign
     }
 
-    // Sanitize inputs
-    const orgID = sani.html(organizationID);
-    const projID = sani.html(projectID);
-    const elemID = sani.html(elementID);
-
     // Get the element
-    findElement(reqUser, orgID, projID, elemID)
+    // Note: organizationID, projectID, and elementID are sanitized in findElement()
+    findElement(reqUser, organizationID, projectID, elementID)
     .then((element) => {
-      // Check Permissions
+      // Check reqUser does NOT admin permissions or NOT global admin
       if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
+        // reqUser does NOT have admin permissions or NOT global admin, reject error
         return reject(new errors.CustomError('User does not have permissions.', 401));
       }
 
       // get list of keys the user is trying to update
-      const elemUpdateFields = Object.keys(elementData);
+      const elemUpdateFields = Object.keys(elementUpdate);
       // Get list of parameters which can be updated from model
       const validUpdateFields = element.getValidUpdateFields();
       // Get a list of validators
@@ -648,17 +647,17 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementDat
         updateField = elemUpdateFields[i];
         // Error Check - Check if updated field also exists in the original element.
         if (!element.toJSON().hasOwnProperty(updateField)) {
+          // Original project does NOT contain updatedField, reject error
           return reject(new errors.CustomError(`Element does not contain field ${updateField}.`, 400));
         }
         // if parameter is of type object, stringify and compare
-        if (utils.checkType([elementData[updateField]], 'object')) {
-          if (JSON.stringify(element[updateField])
-            === JSON.stringify(elementData[updateField])) {
+        if (utils.checkType([elementUpdate[updateField]], 'object')) {
+          if (utils.deepEqual(element[updateField], elementUpdate[updateField])) {
             continue;
           }
         }
         // if parameter is the same don't bother updating it
-        if (element[updateField] === elementData[updateField]) {
+        if (element[updateField] === elementUpdate[updateField]) {
           continue;
         }
         // Error Check - Check if field can be updated
@@ -667,14 +666,14 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementDat
         }
 
         // Error Check - Check if updated field is of type string
-        if (!utils.checkType([elementData[updateField]], 'string')
+        if (!utils.checkType([elementUpdate[updateField]], 'string')
           && (Element.Element.schema.obj[updateField].type.schemaName !== 'Mixed')) {
           return reject(new errors.CustomError(`The Element [${updateField}] is not of type String.`, 400));
         }
 
         // Error Check - If the field has a validator, ensure the field is valid
         if (elementValidators[updateField]) {
-          if (!RegExp(elementValidators[updateField]).test(elementData[updateField])) {
+          if (!RegExp(elementValidators[updateField]).test(elementUpdate[updateField])) {
             return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
           }
         }
@@ -682,37 +681,44 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementDat
         // Updates each individual tag that was provided.
         if (Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
           // eslint-disable-next-line no-loop-func
-          Object.keys(elementData[updateField]).forEach((key) => {
-            element.custom[key] = sani.sanitize(elementData[updateField][key]);
+          Object.keys(elementUpdate[updateField]).forEach((key) => {
+            element.custom[key] = sani.sanitize(elementUpdate[updateField][key]);
           });
 
-          // Special thing for mixed fields in Mongoose
+          // Mark mixed fields as updated, required for mixed fields to update in mongoose
           // http://mongoosejs.com/docs/schematypes.html#mixed
           element.markModified(updateField);
         }
         else {
-          // sanitize field
-          updateVal = sani.sanitize(elementData[updateField]);
-          // Update field in element object
-          element[updateField] = updateVal;
+          // Sanitize the updated value
+          element[updateField] = sani.sanitize(elementUpdate[updateField]);
         }
       }
       // Save updated element
-      element.save((saveElemErr) => {
-        if (saveElemErr) {
-          return reject(new errors.CustomError('Save failed.'));
-        }
-
-        // Return the updated element object
-        return resolve(element);
-      });
+      return element.save();
     })
-    .catch((findElementError) => reject(findElementError));
+    .then((updatedElement) => resolve(updatedElement))
+    .catch((error) => {
+      // If the error is not a custom error
+      if (error instanceof errors.CustomError) {
+        return reject(error);
+      }
+      return reject(new errors.CustomError(error.message));
+    });
   });
 }
 
 /**
  * @description This function updates the parent element.
+ *
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {String} orgID - The organization ID.
+ * @param {String} projID - The project ID.
+ * @param {String} elemID - The element ID.
+ * @param {Element} newElement - The new child element.
+ *
+ * @return {Promise} resolve - Updated element id
+ *                   reject -  error
  *
  * @example
  * updateParent('austin', 'lockheed', 'mbee', 'elem0', {Elem1})
@@ -722,16 +728,6 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementDat
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The user object of the requesting user.
- * @param {String} orgID  The organization ID.
- * @param {String} projID  The project ID.
- * @param {String} elemID  The element ID.
- * @param {Element} newElement  The new child element.
- *
- * @return {Promise} resolve - Updated element id
- *                   reject -  error
  */
 function updateParent(reqUser, orgID, projID, elemID, newElement) {
   return new Promise((resolve, reject) => {
@@ -742,12 +738,13 @@ function updateParent(reqUser, orgID, projID, elemID, newElement) {
     // Find the parent element
     findElement(reqUser, orgID, projID, elemID)
     .then((parentElement) => {
-      // To be a parent element, element type must be a package
+      // Check if parent element type is package
       if (parentElement.type !== 'Package') {
+        // Parent Element type is not package, throw error
         return reject(new errors.CustomError('Parent element is not of type Package.', 400));
       }
 
-      // Add _id to the array
+      // Add _id to Parent Element Array
       parentElement.contains.push(newElement._id);
 
       // Save the updated parentElement
@@ -759,8 +756,16 @@ function updateParent(reqUser, orgID, projID, elemID, newElement) {
 }
 
 /**
- * @description This function takes a user, orgID, projID, elementID
- * and JSON object of options and deletes an element.
+ * @description This function deletes an element.
+ *
+ * @param {User} reqUser  The user object of the requesting user.
+ * @param {String} organizationID  The organization ID.
+ * @param {String} projectID  The project ID.
+ * @param {String} elementID  The element ID.
+ * @param {Object} hardDelete  Flag denoting whether to hard or soft delete.
+ *
+ * @return {Promise} resolve - deleted element
+ *                   reject -  error
  *
  * @example
  * removeElement({Austin}, 'lockheed', 'mbee', 'elem1', {soft: false} )
@@ -770,27 +775,23 @@ function updateParent(reqUser, orgID, projID, elemID, newElement) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser  The user object of the requesting user.
- * @param {String} organizationID  The organization ID.
- * @param {String} projectID  The project ID.
- * @param {String} elementID  The element ID.
- * @param {Object} hardDelete  Flag denoting whether to hard or soft delete.
  */
 function removeElement(reqUser, organizationID, projectID, elementID, hardDelete) {
   return new Promise((resolve, reject) => {
-    // Check parameters are valid
+    // Check valid param type
     try {
-      utils.assertType([organizationID, projectID, elementID], 'string');
-      utils.assertType([hardDelete], 'boolean');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new errors.CustomError(error.message, 400, 'error'));
     }
 
-    // If user tries to hard-delete and is not a system admin, reject
+    // Check if hardDelete is true and user is NOT admin
     if (hardDelete && !reqUser.admin) {
+      // HardDelete is false and user is NOT admin
       return reject(new errors.CustomError('User does not have permission to hard delete an'
         + ' element.', 401));
     }
@@ -800,23 +801,22 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
     .then((element) => {
       // Verify user has permissions to delete element
       if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
+        // User does NOT have permissions
         return reject(new errors.CustomError('User does not have permission.', 401));
       }
 
-      // Hard delete
+      // Check if hard delete is true
       if (hardDelete) {
+        // Delete Element
         Element.Element.deleteOne({ uid: element.uid })
         .then(() => resolve(element))
         .catch((error) => reject(error));
       }
       else {
-        Element.Element.updateOne({ uid: element.uid }, { deleted: true })
-        .then(() => {
-          // Set the returned element deleted field to true since updateOne()
-          // returns a query not the updated element.
-          element.deleted = true;
-          return resolve(element);
-        })
+        // Hard delete is false, update element deleted field
+        element.deleted = true;
+        element.save()
+        .then(() => resolve(element))
         .catch((error) => reject(error));
       }
     })

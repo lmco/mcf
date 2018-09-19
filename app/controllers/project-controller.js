@@ -414,6 +414,7 @@ function createProject(reqUser, project) {
  */
 function updateProject(reqUser, organizationID, projectID, projectUpdated) {
   return new Promise((resolve, reject) => {
+    // Check parameters are correct type
     try {
       assert.strictEqual(typeof organizationID, 'string', 'organizationID is not a string');
       assert.strictEqual(typeof projectID, 'string', 'projectID is not a string');
@@ -424,24 +425,21 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       return reject(new errors.CustomError(error.message, 400));
     }
 
-    // If mongoose model, convert to plain JSON
     // TODO: Re-assess this.
+    // Check if orgUpdate is instance of Organization model
     if (projectUpdated instanceof Project) {
-      // Disabling linter because the reasign is needed to convert the object to JSON
+      // Disabling linter because the reassign is needed to convert the object to JSON
+      // orgUpdate is instance of Organization model, convert to JSON
       projectUpdated = projectUpdated.toJSON(); // eslint-disable-line no-param-reassign
     }
 
-    // Sanitize project properties
-    const orgID = sani.html(organizationID);
-    const projID = sani.html(projectID);
-
-    // Lookup project with findProject. This will only resolve a project
-    // that exists and the user has read access to.
-    findProject(reqUser, orgID, projID)
+    // Find project
+    // Note: organizationID and projectID is sanitized in findProject()
+    findProject(reqUser, organizationID, projectID)
     .then((project) => {
-      // Check Permissions - user must must have admin (as opposed to write)
-      // because updating projects only involves updating project metadata.
+      // Check reqUser does NOT admin permissions or NOT global admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
+        // reqUser does NOT have admin permissions or NOT global admin, reject error
         return reject(new errors.CustomError('User does not have permissions.', 401));
       }
 
