@@ -44,6 +44,24 @@ module.exports.CustomError = class CustomError extends Error {
 
   /**
    * @description Returns a HTTP message based on the status code.
+   *
+   * @return {String} message
+   * +-------------+-------------------------+
+   * | Status Code |         Message         |
+   * +-------------+-------------------------+
+   * | 200         | 'OK'                    |
+   * | 300         | 'Multiple Choices'      |
+   * | 301         | 'Moved Permanently'     |
+   * | 400         | 'Bad Request'           |
+   * | 401         | 'Unauthorized'          |
+   * | 403         | 'Forbidden'             |
+   * | 403         | 'Not Found'             |
+   * | 418         | 'I'm a teapot'          |
+   * | 500         | 'Internal Server Error' |
+   * | 501         | 'Not Implemented'       |
+   * | 503         | 'Service Unavaliable'   |
+   * | default     | 'Internal Server Error' |
+   * +-------------+-------------------------+
    */
   getMessage() {
     switch (this.status) {

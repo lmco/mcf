@@ -29,15 +29,15 @@ module.exports = {
   findElements,
   removeElement,
   removeElements,
-  updateElement,
+  updateElement
 };
-  /*
-  // TODO: internal use, remove at end
-  updateParent,
-  findElementsQuery,
-  createPackage,
-  createRelationship,
-  createBlock
+/*
+// TODO: internal use, remove at end
+updateParent,
+findElementsQuery,
+createPackage,
+createRelationship,
+createBlock
 */
 
 
@@ -608,8 +608,8 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementDat
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
       assert.ok(typeof elementData === 'object', 'Element Data is not a object.');
-
-    } // TODO: Code review stopped here 09/18/2018
+    }
+    // TODO: Code review stopped here 09/18/2018
     catch (error) {
       return reject(error);
     }
