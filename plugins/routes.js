@@ -58,7 +58,7 @@ function loadPlugins() {
   files.forEach((f) => {
     // Skip routes.js
     if (protectedFileNames.includes(f)) {
-      continue;
+      return;
     }
 
     // Removes old plugins
