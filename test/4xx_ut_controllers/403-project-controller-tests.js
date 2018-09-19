@@ -426,15 +426,16 @@ function findProj(done) {
  * @description Verify projects the user has access to findProjects() is found.
  */
 function findProjects(done) {
-  userData = testData.users[12];
+  const userData = testData.users[12];
+  let adminUser2 = null;
   UserController.createUser(adminUser, userData)
   .then((newUser) => {
-    let adminUser2 = newUser;
-    const orgData2 = testData.orgs[];
+    adminUser2 = newUser;
+    const orgData2 = testData.orgs[9];
     OrgController.createOrg(newUser, orgData2)
-    .then((retOrg) => {
-      const projData3 = testData.project[];
-      const projData4 = testData.project[];
+    .then(() => {
+      const projData3 = testData.project[18];
+      const projData4 = testData.project[19];
       ProjController.createProject(adminUser2, projData3);
       ProjController.createProject(adminUser2, projData4)
       .then(() => {
@@ -442,27 +443,27 @@ function findProjects(done) {
 
         // Find project
         ProjController.findProjects(adminUser, orgId)
-        .then((proj) => {
+        .then((projs) => {
           // Verify project fields
-          chai.expect(proj.id).to.equal(testData.projects[7].id);
-          chai.expect(proj.name).to.equal(testData.projects[7].name);
+          chai.expect(projs.length).to.equal(2);
+          console.log(projs);
           done();
         })
         .catch((err) => {
           // Expect no error
-          chai.expect(error.message).to.equal(null);
+          chai.expect(err.message).to.equal(null);
           done();
         });
       })
-      .catch((err) => {
+      .catch((error) => {
         // Expect no error
         chai.expect(error.message).to.equal(null);
         done();
       });
     })
-    .catch((err) => {
+    .catch((error3) => {
       // Expect no error
-      chai.expect(error.message).to.equal(null);
+      chai.expect(error3.message).to.equal(null);
       done();
     });
   })

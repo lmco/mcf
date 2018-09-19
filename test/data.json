@@ -271,6 +271,20 @@
     {
       "id": "hulktwopointoh",
       "name": "New Hulk"
+    },
+    {
+      "id": "nickfury",
+      "name": "Nick Fury",
+      "org": {
+        "id": "shield"
+      }
+    },
+    {
+      "id": "mariahill",
+      "name": "Maria Hill",
+      "org": {
+        "id": "shield"
+      }
     }
   ],
 
