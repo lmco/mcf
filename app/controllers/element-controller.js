@@ -140,8 +140,8 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Ensure parameters are correctly formatted
     try {
-      // Check input parms are valid type
-      assert.ok(Array.isArray(arrProjects), 'Project Array is not an array.');
+      // Check input params are valid type
+      assert.ok(Array.isArray(arrProjects) , 'Project Array is not an array.');
       assert.ok(typeof hardDelete === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
@@ -216,7 +216,7 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
 function findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
   return new Promise((resolve, reject) => {
     try {
-      // Check input parms are valid type
+      // Check input params are valid type
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
