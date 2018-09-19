@@ -12,6 +12,7 @@
  * @description This file implements the plugin loading and routing logic.
  */
 
+// Node.js modules
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
