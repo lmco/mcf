@@ -29,15 +29,15 @@ module.exports = {
   findElements,
   removeElement,
   removeElements,
-  updateElement,
+  updateElement
 };
-  /*
-  // TODO: internal use, remove at end
-  updateParent,
-  findElementsQuery,
-  createPackage,
-  createRelationship,
-  createBlock
+/*
+// TODO: internal use, remove at end
+updateParent,
+findElementsQuery,
+createPackage,
+createRelationship,
+createBlock
 */
 
 
@@ -609,7 +609,6 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
       assert.ok(typeof elementUpdate === 'object', 'Element Data is not a object.');
-
     }
     catch (error) {
       return reject(error);
