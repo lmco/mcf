@@ -30,9 +30,6 @@ const chai = require('chai');
 // Load MBEE modules
 const Org = M.require('models.organization');
 const db = M.require('lib.db');
-const AuthController = M.require('lib.auth');
-const User = M.require('models.user');
-const mockExpress = M.require('lib.mock-express');
 
 // Variables used across test functions
 let userAdmin = null;

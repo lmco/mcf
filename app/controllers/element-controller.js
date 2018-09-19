@@ -484,7 +484,13 @@ function createRelationship(reqUser, elemData, elemInfo) {
       return newElement.save();
     })
     .then(() => resolve(newElement))
-    .catch((error) => reject(error));
+    .catch((error) => {
+      // If the error is not a custom error
+      if (error instanceof errors.CustomError) {
+        return reject(error);
+      }
+      return reject(new errors.CustomError(error.message));
+    });
   });
 }
 
@@ -530,7 +536,13 @@ function createPackage(reqUser, elemData) {
       return newElement.save();
     })
     .then(() => resolve(newElement))
-    .catch((error) => reject(error));
+    .catch((error) => {
+      // If the error is not a custom error
+      if (error instanceof errors.CustomError) {
+        return reject(error);
+      }
+      return reject(new errors.CustomError(error.message));
+    });
   });
 }
 
@@ -575,7 +587,13 @@ function createBlock(reqUser, elemData) {
       return newElement.save();
     })
     .then(() => resolve(newElement))
-    .catch((error) => reject(error));
+    .catch((error) => {
+      // If the error is not a custom error
+      if (error instanceof errors.CustomError) {
+        return reject(error);
+      }
+      return reject(new errors.CustomError(error.message));
+    });
   });
 }
 

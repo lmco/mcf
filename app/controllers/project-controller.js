@@ -85,9 +85,9 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     }
 
     // Sanitize the organization ID
-    const orgID = sani.html(organizationID);
+    const orgID = sani.sanitize(organizationID);
 
-    const searchParams = { 'org.id': orgID, deleted: false };
+    const searchParams = { uid: { $regex: `^${orgID}:` }, deleted: false };
 
     // Check softDeleted flag true and User Admin true
     if (softDeleted && reqUser.admin) {
@@ -222,8 +222,8 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
     }
 
     // Sanitize project properties
-    const orgID = sani.html(organizationID);
-    const projID = sani.html(projectID);
+    const orgID = sani.sanitize(organizationID);
+    const projID = sani.sanitize(projectID);
     const projUID = utils.createUID(orgID, projID);
 
     const searchParams = { uid: projUID, deleted: false };
@@ -275,17 +275,10 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
  */
 function findProjectsQuery(query) {
   return new Promise((resolve, reject) => {
-    const sanitizedQuery = sani.sanitize(query);
-    Project.find(sanitizedQuery)
+    Project.find(query)
     .populate('org permissions.read permissions.write permissions.admin')
-    .exec((err, projects) => {
-      // Error Check: if any error occurs, reject
-      if (err) {
-        return reject(err);
-      }
-      // Return resulting project
-      return resolve(projects);
-    });
+    .then((projects) => resolve(projects))
+    .catch((error) => reject(error));
   });
 }
 
