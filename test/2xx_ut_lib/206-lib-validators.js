@@ -182,7 +182,7 @@ function verifyUserUsername(done) {
  */
 function verifyUserPassword(done) {
   // Valid passwords
-  chai.expect(validators.user.password('Ilovespace123')).to.equal(true);
+  chai.expect(validators.user.password('Ilovespace123!')).to.equal(true);
   chai.expect(validators.user.password('sp3c1alChar5^&*')).to.equal(true);
 
   // Invalid passwords

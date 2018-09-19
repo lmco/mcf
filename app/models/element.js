@@ -122,7 +122,8 @@ const ElementSchema = new mongoose.Schema({
     type: String
   },
   custom: {
-    type: mongoose.Schema.Types.Mixed
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   },
   createdOn: {
     type: Date,
@@ -216,6 +217,15 @@ const PackageSchema = new mongoose.Schema({
 /* --------------------------( Element Middleware )-------------------------- */
 
 /**
+ * @description Pre-find actions
+ * @memberOf ElementSchema
+ */
+ElementSchema.pre('find', function(next) {
+  this.populate('project');
+  next();
+});
+
+/**
  * @description Pre-save actions.
  * @memberof ElementSchema
  */
@@ -253,7 +263,7 @@ ElementSchema.methods.getValidTypes = function() {
 
 ElementSchema.statics.getValidTypes = function() {
   return ElementSchema.methods.getValidTypes();
-}
+};
 /* ------------------------------( Models )---------------------------------- */
 
 const Element = mongoose.model('Element', ElementSchema);

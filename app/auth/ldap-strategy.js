@@ -37,6 +37,13 @@ const ldapConfig = M.config.auth.ldap;
  * Implement authentication via LDAP using username/password and
  * configuration in config file.
  *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @param {String} username - Username to authenticate via LDAP AD
+ * @param {String} password - Password to authenticate via LDAP AD
+ * @returns {Promise} resolve - authenticated user object
+ *                    reject - an error
+ *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
  *   .then(user => {
@@ -45,12 +52,6 @@ const ldapConfig = M.config.auth.ldap;
  *   .catch(err => {
  *     console.log(err);
  *   })
- *
- * @param req request express object
- * @param res response express object
- * @param {String} username to authenticate via LDAP AD
- * @param {String} password to authenticate via LDAP AD
- * @returns Promise authenticated user as the User object or an error.
  */
 module.exports.handleBasicAuth = function(req, res, username, password) {
   // Return a promise
@@ -81,6 +82,12 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  * @description Authenticates user with passed in token.
  * Implements handleTokenAuth() provided by the Local Strategy.
  *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @param token - Token user authentication token, encrypted
+ * @returns {Promise} resolve - local user object
+ *                    reject - an error
+ *
  * @example
  * AuthController.handleTokenAuth(req, res, token)
  *   .then(user => {
@@ -89,12 +96,6 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  *   .catch(err => {
  *     console.log(err);
  *   })
- *
- * @param req request express object
- * @param res response express object
- * @param token user authentication token, encrypted
- *
- * @returns Promise local user object or an error.
  */
 module.exports.handleTokenAuth = function(req, res, token) {
   return new Promise((resolve, reject) => {
@@ -108,9 +109,9 @@ module.exports.handleTokenAuth = function(req, res, token) {
  * @description  This function generates the session token for user login.
  * Implements the Local Strategy doLogin function.
  *
- * @param req request express object
- * @param res response express object
- * @param next callback to continue express authentication
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @param {callback} next - Callback to continue express authentication
  */
 module.exports.doLogin = function(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
@@ -121,7 +122,8 @@ module.exports.doLogin = function(req, res, next) {
  * @description Connects to an LDAP server and resolves a client object used
  * to preform search and bind operations.
  *
- * @returns Promise an LDAP client object or an error
+ * @returns {Promise} resolve - an LDAP client object
+ *                    reject - an error
  */
 function ldapConnect() {
   M.log.debug('Attempting to bind to the LDAP server.');
@@ -161,7 +163,10 @@ function ldapConnect() {
 /**
  * @description Searches for and resolve a user from LDAP server.
  *
- * @returns Promise LDAP user information or an error.
+ * @param ldapClient - LDAP client
+ * @param {String} username - Username to find LDAP user
+ * @returns {Promise} resolve - LDAP user information
+ *                    reject - an error
  */
 function ldapSearch(ldapClient, username) {
   M.log.debug('Attempting to search for LDAP user.');
@@ -238,7 +243,11 @@ function ldapSearch(ldapClient, username) {
 /**
  * @description Validates a users password with LDAP server
  *
- * @returns Promise the authenticated user's information or an error
+ * @param ldapClient - LDAP client
+ * @param {Object} user - LDAP user
+ * @param {String} password - Password to verify LDAP user
+ * @returns {Promise} resolve - authenticated user's information
+ *                    reject - an error
  */
 function ldapAuth(ldapClient, user, password) {
   M.log.debug(`Authenticating ${user[ldapConfig.attributes.username]} ...`);
@@ -264,7 +273,9 @@ function ldapAuth(ldapClient, user, password) {
 /**
  * @description Synchronizes authenticated user's LDAP information with database.
  *
- * @returns Promise synchronized user model object or an error.
+ * @param {Object} ldapUserObj - LDAP user information
+ * @returns {Promise} resolve - synchronized user model object
+ *                    reject - an error
  */
 function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');

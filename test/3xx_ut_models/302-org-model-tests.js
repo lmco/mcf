@@ -30,15 +30,13 @@ const chai = require('chai');
 // Load MBEE modules
 const Org = M.require('models.organization');
 const db = M.require('lib.db');
-const AuthController = M.require('lib.auth');
-const User = M.require('models.user');
-const mockExpress = M.require('lib.mock-express');
 
 // Variables used across test functions
 let userAdmin = null;
 
 /* --------------------( Test Data )-------------------- */
 const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 
 /* --------------------( Main )-------------------- */
 /**
@@ -54,28 +52,17 @@ describe(M.getModuleName(module.filename), () => {
    */
   before((done) => {
     db.connect();
-    const params = {};
-    const body = {
-      username: M.config.test.username,
-      password: M.config.test.password
-    };
 
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      chai.expect(err).to.equal(null);
-      chai.expect(reqObj.user.username).to.equal(M.config.test.username);
-
-      User.findOneAndUpdate({ username: reqObj.user.username }, { admin: true },
-        { new: true },
-        (updateErr, userUpdate) => {
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-
-          userAdmin = userUpdate;
-          done();
-        });
+    // Create admin user
+    testUtils.createAdminUser()
+    .then((user) => {
+      userAdmin = user;
+      done();
+    })
+    .catch((error) => {
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
@@ -84,18 +71,14 @@ describe(M.getModuleName(module.filename), () => {
    * connection.
    */
   after((done) => {
-    // Find user
-    User.findOne({ username: M.config.test.username })
-    // Remove user
-    .then((user) => user.remove())
+    // Remove admin user
+    testUtils.removeAdminUser()
     .then(() => {
-      // Disconnect from database
+      // Disconnect for database
       db.disconnect();
       done();
     })
     .catch((error) => {
-      db.disconnect();
-
       // Expect no error
       chai.expect(error).to.equal(null);
       done();
