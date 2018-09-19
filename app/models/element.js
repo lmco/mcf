@@ -205,6 +205,14 @@ const PackageSchema = new mongoose.Schema({
 }, options);
 
 
+// PackageSchema.virtual('contains', {
+//   ref: 'Element',
+//   localField: '_id',
+//   foreignField: 'parent',
+//   justOne: false
+// });
+
+
 /* --------------------------( Element Middleware )-------------------------- */
 
 /**
@@ -235,6 +243,17 @@ ElementSchema.methods.getValidUpdateFields = function() {
 };
 
 
+/**
+ * @description Returns a valid element type
+ * @memberof ElementSchema
+ */
+ElementSchema.methods.getValidTypes = function() {
+  return ['Relationship', 'Block', 'Package'];
+};
+
+ElementSchema.statics.getValidTypes = function() {
+  return ElementSchema.methods.getValidTypes();
+}
 /* ------------------------------( Models )---------------------------------- */
 
 const Element = mongoose.model('Element', ElementSchema);
