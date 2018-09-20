@@ -194,7 +194,7 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
  * @param {String} projectID - The project ID of the Project which is being searched for.
  * @param {Boolean} softDeleted - The flag to control whether or not to find softDeleted projects.
  *
- * @return {Object} search project object
+ * @return {Project} The found project
  *
  * @example
  * findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')

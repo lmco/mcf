@@ -21,9 +21,9 @@
  * implements controller logic and behavior for Users.
  */
 
-// Expose `user controller`
+// Expose uer controller functions
 // Note: The export is being done before the import to solve the issues of
-// circular refrences between controllers.
+// circular references between controllers.
 module.exports = {
   findUsers,
   findUser,
@@ -33,23 +33,23 @@ module.exports = {
   removeUser
 };
 
-// Node Modules
+// Node.js Modules
 const assert = require('assert');
 
 // MBEE Modules
-const User = M.require('models.user');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
+const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
-const validators = M.require('lib.validators');
 
-// eslint consistent-return rule is disabled for this file.
-// The rule may not fit controller-related functions as
-// returns are inconsistent.
+// eslint consistent-return rule is disabled for this file. The rule may not fit
+// controller-related functions as returns are inconsistent.
 /* eslint-disable consistent-return */
 
 /**
  * @description This function finds all users.
+ *
+ * @return {Array} Array of found user objects
  *
  * @example
  * findUsers()
@@ -61,10 +61,9 @@ const validators = M.require('lib.validators');
  * });
  *
  */
-// TODO: add options param and discuss it(search options) MBX-427
 function findUsers() {
   return new Promise((resolve, reject) => {
-    // Find NOT soft deleted users
+    // Find users
     findUsersQuery({ deletedOn: null })
     .then((users) => resolve(users))
     .catch((error) => reject(error));
@@ -73,6 +72,10 @@ function findUsers() {
 
 /**
  * @description This function takes a username and finds a user
+ *
+ * @param {String} searchedUsername The username of the searched user.
+ *
+ * @return {User} The found user
  *
  * @example
  * findUser('tstark')
@@ -83,31 +86,36 @@ function findUsers() {
  *   M.log.error(error);
  * });
  *
- * @param {String} searchedUsername The username of the searched user.
- */
+ * */
 function findUser(searchedUsername) {
   return new Promise((resolve, reject) => {
-    // Sanitize username
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof searchedUsername === 'string', 'Username is not a string.');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'error'));
+    }
+
+    // Sanitize query inputs
     const username = sani.sanitize(searchedUsername);
 
-    // Create query
-    const query = { username: username, deletedOn: null };
-
     // Find users
-    findUsersQuery(query)
+    findUsersQuery({ username: username, deletedOn: null })
     .then((arrUsers) => {
-      // Ensure a user was found
-      if (arrUsers.length < 1) {
+      // Error Check: ensure at least one user was found
+      if (arrUsers.length === 0) {
+        // No users found, reject error
         return reject(new M.CustomError('User not found.', 404));
       }
 
-      // Check if more than one user found
+      // Error Check: ensure no more than one user was found
       if (arrUsers.length > 1) {
-        // More than 1 user found, reject error
+        // Users length greater than one, reject error
         return reject(new M.CustomError('More than one user found.', 400));
       }
 
-      // Return first user in the array
+      // All checks passed, resolve user
       return resolve(arrUsers[0]);
     })
     .catch((error) => reject(error));
@@ -116,6 +124,10 @@ function findUser(searchedUsername) {
 
 /**
  * @description Finds users by a database query.
+ *
+ * @param {Object} usersQuery - The query to be made to the database.
+ *
+ * @return {Object} A list of users
  *
  * @example
  * findUsersQuery({ fname: 'Tony' })
@@ -126,19 +138,12 @@ function findUser(searchedUsername) {
  *   M.log.error(error);
  * });
  *
- *
- * @param {Object} usersQuery - The query to be made to the database.
  */
 function findUsersQuery(usersQuery) {
   return new Promise((resolve, reject) => {
-    // Sanitize query
-    const query = sani.sanitize(usersQuery);
-
-    // Find the user
-    User.find(query)
-    // Resolve  found users
+    // Find users
+    User.find(usersQuery)
     .then((users) => resolve(users))
-    // Reject error
     .catch(() => reject(new M.CustomError('Find failed.')));
   });
 }
@@ -146,6 +151,11 @@ function findUsersQuery(usersQuery) {
 /**
  * @description This function takes a requesting user and new user data
  * to create a new user.
+ *
+ * @param {User} reqUser - The requesting user.
+ * @param {Object} newUserData - Object containing new user data.
+ *
+ * @return {User} The newly created user.
  *
  * @example
  * createUser({Tony}, {username: 'ppotts', fname: 'Pepper', lname: 'Potts'})
@@ -155,14 +165,10 @@ function findUsersQuery(usersQuery) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The requesting user.
- * @param {Object} newUserData - Object containing new user data.
  */
 function createUser(reqUser, newUserData) {
   return new Promise((resolve, reject) => {
-    // Check admin and valid user data
+    // Error Check: ensure input parameters are valid
     try {
       assert.ok(reqUser.admin, 'User does not have permissions.');
       assert.ok(newUserData.hasOwnProperty('username'), 'Username not provided in request body.');
@@ -178,28 +184,26 @@ function createUser(reqUser, newUserData) {
       return reject(new M.CustomError(error.message, statusCode, 'error'));
     }
 
-    // Define function-wide user
-    let createdUser;
+    // Initialize function-wide variables
+    let createdUser = null;
 
-    // Find user
+    // Check if user already exists
     findUsersQuery({ username: sani.sanitize(newUserData.username) })
     .then((users) => {
-      // Ensure user doesn't already exist
+      // Error Check: ensure no user was found
       if (users.length >= 1) {
         return reject(new M.CustomError('A user with a matching username already exists.', 403));
       }
 
       // Create the new user
-      // Sanitize the input, the model should handle
-      // data validation
       const user = new User(sani.sanitize(newUserData));
 
       // Save new user
       return user.save();
     })
-    // Find the default
     .then((user) => {
       createdUser = user;
+      // Find the default organization
       return OrgController.findOrgsQuery({ id: 'default' });
     })
     .then((orgs) => {
@@ -226,6 +230,12 @@ function createUser(reqUser, newUserData) {
  * @description This function takes a user object, username and
  * JSON data and updates a user.
  *
+ * @param {User} reqUser - The requesting user.
+ * @param {String} usernameToUpdate - The username of the user to be updated.
+ * @param {Object} newUserData - An object containing updated User data
+ *
+ * @return {User} The updated user
+ *
  * @example
  * updateUser({Tony}, 'ppotts', {fname: 'Pep'})
  * .then(function(user) {
@@ -235,14 +245,10 @@ function createUser(reqUser, newUserData) {
  *   M.log.error(error);
  * });
  *
- *
- * @param {User} reqUser - The requesting user.
- * @param {String} usernameToUpdate - The username of the user to be updated.
- * @param {Object} newUserData - An object containing updated User data
  */
 function updateUser(reqUser, usernameToUpdate, newUserData) {
   return new Promise((resolve, reject) => {
-    // Check valid user data and admin
+    // Error Check: ensure input parameters are valid
     try {
       assert.ok(reqUser.admin, 'User does not have permissions.');
       assert.ok(typeof usernameToUpdate === 'string', 'Username is not a string.');
@@ -258,56 +264,67 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
     }
 
     // Find user
+    // Note: usernameToUpdate is sanitized in findUser()
     findUser(usernameToUpdate)
     .then((user) => {
-      // Update user with properties found in newUserData
-      const props = Object.keys(newUserData);
-      // Get a list of validators
-      const userValidators = validators.user;
+      // Get list of keys the user is trying to update
+      const userUpdateFields = Object.keys(newUserData);
       // Get list of parameters which can be updated from model
       const validUpdateFields = user.getValidUpdateFields();
 
-      // Loop through properties
-      for (let i = 0; i < props.length; i++) {
-        // Error check - make sure the properties exist and can be updated
-        if (!validUpdateFields.includes(props[i])) {
-          return reject(new M.CustomError(`User property [${props[i]}] cannot be changed.`, 403));
+      // Loop through userUpdateFields
+      for (let i = 0; i < userUpdateFields.length; i++) {
+        // Error Check: Check if field can be updated
+        if (!validUpdateFields.includes(userUpdateFields[i])) {
+          // field cannot be updated, reject error
+          return reject(new M.CustomError(`User property [${userUpdateFields[i]}] cannot be changed.`, 403));
         }
 
-        // Error Check - If the field has a validator, ensure the field is valid
-        if (userValidators[props]) {
-          if (!RegExp(userValidators[props]).test(newUserData[props])) {
-            return reject(new M.CustomError(`The updated ${props} is not valid.`, 403));
+        // Check if updateField type is 'Mixed'
+        if (User.schema.obj[userUpdateFields[i]].type.schemaName === 'Mixed') {
+          // Only objects should be passed into mixed data
+          if (typeof newUserData[userUpdateFields[i]] !== 'object') {
+            return reject(new M.CustomError(`${userUpdateFields[i]} must be an object`, 400));
           }
-        }
 
-        // Updates each individual tag that was provided
-        if (User.schema.obj[props[i]].type.schemaName === 'Mixed') {
+          // Update each value in the object
           // eslint-disable-next-line no-loop-func
-          Object.keys(newUserData[props[i]]).forEach((key) => {
-            user.custom[key] = sani.sanitize(newUserData[props[i]][key]);
+          Object.keys(newUserData[userUpdateFields[i]]).forEach((key) => {
+            user.custom[key] = sani.sanitize(newUserData[userUpdateFields[i]][key]);
           });
 
-          // Note: Special requirement for mixed fields in Mongoose
-          // markModified() when property type 'mixed' is updated
-          user.markModified(props[i]);
+          // Mark mixed fields as updated, required for mixed fields to update in mongoose
+          // http://mongoosejs.com/docs/schematypes.html#mixed
+          user.markModified(userUpdateFields[i]);
         }
         else {
-          // Sanitize field
-          user[props[i]] = sani.sanitize(newUserData[props[i]]);
+          // Schema type is not mixed
+          // Sanitize field and update field in project object
+          user[userUpdateFields[i]] = sani.sanitize(newUserData[userUpdateFields[i]]);
         }
       }
 
-      // Save the user
+      // Save updated user
       return user.save();
     })
     .then((updatedUser) => resolve(updatedUser))
-    .catch((error) => reject(error));
+    .catch((error) => {
+      // If the error is not a custom error
+      if (error instanceof M.CustomError) {
+        return reject(error);
+      }
+      return reject(new M.CustomError(error.message));
+    });
   });
 }
 
 /**
  * @description This function takes a user object and username and deletes a user.
+ *
+ * @param {User} reqUser - The requesting user.
+ * @param {String} usernameToDelete - The username of the user to be deleted.
+ *
+ * @return {User} The newly deleted user.
  *
  * @example
  * removeUser({Tony}, 'ppotts')
@@ -317,14 +334,10 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- *
- * @param {User} reqUser - The requesting user.
- * @param {String} usernameToDelete - The username of the user to be deleted.
  */
 function removeUser(reqUser, usernameToDelete) {
   return new Promise((resolve, reject) => {
-    // Check admin user and parameter is valid
+    // Error Check: ensure input parameters are valid
     try {
       assert.ok(reqUser.admin, 'User does not have permissions.');
       assert.ok(typeof usernameToDelete === 'string', 'Username is not a string.');
@@ -338,18 +351,16 @@ function removeUser(reqUser, usernameToDelete) {
       return reject(new M.CustomError(error.message, statusCode, 'error'));
     }
 
-    // Error check - request user cannot deleted self
+    // Error Check: request user cannot deleted self
     if (reqUser.username === usernameToDelete) {
       return reject(new M.CustomError('User cannot delete themselves.', 403));
     }
 
-    // Sanitize username
-    const username = sani.sanitize(usernameToDelete);
     // Define function-wide user
     let userToDelete;
 
     // Get user object
-    findUser(username)
+    findUser(usernameToDelete)
     .then((user) => {
       // Set user
       userToDelete = user;
