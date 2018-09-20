@@ -18,10 +18,10 @@
  * @description This file tests the utility functions.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
-// Load MBEE modules
+// MBEE modules
 const utils = M.require('lib.utils');
 
 /* --------------------( Main )-------------------- */

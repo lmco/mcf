@@ -18,7 +18,7 @@
  * @description Implements authentication strategy for local and ldap.
  */
 
-// Load MBEE modules
+// MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
 const LDAPStrategy = M.require('auth.ldap-strategy');
 const User = M.require('models.user');

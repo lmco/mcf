@@ -11,11 +11,11 @@
  * as test the controlls with invalid inputs.
  */
 
-// Load NPM modules
+// NPM modules
 const chai = require('chai');
 const path = require('path');
 
-// Load MBEE modules
+// MBEE modules
 const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');

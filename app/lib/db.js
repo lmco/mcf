@@ -18,7 +18,7 @@
  * @description Defines database connection functions.
  */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');

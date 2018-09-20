@@ -22,11 +22,11 @@
  * also deleted.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 const path = require('path');
 
-// Load MBEE modules
+// MBEE modules
 const Element = M.require('models.element');
 const Org = M.require('models.organization');
 const Project = M.require('models.project');

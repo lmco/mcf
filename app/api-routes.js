@@ -22,7 +22,7 @@
  * This will authenticate the user and move to the next function.
  */
 
-// Load node modules
+// Node modules
 const express = require('express');
 const api = express.Router();
 

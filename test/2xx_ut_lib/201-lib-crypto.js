@@ -19,10 +19,10 @@
  * and decrypt functions in the library.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
-// Load MBEE modules
+// MBEE modules
 const mbeeCrypto = M.require('lib.crypto');
 
 /* --------------------( Main )-------------------- */

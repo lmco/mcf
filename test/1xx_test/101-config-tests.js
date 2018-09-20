@@ -19,7 +19,7 @@
  * object. For now, it only tests the version number.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
 /* --------------------( Main )-------------------- */

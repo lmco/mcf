@@ -20,12 +20,12 @@
  * handle other object behaviors.
  */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
-// Load MBEE modules
+// MBEE modules
 const User = M.require('models.user');
 const crypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');

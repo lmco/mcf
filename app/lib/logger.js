@@ -27,7 +27,7 @@
  *   - `log.error('An error has occurred')`
  */
 
-// Load node modules
+// Node modules
 const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
 const { execSync } = require('child_process');
