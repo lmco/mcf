@@ -313,10 +313,10 @@ function rejectPatchElement(done) {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
     // Expect response status: 500 Internal Server Error
-    chai.expect(response.statusCode).to.equal(403);
+    chai.expect(response.statusCode).to.equal(500);
     // Verify error message in response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Forbidden');
+    chai.expect(json.message).to.equal('Internal Server Error');
     done();
   });
 }

@@ -24,7 +24,6 @@
 const User = M.require('models.user');
 const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
-const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 
 /**
@@ -61,7 +60,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
       }
       // Check for empty user
       if (!user) {
-        return reject(new errors.CustomError('No user found.', 401));
+        return reject(new M.CustomError('No user found.', 401));
       }
       // User exist
       // Compute the password hash on given password
@@ -69,7 +68,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
       .then(result => {
         // Check password is valid
         if (!result) {
-          return reject(new errors.CustomError('Invalid password.', 401));
+          return reject(new M.CustomError('Invalid password.', 401));
         }
         // Authenticated, return user
         return resolve(user);
@@ -128,7 +127,7 @@ module.exports.handleTokenAuth = function(req, res, token) {
           req.user = null;
           req.session.destroy();
           // Return error
-          return reject(new errors.CustomError('No user found.', 404));
+          return reject(new M.CustomError('No user found.', 404));
         }
         // return User object if authentication was successful
         return resolve(user);
@@ -136,7 +135,7 @@ module.exports.handleTokenAuth = function(req, res, token) {
     }
     // If token is expired user is unauthorized
     else {
-      return reject(new errors.CustomError('Token is expired or session is invalid.', 401));
+      return reject(new M.CustomError('Token is expired or session is invalid.', 401));
     }
   });
 };

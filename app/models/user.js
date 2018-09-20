@@ -264,7 +264,7 @@ UserSchema.methods.verifyPassword = function(pass) {
 };
 
 /**
- * @description An object containing what is allowed on an update to a user.
+ * @description Returns user fields that can be changed
  * @memberOf UserSchema
  */
 UserSchema.methods.getValidUpdateFields = function() {
@@ -272,7 +272,7 @@ UserSchema.methods.getValidUpdateFields = function() {
 };
 
 /**
- * @description Returns the user's public data.
+ * @description Returns a user's public data.
  * @memberOf UserSchema
  */
 UserSchema.methods.getPublicData = function() {
@@ -291,7 +291,7 @@ UserSchema.methods.getPublicData = function() {
 
 /* ---------------------------( User Properties )---------------------------- */
 
-// Necessary for virtual getters to be executed.
+// Required for virtual getters
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });
 

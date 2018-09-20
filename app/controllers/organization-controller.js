@@ -20,9 +20,9 @@
  * that provides functions implementing controller logic and behavior.
  */
 
-// Expose `organization controller`
+// Expose organization controller functions
 // Note: The export is being done before the import to solve the issues of
-// circular refrences between controllers.
+// circular references between controllers.
 module.exports = {
   findOrgs,
   findOrg,
@@ -35,22 +35,25 @@ module.exports = {
   findAllPermissions
 };
 
-// MBEE modules
-const ProjController = M.require('controllers.project-controller');
-const Organization = M.require('models.organization');
-const utils = M.require('lib.utils');
-const sani = M.require('lib.sanitization');
-const errors = M.require('lib.errors');
+// Node.js Modules
+const assert = require('assert');
 
-// eslint consistent-return rule is disabled for this file.
-// The rule may not fit controller-related functions as
-// returns are inconsistent.
+// MBEE Modules
+const ProjController = M.require('controllers.project-controller');
+const UserController = M.require('controllers.user-controller');
+const Organization = M.require('models.organization');
+const sani = M.require('lib.sanitization');
+const utils = M.require('lib.utils');
+
+// eslint consistent-return rule is disabled for this file. The rule may not fit
+// controller-related functions as returns are inconsistent.
 /* eslint-disable consistent-return */
 
 /**
  * @description This function finds all organizations a user belongs to.
  *
- * @param {User} user - The user whose organizations to find
+ * @param {User} reqUser - The user whose organizations to find
+ *
  * @return {Promise} resolve - Array of found organization objects
  *                    reject - error
  *
@@ -61,12 +64,12 @@ const errors = M.require('lib.errors');
  * })
  * .catch(err => {
  *   console.log(err);
- * })
+ * });
  *
  */
-function findOrgs(user) {
+function findOrgs(reqUser) {
   return new Promise((resolve, reject) => {
-    const userID = sani.sanitize(user._id);
+    const userID = sani.sanitize(reqUser._id);
     // Find Organizations user has read access
     findOrgsQuery({ 'permissions.read': userID, deleted: false })
     .then((orgs) => resolve(orgs))
@@ -82,6 +85,7 @@ function findOrgs(user) {
  * @param {String} organizationID - The string of the org ID.
  * @param {Boolean} softDeleted - An optional flag that allows users to
  *  search for soft deleted projects as well.
+ *
  * @return {Promise} resolve - searched organization object
  *                    reject - error
  *
@@ -96,16 +100,15 @@ function findOrgs(user) {
  */
 function findOrg(reqUser, organizationID, softDeleted = false) {
   return new Promise((resolve, reject) => {
-    // Check organizationID is a string
+    // Error Check: ensure input parameters are valid
     try {
-      utils.assertType([organizationID], 'string');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
     }
     catch (error) {
-      // organizationID NOT String, reject error
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
-    // Sanitize organizationID
+    // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
     // Set search Params for orgid and deleted = false
@@ -120,22 +123,22 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
     // Find orgs
     findOrgsQuery(searchParams)
     .then((orgs) => {
-      // Check orgs NOT found
+      // Error Check: ensure at least one org was found
       if (orgs.length === 0) {
         // No orgs found, reject error
-        return reject(new errors.CustomError('Org not found.', 404));
+        return reject(new M.CustomError('Org not found.', 404));
       }
 
-      // Check orgs length greater than one
+      // Error Check: ensure no more than one org was found
       if (orgs.length > 1) {
         // Orgs length greater than one, reject error
-        return reject(new errors.CustomError('More than one org found.', 400));
+        return reject(new M.CustomError('More than one org found.', 400));
       }
 
-      // Check user does NOT have read access and is NOT global admin
+      // Error Check: ensure reqUser has either read permissions or is global admin
       if (!orgs[0].getPermissions(reqUser).read && !reqUser.admin) {
         // User does NOT have read access and is NOT global admin, reject error
-        return reject(new errors.CustomError('User does not have permissions.', 401));
+        return reject(new M.CustomError('User does not have permissions.', 401));
       }
 
       // All checks passed, resolve org
@@ -149,6 +152,7 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
  * @description Find orgs by a database query.
  *
  * @param {Object} orgQuery - The query to be made to the database
+ *
  * @return {Promise} resolve - organization object
  *                   reject - error
  *
@@ -163,17 +167,11 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
  */
 function findOrgsQuery(orgQuery) {
   return new Promise((resolve, reject) => {
-    // Sanitize query
-    const query = sani.sanitize(orgQuery);
-
     // Find orgs
-    Organization.find(query)
-    // Populate org's projects, and permissions
+    Organization.find(orgQuery)
     .populate('projects permissions.read permissions.write permissions.admin')
-    // Resolve found orgs
     .then((orgs) => resolve(orgs))
-    // Reject error
-    .catch(() => reject(new errors.CustomError('Find failed.')));
+    .catch(() => reject(new M.CustomError('Find failed.')));
   });
 }
 
@@ -200,30 +198,40 @@ function createOrg(reqUser, newOrgData) {
     // Initialize optional fields with a default
     let custom = null;
 
-    // Check admin and valid org data
+    // Error Check: ensure input parameters are valid
     try {
-      utils.assertAdmin(reqUser);
-      utils.assertExists(['id', 'name'], newOrgData);
-      utils.assertType([newOrgData.id, newOrgData.name], 'string');
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(newOrgData.hasOwnProperty('id'), 'ID not provided in request body.');
+      assert.ok(newOrgData.hasOwnProperty('name'), 'Name not provided in request body.');
+      assert.ok(typeof newOrgData.id === 'string', 'ID in request body is not a string.');
+      assert.ok(typeof newOrgData.name === 'string', 'Name in request body is not a string.');
+
+      // If custom data provided, validate type and sanitize
       if (utils.checkExists(['custom'], newOrgData)) {
-        utils.assertType([newOrgData.custom], 'object');
+        assert.ok(typeof newOrgData.custom === 'object',
+          'Custom in request body is not an object.');
         custom = sani.html(newOrgData.custom);
       }
     }
     catch (error) {
-      return reject(error);
+      let statusCode = 400;
+      // Return a 401 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 401;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'error'));
     }
 
-    // Sanitize fields
+    // Sanitize query inputs
     const orgID = sani.html(newOrgData.id);
     const orgName = sani.html(newOrgData.name);
 
     // Check if org already exists
     findOrgsQuery({ id: orgID })
     .then((foundOrg) => {
-      // If org already exists, reject
+      // Error Check: ensure no org was found
       if (foundOrg.length > 0) {
-        return reject(new errors.CustomError('An organization with the same ID already exists.', 403));
+        return reject(new M.CustomError('An organization with the same ID already exists.', 403));
       }
 
       // Create the new org
@@ -243,11 +251,11 @@ function createOrg(reqUser, newOrgData) {
     .then((createdOrg) => resolve(createdOrg))
     .catch((error) => {
       // If error is a CustomError, reject it
-      if (error instanceof errors.CustomError) {
+      if (error instanceof M.CustomError) {
         return reject(error);
       }
       // If it's not a CustomError, create one and reject
-      return reject(new errors.CustomError(error.message));
+      return reject(new M.CustomError(error.message));
     });
   });
 }
@@ -258,7 +266,7 @@ function createOrg(reqUser, newOrgData) {
  *
  * @param {User} reqUser - The object containing the  requesting user.
  * @param {String} organizationID - The organization ID.
- * @param {Object} orgUpdate - An object containing updated Organization data
+ * @param {Object} orgUpdated - An object containing updated Organization data
  *
  * @return {Object} updated org
  *
@@ -271,43 +279,43 @@ function createOrg(reqUser, newOrgData) {
  *   M.log.error(error);
  * });
  */
-function updateOrg(reqUser, organizationID, orgUpdate) {
+function updateOrg(reqUser, organizationID, orgUpdated) {
   return new Promise((resolve, reject) => {
-    // Check parameters are correct type
+    // Error Check: ensure input parameters are valid
     try {
-      utils.assertType([organizationID], 'string');
-      utils.assertType([orgUpdate], 'object');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof orgUpdated === 'object', 'Updated org is not an object');
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
-    // Check if orgUpdate is instance of Organization model
-    if (orgUpdate instanceof Organization) {
+    // Check if orgUpdated is instance of Organization model
+    if (orgUpdated instanceof Organization) {
       // Disabling linter because the reassign is needed to convert the object to JSON
-      // orgUpdate is instance of Organization model, convert to JSON
-      orgUpdate = orgUpdate.toJSON(); // eslint-disable-line no-param-reassign
+      // orgUpdated is instance of Organization model, convert to JSON
+      orgUpdated = orgUpdated.toJSON(); // eslint-disable-line no-param-reassign
     }
 
-    // Check if orgID is default
+    // Error Check: ensure the org being updated is not the default org
     if (organizationID === 'default') {
       // orgID is default, reject error
-      return reject(new errors.CustomError('Cannot update the default org.', 403));
+      return reject(new M.CustomError('Cannot update the default org.', 403));
     }
 
     // Find organization
     // Note: organizationID is sanitized in findOrg()
     findOrg(reqUser, organizationID)
     .then((org) => {
-      // Check reqUser does NOT admin permissions or NOT global admin
+      // Error Check: ensure reqUser is an org admin or global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new errors.CustomError('User does not have permissions.', 401));
+        return reject(new M.CustomError('User does not have permissions.', 401));
       }
 
-      // Get keys from orgUpdate
-      const orgUpdateFields = Object.keys(orgUpdate);
-      // Get valid update fields
+      // Get list of keys the user is trying to update
+      const orgUpdateFields = Object.keys(orgUpdated);
+      // Get list of parameters which can be updated from model
       const validUpdateFields = org.getValidUpdateFields();
 
       // Loop through orgUpdateFields
@@ -317,35 +325,42 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
         // Check if original org does NOT contain updatedField
         if (!org.toJSON().hasOwnProperty(updateField)) {
           // Original org does NOT contain updatedField, reject error
-          return reject(new errors.CustomError(`Organization does not contain field ${updateField}.`, 400));
+          return reject(new M.CustomError(`Organization does not contain field ${updateField}.`, 400));
         }
 
         // Check if updated field is equal to the original field
-        if (utils.deepEqual(org.toJSON()[updateField], orgUpdate[updateField])) {
+        if (utils.deepEqual(org.toJSON()[updateField], orgUpdated[updateField])) {
           // Updated value matches existing value, continue to next loop iteration
           continue;
         }
 
-        // Check if updateField is invalid
+        // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
-          // updateField is invalid, reject error
-          return reject(new errors.CustomError(`Organization property [${updateField}] cannot be changed.`, 403));
+          // field cannot be updated, reject error
+          return reject(new M.CustomError(`Organization property [${updateField}] cannot be changed.`, 403));
         }
 
         // Check if updateField type is 'Mixed'
         if (Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
-          // updateField is 'Mixed', update each value in mixed
+          // Only objects should be passed into mixed data
+          if (typeof orgUpdated[updateField] !== 'object') {
+            return reject(new M.CustomError(`${updateField} must be an object`, 400));
+          }
+
+          // Update each value in the object
           // eslint-disable-next-line no-loop-func
-          Object.keys(orgUpdate[updateField]).forEach((key) => {
-            org.custom[key] = sani.sanitize(orgUpdate[updateField][key]);
+          Object.keys(orgUpdated[updateField]).forEach((key) => {
+            org.custom[key] = sani.sanitize(orgUpdated[updateField][key]);
           });
+
           // Mark mixed fields as updated, required for mixed fields to update in mongoose
           // http://mongoosejs.com/docs/schematypes.html#mixed
           org.markModified(updateField);
         }
         else {
-          // Sanitize the updated value
-          org[updateField] = sani.sanitize(orgUpdate[updateField]);
+          // Schema type is not mixed
+          // Sanitize field and update field in org object
+          org[updateField] = sani.sanitize(orgUpdated[updateField]);
         }
       }
 
@@ -355,10 +370,10 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
     .then(updatedOrg => resolve(updatedOrg))
     .catch((error) => {
       // If the error is not a custom error
-      if (error instanceof errors.CustomError) {
+      if (error instanceof M.CustomError) {
         return reject(error);
       }
-      return reject(new errors.CustomError(error.message));
+      return reject(new M.CustomError(error.message));
     });
   });
 }
@@ -382,35 +397,31 @@ function updateOrg(reqUser, organizationID, orgUpdate) {
  *   M.log.error(error);
  * });
  */
-// TODO: MBX-434 discuss if options should become a boolean for soft or hard delete.
-// TODO: MBX-434 Come back and review function following Austin and Phill working out
-// Project and Element removal.
-// And do appropriate checks for either implementations.
 function removeOrg(reqUser, organizationID, hardDelete = false) {
   return new Promise((resolve, reject) => {
-    // Check valid param type
+    // Error Check: ensure input parameters are valid
     try {
-      utils.assertAdmin(reqUser);
-      utils.assertType([organizationID], 'string');
-      utils.assertType([hardDelete], 'boolean');
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
-    // Check if orgID is default
+    // Error Check: ensure reqUser is not deleting the default org
     if (organizationID === 'default') {
       // orgID is default, reject error.
-      return reject(new errors.CustomError('The default organization cannot be deleted.', 403));
+      return reject(new M.CustomError('The default organization cannot be deleted.', 403));
     }
 
-    // Find organization to ensure it exists
+    // Find the organization
     findOrg(reqUser, organizationID, true)
     .then((org) => {
       // Hard delete
       if (hardDelete) {
         Organization.deleteOne({ id: org.id })
-        // Delete all projects in that org
+        // Delete all projects in the org
         .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
         .then(() => resolve(org))
         .catch((error) => reject(error));
@@ -418,7 +429,7 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
       // Soft delete
       else {
         Organization.updateOne({ id: org.id }, { deleted: true })
-        // Soft-delete all projects in that org
+        // Soft-delete all projects in the org
         .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
         .then(() => {
           // Set the returned org deleted field to true since updateOne()
@@ -433,8 +444,6 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
   });
 }
 
-// TODO: MBX-436  Change all function headers to match the following, including an
-// example of an expected return.
 /**
  * @description This function returns a users permission on an org.
  *
@@ -462,7 +471,7 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
  */
 function findPermissions(reqUser, searchedUsername, organizationID) {
   return new Promise((resolve, reject) => {
-    // Find all user permissions on org
+    // Find org - input is sanitized by findAllPermissions()
     findAllPermissions(reqUser, organizationID)
     .then(permissionList => {
       // Check if user NOT in permissionsList
@@ -498,21 +507,21 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
  *
  */
 function setPermissions(reqUser, organizationID, searchedUsername, role) {
-  const UserController = M.require('controllers.user-controller');
-
   return new Promise((resolve, reject) => {
-    // Check parameters ar valid
+    // Error Check: ensure input parameters are valid
     try {
-      utils.assertType([organizationID, role, searchedUsername], 'string');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof searchedUsername === 'string', 'Searched username is not a string.');
+      assert.ok(typeof role === 'string', 'Role is not a string.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Check if role parameter NOT a valid role
     if (!['admin', 'write', 'read', 'REMOVE_ALL'].includes(role)) {
       // Role parameter NOT a valid role, reject error
-      return reject(new errors.CustomError('The permission entered is not a valid permission.', 400));
+      return reject(new M.CustomError('The permission entered is not a valid permission.', 400));
     }
 
     // Sanitize parameters
@@ -531,7 +540,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
       // Check if requesting user is found user
       if (reqUser._id.toString() === foundUser._id.toString()) {
         // Requesting user is found user, reject error
-        return reject(new errors.CustomError('User cannot change their own permissions.', 403));
+        return reject(new M.CustomError('User cannot change their own permissions.', 403));
       }
       // Find org
       return findOrg(reqUser, orgID);
@@ -540,7 +549,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
       // Check requesting user NOT org admin and NOT global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         // Requesting user NOT org admin and NOT global admin, reject error
-        return reject(new errors.CustomError('User cannot change organization permissions.', 401));
+        return reject(new M.CustomError('User cannot change organization permissions.', 401));
       }
 
       // Initialize permissions and get permissions levels
@@ -586,10 +595,10 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
     .then((savedOrg) => resolve(savedOrg))
     .catch((error) => {
       // If the error is not a custom error
-      if (error instanceof errors.CustomError) {
+      if (error instanceof M.CustomError) {
         return reject(error);
       }
-      return reject(new errors.CustomError(error.message));
+      return reject(new M.CustomError(error.message));
     });
   });
 }
@@ -626,44 +635,36 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
  */
 function findAllPermissions(reqUser, organizationID) {
   return new Promise((resolve, reject) => {
-    // Check reqUser is Admin and parameters are valid.
+    // Error Check: ensure input parameters are valid
     try {
-      utils.assertType([organizationID], 'string');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
-    // Sanitize organizationID
-    const orgID = sani.sanitize(organizationID);
-
-    // Initialize returnDict
-    const returnDict = {};
-
     // Find the org
-    findOrg(reqUser, orgID)
+    findOrg(reqUser, organizationID)
     .then((org) => {
-      // Set users to read permissions list
-      const users = org.permissions.read;
+      // Get the permission types for an org
+      const permissionLevels = org.getPermissionLevels();
+      // Get a list of all users on the project
+      const memberList = org.permissions[permissionLevels[1]].map(u => u.username);
 
-      // Loop through each user in the org
-      users.forEach((u) => {
-        // Add a field for each username to returnDict
-        returnDict[u.username] = {};
+      // Initialize variables
+      let permissionsList = [];
+      const roleList = {};
 
-        // Loop through each type of permission for each user
-        org.getPermissionLevels().forEach((role) => {
-          // Check if role is NOT 'REMOVE_ALL'
-          if (role !== 'REMOVE_ALL') {
-            // role is NOT 'REMOVE_ALL', map boolean value of permission to permVals
-            const permVals = org.permissions[role].map(v => v._id.toString());
-            // Set returnDict username role to boolean
-            returnDict[u.username][role] = permVals.includes(u._id.toString());
-          }
-        });
-      });
-      // Resolve returnDict
-      return resolve(returnDict);
+      // Loop through each member of the org
+      for (let i = 0; i < memberList.length; i++) {
+        roleList[memberList[i]] = {};
+        // Loop through each permission type, excluding REMOVE_ALL
+        for (let j = 1; j < permissionLevels.length; j++) {
+          permissionsList = org.permissions[permissionLevels[j]].map(u => u.username);
+          roleList[memberList[i]][permissionLevels[j]] = permissionsList.includes(memberList[i]);
+        }
+      }
+      return resolve(roleList);
     })
     .catch(error => reject(error));
   });

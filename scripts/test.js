@@ -151,6 +151,6 @@ function mochaWalk(dir, mochaObj) {
     // Add the full path and filename to mocha
     mochaObj.addFile(path.join(dir, file));
   });
-};
+}
 
 module.exports = test;

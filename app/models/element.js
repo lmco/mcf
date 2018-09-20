@@ -58,7 +58,7 @@ const options = { discriminatorKey: 'type' };
  * @description The base schema definition inherited by all other element types.
  *
  * @property {String} id - The elements non-unique element ID.
- * @property {String} uid - The elements unique id namespaced by its project
+ * @property {String} uid - The elements unique id name-spaced by its project
  * and organization.
  * @property {String} uuid - The elements RFC 4122 id, automatically generated
  * or taken from another source if imported.
@@ -206,14 +206,6 @@ const PackageSchema = new mongoose.Schema({
 }, options);
 
 
-// PackageSchema.virtual('contains', {
-//   ref: 'Element',
-//   localField: '_id',
-//   foreignField: 'parent',
-//   justOne: false
-// });
-
-
 /* --------------------------( Element Middleware )-------------------------- */
 
 /**
@@ -245,7 +237,7 @@ ElementSchema.pre('save', function(next) {
 /* ---------------------------( Element Methods )---------------------------- */
 
 /**
- * @description Returns the fields which users are allowed to update on a element.
+ * @description Returns element fields that can be changed
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
@@ -254,7 +246,7 @@ ElementSchema.methods.getValidUpdateFields = function() {
 
 
 /**
- * @description Returns a valid element type
+ * @description Returns valid element types
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidTypes = function() {
@@ -272,7 +264,7 @@ const Relationship = Element.discriminator('Relationship', RelationshipSchema);
 const Package = Element.discriminator('Package', PackageSchema);
 
 
-/* ----------------------------( Expose Models )----------------------------- */
+/* ------------------------( Element Schema Export )------------------------- */
 
 module.exports.Element = Element;
 module.exports.Block = Block;
