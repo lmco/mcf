@@ -69,10 +69,6 @@ const utils = M.require('lib.utils');
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
- * TODO: MBX-438 - This function was doing double queries when it doesn't need
- * to, we need to determine the best way to handle this and write a test in 403
- * to verify this function.
  */
 function findProjects(reqUser, organizationID, softDeleted = false) {
   return new Promise((resolve, reject) => {
@@ -153,12 +149,13 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
 
     // Loop through each org
     Object(arrOrganizations).forEach((org) => {
-      // Ensure user has permissions to delete projects on each org
+      // Error Check: ensure user has permissions to delete projects on each org
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         return reject(new M.CustomError(
           `User does not have permission to delete projects in the org ${org.name}.`, 401
         ));
       }
+      // Add org to deleteQuery
       deleteQuery.$or.push({ org: org._id });
       arrDeletedProjects = arrDeletedProjects.concat(org.projects);
     });
@@ -348,7 +345,7 @@ function createProject(reqUser, project) {
     // Initialize function-wide variables
     let org = null;
 
-    // Error check - Make sure the org exists
+    // Error Check: make sure the org exists
     OrgController.findOrg(reqUser, orgID)
     .then((_org) => {
       // Error check: make sure user has write permission on org
@@ -430,7 +427,6 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
-    // TODO: Re-assess this.
     // Check if projectUpdated is instance of Project model
     if (projectUpdated instanceof Project) {
       // Disabling linter because the reassign is needed to convert the object to JSON
@@ -706,7 +702,7 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  *   M.log.error(error);
  * });
  *
- * TODO: (Jake) Clean up this code (MBX-458)
+ * TODO: (Jake) Clean up this code (MBX-446)
  */
 function setPermissions(reqUser, organizationID, projectID, searchedUsername, role) {
   return new Promise((resolve, reject) => {
