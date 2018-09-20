@@ -806,7 +806,6 @@ function getAllProjMemRoles(req, res) {
  *
  * @description Takes an orgid, projectid and username in the URI and returns
  * an object specifying which roles the user has within the project.
- * // TODO: Move findUser to setPermissions() in the project-controller (MBX-426)
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -925,7 +924,7 @@ function getUsers(req, res) {
   }
 
   // Get all users in MBEE
-  UserController.findUsers()
+  UserController.findUsers(req.user)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -956,7 +955,7 @@ function getUser(req, res) {
 
   // Find the member from it's username
   // NOTE: findUser() sanitizes req.params.username
-  UserController.findUser(req.params.username)
+  UserController.findUser(req.user, req.params.username)
   .then((user) => {
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');

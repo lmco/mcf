@@ -49,10 +49,13 @@ const sani = M.require('lib.sanitization');
 /**
  * @description This function finds all users.
  *
+ * @param {User} reqUser - The requesting user
+ * @param {Boolean} softDeleted - The optional flag to denote searching for deleted users
+ *
  * @return {Array} Array of found user objects
  *
  * @example
- * findUsers()
+ * findUsers({Tony})
  * .then(function(users) {
  *   // do something with the found users
  * })
@@ -61,24 +64,42 @@ const sani = M.require('lib.sanitization');
  * });
  *
  */
-function findUsers() {
+function findUsers(reqUser, softDeleted = false) {
   return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'error'));
+    }
+
+    const searchParams = { deleted: false };
+
+    // Check softDeleted flag true and User Admin true
+    if (softDeleted && reqUser.admin) {
+      // softDeleted flag true and User Admin true, remove deleted: false
+      delete searchParams.deleted;
+    }
+
     // Find users
-    findUsersQuery({ deletedOn: null })
+    findUsersQuery(searchParams)
     .then((users) => resolve(users))
     .catch((error) => reject(error));
   });
 }
 
 /**
- * @description This function takes a username and finds a user
+ * @description This function finds a user.
  *
- * @param {String} searchedUsername The username of the searched user.
+ * @param {User} reqUser - The requesting user
+ * @param {String} searchedUsername - The username of the searched user.
+ * @param {Boolean] softDeleted - The optional flag to denote searching for deleted users
  *
  * @return {User} The found user
  *
  * @example
- * findUser('tstark')
+ * findUser({Tony}, 'tstark', false)
  * .then(function(user) {
  *   // do something with the found user
  * })
@@ -87,11 +108,12 @@ function findUsers() {
  * });
  *
  * */
-function findUser(searchedUsername) {
+function findUser(reqUser, searchedUsername, softDeleted = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof searchedUsername === 'string', 'Username is not a string.');
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'error'));
@@ -100,8 +122,16 @@ function findUser(searchedUsername) {
     // Sanitize query inputs
     const username = sani.sanitize(searchedUsername);
 
+    const searchParams = { username: username, deleted: false };
+
+    // Check softDeleted flag true and User Admin true
+    if (softDeleted && reqUser.admin) {
+      // softDeleted flag true and User Admin true, remove deleted: false
+      delete searchParams.deleted;
+    }
+
     // Find users
-    findUsersQuery({ username: username, deletedOn: null })
+    findUsersQuery(searchParams)
     .then((arrUsers) => {
       // Error Check: ensure at least one user was found
       if (arrUsers.length === 0) {
@@ -265,7 +295,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
 
     // Find user
     // Note: usernameToUpdate is sanitized in findUser()
-    findUser(usernameToUpdate)
+    findUser(reqUser, usernameToUpdate)
     .then((user) => {
       // Get list of keys the user is trying to update
       const userUpdateFields = Object.keys(newUserData);
@@ -360,7 +390,7 @@ function removeUser(reqUser, usernameToDelete) {
     let userToDelete;
 
     // Get user object
-    findUser(usernameToDelete)
+    findUser(reqUser, usernameToDelete)
     .then((user) => {
       // Set user
       userToDelete = user;

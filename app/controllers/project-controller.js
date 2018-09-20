@@ -727,7 +727,7 @@ function setPermissions(reqUser, organizationID, projectID, searchedUsername, ro
     let setUser = null;
 
     // Lookup the user
-    UserController.findUser(searchUsername)
+    UserController.findUser(reqUser, searchUsername)
     .then(foundUser => {
       setUser = foundUser;
       return findProject(reqUser, organizationID, projectID);
