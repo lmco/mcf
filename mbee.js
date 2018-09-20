@@ -143,6 +143,11 @@ if (installComplete) {
     writable: false,
     enumerable: true
   });
+
+  // Initialize the CustomError Class
+  Object.defineProperty(M, 'CustomError', {
+    value: M.require('lib.errors').CustomError
+  });
 }
 
 // Make the M object read only and its properties cannot be changed or removed.

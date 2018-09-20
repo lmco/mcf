@@ -33,13 +33,14 @@ module.exports = {
   removeUser
 };
 
-// Load MBEE modules
+// Node Modules
+const assert = require('assert');
+
+// MBEE Modules
 const User = M.require('models.user');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
-const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
-const errors = M.require('lib.errors');
 const validators = M.require('lib.validators');
 
 // eslint consistent-return rule is disabled for this file.
@@ -97,13 +98,13 @@ function findUser(searchedUsername) {
     .then((arrUsers) => {
       // Ensure a user was found
       if (arrUsers.length < 1) {
-        return reject(new errors.CustomError('User not found.', 404));
+        return reject(new M.CustomError('User not found.', 404));
       }
 
       // Check if more than one user found
       if (arrUsers.length > 1) {
         // More than 1 user found, reject error
-        return reject(new errors.CustomError('More than one user found.', 400));
+        return reject(new M.CustomError('More than one user found.', 400));
       }
 
       // Return first user in the array
@@ -138,7 +139,7 @@ function findUsersQuery(usersQuery) {
     // Resolve  found users
     .then((users) => resolve(users))
     // Reject error
-    .catch(() => reject(new errors.CustomError('Find failed.')));
+    .catch(() => reject(new M.CustomError('Find failed.')));
   });
 }
 
@@ -163,12 +164,18 @@ function createUser(reqUser, newUserData) {
   return new Promise((resolve, reject) => {
     // Check admin and valid user data
     try {
-      utils.assertAdmin(reqUser);
-      utils.assertExists(['username'], newUserData);
-      utils.assertType([newUserData.username], 'string');
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(newUserData.hasOwnProperty('username'), 'Username not provided in request body.');
+      assert.ok(typeof newUserData.username === 'string',
+        'Username in request body is not a string.');
     }
     catch (error) {
-      return reject(error);
+      let statusCode = 400;
+      // Return a 401 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 401;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'error'));
     }
 
     // Define function-wide user
@@ -179,9 +186,7 @@ function createUser(reqUser, newUserData) {
     .then((users) => {
       // Ensure user doesn't already exist
       if (users.length >= 1) {
-        return reject(
-          new errors.CustomError('A user with a matching username already exists.', 403)
-        );
+        return reject(new M.CustomError('A user with a matching username already exists.', 403));
       }
 
       // Create the new user
@@ -208,11 +213,11 @@ function createUser(reqUser, newUserData) {
     .then(() => resolve(createdUser))
     .catch((error) => {
       // If error is a CustomError, reject it
-      if (error instanceof errors.CustomError) {
+      if (error instanceof M.CustomError) {
         return reject(error);
       }
       // If it's not a CustomError, create one and reject
-      return reject(new errors.CustomError(error.message));
+      return reject(new M.CustomError(error.message));
     });
   });
 }
@@ -239,12 +244,17 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
   return new Promise((resolve, reject) => {
     // Check valid user data and admin
     try {
-      utils.assertAdmin(reqUser);
-      utils.assertType([usernameToUpdate], 'string');
-      utils.assertType([newUserData], 'object');
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof usernameToUpdate === 'string', 'Username is not a string.');
+      assert.ok(typeof newUserData === 'object', 'Updated user is not an object.');
     }
     catch (error) {
-      return reject(error);
+      let statusCode = 400;
+      // Return a 401 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 401;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'error'));
     }
 
     // Find user
@@ -261,13 +271,13 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       for (let i = 0; i < props.length; i++) {
         // Error check - make sure the properties exist and can be updated
         if (!validUpdateFields.includes(props[i])) {
-          return reject(new errors.CustomError(`User property [${props[i]}] cannot be changed.`, 403));
+          return reject(new M.CustomError(`User property [${props[i]}] cannot be changed.`, 403));
         }
 
         // Error Check - If the field has a validator, ensure the field is valid
         if (userValidators[props]) {
           if (!RegExp(userValidators[props]).test(newUserData[props])) {
-            return reject(new errors.CustomError(`The updated ${props} is not valid.`, 403));
+            return reject(new M.CustomError(`The updated ${props} is not valid.`, 403));
           }
         }
 
@@ -316,16 +326,21 @@ function removeUser(reqUser, usernameToDelete) {
   return new Promise((resolve, reject) => {
     // Check admin user and parameter is valid
     try {
-      utils.assertAdmin(reqUser);
-      utils.assertType([usernameToDelete], 'string');
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof usernameToDelete === 'string', 'Username is not a string.');
     }
     catch (error) {
-      return reject(error);
+      let statusCode = 400;
+      // Return a 401 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 401;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'error'));
     }
 
     // Error check - request user cannot deleted self
     if (reqUser.username === usernameToDelete) {
-      return reject(new errors.CustomError('User cannot delete themselves.', 403));
+      return reject(new M.CustomError('User cannot delete themselves.', 403));
     }
 
     // Sanitize username

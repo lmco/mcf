@@ -47,7 +47,6 @@ const ElementController = M.require('controllers.element-controller');
 const Project = M.require('models.project');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
-const errors = M.require('lib.errors');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -79,9 +78,13 @@ const errors = M.require('lib.errors');
  */
 function findProjects(reqUser, organizationID, softDeleted = false) {
   return new Promise((resolve, reject) => {
-    // Error check: if org ID is not a string, reject with bad request
-    if (typeof organizationID !== 'string') {
-      return reject(new errors.CustomError('Organization ID is not a string', 400));
+    // Check input parameters are valid
+    try {
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize the organization ID
@@ -135,18 +138,18 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  */
 function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
   return new Promise((resolve, reject) => {
-    // Ensure parameters of correctly formatted
+    // Check input parameters are valid
     try {
-      utils.assertType([arrOrganizations], 'object');
-      utils.assertType([hardDelete], 'boolean');
+      assert.ok(typeof arrOrganizations === 'object', 'Organizations array is not an object.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // If hard deleting, ensure user is a site-wide admin
     if (hardDelete && !reqUser.admin) {
-      return reject(new errors.CustomError('User does not have permission to permanently'
+      return reject(new M.CustomError('User does not have permission to permanently'
           + ' delete a project.', 401));
     }
 
@@ -158,7 +161,7 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
     Object(arrOrganizations).forEach((org) => {
       // Ensure user has permissions to delete projects on each org
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new errors.CustomError(
+        return reject(new M.CustomError(
           `User does not have permission to delete projects in the org ${org.name}.`, 401
         ));
       }
@@ -213,12 +216,14 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
  */
 function findProject(reqUser, organizationID, projectID, softDeleted = false) {
   return new Promise((resolve, reject) => {
+    // Check input parameters are valid
     try {
-      utils.assertType([organizationID, projectID], 'string');
-      utils.assertType([softDeleted], 'boolean');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize project properties
@@ -235,17 +240,17 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
     .then((projects) => {
       // Error Check - Ensure only 1 project is found
       if (projects.length < 1) {
-        return reject(new errors.CustomError('Project not found.', 404));
+        return reject(new M.CustomError('Project not found.', 404));
       }
 
       // Ensure only one project was found
       if (projects.length > 1) {
-        return reject(new errors.CustomError('More than one project found.', 400, 'critical'));
+        return reject(new M.CustomError('More than one project found.', 400, 'critical'));
       }
 
       // Check Permissions
       if (!projects[0].getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401));
       }
 
       // Return resulting project
@@ -332,8 +337,7 @@ function createProject(reqUser, project) {
       }
     }
     catch (error) {
-      M.log.error(error.message);
-      return reject(new errors.CustomError(error.message, 400));
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize project properties
@@ -346,14 +350,14 @@ function createProject(reqUser, project) {
     .then((org) => {
       // Error check: make sure user has write permission on org
       if (!org.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401));
       }
 
       // Error check: check if the project already exists
       // Must nest promise since it uses the return from findOrg
       // TODO: Relates to MBX-433. Use findProjectsQuery() talk to Josh or Jake.
       findProject(reqUser, org.id, projID)
-      .then(() => reject(new errors.CustomError('A project with a matching ID already exists.', 403)))
+      .then(() => reject(new M.CustomError('A project with a matching ID already exists.', 403)))
       .catch((error) => {
         // Project was not found which is expected
         if (error.description === 'Project not found.') {
@@ -374,7 +378,7 @@ function createProject(reqUser, project) {
 
           newProject.save((saveErr, projectUpdated) => {
             if (saveErr) {
-              return reject(new errors.CustomError('Save failed.'));
+              return reject(new M.CustomError('Save failed.'));
             }
             // Return success and the JSON object
             return resolve(projectUpdated);
@@ -419,8 +423,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       assert.strictEqual(typeof projectUpdated, 'object', 'projectUpdated is not an object');
     }
     catch (error) {
-      M.log.error(error.message);
-      return reject(new errors.CustomError(error.message, 400));
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // TODO: Re-assess this.
@@ -438,7 +441,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       // Check reqUser does NOT admin permissions or NOT global admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new errors.CustomError('User does not have permissions.', 401));
+        return reject(new M.CustomError('User does not have permissions.', 401));
       }
 
       // Get list of keys the user is trying to update
@@ -457,14 +460,14 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
 
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
-          return reject(new errors.CustomError(`Project property [${updateField}] cannot be changed.`, 403));
+          return reject(new M.CustomError(`Project property [${updateField}] cannot be changed.`, 403));
         }
 
         // Updates each individual tag that was provided.
         if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof projectUpdated[updateField] !== 'object') {
-            return reject(new errors.CustomError(`${updateField} must be an object`, 400));
+            return reject(new M.CustomError(`${updateField} must be an object`, 400));
           }
 
           // eslint-disable-next-line no-loop-func
@@ -486,7 +489,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       // Save updated org
       project.save((saveProjErr) => {
         if (saveProjErr) {
-          return reject(new errors.CustomError('Save failed.'));
+          return reject(new M.CustomError('Save failed.'));
         }
         // Return the updated project object
         return resolve(project);
@@ -523,16 +526,17 @@ function removeProject(reqUser, organizationID, projectID, hardDelete) {
   return new Promise((resolve, reject) => {
     // Check parameters are valid
     try {
-      utils.assertType([organizationID, projectID], 'string');
-      utils.assertType([hardDelete], 'boolean');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // If user tries to hard-delete and is not a system admin, reject
     if (hardDelete && !reqUser.admin) {
-      return reject(new errors.CustomError('User does not have permission to permanently delete a project.', 401));
+      return reject(new M.CustomError('User does not have permission to permanently delete a project.', 401));
     }
 
     // Find the project
@@ -540,7 +544,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete) {
     .then((project) => {
       // Verify user has permissions to delete project
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401));
       }
 
       // Hard delete
@@ -707,7 +711,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, permiss
       assert.ok(typeof permissionType === 'string', 'Permission type is not a string.');
     }
     catch (error) {
-      return reject(new errors.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize input
@@ -728,7 +732,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, permiss
     .then((project) => {
       // Check permissions
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401));
       }
 
       // Grab permissions levels from Project schema method
@@ -736,12 +740,12 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, permiss
 
       // Error Check - Make sure that a valid permissions type was passed
       if (!permissionLevels.includes(permType)) {
-        return reject(new errors.CustomError('Permission type not found.', 404));
+        return reject(new M.CustomError('Permission type not found.', 404));
       }
 
       // Error Check - Do not user to change their own permissions
       if (reqUser.username === setUser.username) {
-        return reject(new errors.CustomError('User cannot change their own permissions.', 403));
+        return reject(new M.CustomError('User cannot change their own permissions.', 403));
       }
 
       // Grab the index of the permission type
@@ -777,7 +781,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, permiss
         pushPullRoles,
         (saveProjErr, projectSaved) => {
           if (saveProjErr) {
-            return reject(new errors.CustomError('Save failed.'));
+            return reject(new M.CustomError('Save failed.'));
           }
           // Check if user has org read permissions
           OrgController.findPermissions(reqUser, setUser.username, orgID)

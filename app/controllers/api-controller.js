@@ -31,7 +31,6 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
-const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 
 // Expose `ElementController`
@@ -212,7 +211,7 @@ function version(req, res) {
 function getOrgs(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -294,7 +293,7 @@ function deleteOrgs(req, res) {
 function getOrg(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -324,13 +323,13 @@ function getOrg(req, res) {
 function postOrg(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
-    const error = new errors.CustomError('Organization ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError('Organization ID in the body does not match ID in the params.', 400);
     return res.status(error.status).send(error);
   }
 
@@ -363,13 +362,13 @@ function postOrg(req, res) {
 function patchOrg(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
-    const error = new errors.CustomError('Organization ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError('Organization ID in the body does not match ID in the params.', 400);
     return res.status(error.status).send(error);
   }
 
@@ -399,7 +398,7 @@ function patchOrg(req, res) {
 function deleteOrg(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -436,7 +435,7 @@ function deleteOrg(req, res) {
 function getOrgRole(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -471,7 +470,7 @@ function getOrgRole(req, res) {
 function postOrgRole(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -502,7 +501,7 @@ function postOrgRole(req, res) {
 function deleteOrgRole(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -533,7 +532,7 @@ function deleteOrgRole(req, res) {
 function getAllOrgMemRoles(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -564,7 +563,7 @@ function getAllOrgMemRoles(req, res) {
 function getProjects(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -641,7 +640,7 @@ function deleteProjects(req, res) {
 function getProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -671,19 +670,19 @@ function getProject(req, res) {
 function postProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
   // If org ID was provided in the body, ensure it matches org ID in params
   if (utils.checkExists(['org.id'], req.body) && (req.params.orgid !== req.body.org.id)) {
-    const error = new errors.CustomError('Org ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError('Org ID in the body does not match ID in the params.', 400);
     return res.status(error.status).send(error);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
   if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
-    const error = new errors.CustomError('Project ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError('Project ID in the body does not match ID in the params.', 400);
     return res.status(error.status).send(error);
   }
 
@@ -719,7 +718,7 @@ function postProject(req, res) {
 function patchProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -749,7 +748,7 @@ function patchProject(req, res) {
 function deleteProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -786,7 +785,7 @@ function deleteProject(req, res) {
 function getAllProjMemRoles(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -817,7 +816,7 @@ function getAllProjMemRoles(req, res) {
 function getProjMemRole(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -853,7 +852,7 @@ function getProjMemRole(req, res) {
 function postProjectRole(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -884,7 +883,7 @@ function postProjectRole(req, res) {
 function deleteProjectRole(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -916,7 +915,7 @@ function deleteProjectRole(req, res) {
 function getUsers(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -951,7 +950,7 @@ function getUsers(req, res) {
 function getUser(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -980,13 +979,13 @@ function getUser(req, res) {
 function postUser(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
   // If username was provided in the body, ensure it matches username in params
   if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
-    const error = new errors.CustomError('Username in body does not match username in params.', 400, 'warn');
+    const error = new M.CustomError('Username in body does not match username in params.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
@@ -1016,7 +1015,7 @@ function postUser(req, res) {
 function patchUser(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -1045,7 +1044,7 @@ function patchUser(req, res) {
 function deleteUser(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -1074,7 +1073,7 @@ function deleteUser(req, res) {
 function whoami(req, res) {
   // Sanity check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -1098,7 +1097,7 @@ function whoami(req, res) {
 function getElements(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -1127,7 +1126,7 @@ function getElements(req, res) {
 function getElement(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -1158,7 +1157,7 @@ function getElement(req, res) {
 function postElement(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -1189,7 +1188,7 @@ function postElement(req, res) {
 function patchElement(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -1221,7 +1220,7 @@ function patchElement(req, res) {
 function deleteElement(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new errors.CustomError('Request Failed.', 500, 'critical');
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 

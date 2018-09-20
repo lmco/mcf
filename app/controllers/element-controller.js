@@ -50,7 +50,6 @@ const Element = M.require('models.element');
 const utils = M.require('lib.utils');
 const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
-const errors = M.require('lib.errors');
 
 // We are disabling the eslint consistent-return rule for this file.
 // The rule doesn't work well for many controller-related functions and
@@ -80,14 +79,14 @@ const errors = M.require('lib.errors');
  */
 function findElements(reqUser, organizationID, projectID, softDeleted = false) {
   return new Promise((resolve, reject) => {
+    // Check input parameters are valid
     try {
-      // Check input params are valid type
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new errors.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize input
@@ -107,7 +106,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     .then((elements) => {
       // Ensure user is part of the project
       if (!elements[0].project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permissions.', 401));
+        return reject(new M.CustomError('User does not have permissions.', 401));
       }
 
       return resolve(elements);
@@ -145,12 +144,12 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
       assert.ok(typeof hardDelete === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new errors.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // If hard deleting, ensure user is a site-wide admin
     if (hardDelete && !reqUser.admin) {
-      return reject(new errors.CustomError(
+      return reject(new M.CustomError(
         'User does not have permission to permanently delete a element.', 401
       ));
     }
@@ -163,7 +162,7 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
       // Check that user has write permission on project
       if (!project.getPermissions(reqUser).write && !reqUser.admin) {
         // User does not have write permissions on project, reject
-        return reject(new errors.CustomError('User does not have permission to delete elements'
+        return reject(new M.CustomError('User does not have permission to delete elements'
           + ` on the project ${project.name}`));
       }
       // Add project to deleteQuery
@@ -223,7 +222,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new errors.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize the parameters
@@ -246,11 +245,11 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
     .then((elements) => {
       // Ensure more than one element was not returned.
       if (elements.length > 1) {
-        return reject(new errors.CustomError('More than one element found.', 400));
+        return reject(new M.CustomError('More than one element found.', 400));
       }
 
       if (!elements[0].project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permissions.', 401));
+        return reject(new M.CustomError('User does not have permissions.', 401));
       }
 
       return resolve(elements[0]);
@@ -284,7 +283,7 @@ function findElementsQuery(elementQuery) {
     .then((arrElements) => {
       // No elements found
       if (arrElements.length === 0) {
-        return reject(new errors.CustomError('No elements found.', 404));
+        return reject(new M.CustomError('No elements found.', 404));
       }
       // Return resulting element
       return resolve(arrElements);
@@ -322,8 +321,17 @@ function createElement(reqUser, element) {
 
     // Error checking, setting optional variables
     try {
-      utils.assertExists(['id', 'project.id', 'project.org.id', 'type'], element);
-      utils.assertType([element.id, element.project.id, element.project.org.id, element.type], 'string');
+      assert.ok(element.hasOwnProperty('id'), 'ID not provided in request body.');
+      assert.ok(element.hasOwnProperty('type'), 'Element type not provided in request body.');
+      assert.ok(element.project.hasOwnProperty('id'), 'Project ID not provided in request body.');
+      assert.ok(element.project.org.hasOwnProperty('id'), 'Org ID not provided in request body.');
+      assert.ok(typeof element.id === 'string', 'ID in request body is not a string.');
+      assert.ok(typeof element.project.id === 'string',
+        'Project ID in request body is not a string.');
+      assert.ok(typeof element.project.org.id === 'string',
+        'Org ID in request body is not a string.');
+      assert.ok(typeof element.type === 'string', 'Element type in request body is not a string.');
+
       if (typeof element.name === 'string') {
         elemName = sani.html(element.name);
       }
@@ -341,7 +349,7 @@ function createElement(reqUser, element) {
       }
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize required fields
@@ -356,19 +364,19 @@ function createElement(reqUser, element) {
     .then((proj) => {
       // Check Permissions
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new errors.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401));
       }
 
       // Error check - check if the element already exists
       // Must nest promises since the catch uses proj, returned from findProject.
       findElementsQuery({ $or: [{ uid: elemUID }, { uuid: uuid }] })
-      .then(() => reject(new errors.CustomError('Element already exists.', 400)))
+      .then(() => reject(new M.CustomError('Element already exists.', 400)))
       .catch((findError) => {
         // This is ok, we don't want the element to already exist.
         if (findError.description === 'No elements found.') {
           // Error Check - NOT included element type
           if (!Element.Element.getValidTypes().includes(elementType)) {
-            return reject(new errors.CustomError('Invalid element type.', 400));
+            return reject(new M.CustomError('Invalid element type.', 400));
           }
 
           // Define element data
@@ -436,12 +444,13 @@ function createRelationship(reqUser, elemData, elemInfo) {
   return new Promise((resolve, reject) => {
     // Check for valid params
     try {
-      utils.assertExists(['target', 'source'], elemInfo);
+      assert.ok(elemInfo.hasOwnProperty('target'), 'Element target not provided.');
+      assert.ok(elemInfo.hasOwnProperty('source'), 'Element source not provided.');
       assert.ok(typeof elemInfo.target === 'string', 'Element target is not a string.');
       assert.ok(typeof elemInfo.source === 'string', 'Element source is not a string');
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Sanitize
@@ -486,10 +495,10 @@ function createRelationship(reqUser, elemData, elemInfo) {
     .then(() => resolve(newElement))
     .catch((error) => {
       // If the error is not a custom error
-      if (error instanceof errors.CustomError) {
+      if (error instanceof M.CustomError) {
         return reject(error);
       }
-      return reject(new errors.CustomError(error.message));
+      return reject(new M.CustomError(error.message));
     });
   });
 }
@@ -538,10 +547,10 @@ function createPackage(reqUser, elemData) {
     .then(() => resolve(newElement))
     .catch((error) => {
       // If the error is not a custom error
-      if (error instanceof errors.CustomError) {
+      if (error instanceof M.CustomError) {
         return reject(error);
       }
-      return reject(new errors.CustomError(error.message));
+      return reject(new M.CustomError(error.message));
     });
   });
 }
@@ -589,10 +598,10 @@ function createBlock(reqUser, elemData) {
     .then(() => resolve(newElement))
     .catch((error) => {
       // If the error is not a custom error
-      if (error instanceof errors.CustomError) {
+      if (error instanceof M.CustomError) {
         return reject(error);
       }
-      return reject(new errors.CustomError(error.message));
+      return reject(new M.CustomError(error.message));
     });
   });
 }
@@ -629,7 +638,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       assert.ok(typeof elementUpdate === 'object', 'Element Data is not a object.');
     }
     catch (error) {
-      return reject(error);
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Check if elementUpdate is instance of Element model
@@ -646,7 +655,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       // Check reqUser does NOT admin permissions or NOT global admin
       if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new errors.CustomError('User does not have permissions.', 401));
+        return reject(new M.CustomError('User does not have permissions.', 401));
       }
 
       // get list of keys the user is trying to update
@@ -664,7 +673,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         // Error Check - Check if updated field also exists in the original element.
         if (!element.toJSON().hasOwnProperty(updateField)) {
           // Original project does NOT contain updatedField, reject error
-          return reject(new errors.CustomError(`Element does not contain field ${updateField}.`, 400));
+          return reject(new M.CustomError(`Element does not contain field ${updateField}.`, 400));
         }
         // Check if updated field is equal to the original field
         if (utils.deepEqual(element.toJSON()[updateField], elementUpdate[updateField])) {
@@ -673,19 +682,19 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
 
         // Error Check - Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
-          return reject(new errors.CustomError(`Element property [${updateField}] cannot be changed.`, 403));
+          return reject(new M.CustomError(`Element property [${updateField}] cannot be changed.`, 403));
         }
 
         // Error Check - Check if updated field is of type string
         if (!utils.checkType([elementUpdate[updateField]], 'string')
           && (Element.Element.schema.obj[updateField].type.schemaName !== 'Mixed')) {
-          return reject(new errors.CustomError(`The Element [${updateField}] is not of type String.`, 400));
+          return reject(new M.CustomError(`The Element [${updateField}] is not of type String.`, 400));
         }
 
         // Error Check - If the field has a validator, ensure the field is valid
         if (elementValidators[updateField]) {
           if (!RegExp(elementValidators[updateField]).test(elementUpdate[updateField])) {
-            return reject(new errors.CustomError(`The updated ${updateField} is not valid.`, 403));
+            return reject(new M.CustomError(`The updated ${updateField} is not valid.`, 403));
           }
         }
 
@@ -711,10 +720,10 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
     .then((updatedElement) => resolve(updatedElement))
     .catch((error) => {
       // If the error is not a custom error
-      if (error instanceof errors.CustomError) {
+      if (error instanceof M.CustomError) {
         return reject(error);
       }
-      return reject(new errors.CustomError(error.message));
+      return reject(new M.CustomError(error.message));
     });
   });
 }
@@ -752,7 +761,7 @@ function updateParent(reqUser, orgID, projID, elemID, newElement) {
       // Check if parent element type is package
       if (parentElement.type !== 'Package') {
         // Parent Element type is not package, throw error
-        return reject(new errors.CustomError('Parent element is not of type Package.', 400));
+        return reject(new M.CustomError('Parent element is not of type Package.', 400));
       }
 
       // Add _id to Parent Element Array
@@ -797,13 +806,13 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
       assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(new errors.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'error'));
     }
 
     // Check if hardDelete is true and user is NOT admin
     if (hardDelete && !reqUser.admin) {
       // HardDelete is false and user is NOT admin
-      return reject(new errors.CustomError('User does not have permission to hard delete an'
+      return reject(new M.CustomError('User does not have permission to hard delete an'
         + ' element.', 401));
     }
 
@@ -813,7 +822,7 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
       // Verify user has permissions to delete element
       if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
         // User does NOT have permissions
-        return reject(new errors.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401));
       }
 
       // Check if hard delete is true
