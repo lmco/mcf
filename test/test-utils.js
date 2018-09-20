@@ -27,7 +27,6 @@
 const path = require('path');
 
 // MBEE modules
-const Project = M.require('models.project');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const testData = require(path.join(M.root, 'test', 'data.json'));
@@ -38,7 +37,7 @@ const testData = require(path.join(M.root, 'test', 'data.json'));
 module.exports.createNonadminUser = function(userData = null) {
   return new Promise((resolve, reject) => {
     // Define new user
-    newUser = null;
+    let newUser = null;
 
     // Check any admin exist
     User.findOne({ username: userData.username })
@@ -50,7 +49,7 @@ module.exports.createNonadminUser = function(userData = null) {
       }
 
       // User data present, create user
-      user = new User({
+      const user = new User({
         username: userData.username,
         password: userData.password,
         fname: userData.fname,
@@ -88,7 +87,7 @@ module.exports.createNonadminUser = function(userData = null) {
 module.exports.createAdminUser = function() {
   return new Promise((resolve, reject) => {
     // Define new user
-    newAdminUser = null;
+    let newAdminUser = null;
 
     // Check any admin exist
     User.findOne({ username: testData.users[0].adminUsername })
@@ -100,7 +99,7 @@ module.exports.createAdminUser = function() {
       }
 
       // User data present, create user
-      user = new User({
+      const user = new User({
         username: testData.users[0].adminUsername,
         password: testData.users[0].adminPassword,
         ovider: 'local',
@@ -174,48 +173,16 @@ module.exports.createOrganization = function(adminUser, orgData) {
  */
 module.exports.removeOrganization = function(adminUser, organizationID) {
   return new Promise((resolve, reject) => {
-    // Set hard delete
-    hardDelete = true;
-
-    // Initialize the query object
-    const deleteQuery = { $or: [] };
-    let arrDeletedProjects = [];
-
+    let organization = null;
     // Find organization to ensure it exists
-    findOrg(adminUser, organizationID, true)
+    Organization.find({ id: organizationID, deleted: false })
     .then((org) => {
+      organization = org;
       // Hard delete
-      Organization.deleteOne({ id: org.id })
+      return Organization.deleteOne({ id: org.id });
       // Delete all projects in that org
-      .then(() => {
-        // Loop through each org
-        Object([arrOrganizations]).forEach((org) => {
-          // Ensure user has permissions to delete projects on each org
-          if (!org.getPermissions(adminUser).admin && !adminUser.admin) {
-            return reject(new M.CustomError(
-              `User does not have permission to delete projects in the org ${org.name}.`, 401
-            ));
-          }
-          deleteQuery.$or.push({ org: org._id });
-          arrDeletedProjects = arrDeletedProjects.concat(org.projects);
-        });
-
-        // If there are no elements to delete
-        if (deleteQuery.$or.length === 0) {
-          return resolve();
-        }
-
-        // Hard delete projects
-        if (hardDelete) {
-          Project.deleteMany(deleteQuery)
-          // Delete elements in associated projects
-          .then(() => ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete))
-          .then(() => resolve(arrDeletedProjects))
-          .catch((error) => reject(error));
-        }
-      })
-      .then(() => resolve(org))
-      .catch((error) => reject(error));
-    });
+    })
+    .then(() => resolve(organization))
+    .catch((error) => reject(error));
   });
-}
+};
