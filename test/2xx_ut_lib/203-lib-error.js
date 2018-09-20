@@ -18,10 +18,10 @@
  * @description This file tests basic CustomError functionality.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
-// Load MBEE modules
+// MBEE modules
 const errors = M.require('lib.errors');
 
 /* --------------------( Main )-------------------- */

@@ -20,7 +20,7 @@
 
 /* eslint-disable no-console */
 
-// Load node modules
+// Node modules
 const { spawn, spawnSync } = require('child_process');
 
 // If the application is run directly from node, notify the user and fail

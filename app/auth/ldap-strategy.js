@@ -18,12 +18,12 @@
  * @description This file implements authentication using LDAP Active Directory.
  */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
 const ldap = require('ldapjs');
 
-// Load MBEE modules
+// MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
 const UserController = M.require('controllers.user-controller');
 const sani = M.require('lib.sanitization');

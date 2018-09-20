@@ -17,7 +17,7 @@
  * This file executes the test suite with Mocha.
  */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
 const Mocha = require('mocha');

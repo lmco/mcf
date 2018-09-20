@@ -19,7 +19,7 @@
  * express to perform actions during requests.
  */
 
-// Load MBEE modules
+// MBEE modules
 const errors = M.require('lib.errors');
 
 /**

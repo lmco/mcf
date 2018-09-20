@@ -33,7 +33,7 @@ module.exports = {
   removeUser
 };
 
-// Load MBEE modules
+// MBEE modules
 const User = M.require('models.user');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');

@@ -13,7 +13,7 @@
 
 /* eslint-disable no-console */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -27,7 +27,7 @@ if (module.parent == null) {
   process.exit(-1);
 }
 
-// Load MBEE modules
+// MBEE modules
 const startup = M.require('lib.startup');
 
 /**

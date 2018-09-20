@@ -20,7 +20,7 @@
  * defined in the configuration file.
  */
 
-// Load MBEE modules
+// MBEE modules
 const AuthModule = M.require(`auth.${M.config.auth.strategy}`);
 const sani = M.require('lib.sanitization');
 

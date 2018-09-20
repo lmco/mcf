@@ -19,7 +19,7 @@
  * functions for use in the test framework.
  */
 
-// Load MBEE modules
+// MBEE modules
 const errors = M.require('lib.errors');
 
 /**

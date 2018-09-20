@@ -18,11 +18,11 @@
  * @description Defines the MBEE routes mounted a '/'.
  */
 
-// Load node modules
+// Node modules
 const express = require('express');
 const router = express.Router();
 
-// Load MBEE modules
+// MBEE modules
 const UIController = M.require('controllers.ui-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');

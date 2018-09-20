@@ -19,13 +19,13 @@
  * GET, POST, PATCH, and DELETE of an element.
  */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
 const path = require('path');
 
-// Load MBEE modules
+// MBEE modules
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const db = M.require('lib.db');

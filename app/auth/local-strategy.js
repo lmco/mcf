@@ -20,7 +20,7 @@
  * authentication. This should be the default authentication strategy for MBEE.
  */
 
-// Load MBEE modules
+// MBEE modules
 const User = M.require('models.user');
 const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');

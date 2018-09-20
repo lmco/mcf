@@ -13,8 +13,6 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @module  controllers.organization_controller
- *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
  *
@@ -37,7 +35,7 @@ module.exports = {
   findAllPermissions
 };
 
-// Load MBEE modules
+// MBEE modules
 const ProjController = M.require('controllers.project-controller');
 const Organization = M.require('models.organization');
 const utils = M.require('lib.utils');

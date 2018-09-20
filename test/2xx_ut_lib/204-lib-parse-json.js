@@ -19,10 +19,10 @@
  * of JSON files with comments allowed.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
-// Load MBEE modules
+// MBEE modules
 const parseJSON = M.require('lib.parse-json');
 
 /* --------------------( Main )-------------------- */
