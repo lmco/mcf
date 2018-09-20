@@ -27,6 +27,7 @@ const path = require('path'); // Find directory paths
 // Project Metadata
 const pkg = require(path.join(__dirname, 'package.json'));
 
+
 // The global MBEE helper object
 global.M = {};
 
@@ -151,9 +152,6 @@ Object.freeze(M);
 // Invoke main
 main();
 
-/******************************************************************************
- *  Main Function                                                             *
- ******************************************************************************/
 function main() {
   // Set argument commands for use in configuration lib and main function
   // Example: node mbee.js <subcommand> <opts>

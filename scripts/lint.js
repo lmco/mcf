@@ -1,39 +1,40 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * scripts/linter.js
+ * Classification: UNCLASSIFIED
  *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @module scripts.lint
  *
- * Runs the ESLint tool against all Javascript code.
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * @description Runs the linter
  */
 
-/* eslint-disable no-console */
-
-// Node modules
-const { spawn } = require('child_process');
-
-// If the application is run directly from node, notify the user and fail
-if (module.parent == null) {
+// Error Check - Check if file was run directly or global M object is undefined
+if (module.parent == null || typeof M === 'undefined') {
+  // File was run directly, print error message and exit process
   // eslint-disable-next-line no-console
   console.log('\nError: please use mbee to run this script by using the '
     + 'following command. \n\nnode mbee lint\n');
   process.exit(-1);
 }
 
+// Node modules
+const { spawn } = require('child_process');
+
 /**
- * Runs ESLint against the primary Javascript directories.
+ * @description Runs ESLint against the primary Javascript directories.
  */
 function lint(_args) {
+  // Set default lint files and include additional args
   const args = [
     `${M.root}/*.js`,
     `${M.root}/app/**/*.js`,
@@ -42,8 +43,10 @@ function lint(_args) {
     `${M.root}/test/**/*.js`
   ].concat(_args);
 
+  // Run linter with specified args
   spawn(`${M.root}/node_modules/.bin/eslint`, args, { stdio: 'inherit' })
   .on('data', (data) => {
+    // eslint-disable-next-line no-console
     console.log(data.toString());
   })
   .on('exit', (code) => {

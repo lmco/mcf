@@ -117,7 +117,7 @@ function loadPlugins() {
 function clonePluginFromGitRepo(data) {
   // Remove plugin if it already exists in plugins directory
   const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
-  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join('plugins', data.name)}`);
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(__dirname, 'plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
   // Set deploy key file permissions
@@ -136,7 +136,8 @@ function clonePluginFromGitRepo(data) {
   }
 
   // Create the git clone command
-  const cmd = `${deployKeyCmd}git clone ${version}${data.source} ${path.join('plugins', data.name)}`;
+  const cmd = `${deployKeyCmd}git clone ${version}${data.source} `
+            + `${path.join(__dirname, 'plugins', data.name)}`;
 
   // Clone the repo
   M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
