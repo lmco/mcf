@@ -69,8 +69,8 @@ const ProjectSchema = new mongoose.Schema({
   },
   uid: {
     type: String,
-    unique: true
-    // TODO: FIXME: required = true?
+    unique: true,
+    required: true
   },
   name: {
     type: String,
@@ -123,11 +123,11 @@ const ProjectSchema = new mongoose.Schema({
  * @memberof ProjectSchema
  */
 ProjectSchema.methods.getPublicData = function() {
-  // Map read, write, and admin refrences to only contain user public data
+  // Map read, write, and admin references to only contain user public data
   this.permissions.read = this.permissions.read.map(u => u.getPublicData());
   this.permissions.write = this.permissions.write.map(u => u.getPublicData());
   this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
-  // Return the project with only user public data
+  // Return the project
   return this;
 };
 
