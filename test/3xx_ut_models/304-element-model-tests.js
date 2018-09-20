@@ -83,6 +83,7 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
       done();
@@ -102,10 +103,11 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      db.disconnect();
+
+      M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-
-      db.disconnect();
       done();
     });
   });
@@ -148,6 +150,7 @@ function createRootPackage(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -196,6 +199,7 @@ function createBlock(done) {
   })
   .then(() => done())
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -255,6 +259,7 @@ function createRelationship(done) {
   })
   .then(() => done())
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -273,6 +278,7 @@ function findBlock(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -293,6 +299,7 @@ function updateBlock(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -323,6 +330,7 @@ function deleteElements(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

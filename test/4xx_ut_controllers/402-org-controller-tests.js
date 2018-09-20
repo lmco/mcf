@@ -76,6 +76,8 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -102,11 +104,12 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
-
       // Disconnect from the database
       db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
@@ -162,8 +165,10 @@ function createNewOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
+    done();
   });
 }
 
@@ -189,6 +194,7 @@ function createSecondOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -207,6 +213,7 @@ function findExistingOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -292,6 +299,7 @@ function updateOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -316,6 +324,7 @@ function updateOrgObject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -334,6 +343,7 @@ function findAllExistingOrgs(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -352,6 +362,7 @@ function softDeleteExistingOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -436,6 +447,7 @@ function softDeleteProjectAndOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -470,6 +482,7 @@ function hardDeleteProjectAndOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -532,6 +545,7 @@ function setUserOrgRole(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -572,6 +586,7 @@ function getUserRoles(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -595,6 +610,7 @@ function getMembers(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -635,6 +651,7 @@ function removeUserRole(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -655,6 +672,7 @@ function rejectGetUserRoles(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

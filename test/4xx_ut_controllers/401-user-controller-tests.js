@@ -59,6 +59,8 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -86,11 +88,12 @@ describe(M.getModuleName(module.filename), () => {
       });
     })
     .catch((error) => {
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
-
       // Disconnect from the database
       db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
@@ -133,6 +136,7 @@ function createNewUser(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -226,6 +230,7 @@ function updateFirstName(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -320,6 +325,7 @@ function findExistingUser(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
