@@ -11,11 +11,11 @@
  * as test the controlls with invalid inputs.
  */
 
-// Load NPM modules
+// NPM modules
 const chai = require('chai');
 const path = require('path');
 
-// Load MBEE modules
+// MBEE modules
 const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
@@ -126,6 +126,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
   it('should reject creation of project with non-A user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
+  it('should find all projects which user has permissions on', findProjects);
   it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
   it('should reject update to the id name', rejectProjectId);
@@ -417,6 +418,36 @@ function findProj(done) {
   .catch((error) => {
     // Expect no error
     chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verify projects the user has access to findProjects() is found.
+ */
+function findProjects(done) {
+  const userData = testData.users[12];
+  let adminUser2 = null;
+  UserController.createUser(adminUser, userData)
+  .then((newUser) => {
+    adminUser2 = newUser;
+    return OrgController.createOrg(newUser, testData.orgs[9]);
+  })
+  .then(() => ProjController.createProject(adminUser2, testData.projects[18]))
+  .then(() => ProjController.createProject(adminUser2, testData.projects[19]))
+  .then(() => ProjController.findProjects(adminUser, org.id))
+  .then((projs) => {
+    // Verify project fields
+    chai.expect(projs.length).to.equal(2);
+    return OrgController.removeOrg(adminUser2, testData.orgs[9].id, true);
+  })
+  .then(() => {
+    UserController.removeUser(adminUser, testData.users[12].username);
+    done();
+  })
+  .catch((err) => {
+    // Expect no error
+    chai.expect(err.message).to.equal(null);
     done();
   });
 }

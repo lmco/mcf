@@ -15,23 +15,18 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This file defines the API routes.
+ * @description This file defines the MBEE API routes.
  *
- * Note that all routes that require authentication have
- * "AuthController.authenticate" as the first function they
- * map to. This will do authentication and if the users is authenticated, the
- * next function is called.
- *
- * The ".bind(AuthController)" portion of that allows the `this` keyword within
- * the AuthController to reference the AuthController object rather than
- * being undefined.
+ * Note: Routes that require authentication calls
+ * "AuthController.authenticate()" as their first function.
+ * This will authenticate the user and move to the next function.
  */
 
-// Load node modules
+// Node modules
 const express = require('express');
 const api = express.Router();
 
-// Load MBEE modules
+// MBEE modules
 const APIController = M.require('controllers.api-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
@@ -43,7 +38,7 @@ const Middleware = M.require('lib.middleware');
  *   get:
  *     tags:
  *       - general
- *     description: This API endpoint should be used to test is the API is functional.
+ *     description: This API endpoint test if the API is functional.
  *     produces:
  *       - application/json
  *     responses:
@@ -1367,20 +1362,26 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  */
 api.route('/users')
 .get(
-  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
+  Middleware.disableUserAPI,
   APIController.getUsers
 )
 .post(
+  AuthController.authenticate,
+  Middleware.logRoute,
   Middleware.disableUserAPI,
   APIController.notImplemented
 )
 .patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
   Middleware.disableUserAPI,
   APIController.notImplemented
 )
 .delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
   Middleware.disableUserAPI,
   APIController.notImplemented
 );
@@ -1573,107 +1574,29 @@ api.route('/users/whoami')
  */
 api.route('/users/:username')
 .get(
-  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
+  Middleware.disableUserAPI,
   APIController.getUser
 )
 .post(
-  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
+  Middleware.disableUserAPI,
   APIController.postUser
 )
 .patch(
-  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
+  Middleware.disableUserAPI,
   APIController.patchUser
 )
 .delete(
-  Middleware.disableUserAPI,
   AuthController.authenticate,
   Middleware.logRoute,
+  Middleware.disableUserAPI,
   APIController.deleteUser
 );
-
-/**
- * @swagger
- * /api/users/:id/roles:
- *   get:
- *     tags:
- *       - users
- *     description: Not implemented, reserved for future use.
- *     responses:
- *       501:
- *         description: Not Implemented
- *   post:
- *     tags:
- *       - users
- *     description: Not implemented, reserved for future use.
- *     responses:
- *       501:
- *         description: Not Implemented
- *   patch:
- *     tags:
- *       - users
- *     description: Not implemented, reserved for future use.
- *     responses:
- *       501:
- *         description: Not Implemented
- *   delete:
- *     tags:
- *       - users
- *     description: Not implemented, reserved for future use.
- *     responses:
- *       501:
- *         description: Not Implemented
- */
-api.route('/users/:username/roles')
-.get(APIController.notImplemented)
-.post(APIController.notImplemented)
-.patch(APIController.notImplemented)
-.delete(APIController.notImplemented);
-
-
-/**
- * @swagger
- * /api/users/:id/groups:
- *   get:
- *     tags:
- *       - users
- *     description: Not implemented, reserved for future use.
- *     responses:
- *       501:
- *         description: Not Implemented
- *   post:
- *     tags:
- *       - users
- *     description: Not implemented, reserved for future use.
- *     responses:
- *       501:
- *         description: Not Implemented
- *   patch:
- *     tags:
- *       - users
- *     description: Not implemented, reserved for future use.
- *     responses:
- *       501:
- *         description: Not Implemented
- *   delete:
- *     tags:
- *       - users
- *     description: Not implemented, reserved for future use.
- *     responses:
- *       501:
- *         description: Not Implemented
- */
-api.route('/users/:username/groups')
-.get(APIController.notImplemented)
-.post(APIController.notImplemented)
-.patch(APIController.notImplemented)
-.delete(APIController.notImplemented);
-
 
 // Export the API router
 module.exports = api;

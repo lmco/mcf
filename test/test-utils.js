@@ -23,10 +23,10 @@
  * making MBEE tests easier to read and run.
  *
  */
-// Load node modules
+// Node modules
 const path = require('path');
 
-// Load MBEE modules
+// MBEE modules
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const UserController = M.require('controllers.user-controller');

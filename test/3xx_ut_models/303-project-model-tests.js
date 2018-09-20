@@ -21,11 +21,11 @@
  * test the max character limit on the ID field.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 const path = require('path');
 
-// Load MBEE modules
+// MBEE modules
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
 const db = M.require('lib/db');
@@ -189,7 +189,8 @@ function verifyProjectFieldMaxChar(done) {
   const newProject = new Project({
     id: testData.projects[2].id,
     name: testData.projects[2].name,
-    org: org._id
+    org: org._id,
+    uid: `${org.id}:${testData.projects[2].id}`
   });
 
   // Save project model object to database

@@ -18,11 +18,11 @@
  * @description This tests the Element Controller functionality.
  */
 
-// Load NPM modules
+// NPM modules
 const chai = require('chai');
 const path = require('path');
 
-// Load MBEE modules
+// MBEE modules
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const ElemController = M.require('controllers.element-controller');

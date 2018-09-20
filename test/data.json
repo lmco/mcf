@@ -78,6 +78,14 @@
     {
       "username": "deadpool",
       "fname": "Mr Wade"
+    },
+    {
+      "username": "secondadminuser",
+      "password": "password!123",
+      "fname": "Second",
+      "preferredName": "Admin User",
+      "lname": "AdminUser",
+      "admin": true
     }
   ],
 
@@ -263,6 +271,20 @@
     {
       "id": "hulktwopointoh",
       "name": "New Hulk"
+    },
+    {
+      "id": "nickfury",
+      "name": "Nick Fury",
+      "org": {
+        "id": "shield"
+      }
+    },
+    {
+      "id": "mariahill",
+      "name": "Maria Hill",
+      "org": {
+        "id": "shield"
+      }
     }
   ],
 

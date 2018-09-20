@@ -1,23 +1,24 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * scripts/test.js
+ * Classification: UNCLASSIFIED
+ *
+ * @module scripts.test
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This file executes the test suite with Mocha.
+ * @description This file executes the MBEE test suite with Mocha.
  */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
 const Mocha = require('mocha');
@@ -31,13 +32,8 @@ if (module.parent == null) {
 }
 
 /**
- * Runs the collection of test suites by running the "test/runner.js" script
- * with Mocha. This function calls the Mocha test framework. The following
- * command line arguments may be useful:
- *
- * --slow N       Defines the number of milliseconds for a test to be considered
- *                slow. Half that number will warn that the test is nearly slow.
- * --grep <REGEX> Only runs the test whose name matches REGEX.
+ * @description Runs the collection of test suites script with Mocha.
+ * Any command line accepted by Mocha is valid.
  */
 function test(_args) {
   printHeader();
@@ -73,7 +69,7 @@ function test(_args) {
     _args.push('19');
   }
 
-  // allocate options variable for mocha
+  // Allocate options variable for mocha
   const opts = {};
 
   // Loop through _args array and load the opts object
@@ -96,34 +92,13 @@ function test(_args) {
   // Set the test directory
   const testDir = `${M.root}/test`;
 
-  // The mocha walk function is responsible for loading .js files into mocha
-  // for use during tests
-  const mochaWalk = function(dir) {
-    // Read the current directory and use a callback to filter the results
-    fs.readdirSync(dir).filter(function(file) {
-      // Check if the file is actually a directory
-      if (fs.lstatSync(path.join(dir, file)).isDirectory()) {
-        // The file is actually a directory, call mochaWalk recursively with the
-        // full path of the directory
-        mochaWalk(path.join(dir, file));
-      }
-      // Return true to the filter if the file is a javascript file
-      return file.substr(-3) === '.js';
-    })
-    // Loop through the resulting array of files
-    .forEach(function(file) {
-      // Add the full path and filename to mocha
-      mocha.addFile(path.join(dir, file));
-    });
-  };
-
   // Call the mochaWalk function to load in all of the test files
-  mochaWalk(testDir);
+  mochaWalk(testDir, mocha);
 
   // Run the tests.
-  mocha.run(function(failures) {
+  mocha.run((error) => {
     // Check for failures
-    if (failures) {
+    if (error) {
       // mocha did not pass all test, exit with error code -1
       process.exit(-1);
     }
@@ -153,6 +128,29 @@ function printHeader() {
   console.log(` ${G}\`-'${W} \t Date: ${date}`); // eslint-disable-line no-console
   console.log('_'.repeat(65)); // eslint-disable-line no-console
   console.log(''); // eslint-disable-line no-console
+}
+
+/**
+ * @description The mocha walk function is responsible for loading .js files into mocha
+ * for use during tests
+ */
+function mochaWalk(dir, mochaObj) {
+  // Read the current directory and use a callback to filter the results
+  fs.readdirSync(dir).filter((file) => {
+    // Check if the file is actually a directory
+    if (fs.lstatSync(path.join(dir, file)).isDirectory()) {
+      // The file is actually a directory, call mochaWalk recursively with the
+      // full path of the directory
+      mochaWalk(path.join(dir, file), mochaObj);
+    }
+    // Return true to the filter if the file is a javascript file
+    return file.substr(-3) === '.js';
+  })
+  // Loop through the resulting array of files
+  .forEach(function(file) {
+    // Add the full path and filename to mocha
+    mochaObj.addFile(path.join(dir, file));
+  });
 }
 
 module.exports = test;

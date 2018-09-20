@@ -165,7 +165,7 @@ OrganizationSchema.methods.getPermissions = function(user) {
 
 /* -----------------------( Organization Properties )------------------------ */
 
-// Required for virtual getters to return JSON object information
+// Required for virtual getters
 OrganizationSchema.set('toJSON', { virtuals: true });
 OrganizationSchema.set('toObject', { virtuals: true });
 

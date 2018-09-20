@@ -18,16 +18,15 @@
  * @description This file implements authentication using LDAP Active Directory.
  */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
 const ldap = require('ldapjs');
 
-// Load MBEE modules
+// MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
 const UserController = M.require('controllers.user-controller');
 const sani = M.require('lib.sanitization');
-const errors = M.require('lib.errors');
 
 // Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
@@ -231,7 +230,7 @@ function ldapSearch(ldapClient, username) {
         if (!person) {
           // Person undefined, reject error
           ldapClient.destroy(); // Disconnect from LDAP server on failure
-          return reject(new errors.CustomError('Invalid username or password.', 401));
+          return reject(new M.CustomError('Invalid username or password.', 401));
         }
         // Person defined, return results
         return resolve(person.object);
@@ -259,7 +258,7 @@ function ldapAuth(ldapClient, user, password) {
       if (authErr) {
         M.log.error(authErr);
         ldapClient.destroy(); // Disconnect from LDAP server on failure
-        return reject(new errors.CustomError('Invalid username or password.', 401));
+        return reject(new M.CustomError('Invalid username or password.', 401));
       }
       // Validation successful, resolve authenticated user's information
       M.log.debug(`User [${user[ldapConfig.attributes.username]

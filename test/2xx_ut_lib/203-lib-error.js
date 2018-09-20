@@ -18,11 +18,8 @@
  * @description This file tests basic CustomError functionality.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
-
-// Load MBEE modules
-const errors = M.require('lib.errors');
 
 /* --------------------( Main )-------------------- */
 /**
@@ -42,7 +39,7 @@ describe(M.getModuleName(module.filename), () => {
  * properties on the CustomError object.
  */
 function noStatusCode(done) {
-  const err = new errors.CustomError('Database save failed.');
+  const err = new M.CustomError('Database save failed.');
   chai.expect(err.status).to.equal(500);
   chai.expect(err.message).to.equal('Internal Server Error');
   chai.expect(err.description).to.equal('Database save failed.');
@@ -54,7 +51,7 @@ function noStatusCode(done) {
  * properties on the CustomError object.
  */
 function status400(done) {
-  const err = new errors.CustomError('Project id not provided.', 400);
+  const err = new M.CustomError('Project id not provided.', 400);
   err.log();
   chai.expect(err.status).to.equal(400);
   chai.expect(err.message).to.equal('Bad Request');

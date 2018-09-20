@@ -19,7 +19,7 @@
  * objects.
  */
 
-// Load MBEE modules
+// MBEE modules
 const utils = M.require('lib.utils');
 
 /**

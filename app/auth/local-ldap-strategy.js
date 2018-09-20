@@ -18,11 +18,10 @@
  * @description Implements authentication strategy for local and ldap.
  */
 
-// Load MBEE modules
+// MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
 const LDAPStrategy = M.require('auth.ldap-strategy');
 const User = M.require('models.user');
-const errors = M.require('lib.errors');
 
 /**
  * @description Handles basic-style authentication. This function gets called both for
@@ -67,7 +66,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
       }
       else {
         // More than 1 user found or provide not set to ldap/local
-        return reject(new errors.CustomError('More than one user found or invalid provider.'));
+        return reject(new M.CustomError('More than one user found or invalid provider.'));
       }
     });
   });

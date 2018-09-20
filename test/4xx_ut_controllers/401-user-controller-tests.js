@@ -19,12 +19,12 @@
  * delete, update, and find users.
  */
 
-// Load node modules
+// Node modules
 const path = require('path');
 const chai = require('chai');
 
 
-// Load MBEE modules
+// MBEE modules
 const UserController = M.require('controllers.user-controller');
 const User = M.require('models.user');
 const db = M.require('lib.db');
@@ -234,7 +234,7 @@ function updateFirstName(done) {
 
 /**
  * @description Verify that update fails when given invalid input.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Internal Server Error'
  */
 function rejectInvalidLastNameUpdate(done) {
   // Create user data
@@ -249,8 +249,8 @@ function rejectInvalidLastNameUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Forbidden');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }

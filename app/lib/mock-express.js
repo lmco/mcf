@@ -19,9 +19,6 @@
  * functions for use in the test framework.
  */
 
-// Load MBEE modules
-const errors = M.require('lib.errors');
-
 /**
  * mock_express.js
  *
@@ -34,10 +31,10 @@ const errors = M.require('lib.errors');
 module.exports.getReq = function getReq(params, body) {
   // Error-Check
   if (typeof params !== 'object') {
-    throw errors.CustomError('params is not of type object.');
+    throw M.CustomError('params is not of type object.');
   }
   if (typeof params !== 'object') {
-    throw errors.CustomError('body is not of type object.');
+    throw M.CustomError('body is not of type object.');
   }
 
   return {
