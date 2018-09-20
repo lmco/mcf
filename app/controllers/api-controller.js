@@ -20,13 +20,13 @@
  * couples with the app/api-routes.js file.
  */
 
-// Node modules
+// Node.js Modules
 const path = require('path');
 
-// NPM modules
+// NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
 
-// MBEE modules
+// MBEE Modules
 const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
