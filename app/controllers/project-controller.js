@@ -702,15 +702,14 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  *   M.log.error(error);
  * });
  *
- * TODO: (Jake) Clean up this code (MBX-446)
  */
-function setPermissions(reqUser, organizationID, projectID, searchedUsername, role) {
+function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof searchedUsername === 'string', 'Searched username is not a string.');
+      assert.ok(typeof setUsername === 'string', 'Searched username is not a string.');
       assert.ok(typeof role === 'string', 'Role is not a string.');
     }
     catch (error) {
@@ -718,7 +717,7 @@ function setPermissions(reqUser, organizationID, projectID, searchedUsername, ro
     }
 
     // Sanitize input
-    const permType = sani.html(permissionType);
+    const permType = sani.html(role);
 
     // Initialize setUser
     let setUser = null;
@@ -732,7 +731,7 @@ function setPermissions(reqUser, organizationID, projectID, searchedUsername, ro
 
       // Error Check - Do not allow user to change their own permission
       if (reqUser.username === setUser.username) {
-        return reject(new errors.CustomError('User cannot change their own permissions.', 403));
+        return reject(new M.CustomError('User cannot change their own permissions.', 403));
       }
       // Find project to set permissions on
       // Note: organizationID and projectID are sanitized in findProject()
@@ -781,7 +780,7 @@ function setPermissions(reqUser, organizationID, projectID, searchedUsername, ro
           .filter(user => setUser.username === user.username);
         }
       }
-      
+
       // Save updated project
       return project.save();
     })
