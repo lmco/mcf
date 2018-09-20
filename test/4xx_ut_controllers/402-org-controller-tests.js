@@ -76,6 +76,7 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      console.log(error);
       chai.expect(error).to.equal(null);
       done();
     });
