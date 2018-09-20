@@ -19,9 +19,6 @@
  * express to perform actions during requests.
  */
 
-// MBEE modules
-const errors = M.require('lib.errors');
-
 /**
  * @description Log the route and method requested by a user.
  *
@@ -65,7 +62,7 @@ module.exports.disableUserAPI = function disableUserAPI(req, res, next) {
     // Create error message '<method> <url> is disabled'
     const message = `${req.method} ${req.originalUrl} is disabled.`;
     // Create custom error 403 Forbidden
-    const error = new errors.CustomError(message, 403);
+    const error = new M.CustomError(message, 403);
     // Log custom error
     M.log.error(error);
     // Return error to user

@@ -21,9 +21,6 @@
 // Node modules
 const crypto = require('crypto');  // NOTE: Refers to standard node crypto library
 
-// MBEE modules
-const errors = M.require('lib.errors');
-
 /**
  * @description Encrypts data with AES-256 using the app secret and returns the
  * encrypted data as a base64 encoded string.
@@ -54,7 +51,7 @@ module.exports.encrypt = function(data) {
 module.exports.decrypt = function(data) {
   if (data === undefined || data.toString() === '') {
     // NOTE: Changed from returning '{}' to throwing an error
-    throw new errors.CustomError(`Can't decrypt ${data}. Returning ...`, 400);
+    throw new M.CustomError(`Can't decrypt ${data}. Returning ...`, 400);
   }
 
   try {
@@ -75,7 +72,7 @@ module.exports.decrypt = function(data) {
   catch (error) {
     // Decryption failed, throw an error
     // NOTE: Changed from returning '{}' to throwing an error
-    throw new errors.CustomError('Decryption failed.', 400);
+    throw new M.CustomError('Decryption failed.', 400);
   }
 };
 

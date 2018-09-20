@@ -23,9 +23,6 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 
-// MBEE modules
-const errors = M.require('lib.errors');
-
 /**
  * @description Provides time unit conversions.
  */
@@ -108,13 +105,13 @@ module.exports.assertType = function(arrItems, assertType) {
   // An empty array is never expected
   if (!Array.isArray(arrItems)) {
     const desc = `Array was expected. Got ${typeof arrItems}`;
-    throw new errors.CustomError(desc, 400);
+    throw new M.CustomError(desc, 400);
   }
 
   // An empty array is never expected
   if (arrItems.length === 0) {
     const desc = 'Array is empty. Assertion check failed.';
-    throw new errors.CustomError(desc, 400);
+    throw new M.CustomError(desc, 400);
   }
 
   // Define valid type
@@ -124,11 +121,11 @@ module.exports.assertType = function(arrItems, assertType) {
   if (!validType.includes(assertType)) {
     // Invalid type, throw error
     const desc = `${assertType} is not a valid javascript type.`;
-    throw new errors.CustomError(desc, 400);
+    throw new M.CustomError(desc, 400);
   }
   Object.keys(arrItems).forEach((item) => {
     if (typeof arrItems[item] !== assertType) { // eslint-disable-line valid-typeof
-      throw new errors.CustomError(`Value is not a ${assertType}.`, 400);
+      throw new M.CustomError(`Value is not a ${assertType}.`, 400);
     }
   });
 };
@@ -172,7 +169,7 @@ module.exports.assertExists = function(properties, obj) {
     // Loop over nested object properties, updating ref with each iteration.
     prop.split('.').forEach(p => { ref = ref[p]; });
     if (ref === undefined) {
-      throw new errors.CustomError(`Object does not have property ${prop}.`, 400);
+      throw new M.CustomError(`Object does not have property ${prop}.`, 400);
     }
   });
 };
@@ -206,7 +203,7 @@ module.exports.checkExists = function(properties, obj) {
  */
 module.exports.assertAdmin = function(user) {
   if (!user.admin) {
-    throw new errors.CustomError('User does not have permissions.', 401);
+    throw new M.CustomError('User does not have permissions.', 401);
   }
 };
 
@@ -231,7 +228,7 @@ module.exports.createUID = function(...args) {
  */
 module.exports.parseUID = function(uid) {
   if (!uid.includes(this.UID_DELIMITER)) {
-    throw new errors.CustomError('Invalid UID.', 400);
+    throw new M.CustomError('Invalid UID.', 400);
   }
   return uid.split(this.UID_DELIMITER);
 };

@@ -78,7 +78,7 @@ function start(args) {
   if (M.config.server.http.enabled) {
     httpServer.listen(M.config.server.http.port, () => {
       const port = M.config.server.http.port;
-      M.log.info(`MBEE server listening on port ${port}!`);s
+      M.log.info(`MBEE server listening on port ${port}!`);
     });
   }
 

@@ -68,7 +68,7 @@ function docker(args) {
     // Run build process
     const cmd = spawn('docker', buildArgs, { stdio: 'inherit' });
     cmd.on('data', (data) => {
-      console.log(data.toString());
+      console.log(data.toString()); // eslint-disable-line no-console
     });
     cmd.on('exit', (code) => {
       // Check if exit code NOT 0
@@ -111,6 +111,7 @@ function docker(args) {
 
     // Run the Docker container
     const cmd = spawn('docker', rargs, { stdio: 'inherit' });
+    // eslint-disable-next-line no-console
     cmd.on('data', (data) => { console.log(data.toString()); });
     cmd.on('exit', (code) => {
       // Check if exit code NOT 0
@@ -135,6 +136,7 @@ function docker(args) {
 
     // Call the Docker logs command
     const cmd = spawn('docker', rargs, { stdio: 'inherit' });
+    // eslint-disable-next-line no-console
     cmd.on('data', (data) => { console.log(data.toString()); });
     cmd.on('exit', (code) => {
       // Check if exit code NOT 0
