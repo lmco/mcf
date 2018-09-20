@@ -22,13 +22,13 @@
  * // users
  */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
 const path = require('path');
 
-// Load MBEE modules
+// MBEE modules
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */

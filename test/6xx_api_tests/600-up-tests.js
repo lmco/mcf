@@ -20,12 +20,12 @@
  * started.
  */
 
-// Load NPM modules
+// NPM modules
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
 
-// Load MBEE modules
+// MBEE modules
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */

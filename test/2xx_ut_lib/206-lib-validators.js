@@ -18,10 +18,10 @@
  * @description This file tests the validator functions.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
-// Load MBEE modules
+// MBEE modules
 const validators = M.require('lib.validators');
 
 /* --------------------( Main )-------------------- */

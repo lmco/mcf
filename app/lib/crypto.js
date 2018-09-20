@@ -18,7 +18,7 @@
  * @description Defines common cryptographic functions.
  */
 
-// Load node modules
+// Node modules
 const crypto = require('crypto');  // NOTE: Refers to standard node crypto library
 
 /**

@@ -22,10 +22,10 @@
  * test to ensure the database is empty and improve CI testing.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
-// Load MBEE modules
+// MBEE modules
 const User = M.require('models.user');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');

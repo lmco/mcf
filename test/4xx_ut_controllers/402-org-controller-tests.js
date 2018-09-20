@@ -21,11 +21,11 @@
  * permissions of organizations.
  */
 
-// Load NPM modules
+// NPM modules
 const chai = require('chai');
 const path = require('path');
 
-// Load MBEE modules
+// MBEE modules
 const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const Project = M.require('models.project');

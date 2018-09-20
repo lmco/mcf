@@ -23,11 +23,11 @@
  * setters, and getters.
  */
 
-// Load node modules
+// Node modules
 const path = require('path');
 const chai = require('chai');
 
-// Load MBEE modules
+// MBEE modules
 const Org = M.require('models.organization');
 const db = M.require('lib.db');
 

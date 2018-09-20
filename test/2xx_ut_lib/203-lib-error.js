@@ -18,7 +18,7 @@
  * @description This file tests basic CustomError functionality.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
 /* --------------------( Main )-------------------- */

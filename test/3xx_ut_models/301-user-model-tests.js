@@ -21,11 +21,11 @@
  * the user model methods, validators, setters, and getters.
  */
 
-// Load node modules
+// Node modules
 const path = require('path');
 const chai = require('chai');
 
-// Load MBEE modules
+// MBEE modules
 const User = M.require('models.user');
 const db = M.require('lib.db');
 

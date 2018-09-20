@@ -18,10 +18,10 @@
  * @description Tests the sanitization module and each of its functions.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
-// Load MBEE modules
+// MBEE modules
 const sani = M.require('lib.sanitization');
 
 /* --------------------( Main )-------------------- */

@@ -37,7 +37,7 @@ module.exports = {
   updateProject
 };
 
-// Node.js modules
+// Node modules
 const assert = require('assert');
 
 // MBEE modules
