@@ -431,46 +431,23 @@ function findProjects(done) {
   UserController.createUser(adminUser, userData)
   .then((newUser) => {
     adminUser2 = newUser;
-    const orgData2 = testData.orgs[9];
-    OrgController.createOrg(newUser, orgData2)
-    .then(() => {
-      const projData3 = testData.projects[18];
-      const projData4 = testData.projects[19];
-      ProjController.createProject(adminUser2, projData3);
-      ProjController.createProject(adminUser2, projData4)
-      .then(() => {
-        const orgId = org.id;
-
-        // Find project
-        ProjController.findProjects(adminUser, orgId)
-        .then((projs) => {
-          // Verify project fields
-          chai.expect(projs.length).to.equal(2);
-          OrgController.removeOrg(adminUser2, testData.orgs[9].id, true);
-          UserController.removeUser(adminUser, testData.users[12].username);
-          done();
-        })
-        .catch((err) => {
-          // Expect no error
-          chai.expect(err.message).to.equal(null);
-          done();
-        });
-      })
-      .catch((error) => {
-        // Expect no error
-        chai.expect(error.message).to.equal(null);
-        done();
-      });
-    })
-    .catch((error3) => {
-      // Expect no error
-      chai.expect(error3.message).to.equal(null);
-      done();
-    });
+    return OrgController.createOrg(newUser, testData.orgs[9]);
   })
-  .catch((error4) => {
+  .then(() => ProjController.createProject(adminUser2, testData.projects[18]))
+  .then(() => ProjController.createProject(adminUser2, testData.projects[19]))
+  .then(() => ProjController.findProjects(adminUser, org.id))
+  .then((projs) => {
+    // Verify project fields
+    chai.expect(projs.length).to.equal(2);
+    return OrgController.removeOrg(adminUser2, testData.orgs[9].id, true);
+  })
+  .then(() => {
+    UserController.removeUser(adminUser, testData.users[12].username);
+    done();
+  })
+  .catch((err) => {
     // Expect no error
-    chai.expect(error4.message).to.equal(null);
+    chai.expect(err.message).to.equal(null);
     done();
   });
 }

@@ -360,7 +360,8 @@ function removeUser(reqUser, usernameToDelete) {
         arrOrgs[i].save((error) => {
           // If error, log it
           if (error) {
-            M.log.critical(`${userToDelete} was not removed from org ${arrOrgs[i].id}.`);
+            M.log.error(error);
+            M.log.warn(`${userToDelete} was not removed from org ${arrOrgs[i].id}.`);
           }
         });
       }
