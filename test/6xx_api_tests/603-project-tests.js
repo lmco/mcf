@@ -79,6 +79,8 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -108,6 +110,7 @@ describe(M.getModuleName(module.filename), () => {
       // Disconnect from database
       db.disconnect();
 
+      M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
       done();
@@ -249,8 +252,6 @@ function getAllProjects(done) {
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid fails to
  * create a project with mismatched org ids.
- * // TODO: The org mismatch is not getting denied when trying to POST with two
- * // different org ids in the url and the body data (JIRA MBX-424)
  */
 function rejectPostOrgIdMismatch(done) {
   request({

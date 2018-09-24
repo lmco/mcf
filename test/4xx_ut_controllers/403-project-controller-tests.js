@@ -81,6 +81,8 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -106,8 +108,11 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
-      chai.expect(error.message).to.equal(null);
       db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
@@ -124,17 +129,16 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creation of project with invalid ID', rejectInvalidProjectId);
   it('should reject creation of project with invalid name', rejectInvalidProjectName);
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
-  it('should reject creation of project with non-A user', rejectNonAdminCreateProject);
+  it('should reject creation of project with non-Admin user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
   it('should find all projects which user has permissions on', findProjects);
   it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
   it('should reject update to the id name', rejectProjectId);
-  it('should reject non-A user from finding a project', nonAUser);
-  it('should reject updating due to non-A user', rejectNonAdminProjectUpdate);
+  it('should reject non-Admin user from finding a project', nonAUser);
+  it('should reject updating due to non-Admin user', rejectNonAdminProjectUpdate);
   it('should find the permissions on the project', findPerm);
   it('should set the permissions on the project', setPerm);
-  // TODO: MBX-330: User need to be part of org before project permission set.
   it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
   it('should delete second project', deleteProject02);
@@ -161,6 +165,7 @@ function createProject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -219,6 +224,7 @@ function updateProjectName(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -241,6 +247,7 @@ function updateProjectObject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -255,12 +262,13 @@ function createProject02(done) {
   // Create project
   ProjController.createProject(adminUser, projData)
   .then((proj) => {
-    // Verfy project fields
+    // Verify project fields
     chai.expect(proj.id).to.equal(testData.projects[8].id);
     chai.expect(proj.name).to.equal(testData.projects[8].name);
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -416,6 +424,7 @@ function findProj(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -445,9 +454,10 @@ function findProjects(done) {
     UserController.removeUser(adminUser, testData.users[12].username);
     done();
   })
-  .catch((err) => {
+  .catch((error) => {
+    M.log.error(error);
     // Expect no error
-    chai.expect(err.message).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -520,6 +530,7 @@ function updateProj(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -613,6 +624,7 @@ function setPerm(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -678,6 +690,7 @@ function deleteProject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

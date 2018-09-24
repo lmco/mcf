@@ -72,6 +72,9 @@ function cleanDB(done) {
   .then(() => Element.Element.remove({}))  // Remove elements
   .then(() => done())
   .catch(error => {
+    M.log.error(error);
+
+    // Expect no error
     chai.expect(error).to.equal(null);
     done();
   });
@@ -98,7 +101,7 @@ function createDefaultOrg(done) {
     else {
       // Prune current users to ensure no deleted
       // users are still part of the org
-      UserController.findUsers()
+      UserController.findUsers({ admin: true })
       .then((users) => {
         const newList = [];
 
@@ -114,6 +117,9 @@ function createDefaultOrg(done) {
       })
       .then(() => done())
       .catch((err2) => {
+        M.log.error(err2);
+
+        // Expect no error
         chai.expect(err2).to.equal(null);
         done();
       });

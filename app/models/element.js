@@ -256,6 +256,16 @@ ElementSchema.methods.getValidTypes = function() {
 ElementSchema.statics.getValidTypes = function() {
   return ElementSchema.methods.getValidTypes();
 };
+
+/* ---------------------------( Element Indexes )---------------------------- */
+
+/**
+ * @description Adds a compound index on the name and documentation fields.
+ * @memberof ElementSchema
+ */
+ElementSchema.index({ name: 'text', documentation: 'text' });
+
+
 /* ------------------------------( Models )---------------------------------- */
 
 const Element = mongoose.model('Element', ElementSchema);

@@ -61,7 +61,7 @@ function build(_args) {
   const args = (_args === undefined || _args.length === 0) ? ['--all'] : _args;
 
   // Copy static dependencies to build directory
-  // TODO: Add gulp documentation reference to readme
+  // TODO: Add gulp documentation reference to readme (MBX-463)
   if (args.includes('--all') || args.includes('--copy-deps')) {
     M.log.info('  + Copying dependencies ...');
 
@@ -70,14 +70,14 @@ function build(_args) {
     .pipe(gulp.dest('build/public/img'));
 
     // Copy React
-    // TODO: remove from PRC-001
+    // TODO: remove from PRC-001 (MBX-370)
     gulp.src('./node_modules/react/umd/react.production.min.js')
     .pipe(react())
     .pipe(concat('react.min.js'))
     .pipe(gulp.dest('build/public/js'));
 
     // Copy ReactDOM
-    // TODO: remove from PRC-001
+    // TODO: remove from PRC-001 (MBX-370)
     gulp.src('./node_modules/react-dom/umd/react-dom.production.min.js')
     .pipe(react())
     .pipe(concat('react-dom.min.js'))
@@ -108,7 +108,7 @@ function build(_args) {
     .pipe(gulp.dest('build/public/js'));
 
     // Copy MBEE JS
-    // TODO: remove from PRC-001
+    // TODO: remove from PRC-001 (MBX-370)
     gulp.src('./app/ui/js/**/*.js')
     .pipe(concat('mbee.js'))
     .pipe(gulp.dest('build/public/js'));
@@ -129,7 +129,7 @@ function build(_args) {
   }
 
   // Builds the React libraries into client-side JS
-  // TODO: remove from PRC-001
+  // TODO: remove from PRC-001 (MBX-370)
   if (args.includes('--all') || args.includes('--react')) {
     M.log.info('  + Building react ...');
     // Build React

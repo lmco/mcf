@@ -76,6 +76,8 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -102,22 +104,22 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
-
       // Disconnect from the database
       db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
 
-  // TODO: use 'reject' instead of 'fail' or 'throw an error'
   /* Execute the tests */
   it('should create a new org', createNewOrg);
   it('should create a second org', createSecondOrg);
   it('should find an existing org', findExistingOrg);
-  it('should throw an error saying the field cannot be updated', updateOrgFieldErr);
-  it('should throw an error saying the name field is not a string', updateOrgTypeErr);
+  it('should reject update on immutable field', rejectUpdateImmutableField);
+  it('should reject update of a field to an invalid type', rejectUpdateBadType);
   it('should reject update from non admin user', rejectNonAdminUpdate);
   it('should update an orgs name', updateOrg);
   it('should update an orgs name using model object', updateOrgObject);
@@ -125,18 +127,18 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft delete an existing org', softDeleteExistingOrg);
   it('should delete an existing org', deleteExistingOrg);
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
-  it('should fail finding a soft-deleted org', rejectFindSoftDelOrg);
+  it('should reject find of soft-deleted org', rejectFindSoftDelOrg);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
-  it('should fail trying to update the default org', updateDefaultOrg);
-  it('should fail trying to delete the default org', rejectDefaultOrgDelete);
+  it('should reject update of default org', updateDefaultOrg);
+  it('should reject delete of default org', rejectDefaultOrgDelete);
   it('should add a user to an org', setUserOrgRole);
   it('should reject user changing their permissions', rejectUserRole);
   it('should get a users roles within an org', getUserRoles);
   it('should get all members with permissions in an org', getMembers);
-  it('should throw an error saying the user is not an admin', rejectNonAdminSetPermissions);
+  it('should reject set permissions by non-admin user', rejectNonAdminSetPermissions);
   it('should remove a users role within an org', removeUserRole);
-  it('should throw an error saying the user is not in the org', rejectGetUserRoles);
-  it('should throw an error the permission is not valid', rejectInvalidPermission);
+  it('should reject get permissions of user whose not in org', rejectGetUserRoles);
+  it('should reject set permissions to an invalid permission type', rejectInvalidPermission);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -162,8 +164,10 @@ function createNewOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
+    done();
   });
 }
 
@@ -189,6 +193,7 @@ function createSecondOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -207,6 +212,7 @@ function findExistingOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -217,7 +223,7 @@ function findExistingOrg(done) {
  * @description Verifies a user CANNOT update permissions.
  * Expected error thrown: 'Bad Request'
  */
-function updateOrgFieldErr(done) {
+function rejectUpdateImmutableField(done) {
   // Update organization
   OrgController.updateOrg(adminUser, testData.orgs[2].id, testData.invalidPermissions[0])
   .then(() => {
@@ -237,7 +243,7 @@ function updateOrgFieldErr(done) {
  * @description Verifies updateOrg fails given invalid data.
  * Expected error thrown: 'Internal Server Error'
  */
-function updateOrgTypeErr(done) {
+function rejectUpdateBadType(done) {
   // Update organization
   OrgController.updateOrg(adminUser, testData.orgs[2].id, testData.names[2])
   .then(() => {
@@ -292,6 +298,7 @@ function updateOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -316,6 +323,7 @@ function updateOrgObject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -334,6 +342,7 @@ function findAllExistingOrgs(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -352,6 +361,7 @@ function softDeleteExistingOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -401,8 +411,6 @@ function deleteExistingOrg(done) {
 
 /**
  * @description Verify projects and elements soft deleted when org soft deleted.
- * // TODO : MBX-380 Discuss changing project controller to model
- * // TODO : MBX-380 Discuss taking out element
  */
 function softDeleteProjectAndOrg(done) {
   // Create an org via controller
@@ -436,6 +444,7 @@ function softDeleteProjectAndOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -470,6 +479,7 @@ function hardDeleteProjectAndOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -532,6 +542,7 @@ function setUserOrgRole(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -572,6 +583,7 @@ function getUserRoles(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -595,6 +607,7 @@ function getMembers(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -635,6 +648,7 @@ function removeUserRole(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -655,6 +669,7 @@ function rejectGetUserRoles(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

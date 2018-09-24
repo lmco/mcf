@@ -60,6 +60,7 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
       done();
@@ -79,6 +80,7 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
       done();
@@ -113,6 +115,7 @@ function createOrg(done) {
   org.save()
   .then(() => done())
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -132,6 +135,7 @@ function findOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -153,6 +157,7 @@ function updateOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -171,6 +176,7 @@ function findOrgPermissions(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.eqaul(null);
     done();
@@ -204,6 +210,7 @@ function softDeleteOrg(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -218,6 +225,7 @@ function deleteOrg(done) {
   Org.findOneAndRemove({ id: testData.orgs[0].id })
   .then(() => done())
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

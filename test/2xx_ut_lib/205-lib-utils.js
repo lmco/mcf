@@ -72,6 +72,8 @@ function stringIsString(done) {
     utils.assertType(['hello', 'goodbye'], 'string');
   }
   catch (error) {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
   }
@@ -108,6 +110,8 @@ function objectIsObject(done) {
     utils.assertType([{ hello: 'string' }], 'object');
   }
   catch (error) {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
   }
@@ -124,6 +128,8 @@ function projectIDExists(done) {
     utils.assertExists(['project.id'], sampleObj);
   }
   catch (error) {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
   }
   // Checks for correct key and returns true
@@ -156,6 +162,8 @@ function multipleExist(done) {
     utils.assertExists(['project.id', 'project.name', 'project.org.id', 'type'], sampleObj);
   }
   catch (error) {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
   }
   chai.expect(utils.checkExists(['project.name', 'project.org.id'], sampleObj)).to.equal(true);
@@ -171,6 +179,8 @@ function userIsAdmin(done) {
     utils.assertAdmin(user);
   }
   catch (error) {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
   }
   chai.expect(user.admin).to.equal(true);
@@ -203,6 +213,8 @@ function validUID(done) {
     done();
   }
   catch (error) {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
   }
@@ -235,6 +247,8 @@ function parseValidUID(done) {
     done();
   }
   catch (error) {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
   }
@@ -265,6 +279,8 @@ function parseValidUIDSecondElement(done) {
     done();
   }
   catch (error) {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
   }

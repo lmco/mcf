@@ -55,9 +55,9 @@ const utils = M.require('lib.utils');
  * @return {Promise} resolve - element
  *                   reject - error
  @example
- * findElements({Austin}, 'lockheed', 'mbee')
+ * findElements({User}, 'orgID', 'projectID', false)
  * .then(function(element) {
- *   // do something with the element
+ *   // Do something with the found element
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -113,9 +113,9 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
  *                   reject -  error
  *
  * @example
- * removeElements({Austin}, 'lockheed', 'mbee', {soft: false})
- * .then(function(element) {
- *   // do something with the elements
+ * removeElements({User}, [{Project1}, {Project2}], 'false')
+ * .then(function(query) {
+ *   // Do something with the returned query
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -186,9 +186,9 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
  *                   reject - error
  *
  * @example
- * findElement({Austin}, 'lockheed', 'mbee', 'elem1', false)
+ * findElement({User}, 'orgID', 'projectID', 'elementID', false)
  * .then(function(element) {
- *   // do something with the element
+ *   // Do something with the found element
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -253,8 +253,8 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
  *
  * @example
  * findElementQuery({ uid: 'org:project:id' })
- * .then(function(element) {
- *   // do something with the element
+ * .then(function(elements) {
+ *   // Do something with the found elements
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -287,9 +287,9 @@ function findElementsQuery(elementQuery) {
  *                   reject - error
  *
  * @example
- * createElement({Austin}, {Element 1})
+ * createElement({User}, { id: 'elementID', project: { id: 'projID', org: {id: 'orgID' }}})
  * .then(function(element) {
- *   // do something with the element
+ *   // Do something with the newly created element
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -379,17 +379,17 @@ function createElement(reqUser, element) {
 
           // Check element type
           if (elementType === 'Relationship') {
-            createRelationship(reqUser, elemData, element)
+            createRelationshipHelper(reqUser, elemData, element)
             .then((newElement) => resolve(newElement))
             .catch((createRelationshipError) => reject(createRelationshipError));
           }
           else if (elementType === 'Package') {
-            createPackage(reqUser, elemData)
+            createPackageHelper(reqUser, elemData)
             .then((newElement) => resolve(newElement))
             .catch((createRelationshipError) => reject(createRelationshipError));
           }
           else {
-            createBlock(reqUser, elemData)
+            createBlockHelper(reqUser, elemData)
             .then((newElement) => resolve(newElement))
             .catch((createRelationshipError) => reject(createRelationshipError));
           }
@@ -416,16 +416,16 @@ function createElement(reqUser, element) {
  *                   reject -  error
  *
  * @example
- * createRelationship({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null, {})
+ * createRelationshipHelper({User}, {Element}, { id: 'elementID', project: {id: 'projectID'}})
  * .then(function(element) {
- *   // return element to create function
+ *   // Do something with the newly created relationship
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
  *
  */
-function createRelationship(reqUser, elemData, elemInfo) {
+function createRelationshipHelper(reqUser, elemData, elemInfo) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
@@ -499,16 +499,16 @@ function createRelationship(reqUser, elemData, elemInfo) {
  *                   reject -  error
  *
  * @example
- * createPackage({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null)
+ * createPackageHelper({User}, {Element})
  * .then(function(element) {
- *   // return element to create function
+ *   // Do something with the newly created package
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
  *
  */
-function createPackage(reqUser, elemData) {
+function createPackageHelper(reqUser, elemData) {
   return new Promise((resolve, reject) => {
     const newElement = new Element.Package({
       id: elemData.elemID,
@@ -551,16 +551,16 @@ function createPackage(reqUser, elemData) {
  *                   reject -  error
  *
  * @example
- * createBlock({Austin}, 'lockheed', {MBEE}, 'e1', 'uid', 'E1', null)
+ * createBlockHelper({User}, {Element})
  * .then(function(element) {
- *   // return element to create function
+ *   // DO something with the newly created block
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
  *
  */
-function createBlock(reqUser, elemData) {
+function createBlockHelper(reqUser, elemData) {
   return new Promise((resolve, reject) => {
     const newElement = new Element.Block({
       id: elemData.elemID,
@@ -604,7 +604,7 @@ function createBlock(reqUser, elemData) {
  *                   reject -  error
  *
  * @example
- * updateElement('austin', 'lockheed', 'mbee', 'elem1', { name: 'New Name'} )
+ * updateElement({User}, 'orgID', 'projectID', 'elementID', { name: 'Updated Element' })
  * .then(function(org) {
  *   // do something with the updated element.
  * })
@@ -724,9 +724,9 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
  *                   reject -  error
  *
  * @example
- * updateParent('austin', 'lockheed', 'mbee', 'elem0', {Elem1})
- * .then(function(element) {
- *   // do something with the element
+ * updateParent({User}, 'orgID', 'projectID', 'elementID', {Element})
+ * .then(function(_id) {
+ *   // Do something with the parents _id
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -771,15 +771,15 @@ function updateParent(reqUser, orgID, projID, elemID, newElement) {
  *                   reject -  error
  *
  * @example
- * removeElement({Austin}, 'lockheed', 'mbee', 'elem1', {soft: false} )
+ * removeElement({User}, 'orgID', 'projectID', 'elementID', false)
  * .then(function(element) {
- *   // do something with the element
+ *   // Do something with the newly deleted element
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
  */
-function removeElement(reqUser, organizationID, projectID, elementID, hardDelete) {
+function removeElement(reqUser, organizationID, projectID, elementID, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {

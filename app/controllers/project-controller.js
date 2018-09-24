@@ -62,9 +62,9 @@ const utils = M.require('lib.utils');
  * @return {Array} array of found project objects
  *
  * @example
- * findProjects({Tony Stark}, 'StarkIndustries')
+ * findProjects({User}, 'orgID', false)
  * .then(function(projects) {
- *   // do something with the returned projects
+ *   // Do something with the found projects
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -118,9 +118,9 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  * @return {Array} array of deleted projects
  *
  * @example
- * removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
+ * removeProjects({User}, [{Org1}, {Org2}], false)
  * .then(function(projects) {
- *   // do something with the deleted projects.
+ *   // Do something with the deleted projects
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -197,9 +197,9 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
  * @return {Project} The found project
  *
  * @example
- * findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
+ * findProject({User}, 'orgID', 'projectID', false)
  * .then(function(project) {
- *   // do something with the returned project
+ *   // Do something with the found project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -271,7 +271,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
  * @example
  * findProjectsQuery({ uid: 'org:proj' })
  * .then(function(projects) {
- *   // do something with the found projects.
+ *   // Do something with the found projects
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -297,9 +297,9 @@ function findProjectsQuery(query) {
  * @return {Object} created project object
  *
  * @example
- * createProject({Tony Stark}, {Arc Reactor 1})
+ * createProject({User}, { id: 'projectID', name: 'New Project', org: { id: 'orgID' } })
  * .then(function(project) {
- *   // do something with the newly created project.
+ *   // Do something with the newly created project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -407,9 +407,9 @@ function createProject(reqUser, project) {
  * @return {Object} updated project object
  *
  * @example
- * updateProject({Tony Stark}, {Arc Reactor 1})
+ * updateProject({User}, 'orgID', 'projectID', { name: 'Updated Project' })
  * .then(function(project) {
- *   // do something with the updated project.
+ *   // Do something with the updated project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -514,15 +514,15 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
  * @return {Object} deleted project object
  *
  * @example
- * removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
+ * removeProject({User}, 'orgID', 'projectID', false)
  * .then(function(project) {
- *   // do something with the deleted project.
+ *   // Do something with the deleted project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
  */
-function removeProject(reqUser, organizationID, projectID, hardDelete) {
+function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
@@ -595,9 +595,9 @@ function removeProject(reqUser, organizationID, projectID, hardDelete) {
  *
  * @example <caption>Calling example</caption>
  *
- * findAllPermissions(myUser, 'stark', 'arc')
+ * findAllPermissions({User}, 'orgID', 'projectID')
  * .then(function(permissions) {
- *   // do something with the list of user permissions
+ *   // Do something with the list of user permissions
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -655,9 +655,9 @@ function findAllPermissions(reqUser, organizationID, projectID) {
  * </code></pre>
  *
  * @example
- * findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
+ * findPermissions({User}, 'username', 'orgID', 'projectID')
  * .then(function(permissions) {
- *   // do something with the list of permissions
+ *   // Do something with the users permissions
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -694,9 +694,9 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  *                   reject - error
  *
  * @example
- * setPermissions({Tony}, 'stark_industries', 'arc_reactor', {Jarvis}, 'write')
+ * setPermissions({User}, 'orgID', 'projectID', 'username', 'write')
  * .then(function(project) {
- *   // do something with the updated project.
+ *   // Do something with the updated project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -727,7 +727,7 @@ function setPermissions(reqUser, organizationID, projectID, searchedUsername, ro
     let setUser = null;
 
     // Lookup the user
-    UserController.findUser(searchUsername)
+    UserController.findUser(reqUser, searchUsername)
     .then(foundUser => {
       setUser = foundUser;
       return findProject(reqUser, organizationID, projectID);
