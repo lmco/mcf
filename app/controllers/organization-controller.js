@@ -532,7 +532,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
     let foundUser;
 
     // Find searchedUser
-    UserController.findUser(searchedUser)
+    UserController.findUser(reqUser, searchedUser)
     .then((user) => {
       // set foundUser
       foundUser = user;

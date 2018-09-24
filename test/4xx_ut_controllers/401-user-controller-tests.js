@@ -311,7 +311,7 @@ function findExistingUser(done) {
   const username = testData.users[3].username;
 
   // Find user via controller
-  UserController.findUser(username)
+  UserController.findUser(adminUser, username)
   .then((searchUser) => {
     // Found a user, verify user data
     chai.expect(searchUser.username).to.equal(testData.users[3].username);
@@ -335,7 +335,7 @@ function rejectFindNonExistentUser(done) {
   const username = testData.usernames[1].username;
 
   // Find user via controller
-  UserController.findUser(username)
+  UserController.findUser(adminUser, username)
   .then(() => {
     // Expect findUser() to fail
     // Should not execute, force test to fail
@@ -406,7 +406,7 @@ function deleteUser(done) {
   // Delete user via controller
   UserController.removeUser(adminUser, username)
   // Remove user succeeded, attempt to find user
-  .then(() => UserController.findUser(testData.users[3].username))
+  .then(() => UserController.findUser(adminUser, testData.users[3].username))
   .then(() => {
     // Expect findUser() to fail
     // Should not execute, force test to fail

@@ -21,7 +21,7 @@
 /**
  * @description Sanitizes database queries and scripting tags.
  *
- * @return sanitized user input
+ * @return {String} sanitized user input
  */
 module.exports.sanitize = function(userInput) {
   return module.exports.mongo(module.exports.html(userInput));
