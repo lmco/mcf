@@ -69,6 +69,7 @@ function cleanDB(done) {
   .then(() => Element.Element.remove({}))
   .then(() => done())
   .catch(error => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

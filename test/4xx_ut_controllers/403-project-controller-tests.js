@@ -81,6 +81,8 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -106,8 +108,11 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
-      chai.expect(error.message).to.equal(null);
       db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
@@ -161,6 +166,7 @@ function createProject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -219,6 +225,7 @@ function updateProjectName(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -241,6 +248,7 @@ function updateProjectObject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -255,12 +263,13 @@ function createProject02(done) {
   // Create project
   ProjController.createProject(adminUser, projData)
   .then((proj) => {
-    // Verfy project fields
+    // Verify project fields
     chai.expect(proj.id).to.equal(testData.projects[8].id);
     chai.expect(proj.name).to.equal(testData.projects[8].name);
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -416,6 +425,7 @@ function findProj(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -445,9 +455,10 @@ function findProjects(done) {
     UserController.removeUser(adminUser, testData.users[12].username);
     done();
   })
-  .catch((err) => {
+  .catch((error) => {
+    M.log.error(error);
     // Expect no error
-    chai.expect(err.message).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -520,6 +531,7 @@ function updateProj(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -613,6 +625,7 @@ function setPerm(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -678,6 +691,7 @@ function deleteProject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

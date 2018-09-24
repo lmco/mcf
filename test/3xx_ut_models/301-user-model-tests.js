@@ -74,7 +74,11 @@ function createUser(done) {
   // Create a new User object
   const user = new User(testData.users[2]);
   // Save user object to the database
-  user.save((error) => {
+  user.save()
+  .then(() => done())
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error).to.equal(null);
     done();
   });
@@ -97,6 +101,7 @@ function getUser(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -118,6 +123,7 @@ function verifyValidPassword(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -139,6 +145,7 @@ function verifyInvalidPassword(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -164,6 +171,7 @@ function updateUser(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -198,6 +206,7 @@ function softDeleteUser(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -216,6 +225,7 @@ function getSoftDeletedUser(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -232,6 +242,7 @@ function deleteUser(done) {
   .then(user => user.remove())
   .then(() => done())
   .catch(error => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
