@@ -31,7 +31,7 @@ if (module.parent == null || typeof M === 'undefined') {
 const { spawn, spawnSync } = require('child_process');
 
 
-// TODO: Include detailed docker information in readme
+// TODO: Include detailed docker information in readme (MBX-464)
 /**
  * @description The Docker command can be used to build a Docker image or run a Docker
  * container. It supports the command line arguments:

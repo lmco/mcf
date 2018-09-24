@@ -134,7 +134,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject updating due to non-A user', rejectNonAdminProjectUpdate);
   it('should find the permissions on the project', findPerm);
   it('should set the permissions on the project', setPerm);
-  // TODO: MBX-330: User need to be part of org before project permission set.
   it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
   it('should delete second project', deleteProject02);

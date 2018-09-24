@@ -18,8 +18,6 @@
  *
  * @description This tests the user API controller functionality:
  * GET, POST, PATCH, and DELETE a user.
- * // TODO: MBX-348 Create test to verify only admin user can make GET request of all
- * // users
  */
 
 // Node modules

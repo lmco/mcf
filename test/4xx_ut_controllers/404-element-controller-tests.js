@@ -46,7 +46,6 @@ let proj = null;
 describe(M.getModuleName(module.filename), () => {
   /**
    * After: Connect to database. Create an admin user, organization, and project
-   * TODO: MBX-384 What does this function do?
    */
 
   before((done) => {
