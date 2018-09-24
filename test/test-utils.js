@@ -34,13 +34,13 @@ const testData = require(path.join(M.root, 'test', 'data.json'));
  * @description Helper function to create test non-admin user in
  * MBEE tests.
  */
-module.exports.createNonadminUser = function(userData = null) {
+module.exports.createNonadminUser = function() {
   return new Promise((resolve, reject) => {
     // Define new user
     let newUser = null;
 
     // Check any admin exist
-    User.findOne({ username: userData.username })
+    User.findOne({ username: testData.users[1].username })
     .then((foundUser) => {
       // Check user found
       if (foundUser !== null) {
@@ -50,10 +50,10 @@ module.exports.createNonadminUser = function(userData = null) {
 
       // User data present, create user
       const user = new User({
-        username: userData.username,
-        password: userData.password,
-        fname: userData.fname,
-        lname: userData.lname,
+        username: testData.users[1].username,
+        password: testData.users[1].password,
+        fname: testData.users[1].fname,
+        lname: testData.users[1].lname,
         admin: false
       });
 
@@ -102,7 +102,7 @@ module.exports.createAdminUser = function() {
       const user = new User({
         username: testData.users[0].adminUsername,
         password: testData.users[0].adminPassword,
-        ovider: 'local',
+        provider: 'local',
         admin: true
       });
 
@@ -133,7 +133,7 @@ module.exports.createAdminUser = function() {
  * @description Helper function to delete test user in
  * MBEE tests.
  */
-module.exports.removeUser = function(userData) {
+module.exports.removeNonadminUser = function(userData) {
   return new Promise((resolve, reject) => {
     // Find admin user
     User.findOne({ username: userData.username })
@@ -161,12 +161,12 @@ module.exports.removeAdminUser = function() {
  * @description Helper function to create organization in
  * MBEE tests.
  */
-module.exports.createOrganization = function(adminUser, orgData) {
+module.exports.createOrganization = function(adminUser) {
   return new Promise((resolve, reject) => {
     // Create the new organization
     const newOrg = new Organization({
-      id: orgData.id,
-      name: orgData.name,
+      id: testData.orgs[0].id,
+      name: testData.orgs[0].name,
       permissions: {
         admin: [adminUser._id],
         write: [adminUser._id],
@@ -194,7 +194,6 @@ module.exports.removeOrganization = function(adminUser, organizationID) {
       organization = org;
       // Hard delete
       return Organization.deleteOne({ id: org.id });
-      // Delete all projects in that org
     })
     .then(() => resolve(organization))
     .catch((error) => reject(error));
