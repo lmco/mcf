@@ -1159,6 +1159,28 @@ function postElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If projectID was provided in the body, ensure it matches projectID in params
+  if (utils.checkExists(['project.id'], req.body) &&
+    req.body.project.id !== req.params.projectid) {
+    const error = new M.CustomError(
+      'Project ID in body does not match project ID in params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // If orgID was provided in the body, ensure it matches orgID in params
+  if (utils.checkExists(['project.org.id'], req.body) &&
+    req.body.project.org.id !== req.params.orgid) {
+    const error = new M.CustomError(
+      'Org ID in body does not match org ID in params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Set project and org data in case it wasn't provided
+  req.body.project.id = req.params.projectid;
+  req.body.project.org.id = req.params.orgid;
+
   // Create element with provided parameters
   // NOTE: createElement() sanitizes req.body.name
   ElementController.createElement(req.user, req.body)
