@@ -55,9 +55,9 @@ const sani = M.require('lib.sanitization');
  * @return {Array} Array of found user objects
  *
  * @example
- * findUsers({Tony})
+ * findUsers({User}, false)
  * .then(function(users) {
- *   // do something with the found users
+ *   // Do something with the found users
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -99,9 +99,9 @@ function findUsers(reqUser, softDeleted = false) {
  * @return {User} The found user
  *
  * @example
- * findUser({Tony}, 'tstark', false)
+ * findUser({User}, 'username', false)
  * .then(function(user) {
- *   // do something with the found user
+ *   // Do something with the found user
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -162,7 +162,7 @@ function findUser(reqUser, searchedUsername, softDeleted = false) {
  * @example
  * findUsersQuery({ fname: 'Tony' })
  * .then(function(users) {
- *   // do something with the found users
+ *   // Do something with the found users
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -188,9 +188,9 @@ function findUsersQuery(usersQuery) {
  * @return {User} The newly created user.
  *
  * @example
- * createUser({Tony}, {username: 'ppotts', fname: 'Pepper', lname: 'Potts'})
+ * createUser({User}, { username: 'newUsername', fname: 'First', lname: 'Last' })
  * .then(function(user) {
- *   // do something with the newly created user
+ *   // Do something with the newly created user
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -267,9 +267,9 @@ function createUser(reqUser, newUserData) {
  * @return {User} The updated user
  *
  * @example
- * updateUser({Tony}, 'ppotts', {fname: 'Pep'})
+ * updateUser({User}, 'username', { fname: 'Updated First' })
  * .then(function(user) {
- *   // do something with the newly update user
+ *   // Do something with the newly updated user
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -357,9 +357,9 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
  * @return {User} The newly deleted user.
  *
  * @example
- * removeUser({Tony}, 'ppotts')
+ * removeUser({User}, 'username')
  * .then(function(user) {
- *   // do something with the deleted users username
+ *   // Do something with the deleted user
  * })
  * .catch(function(error) {
  *   M.log.error(error);
