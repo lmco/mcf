@@ -315,10 +315,10 @@ function createProject(reqUser, project) {
     try {
       assert.ok(project.id !== undefined, 'project.id is undefined');
       assert.ok(project.name !== undefined, 'project.name is undefined');
-      assert.ok(project.org.id !== undefined, 'project.org.id is undefined');
+      assert.ok(project.orgid !== undefined, 'project.orgid is undefined');
       assert.strictEqual(typeof project.id, 'string');
       assert.strictEqual(typeof project.name, 'string');
-      assert.strictEqual(typeof project.org.id, 'string');
+      assert.strictEqual(typeof project.orgid, 'string');
 
       // If custom data provided, validate type and sanitize
       if (project.hasOwnProperty('custom')) {
@@ -340,7 +340,7 @@ function createProject(reqUser, project) {
     // Sanitize query inputs
     const projID = sani.html(project.id);
     const projName = sani.html(project.name);
-    const orgID = sani.html(project.org.id);
+    const orgID = sani.html(project.orgid);
 
     // Initialize function-wide variables
     let org = null;

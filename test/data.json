@@ -189,9 +189,7 @@
     {
       "id": "ironman",
       "name": "Iron man Suite",
-      "org": {
-        "id": "starkhq"
-      },
+      "orgid": "starkhq",
       "custom": {
         "builtFor": "Tony"
       }
@@ -207,16 +205,12 @@
     {
       "id": "arcreactor",
       "name": "Arc Reactor",
-      "org": {
-        "id": "starkhq"
-      }
+      "orgid": "starkhq"
     },
     {
       "id": "iamnoadmin",
       "name": "dontmakeme",
-      "org": {
-        "id": "starkhq"
-      }
+      "orgid": "starkhq"
     },
     {
       "id": "ironman",
@@ -229,44 +223,32 @@
     {
       "id": "thor",
       "name": "Thor Odinson",
-      "org": {
-        "id": "asgard"
-      }
+      "orgid": "asgard"
     },
     {
       "id": "hulk",
       "name": "Bruce Banner",
-      "org": {
-        "id": "biochemistry"
-      }
+      "orgid": "biochemistry"
     },
     {
       "id": "bettyross",
       "name": "Hulks GF",
-      "org": {
-        "id": "biochemistry"
-      }
+      "orgid": "biochemistry"
     },
     {
       "id": "hulk",
       "name": "Anger",
-      "org": {
-        "id": "biochemistry"
-      }
+      "orgid": "biochemistry"
     },
     {
       "id": "brucebanner",
       "name": "Bruce Banner",
-      "org": {
-        "id": "biochemistry"
-      }
+      "orgid": "biochemistry"
     },
     {
       "id": "rebirth",
       "name": "Super Soldier Serum",
-      "org": {
-        "id": "nineteenforty"
-      }
+      "orgid": "nineteenforty"
     },
     {
       "id": "hulktwopointoh",
@@ -275,16 +257,12 @@
     {
       "id": "nickfury",
       "name": "Nick Fury",
-      "org": {
-        "id": "shield"
-      }
+      "orgid": "shield"
     },
     {
       "id": "mariahill",
       "name": "Maria Hill",
-      "org": {
-        "id": "shield"
-      }
+      "orgid": "shield"
     }
   ],
 
@@ -334,12 +312,7 @@
     {
       "id": "elem0",
       "name": "Mjolnir",
-      "project": {
-        "id": "thor",
-        "org": {
-          "id": "asgard"
-        }
-      },
+      "projectUID": "asgard:thor",
       "type": "Package",
       "custom": {
         "location": "Earth",
@@ -350,24 +323,14 @@
     {
       "id": "elem1",
       "name": "Heimdall the Gatekeeper",
-      "project": {
-        "id": "thor",
-        "org": {
-          "id": "asgard"
-        }
-      },
+      "projectUID": "asgard:thor",
       "type": "block",
       "parent": "elem0"
     },
     {
       "id": "elem2",
       "name": "Loki brother of Thor",
-      "project": {
-        "id": "thor",
-        "org": {
-          "id": "asgard"
-        }
-      },
+      "projectUID": "asgard:thor",
       "type": "Block",
       "parent": "elem0",
       "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
@@ -375,12 +338,7 @@
     {
       "id": "rel1",
       "name": "Hate Relationship",
-      "project": {
-        "id": "thor",
-        "org": {
-          "id": "asgard"
-        }
-      },
+      "projectUID": "asgard:thor",
       "type": "Relationship",
       "source": "elem1",
       "target": "elem2"
@@ -397,23 +355,13 @@
     {
       "id": "0000",
       "name": "Steve Rogers",
-      "project": {
-        "id": "rebirth",
-        "org": {
-          "id": "nineteenforty"
-        }
-      },
+      "projectUID": "nineteenforty:rebirth",
       "type": "Block"
     },
     {
       "id": "0001",
       "name": "Steve Rogers 2",
-      "project": {
-        "id": "rebirth",
-        "org": {
-          "id": "nineteenforty"
-        }
-      },
+      "projectUID": "nineteenforty:rebirth",
       "type": "Block"
     },
     {
@@ -423,12 +371,7 @@
     {
       "id": "0003",
       "name": "",
-      "project": {
-        "id": "rebirth",
-        "org": {
-          "id": "nineteenforty"
-        }
-      },
+      "projectUID": "nineteenforty:rebirth",
       "type": "Block"
     }
   ],
