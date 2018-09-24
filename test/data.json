@@ -5,10 +5,10 @@
       "adminPassword": "test12345"
     },
     {
-      "username": "nonadminUser",
-      "password": "password123",
-      "fname": "userFirstname",
+      "username": "nonadmin_user",
+      "password": "Password123",
       "preferredName": "nonadmin user",
+      "fname": "userFirstname",
       "lname": "userLastname",
       "admin": false
     },
@@ -190,7 +190,7 @@
       "id": "ironman",
       "name": "Iron man Suite",
       "org": {
-        "id": "starkhq"
+        "id": "avengers"
       },
       "custom": {
         "builtFor": "Tony"

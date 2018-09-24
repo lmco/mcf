@@ -59,10 +59,8 @@ describe(M.getModuleName(module.filename), () => {
       // Set global admin user
       adminUser = _adminUser;
 
-      // Define organization data
-      const orgData = testData.orgs[8];
       // Create organization
-      return testUtils.createOrganization(adminUser, orgData);
+      return testUtils.createOrganization(adminUser);
     })
     .then((retOrg) => {
       // Set global organization
@@ -83,7 +81,7 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(error).to.equal(null);
       done();
     });
-  }); // END: before()
+  });
 
   /**
    * After: Remove Organization and project.

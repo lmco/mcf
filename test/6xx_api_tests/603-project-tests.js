@@ -60,19 +60,16 @@ describe(M.getModuleName(module.filename), () => {
       // Set to global admin
       adminUser = user;
 
-      // Define org data
-      const orgData = testData.orgs[11];
-
       // Create org
-      return testUtils.createOrganization(user, orgData);
+      return testUtils.createOrganization(user);
     })
     .then((retOrg) => {
       // Set global org
       org = retOrg;
 
       // Verify org was created correctly
-      chai.expect(retOrg.id).to.equal(testData.orgs[11].id);
-      chai.expect(retOrg.name).to.equal(testData.orgs[11].name);
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
@@ -89,10 +86,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the Organization
-    OrgController.removeOrg(adminUser, testData.orgs[11].id, true)
+    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
     .then((retOrg) => {
       // Verify deleted org
-      chai.expect(retOrg.id).to.equal(testData.orgs[11].id);
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
 
       // Find the admin user
       return User.findOne({ username: adminUser.username });

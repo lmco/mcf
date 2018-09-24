@@ -53,28 +53,24 @@ describe(M.getModuleName(module.filename), () => {
       // Set global admin user
       adminUser = _adminUser;
 
-      // Define non-admin user data
-      const nonAdminUserData = testData.users[8];
-
       // Create non-admin user
-      return testUtils.createNonadminUser(nonAdminUserData);
+      return testUtils.createNonadminUser();
     })
     .then((_nonadminUser) => {
       nonAdminUser = _nonadminUser;
-      chai.expect(nonAdminUser.username).to.equal(testData.users[8].username);
-      chai.expect(nonAdminUser.fname).to.equal(testData.users[8].fname);
-      chai.expect(nonAdminUser.lname).to.equal(testData.users[8].lname);
+      chai.expect(nonAdminUser.username).to.equal(testData.users[1].username);
+      chai.expect(nonAdminUser.fname).to.equal(testData.users[1].fname);
+      chai.expect(nonAdminUser.lname).to.equal(testData.users[1].lname);
     })
     .then(() => {
-      // Define organization data
-      const orgData = testData.orgs[7];
+
       // Create organization
-      return testUtils.createOrganization(adminUser, orgData);
+      return testUtils.createOrganization(adminUser);
     })
     .then((retOrg) => {
       org = retOrg;
-      chai.expect(retOrg.id).to.equal(testData.orgs[7].id);
-      chai.expect(retOrg.name).to.equal(testData.orgs[7].name);
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
@@ -91,14 +87,14 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    OrgController.removeOrg(adminUser, testData.orgs[7].id, true)
+    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
     .then(() => {
       // Removing the non-admin user
-      const userTwo = testData.users[8].username;
+      const userTwo = testData.users[1].username;
       return UserController.removeUser(adminUser, userTwo);
     })
     .then((delUser2) => {
-      chai.expect(delUser2.username).to.equal(testData.users[8].username);
+      chai.expect(delUser2.username).to.equal(testData.users[1].username);
       return testUtils.removeAdminUser();
     })
     .then((delAdminUser) => {
@@ -114,6 +110,7 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a new project', createProject);
+  /*
   it('should throw an error saying the field cannot be updated', rejectImmutableField);
   it('should throw an error saying the field is not of type string', updateTypeError);
   it('should update a project', updateProjectName);
@@ -137,7 +134,7 @@ describe(M.getModuleName(module.filename), () => {
   // TODO: MBX-330: User need to be part of org before project permission set.
   it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
-  it('should delete second project', deleteProject02);
+  it('should delete second project', deleteProject02);*/
 });
 
 /* --------------------( Tests )-------------------- */
