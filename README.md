@@ -1,7 +1,5 @@
 # Model-Based Engineering Environment
 
-TODO
-
 The Model-Based Engineering Environment or MBEE is modeling collaboration tool
 that integrates system models with multidisciplinary engineering data to enable
 the system model to be a single-source of truth project data. It makes model

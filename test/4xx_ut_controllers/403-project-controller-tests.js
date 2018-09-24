@@ -129,14 +129,14 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creation of project with invalid ID', rejectInvalidProjectId);
   it('should reject creation of project with invalid name', rejectInvalidProjectName);
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
-  it('should reject creation of project with non-A user', rejectNonAdminCreateProject);
+  it('should reject creation of project with non-Admin user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
   it('should find all projects which user has permissions on', findProjects);
   it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
   it('should reject update to the id name', rejectProjectId);
-  it('should reject non-A user from finding a project', nonAUser);
-  it('should reject updating due to non-A user', rejectNonAdminProjectUpdate);
+  it('should reject non-Admin user from finding a project', nonAUser);
+  it('should reject updating due to non-Admin user', rejectNonAdminProjectUpdate);
   it('should find the permissions on the project', findPerm);
   it('should set the permissions on the project', setPerm);
   it('should soft-delete a project', softDeleteProject);
