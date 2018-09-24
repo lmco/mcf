@@ -130,6 +130,20 @@ module.exports.createAdminUser = function() {
 };
 
 /**
+ * @description Helper function to delete test user in
+ * MBEE tests.
+ */
+module.exports.removeUser = function(userData) {
+  return new Promise((resolve, reject) => {
+    // Find admin user
+    User.findOne({ username: userData.username })
+    .then((foundUser) => foundUser.remove())
+    .then(() => resolve(null))
+    .catch((error) => reject(error));
+  });
+};
+
+/**
  * @description Helper function to delete test admin user in
  * MBEE tests.
  */
