@@ -58,12 +58,12 @@ const utils = M.require('lib.utils');
  *                    reject - error
  *
  * @example
- * findOrgs(username)
- * .then(orgs => {
- *   console.log(orgs);
+ * findOrgs({User})
+ * .then(function(orgs) {
+ *   // Do something with the found orgs
  * })
- * .catch(err => {
- *   console.log(err);
+ * .catch(function(error) {
+ *   M.log.error(error);
  * });
  *
  */
@@ -90,9 +90,9 @@ function findOrgs(reqUser) {
  *                    reject - error
  *
  *  @example
- * findOrg('josh', 'mbee-sw')
+ * findOrg({User}, 'orgID')
  * .then(function(org) {
- *   // do something with the org
+ *   // Do something with the found org
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -158,8 +158,8 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
  *
  * @example
  * findOrgsQuery({ id: 'org' })
- * .then(function(org) {
- *   // do something with the found orgs.
+ * .then(function(orgs) {
+ *   // Do something with the found orgs
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -185,9 +185,9 @@ function findOrgsQuery(orgQuery) {
  * @return {Object} created organization object
  *
  * @example
- * createOrg('josh', {mbee-sw})
+ * createOrg({User}, { id: 'orgID', name: 'New Org' })
  * .then(function(org) {
- *   // do something with the newly created org
+ *   // Do something with the newly created org
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -271,9 +271,9 @@ function createOrg(reqUser, newOrgData) {
  * @return {Object} updated org
  *
  * @example
- * updateOrg('josh', {mbee-sw})
+ * updateOrg({User}, 'orgID', { name: 'Different Org Name' })
  * .then(function(org) {
- *   // do something with the newly updated org
+ *   // Do something with the newly updated org
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -389,9 +389,9 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
  * @return {Object} removed organization object
  *
  * @example
- * removeOrg('josh', {mbee-sw}, {soft: false})
+ * removeOrg({User}, 'orgID', true)
  * .then(function(org) {
- *   // do something with the newly updated org
+ *   // Do something with the newly removed org
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -461,9 +461,9 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
  * }
  *
  * @example
- * findPermissions(Josh, Austin, 'mbee')
- * .then(function(org) {
- *  // Get the users roles
+ * findPermissions({User}, 'username', 'orgID')
+ * .then(function(permissions) {
+ *  // // Do something with the users permissions
  * })
  * .catch(function(error) {
  *  M.log.error(error);
@@ -497,9 +497,9 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
  * @returns {Object} The updated Organization object
  *
  * @example
- * setPermissions(Josh, Austin, 'mbee', 'write')
+ * setPermissions({User}, 'orgID', 'username', 'write')
  * .then(function(org) {
- *   // Change the users role
+ *   // Do something with the updated org
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -624,9 +624,9 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
  * }
  *
  * @example
- * findAllPermissions(Austin, 'mbee')
- * .then(function(org) {
- *   // Retrieve the members
+ * findAllPermissions({User}, 'orgID')
+ * .then(function(permissions) {
+ *   // Do something with the list of user permissions
  * })
  * .catch(function(error) {
  *   M.log.error(error);
