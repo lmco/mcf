@@ -56,8 +56,6 @@ describe(M.getModuleName(module.filename), () => {
  * items from all MongoDB collections.
  */
 function cleanDB(done) {
-  // TODO: Should not run if production MBX-401
-  // TODO: Allow to run using --force MBX-401
   // Remove users
   User.remove({})
 

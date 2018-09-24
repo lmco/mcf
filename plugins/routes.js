@@ -85,7 +85,7 @@ function loadPlugins() {
     M.log.info(`Loading plugin '${namespace}' ...`);
 
     // Install the dependencies
-    // TODO: MBX-456 Make sure Yarn install works if NPM was used earlier
+    // TODO: (MBX-456) Make sure Yarn install works if NPM was used earlier
     const yarnExe = path.join(M.root, 'node_modules', '.bin', 'yarn');
     const rootNodeModules = path.join('..', '..', 'node_modules');
     const commands = [
@@ -95,7 +95,7 @@ function loadPlugins() {
     const stdout = execSync(commands.join('; '));
     M.log.verbose(stdout.toString());
 
-    // TODO: Reword this comment (add words)
+    // TODO: Reword this comment (add words) (MBX-465)
     try {
       pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
     }
@@ -151,10 +151,10 @@ function clonePluginFromGitRepo(data) {
  * plugins directory.
  * @param data
  *
- * TODO: Remove from prc-001
+ * TODO: Remove from prc-001 (MBX-370)
  */
 // function getPluginFromURL(data) {
-//  // TODO
+//  // TODO (MBX-203)
 // }
 
 /**
@@ -190,7 +190,7 @@ function copyPluginFromLocalDir(data) {
  * Extracts a zip file into the appropriate location in the plugins directory.
  * @param data
  *
- * TODO: Remove from prc-001
+ * TODO: Remove from prc-001 (MBX-370)
  */
 // function extractZip(data) {
 //
@@ -221,20 +221,20 @@ function copyPluginFromLocalDir(data) {
  * directory.
  * @param data
  *
- * TODO: Remove from prc-001
+ * TODO: Remove from prc-001 (MBX-370)
  */
 // function extractTarGz(data) {
-//   // TODO
+//   // TODO (MBX-204)
 // }
 
 /**
  * Extracts a gzip file into the appropriate location in the plugins directory.
  * @param data
  *
- * TODO: Remove from prc-001
+ * TODO: Remove from prc-001 (MBX-370)
  */
 // function extractGz(data) {
-//   // TODO
+//   // TODO (MBX-204)
 // }
 
 

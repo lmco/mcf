@@ -244,7 +244,7 @@ function updateFirstName(done) {
 function rejectInvalidLastNameUpdate(done) {
   // Create user data
   const username = testData.users[3].username;
-  const userData = testData.names[0]; // TODO: MBX-376 Add this style to style guide
+  const userData = testData.names[0];
   // Update user via controller
   UserController.updateUser(adminUser, username, userData)
   .then(() => {

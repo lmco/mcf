@@ -252,8 +252,6 @@ function getAllProjects(done) {
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid fails to
  * create a project with mismatched org ids.
- * // TODO: The org mismatch is not getting denied when trying to POST with two
- * // different org ids in the url and the body data (JIRA MBX-424)
  */
 function rejectPostOrgIdMismatch(done) {
   request({

@@ -63,7 +63,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft delete a user', softDeleteUser);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
-  // it('should login an LDAP user', loginLDAPUser);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -248,29 +247,3 @@ function deleteUser(done) {
     done();
   });
 }
-
-/**
- * TODO -  Remove, replace, or rename this test as needed. (MBX-371)
- * Update test to work with any auth strategy, not just with LDAP
- * The test is dependent only on an LDAP configuration which may not always be
- * the case.
- *
- * @description INSERT DESCRIPTION
- */
-// function loginLDAPUser(done) {
-//   const AuthController = M.require('lib.auth');
-//   const u = M.config.test.username;
-//   const p = M.config.test.password;
-//   AuthController.handleBasicAuth(null, null, u, p)
-//   .then(user => {
-//     chai.expect(user.username).to.equal(M.config.test.username);
-//     User.findOneAndUpdate({ username: u }, { admin: true }, (updateErr, userUpdate) => {
-//       chai.expect(updateErr).to.equal(null);
-//       done();
-//     });
-//   })
-//   .catch(error => {
-//     chai.expect(error).to.equal(null);
-//     done();
-//   });
-// }

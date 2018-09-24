@@ -123,7 +123,6 @@ function swaggerSpec() {
 }
 
 /* -------------------------( General API Endpoints )------------------------ */
-// TODO: Evaluate route mapping for all functions
 /**
  * GET /api/doc/swagger.json
  *
@@ -234,7 +233,7 @@ function getOrgs(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * POST /api/orgs
  *
  * @description Accepts an array of JSON objects containing organization data.
@@ -250,7 +249,7 @@ function postOrgs(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * PATCH /api/orgs
  *
  * @description Accepts an array of JSON objects containing organization data.
@@ -267,7 +266,7 @@ function patchOrgs(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * DELETE /api/orgs
  *
  * @description This function will soft-delete all orgs.
@@ -585,7 +584,7 @@ function getProjects(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * POST /api/org/:orgid/projects
  *
  * @description Accepts an array of JSON objects containing project data.
@@ -599,7 +598,7 @@ function postProjects(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * PATCH /api/org/:orgid/projects
  *
  * @description Accepts an array of JSON objects containing project data.
@@ -616,7 +615,7 @@ function patchProjects(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * DELETE /api/org/:orgid/projects
  *
  * @description This function will soft-delete all projects.

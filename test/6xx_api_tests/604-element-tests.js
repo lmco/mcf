@@ -123,7 +123,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST an element', postElement01);
   it('should POST a second element', postElement02);
   it('should GET the previously posted element', getElement);
-  // TODO: MBX-396 add a second post
   it('should GET all elements for a project', getElements);
   it('should PATCH an elements name', patchElement);
   it('should reject a POST with an invalid name field', rejectPostElement);
