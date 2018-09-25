@@ -43,6 +43,7 @@ const validators = M.require('lib.validators');
  *  TODO: Change class to functions
  */
 class UiController {
+
   /**
    * Renders the home page.
    */
