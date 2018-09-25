@@ -133,10 +133,10 @@ module.exports.createAdminUser = function() {
  * @description Helper function to delete test user in
  * MBEE tests.
  */
-module.exports.removeNonadminUser = function(userData) {
+module.exports.removeNonadminUser = function() {
   return new Promise((resolve, reject) => {
     // Find admin user
-    User.findOne({ username: userData.username })
+    User.findOne({ username: testData.users[1].username })
     .then((foundUser) => foundUser.remove())
     .then(() => resolve(null))
     .catch((error) => reject(error));
