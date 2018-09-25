@@ -328,7 +328,9 @@ function postOrg(req, res) {
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
-    const error = new M.CustomError('Organization ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError(
+      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
@@ -367,7 +369,9 @@ function patchOrg(req, res) {
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
-    const error = new M.CustomError('Organization ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError(
+      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
@@ -675,13 +679,17 @@ function postProject(req, res) {
 
   // If org ID was provided in the body, ensure it matches org ID in params
   if (utils.checkExists(['org.id'], req.body) && (req.params.orgid !== req.body.org.id)) {
-    const error = new M.CustomError('Org ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError(
+      'Org ID in the body does not match ID in the params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
   if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
-    const error = new M.CustomError('Project ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError(
+      'Project ID in the body does not match ID in the params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
@@ -983,7 +991,9 @@ function postUser(req, res) {
 
   // If username was provided in the body, ensure it matches username in params
   if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
-    const error = new M.CustomError('Username in body does not match username in params.', 400, 'warn');
+    const error = new M.CustomError(
+      'Username in body does not match username in params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
@@ -1230,7 +1240,7 @@ function deleteElement(req, res) {
   }
 
   // Remove the specified project
-  // NOTE: removeProject() sanitizes req.params.orgid, req.params.projecid, and
+  // NOTE: removeProject() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.elementid
   ElementController.removeElement(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid, hardDelete)
