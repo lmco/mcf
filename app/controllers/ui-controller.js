@@ -40,26 +40,24 @@ const validators = M.require('lib.validators');
  * @description This class Defines UI-related controller functionallity.
  * It handles the server-side logic for most UI routes and renders the
  * appropriate views.
+ *  TODO: Change class to functions
  */
 class UiController {
-
   /**
    * Renders the home page.
    */
-
   static home(req, res) {
     return utils.render(req, res, 'home', {
       title: 'MBEE | Model-Based Engineering Environment'
     });
   }
 
-
   /**
    * This renders the primary MBEE application UI.
    * It parses the request paramaters in the URL to determine how to render
    * the MBEE view.
+   * // TODO: Remove this in prc-001, keep in masters MBX-370
    */
-
   static mbee(req, res) {
     return utils.render(req, res, 'mbee', {
       org: sani.sanitize(req.params.org),
@@ -68,13 +66,12 @@ class UiController {
     });
   }
 
-
   /**
    * This function will render the admin console.
    * The admin console provides a place for global administrators to
    * maintain the MBEE application.
+   * // TODO: Remove this in prc-001, keep in masters MBX-370
    */
-
   static admin(req, res) {
     return utils.render(req, res, 'admin', {
       title: 'Admin | Model-Based Engineering Environment'
@@ -89,7 +86,7 @@ class UiController {
     return swaggerJSDoc({
       swaggerDefinition: {
         info: {
-          title: 'MBEE API Documentation',          // Title (required)
+          title: 'MBEE API Documentation',       // Title (required)
           version: M.version                     // Version (required)
         }
       },
@@ -111,13 +108,11 @@ class UiController {
     });
   }
 
-
   /**
-   * Renders the about page. This page is accessible even when users are not
+   * @description Renders the about page. This page is accessible even when users are not
    * signed in. Therefore, this function has some logic to identify whether
    * or not the user is logged in.
    */
-
   static showAboutPage(req, res) {
     const token = crypto.inspectToken(req.session.token);
     User.findOne({
@@ -140,9 +135,9 @@ class UiController {
     });
   }
 
-
   /**
-   * Renders the documentation.
+   * @description Renders the documentation.
+   * // TODO: Remove this in prc-001, keep in masters MBX-370
    */
   static renderFlightManual(req, res) {
     if (!req.params.hasOwnProperty('page')) {
@@ -155,9 +150,9 @@ class UiController {
     });
   }
 
-
   /**
-   * Renders the developer documentation.
+   * @description Renders the developer documentation.
+   * // TODO: evaluate rather to remove this in prc-001, keep in masters MBX-370
    */
   static renderJSDoc(req, res) {
     if (!req.params.hasOwnProperty('page')) {
@@ -170,9 +165,8 @@ class UiController {
     });
   }
 
-
   /**
-   * This page renders the login screen. If a get query parameter called
+   * @description This page renders the login screen. If a get query parameter called
    * "next" is passed in the URL, the next url rendered as a hidden input
    * to tell the login process where to redirect the user after a successful
    * login.
@@ -192,9 +186,8 @@ class UiController {
     });
   }
 
-
   /**
-   * This is the final function in the UI authentication chain. First,
+   * @description This is the final function in the UI authentication chain. First,
    * the authentication controller's authenticate() and doLogin() functions
    * are called. This function should only get called once login was
    * successful. It handles the appropriate redirect for the user.
@@ -217,12 +210,10 @@ class UiController {
     res.redirect(next);
   }
 
-
   /**
-   * Logs out the user by unsetting the req.user object and the
+   * @description Logs out the user by unsetting the req.user object and the
    * req.session.token object.
    */
-
   static logout(req, res) {
     // destroy the session
     req.user = null;

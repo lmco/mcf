@@ -56,8 +56,6 @@ describe(M.getModuleName(module.filename), () => {
  * items from all MongoDB collections.
  */
 function cleanDB(done) {
-  // TODO: Should not run if production MBX-401
-  // TODO: Allow to run using --force MBX-401
   // Remove users
   User.remove({})
 
@@ -69,6 +67,7 @@ function cleanDB(done) {
   .then(() => Element.Element.remove({}))
   .then(() => done())
   .catch(error => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

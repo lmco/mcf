@@ -15,7 +15,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description Defines the MBEE routes mounted a '/'.
+ * @description Defines the MBEE routes mounted at '/'.
  */
 
 // Node modules
@@ -37,6 +37,7 @@ router.route('/doc/api')
 /**
  * Both routes map to the same controller. The controller method handles
  * the logic of checking for the page parameter.
+ * // TODO: Remove this in prc-001, keep in masters MBX-370
  */
 router.route('/doc/flight-manual')
 .get(Middleware.logRoute, UIController.renderFlightManual);
@@ -46,6 +47,7 @@ router.route('/doc/flight-manual/:page')
 /**
  * Both routes map to the same controller. The controller method handles
  * the logic of checking for the page parameter.
+ * // TODO: Remove this in prc-001 if needed, keep in masters
  */
 router.route('/doc/developers')
 .get(Middleware.logRoute, UIController.renderJSDoc);
@@ -78,7 +80,7 @@ router.route('/about')
   UIController.showAboutPage
 );
 
-/* This renders the home page for logged in users */
+/* This renders the home page for logged in users */ // TODO: Create a simple yet professional looking homepage
 router.route('/')
 .get(
   AuthController.authenticate,
@@ -86,7 +88,7 @@ router.route('/')
   UIController.home
 );
 
-/* This renders the home page for logged in users */
+/* This renders the home page for logged in users */ // TODO: Remove this in prc-001, keep in masters MBX-370
 router.route('/:org/:project')
 .get(
   AuthController.authenticate,
@@ -104,7 +106,7 @@ router.route('/logout')
   UIController.logout
 );
 
-/* Renders the admin console */
+/* Renders the admin console */ // TODO: Remove this in prc-001, keep in masters MBX-370
 router.route('/admin/console')
 .get(
   AuthController.authenticate,

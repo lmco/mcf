@@ -56,6 +56,8 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -73,8 +75,11 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
-      chai.expect(error).to.equal(null);
       db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
       done();
     });
   });

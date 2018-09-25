@@ -80,7 +80,6 @@ const formatter = printf((msg) => {
 
   // For each line in the stack trace, remove winston specific lines
   for (let i = 0; i < lines.length; i++) {
-    // TODO: CustomError stack trace still printing these lines (MBX-408)
     if (lines[i].includes('node_modules')
          || lines[i].includes('DerivedLogger')
          || lines[i].includes('at doWrite')
@@ -141,7 +140,6 @@ const formatter = printf((msg) => {
 
 // Creates the log directory if it doesn't already exist
 const logDir = (M.config.log.dir === undefined) ? 'logs' : M.config.log.dir;
-// TODO: make OS Specific (MBX-358)
 const cmd = `mkdir -p ${logDir}`;
 execSync(cmd);
 
