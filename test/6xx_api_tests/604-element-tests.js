@@ -93,7 +93,6 @@ describe(M.getModuleName(module.filename), () => {
    * After: Delete organization and admin user
    */
   after((done) => {
-    /*
     // Delete organization
     OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
     .then((retOrg) => {
@@ -114,7 +113,7 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(error.message).to.equal(null);
 
       done();
-    });*/
+    });
     done();
   });
 

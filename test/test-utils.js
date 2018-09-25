@@ -135,23 +135,26 @@ module.exports.createAdminUser = function() {
  */
 module.exports.removeNonadminUser = function() {
   return new Promise((resolve, reject) => {
+    // Define user id
+    let userToDelete = null;
+
     // Find admin user
     User.findOne({ username: testData.users[1].username })
     .then((foundUser) => {
       // Save user and remove user
-      user = foundUser;
+      userToDelete = foundUser;
       return foundUser.remove();
     })
     .then(() => Organization.find({ id: 'default' }))
     .then((orgs) => {
       // Remove user from permissions list in each project
       orgs[0].permissions.read = orgs[0].permissions.read
-      .filter(user => user._id.toString() !== user._id.toString());
+      .filter(user => user._id.toString() !== userToDelete._id.toString());
       orgs[0].permissions.write = orgs[0].permissions.write
-      .filter(user => user._id.toString() !== user._id.toString());
+      .filter(user => user._id.toString() !== userToDelete._id.toString());
       return orgs[0].save();
     })
-    .then(() => resolve(user.username))
+    .then(() => resolve(userToDelete.username))
     .catch((error) => reject(error));
   });
 };
@@ -163,25 +166,25 @@ module.exports.removeNonadminUser = function() {
 module.exports.removeAdminUser = function() {
   return new Promise((resolve, reject) => {
     // Define user id
-    let user = null;
+    let userToDelete = null;
 
     // Find admin user
     User.findOne({ username: testData.users[0].adminUsername })
     .then((foundUser) => {
       // Save user and remove user
-      user = foundUser;
+      userToDelete = foundUser;
       return foundUser.remove();
     })
     .then(() => Organization.find({ id: 'default' }))
     .then((orgs) => {
       // Remove user from permissions list in each project
       orgs[0].permissions.read = orgs[0].permissions.read
-      .filter(user => user._id.toString() !== user._id.toString());
+      .filter(user => user._id.toString() !== userToDelete._id.toString());
       orgs[0].permissions.write = orgs[0].permissions.write
-      .filter(user => user._id.toString() !== user._id.toString());
+      .filter(user => user._id.toString() !== userToDelete._id.toString());
       return orgs[0].save();
     })
-    .then(() => resolve(user.username))
+    .then(() => resolve(userToDelete.username))
     .catch((error) => reject(error));
   });
 };

@@ -62,11 +62,7 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(nonAdminUser.fname).to.equal(testData.users[1].fname);
       chai.expect(nonAdminUser.lname).to.equal(testData.users[1].lname);
     })
-    .then(() => {
-
-      // Create organization
-      return testUtils.createOrganization(adminUser);
-    })
+    .then(() => testUtils.createOrganization(adminUser))
     .then((retOrg) => {
       org = retOrg;
       chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
@@ -127,7 +123,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
   it('should reject creation of project with non-Admin user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
-  /*
   it('should find all projects which user has permissions on', findProjects);
   it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
@@ -139,7 +134,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
   it('should delete second project', deleteProject02);
-  */
 });
 
 /* --------------------( Tests )-------------------- */
