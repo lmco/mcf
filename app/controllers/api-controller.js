@@ -673,6 +673,12 @@ function postProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If org ID was provided in the body, ensure it matches org ID in params
+  if (req.body.hasOwnProperty('orgid') && (req.params.orgid !== req.body.orgid)) {
+    const error = new M.CustomError('Org ID in the body does not match ID in the params.', 400);
+    return res.status(error.status).send(error);
+  }
+
   // If project ID was provided in the body, ensure it matches project ID in params
   if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
     const error = new M.CustomError('Project ID in the body does not match ID in the params.', 400);
@@ -684,13 +690,7 @@ function postProject(req, res) {
 
   // Create project with provided parameters
   // NOTE: createProject() sanitizes req.params.projectid, req.params.org.id and req.body.name
-  ProjectController.createProject(req.user, {
-    id: req.params.projectid,
-    name: req.body.name,
-    org: {
-      id: req.params.orgid
-    }
-  })
+  ProjectController.createProject(req.user, req.body)
   .then((project) => {
     // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
@@ -978,6 +978,14 @@ function postUser(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If username was provided in the body, ensure it matches username in params
+  if (req.body.hasOwnProperty('username') && (req.params.username !== req.body.username)) {
+    const error = new M.CustomError(
+      'Username in the body does not match username in the params.', 400
+    );
+    return res.status(error.status).send(error);
+  }
+
   // Set the username in req.body in case it wasn't provided
   req.body.username = req.params.username;
 
@@ -1153,8 +1161,23 @@ function postElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Generate the project UID from url parameters and add to request body
-  req.body.projectUID = utils.createUID(req.params.orgid, req.params.projectid);
+  // If element ID was provided in the body, ensure it matches element ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.elementid !== req.body.id)) {
+    const error = new M.CustomError('Element ID in the body does not match ID in the params.', 400);
+    return res.status(error.status).send(error);
+  }
+
+  // Generate the project UID from url parameters
+  const projUID = utils.createUID(req.params.orgid, req.params.projectid);
+
+  // If project UID was provided in the body, ensure it matches project UID from params
+  if (req.body.hasOwnProperty('projectUID') && (projUID !== req.body.projectUID)) {
+    const error = new M.CustomError('Project UID in the body does not match params.', 400);
+    return res.status(error.status).send(error);
+  }
+
+  // Set projectUID in request body
+  req.body.projectUID = projUID;
 
   // Create element with provided parameters
   // NOTE: createElement() sanitizes req.body.name
