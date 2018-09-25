@@ -38,9 +38,8 @@ const Middleware = M.require('lib.middleware');
  *   get:
  *     tags:
  *       - general
- *     description: This API endpoint test if the API is functional.
- *     produces:
- *       - application/json
+ *     description: Returns a 200 status. Used to test if the API is up or a
+ *        connection can be established.
  *     responses:
  *       200:
  *         description: Success
