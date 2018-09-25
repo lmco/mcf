@@ -1252,7 +1252,6 @@ body {
 .swagger-ui table tbody tr td:first-of-type {
   width: 20%;
   padding: 10px 0;
-  position: absolute;
 }
 
 .col {
@@ -1706,4 +1705,8 @@ body {
 
  .swagger-ui .info a:hover {
    color: #0f6ab4;
+ }
+
+ .swagger-ui .tablinks {
+     padding-right: 15px;
  }
