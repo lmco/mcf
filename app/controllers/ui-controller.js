@@ -27,7 +27,6 @@ module.exports = {
   home,
   mbee,
   admin,
-  swaggerSpec,
   swaggerDoc,
   showAboutPage,
   renderFlightManual,
@@ -109,7 +108,7 @@ function swaggerSpec() {
  */
 function swaggerDoc(req, res) {
   return utils.render(req, res, 'swagger', {
-    swagger: UiController.swaggerSpec(),
+    swagger: swaggerSpec(),
     title: 'API Documentation | Model-Based Engineering Environment'
   });
 }
