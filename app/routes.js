@@ -80,7 +80,8 @@ router.route('/about')
   UIController.showAboutPage
 );
 
-/* This renders the home page for logged in users */ // TODO: Create a simple yet professional looking homepage
+/* This renders the home page for logged in users */
+// TODO: Create a simple yet professional looking homepage
 router.route('/')
 .get(
   AuthController.authenticate,
@@ -88,7 +89,8 @@ router.route('/')
   UIController.home
 );
 
-/* This renders the home page for logged in users */ // TODO: Remove this in prc-001, keep in masters MBX-370
+/* This renders the home page for logged in users */
+// TODO: Remove this in prc-001, keep in masters MBX-370
 router.route('/:org/:project')
 .get(
   AuthController.authenticate,
