@@ -100,7 +100,7 @@ describe(M.getModuleName(module.filename), () => {
       return testUtils.removeAdminUser();
     })
     .then((delAdminUser) => {
-      chai.expect(delAdminUser).to.equal(null);
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
       done();
     })
     .catch((error) => {
@@ -115,7 +115,6 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a new project', createProject);
-  /*
   it('should throw an error saying the field cannot be updated', rejectImmutableField);
   it('should throw an error saying the field is not of type string', updateTypeError);
   it('should update a project', updateProjectName);
@@ -128,6 +127,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
   it('should reject creation of project with non-Admin user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
+  /*
   it('should find all projects which user has permissions on', findProjects);
   it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
@@ -138,7 +138,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should set the permissions on the project', setPerm);
   it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
-  it('should delete second project', deleteProject02);*/
+  it('should delete second project', deleteProject02);
+  */
 });
 
 /* --------------------( Tests )-------------------- */
