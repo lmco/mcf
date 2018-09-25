@@ -148,13 +148,28 @@ module.exports.removeNonadminUser = function() {
  * MBEE tests.
  */
 module.exports.removeAdminUser = function() {
-  return new Promise((resolve, reject) => {
-    // Find admin user
-    User.findOne({ username: testData.users[0].adminUsername })
-    .then((foundUser) => foundUser.remove())
-    .then(() => resolve(null))
-    .catch((error) => reject(error));
-  });
+    return new Promise((resolve, reject) => {
+        // Define user id 
+        let userId = null;
+
+        // Find admin user
+        User.findOne({ username: testData.users[0].adminUsername })
+        .then((foundUser) => {
+        // Save user Id and remove user
+        userId = foundUser._id;
+        foundUser.remove();
+        })
+        .then(() => {
+            // Find orgs
+            return Organization.find({ id: 'default' });
+        })
+        .then((orgs) => {
+            orgs.splice( orgs.indexOf(userId._id), 1 );
+            orgs.save();
+        })
+        .then(() => resolve(null))
+        .catch((error) => reject(error));
+    });
 };
 
 /**
@@ -185,11 +200,11 @@ module.exports.createOrganization = function(adminUser) {
  * @description Helper function to remove organization in
  * MBEE tests.
  */
-module.exports.removeOrganization = function(adminUser, organizationID) {
+module.exports.removeOrganization = function(adminUser) {
   return new Promise((resolve, reject) => {
     let organization = null;
     // Find organization to ensure it exists
-    Organization.find({ id: organizationID, deleted: false })
+    Organization.find({ id: testData.orgs[0].id, deleted: false })
     .then((org) => {
       organization = org;
       // Hard delete
