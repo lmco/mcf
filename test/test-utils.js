@@ -134,13 +134,26 @@ module.exports.createAdminUser = function() {
  * MBEE tests.
  */
 module.exports.removeNonadminUser = function() {
-  return new Promise((resolve, reject) => {
-    // Find admin user
-    User.findOne({ username: testData.users[1].username })
-    .then((foundUser) => foundUser.remove())
-    .then(() => resolve(null))
-    .catch((error) => reject(error));
-  });
+    return new Promise((resolve, reject) => {
+        // Find admin user
+        User.findOne({ username: testData.users[1].username })
+            .then((foundUser) => {
+                // Save user Id and remove user
+                userId = foundUser._id;
+                return foundUser.remove();
+            })
+            .then(() => Organization.find({ id: 'default' }))
+            .then((orgs) => {
+                // Remove user from permissions list in each project
+                orgs[0].permissions.read = orgs[0].permissions.read
+                    .filter(user => user._id.toString() !== userId.toString());
+                orgs[0].permissions.write = orgs[0].permissions.write
+                    .filter(user => user._id.toString() !== userId.toString());
+                return orgs[0].save();
+            })
+            .then(() => resolve(userId))
+            .catch((error) => reject(error));
+    });
 };
 
 /**
@@ -154,21 +167,22 @@ module.exports.removeAdminUser = function() {
 
         // Find admin user
         User.findOne({ username: testData.users[0].adminUsername })
-        .then((foundUser) => {
-        // Save user Id and remove user
-        userId = foundUser._id;
-        foundUser.remove();
-        })
-        .then(() => {
-            // Find orgs
-            return Organization.find({ id: 'default' });
-        })
-        .then((orgs) => {
-            orgs.splice( orgs.indexOf(userId._id), 1 );
-            orgs.save();
-        })
-        .then(() => resolve(null))
-        .catch((error) => reject(error));
+            .then((foundUser) => {
+                // Save user Id and remove user
+                userId = foundUser._id;
+                return foundUser.remove();
+            })
+            .then(() => Organization.find({ id: 'default' }))
+            .then((orgs) => {
+                // Remove user from permissions list in each project
+                orgs[0].permissions.read = orgs[0].permissions.read
+                    .filter(user => user._id.toString() !== userId.toString());
+                orgs[0].permissions.write = orgs[0].permissions.write
+                    .filter(user => user._id.toString() !== userId.toString());
+                return orgs[0].save();
+            })
+            .then(() => resolve(userId))
+            .catch((error) => reject(error));
     });
 };
 
