@@ -133,12 +133,25 @@ module.exports.createAdminUser = function() {
  * @description Helper function to delete test user in
  * MBEE tests.
  */
-module.exports.removeNonadminUser = function(userData) {
+module.exports.removeNonadminUser = function() {
   return new Promise((resolve, reject) => {
     // Find admin user
-    User.findOne({ username: userData.username })
-    .then((foundUser) => foundUser.remove())
-    .then(() => resolve(null))
+    User.findOne({ username: testData.users[1].username })
+    .then((foundUser) => {
+      // Save user Id and remove user
+      userId = foundUser._id;
+      return foundUser.remove();
+    })
+    .then(() => Organization.find({ id: 'default' }))
+    .then((orgs) => {
+      // Remove user from permissions list in each project
+      orgs[0].permissions.read = orgs[0].permissions.read
+      .filter(user => user._id.toString() !== userId.toString());
+      orgs[0].permissions.write = orgs[0].permissions.write
+      .filter(user => user._id.toString() !== userId.toString());
+      return orgs[0].save();
+    })
+    .then(() => resolve(userId))
     .catch((error) => reject(error));
   });
 };
@@ -149,10 +162,26 @@ module.exports.removeNonadminUser = function(userData) {
  */
 module.exports.removeAdminUser = function() {
   return new Promise((resolve, reject) => {
+    // Define user id
+    let userId = null;
+
     // Find admin user
     User.findOne({ username: testData.users[0].adminUsername })
-    .then((foundUser) => foundUser.remove())
-    .then(() => resolve(null))
+    .then((foundUser) => {
+      // Save user Id and remove user
+      userId = foundUser._id;
+      return foundUser.remove();
+    })
+    .then(() => Organization.find({ id: 'default' }))
+    .then((orgs) => {
+      // Remove user from permissions list in each project
+      orgs[0].permissions.read = orgs[0].permissions.read
+      .filter(user => user._id.toString() !== userId.toString());
+      orgs[0].permissions.write = orgs[0].permissions.write
+      .filter(user => user._id.toString() !== userId.toString());
+      return orgs[0].save();
+    })
+    .then(() => resolve(userId))
     .catch((error) => reject(error));
   });
 };
@@ -185,11 +214,11 @@ module.exports.createOrganization = function(adminUser) {
  * @description Helper function to remove organization in
  * MBEE tests.
  */
-module.exports.removeOrganization = function(adminUser, organizationID) {
+module.exports.removeOrganization = function() {
   return new Promise((resolve, reject) => {
     let organization = null;
     // Find organization to ensure it exists
-    Organization.find({ id: organizationID, deleted: false })
+    Organization.find({ id: testData.orgs[0].id, deleted: false })
     .then((org) => {
       organization = org;
       // Hard delete
