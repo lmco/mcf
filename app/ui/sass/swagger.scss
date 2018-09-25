@@ -1251,7 +1251,12 @@ body {
 
 .swagger-ui table tbody tr td:first-of-type {
   width: 20%;
-  padding: 10px 0
+  padding: 10px 0;
+  position: absolute;
+}
+
+.col {
+    width: unset;
 }
 
 .swagger-ui table thead tr td, .swagger-ui table thead tr th {
