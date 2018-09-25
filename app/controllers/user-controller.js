@@ -21,7 +21,7 @@
  * implements controller logic and behavior for Users.
  */
 
-// Expose uer controller functions
+// Expose user controller functions
 // Note: The export is being done before the import to solve the issues of
 // circular references between controllers.
 module.exports = {
