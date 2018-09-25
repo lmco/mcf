@@ -114,7 +114,6 @@ describe(M.getModuleName(module.filename), () => {
 
       done();
     });
-    done();
   });
 
   /* Execute the tests */

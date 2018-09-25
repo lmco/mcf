@@ -439,7 +439,7 @@ function findProjects(done) {
   .then(() => ProjController.findProjects(adminUser, org.id))
   .then((projs) => {
     // Verify project fields
-    chai.expect(projs.length).to.equal(2);
+    chai.expect(projs.length).to.equal(4);
     return OrgController.removeOrg(adminUser2, testData.orgs[9].id, true);
   })
   .then(() => {
