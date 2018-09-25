@@ -48,7 +48,7 @@ module.exports.createNonadminUser = function() {
         return resolve(foundUser);
       }
 
-      // User data present, create user
+      // Create user
       const user = new User({
         username: testData.users[1].username,
         password: testData.users[1].password,
@@ -98,7 +98,7 @@ module.exports.createAdminUser = function() {
         return resolve(foundUser);
       }
 
-      // User data present, create user
+      // Create user
       const user = new User({
         username: testData.users[0].adminUsername,
         password: testData.users[0].adminPassword,
