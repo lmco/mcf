@@ -137,7 +137,7 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!orgs[0].getPermissions(reqUser).read && !reqUser.admin) {
         // User does NOT have read access and is NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
       // All checks passed, resolve org
@@ -214,9 +214,9 @@ function createOrg(reqUser, newOrgData) {
     }
     catch (error) {
       let statusCode = 400;
-      // Return a 401 if request is permissions related
+      // Return a 403 if request is permissions related
       if (error.message.includes('permissions')) {
-        statusCode = 401;
+        statusCode = 403;
       }
       return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
@@ -311,7 +311,7 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
       // Error Check: ensure reqUser is an org admin or global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
       // Get list of keys the user is trying to update
@@ -559,7 +559,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         // Requesting user NOT org admin and NOT global admin, reject error
         return reject(new M.CustomError(
-          'User cannot change organization permissions.', 401, 'warn'
+          'User cannot change organization permissions.', 403, 'warn'
         ));
       }
 

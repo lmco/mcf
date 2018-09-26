@@ -205,9 +205,9 @@ function createUser(reqUser, newUserData) {
     }
     catch (error) {
       let statusCode = 400;
-      // Return a 401 if request is permissions related
+      // Return a 403 if request is permissions related
       if (error.message.includes('permissions')) {
-        statusCode = 401;
+        statusCode = 403;
       }
       return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
@@ -286,9 +286,9 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
     }
     catch (error) {
       let statusCode = 400;
-      // Return a 401 if request is permissions related
+      // Return a 403 if request is permissions related
       if (error.message.includes('permissions')) {
-        statusCode = 401;
+        statusCode = 403;
       }
       return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
@@ -378,9 +378,9 @@ function removeUser(reqUser, usernameToDelete) {
     }
     catch (error) {
       let statusCode = 400;
-      // Return a 401 if request is permissions related
+      // Return a 403 if request is permissions related
       if (error.message.includes('permissions')) {
-        statusCode = 401;
+        statusCode = 403;
       }
       return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }

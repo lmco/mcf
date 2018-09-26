@@ -392,7 +392,7 @@ function rejectInvalidOrgId(done) {
  * @description Verifies non-admin CANNOT create a project.
  * Note: non-admin is NOT a site wide admin
  *       non-admin does NOT have write permissions with Org
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectNonAdminCreateProject(done) {
   const projData = testData.projects[9];
@@ -406,8 +406,8 @@ function rejectNonAdminCreateProject(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -493,7 +493,7 @@ function rejectFindNonexistentProject(done) {
  * @description Verifies non-admin user CANNOT find project
  * Note: non-admin is NOT a site wide admin
  *       non-admin does NOT have read permissions with Org
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function nonAUser(done) {
   const orgId = org.id;
@@ -508,8 +508,8 @@ function nonAUser(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -569,7 +569,7 @@ function rejectProjectId(done) {
  * @description Verifies non-admin CANNOT update project.
  * Note: non-admin is NOT a site wide admin
  *       non-admin does NOT have admin permissions with project
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectNonAdminProjectUpdate(done) {
   const orgId = org.id;
@@ -585,8 +585,8 @@ function rejectNonAdminProjectUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
