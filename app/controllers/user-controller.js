@@ -116,7 +116,7 @@ function findUser(reqUser, searchedUsername, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Sanitize query inputs
@@ -136,13 +136,13 @@ function findUser(reqUser, searchedUsername, softDeleted = false) {
       // Error Check: ensure at least one user was found
       if (arrUsers.length === 0) {
         // No users found, reject error
-        return reject(new M.CustomError('User not found.', 404));
+        return reject(new M.CustomError('User not found.', 404, 'warn'));
       }
 
       // Error Check: ensure no more than one user was found
       if (arrUsers.length > 1) {
         // Users length greater than one, reject error
-        return reject(new M.CustomError('More than one user found.', 400));
+        return reject(new M.CustomError('More than one user found.', 400, 'warn'));
       }
 
       // All checks passed, resolve user
@@ -174,7 +174,7 @@ function findUsersQuery(usersQuery) {
     // Find users
     User.find(usersQuery)
     .then((users) => resolve(users))
-    .catch(() => reject(new M.CustomError('Find failed.')));
+    .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
   });
 }
 
@@ -211,7 +211,7 @@ function createUser(reqUser, newUserData) {
       if (error.message.includes('permissions')) {
         statusCode = 401;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'error'));
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
 
     // Initialize function-wide variables
@@ -222,7 +222,9 @@ function createUser(reqUser, newUserData) {
     .then((users) => {
       // Error Check: ensure no user was found
       if (users.length >= 1) {
-        return reject(new M.CustomError('A user with a matching username already exists.', 403));
+        return reject(new M.CustomError(
+          'A user with a matching username already exists.', 403, 'warn'
+        ));
       }
 
       // Create the new user
@@ -251,7 +253,7 @@ function createUser(reqUser, newUserData) {
         return reject(error);
       }
       // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message));
+      return reject(new M.CustomError(error.message, 500, 'warn'));
     });
   });
 }
@@ -290,7 +292,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       if (error.message.includes('permissions')) {
         statusCode = 401;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'error'));
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
 
     // Find user
@@ -307,14 +309,18 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(userUpdateFields[i])) {
           // field cannot be updated, reject error
-          return reject(new M.CustomError(`User property [${userUpdateFields[i]}] cannot be changed.`, 403));
+          return reject(new M.CustomError(
+            `User property [${userUpdateFields[i]}] cannot be changed.`, 403, 'warn'
+          ));
         }
 
         // Check if updateField type is 'Mixed'
         if (User.schema.obj[userUpdateFields[i]].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof newUserData[userUpdateFields[i]] !== 'object') {
-            return reject(new M.CustomError(`${userUpdateFields[i]} must be an object`, 400));
+            return reject(new M.CustomError(
+              `${userUpdateFields[i]} must be an object`, 400, 'warn'
+            ));
           }
 
           // Update each value in the object
@@ -343,7 +349,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       if (error instanceof M.CustomError) {
         return reject(error);
       }
-      return reject(new M.CustomError(error.message));
+      return reject(new M.CustomError(error.message, 500, 'warn'));
     });
   });
 }
@@ -378,12 +384,12 @@ function removeUser(reqUser, usernameToDelete) {
       if (error.message.includes('permissions')) {
         statusCode = 401;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'error'));
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
 
     // Error Check: request user cannot deleted self
     if (reqUser.username === usernameToDelete) {
-      return reject(new M.CustomError('User cannot delete themselves.', 403));
+      return reject(new M.CustomError('User cannot delete themselves.', 403, 'warn'));
     }
 
     // Define function-wide user

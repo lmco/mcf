@@ -13,6 +13,7 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior
  * distribution.
+ *  // TODO: Remove this in prc-001, keep in masters MBX-370
  */
 (function() {
   /* eslint-disable no-undef */

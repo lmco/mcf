@@ -5,10 +5,10 @@
       "adminPassword": "test12345"
     },
     {
-      "username": "nonadminUser",
-      "password": "password123",
-      "fname": "userFirstname",
+      "username": "nonadmin_user",
+      "password": "Password123",
       "preferredName": "nonadmin user",
+      "fname": "userFirstname",
       "lname": "userLastname",
       "admin": false
     },
@@ -189,7 +189,13 @@
     {
       "id": "ironman",
       "name": "Iron man Suite",
+<<<<<<< HEAD
       "orgid": "starkhq",
+=======
+      "org": {
+        "id": "avengers"
+      },
+>>>>>>> prc-001
       "custom": {
         "builtFor": "Tony"
       }
@@ -205,12 +211,24 @@
     {
       "id": "arcreactor",
       "name": "Arc Reactor",
+<<<<<<< HEAD
       "orgid": "starkhq"
+=======
+      "org": {
+        "id": "avengers"
+      }
+>>>>>>> prc-001
     },
     {
       "id": "iamnoadmin",
       "name": "dontmakeme",
+<<<<<<< HEAD
       "orgid": "starkhq"
+=======
+      "org": {
+        "id": "avengers"
+      }
+>>>>>>> prc-001
     },
     {
       "id": "ironman",
@@ -223,32 +241,68 @@
     {
       "id": "thor",
       "name": "Thor Odinson",
+<<<<<<< HEAD
       "orgid": "asgard"
+=======
+      "org": {
+        "id": "avengers"
+      }
+>>>>>>> prc-001
     },
     {
       "id": "hulk",
       "name": "Bruce Banner",
+<<<<<<< HEAD
       "orgid": "biochemistry"
+=======
+      "org": {
+        "id": "avengers"
+      }
+>>>>>>> prc-001
     },
     {
       "id": "bettyross",
       "name": "Hulks GF",
+<<<<<<< HEAD
       "orgid": "biochemistry"
+=======
+      "org": {
+        "id": "avengers"
+      }
+>>>>>>> prc-001
     },
     {
       "id": "hulk",
       "name": "Anger",
+<<<<<<< HEAD
       "orgid": "biochemistry"
+=======
+      "org": {
+        "id": "avengers"
+      }
+>>>>>>> prc-001
     },
     {
       "id": "brucebanner",
       "name": "Bruce Banner",
+<<<<<<< HEAD
       "orgid": "biochemistry"
+=======
+      "org": {
+        "id": "avengers"
+      }
+>>>>>>> prc-001
     },
     {
       "id": "rebirth",
       "name": "Super Soldier Serum",
+<<<<<<< HEAD
       "orgid": "nineteenforty"
+=======
+      "org": {
+        "id": "incorrectavengers"
+      }
+>>>>>>> prc-001
     },
     {
       "id": "hulktwopointoh",
@@ -257,12 +311,24 @@
     {
       "id": "nickfury",
       "name": "Nick Fury",
+<<<<<<< HEAD
       "orgid": "shield"
+=======
+      "org": {
+        "id": "avengers"
+      }
+>>>>>>> prc-001
     },
     {
       "id": "mariahill",
       "name": "Maria Hill",
+<<<<<<< HEAD
       "orgid": "shield"
+=======
+      "org": {
+        "id": "avengers"
+      }
+>>>>>>> prc-001
     }
   ],
 
@@ -312,7 +378,16 @@
     {
       "id": "elem0",
       "name": "Mjolnir",
+<<<<<<< HEAD
       "projectUID": "asgard:thor",
+=======
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "avengers"
+        }
+      },
+>>>>>>> prc-001
       "type": "Package",
       "custom": {
         "location": "Earth",
@@ -323,14 +398,32 @@
     {
       "id": "elem1",
       "name": "Heimdall the Gatekeeper",
+<<<<<<< HEAD
       "projectUID": "asgard:thor",
+=======
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "avengers"
+        }
+      },
+>>>>>>> prc-001
       "type": "block",
       "parent": "elem0"
     },
     {
       "id": "elem2",
       "name": "Loki brother of Thor",
+<<<<<<< HEAD
       "projectUID": "asgard:thor",
+=======
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "avengers"
+        }
+      },
+>>>>>>> prc-001
       "type": "Block",
       "parent": "elem0",
       "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
@@ -338,7 +431,16 @@
     {
       "id": "rel1",
       "name": "Hate Relationship",
+<<<<<<< HEAD
       "projectUID": "asgard:thor",
+=======
+      "project": {
+        "id": "thor",
+        "org": {
+          "id": "avengers"
+        }
+      },
+>>>>>>> prc-001
       "type": "Relationship",
       "source": "elem1",
       "target": "elem2"
@@ -355,13 +457,31 @@
     {
       "id": "0000",
       "name": "Steve Rogers",
+<<<<<<< HEAD
       "projectUID": "nineteenforty:rebirth",
+=======
+      "project": {
+        "id": "brucebanner",
+        "org": {
+          "id": "avengers"
+        }
+      },
+>>>>>>> prc-001
       "type": "Block"
     },
     {
       "id": "0001",
       "name": "Steve Rogers 2",
+<<<<<<< HEAD
       "projectUID": "nineteenforty:rebirth",
+=======
+      "project": {
+        "id": "brucebanner",
+        "org": {
+          "id": "avengers"
+        }
+      },
+>>>>>>> prc-001
       "type": "Block"
     },
     {
@@ -371,7 +491,16 @@
     {
       "id": "0003",
       "name": "",
+<<<<<<< HEAD
       "projectUID": "nineteenforty:rebirth",
+=======
+      "project": {
+        "id": "brucebanner",
+        "org": {
+          "id": "avengers"
+        }
+      },
+>>>>>>> prc-001
       "type": "Block"
     }
   ],
@@ -400,26 +529,26 @@
       "id": "period",
       "name": "This is just to see if a period works....",
       "org": {
-        "id": "starkhq"
+        "id": "avengers"
       }
     },
     {
       "id": "",
       "name": "denyme",
       "org": {
-        "id": "starkhq"
+        "id": "avengers"
       }
     },
     {
       "id": "imfake",
       "name": "",
       "org": {
-        "id": "starkhq"
+        "id": "avengers"
       }
     },
     {
       "id": "imfake",
-      "name": "starkhq",
+      "name": "avengers",
       "org": {
         "id": ""
       }
@@ -433,7 +562,7 @@
       "project": {
         "id": "thor",
         "org": {
-          "id": "asgard"
+          "id": "avengers"
         }
       },
       "type": "BLOCK",
@@ -445,7 +574,7 @@
       "project": {
         "id": "thor",
         "org": {
-          "id": "asgard"
+          "id": "avengers"
         }
       },
       "type": "Block",
