@@ -678,7 +678,7 @@ function postProject(req, res) {
   }
 
   // If org ID was provided in the body, ensure it matches org ID in params
-  if (req.body.hasOwnProperty('orgid') && (req.params.orgid !== req.body.org.id)) {
+  if (req.body.hasOwnProperty('orgid') && (req.params.orgid !== req.body.orgid)) {
     const error = new M.CustomError(
       'Org ID in the body does not match ID in the params.', 400, 'warn'
     );
