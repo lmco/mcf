@@ -551,7 +551,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
         ));
       }
       // Find org
-      // Note: organizationID is satitized in findORg
+      // Note: organizationID is sanitized in findOrg
       return findOrg(reqUser, organizationID);
     })
     .then((org) => {
