@@ -532,7 +532,6 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
     }
 
     // Sanitize parameters
-    const orgID = sani.sanitize(organizationID);
     const searchedUser = sani.sanitize(searchedUsername);
 
     // Initialize foundUser
@@ -552,7 +551,8 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
         ));
       }
       // Find org
-      return findOrg(reqUser, orgID);
+      // Note: organizationID is sanitized in findOrg
+      return findOrg(reqUser, organizationID);
     })
     .then((org) => {
       // Check requesting user NOT org admin and NOT global admin
