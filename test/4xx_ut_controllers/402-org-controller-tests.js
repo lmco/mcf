@@ -62,17 +62,13 @@ describe(M.getModuleName(module.filename), () => {
       // Set global admin user
       adminUser = user;
 
-      // Define non-admin user data
-      const nonAdminUserData = testData.users[7];
-
-      // Create non-admin user
-      return testUtils.createNonadminUser(nonAdminUserData);
+      return testUtils.createNonadminUser();
     })
     .then((nonadminUser) => {
       newUser = nonadminUser;
-      chai.expect(newUser.username).to.equal(testData.users[7].username);
-      chai.expect(newUser.fname).to.equal(testData.users[7].fname);
-      chai.expect(newUser.lname).to.equal(testData.users[7].lname);
+      chai.expect(newUser.username).to.equal(testData.users[1].username);
+      chai.expect(newUser.fname).to.equal(testData.users[1].fname);
+      chai.expect(newUser.lname).to.equal(testData.users[1].lname);
       done();
     })
     .catch((error) => {
@@ -92,7 +88,7 @@ describe(M.getModuleName(module.filename), () => {
     // Removing non-admin user
     .then(() => UserController.removeUser(adminUser, newUser.username))
     .then((delUser2) => {
-      chai.expect(delUser2.username).to.equal(testData.users[7].username);
+      chai.expect(delUser2.username).to.equal(testData.users[1].username);
       // Find admin user
       return User.findOne({ username: adminUser.username });
     })
@@ -598,9 +594,9 @@ function getMembers(done) {
   OrgController.findAllPermissions(adminUser, org.id.toString())
   .then((members) => {
     // Verify user permissions are correct
-    chai.expect(members.groot.read).to.equal(true);
-    chai.expect(members.groot.write).to.equal(true);
-    chai.expect(members.groot.admin).to.equal(false);
+    chai.expect(members.nonadmin_user.read).to.equal(true);
+    chai.expect(members.nonadmin_user.write).to.equal(true);
+    chai.expect(members.nonadmin_user.admin).to.equal(false);
     chai.expect(members[adminUser.username].read).to.equal(true);
     chai.expect(members[adminUser.username].write).to.equal(true);
     chai.expect(members[adminUser.username].admin).to.equal(true);

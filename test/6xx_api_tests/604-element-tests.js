@@ -59,30 +59,26 @@ describe(M.getModuleName(module.filename), () => {
       // Set admin global user
       adminUser = user;
 
-      // Define org data
-      const orgData = testData.orgs[12];
-
       // Create org
-      return testUtils.createOrganization(adminUser, orgData);
+      return testUtils.createOrganization(adminUser);
     })
     .then((retOrg) => {
       org = retOrg;
-      chai.expect(retOrg.id).to.equal(testData.orgs[12].id);
-      chai.expect(retOrg.name).to.equal(testData.orgs[12].name);
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
 
       // Define project data
-      const projData = testData.projects[16];
-
+      const projData = testData.projects[15];
       // Create project
       return ProjController.createProject(adminUser, projData);
     })
     .then((retProj) => {
       proj = retProj;
-      chai.expect(retProj.id).to.equal(testData.projects[16].id);
-      chai.expect(retProj.name).to.equal(testData.projects[16].name);
+      chai.expect(retProj.id).to.equal(testData.projects[15].id);
+      chai.expect(retProj.name).to.equal(testData.projects[15].name);
       done();
     })
     .catch((error) => {
@@ -98,14 +94,14 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Delete organization
-    OrgController.removeOrg(adminUser, testData.orgs[12].id, true)
+    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
     .then((retOrg) => {
-      chai.expect(retOrg.id).to.equal(testData.orgs[12].id);
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
       // Delete admin user
       return testUtils.removeAdminUser();
     })
     .then((user) => {
-      chai.expect(user).to.equal(null);
+      chai.expect(user).to.equal(testData.users[0].adminUsername);
       db.disconnect();
       done();
     })
@@ -115,6 +111,7 @@ describe(M.getModuleName(module.filename), () => {
       M.log.error(error);
       // Expect no error
       chai.expect(error.message).to.equal(null);
+
       done();
     });
   });

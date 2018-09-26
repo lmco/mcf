@@ -344,7 +344,6 @@ function createProject(reqUser, project) {
 
     // Initialize function-wide variables
     let org = null;
-
     // Error Check: make sure the org exists
     OrgController.findOrg(reqUser, orgID)
     .then((_org) => {

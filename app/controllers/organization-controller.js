@@ -107,7 +107,6 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
-
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
