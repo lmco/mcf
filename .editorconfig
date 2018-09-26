@@ -1,48 +1,30 @@
-# EditorConfig is awesome: http://EditorConfig.org
+# EditorConfig: https://EditorConfig.org
 
-# top-most EditorConfig file
+# Top-most EditorConfig file
 root = true
 
-# Unix-style newlines with a newline ending every file
+# All files
 [*]
+charset = utf-8
 end_of_line = lf
 indent_style = space
 indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# Matches multiple files with brace expansion notation
-# Set default charset
-[*.{js,jsx,json}]
-charset = utf-8
-indent_style = space
+# JavaScript and JSON
+[*.{js,json}]
 indent_size = 2
 
+# JSON-like files
+[{.eslintrc,*.cfg}]
+indent_size = 2
+
+# HTML and HTML-templates
 [*.{html,ejs}]
-charset = utf-8
-indent_style = space
 indent_size = 2
 
+# CSS and CSS Preprocessors
 [*.{sass,css}]
-charset = utf-8
-indent_style = space
 indent_size = 2
 
-# 4 space indentation
-[*.py]
-indent_style = space
-indent_size = 4
-
-# Tab indentation (no size specified)
-[Makefile]
-indent_style = tab
-
-# Matches the exact files either package.json or .travis.yml
-[.eslintrc]
-indent_style = space
-indent_size = 2
-
-# Matches the exact files either package.json or .travis.yml
-[{Dockerfile,Jenkinsfile}]
-indent_style = space
-indent_size = 4

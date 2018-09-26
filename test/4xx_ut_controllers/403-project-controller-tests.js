@@ -53,34 +53,28 @@ describe(M.getModuleName(module.filename), () => {
       // Set global admin user
       adminUser = _adminUser;
 
-      // Define non-admin user data
-      const nonAdminUserData = testData.users[8];
-
       // Create non-admin user
-      return testUtils.createNonadminUser(nonAdminUserData);
+      return testUtils.createNonadminUser();
     })
     .then((_nonadminUser) => {
       nonAdminUser = _nonadminUser;
-      chai.expect(nonAdminUser.username).to.equal(testData.users[8].username);
-      chai.expect(nonAdminUser.fname).to.equal(testData.users[8].fname);
-      chai.expect(nonAdminUser.lname).to.equal(testData.users[8].lname);
+      chai.expect(nonAdminUser.username).to.equal(testData.users[1].username);
+      chai.expect(nonAdminUser.fname).to.equal(testData.users[1].fname);
+      chai.expect(nonAdminUser.lname).to.equal(testData.users[1].lname);
     })
-    .then(() => {
-      // Define organization data
-      const orgData = testData.orgs[7];
-      // Create organization
-      return testUtils.createOrganization(adminUser, orgData);
-    })
+    .then(() => testUtils.createOrganization(adminUser))
     .then((retOrg) => {
       org = retOrg;
-      chai.expect(retOrg.id).to.equal(testData.orgs[7].id);
-      chai.expect(retOrg.name).to.equal(testData.orgs[7].name);
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -91,23 +85,26 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    OrgController.removeOrg(adminUser, testData.orgs[7].id, true)
+    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
     .then(() => {
       // Removing the non-admin user
-      const userTwo = testData.users[8].username;
+      const userTwo = testData.users[1].username;
       return UserController.removeUser(adminUser, userTwo);
     })
     .then((delUser2) => {
-      chai.expect(delUser2.username).to.equal(testData.users[8].username);
+      chai.expect(delUser2.username).to.equal(testData.users[1].username);
       return testUtils.removeAdminUser();
     })
     .then((delAdminUser) => {
-      chai.expect(delAdminUser).to.equal(null);
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
       done();
     })
     .catch((error) => {
-      chai.expect(error.message).to.equal(null);
       db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
@@ -124,17 +121,16 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creation of project with invalid ID', rejectInvalidProjectId);
   it('should reject creation of project with invalid name', rejectInvalidProjectName);
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
-  it('should reject creation of project with non-A user', rejectNonAdminCreateProject);
+  it('should reject creation of project with non-Admin user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
   it('should find all projects which user has permissions on', findProjects);
   it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
   it('should reject update to the id name', rejectProjectId);
-  it('should reject non-A user from finding a project', nonAUser);
-  it('should reject updating due to non-A user', rejectNonAdminProjectUpdate);
+  it('should reject non-Admin user from finding a project', nonAUser);
+  it('should reject updating due to non-Admin user', rejectNonAdminProjectUpdate);
   it('should find the permissions on the project', findPerm);
   it('should set the permissions on the project', setPerm);
-  // TODO: MBX-330: User need to be part of org before project permission set.
   it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
   it('should delete second project', deleteProject02);
@@ -161,6 +157,7 @@ function createProject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -219,6 +216,7 @@ function updateProjectName(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -241,6 +239,7 @@ function updateProjectObject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -255,12 +254,13 @@ function createProject02(done) {
   // Create project
   ProjController.createProject(adminUser, projData)
   .then((proj) => {
-    // Verfy project fields
+    // Verify project fields
     chai.expect(proj.id).to.equal(testData.projects[8].id);
     chai.expect(proj.name).to.equal(testData.projects[8].name);
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -416,6 +416,7 @@ function findProj(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -438,16 +439,17 @@ function findProjects(done) {
   .then(() => ProjController.findProjects(adminUser, org.id))
   .then((projs) => {
     // Verify project fields
-    chai.expect(projs.length).to.equal(2);
+    chai.expect(projs.length).to.equal(4);
     return OrgController.removeOrg(adminUser2, testData.orgs[9].id, true);
   })
   .then(() => {
     UserController.removeUser(adminUser, testData.users[12].username);
     done();
   })
-  .catch((err) => {
+  .catch((error) => {
+    M.log.error(error);
     // Expect no error
-    chai.expect(err.message).to.equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -520,6 +522,7 @@ function updateProj(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -613,6 +616,7 @@ function setPerm(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -678,6 +682,7 @@ function deleteProject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

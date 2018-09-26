@@ -59,6 +59,8 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -86,11 +88,12 @@ describe(M.getModuleName(module.filename), () => {
       });
     })
     .catch((error) => {
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
-
       // Disconnect from the database
       db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
@@ -133,6 +136,7 @@ function createNewUser(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -226,6 +230,7 @@ function updateFirstName(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -239,7 +244,7 @@ function updateFirstName(done) {
 function rejectInvalidLastNameUpdate(done) {
   // Create user data
   const username = testData.users[3].username;
-  const userData = testData.names[0]; // TODO: MBX-376 Add this style to style guide
+  const userData = testData.names[0];
   // Update user via controller
   UserController.updateUser(adminUser, username, userData)
   .then(() => {
@@ -311,7 +316,7 @@ function findExistingUser(done) {
   const username = testData.users[3].username;
 
   // Find user via controller
-  UserController.findUser(username)
+  UserController.findUser(adminUser, username)
   .then((searchUser) => {
     // Found a user, verify user data
     chai.expect(searchUser.username).to.equal(testData.users[3].username);
@@ -320,6 +325,7 @@ function findExistingUser(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -335,7 +341,7 @@ function rejectFindNonExistentUser(done) {
   const username = testData.usernames[1].username;
 
   // Find user via controller
-  UserController.findUser(username)
+  UserController.findUser(adminUser, username)
   .then(() => {
     // Expect findUser() to fail
     // Should not execute, force test to fail
@@ -406,7 +412,7 @@ function deleteUser(done) {
   // Delete user via controller
   UserController.removeUser(adminUser, username)
   // Remove user succeeded, attempt to find user
-  .then(() => UserController.findUser(testData.users[3].username))
+  .then(() => UserController.findUser(adminUser, testData.users[3].username))
   .then(() => {
     // Expect findUser() to fail
     // Should not execute, force test to fail

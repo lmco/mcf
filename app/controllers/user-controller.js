@@ -21,7 +21,7 @@
  * implements controller logic and behavior for Users.
  */
 
-// Expose uer controller functions
+// Expose user controller functions
 // Note: The export is being done before the import to solve the issues of
 // circular references between controllers.
 module.exports = {
@@ -49,70 +49,100 @@ const sani = M.require('lib.sanitization');
 /**
  * @description This function finds all users.
  *
+ * @param {User} reqUser - The requesting user
+ * @param {Boolean} softDeleted - The optional flag to denote searching for deleted users
+ *
  * @return {Array} Array of found user objects
  *
  * @example
- * findUsers()
+ * findUsers({User}, false)
  * .then(function(users) {
- *   // do something with the found users
+ *   // Do something with the found users
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
  *
  */
-function findUsers() {
+function findUsers(reqUser, softDeleted = false) {
   return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'error'));
+    }
+
+    const searchParams = { deleted: false };
+
+    // Check softDeleted flag true and User Admin true
+    if (softDeleted && reqUser.admin) {
+      // softDeleted flag true and User Admin true, remove deleted: false
+      delete searchParams.deleted;
+    }
+
     // Find users
-    findUsersQuery({ deletedOn: null })
+    findUsersQuery(searchParams)
     .then((users) => resolve(users))
     .catch((error) => reject(error));
   });
 }
 
 /**
- * @description This function takes a username and finds a user
+ * @description This function finds a user.
  *
- * @param {String} searchedUsername The username of the searched user.
+ * @param {User} reqUser - The requesting user
+ * @param {String} searchedUsername - The username of the searched user.
+ * @param {Boolean] softDeleted - The optional flag to denote searching for deleted users
  *
  * @return {User} The found user
  *
  * @example
- * findUser('tstark')
+ * findUser({User}, 'username', false)
  * .then(function(user) {
- *   // do something with the found user
+ *   // Do something with the found user
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
  *
  * */
-function findUser(searchedUsername) {
+function findUser(reqUser, searchedUsername, softDeleted = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof searchedUsername === 'string', 'Username is not a string.');
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Sanitize query inputs
     const username = sani.sanitize(searchedUsername);
 
+    const searchParams = { username: username, deleted: false };
+
+    // Check softDeleted flag true and User Admin true
+    if (softDeleted && reqUser.admin) {
+      // softDeleted flag true and User Admin true, remove deleted: false
+      delete searchParams.deleted;
+    }
+
     // Find users
-    findUsersQuery({ username: username, deletedOn: null })
+    findUsersQuery(searchParams)
     .then((arrUsers) => {
       // Error Check: ensure at least one user was found
       if (arrUsers.length === 0) {
         // No users found, reject error
-        return reject(new M.CustomError('User not found.', 404));
+        return reject(new M.CustomError('User not found.', 404, 'warn'));
       }
 
       // Error Check: ensure no more than one user was found
       if (arrUsers.length > 1) {
         // Users length greater than one, reject error
-        return reject(new M.CustomError('More than one user found.', 400));
+        return reject(new M.CustomError('More than one user found.', 400, 'warn'));
       }
 
       // All checks passed, resolve user
@@ -132,7 +162,7 @@ function findUser(searchedUsername) {
  * @example
  * findUsersQuery({ fname: 'Tony' })
  * .then(function(users) {
- *   // do something with the found users
+ *   // Do something with the found users
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -144,7 +174,7 @@ function findUsersQuery(usersQuery) {
     // Find users
     User.find(usersQuery)
     .then((users) => resolve(users))
-    .catch(() => reject(new M.CustomError('Find failed.')));
+    .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
   });
 }
 
@@ -158,9 +188,9 @@ function findUsersQuery(usersQuery) {
  * @return {User} The newly created user.
  *
  * @example
- * createUser({Tony}, {username: 'ppotts', fname: 'Pepper', lname: 'Potts'})
+ * createUser({User}, { username: 'newUsername', fname: 'First', lname: 'Last' })
  * .then(function(user) {
- *   // do something with the newly created user
+ *   // Do something with the newly created user
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -181,7 +211,7 @@ function createUser(reqUser, newUserData) {
       if (error.message.includes('permissions')) {
         statusCode = 401;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'error'));
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
 
     // Initialize function-wide variables
@@ -192,7 +222,9 @@ function createUser(reqUser, newUserData) {
     .then((users) => {
       // Error Check: ensure no user was found
       if (users.length >= 1) {
-        return reject(new M.CustomError('A user with a matching username already exists.', 403));
+        return reject(new M.CustomError(
+          'A user with a matching username already exists.', 403, 'warn'
+        ));
       }
 
       // Create the new user
@@ -221,7 +253,7 @@ function createUser(reqUser, newUserData) {
         return reject(error);
       }
       // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message));
+      return reject(new M.CustomError(error.message, 500, 'warn'));
     });
   });
 }
@@ -237,9 +269,9 @@ function createUser(reqUser, newUserData) {
  * @return {User} The updated user
  *
  * @example
- * updateUser({Tony}, 'ppotts', {fname: 'Pep'})
+ * updateUser({User}, 'username', { fname: 'Updated First' })
  * .then(function(user) {
- *   // do something with the newly update user
+ *   // Do something with the newly updated user
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -260,12 +292,12 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       if (error.message.includes('permissions')) {
         statusCode = 401;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'error'));
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
 
     // Find user
     // Note: usernameToUpdate is sanitized in findUser()
-    findUser(usernameToUpdate)
+    findUser(reqUser, usernameToUpdate)
     .then((user) => {
       // Get list of keys the user is trying to update
       const userUpdateFields = Object.keys(newUserData);
@@ -277,14 +309,18 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(userUpdateFields[i])) {
           // field cannot be updated, reject error
-          return reject(new M.CustomError(`User property [${userUpdateFields[i]}] cannot be changed.`, 403));
+          return reject(new M.CustomError(
+            `User property [${userUpdateFields[i]}] cannot be changed.`, 403, 'warn'
+          ));
         }
 
         // Check if updateField type is 'Mixed'
         if (User.schema.obj[userUpdateFields[i]].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof newUserData[userUpdateFields[i]] !== 'object') {
-            return reject(new M.CustomError(`${userUpdateFields[i]} must be an object`, 400));
+            return reject(new M.CustomError(
+              `${userUpdateFields[i]} must be an object`, 400, 'warn'
+            ));
           }
 
           // Update each value in the object
@@ -313,7 +349,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       if (error instanceof M.CustomError) {
         return reject(error);
       }
-      return reject(new M.CustomError(error.message));
+      return reject(new M.CustomError(error.message, 500, 'warn'));
     });
   });
 }
@@ -327,9 +363,9 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
  * @return {User} The newly deleted user.
  *
  * @example
- * removeUser({Tony}, 'ppotts')
+ * removeUser({User}, 'username')
  * .then(function(user) {
- *   // do something with the deleted users username
+ *   // Do something with the deleted user
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -348,19 +384,19 @@ function removeUser(reqUser, usernameToDelete) {
       if (error.message.includes('permissions')) {
         statusCode = 401;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'error'));
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
 
     // Error Check: request user cannot deleted self
     if (reqUser.username === usernameToDelete) {
-      return reject(new M.CustomError('User cannot delete themselves.', 403));
+      return reject(new M.CustomError('User cannot delete themselves.', 403, 'warn'));
     }
 
     // Define function-wide user
     let userToDelete;
 
     // Get user object
-    findUser(usernameToDelete)
+    findUser(reqUser, usernameToDelete)
     .then((user) => {
       // Set user
       userToDelete = user;

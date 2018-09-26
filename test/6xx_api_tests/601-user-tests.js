@@ -18,8 +18,6 @@
  *
  * @description This tests the user API controller functionality:
  * GET, POST, PATCH, and DELETE a user.
- * // TODO: MBX-348 Create test to verify only admin user can make GET request of all
- * // users
  */
 
 // Node modules
@@ -59,6 +57,8 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -76,8 +76,11 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
-      chai.expect(error).to.equal(null);
       db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
       done();
     });
   });

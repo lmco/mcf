@@ -86,6 +86,7 @@ function parseTest(done) {
     JSON.parse(parseString);
   }
   catch (err) {
+    M.log.error(err);
     // Expect no error
     chai.expect(true).to.equal(false);
   }

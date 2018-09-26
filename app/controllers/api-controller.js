@@ -123,7 +123,6 @@ function swaggerSpec() {
 }
 
 /* -------------------------( General API Endpoints )------------------------ */
-// TODO: Evaluate route mapping for all functions
 /**
  * GET /api/doc/swagger.json
  *
@@ -234,7 +233,7 @@ function getOrgs(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * POST /api/orgs
  *
  * @description Accepts an array of JSON objects containing organization data.
@@ -250,7 +249,7 @@ function postOrgs(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * PATCH /api/orgs
  *
  * @description Accepts an array of JSON objects containing organization data.
@@ -267,7 +266,7 @@ function patchOrgs(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * DELETE /api/orgs
  *
  * @description This function will soft-delete all orgs.
@@ -329,7 +328,9 @@ function postOrg(req, res) {
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
-    const error = new M.CustomError('Organization ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError(
+      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
@@ -368,7 +369,9 @@ function patchOrg(req, res) {
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
-    const error = new M.CustomError('Organization ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError(
+      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
@@ -585,7 +588,7 @@ function getProjects(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * POST /api/org/:orgid/projects
  *
  * @description Accepts an array of JSON objects containing project data.
@@ -599,7 +602,7 @@ function postProjects(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * PATCH /api/org/:orgid/projects
  *
  * @description Accepts an array of JSON objects containing project data.
@@ -616,7 +619,7 @@ function patchProjects(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release
+ * TODO: Remove function prior to public release (MBX-370)
  * DELETE /api/org/:orgid/projects
  *
  * @description This function will soft-delete all projects.
@@ -676,13 +679,17 @@ function postProject(req, res) {
 
   // If org ID was provided in the body, ensure it matches org ID in params
   if (utils.checkExists(['org.id'], req.body) && (req.params.orgid !== req.body.org.id)) {
-    const error = new M.CustomError('Org ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError(
+      'Org ID in the body does not match ID in the params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
   if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
-    const error = new M.CustomError('Project ID in the body does not match ID in the params.', 400);
+    const error = new M.CustomError(
+      'Project ID in the body does not match ID in the params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
@@ -806,7 +813,6 @@ function getAllProjMemRoles(req, res) {
  *
  * @description Takes an orgid, projectid and username in the URI and returns
  * an object specifying which roles the user has within the project.
- * // TODO: Move findUser to setPermissions() in the project-controller (MBX-426)
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -925,7 +931,7 @@ function getUsers(req, res) {
   }
 
   // Get all users in MBEE
-  UserController.findUsers()
+  UserController.findUsers(req.user)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -956,7 +962,7 @@ function getUser(req, res) {
 
   // Find the member from it's username
   // NOTE: findUser() sanitizes req.params.username
-  UserController.findUser(req.params.username)
+  UserController.findUser(req.user, req.params.username)
   .then((user) => {
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
@@ -985,7 +991,9 @@ function postUser(req, res) {
 
   // If username was provided in the body, ensure it matches username in params
   if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
-    const error = new M.CustomError('Username in body does not match username in params.', 400, 'warn');
+    const error = new M.CustomError(
+      'Username in body does not match username in params.', 400, 'warn'
+    );
     return res.status(error.status).send(error);
   }
 
@@ -1232,7 +1240,7 @@ function deleteElement(req, res) {
   }
 
   // Remove the specified project
-  // NOTE: removeProject() sanitizes req.params.orgid, req.params.projecid, and
+  // NOTE: removeProject() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.elementid
   ElementController.removeElement(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid, hardDelete)

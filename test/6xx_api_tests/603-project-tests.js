@@ -60,25 +60,24 @@ describe(M.getModuleName(module.filename), () => {
       // Set to global admin
       adminUser = user;
 
-      // Define org data
-      const orgData = testData.orgs[11];
-
       // Create org
-      return testUtils.createOrganization(user, orgData);
+      return testUtils.createOrganization(user);
     })
     .then((retOrg) => {
       // Set global org
       org = retOrg;
 
       // Verify org was created correctly
-      chai.expect(retOrg.id).to.equal(testData.orgs[11].id);
-      chai.expect(retOrg.name).to.equal(testData.orgs[11].name);
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
       chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
@@ -89,10 +88,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the Organization
-    OrgController.removeOrg(adminUser, testData.orgs[11].id, true)
+    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
     .then((retOrg) => {
       // Verify deleted org
-      chai.expect(retOrg.id).to.equal(testData.orgs[11].id);
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
 
       // Find the admin user
       return User.findOne({ username: adminUser.username });
@@ -108,6 +107,7 @@ describe(M.getModuleName(module.filename), () => {
       // Disconnect from database
       db.disconnect();
 
+      M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
       done();
@@ -249,8 +249,6 @@ function getAllProjects(done) {
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid fails to
  * create a project with mismatched org ids.
- * // TODO: The org mismatch is not getting denied when trying to POST with two
- * // different org ids in the url and the body data (JIRA MBX-424)
  */
 function rejectPostOrgIdMismatch(done) {
   request({

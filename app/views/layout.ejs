@@ -17,7 +17,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description The layout file that decribes how pages are layed out.
+ * @description The layout file is the base template for all other views.
  */
 %>
 <html lang="en">
@@ -44,6 +44,7 @@
      %>
     <%- defineContent('styles') %>
 
+    <!-- TODO: Remove react scripts before public release (MBX-370) -->
     <!-- React.js -->
     <script type="text/javascript" src="/js/react.min.js"></script>
     <script type="text/javascript" src="/js/react-dom.min.js"></script>
@@ -70,6 +71,7 @@
     <script type="text/javascript" src="/js/jquery.min.js"></script>
     <script type="text/javascript" src="/js/popper.min.js"></script>
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <!-- TODO: Remove mbee.js script before public release (MBX-370) -->
     <script type="text/javascript" src="/js/mbee.js"></script>
 
     <%

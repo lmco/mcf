@@ -160,7 +160,7 @@ function initApp() {
     else {
       // Prune current users to ensure no deleted
       // users are still part of the org
-      UserController.findUsers()
+      UserController.findUsers({ admin: true })
       .then((users) => {
         const newList = [];
 

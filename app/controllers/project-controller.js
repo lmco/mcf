@@ -62,9 +62,9 @@ const utils = M.require('lib.utils');
  * @return {Array} array of found project objects
  *
  * @example
- * findProjects({Tony Stark}, 'StarkIndustries')
+ * findProjects({User}, 'orgID', false)
  * .then(function(projects) {
- *   // do something with the returned projects
+ *   // Do something with the found projects
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -78,7 +78,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Sanitize query inputs
@@ -118,9 +118,9 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  * @return {Array} array of deleted projects
  *
  * @example
- * removeProjects({Tony Stark}, 'StarkIndustries', {soft: true})
+ * removeProjects({User}, [{Org1}, {Org2}], false)
  * .then(function(projects) {
- *   // do something with the deleted projects.
+ *   // Do something with the deleted projects
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -134,13 +134,13 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
       assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // If hard deleting, ensure user is a site-wide admin
     if (hardDelete && !reqUser.admin) {
       return reject(new M.CustomError('User does not have permission to permanently'
-          + ' delete a project.', 401));
+          + ' delete a project.', 401, 'warn'));
     }
 
     // Initialize the query object
@@ -152,7 +152,7 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
       // Error Check: ensure user has permissions to delete projects on each org
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         return reject(new M.CustomError(
-          `User does not have permission to delete projects in the org ${org.name}.`, 401
+          `User does not have permission to delete projects in the org ${org.name}.`, 401, 'warn'
         ));
       }
       // Add org to deleteQuery
@@ -197,9 +197,9 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
  * @return {Project} The found project
  *
  * @example
- * findProject({Tony Stark}, 'StarkIndustries', 'ArcReactor1')
+ * findProject({User}, 'orgID', 'projectID', false)
  * .then(function(project) {
- *   // do something with the returned project
+ *   // Do something with the found project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -214,7 +214,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Sanitize query inputs
@@ -237,19 +237,19 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
       // Error Check: ensure at least one project was found
       if (projects.length === 0) {
         // No projects found, reject error
-        return reject(new M.CustomError('Project not found.', 404));
+        return reject(new M.CustomError('Project not found.', 404, 'warn'));
       }
 
       // Error Check: ensure no more than one project was found
       if (projects.length > 1) {
         // Projects length greater than one, reject error
-        return reject(new M.CustomError('More than one project found.', 400, 'critical'));
+        return reject(new M.CustomError('More than one project found.', 400, 'warn'));
       }
 
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!projects[0].getPermissions(reqUser).read && !reqUser.admin) {
         // User does NOT have read access and is NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
       }
 
       // All checks passed, resolve project
@@ -271,7 +271,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
  * @example
  * findProjectsQuery({ uid: 'org:proj' })
  * .then(function(projects) {
- *   // do something with the found projects.
+ *   // Do something with the found projects
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -283,7 +283,7 @@ function findProjectsQuery(query) {
     Project.find(query)
     .populate('org permissions.read permissions.write permissions.admin')
     .then((projects) => resolve(projects))
-    .catch(() => reject(new M.CustomError('Find failed.')));
+    .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
   });
 }
 
@@ -297,9 +297,9 @@ function findProjectsQuery(query) {
  * @return {Object} created project object
  *
  * @example
- * createProject({Tony Stark}, {Arc Reactor 1})
+ * createProject({User}, { id: 'projectID', name: 'New Project', org: { id: 'orgID' } })
  * .then(function(project) {
- *   // do something with the newly created project.
+ *   // Do something with the newly created project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -334,7 +334,7 @@ function createProject(reqUser, project) {
       }
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Sanitize query inputs
@@ -344,13 +344,12 @@ function createProject(reqUser, project) {
 
     // Initialize function-wide variables
     let org = null;
-
     // Error Check: make sure the org exists
     OrgController.findOrg(reqUser, orgID)
     .then((_org) => {
       // Error check: make sure user has write permission on org
       if (!_org.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
       }
 
       // Set function wide variable
@@ -362,7 +361,7 @@ function createProject(reqUser, project) {
     .then((foundProject) => {
       // Error Check: ensure no project was found
       if (foundProject.length > 0) {
-        reject(new M.CustomError('A project with the same ID already exists.', 403));
+        reject(new M.CustomError('A project with the same ID already exists.', 403, 'warn'));
       }
 
       // Create the new project
@@ -390,7 +389,7 @@ function createProject(reqUser, project) {
         return reject(error);
       }
       // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message));
+      return reject(new M.CustomError(error.message, 500, 'warn'));
     });
   });
 }
@@ -407,9 +406,9 @@ function createProject(reqUser, project) {
  * @return {Object} updated project object
  *
  * @example
- * updateProject({Tony Stark}, {Arc Reactor 1})
+ * updateProject({User}, 'orgID', 'projectID', { name: 'Updated Project' })
  * .then(function(project) {
- *   // do something with the updated project.
+ *   // Do something with the updated project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -424,7 +423,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       assert.strictEqual(typeof projectUpdated, 'object', 'projectUpdated is not an object');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Check if projectUpdated is instance of Project model
@@ -441,7 +440,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       // Error Check: ensure reqUser is a project admin or global admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 401));
+        return reject(new M.CustomError('User does not have permissions.', 401, 'warn'));
       }
 
       // Get list of keys the user is trying to update
@@ -462,14 +461,16 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
           // field cannot be updated, reject error
-          return reject(new M.CustomError(`Project property [${updateField}] cannot be changed.`, 403));
+          return reject(new M.CustomError(
+            `Project property [${updateField}] cannot be changed.`, 403, 'warn'
+          ));
         }
 
         // Check if updateField type is 'Mixed'
         if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof projectUpdated[updateField] !== 'object') {
-            return reject(new M.CustomError(`${updateField} must be an object`, 400));
+            return reject(new M.CustomError(`${updateField} must be an object`, 400, 'warn'));
           }
 
           // Update each value in the object
@@ -498,7 +499,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       if (error instanceof M.CustomError) {
         return reject(error);
       }
-      return reject(new M.CustomError(error.message));
+      return reject(new M.CustomError(error.message, 500, 'warn'));
     });
   });
 }
@@ -514,15 +515,15 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
  * @return {Object} deleted project object
  *
  * @example
- * removeProject({Tony Stark}, 'Stark', Arc Reactor 1', {soft: true})
+ * removeProject({User}, 'orgID', 'projectID', false)
  * .then(function(project) {
- *   // do something with the deleted project.
+ *   // Do something with the deleted project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
  */
-function removeProject(reqUser, organizationID, projectID, hardDelete) {
+function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
@@ -531,12 +532,14 @@ function removeProject(reqUser, organizationID, projectID, hardDelete) {
       assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Error Check: if hard deleting, ensure user is global admin
     if (hardDelete && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permission to permanently delete a project.', 401));
+      return reject(new M.CustomError(
+        'User does not have permission to permanently delete a project.', 401, 'warn'
+      ));
     }
 
     // Find the project
@@ -544,7 +547,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete) {
     .then((project) => {
       // Error Check: ensure user has permissions to delete project
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
       }
 
       // Hard delete
@@ -595,9 +598,9 @@ function removeProject(reqUser, organizationID, projectID, hardDelete) {
  *
  * @example <caption>Calling example</caption>
  *
- * findAllPermissions(myUser, 'stark', 'arc')
+ * findAllPermissions({User}, 'orgID', 'projectID')
  * .then(function(permissions) {
- *   // do something with the list of user permissions
+ *   // Do something with the list of user permissions
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -655,9 +658,9 @@ function findAllPermissions(reqUser, organizationID, projectID) {
  * </code></pre>
  *
  * @example
- * findPermissions({Tony Stark}, 'stark', 'arc', {Jarvis})
+ * findPermissions({User}, 'username', 'orgID', 'projectID')
  * .then(function(permissions) {
- *   // do something with the list of permissions
+ *   // Do something with the users permissions
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -694,9 +697,9 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  *                   reject - error
  *
  * @example
- * setPermissions({Tony}, 'stark_industries', 'arc_reactor', {Jarvis}, 'write')
+ * setPermissions({User}, 'orgID', 'projectID', 'username', 'write')
  * .then(function(project) {
- *   // do something with the updated project.
+ *   // Do something with the updated project
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -713,7 +716,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
       assert.ok(typeof role === 'string', 'Role is not a string.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Sanitize input
@@ -725,7 +728,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
 
     // Lookup the user
     // Note: setUsername is sanitized in findUser()
-    UserController.findUser(setUsername)
+    UserController.findUser(reqUser, setUsername)
     .then(foundUser => {
       setUser = foundUser;
 
@@ -740,7 +743,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
     .then((project) => {
       // Error Check - User must be admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 401));
+        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
       }
 
       // Get permission levels from Project schema method
@@ -748,12 +751,12 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
 
       // Error Check - Make sure that a valid permission type was passed
       if (!permissionLevels.includes(permType)) {
-        return reject(new M.CustomError('Permission type not found.', 404));
+        return reject(new M.CustomError('Permission type not found.', 404, 'warn'));
       }
 
       // Error Check - Do NOT allow user to change their own permissions
       if (reqUser.username === setUser.username) {
-        return reject(new M.CustomError('User cannot change their own permissions.', 403));
+        return reject(new M.CustomError('User cannot change their own permissions.', 403, 'warn'));
       }
 
       // Grab the index of the permission type

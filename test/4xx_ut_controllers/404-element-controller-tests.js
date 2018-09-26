@@ -46,7 +46,6 @@ let proj = null;
 describe(M.getModuleName(module.filename), () => {
   /**
    * After: Connect to database. Create an admin user, organization, and project
-   * TODO: MBX-384 What does this function do?
    */
 
   before((done) => {
@@ -59,10 +58,8 @@ describe(M.getModuleName(module.filename), () => {
       // Set global admin user
       adminUser = _adminUser;
 
-      // Define organization data
-      const orgData = testData.orgs[8];
       // Create organization
-      return testUtils.createOrganization(adminUser, orgData);
+      return testUtils.createOrganization(adminUser);
     })
     .then((retOrg) => {
       // Set global organization
@@ -80,10 +77,12 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
+      // Expect no error
       chai.expect(error).to.equal(null);
       done();
     });
-  }); // END: before()
+  });
 
   /**
    * After: Remove Organization and project.
@@ -108,6 +107,10 @@ describe(M.getModuleName(module.filename), () => {
       });
     })
     .catch((error) => {
+      db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
       chai.expect(error.message).to.equal(null);
       done();
     });
@@ -150,6 +153,7 @@ function createPackage(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -169,6 +173,7 @@ function findElement(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -198,6 +203,7 @@ function createChildElement(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -246,6 +252,7 @@ function createBlockWithUUID(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -269,6 +276,7 @@ function createRelationship(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -310,6 +318,7 @@ function findElements(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -328,6 +337,7 @@ function findElementByUUID(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -354,6 +364,7 @@ function updateElement(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -394,6 +405,7 @@ function softDeleteElement(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -441,6 +453,8 @@ function softDeleteAllElements(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
   });

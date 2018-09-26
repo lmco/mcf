@@ -65,6 +65,7 @@ describe(M.getModuleName(module.filename), () => {
       done();
     })
     .catch((error) => {
+      M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
       done();
@@ -85,6 +86,7 @@ describe(M.getModuleName(module.filename), () => {
     .catch((error) => {
       db.disconnect();
 
+      M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
       done();
@@ -114,7 +116,10 @@ function createProject(done) {
     uid: utils.createUID(org.id, testData.projects[0].id)
   });
   // Save project model object to database
-  newProject.save((error) => {
+  newProject.save()
+  .then(() => done())
+  .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -133,6 +138,7 @@ function findProject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -155,6 +161,7 @@ function updateProject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -174,6 +181,7 @@ function deleteProject(done) {
     done();
   })
   .catch((error) => {
+    M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

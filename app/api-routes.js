@@ -38,12 +38,11 @@ const Middleware = M.require('lib.middleware');
  *   get:
  *     tags:
  *       - general
- *     description: This API endpoint test if the API is functional.
- *     produces:
- *       - application/json
+ *     description: Returns a 200 status. Used to test if the API is up or a
+ *        connection can be established.
  *     responses:
  *       200:
- *         description: Success
+ *         description: OK
  */
 api.get('/test', Middleware.logRoute, APIController.test);
 
@@ -54,12 +53,12 @@ api.get('/test', Middleware.logRoute, APIController.test);
  *   get:
  *     tags:
  *       - general
- *     description: Returns the swagger JSON file.
+ *     description: Returns the swagger spec file in JSON format.
  *     produces:
  *       - application/json
  *     responses:
  *       200:
- *         description: Success
+ *         description: OK
  */
 api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
 
@@ -70,11 +69,30 @@ api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
  *     tags:
  *       - general
  *     description: Logs the user into the application.
+ *     parameters:
+ *       - name: Content
+ *         description: The object containing username and password
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - username
+ *             - password
+ *           properties:
+ *             username:
+ *               type: string
+ *             password:
+ *               type: string
  *     produces:
+ *       - application/json
+ *     consumes:
  *       - application/json
  *     responses:
  *       200:
- *         description: Success
+ *         description: OK
+ *       400:
+ *         description: Bad Request
  *       401:
  *         description: Unauthorized
  *       500:
@@ -100,7 +118,9 @@ api.route('/login')
  *       - application/json
  *     responses:
  *       200:
- *         description: Success
+ *         description: OK
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Internal Server Error
  */
@@ -123,7 +143,7 @@ api.route('/version')
  *       - application/json
  *     responses:
  *       200:
- *         description: Success
+ *         description: OK
  *       401:
  *         description: Unauthorized
  *       500:
@@ -191,7 +211,7 @@ api.route('/orgs')
  *         type: string
  *     responses:
  *       200:
- *         description: Success
+ *         description: OK
  *       400:
  *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
@@ -234,7 +254,7 @@ api.route('/orgs')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The organization was successfully created.
+ *         description: OK - The organization was successfully created.
  *                      The created organization is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -284,7 +304,7 @@ api.route('/orgs')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The organization was successfully created or
+ *         description: OK - The organization was successfully created or
  *                      updated. The new organization is returned as JSON.
  *
  *       400:
@@ -317,7 +337,7 @@ api.route('/orgs')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The organization was successfully removed.
+ *         description: OK - The organization was successfully removed.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
@@ -373,7 +393,7 @@ api.route('/orgs/:orgid')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The projects were successfully retrieved.
+ *         description: OK - The projects were successfully retrieved.
  *                      A list of projects is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -453,7 +473,7 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The project was successfully retrieved.
+ *         description: OK - The project was successfully retrieved.
  *                      The project is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -510,7 +530,7 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The project was successfully created.
+ *         description: OK - The project was successfully created.
  *                      The new project is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -565,7 +585,7 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The project was successfully created.
+ *         description: OK - The project was successfully created.
  *                      The new project is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -600,7 +620,7 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The project was successfully deleted.
+ *         description: OK - The project was successfully deleted.
  *                      The new project is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -653,7 +673,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The members of an org and thier permissions
+ *         description: OK - The members of an org and thier permissions
  *                      were succesfully retrieved and returned as JSON.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -688,7 +708,7 @@ api.route('/orgs/:orgid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The member of the org and thier permissions
+ *         description: OK - The member of the org and thier permissions
  *                      were succesfully retrieved and returned as JSON.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -717,7 +737,7 @@ api.route('/orgs/:orgid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The members permissions were set or updated,
+ *         description: OK - The members permissions were set or updated,
  *                      and the organization is returned in JSON.
  *       403:
  *         description: Forbidden - This implies the user tried to set their
@@ -749,7 +769,7 @@ api.route('/orgs/:orgid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The members permissions were set or updated,
+ *         description: OK - The members permissions were set or updated,
  *                      and the organization is returned in JSON.
  *       403:
  *         description: Forbidden - This implies the user tried to change their
@@ -776,7 +796,7 @@ api.route('/orgs/:orgid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The members permissions were deleted,
+ *         description: OK - The members permissions were deleted,
  *                      and the organization is returned in JSON.
  *       403:
  *         description: Forbidden - This implies the user tried to remove their
@@ -833,7 +853,7 @@ api.route('/orgs/:orgid/members/:username')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The members of a project and thier permissions
+ *         description: OK - The members of a project and thier permissions
  *                      were succesfully retrieved and returned as JSON.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -873,7 +893,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The member of the project and thier permissions
+ *         description: OK - The member of the project and thier permissions
  *                      were succesfully retrieved and returned as JSON.
  *       500:
  *         description: Internal Server Error - Something went wrong on the
@@ -907,7 +927,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The members permissions were set or updated,
+ *         description: OK - The members permissions were set or updated,
  *                      and the project is returned in JSON.
  *       403:
  *         description: Forbidden - This implies the user tried to set their
@@ -944,7 +964,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The members permissions were set or updated,
+ *         description: OK - The members permissions were set or updated,
  *                      and the project is returned in JSON.
  *       403:
  *         description: Forbidden - This implies the user tried to change their
@@ -976,7 +996,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The members permissions were deleted,
+ *         description: OK - The members permissions were deleted,
  *                      and the project is returned in JSON.
  *       403:
  *         description: Forbidden - This implies the user tried to remove their
@@ -1030,7 +1050,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The projects were successfully retrieved.
+ *         description: OK - The projects were successfully retrieved.
  *                      A list of projects is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -1120,7 +1140,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The element was successfully retrieved.
+ *         description: OK - The element was successfully retrieved.
  *                      The element is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -1175,7 +1195,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The element was successfully created.
+ *         description: OK - The element was successfully created.
  *                      The new/updated element is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -1236,7 +1256,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The element was successfully created.
+ *         description: OK - The element was successfully created.
  *                      The new/updated element is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -1276,7 +1296,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *         type: string
  *     responses:
  *       200:
- *         description: Success - The element was successfully deleted.
+ *         description: OK - The element was successfully deleted.
  *                      The element ID is returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -1327,7 +1347,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *       - N/A
  *     responses:
  *       200:
- *         description: Success - All users should be returned as JSON.
+ *         description: OK - All users should be returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
@@ -1395,7 +1415,7 @@ api.route('/users')
  *     description: Returns the currently logged in user information
  *     responses:
  *       200:
- *         description: Success - The JSON-encoded user information is returned.
+ *         description: OK - The JSON-encoded user information is returned.
  *       400:
  *         description: Bad Request - Usually an authentication issue.
  *       401:
@@ -1429,7 +1449,7 @@ api.route('/users/whoami')
  *         in: path
  *     responses:
  *       200:
- *         description: Success - The user was retieved and the public user
+ *         description: OK - The user was retieved and the public user
  *                      object should be returned as JSON.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -1476,7 +1496,7 @@ api.route('/users/whoami')
  *         in: body
  *     responses:
  *       200:
- *         description: Success - The user was created. The newly created user
+ *         description: OK - The user was created. The newly created user
  *                      is returned as a JSON-encoded object.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -1528,7 +1548,7 @@ api.route('/users/whoami')
  *         in: body
  *     responses:
  *       200:
- *         description: Success - The user was created. The newly created user
+ *         description: OK - The user was created. The newly created user
  *                      is returned as a JSON-encoded object.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
@@ -1557,7 +1577,7 @@ api.route('/users/whoami')
  *         in: path
  *     responses:
  *       200:
- *         description: Success - The user was deleted.
+ *         description: OK - The user was deleted.
  *       400:
  *         description: Bad Request - This implies that the request is invalid
  *                      or malformed.
