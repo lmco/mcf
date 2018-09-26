@@ -694,6 +694,7 @@ function postProject(req, res) {
   }
 
   // Set the orgid in req.body in case it wasn't provided
+  req.body.id = req.params.projectid;
   req.body.orgid = req.params.orgid;
 
   // Create project with provided parameters
