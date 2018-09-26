@@ -460,6 +460,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
 
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
+          console.log(updateField);
           // field cannot be updated, reject error
           return reject(new M.CustomError(
             `Project property [${updateField}] cannot be changed.`, 403, 'warn'

@@ -67,10 +67,10 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create the project model object
       const newProject = new Project({
-        id: testData.projects[3].id,
-        name: testData.projects[3].name,
+        id: testData.projects[1].id,
+        name: testData.projects[1].name,
         org: org._id,
-        uid: `${org.id}:${testData.projects[3].id}`
+        uid: `${org.id}:${testData.projects[1].id}`
       });
 
       // Save the project model object to the database
