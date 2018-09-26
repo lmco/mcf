@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module auth.ldap_strategy
+ * @module auth.ldap-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -83,7 +83,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param token - Token user authentication token, encrypted
+ * @param {String} token - Token user authentication token, encrypted
  * @returns {Promise} resolve - local user object
  *                    reject - an error
  *
@@ -116,7 +116,7 @@ module.exports.doLogin = function(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
 };
 
-/* ----------( LDAP Helper Functions )----------*/
+/* ------------------------( LDAP Helper Functions )--------------------------*/
 /**
  * @description Connects to an LDAP server and resolves a client object used
  * to preform search and bind operations.
@@ -162,7 +162,7 @@ function ldapConnect() {
 /**
  * @description Searches for and resolve a user from LDAP server.
  *
- * @param ldapClient - LDAP client
+ * @param {Object} ldapClient - LDAP client
  * @param {String} username - Username to find LDAP user
  * @returns {Promise} resolve - LDAP user information
  *                    reject - an error
@@ -242,7 +242,7 @@ function ldapSearch(ldapClient, username) {
 /**
  * @description Validates a users password with LDAP server
  *
- * @param ldapClient - LDAP client
+ * @param {Object} ldapClient - LDAP client
  * @param {Object} user - LDAP user
  * @param {String} password - Password to verify LDAP user
  * @returns {Promise} resolve - authenticated user's information

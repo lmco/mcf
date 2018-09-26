@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  controllers.ui_controller
+ * @module  controllers.ui-controller
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -13,7 +13,8 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @author Austin J Bieber <austin.j.bieber@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
  * @description This implements the behavior and logic for the user interface.
  * All UI routes map to this controller which in turn uses other controllers to

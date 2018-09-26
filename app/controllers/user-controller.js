@@ -13,8 +13,6 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @module  controllers.user_controller
- *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description Provides an abstraction layer on top of the User model that
@@ -52,7 +50,7 @@ const sani = M.require('lib.sanitization');
  * @param {User} reqUser - The requesting user
  * @param {Boolean} softDeleted - The optional flag to denote searching for deleted users
  *
- * @return {Array} Array of found user objects
+ * @returns {Promise} Array of found user objects
  *
  * @example
  * findUsers({User}, false)
@@ -94,9 +92,9 @@ function findUsers(reqUser, softDeleted = false) {
  *
  * @param {User} reqUser - The requesting user
  * @param {String} searchedUsername - The username of the searched user.
- * @param {Boolean] softDeleted - The optional flag to denote searching for deleted users
+ * @param {Boolean} softDeleted - The optional flag to denote searching for deleted users
  *
- * @return {User} The found user
+ * @returns {Promise} The found user
  *
  * @example
  * findUser({User}, 'username', false)
@@ -157,7 +155,7 @@ function findUser(reqUser, searchedUsername, softDeleted = false) {
  *
  * @param {Object} usersQuery - The query to be made to the database.
  *
- * @return {Object} A list of users
+ * @returns {Promise} A list of users
  *
  * @example
  * findUsersQuery({ fname: 'Tony' })
@@ -185,7 +183,7 @@ function findUsersQuery(usersQuery) {
  * @param {User} reqUser - The requesting user.
  * @param {Object} newUserData - Object containing new user data.
  *
- * @return {User} The newly created user.
+ * @returns {Promise} The newly created user.
  *
  * @example
  * createUser({User}, { username: 'newUsername', fname: 'First', lname: 'Last' })
@@ -266,7 +264,7 @@ function createUser(reqUser, newUserData) {
  * @param {String} usernameToUpdate - The username of the user to be updated.
  * @param {Object} newUserData - An object containing updated User data
  *
- * @return {User} The updated user
+ * @returns {Promise} The updated user
  *
  * @example
  * updateUser({User}, 'username', { fname: 'Updated First' })
@@ -360,7 +358,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
  * @param {User} reqUser - The requesting user.
  * @param {String} usernameToDelete - The username of the user to be deleted.
  *
- * @return {User} The newly deleted user.
+ * @returns {Promise} The newly deleted user.
  *
  * @example
  * removeUser({User}, 'username')

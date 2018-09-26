@@ -6,7 +6,7 @@
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI
- * <br/>
+ *
  * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
  * It is not approved for public release or redistribution.<br/>
  *
@@ -17,7 +17,7 @@
  *
  * @description Helper function for MBEE test.
  * - Used to create users, organizations, projects, elements in the database.
- * - Assumes database connection already estabished
+ * - Assumes database connection already established
  *
  * This function takes the complexity out of MBEE tests,
  * making MBEE tests easier to read and run.

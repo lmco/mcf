@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module lib.mock_express
+ * @module lib.mock-express
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

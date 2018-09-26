@@ -181,7 +181,7 @@ function findOrgsQuery(orgQuery) {
  * @param {User} reqUser - The object containing the user of the requesting user.
  * @param {Object} newOrgData - Object containing new org data.
  *
- * @return {Object} created organization object
+ * @return {Promise} Created organization object
  *
  * @example
  * createOrg({User}, { id: 'orgID', name: 'New Org' })
@@ -269,7 +269,7 @@ function createOrg(reqUser, newOrgData) {
  * @param {String} organizationID - The organization ID.
  * @param {Object} orgUpdated - An object containing updated Organization data
  *
- * @return {Object} updated org
+ * @return {Promise} updated org
  *
  * @example
  * updateOrg({User}, 'orgID', { name: 'Different Org Name' })
@@ -391,7 +391,7 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
  * @param {String} organizationID - The ID of the org being deleted.
  * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
  *
- * @return {Object} removed organization object
+ * @return {Promise} removed organization object
  *
  * @example
  * removeOrg({User}, 'orgID', true)
@@ -454,9 +454,9 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} searchedUsername - The username to find permissions for.
- * @param {string} organizationID - The ID of the organization
+ * @param {String} organizationID - The ID of the organization
  *
- * @returns {Object}
+ * @returns {Promise}
  * {
  *   username: {
  *     read: boolean,
@@ -496,10 +496,10 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The ID of the org being deleted.
- * @param {User} searchedUsername - The object containing the user whose roles are to be changed.
+ * @param {String} searchedUsername - The username of the user whose roles are to be changed.
  * @param {String} role - The new role for the user.
  *
- * @returns {Object} The updated Organization object
+ * @returns {Promise} The updated Organization object
  *
  * @example
  * setPermissions({User}, 'orgID', 'username', 'write')
@@ -620,7 +620,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The ID of the org being deleted.
  *
- * @return {Object} An object containing users permissions
+ * @returns {Promise} An object containing users permissions
  * {
  *   username1: {
  *     read: boolean,

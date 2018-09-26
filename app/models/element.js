@@ -193,8 +193,7 @@ const RelationshipSchema = new mongoose.Schema({
  * extends elements by adding a contains field used to provide structure and
  * to group elements.
  *
- * @property {Element} source - Defines the origin of a relationship.
- * @property {Element} target - Defines the end of a relationship.
+ * @property {Array} contains - An array of sub elements _id
  *
  */
 const PackageSchema = new mongoose.Schema({

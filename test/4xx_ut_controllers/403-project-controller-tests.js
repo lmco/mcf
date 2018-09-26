@@ -1,5 +1,17 @@
 /**
- * @module test/403-project-controller
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test.403-project-controller-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
@@ -7,8 +19,8 @@
  * @description  This tests the Project Controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The project controller tests create,
- * update, find, soft delete, hard delte, and permissions of projects. As well
- * as test the controlls with invalid inputs.
+ * update, find, soft delete, hard delete, and permissions of projects. As well
+ * as test the controllers with invalid inputs.
  */
 
 // NPM modules

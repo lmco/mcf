@@ -266,7 +266,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
  *
  * @param {Object} query - The query to be made to the database
  *
- * @return {Object} project object
+ * @returns {Promise} project object
  *
  * @example
  * findProjectsQuery({ uid: 'org:proj' })
@@ -294,7 +294,7 @@ function findProjectsQuery(query) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {Object} project - The object of the project being created.
  *
- * @return {Object} created project object
+ * @returns {Promise} created project object
  *
  * @example
  * createProject({User}, { id: 'projectID', name: 'New Project', org: { id: 'orgID' } })
@@ -403,7 +403,7 @@ function createProject(reqUser, project) {
  * @param {String} projectID - The project ID.
  * @param {Object} projectUpdated - The object of the updated project.
  *
- * @return {Object} updated project object
+ * @returns {Promise} updated project object
  *
  * @example
  * updateProject({User}, 'orgID', 'projectID', { name: 'Updated Project' })
@@ -512,7 +512,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
  * @param {String} projectID - The project ID of the Project which is being deleted.
  * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
  *
- * @return {Object} deleted project object
+ * @returns {Promise} deleted project object
  *
  * @example
  * removeProject({User}, 'orgID', 'projectID', false)

@@ -28,7 +28,7 @@ const crypto = require('crypto');  // NOTE: Refers to standard node crypto libra
  * @params {Object} data - Data to be encrypted
  * @return {String} encrypted data
  */
-module.exports.encrypt = function(data) {
+module.exports.encrypt = function encrypt(data) {
   const secret = M.config.server.secret;
   const cipher = crypto.createCipher('aes-256-cbc', secret);
 
@@ -48,7 +48,7 @@ module.exports.encrypt = function(data) {
  * @params {String} data - Data to be decrypted
  * @return {Object} decrypted data
  */
-module.exports.decrypt = function(data) {
+module.exports.decrypt = function decrypt(data) {
   if (data === undefined || data.toString() === '') {
     // NOTE: Changed from returning '{}' to throwing an error
     throw new M.CustomError(`Can't decrypt ${data}. Returning ...`, 400);
@@ -82,7 +82,7 @@ module.exports.decrypt = function(data) {
  * @params {Object} data - Data to generate token
  * @return {String} encrypted token
  */
-module.exports.generateToken = function(data) {
+module.exports.generateToken = function generateToken(data) {
   // Return encrypted input
   return module.exports.encrypt(JSON.stringify(data));
 };
@@ -93,7 +93,7 @@ module.exports.generateToken = function(data) {
  * @params {String} data - Data to inspect token
  * @return {Object} decrypted token
  */
-module.exports.inspectToken = function(token) {
+module.exports.inspectToken = function inspectToken(token) {
   // Decrypt input and return parsed data
   return JSON.parse(module.exports.decrypt(token));
 };

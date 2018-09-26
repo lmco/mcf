@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module lib.dib
+ * @module lib.db
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
