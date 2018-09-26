@@ -132,18 +132,23 @@ api.route('/version')
 );
 
 
+// TODO: MBX-370, Remove Post, Patch, and Delete documentation before public release
+
 /**
  * @swagger
  * /api/orgs:
  *   get:
  *     tags:
  *       - organizations
- *     description: Returns an array of organizations user is part of. Empty array if none.
+ *     description: Returns an array of organizations that the requesting user is a member of.
+ *         If the user is not a member of any organizations, an empty array is returned.
  *     produces:
  *       - application/json
  *     responses:
  *       200:
  *         description: OK
+ *       400:
+ *         description: Bad Request
  *       401:
  *         description: Unauthorized
  *       500:
@@ -196,37 +201,34 @@ api.route('/orgs')
 
 /**
  * @swagger
- * /api/orgs/{orgid}:
+ * /api/orgs/:orgid:
  *   get:
  *     tags:
  *       - organizations
- *     description: Retrieves and returns an organization by ID.
+ *     description: Returns an organization's public data.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization to get
- *         in: path
+ *         in: URI
  *         required: true
  *         type: string
  *     responses:
  *       200:
  *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this org.
+ *         description: Unauthorized
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
  *   post:
  *     tags:
  *       - organizations
- *     description: Creates an organization.
+ *     description: Create a new organization.
  *     produces:
  *       - application/json
  *     parameters:
@@ -234,93 +236,82 @@ api.route('/orgs')
  *         description: The ID of the organization to create. A valid orgid must
  *                      only contain lowercase letters, numbers, and dashes
  *                      ("-") and must begin with a letter.
- *         in: path
+ *         in: URI
  *         required: true
  *         type: string
- *       - name: id
- *         description: The ID of the organization to create. If provided, this
- *                      must match the orgid provided in the URI. A valid orgid
- *                      must only contain lowercase letters, numbers, and
- *                      dashes ("-") and must begin with a letter.
- *         in: body
- *         required: false
- *         type: string
- *       - name: name
- *         description: The name of the organization. A valid organization name
- *                      can only contain letters, numbers, dashes ("-"), and
- *                      spaces.
+ *       - name: content
+ *         description: The object containing the organization data.
  *         in: body
  *         required: true
- *         type: string
+ *         schema:
+ *           type: object
+ *           required:
+ *             - name
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: The name of the organization. A valid organization name
+ *                            can only contain letters, numbers, dashes ("-"), and
+ *                            spaces.
+ *             id:
+ *               type: string
+ *               description: The ID of the organization to create. A valid id must
+ *                            only contain lowercase letters, numbers, and dashes
+ *                            ("-") and must begin with a letter.
+ *             custom:
+ *               type: JSON Object
+ *               description: Custom JSON data that can be added to an organization
  *     responses:
  *       200:
- *         description: OK - The organization was successfully created.
- *                      The created organization is returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this org.
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to create an org
- *                      which already exists.
+ *         description: Forbidden
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   patch:
  *     tags:
  *       - organizations
- *     description: Creates or updates an organization. If the organization does
- *                  not yet exist it will be created (this is the same as a POST
- *                  request). If the organization already exists, this will
- *                  replace that organization.
+ *     description: Updates an existing organization.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization to update. A valid orgid must
- *                      only contain lowercase letters, numbers, and dashes
- *                      ("-") and must begin with a letter.
- *         in: path
+ *         description: The ID of the existing organization to update.
+ *         in: URI
  *         required: true
  *         type: string
- *       - name: id
- *         description: The ID of the organization to update. If provided, this
- *                      must match the orgid provided in the URI. A valid orgid
- *                      must only contain lowercase letters, numbers, and
- *                      dashes ("-") and must begin with a letter.
- *         in: body
- *         required: false
- *         type: string
- *       - name: name
- *         description: The name of the organization. A valid organization name
- *                      can only contain letters, numbers, dashes ("-"), and
- *                      spaces.
+ *       - name: content
+ *         description: The object containing the updated organization data.
  *         in: body
  *         required: true
- *         type: string
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: The updated name of the organization.
+ *             custom:
+ *               type: JSON Object
+ *               description: The updated custom JSON data of the organization.
  *     responses:
  *       200:
- *         description: OK - The organization was successfully created or
- *                      updated. The new organization is returned as JSON.
- *
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this org.
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to update a
- *                      property of the org which was immutable.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   delete:
  *     tags:
  *       - organizations
@@ -329,26 +320,35 @@ api.route('/orgs')
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization to delete. A valid orgid must
- *                      only contain lowercase letters, numbers, and dashes
- *                      ("-") and must begin with a letter.
- *         in: path
+ *         description: The ID of the organization to delete.
+ *         in: URI
  *         required: true
  *         type: string
+ *       - name: content
+ *         description: The object containing delete options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the organization should be hard deleted or
+ *                            not. The user must be a global admin to hard delete. Defaults to
+ *                            false.
  *     responses:
  *       200:
- *         description: OK - The organization was successfully removed.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this org.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
  */
 api.route('/orgs/:orgid')
 .get(
@@ -372,40 +372,49 @@ api.route('/orgs/:orgid')
   APIController.deleteOrg
 );
 
-
+// TODO: MBX-370 Remove batch post, patch, and delete of projects
 /**
  * @swagger
  * /api/orgs/:orgid/projects:
  *   get:
  *     tags:
  *       - projects
- *     description: Gets a list of all projects the user has access to within an organization.
+ *     description: Returns a list of all projects and their public data that the requesting
+ *                  user has access to within an organization.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization whose projects to get.
- *                      A valid orgid can only contain lowercase letters,
- *                      numbers, and dashes (e.g. "-") and must begin with a
- *                      letter.
- *         in: path
+ *         in: URI
  *         required: true
  *         type: string
+ *       - name: content
+ *         description: The object containing get project options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             softDeleted:
+ *               type: boolean
+ *               description: The boolean indicating if soft deleted projects are returned. The user
+ *                            must be a global admin or an admin on the organization to find soft
+ *                            deleted projects.
  *     responses:
  *       200:
- *         description: OK - The projects were successfully retrieved.
- *                      A list of projects is returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this org.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   post:
  *     tags:
  *       - projects
@@ -457,7 +466,7 @@ api.route('/orgs/:orgid/projects')
  *   get:
  *     tags:
  *       - projects
- *     description: Gets a project by organization ID.
+ *     description: Returns a project's public data.
  *     produces:
  *       - application/json
  *     parameters:
@@ -471,21 +480,32 @@ api.route('/orgs/:orgid/projects')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: content
+ *         description: The object containing get project options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             softDeleted:
+ *               type: boolean
+ *               description: The boolean indicating if a soft deleted project is returned. The user
+ *                            must be a global admin or an admin on the organization to find a soft
+ *                            deleted project.
  *     responses:
  *       200:
- *         description: OK - The project was successfully retrieved.
- *                      The project is returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this organization or project.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   post:
  *     tags:
  *       - projects
@@ -494,122 +514,118 @@ api.route('/orgs/:orgid/projects')
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization containing the new project.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project. A valid project ID must consist
+ *         description: The ID of the new project. A valid project ID must consist
  *                      of only lowercase letters, numbers, and dashes (e.g.
  *                      "-") and must begin with a letter.
  *         in: URI
  *         required: true
  *         type: string
- *       - name: id
- *         description: The ID of the project. If this is provided, it must
+ *       - name: content
+ *         description: The object containing the new project data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - id
+ *             - name
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: The ID of the project. If this is provided, it must
  *                      match the project ID provided in the URI. A valid
  *                      project ID must consist of only lowercase letters,
  *                      numbers, and dashes (e.g. "-") and must begin with a
  *                      letter.
- *         in: body
- *         required: false
- *         type: string
- *       - name: name
- *         description: The name of the new project. A valid project name can
+ *             name:
+ *               type: string
+ *               description: The name of the new project. A valid project name can
  *                      only consist of only letters, numbers, and dashes
  *                      (e.g. "-").
- *         in: body
- *         required: true
- *         type: string
- *       - name: orgid
- *         description: The ID of the organization containing project. If this
+ *             orgid:
+ *               type: string
+ *               description: The ID of the organization containing project. If this
  *                      is provided, it must match the organization ID provided
  *                      in the URI.
- *         in: body
- *         required: false
- *         type: string
+ *             custom:
+ *               type: JSON Object
+ *               description: Custom JSON data that can be added to a project.
+ *             visibility:
+ *               type: string
+ *               description: Indicates the visibility of the project. Can be either
+ *                            private or internal. Defaults to private if not included.
  *     responses:
  *       200:
- *         description: OK - The project was successfully created.
- *                      The new project is returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this org/project.
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to create a
- *                      project which already exists.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   patch:
  *     tags:
  *       - projects
- *     description: Creates or replaces a project. If the project does not yet exist, it will be
- *                  reated (just like a POST). If it does exist, the project will be replaced with
- *                  data provided.
+ *     description: Updates an existing project.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization containing the project to update.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project to create/replace. A valid project
- *                      ID must consist of only lowercase letters, numbers, and
- *                      dashes (e.g. "-") and must begin with a letter.
+ *         description: The ID of the project to update.
  *         in: URI
  *         required: true
  *         type: string
- *       - name: id
- *         description: The ID of the project. If this is provided, it must
- *                      match the project ID provided in the URI. A valid
- *                      project ID must consist of only lowercase letters,
- *                      numbers, and dashes (e.g. "-") and must begin with a
- *                      letter.
- *         in: body
- *         required: false
- *         type: string
- *       - name: name
- *         description: The name of the project. A valid project name can
- *                      only consist of only letters, numbers, and dashes
- *                      (e.g. "-").
+ *       - name: content
+ *         description:
  *         in: body
  *         required: true
- *         type: string
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: The updated name for the project.
+ *             custom:
+ *               type: JSON Object
+ *               description: The updated custom data for the project.
  *     responses:
  *       200:
- *         description: OK - The project was successfully created.
- *                      The new project is returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this organization or project.
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to update a
- *                      property of a project that is immutable.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   delete:
  *     tags:
  *       - projects
- *     description: Deletes a project
+ *     description: Deletes a project.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization containing the project to be deleted.
  *         in: URI
  *         required: true
  *         type: string
@@ -618,21 +634,31 @@ api.route('/orgs/:orgid/projects')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: content
+ *         description: The object containing delete options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the project should be hard deleted or
+ *                            not. The user must be a global admin or project admin to hard delete.
+ *                            Defaults to false.
  *     responses:
  *       200:
- *         description: OK - The project was successfully deleted.
- *                      The new project is returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this organization or project.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
  */
 api.route('/orgs/:orgid/projects/:projectid')
 .get(
@@ -656,28 +682,35 @@ api.route('/orgs/:orgid/projects/:projectid')
   APIController.deleteProject
 );
 
+
 /**
  * @swagger
  * /api/orgs/:orgid/members:
  *   get:
  *     tags:
  *       - organizations
- *     description: Get the users/users' permissions in an organization.
+ *     description: Returns a list of users roles who are members of an organization.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization to get members permissions from.
  *         in: URI
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: OK - The members of an org and thier permissions
- *                      were succesfully retrieved and returned as JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
  */
 api.route('/orgs/:orgid/members')
 .get(
@@ -692,129 +725,159 @@ api.route('/orgs/:orgid/members')
  *   get:
  *     tags:
  *       - organizations
- *     description: Retrieves the permissions a user has within an org.
+ *     description: Returns the permissions a user has on an organization.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization to get a users permissions on.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: username
- *         description: The username of the searched user.
+ *         description: The username of the user to return permissions on.
  *         in: URI
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: OK - The member of the org and thier permissions
- *                      were succesfully retrieved and returned as JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   post:
  *     tags:
  *       - organizations
- *     description: Sets an/or updates a users permissions within an org.
+ *     description: Sets or updates a users permissions on an organization.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization to set or update user permission on.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: username
- *         description: The username of the searched user.
+ *         description: The username of the user to set up update permissions on.
  *         in: URI
  *         required: true
  *         type: string
- *       - name: role
- *         description: The role the user will have in the org.
- *         in: URI
+ *       - name: content
+ *         description: The object containing the permissions level to set.
+ *         in: body
  *         required: true
- *         type: string
+ *         schema:
+ *           type: object
+ *           required:
+ *             - role
+ *           properties:
+ *             role:
+ *               type: string
+ *               description: The role the user will be set to on the organization.
  *     responses:
  *       200:
- *         description: OK - The members permissions were set or updated,
- *                      and the organization is returned in JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to set their
- *                      own permissions.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   patch:
  *     tags:
  *       - organizations
- *     description: Sets an/or updates a users permissions within an org.
+ *     description: Sets or updates a users permissions on an organization.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization to set or update user permission on.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: username
- *         description: The username of the searched user.
+ *         description: The username of the user to set up update permissions on.
  *         in: URI
  *         required: true
  *         type: string
- *       - name: role
- *         description: The role the user will have in the org.
- *         in: URI
+ *       - name: content
+ *         description: The object containing the permissions level to set.
+ *         in: body
  *         required: true
- *         type: string
+ *         schema:
+ *           type: object
+ *           required:
+ *             - role
+ *           properties:
+ *             role:
+ *               type: string
+ *               description: The role the user will be set to on the organization.
  *     responses:
  *       200:
- *         description: OK - The members permissions were set or updated,
- *                      and the organization is returned in JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to change their
- *                      own permissions.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   delete:
  *     tags:
  *       - organizations
- *     description: Deletes a users permissions within an org.
+ *     description: Removes all users permissions from an organization.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization to remove the user from.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: username
- *         description: The username of the searched user.
+ *         description: The username of the user to remove from the organization.
  *         in: URI
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: OK - The members permissions were deleted,
- *                      and the organization is returned in JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to remove their
- *                      own permissions.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
  */
-
-// 6/20/18
-// NOTE: POST and PATCH have the same functionality in this case,
-// thus they map to the same route.
 api.route('/orgs/:orgid/members/:username')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.getOrgRole
 )
+// NOTE: POST and PATCH have the same functionality in this case,
+// thus they map to the same route.
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -837,7 +900,7 @@ api.route('/orgs/:orgid/members/:username')
  *   get:
  *     tags:
  *       - projects
- *     description: Retrieves a list of members and thier pemissions for a project.
+ *     description: Returns a list of members and their permissions for a project.
  *     produces:
  *       - application/json
  *     parameters:
@@ -847,17 +910,23 @@ api.route('/orgs/:orgid/members/:username')
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project.
+ *         description: The ID of the project to get members permissions from.
  *         in: URI
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: OK - The members of a project and thier permissions
- *                      were succesfully retrieved and returned as JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
  */
 api.route('/orgs/:orgid/projects/:projectid/members')
 .get(
@@ -871,111 +940,140 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  * /api/orgs/:orgid/projects/:projectid/members/:username:
  *   get:
  *     tags:
- *       - organizations
- *     description: Retrieves the permissions a user has within an project.
+ *       - projects
+ *     description: Returns the permissions a user has on a project.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: path
+ *         in: URI
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project.
- *         in: path
+ *         description: The ID of the project to get a users permissions on.
+ *         in: URI
  *         required: true
  *         type: string
  *       - name: username
- *         description: The username of the searched user.
- *         in: path
+ *         description: The username of the user to return permissions for.
+ *         in: URI
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: OK - The member of the project and thier permissions
- *                      were succesfully retrieved and returned as JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   post:
  *     tags:
- *       - organizations
- *     description: Sets an/or updates a users permissions within an org.
+ *       - projects
+ *     description: Sets or updates a users permissions on a project.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: path
+ *         in: URI
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project.
- *         in: path
+ *         description: The ID of the project to set or update a user's permissions on.
+ *         in: URI
  *         required: true
  *         type: string
  *       - name: username
- *         description: The username of the searched user.
- *         in: path
+ *         description: The username of the user to set permissions for.
+ *         in: URI
  *         required: true
  *         type: string
- *       - name: role
- *         description: The role the user will have in the org.
- *         in: path
+ *       - name: content
+ *         description: The object containing the permissions level to set.
+ *         in: body
  *         required: true
- *         type: string
+ *         schema:
+ *           type: object
+ *           required:
+ *             - role
+ *           properties:
+ *             role:
+ *               type: string
+ *               description: The role the user will be set to on the project.
  *     responses:
  *       200:
- *         description: OK - The members permissions were set or updated,
- *                      and the project is returned in JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to set their
- *                      own permissions.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   patch:
  *     tags:
- *       - organizations
- *     description: Sets an/or updates a users permissions within an org.
+ *       - projects
+ *     description: Sets or updates a users permissions on a project.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: path
- *         required: true
- *         type: string
- *       - name: projectid
- *         description: The ID of the project.
- *         in: path
- *         required: true
- *         type: string
- *       - name: username
- *         description: The username of the searched user.
- *         in: path
- *         required: true
- *         type: string
- *       - name: role
- *         description: The role the user will have in the org.
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: projectid
+ *         description: The ID of the project to set or update a user's permissions on.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: username
+ *         description: The username of the user to set permissions for.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing the permissions level to set.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - role
+ *           properties:
+ *             role:
+ *               type: string
+ *               description: The role the user will be set to on the project.
  *     responses:
  *       200:
- *         description: OK - The members permissions were set or updated,
- *                      and the project is returned in JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to change their
- *                      own permissions.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   delete:
  *     tags:
- *       - organizations
- *     description: Deletes a users permissions within an org.
+ *       - projects
+ *     description: Removes all users permissions from a project.
  *     produces:
  *       - application/json
  *     parameters:
@@ -985,25 +1083,28 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project.
+ *         description: The ID of the project to remove the user from.
  *         in: URI
  *         required: true
  *         type: string
  *       - name: username
- *         description: The username of the searched user.
+ *         description: The username of the user to remove from the project.
  *         in: URI
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: OK - The members permissions were deleted,
- *                      and the project is returned in JSON.
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies the user tried to remove their
- *                      own permissions.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:username')
 .get(
@@ -1011,6 +1112,8 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
   Middleware.logRoute,
   APIController.getProjMemRole
 )
+// NOTE: POST and PATCH have the same functionality in this case,
+// thus they map to the same route.
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -1028,44 +1131,53 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
 );
 
 
+// TODO: Remove batch operation except GET from below MBX-370
 /**
  * @swagger
  * /api/orgs/:orgid/projects/:projectid/elements:
  *   get:
  *     tags:
  *       - elements
- *     description: Gets an array of all elements the user has access to on a project.
+ *     description: Returns an array of all elements of a project.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose projects to get.
- *         in: path
+ *         description: The ID of the organization containing the project.
+ *         in: URI
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project.
- *         in: path
+ *         description: The ID of the project containing the element.
+ *         in: URI
  *         required: true
  *         type: string
+ *       - name: content
+ *         description: The object containing get elements options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             softDeleted:
+ *               type: boolean
+ *               description: The boolean indicating if a soft deleted element is returned. The user
+ *                            must be a global admin or an admin on the project to find a soft
+ *                            deleted elements.
  *     responses:
  *       200:
- *         description: OK - The projects were successfully retrieved.
- *                      A list of projects is returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this org.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
- *         description: Not Found - This implies no elements were found on the project.
- *
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   post:
  *     tags:
  *       - elements
@@ -1116,199 +1228,210 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  * /api/orgs/:orgid/projects/:projectid/elements/:elementid:
  *   get:
  *     tags:
- *       - model management
- *     summary: Gets an element by ID
- *     description: Retrieves a single element based on its organization, project,
- *                  and element IDs.
+ *       - elements
+ *     description: Returns an element.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization the project is in.
- *         in: path
+ *         description: The ID of the organization containing the project.
+ *         in: URI
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: path
+ *         in: URI
  *         required: true
  *         type: string
  *       - name: elementid
- *         description: The ID of the element to get.
- *         in: path
+ *         description: The ID of the element to return.
+ *         in: URI
  *         required: true
  *         type: string
+ *       - name: content
+ *         description: The object containing get element options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             softDeleted:
+ *               type: boolean
+ *               description: The boolean indicating if the soft deleted element is returned. The
+ *                            user must be a global admin or an admin on the project to
+ *                            find a soft deleted element.
  *     responses:
  *       200:
- *         description: OK - The element was successfully retrieved.
- *                      The element is returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this organization or project.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   post:
  *     tags:
- *       - model management
+ *       - elements
  *     description: Creates a new element.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: path
- *         required: true
- *         type: string
- *       - name: projectid
- *         description: The ID of the project. A valid project ID must consist
- *                      of only lowercase letters, numbers, and dashes (e.g.
- *                      "-") and must begin with a letter.
- *         in: path
- *         required: true
- *         type: string
- *       - name: elementid
- *         description: The ID of the element.
- *         in: path
- *         required: true
- *         type: string
- *       - name: id
- *         description: The ID of the element. If this is provided, it must
- *                      match the element ID provided in the URI.
- *         in: body
- *         required: false
- *         type: string
- *       - name: name
- *         description: The name for the element.
- *         in: body
- *         required: false
- *         type: string
- *       - name: documentation
- *         description: The documentation for the element.
- *         in: body
- *         required: false
- *         type: string
- *     responses:
- *       200:
- *         description: OK - The element was successfully created.
- *                      The new/updated element is returned as JSON.
- *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
- *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this org/project.
- *       403:
- *         description: Forbidden - This implies that the user tried to create
- *                      an element that already has a matching uid or uuid.
- *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
- *   patch:
- *     tags:
- *       - model management
- *     description: Creates or replaces an element. If the element does not yet
- *                  exist, it will be created (just like a POST). If it does
- *                  exist, the element will be replaced with
- *                  data provided.
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: orgid
- *         description: The ID of the organization containing the project.
- *         in: path
- *         required: true
- *         type: string
- *       - name: projectid
- *         description: The ID of the project to create/replace. A valid project
- *                      ID must consist of only lowercase letters, numbers, and
- *                      dashes (e.g. "-") and must begin with a letter.
- *         in: path
- *         required: true
- *         type: string
- *       - name: elementid
- *         description: The ID of the element.
- *         in: path
- *         required: true
- *         type: string
- *       - name: id
- *         description: The ID of the element. If this is provided, it must
- *                      match the element ID provided in the URI.
- *         in: body
- *         required: false
- *         type: string
- *       - name: name
- *         description: The name for the element.
- *         in: body
- *         required: false
- *         type: string
- *       - name: documentation
- *         description: The documentation for the element.
- *         in: body
- *         required: false
- *         type: string
- *     responses:
- *       200:
- *         description: OK - The element was successfully created.
- *                      The new/updated element is returned as JSON.
- *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
- *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this organization or project.
- *       403:
- *         description: Forbidden - This implies that the user tried to update
- *                      a property of an element that is immutable.
- *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
- *   delete:
- *     tags:
- *       -  model management
- *     description: Deletes an element
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: orgid
- *         description: The ID of the organization containing the project.
- *         in: path
+ *         in: URI
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: path
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element to be created.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing the new element data.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           required:
+ *             - id
+ *             - name
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: The ID of the element. If this is provided, it must
+ *                      match the element ID provided in the URI.
+ *             name:
+ *               type: string
+ *               description: The name for the element.
+ *             documentation:
+ *               type: string
+ *               description: The documentation for the element.
+ *             custom:
+ *               type: JSON Object
+ *               description: Custom JSON data that can be added to the element.
+ *     responses:
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
+ *       500:
+ *         description: Internal Server Error
+ *
+ *   patch:
+ *     tags:
+ *       - elements
+ *     description: Updates an existing element.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element to be updated.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing the updated element data.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: The updated name for the element.
+ *             documentation:
+ *               type: string
+ *               description: The updated documentation for the element.
+ *             custom:
+ *               type: JSON Object
+ *               description: The updated custom JSON data for the element.
+ *     responses:
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
+ *       500:
+ *         description: Internal Server Error
+ *
+ *   delete:
+ *     tags:
+ *       -  elements
+ *     description: Deletes an element.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the element.
+ *         in: URI
  *         required: true
  *         type: string
  *       - name: elementid
  *         description: The ID of the element to delete.
- *         in: path
+ *         in: URI
  *         required: true
  *         type: string
+ *       - name: content
+ *         description: The object containing delete options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the element should be hard deleted or
+ *                            not. The user must be a global admin or project admin to hard delete.
+ *                            Defaults to false.
  *     responses:
  *       200:
- *         description: OK - The element was successfully deleted.
- *                      The element ID is returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function. Either
- *                      authentication failed or the user does not have
- *                      authorization to view this organization or project.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
  */
 api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
 .get(
@@ -1333,31 +1456,32 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
 );
 
 
+// TODO: Remove all batch operations except GET below, MBX-370
 /**
  * @swagger
  * /api/users:
  *   get:
  *     tags:
  *       - users
- *     description: Gets a list of all users. Returns a list of JSON objects containing public
- *                  user data.
+ *     description: Returns an array of all user's public data.
  *     produces:
  *       - application/json
  *     parameters:
  *       - N/A
  *     responses:
  *       200:
- *         description: OK - All users should be returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function or authentication
- *                      failed.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   post:
  *     tags:
  *       - users
@@ -1412,14 +1536,18 @@ api.route('/users')
  *   get:
  *     tags:
  *       - users
- *     description: Returns the currently logged in user information
+ *     description: Returns the currently logged in user's public information
  *     responses:
  *       200:
- *         description: OK - The JSON-encoded user information is returned.
+ *         description: OK
  *       400:
- *         description: Bad Request - Usually an authentication issue.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - Failed to authenticate user.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
  *         description: Internal Server Error
  */
@@ -1436,35 +1564,33 @@ api.route('/users/whoami')
  *   get:
  *     tags:
  *       - users
- *     description: Gets a user by username.
+ *     description: Returns a user's public information.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: username
- *         description: The username of the user to get. Note, While it is
- *                      currently prevented, in the future, usernames may be
- *                      allowed to change and should not be considered static.
+ *         description: The username of the user to return
  *         required: true
  *         type: string
- *         in: path
+ *         in: URI
  *     responses:
  *       200:
- *         description: OK - The user was retieved and the public user
- *                      object should be returned as JSON.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function or authentication
- *                      failed.
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   post:
  *     tags:
  *       - users
- *     description: Creates a user.
+ *     description: Creates a new user.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1472,101 +1598,109 @@ api.route('/users/whoami')
  *         description: The username of the user to create.
  *         required: true
  *         type: string
- *         in: path
- *       - name: username
- *         description: The username of the user to create. If provided, this
- *                      must match the username provided in the URI.
- *         required: false
- *         type: string
+ *         in: URI
+ *       - name: content
+ *         description: The object containing the new user data.
  *         in: body
- *       - name: password
- *         description: The username of the user to create.
  *         required: true
- *         type: string
- *         in: body
- *       - name: fname
- *         description: The user's first name.
- *         required: false
- *         type: string
- *         in: body
- *       - name: lname
- *         description: The user's last name.
- *         required: false
- *         type: string
- *         in: body
+ *         schema:
+ *           type: object
+ *           required:
+ *             - username
+ *             - password
+ *           properties:
+ *             username:
+ *               type: string
+ *               description: The username of the user to create. If provided, this
+ *                            must match the username provided in the URI.
+ *             password:
+ *               type: string
+ *               description: The password of the user being created. This field
+ *                            is required unless LDAP authentication is used.
+ *             fname:
+ *               type: string
+ *               description: The user's first name.
+ *             lname:
+ *               type: string
+ *               description: The user's last name.
+ *             preferredName:
+ *               type: string
+ *               description: The user's preferred first name.
+ *             email:
+ *               type: string
+ *               description: The user's email address.
+ *             custom:
+ *               type: JSON Object
+ *               description: Custom JSON data that can be added to a user.
  *     responses:
  *       200:
- *         description: OK - The user was created. The newly created user
- *                      is returned as a JSON-encoded object.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function or authentication
- *                      failed.
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies that the user tried to create
- *                      a user with a matching username of an existing user
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   patch:
  *     tags:
  *       - users
- *     description: Creates or updates user. If the user already exists it will be updated. In this
- *                  case, any valid fields that are given in the request body will replace the
- *                  existing field values.
+ *     description: Updates an existing user.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: username
- *         description: The username of the user to create.
+ *         description: The username of the user to update.
  *         required: true
  *         type: string
- *         in: path
- *       - name: username
- *         description: The username of the user to create. If provided, this
- *                      must match the username provided in the URI.
- *         required: false
- *         type: string
+ *         in: URI
+ *       - name: content
+ *         description: The object containing the updated user data.
  *         in: body
- *       - name: password
- *         description: The username of the user to create.
  *         required: true
- *         type: string
- *         in: body
- *       - name: fname
- *         description: The user's first name.
- *         required: false
- *         type: string
- *         in: body
- *       - name: lname
- *         description: The user's last name.
- *         required: false
- *         type: string
- *         in: body
+ *         schema:
+ *           type: object
+ *           required:
+ *             - username
+ *             - password
+ *           properties:
+ *             fname:
+ *               type: string
+ *               description: The user's updated first name.
+ *             lname:
+ *               type: string
+ *               description: The user's updated last name.
+ *             preferredName:
+ *               type: string
+ *               description: The user's updated preferred first name.
+ *             email:
+ *               type: string
+ *               description: The user's updated email address.
+ *             custom:
+ *               type: JSON Object
+ *               description: The updated custom JSON data for the user.
  *     responses:
  *       200:
- *         description: OK - The user was created. The newly created user
- *                      is returned as a JSON-encoded object.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function or authentication
- *                      failed.
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies that the user tried to update
- *                      the property of a user that is immutable.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
+ *
  *   delete:
  *     tags:
  *       - users
- *     description: Deletes the user.
+ *     description: Deletes a user.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1574,23 +1708,20 @@ api.route('/users/whoami')
  *         description: The username of the user to delete.
  *         required: true
  *         type: string
- *         in: path
+ *         in: URI
  *     responses:
  *       200:
- *         description: OK - The user was deleted.
+ *         description: OK
  *       400:
- *         description: Bad Request - This implies that the request is invalid
- *                      or malformed.
+ *         description: Bad Request
  *       401:
- *         description: Unauthorized - This implies that the user is not
- *                      authorized to perform this function or authentication
- *                      failed.
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden - This implies that the user tried to remove
- *                      themselves.
+ *         description: Forbidden
+ *       404:
+ *         description: Not Found
  *       500:
- *         description: Internal Server Error - Something went wrong on the
- *                      server side. Details may exist in the application logs.
+ *         description: Internal Server Error
  */
 api.route('/users/:username')
 .get(
