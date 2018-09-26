@@ -308,13 +308,8 @@ function createElement(reqUser, element) {
     try {
       assert.ok(element.hasOwnProperty('id'), 'ID not provided in request body.');
       assert.ok(element.hasOwnProperty('type'), 'Element type not provided in request body.');
-      assert.ok(element.project.hasOwnProperty('id'), 'Project ID not provided in request body.');
-      assert.ok(element.project.org.hasOwnProperty('id'), 'Org ID not provided in request body.');
+      assert.ok(element.hasOwnProperty('projectUID'), 'Project UID not provided in request body.');
       assert.ok(typeof element.id === 'string', 'ID in request body is not a string.');
-      assert.ok(typeof element.project.id === 'string',
-        'Project ID in request body is not a string.');
-      assert.ok(typeof element.project.org.id === 'string',
-        'Org ID in request body is not a string.');
       assert.ok(typeof element.type === 'string', 'Element type in request body is not a string.');
 
       if (typeof element.name === 'string') {
@@ -338,14 +333,13 @@ function createElement(reqUser, element) {
     }
 
     // Sanitize query inputs
-    const elemID = sani.html(element.id);
-    const projID = sani.html(element.project.id);
-    const orgID = sani.html(element.project.org.id);
-    const elemUID = utils.createUID(orgID, projID, elemID);
+    const elemID = sani.sanitize(element.id);
+    const splitProjectUID = utils.parseUID(sani.sanitize(element.projectUID));
+    const elemUID = utils.createUID(splitProjectUID[0], splitProjectUID[1], elemID);
     const elementType = utils.toTitleCase(sani.html(element.type));
 
     // Error Check: make sure the project exists
-    ProjController.findProject(reqUser, orgID, projID)
+    ProjController.findProject(reqUser, splitProjectUID[0], splitProjectUID[1])
     .then((proj) => {
       // Error check: make sure user has write permission on project
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
@@ -366,7 +360,7 @@ function createElement(reqUser, element) {
 
           // Create the new element
           const elemData = {
-            orgID: orgID,
+            orgID: splitProjectUID[0],
             elemID: elemID,
             elemName: elemName,
             project: proj,

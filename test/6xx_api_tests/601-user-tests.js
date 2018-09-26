@@ -90,7 +90,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a user', postUser);
   it('should find out the user with the /whoami api tag', whoAmI);
   it('should reject creating a user with invalid username', rejectInvalidUsernamePost);
-  it('should reject creating a user with two different usernames', rejectNonmatchingUsernames);
   it('should get all users', getUsers);
   it('should reject getting a user that does not exist', rejectGetNonexisting);
   it('should update a user', patchUser);
@@ -200,34 +199,6 @@ function rejectInvalidUsernamePost(done) {
     const json = JSON.parse(body);
     // Expected response error: 'Bad Request'
     chai.expect(json.message).to.equal('Internal Server Error');
-    done();
-  });
-}
-
-/**
- * @description Makes an invalid POST request to /api/users/:username. Verifies
- * user CANNOT POST with non-matching username parameters.
- * Expected response error: 'Bad Request'
- */
-function rejectNonmatchingUsernames(done) {
-  // Make POST API request
-  request({
-    url: `${test.url}/api/users/${testData.usernames[2]}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    // Create new user data as POST request body
-    body: JSON.stringify(testData.users[10])
-  },
-  (err, response, body) => {
-    // Expect request to succeed
-    chai.expect(err).to.equal(null);
-    // Expect status 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Parse body to JSON object
-    const json = JSON.parse(body);
-    // Expected response error: 'Bad Request'
-    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

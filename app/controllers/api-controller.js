@@ -678,7 +678,7 @@ function postProject(req, res) {
   }
 
   // If org ID was provided in the body, ensure it matches org ID in params
-  if (utils.checkExists(['org.id'], req.body) && (req.params.orgid !== req.body.org.id)) {
+  if (req.body.hasOwnProperty('orgid') && (req.params.orgid !== req.body.orgid)) {
     const error = new M.CustomError(
       'Org ID in the body does not match ID in the params.', 400, 'warn'
     );
@@ -693,15 +693,12 @@ function postProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Set the orgid in req.body in case it wasn't provided
+  req.body.orgid = req.params.orgid;
+
   // Create project with provided parameters
   // NOTE: createProject() sanitizes req.params.projectid, req.params.org.id and req.body.name
-  ProjectController.createProject(req.user, {
-    id: req.params.projectid,
-    name: req.body.name,
-    org: {
-      id: req.params.orgid
-    }
-  })
+  ProjectController.createProject(req.user, req.body)
   .then((project) => {
     // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
@@ -997,6 +994,9 @@ function postUser(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Set the username in req.body in case it wasn't provided
+  req.body.username = req.params.username;
+
   // Create user with provided parameters
   // NOTE: createUser() sanitizes req.body
   UserController.createUser(req.user, req.body)
@@ -1168,6 +1168,24 @@ function postElement(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // If element ID was provided in the body, ensure it matches element ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.elementid !== req.body.id)) {
+    const error = new M.CustomError('Element ID in the body does not match ID in the params.', 400);
+    return res.status(error.status).send(error);
+  }
+
+  // Generate the project UID from url parameters
+  const projUID = utils.createUID(req.params.orgid, req.params.projectid);
+
+  // If project UID was provided in the body, ensure it matches project UID from params
+  if (req.body.hasOwnProperty('projectUID') && (projUID !== req.body.projectUID)) {
+    const error = new M.CustomError('Project UID in the body does not match params.', 400);
+    return res.status(error.status).send(error);
+  }
+
+  // Set projectUID in request body
+  req.body.projectUID = projUID;
 
   // Create element with provided parameters
   // NOTE: createElement() sanitizes req.body.name
