@@ -20,7 +20,7 @@
  */
 
 // This ID is used as the common regex for other ID fields in this module
-const id = '([a-z0-9])([a-z0-9-]){0,}';
+const id = '([a-z0-9])([-_a-z0-9]){0,}';
 
 /**
  * @description Regular Expressions to validate organization data
@@ -108,7 +108,7 @@ module.exports.project = {
  */
 module.exports.element = {
   id: `^${id}$`,
-  name: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$',
+  name: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
   uuid: '([a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12})'
 };
 
