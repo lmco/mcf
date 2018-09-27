@@ -39,10 +39,10 @@ default, it uses the `default.cfg` file, but that can be changed by setting the
 file with a name matching the `MBEE_ENV` environment variable. For example,
 if `MBEE_ENV=production`, MBEE will look for the file `config/production.cfg`.
 
-The MBEE config is simply a JSON file that allows comments. MBEE is designed to 
+The MBEE config is simply a JSON file that allows comments. MBEE is designed to
 be largely parameterized by this config file. In this config file you will have
 options to alter the server ports, Docker configurations, enabling and
-disabling components, and swapping out authentication schemes. For a 
+disabling components, and swapping out authentication schemes. For a
 more detailed explanation of the fields supported by the config file, see the
 detailed comments provided [example.cfg](config/example.cfg).
 
@@ -62,9 +62,9 @@ to use your authentication strategy.
 
 ### Building MBEE
 
-1. Install dependencies by running `NODE_ENV=dev yarn install` or 
+1. Install dependencies by running `NODE_ENV=dev yarn install` or
 `npm install --dev`.
-2. Build MBEE by running `node mbee build`. This will build the client-side 
+2. Build MBEE by running `node mbee build`. This will build the client-side
 assets by moving dependencies from `node_modules` into build/public, concatenating and
 minifying client-side JavaScript, processing Sass into CSS, and building JSDoc
 documentation into build/doc.
@@ -180,8 +180,6 @@ seen by Mocha, should correspond to the name of the file.
 
 These test numbers are used both to uniquely identify the tests and to define
 their order of execution.
-
-### // TODO: Document the 6XX tests certs MBX-470
 
 ### Code Conventions and ESLint
 
