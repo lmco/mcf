@@ -106,6 +106,12 @@ occur. These warnings have no impact on MBEE or production code as the module
 is only used to build the application. If gulp-react is updated in the future,
 the module will be updated.
 
+#### MBEE Tests
+The MBEE tests should not be ran in production because the tests will create
+an arbitrary admin user in the database.
+
+It's important to ensure that all test users are deleted from the database.
+
 ## Security Related Configuration
 
 ### Plugins and Integrations
@@ -317,7 +323,7 @@ configuration example below:
 ```json
 {
   "auth": {
-    "strategy": "LDAPStrategy",
+    "strategy": "LdapStrategy",
     "ldap": {
         // LDAP information
     },

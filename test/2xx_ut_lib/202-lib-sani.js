@@ -1,12 +1,12 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/202-lib-sani
+ * @module  test.202-lib-sani
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI
- * <br/>
+ *
  * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
  * It is not approved for public release or redistribution.<br/>
  *
@@ -15,19 +15,22 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  Tests the sanitization module and each of its functions.
+ * @description Tests the sanitization module and each of its functions.
  */
 
-// Load node modules
+// Node modules
 const chai = require('chai');
 
-// Load mbee modules
+// MBEE modules
 const sani = M.require('lib.sanitization');
 
-
 /* --------------------( Main )-------------------- */
-
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
   it('should remove invalid mongo query keys from objects', mongoSanTest);
   it('should remove mongo queries if the keys are strings', stringKeyMongoTest);
@@ -37,12 +40,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should sanitize an LDAP filter', sanitizeLDAP);
 });
 
-
 /* --------------------( Tests )-------------------- */
-
-
 /**
- * @description  Loads the sanitization library.
+ * @description Loads the sanitization library.
  */
 function mongoSanTest(done) {
   const mongoSan = sani.mongo({ $lt: 10 });
@@ -51,7 +51,7 @@ function mongoSanTest(done) {
 }
 
 /**
- * @description  Tests the html and mongo sanitization with input of
+ * @description Tests the html and mongo sanitization with input of
  * html. Expected output to be an empty object
  */
 function stringKeyMongoTest(done) {
@@ -61,18 +61,40 @@ function stringKeyMongoTest(done) {
 }
 
 /**
- * @description  Tests the html sanitation with html input.
+ * @description Tests the html sanitation with html input.
  * Expected to change the html input.
+ * Same thing occurring in a test more than once
  */
 function htmlTest(done) {
-  // TODO: sanitize against more special characters
-  const htmlSan = sani.html('<script>');
-  chai.expect(htmlSan).to.equal('&lt;script&gt;');
+  const htmlLessThan = sani.html('<script>');
+  const htmlQuote = sani.html("'OR 1=1");
+  const htmlDoubleQuote = sani.html('"double it up');
+  const htmlTickEqual = sani.html('`OR 1=1');
+  const htmlNull = sani.html(null);
+  const htmlBool = sani.html(false);
+  const htmlSlash = sani.html('/p');
+  const htmlBackSlash = sani.html('\\p');
+  const htmlPercent = sani.html('100%');
+  const htmlParentheses = sani.html('(inside)');
+  const htmlNum = sani.html('#hashslingingslasher');
+  const htmlHat = sani.html('3^2');
+  chai.expect(htmlLessThan).to.equal('&lt;script&gt;');
+  chai.expect(htmlQuote).to.equal('&#039;OR 1&equals;1');
+  chai.expect(htmlDoubleQuote).to.equal('&quot;double it up');
+  chai.expect(htmlTickEqual).to.equal('&grave;OR 1&equals;1');
+  chai.expect(htmlNull).to.equal(null);
+  chai.expect(htmlBool).to.equal(false);
+  chai.expect(htmlSlash).to.equal('&sol;p');
+  chai.expect(htmlBackSlash).to.equal('&bsol;p');
+  chai.expect(htmlPercent).to.equal('100&percnt;');
+  chai.expect(htmlParentheses).to.equal('&lpar;inside&rpar;');
+  chai.expect(htmlNum).to.equal('&num;hashslingingslasher');
+  chai.expect(htmlHat).to.equal('3&Hat;2');
   done();
 }
 
 /**
- * @description  Test sanitation of a JSON Object.
+ * @description Test sanitation of a JSON Object.
  */
 function sanitizeHtmlObject(done) {
   const data = {
@@ -82,29 +104,28 @@ function sanitizeHtmlObject(done) {
     admin: true,
     email: null
   };
-  // TODO: add tests for more special characters
   const htmlSan = sani.html(data);
   chai.expect(htmlSan.name).to.equal('Steve Rogers');
   chai.expect(htmlSan.fname).to.equal('&lt;script&gt;');
-  chai.expect(htmlSan.lname).to.equal('&lt;/script&gt;');
+  chai.expect(htmlSan.lname).to.equal('&lt;&sol;script&gt;');
   chai.expect(htmlSan.admin).to.equal(true);
-  chai.expect(htmlSan.email).to.equal('');
+  chai.expect(htmlSan.email).to.equal(null);
   done();
 }
 
 /**
- * @description  Should attempt to sanitize &amp; and other allowed exceptions.
+ * @description Should attempt to sanitize &amp; and other allowed exceptions.
  */
 function sanitizeAllowedCharacters(done) {
-  const s = 'this string has &amp; and &lt; but also &sample';
-  const expected = 'this string has &amp; and &lt; but also &amp;sample';
+  const s = 'this string has &amp;, &lt;, &nbsp; and  but also &sample';
+  const expected = 'this string has &amp;, &lt;, &nbsp; and  but also &amp;sample';
   const htmlSan = sani.html(s);
   chai.expect(htmlSan).to.equal(expected);
   done();
 }
 
 /**
- * @description  Should attempt to sanitize ldap special filter chars.
+ * @description Should attempt to sanitize ldap special filter chars.
  */
 function sanitizeLDAP(done) {
   const s = 'test1 \\ test2 * test3 ( test4 ) test5 NUL';

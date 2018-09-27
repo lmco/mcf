@@ -1,53 +1,43 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
-/*
- * routes.js
+/**
+ * Classification: UNCLASSIFIED
  *
- * Defines the MBEE routes mounted a '/'.
+ * @module routes
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * @description Defines the MBEE routes mounted at '/'.
  */
 
-// Load node modules
+// Node modules
 const express = require('express');
 const router = express.Router();
 
-// Load mbee modules
-const UIController = M.require('controllers.UIController');
+// MBEE modules
+const UIController = M.require('controllers.ui-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
 
-// TODO: Fix order of routes to actually reflect unauthenticated vs authenticated
-/**********************************************
- * Unauthenticated Routes
- **********************************************/
-
-/* This renders the about page */
-router.route('/about')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.showAboutPage
-);
-
-
+/* ---------- Unauthenticated Routes ----------*/
 /**
  * This renders the swagger doc page for the API routes
  */
 router.route('/doc/api')
 .get(Middleware.logRoute, UIController.swaggerDoc);
 
-
 /**
  * Both routes map to the same controller. The controller method handles
  * the logic of checking for the page parameter.
+ * // TODO: Remove this in prc-001, keep in masters MBX-370
  */
 router.route('/doc/flight-manual')
 .get(Middleware.logRoute, UIController.renderFlightManual);
@@ -57,13 +47,14 @@ router.route('/doc/flight-manual/:page')
 /**
  * Both routes map to the same controller. The controller method handles
  * the logic of checking for the page parameter.
+ * // TODO: Remove this in prc-001 if needed, keep in masters
  */
 router.route('/doc/developers')
 .get(Middleware.logRoute, UIController.renderJSDoc);
 router.route('/doc/developers/:page')
 .get(Middleware.logRoute, UIController.renderJSDoc);
 
-
+/* ---------- Authenticated Routes ----------*/
 /**
  * GET shows the login page.
  * POST is the route that actually logs in the user.
@@ -81,12 +72,16 @@ router.route('/login')
   UIController.login
 );
 
-
-/**********************************************
-/* Authenticated Routes
- **********************************************/
+/* This renders the about page */
+router.route('/about')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.showAboutPage
+);
 
 /* This renders the home page for logged in users */
+// TODO: Create a simple yet professional looking homepage
 router.route('/')
 .get(
   AuthController.authenticate,
@@ -95,6 +90,7 @@ router.route('/')
 );
 
 /* This renders the home page for logged in users */
+// TODO: Remove this in prc-001, keep in masters MBX-370
 router.route('/:org/:project')
 .get(
   AuthController.authenticate,
@@ -112,7 +108,7 @@ router.route('/logout')
   UIController.logout
 );
 
-/* Renders the admin console */
+/* Renders the admin console */ // TODO: Remove this in prc-001, keep in masters MBX-370
 router.route('/admin/console')
 .get(
   AuthController.authenticate,

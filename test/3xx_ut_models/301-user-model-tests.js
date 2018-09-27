@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/301-user-model-tests
+ * @module  test.301-user-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,24 +15,24 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This tests the User Model functionality. These tests
- * are to make sure the code is working as it should or should not be.
- * Especially, when making changes/ updates to the code. The user model tests
- * create, update, finds, soft deletes, and hard deletes users.
- * TODO - Description
+ * @description Tests the user model by performing various actions such as a
+ * find, create, updated, soft delete, and hard delete. Does NOT test the user
+ * controller but instead directly manipulates data using mongoose to check
+ * the user model methods, validators, setters, and getters.
  */
 
-// Load node modules
+// Node modules
+const path = require('path');
 const chai = require('chai');
-const mongoose = require('mongoose');
 
-// Load mbee modules
-const User = M.require('models.User');
+// MBEE modules
+const User = M.require('models.user');
 const db = M.require('lib.db');
 
+/* --------------------( Test Data )-------------------- */
+const testData = require(path.join(M.root, 'test', 'data.json'));
+
 /* --------------------( Main )-------------------- */
-
-
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
  * or grouping several "it" tests into a single group. In this case, the name of
@@ -51,227 +51,199 @@ describe(M.getModuleName(module.filename), () => {
    * After: runs after all tests. Close database connection.
    */
   after(() => {
-    mongoose.connection.close();
+    db.disconnect();
   });
 
   /* Execute the tests */
   it('should create a user', createUser);
   it('should verify a valid password', verifyValidPassword);
-  it('shouldnt verify an invalid password', verifyInvalidPassword);
+  it('should NOT verify an invalid password', verifyInvalidPassword);
   it('should get a user from the database', getUser);
   it('should update a user', updateUser);
   it('should soft delete a user', softDeleteUser);
   it('should get a soft deleted user', getSoftDeletedUser);
   it('should delete a user', deleteUser);
-  it('should login an LDAP user', loginLDAPUser);
 });
 
-
 /* --------------------( Tests )-------------------- */
-
-
 /**
- * @description Creates a user using the User model.
+ * @description Creates a user via model and save it to the database.
  */
 function createUser(done) {
-  const user = new User({
-    username: 'spiderman',
-    password: 'icanshootwebs',
-    fname: 'Peter',
-    preferredName: 'Spidy',
-    lname: 'Parker'
-  });
-  user.save((err) => {
-    chai.expect(err).to.equal(null);
+  // Create a new User object
+  const user = new User(testData.users[2]);
+  // Save user object to the database
+  user.save()
+  .then(() => done())
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }
 
-
 /**
- * @description Verifies that the actual password matches the stored one.
- */
-function verifyValidPassword(done) {
-  User.findOne({
-    username: 'spiderman',
-    deletedOn: null
-  })
-  .exec((err, user) => {
-    // Make sure there are no errors
-    chai.expect(err).to.equal(null);
-
-    // Verify the user's password
-    user.verifyPassword('icanshootwebs')
-    .then((result) => {
-      chai.expect(result).to.equal(true);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error).to.equal(null);
-      done();
-    });
-  });
-}
-
-
-/**
- * @desc Verifies that an incorrect password doesn't match the stored one.
- */
-function verifyInvalidPassword(done) {
-  User.findOne({
-    username: 'spiderman',
-    deletedOn: null
-  }, (err, user) => {
-    // Make sure there are no errors
-    chai.expect(err).to.equal(null);
-
-    // Attempt to verify the user's incorrect password
-    user.verifyPassword('icantshootwebs')
-    .then((result) => {
-      chai.expect(result).to.equal(false);
-      done();
-    })
-    .catch((error) => {
-      chai.expect(error).to.equal(null);
-      done();
-    });
-  });
-}
-
-
-/**
- * @description Gets a user by username and checks the properties. This should
- * explicitly query for a user who has not been soft deleted.
+ * @description Checks that the user from the previous createUser test was
+ * created successfully and contains the expected data.
  */
 function getUser(done) {
-  User.findOne({
-    username: 'spiderman',
-    deletedOn: null
-  }, (err, user) => {
-    // Make sure there are no errors
-    chai.expect(err).to.equal(null);
-
-    // Check first and last name
-    chai.expect(user.fname).to.equal('Peter');
-    chai.expect(user.lname).to.equal('Parker');
-    chai.expect(user.preferredName).to.equal('Spidy');
-
-    // Check the full name
-    chai.expect(user.getFullName()).to.equal('Peter Parker');
-    chai.expect(user.name).to.equal('Peter Parker');
-
+  // Find the created user from the previous createUser test.
+  User.findOne({ username: testData.users[2].username, deletedOn: null })
+  .then((user) => {
+    // Check first, last, and preferred name
+    chai.expect(user.fname).to.equal(testData.users[2].fname);
+    chai.expect(user.lname).to.equal(testData.users[2].lname);
+    chai.expect(user.preferredName).to.equal(testData.users[2].preferredName);
+    // Check the name
+    chai.expect(user.name).to.equal(`${testData.users[2].fname} ${testData.users[2].lname}`);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }
 
+/**
+ * @description Checks that a user password was properly stored and can be
+ * authenticated.
+ */
+function verifyValidPassword(done) {
+  // Find the created user from the previous createUser test.
+  User.findOne({ username: testData.users[2].username, deletedOn: null })
+  // Verify the user's password
+  .then((user) => user.verifyPassword(testData.users[2].password))
+  .then((result) => {
+    // expected - verifyPassword() returned true
+    chai.expect(result).to.equal(true);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
 
 /**
- * @description Updates a user's name using the User Model.
+ * @description Checks that verifyPassword returns false when verifying an
+ * incorrect password.
+ */
+function verifyInvalidPassword(done) {
+  // Find the created user from the previous createUser test.
+  User.findOne({ username: testData.users[2].username, deletedOn: null })
+  // Attempt to verify the user's incorrect password
+  .then((user) => user.verifyPassword('incorrectPassword'))
+  .then((result) => {
+    // expected - verifyPassword returned false
+    chai.expect(result).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates the first and last name of the user previously created
+ * in the createUser test.
  */
 function updateUser(done) {
-  User.findOneAndUpdate({
-    username: 'spiderman'
-  }, {
-    fname: 'Mr.',
-    lname: 'Spiderman'
-  }, (err, user) => {
-    // Make sure there are no errors
-    chai.expect(err).to.equal(null);
-
-    // Re-query the user. The user defined above is not updated
-    User.findOne({
-      username: user.username
-    }, (err2, user2) => {
-      chai.expect(err2).to.equal(null);
-      // Check basic user data
-      chai.expect(user2.username).to.equal('spiderman');
-      chai.expect(user2.fname).to.equal('Mr.');
-      chai.expect(user2.lname).to.equal('Spiderman');
-      chai.expect(user2.getFullName()).to.equal('Mr. Spiderman');
-      chai.expect(user2.name).to.equal('Mr. Spiderman');
-      done();
-    });
-  });
-}
-
-
-/**
- * @description Soft-deletes the user.
- */
-function softDeleteUser(done) {
-  // LM: Changed from findOneAndUpdate to a find and then update
-  // findOneAndUpdate does not call setters, and was causing strange
-  // behavior with the deleted and deletedOn fields.
-  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-  User.findOne({ username: 'spiderman' })
-  .exec((err, user) => {
-    user.deleted = true;
-    user.save((saveErr) => {
-      chai.expect(saveErr).to.equal(null);
-      User.findOne({
-        username: user.username
-      }, (err2, user2) => {
-        // Verify soft delete
-        chai.expect(err2).to.equal(null);
-        chai.expect(user2.deletedOn).to.not.equal(null);
-        chai.expect(user2.deleted).to.equal(true);
-        done();
-      });
-    });
-  });
-}
-
-
-/**
- * @description Gets a soft-deleted user.
- */
-function getSoftDeletedUser(done) {
-  User.findOne({
-    username: 'spiderman'
-  }, (err, user) => {
-    // Make sure there are no errors
-    chai.expect(err).to.equal(null);
-    chai.expect(user.username).to.equal('spiderman');
+  // Find and updated the user created in the previous createUser test.
+  User.findOneAndUpdate({ username: testData.users[2].username },
+    { fname: `${testData.users[2].fname}edit`, lname: testData.users[2].lname })
+  // Find the updated user
+  .then((user) => User.findOne({ username: user.username }))
+  .then((userUpdated) => {
+    // Check the user has the updated first and last name.
+    chai.expect(userUpdated.username).to.equal(testData.users[2].username);
+    chai.expect(userUpdated.fname).to.equal(`${testData.users[2].fname}edit`);
+    chai.expect(userUpdated.lname).to.equal(testData.users[2].lname);
+    chai.expect(userUpdated.name).to.equal(`${testData.users[2].fname}edit ${testData.users[2].lname}`);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }
 
-
 /**
- * @description Deletes the user.
+ * @description Checks that a user can be soft deleted.
  */
-function deleteUser(done) {
-  User.findOne({
-    username: 'spiderman'
-  }, (err, user) => {
-    chai.expect(err).to.equal(null);
-    user.remove((err2) => {
-      chai.expect(err2).to.equal(null);
-      done();
-    });
+function softDeleteUser(done) {
+  // TODO (JU) - remove before public release (MBX-370)
+  // LM: Changed from findOneAndUpdate to a findOne and Save
+  // Note: findOneAndUpdate does not call setters, and was causing strange
+  // behavior with the deleted and deletedOn fields.
+  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
+
+  // Find the user previously created and updated in createUser and updateUser
+  // tests.
+  User.findOne({ username: testData.users[2].username })
+  .then((user) => {
+    // Set the User deleted field
+    user.deleted = true;
+    // Save the updated User object
+    return user.save();
+  })
+  // Find the previously soft deleted user
+  .then((user) => User.findOne({ username: user.username }))
+  .then((user) => {
+    // Verify the soft delete was successful
+    chai.expect(user.deletedOn).to.not.equal(null);
+    chai.expect(user.deleted).to.equal(true);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
   });
 }
 
+/**
+ * @description Finds a user who has been soft deleted.
+ */
+function getSoftDeletedUser(done) {
+  // Finds the user who was previously soft deleted in softDeleteUser
+  User.findOne({ username: testData.users[2].username })
+  .then((user) => {
+    // Check the correct user was found
+    chai.expect(user.username).to.equal(testData.users[2].username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
 
 /**
- * TODO -  Remove, replace, or rename this test as needed.
- *
- * @desc INSERT DESCRIPTION
+ * @description Hard delete a user
  */
-function loginLDAPUser(done) {
-  const AuthController = M.require('lib.auth');
-  const u = M.config.test.username;
-  const p = M.config.test.password;
-  AuthController.handleBasicAuth(null, null, u, p)
-  .then(user => {
-    chai.expect(user.username).to.equal(M.config.test.username);
-    User.findOneAndUpdate({ username: u }, { admin: true }, (updateErr, userUpdate) => {
-      chai.expect(updateErr).to.equal(null);
-      done();
-    });
-  })
-  .catch(err => {
-    chai.expect(err).to.equal(null);
+function deleteUser(done) {
+  // Find the previously created user from the createUser test.
+  User.findOne({ username: testData.users[2].username })
+  // Delete the user
+  .then(user => user.remove())
+  .then(() => done())
+  .catch(error => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }

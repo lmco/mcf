@@ -1,93 +1,527 @@
 {
-    "orgs": [{
-        "id": "empire",
-        "name": "Empire"
-    }, {
-        "id": "rebels",
-        "name": "Rebel Alliance"
+  "users": [
+    {
+      "adminUsername": "test_admin",
+      "adminPassword": "test12345"
+    },
+    {
+      "username": "nonadmin_user",
+      "password": "Password123",
+      "preferredName": "nonadmin user",
+      "fname": "userFirstname",
+      "lname": "userLastname",
+      "admin": false
+    },
+    {
+      "username": "ironman",
+      "password": "JaRvIs100",
+      "fname": "Tony",
+      "preferredName": "Tony",
+      "lname": "Stark",
+      "email": "tony.stark@starkindustries.com",
+      "provider": "local",
+      "admin": false
+    },
+    {
+      "username": "blackpanther",
+      "password": "Forwakanda123",
+      "fname": "Tchalla",
+      "lname": "Panther",
+      "custom": {
+        "location": "Wakanda"
+      }
+    },
+    {
+      "username": "njobu",
+      "password": "fatheroferik",
+      "fname": "NJobi",
+      "lname": "Panther Dad"
+    },
+    {
+      "username": "",
+      "password": "iamnotblackpanther",
+      "fname": "Not",
+      "lname": "Black Panther"
+    },
+    {
+      "username": "blackpanther",
+      "password": "Nottherealone123",
+      "fname": "Tchalla",
+      "lname": "Panther"
+    },
+    {
+      "username": "groot",
+      "password": "Iamgroot123",
+      "fname": "Groot",
+      "lname": "Tree",
+      "admin": false
+    },
+    {
+      "username": "pepperpotts",
+      "password": "Gfoftonystark123",
+      "fname": "Pepper",
+      "lname": "Potts",
+      "admin": false
+    },
+    {
+      "username": "deadpool",
+      "password": "Babyhands123",
+      "fname": "Wade",
+      "lname": "Wilson"
+    },
+    {
+      "username": "deadpoolsbff",
+      "password": "Bartender123",
+      "fname": "Weasel",
+      "lname": "Bff"
+    },
+    {
+      "username": "deadpool",
+      "fname": "Mr Wade"
+    },
+    {
+      "username": "secondadminuser",
+      "password": "password!123",
+      "fname": "Second",
+      "preferredName": "Admin User",
+      "lname": "AdminUser",
+      "admin": true
+    }
+  ],
+
+  "orgs": [
+    {
+        "id": "avengers",
+        "name": "Avengers"
+    },
+    {
+        "id": "stark-industries",
+        "name": "Stark Industries"
+    },
+    {
+      "id": "boombox",
+      "name": "Star Lords Boombox",
+      "custom": {
+        "leader": "Star Lord"
+      }
+    },
+    {
+      "id": "gaurdians",
+      "name": "Gaurdians of Galaxy",
+      "permissions": {
+        "admin": "[adminUser._id]",
+        "write": "[adminUser._id]",
+        "read": "[adminUser._id]"
+      }
+    },
+    {
+      "id": "boombox",
+      "name": "Stolen boombox",
+      "custom": {
+        "leader": "Groot",
+        "musicType": "I am Groot"
+      }
+    },
+    {
+      "id": "boombox",
+      "name": "Back to Star Lord",
+      "custom": {
+        "leader": "Groot",
+        "musicType": "I am Groot"
+      }
+    },
+    {
+      "id": "boombox",
+      "name": "Star Lord Walkman"
+    },
+    {
+      "id": "starkhq",
+      "name": "Stark Headquarts"
+    },
+    {
+      "id": "asgard",
+      "name": "Asgard"
+    },
+    {
+      "id": "shield",
+      "name": "SHIELD"
+    },
+    {
+      "id": "shield",
+      "name": "Hydra"
+    },
+    {
+      "id": "biochemistry",
+      "name": "Scientist",
+      "permissions": {
+        "admin": "[updatedUser._id]",
+        "write": "[updatedUser._id]",
+        "read": "[updatedUser._id]"
+      }
+    },
+    {
+      "id": "nineteenforty",
+      "name": "World War Two"
+    }
+  ],
+
+  "projects": [
+    {
+      "id": "ultron",
+      "name": "Ultron Analysis"
+    },
+    {
+      "id": "jarvis",
+      "name": "Just a Rather Very Intelligent System"
+    },
+    {
+      "id": "thisisaverylongidnamepleaseacceptmeorbreak",
+      "name": "Long Id"
+    },
+    {
+      "id": "timeloop",
+      "name": "Time Gem"
+    },
+    {
+      "id": "godslayer",
+      "name": "God Slayer"
+    },
+    {
+      "id": "ironman",
+      "name": "Iron man Suite",
+      "orgid": "avengers",
+      "custom": {
+        "builtFor": "Tony"
+      }
+    },
+    {
+      "id": "ironman",
+      "name": "Iron Man"
+    },
+    {
+      "id": "ironman",
+      "name": "Iron Man Two"
+    },
+    {
+      "id": "arcreactor",
+      "name": "Arc Reactor",
+      "orgid": "avengers"
+    },
+    {
+      "id": "iamnoadmin",
+      "name": "dontmakeme",
+      "orgid": "avengers"
+    },
+    {
+      "id": "ironman",
+      "name": "Tony Stark",
+      "custom": {
+        "builtFor": "Rhodey",
+        "version": 2.0
+      }
+    },
+    {
+      "id": "thor",
+      "name": "Thor Odinson",
+      "orgid": "avengers"
+    },
+    {
+      "id": "hulk",
+      "name": "Bruce Banner",
+      "orgid": "avengers"
+    },
+    {
+      "id": "bettyross",
+      "name": "Hulks GF",
+      "orgid": "avengers"
+    },
+    {
+      "id": "hulk",
+      "name": "Anger",
+      "orgid": "avengers"
+    },
+    {
+      "id": "brucebanner",
+      "name": "Bruce Banner",
+      "orgid": "avengers"
+    },
+    {
+      "id": "rebirth",
+      "name": "Super Soldier Serum",
+      "orgid": "incorrectavengers"
+    },
+    {
+      "id": "hulktwopointoh",
+      "name": "New Hulk"
+    },
+    {
+      "id": "nickfury",
+      "name": "Nick Fury",
+      "orgid": "avengers"
+    },
+    {
+      "id": "mariahill",
+      "name": "Maria Hill",
+      "orgid": "avengers"
+    }
+  ],
+
+  "elements": [
+    {
+      "type": "Package",
+      "id": "nlp",
+      "name": "Natural Language Processing"
+    },
+    {
+      "type": "Block",
+      "id": "speech-recognition",
+      "name": "Speech Recognition",
+      "custom": {
+        "language": "english"
+      }
+    },
+    {
+      "type": "Block",
+      "id": "text-parser",
+      "name": "Text Parser"
+    },
+    {
+      "type": "Relationship",
+      "id": "speech-to-text",
+      "name": "Speech to Text"
+    },
+    {
+      "type": "Package",
+      "id": "0001",
+      "name": "In time loop"
+    },
+    {
+      "type": "Block",
+      "id": "0002",
+      "name": "In time loop 2"
+    },
+    {
+      "type": "Relationship",
+      "id": "0003",
+      "name": "Time looping"
+    },
+    {
+      "type": "Block",
+      "id": "0000"
+    },
+    {
+      "id": "elem0",
+      "name": "Mjolnir",
+      "projectUID": "avengers:thor",
+      "type": "Package",
+      "custom": {
+        "location": "Earth",
+        "real": true
+      },
+      "documentation": "This is some documentation."
+    },
+    {
+      "id": "elem1",
+      "name": "Heimdall the Gatekeeper",
+      "projectUID": "avengers:thor",
+      "type": "block",
+      "parent": "elem0"
+    },
+    {
+      "id": "elem2",
+      "name": "Loki brother of Thor",
+      "projectUID": "avengers:thor",
+      "type": "Block",
+      "parent": "elem0",
+      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
+    },
+    {
+      "id": "rel1",
+      "name": "Hate Relationship",
+      "projectUID": "avengers:thor",
+      "type": "Relationship",
+      "source": "elem1",
+      "target": "elem2"
+    },
+    {
+      "id": "elem0",
+      "name": "Thors Hammer",
+      "documentation": "This is some different documentation",
+      "custom": {
+        "real": false,
+        "marvel": false
+      }
+    },
+    {
+      "id": "0000",
+      "name": "Steve Rogers",
+      "projectUID": "avengers:brucebanner",
+      "type": "Block"
+    },
+    {
+      "id": "0001",
+      "name": "Steve Rogers 2",
+      "projectUID": "avengers:brucebanner",
+      "type": "Block"
+    },
+    {
+      "id": "0000",
+      "name": "Captain America"
+    },
+    {
+      "id": "0003",
+      "name": "",
+      "projectUID": "avengers:brucebanner",
+      "type": "Block"
+    }
+  ],
+
+  "invalidUsers": [
+    {
+      "username": "!babyLegs",
+      "password": "Deadpool123",
+      "fname": "Baby",
+      "lname": "Legs"
+    }
+  ],
+
+  "invalidOrgs": [
+    {
+      "id": "pymparticles"
+    },
+    {
+      "id": "xmen",
+      "name": ""
+    }
+  ],
+
+  "invalidProjects": [
+    {
+      "id": "period",
+      "name": "This is just to see if a period works....",
+      "orgid": "avengers"
+    },
+    {
+      "id": "",
+      "name": "denyme",
+      "orgid": "avengers"
+    },
+    {
+      "id": "imfake",
+      "name": "",
+      "orgid": "avengers"
+    },
+    {
+      "id": "imfake",
+      "name": "avengers",
+      "orgid": ""
+    }
+  ],
+
+  "invalidElements": [
+    {
+      "id": "elem2",
+      "name": "Frigg wife of Odin",
+      "projectUID": "avengers:thor",
+      "type": "BLOCK",
+      "parent": "elem1"
+    },
+    {
+      "id": "elem5",
+      "name": "Loki brother of Thor",
+      "projectUID": "avengers:thor",
+      "type": "Block",
+      "parent": "elem0",
+      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
+    }
+  ],
+
+  "names": [
+    {
+      "lname": "KLAW@#$"
+    },
+    {
+      "lname": "Faker"
+    },
+    {
+      "name": []
+    },
+    {
+      "name": "betterreject"
+    },
+    {
+      "name": "New Name"
+    },
+    {
+      "name": "Baby Arc Reactor"
+    },
+    {
+      "fname": "Weapon X"
+    },
+    {
+      "name": "%%% INVALID NAME %%%"
+    },
+    {
+      "name": "Invalid Organization"
+    },
+    {
+      "name": ""
+    }
+  ],
+
+  "usernames": [
+    {
+      "username": "goldpanther"
+    },
+    {
+      "username": "nopanther"
+    },
+    {
+      "username": "weasel"
+    },
+    {
+      "username": "pool"
+    },
+    {
+      "username": "francis"
     }],
-    "projects": [{
-        "id": "deathstar",
-        "name": "Death Star",
-        "orgid": "empire"
-    }],
-    "users": [{
-        "username": "admin",
-        "password": "admin",
-        "fname": "Admin",
-        "lname": "",
-        "admin": true
-    }, {
-        "username": "lskywalker0",
-        "password": "r3d5jediknight",
-        "fname": "Luke",
-        "lname": "Skywalker"
-    }, {
-        "username": "han",
-        "password": "iSh0tFir$t",
-        "fname": "Han",
-        "lname": "Solo"
-    }, {
-        "username": "princess",
-        "password": "youremyonlyhope",
-        "fname": "Leia",
-        "lname": "Organa"
-    }, {
-        "username": "vader",
-        "password": "padme",
-        "email": "vader@empire.gov",
-        "fname": "Darth",
-        "lname": "Vader" 
-    }, {
-        "username": "tk421",
-        "password": "stormtrooper",
-        "fname": "Stormtrooper",
-        "lname": "TK421"
-    }, {
-        "username": "fn2187",
-        "password": "stormtrooper",
-        "fname": "Stormtrooper",
-        "lname": "FN2187"
-    }],
-    "elements": [{
-        "id": "XWNG-PRT-0000",
-        "name": "X-Wing Root Element",
-        "text": "The root element of the X-Wing model.",
-        "project": "xwng"
-    }, {
-        "id": "XWNG-PRT-0001",
-        "name": "Engine",
-        "text": "The X-wing engine that allows the vehicle to fly",
-        "project": "xwng"
-    }, {
-        "id": "XWNG-PRT-0002",
-        "name": "Wing",
-        "text": "Four of them actually.",
-        "project": "xwng"
-    }, {
-        "id": "XWNG-PRT-0003",
-        "name": "Photon Torpedoes",
-        "text": "These go into thermal exhaust ports.",
-        "project": "xwng"
-    }, {
-        "id": "DTHSTR-PRT-0000",
-        "name": "Death Star Root Element",
-        "text": "The root element of the Death Star model",
-        "project": "dthstr"
-    }, {
-        "id": "DTHSTR-PRT-0001",
-        "name": "Core Reactor",
-        "text": "The core reactor for the Death Star. Not sure what it does, but is centrally located.",
-        "project": "dthstr"
-    }, {
-        "id": "DTHSTR-PRT-0002",
-        "name": "Tractor Beam",
-        "text": "Used for beaming people up. Or capturing aluminum falcons.",
-        "project": "dthstr"
-    }, {
-        "id": "DTHSTR-PRT-0003",
-        "name": "Thermal Exhaust Port",
-        "text": "Small thermal exhaust port for core reactor. Approx 2m wide opening in Death Star trench. Small one-man fighters are no threat.",
-        "project": "dthstr"
-    }]
+
+  "ids": [
+    {
+      "id": "shouldnotchange"
+    },
+    {
+      "id": "fakeproj"
+    },
+    {
+      "id" : "newironman"
+    },
+    {
+      "id": "mismatched"
+    },
+    {
+      "id":"xmen"
+    },
+    {
+      "id": "invalidOrgId"
+    },
+    {
+      "id": "fakshield"
+    },
+    {
+      "id": "nohulk"
+    },
+    {
+      "id": "33"
+    }
+  ],
+
+  "invalidPermissions": [
+    {
+      "permissions": "shouldNotChange"
+    },
+    {
+      "permissions": "overlord"
+    }
+  ]
 }

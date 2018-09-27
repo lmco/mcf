@@ -1,22 +1,22 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
-/*
- * styles.scss
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module app.ui.sass.styles.scss
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * This defines the style and layout for MBEE.
+ * @description This defines the style and layout for MBEE.
  */
-
 @import 'variables';
 
 html, body {
@@ -27,6 +27,7 @@ html, body {
 body {
     min-height: 100vh;
     font-weight: 300;
+    position: absolute;
 }
 
 /*
@@ -104,6 +105,7 @@ body.lm-dark-theme {
 .navbar-brand img {
     position: relative;
     top: -2px;
+    margin-right: 7px;
 }
 
 .navbar-brand span {
@@ -133,6 +135,13 @@ body.lm-dark-theme {
 
 #login-form {
     margin-top: 20%
+}
+
+#root {
+    height: 100%;
+    position: absolute;
+    min-height: 100%;
+    width: 100%;
 }
 
 

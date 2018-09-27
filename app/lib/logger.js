@@ -1,34 +1,38 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module lib.logger
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description Defines the MBEE logger. The logger should be used everywhere
- * instead of using `console.log`.
+ * @description Defines the MBEE logger. The logger should be used instead of
+ * using `console.log`. The logger adds the ability to write to log
+ * files, timestamp errors, include stack trace, and allow for colored text.
  *
- * To use the logger simple require this file (e.g.
- * `const log = require('logger.js')`. You can the use the logger:
+ * To use the logger simply require this file (e.g.
+ * `const log = require('logger.js')`.
+ *
+ * You can the use the logger:
  *   - `log.info('Hello World')`
- *   - `log.error('An error has occured')`
+ *   - `log.error('An error has occurred')`
  */
 
-// Load node modules
+// Node modules
 const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
 const { execSync } = require('child_process');
 
-/* This defines our log levels */
+// This defines our log levels
 const levels = {
   critical: 0,
   error: 1,
@@ -38,7 +42,7 @@ const levels = {
   debug: 5
 };
 
-/* This defines the colors for each log level */
+// This defines the colors for each log level
 const colors = {
   critical: 'red underline',
   error: 'red',
@@ -47,6 +51,8 @@ const colors = {
   verbose: 'blue',
   debug: 'green'
 };
+
+// This defines the unicode format for each color
 const fmt = {
   color: {
     grey: '\u001b[30m',
@@ -62,15 +68,17 @@ const fmt = {
 };
 
 /**
- * This is the formatting function for console output. To change how logs
- * appear in the console, edit this function. Note, a separate function is used
- * to define the format for the log files (the fileFormatter function).
+ * @description This is the formatting function for console output. Note, a
+ * separate function is used to define the format for the log files (the
+ * fileFormatter() function).
  */
 const formatter = printf((msg) => {
-  // This allows us to get the file, line, and column
+  // Retrieve the error stack
   const stack = new Error().stack;
   const lines = stack.split('\n');
   const reduced = [];
+
+  // For each line in the stack trace, remove winston specific lines
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].includes('node_modules')
          || lines[i].includes('DerivedLogger')
@@ -81,12 +89,14 @@ const formatter = printf((msg) => {
     reduced.push(lines[i]);
   }
 
+  // Retrieve the first line of failure
+  // Note: There are some cases which the reduced stack is less than 2 lines
   const index = (reduced.length > 2) ? 2 : 1;
   const tmp = reduced[index].split(`${process.cwd()}/`);
-  // const func = reduced[index].split('at ')[1].split(' ')[0];
+
+  // Get the file and line number of the error
   const file = tmp[tmp.length - 1].split(':')[0].replace(/\//g, '.');
   const line = tmp[tmp.length - 1].split(':')[1];
-  // const col = tmp[tmp.length - 1].split(':')[2].replace(')', '');
 
   // We want to capitalize the log level. You cannot string.toUpperCase here
   // because the string includes the color formatter and toUpperCase will
@@ -106,12 +116,12 @@ const formatter = printf((msg) => {
     // Print stack for error and critical logs
     let msgPrint = msg.message;
     if (msg.level.includes('error') || msg.level.includes('critical')) {
-      msgPrint += `\n${msg.stack || stack}`;
+      msgPrint += `\n${msg.stack || reduced.join('\n')}`;
     }
     return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msgPrint}`;
   }
-  // If colorize is false, we remove colors from the log level.
 
+  // If colorize is false, we remove colors from the log level, timestamp and file.
   level = level
   .replace('\u001b[30m', '')
   .replace('\u001b[31m', '')
@@ -128,19 +138,17 @@ const formatter = printf((msg) => {
   return `${ts} [${level}] ${f}:${line} -> ${msg.message}`;
 });
 
-
 // Creates the log directory if it doesn't already exist
 const logDir = (M.config.log.dir === undefined) ? 'logs' : M.config.log.dir;
-// TODO: make OS Specific
 const cmd = `mkdir -p ${logDir}`;
 execSync(cmd);
 
 /**
- * This creates the logger. It defines the log level, as specified in the
- * config. Defines the levels and ordering from the level field above and
- * defines the log format and transports which tell the logger where to send
- * log info. By default we have four log transports: the console, an error
- * file, a combined log, and a debug log.
+ * @description This creates the logger. Defines log level, log formatting and
+ * transports.
+ *
+ * There are four transports (location which the log is written to):
+ * the console, an error file, a combined log, and a debug log.
  */
 const logger = winston.createLogger({
   level: M.config.log.level,
@@ -152,23 +160,20 @@ const logger = winston.createLogger({
     formatter
   ),
   transports: [
-    // This is the console transport. It tells the logger to log things
-    // to the console. It uses the default format defined above.
+    // console transport - logs to the console.
     new winston.transports.Console(),
-    // This is the error log transport. It writes all logs of level error
-    // (and below) to error log file. The file is defined in the config.
+    // error log transport - logs error-level and below to error log file
     new winston.transports.File({
       filename: M.config.log.error_file,
       level: 'error'
     }),
-    // This is the combined log. It logs everything of the default level and
-    // below to a combined log.
+    // combined log transport - logs default-level and below to combined log file
+    // NOTE: Default level specified in config file
     new winston.transports.File({
       filename: M.config.log.file,
       level: M.config.log.level
     }),
-    // This is the combined log. It logs all log levels to the debug file
-    // defined in the config.
+    // debug log transport - logs debug-level and below to debug log file
     new winston.transports.File({
       filename: M.config.log.debug_file,
       level: 'debug'
@@ -177,16 +182,7 @@ const logger = winston.createLogger({
   exitOnError: false
 });
 
-// This seems to be needed for our custom log levels
+// Add defined colors to winston logger
 winston.addColors(colors);
 
-// var testMsg = 'Test 1 2 3'
-// logger.critical(testMsg);
-// logger.error(testMsg);
-// logger.warn(testMsg);
-// logger.info(testMsg);
-// logger.verbose(testMsg);
-// logger.debug(testMsg);
-
-/* Export the logger object */
 module.exports = logger;

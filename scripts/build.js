@@ -1,101 +1,126 @@
 #!/usr/bin/env node
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module scripts.build
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * @description Creates the necessary static assets used by the MBEE UI.
+ */
 
-/* eslint-disable no-console */
-
-// Load node modules
-const { execSync } = require('child_process');
-
-// If the application is run directly from node, notify the user and fail
-if (module.parent == null) {
+// Error Check - Check if file was run directly or global M object is undefined
+if (module.parent == null || typeof M === 'undefined') {
+  // File was run directly, print error message and exit process
   // eslint-disable-next-line no-console
   console.log('\nError: please use mbee to run this script by using the '
     + 'following command. \n\nnode mbee build\n');
   process.exit(-1);
 }
 
+// Node modules
+const { execSync } = require('child_process');
+
+// NPM modules
+const gulp = require('gulp');
+const concat = require('gulp-concat');
+const sass = require('gulp-sass');
+const react = require('gulp-react');
+
+
 /**
- * Builds the project by copy dependencies to their final location, compiling
- * Sass into CSS, building Javascript libraries into client-side code, and
- * building developer documentation. Installs dev dependencies first. Accepts
- * the following command-line parameters: `--copy-deps`, `--sass`, `--react`,
- * `--jsdoc`, and `--all`. No arguments defaults to `--all` which does not
- * include JSDoc.
+ * @description Builds the MBEE static assets by:
+ * - Copying dependencies to their final location,
+ * - Compiling Sass into CSS
+ * - Building Javascript libraries into client-side code
+ * - Building JSDoc documentation.
+ *
+ * Accepts the following command-line parameters:
+ * --copy-deps
+ * --sass
+ * --react
+ * --jsdoc
+ * --all
+ *
+ * If NO arguments given, defaults to `--all`
  */
-
 function build(_args) {
-  console.log('Building MBEE ...');
-  // This will throw an error with our current ESLint configuration.
-  // However, if these are global, then installs will fail. We can either accept this
-  // error as is, alter the ESLint configuration, or move install to a separate script.
-  // The comments to the right explicitly disable the rule here.
-  const gulp = require('gulp');           // eslint-disable-line global-require
-  const concat = require('gulp-concat');  // eslint-disable-line global-require
-  const sass = require('gulp-sass');      // eslint-disable-line global-require
-  const react = require('gulp-react');    // eslint-disable-line global-require
+  M.log.info('Building MBEE ...');
 
-  // Allow the function to be called with no parameters
-  // Set the default behavior to build all
+  // Assign parameters to args. If no parameters, default to '--all'
   const args = (_args === undefined || _args.length === 0) ? ['--all'] : _args;
 
-  // This executes the default build process with Gulp.
+  // Copy static dependencies to build directory
   if (args.includes('--all') || args.includes('--copy-deps')) {
-    console.log('  + Copying dependencies ...'); // eslint-disable-line no-console
+    M.log.info('  + Copying dependencies ...');
 
     // Copy images
     gulp.src('./app/ui/img/**/*')
     .pipe(gulp.dest('build/public/img'));
+
     // Copy React
+    // TODO: remove from PRC-001 (MBX-370)
     gulp.src('./node_modules/react/umd/react.production.min.js')
     .pipe(react())
     .pipe(concat('react.min.js'))
     .pipe(gulp.dest('build/public/js'));
+
     // Copy ReactDOM
+    // TODO: remove from PRC-001 (MBX-370)
     gulp.src('./node_modules/react-dom/umd/react-dom.production.min.js')
     .pipe(react())
     .pipe(concat('react-dom.min.js'))
     .pipe(gulp.dest('build/public/js'));
+
     // Copy Swagger CSS
     gulp.src('./node_modules/swagger-ui-express/static/*.css')
     .pipe(gulp.dest('build/public/css'));
+
     // Copy Swagger JS
     gulp.src('./node_modules/swagger-ui-express/static/*.js')
     .pipe(gulp.dest('build/public/js'));
+
     // Copy Bootstrap CSS
     gulp.src('./node_modules/bootstrap/dist/css/bootstrap.min.css')
     .pipe(gulp.dest('build/public/css'));
+
     // Copy Bootstrap JS
     gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
     .pipe(gulp.dest('build/public/js'));
+
     // Copy Jquery JS
     gulp.src('./node_modules/jquery/dist/jquery.min.js')
     .pipe(gulp.dest('build/public/js'));
+
     // Copy Popper JS
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
     .pipe(gulp.dest('build/public/js'));
+
     // Copy MBEE JS
+    // TODO: remove from PRC-001 (MBX-370)
     gulp.src('./app/ui/js/**/*.js')
     .pipe(concat('mbee.js'))
     .pipe(gulp.dest('build/public/js'));
-    // Copy MBEE JS
+
+    // Copy JSDoc JS
     gulp.src('./app/ui/jsdoc-template/static/**/*.js')
     .pipe(concat('jsdoc.js'))
     .pipe(gulp.dest('build/public/js'));
   }
 
-  // Build Sass into CSS
+  // Compile Sass into CSS
   if (args.includes('--all') || args.includes('--sass')) {
-    console.log('  + Building sass ...');
+    M.log.info('  + Compiling sass ...');
     gulp.src('./app/ui/sass/**/*.scss')
     .pipe(sass({ outputStyle: 'compressed' })
     .on('error', sass.logError))
@@ -103,8 +128,9 @@ function build(_args) {
   }
 
   // Builds the React libraries into client-side JS
+  // TODO: remove from PRC-001 (MBX-370)
   if (args.includes('--all') || args.includes('--react')) {
-    console.log('  + Building react ...'); // eslint-disable-line no-console
+    M.log.info('  + Building react ...');
     // Build React
     gulp.src('./app/ui/react-components/**/*.jsx')
     .pipe(react())
@@ -118,21 +144,16 @@ function build(_args) {
 
   // Build JSDoc
   if (args.includes('--all') || args.includes('--jsdoc')) {
-    console.log('  + Building jsdoc ...');
+    M.log.info('  + Building jsdoc ...');
+    // Create JSDoc build command
     const jsdoc = `${process.argv[0]} node_modules/jsdoc/jsdoc.js`;
-    // const tutorials = '-u doc';
-    // const templates = '-t node_modules/ub-jsdoc/'
-    // const files = ['app/**/*.js', 'README.md', 'test/**/*.js'];
     const cmd = `${jsdoc} -c ./config/jsdoc.json`;
 
-    // Execute the JSDoc build command
+    // Execute JSDoc build command
     execSync(cmd);
-
-    // Copy JSDoc static dependencies
-    // gulp.src('./out/*').pipe(gulp.dest('./build/doc'));
   }
 
-  console.log('Build Complete.');
+  M.log.info('Build Complete.');
 }
 
 module.exports = build;

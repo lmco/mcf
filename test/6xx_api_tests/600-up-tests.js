@@ -1,12 +1,12 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/600-up-tests
+ * @module  test.600-up-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI
- * <br/>
+ *
  * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
  * It is not approved for public release or redistribution.<br/>
  *
@@ -15,64 +15,79 @@
  *
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  This file defines basic tests of the API being up. TODO
+ * @description Tests the API functionality. Confirms API and swagger API
+ * documentation is up. Testing these endpoints also confirms that server has
+ * started.
  */
 
-// Load node modules
+// NPM modules
 const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
 
+// MBEE modules
+const test = M.config.test;
+
 /* --------------------( Main )-------------------- */
-
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
+  /* Execute the tests */
   it('should confirm that the API is up', upTest);
   it('should confirm that swagger.json API documentation is up', swaggerJSONTest);
 });
 
-
 /* --------------------( Tests )-------------------- */
-// TODO - add descriptions to all functions and fix spacing between functions
-
-
 /**
- * Tests that the API is running.
+ * @description Verifies the API is up and running.
  */
 function upTest(done) {
-  const test = M.config.test;
-  if (test.hasOwnProperty('NODE_TLS_REJECT_UNAUTHORIZED')) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = test.NODE_TLS_REJECT_UNAUTHORIZED;
-  }
+  // Make an API GET request
   request({
     url: `${test.url}/api/test`,
-    ca: (test.hasOwnProperty('ca')) ? fs.readFileSync(`${M.root}/${test.ca}`) : undefined
+    ca: readCaFile()
   },
   (error, response, body) => {
+    // Expect no error
     chai.expect(error).to.equal(null);
+    // Expect status 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Expect body to be an empty string
     chai.expect(body).to.equal('');
     done();
   });
 }
 
-
 /**
- * Tests that the API is running.
+ * @description Verifies swagger API documentation is up and running.
  */
 function swaggerJSONTest(done) {
-  const test = M.config.test;
-  if (test.hasOwnProperty('NODE_TLS_REJECT_UNAUTHORIZED')) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = test.NODE_TLS_REJECT_UNAUTHORIZED;
-  }
+  // API GET request swagger documentation
   request({
     url: `${test.url}/api/doc/swagger.json`,
-    ca: (test.hasOwnProperty('ca')) ? fs.readFileSync(`${M.root}/${test.ca}`) : undefined
+    ca: readCaFile()
   },
   (error, response, body) => {
+    // Expect no error
     chai.expect(error).to.equal(null);
+    // Expect status 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Expect body is valid JSON
     chai.expect(JSON.parse(body)).to.be.an('object');
     done();
   });
+}
+
+/* ----------( Helper Functions )----------*/
+/**
+ * @description Helper function for reading ca file.
+ */
+function readCaFile() {
+  if (test.hasOwnProperty('ca')) {
+    return fs.readFileSync(`${M.root}/${test.ca}`);
+  }
 }
