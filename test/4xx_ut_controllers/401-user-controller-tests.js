@@ -145,7 +145,7 @@ function createNewUser(done) {
 
 /**
  * @description Verifies non-admin user CANNOT create new user.
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectUserCreateByNonAdmin(done) {
   // Create user data
@@ -160,8 +160,8 @@ function rejectUserCreateByNonAdmin(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -286,7 +286,7 @@ function rejectUsernameUpdate(done) {
 
 /**
  * @description Verifies that a non-admin CANNOT update a user.
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectUserUpdateByNonAdmin(done) {
   // Create user data
@@ -302,8 +302,8 @@ function rejectUserUpdateByNonAdmin(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -357,7 +357,7 @@ function rejectFindNonExistentUser(done) {
 
 /**
  * @description Verifies that a non-admin user CANNOT delete other users.
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectDeleteByNonAdmin(done) {
   // Create user data
@@ -372,15 +372,15 @@ function rejectDeleteByNonAdmin(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
 
 /**
  * @description Verifies that a user cannot delete themselves.
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectDeleteSelf(done) {
   // Create user data
@@ -395,7 +395,7 @@ function rejectDeleteSelf(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });

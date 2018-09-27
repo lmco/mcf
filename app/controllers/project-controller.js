@@ -140,7 +140,7 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
     // If hard deleting, ensure user is a site-wide admin
     if (hardDelete && !reqUser.admin) {
       return reject(new M.CustomError('User does not have permission to permanently'
-          + ' delete a project.', 401, 'warn'));
+          + ' delete a project.', 403, 'warn'));
     }
 
     // Initialize the query object
@@ -152,7 +152,7 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
       // Error Check: ensure user has permissions to delete projects on each org
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         return reject(new M.CustomError(
-          `User does not have permission to delete projects in the org ${org.name}.`, 401, 'warn'
+          `User does not have permission to delete projects in the org ${org.name}.`, 403, 'warn'
         ));
       }
       // Add org to deleteQuery
@@ -249,7 +249,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!projects[0].getPermissions(reqUser).read && !reqUser.admin) {
         // User does NOT have read access and is NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
       // All checks passed, resolve project
@@ -349,7 +349,7 @@ function createProject(reqUser, project) {
     .then((_org) => {
       // Error check: make sure user has write permission on org
       if (!_org.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
       // Set function wide variable
@@ -440,7 +440,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       // Error Check: ensure reqUser is a project admin or global admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
       // Get list of keys the user is trying to update
@@ -538,7 +538,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
     // Error Check: if hard deleting, ensure user is global admin
     if (hardDelete && !reqUser.admin) {
       return reject(new M.CustomError(
-        'User does not have permission to permanently delete a project.', 401, 'warn'
+        'User does not have permission to permanently delete a project.', 403, 'warn'
       ));
     }
 
@@ -547,7 +547,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
     .then((project) => {
       // Error Check: ensure user has permissions to delete project
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
       // Hard delete
@@ -743,7 +743,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
     .then((project) => {
       // Error Check - User must be admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
       // Get permission levels from Project schema method
