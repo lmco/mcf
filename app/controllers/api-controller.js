@@ -214,9 +214,17 @@ function getOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
   // Get all organizations the requesting user has access to
   // NOTE: findOrgs() sanitizes req.user.
-  OrgController.findOrgs(req.user)
+  OrgController.findOrgs(req.user, softDeleted)
   .then((orgs) => {
     // Return only public organization data
     const orgsPublicData = [];
@@ -296,9 +304,17 @@ function getOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
   // Find the org from it's id
   // NOTE: findOrg() sanitizes req.params.orgid
-  OrgController.findOrg(req.user, req.params.orgid)
+  OrgController.findOrg(req.user, req.params.orgid, softDeleted)
   .then((org) => {
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
@@ -334,12 +350,12 @@ function postOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Set id in request body
+  req.body.id = req.params.orgid;
+
   // Create the organization with provided parameters
   // NOTE: createOrg() sanitizes req.params.org.id and req.body.name
-  OrgController.createOrg(req.user, {
-    id: req.params.orgid,
-    name: req.body.name
-  })
+  OrgController.createOrg(req.user, req.body)
   .then((org) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
@@ -570,9 +586,17 @@ function getProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
   // Get all projects the requesting user has access to
   // NOTE: findProjects() sanitizes req.user and org.id.
-  ProjectController.findProjects(req.user, req.params.orgid)
+  ProjectController.findProjects(req.user, req.params.orgid, softDeleted)
   .then((projects) => {
     // Return only public project data
     const projectPublicData = [];
@@ -647,9 +671,17 @@ function getProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
   // Find the project from it's project.id and org.id
   // NOTE: findProject() sanitizes req.params.projectid and req.params.orgid
-  ProjectController.findProject(req.user, req.params.orgid, req.params.projectid, true)
+  ProjectController.findProject(req.user, req.params.orgid, req.params.projectid, softDeleted)
   .then((project) => {
     // Return a 200: OK and the project's public data
     res.header('Content-Type', 'application/json');
@@ -1110,9 +1142,17 @@ function getElements(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
   // Find all elements from it's org.id and project.id
   // NOTE: findElements() sanitizes req.params.orgid and req.params.projectid
-  ElementController.findElements(req.user, req.params.orgid, req.params.projectid)
+  ElementController.findElements(req.user, req.params.orgid, req.params.projectid, softDeleted)
   .then((elements) => {
     // Return a 200: OK and elements
     res.header('Content-Type', 'application/json');
@@ -1139,10 +1179,18 @@ function getElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
   // Find the element from it's element.id, project.id, and org.id
   // NOTE: findElement() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
   ElementController.findElement(req.user, req.params.orgid,
-    req.params.projectid, req.params.elementid)
+    req.params.projectid, req.params.elementid, softDeleted)
   .then((element) => {
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');

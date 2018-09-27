@@ -257,7 +257,7 @@ function rejectUpdateBadType(done) {
 
 /**
  * @description Verifies non-admin user CANNOT update org.
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectNonAdminUpdate(done) {
   // Update org
@@ -269,8 +269,8 @@ function rejectNonAdminUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
@@ -547,7 +547,7 @@ function setUserOrgRole(done) {
 
 /**
  * @description Verifies user CANNOT change own permissions.
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectUserRole(done) {
   // Set permissions via controller
@@ -559,7 +559,7 @@ function rejectUserRole(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });
@@ -612,7 +612,7 @@ function getMembers(done) {
 
 /**
  * @description Verifies non-admin user CANNOT set permissions.
- * Expected error thrown: 'Unauthorized'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectNonAdminSetPermissions(done) {
   // Set permissions via controller
@@ -624,8 +624,8 @@ function rejectNonAdminSetPermissions(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Unauthorized'
-    chai.expect(error.message).to.equal('Unauthorized');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }

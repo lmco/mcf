@@ -82,18 +82,23 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
 
     const searchParams = { uid: { $regex: `^${projectUID}` }, deleted: false };
 
-    // Check softDeleted flag true and User Admin true
-    if (softDeleted && reqUser.admin) {
+    // Error Check: Ensure user has permissions to find deleted elements
+    if (softDeleted && !reqUser.admin) {
+      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+    }
+    // Check softDeleted flag true
+    if (softDeleted) {
       // softDeleted flag true and User Admin true, remove deleted: false
       delete searchParams.deleted;
     }
+
 
     // Find elements
     findElementsQuery(searchParams)
     .then((elements) => {
       // Error Check: ensure user is part of the project
       if (!elements[0].project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permissions.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
       return resolve(elements);
@@ -135,7 +140,7 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
     // If hard deleting, ensure user is a site-wide admin
     if (hardDelete && !reqUser.admin) {
       return reject(new M.CustomError(
-        'User does not have permission to permanently delete a element.', 401, 'warn'
+        'User does not have permission to permanently delete a element.', 403, 'warn'
       ));
     }
 
@@ -147,7 +152,7 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
       // Error Check: ensure user has permissions to delete elements on each project
       if (!project.getPermissions(reqUser).write && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permission to delete elements'
-          + ` on the project ${project.name}`, 401, 'warn'));
+          + ` on the project ${project.name}`, 403, 'warn'));
       }
       // Add project to deleteQuery
       deleteQuery.$or.push({ project: project._id });
@@ -217,8 +222,12 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
     let searchParams = { $and: [{ $or: [{ uid: elemUID },
       { uuid: elemID }] }, { deleted: false }] };
 
-    // Check softDeleted flag true and User Admin true
-    if (softDeleted && reqUser.admin) {
+    // Error Check: Ensure user has permissions to find deleted elements
+    if (softDeleted && !reqUser.admin) {
+      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+    }
+    // Check softDeleted flag true
+    if (softDeleted) {
       // softDeleted flag true and User Admin true, remove deleted: false
       searchParams = { $or: [{ uid: elemUID }, { uuid: elemID }] };
     }
@@ -233,7 +242,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
 
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!elements[0].project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permissions.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
       // All checks passed, resolve element
@@ -343,7 +352,7 @@ function createElement(reqUser, element) {
     .then((proj) => {
       // Error check: make sure user has write permission on project
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
       // Error check - check if the element already exists
@@ -634,7 +643,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       // Error Check: ensure reqUser is a project admin or global admin
       if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
       // Get list of keys the user is trying to update
@@ -791,7 +800,7 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
     // Error Check: if hard deleting, ensure user is global admin
     if (hardDelete && !reqUser.admin) {
       return reject(new M.CustomError('User does not have permission to hard delete an'
-        + ' element.', 401, 'warn'));
+        + ' element.', 403, 'warn'));
     }
 
     // Find the element
@@ -799,7 +808,7 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
     .then((element) => {
       // Error Check: ensure user has permissions to delete project
       if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 401, 'warn'));
+        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
       // Hard delete
