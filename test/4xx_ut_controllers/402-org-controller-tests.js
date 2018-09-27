@@ -84,7 +84,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing organization
-    OrgController.removeOrg(adminUser, testData.orgs[1].id, true)
+    OrgController.removeOrg(adminUser, org.id, true)
     // Removing non-admin user
     .then(() => UserController.removeUser(adminUser, newUser.username))
     .then((delUser2) => {
@@ -296,7 +296,7 @@ function updateOrg(done) {
   .catch((error) => {
     M.log.error(error);
     // Expect no error
-    chai.expect(error.message).to. equal(null);
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -369,7 +369,7 @@ function softDeleteExistingOrg(done) {
  * Expected error thrown: 'Not Found'
  */
 function rejectFindSoftDelOrg(done) {
-  OrgController.findOrg(adminUser, testData.orgs[2].id)
+  OrgController.findOrg(adminUser, testData.orgs[0].id)
   .then(() => {
     // Expected findOrg() to fail
     // No org should be found, force test to fail
@@ -389,9 +389,9 @@ function rejectFindSoftDelOrg(done) {
  */
 function deleteExistingOrg(done) {
   // Deletes org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[2].id, true)
+  OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
   // Find deleted org
-  .then(() => OrgController.findOrg(adminUser, testData.orgs[2].id))
+  .then(() => OrgController.findOrg(adminUser, testData.orgs[0].id))
   .then(() => {
     // Expected findOrg() to fail
     // Should not execute, force test to fail

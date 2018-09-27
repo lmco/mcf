@@ -142,9 +142,9 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createProject(done) {
   // Define and clone the project data
-  var projData = Object.assign({}, testData.projects[0]);
-  projData['custom'] = {'buildFor': 'build'};
-  projData['orgid'] = org.id;
+  const projData = Object.assign({}, testData.projects[0]);
+  projData.custom = { buildFor: 'build' };
+  projData.orgid = org.id;
 
   // Create the project via project controller
   ProjController.createProject(adminUser, projData)
@@ -215,7 +215,7 @@ function updateProjectName(done) {
   const projData1 = Object.assign({}, testData.projects[0]);
 
   // Update project01 name to project02 name
-  projData1['name'] = testData.projects[2].name;
+  projData1.name = testData.projects[2].name;
 
   // Update project
   ProjController.updateProject(adminUser, org.id, testData.projects[0].id, projData1)
@@ -260,8 +260,8 @@ function updateProjectObject(done) {
  */
 function createProject02(done) {
   // Define and clone the project data
-  var projData = Object.assign({}, testData.projects[2]);
-  projData['orgid'] = org.id;
+  const projData = Object.assign({}, testData.projects[2]);
+  projData.orgid = org.id;
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -285,8 +285,8 @@ function createProject02(done) {
  */
 function rejectCreatePeriodName(done) {
   // Define and clone the project data
-  var projData = Object.assign({}, testData.invalidProjects[0]);
-  projData['orgid'] = org.id;
+  const projData = Object.assign({}, testData.invalidProjects[0]);
+  projData.orgid = org.id;
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -309,8 +309,8 @@ function rejectCreatePeriodName(done) {
  */
 function rejectDuplicateProjectId(done) {
   // Define and clone the project data
-  var projData = Object.assign({}, testData.projects[2]);
-  projData['orgid'] = org.id;
+  const projData = Object.assign({}, testData.projects[2]);
+  projData.orgid = org.id;
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -333,8 +333,8 @@ function rejectDuplicateProjectId(done) {
  */
 function rejectInvalidProjectId(done) {
   // Define and clone the project data
-  var projData = Object.assign({}, testData.invalidProjects[1]);
-  projData['orgid'] = org.id;
+  const projData = Object.assign({}, testData.invalidProjects[1]);
+  projData.orgid = org.id;
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -357,8 +357,8 @@ function rejectInvalidProjectId(done) {
  */
 function rejectInvalidProjectName(done) {
   // Define and clone the project data
-  var projData = Object.assign({}, testData.invalidProjects[2]);
-  projData['orgid'] = org.id;
+  const projData = Object.assign({}, testData.invalidProjects[2]);
+  projData.orgid = org.id;
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -381,8 +381,8 @@ function rejectInvalidProjectName(done) {
  */
 function rejectInvalidOrgId(done) {
   // Define and clone the project data
-  var projData = Object.assign({}, testData.invalidProjects[3]);
-  projData['orgid'] = "";
+  const projData = Object.assign({}, testData.invalidProjects[3]);
+  projData.orgid = '';
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -407,8 +407,8 @@ function rejectInvalidOrgId(done) {
  */
 function rejectNonAdminCreateProject(done) {
   // Define and clone the project data
-  var projData = Object.assign({}, testData.invalidProjects[0]);
-  projData['orgid'] = org.id;
+  const projData = Object.assign({}, testData.invalidProjects[0]);
+  projData.orgid = org.id;
 
   // Create project
   ProjController.createProject(nonAdminUser, projData)
@@ -453,10 +453,10 @@ function findProj(done) {
  */
 function findProjects(done) {
   // Define and clone the user data
-  var userData = Object.assign({}, testData.users[2]);
+  const userData = Object.assign({}, testData.users[2]);
 
   // Set to admin user
-  userData['admin'] = true;
+  userData.admin = true;
 
   let adminUser2 = null;
   UserController.createUser(adminUser, userData)
@@ -467,8 +467,8 @@ function findProjects(done) {
   })
   .then(() => {
     // Define and clone the project data
-    var projData = Object.assign({}, testData.projects[1]);
-    projData['orgid'] = org.id;
+    const projData = Object.assign({}, testData.projects[1]);
+    projData.orgid = org.id;
     return ProjController.createProject(adminUser2, projData);
   })
   .then(() => ProjController.findProjects(adminUser, org.id))
@@ -542,11 +542,11 @@ function nonAUser(done) {
  */
 function updateProj(done) {
   // Define and clone the project data
-  var projId = testData.projects[0].id;
-  var updateProjData = Object.assign({}, testData.projects[1]);
+  const projId = testData.projects[0].id;
+  const updateProjData = Object.assign({}, testData.projects[1]);
   // Note: New project id must not change. Keep same project ID
-  updateProjData['id'] = projId;
-  updateProjData['custom'] = {'builtFor': 'built', 'version' : '0.0'};
+  updateProjData.id = projId;
+  updateProjData.custom = { builtFor: 'built', version: '0.0' };
 
   // Update project
   ProjController.updateProject(adminUser, org.id, projId, updateProjData)
@@ -600,7 +600,7 @@ function rejectProjectId(done) {
 function rejectNonAdminProjectUpdate(done) {
   const orgId = org.id;
   const projId = testData.projects[1].id;
-  const updateProjData = {'name':'New Name'};
+  const updateProjData = { name: 'New Name' };
 
   // Update project
   ProjController.updateProject(nonAdminUser, orgId, projId, updateProjData)
@@ -668,7 +668,7 @@ function setPerm(done) {
 function softDeleteProject(done) {
   // Create an element via the Element model
   const elem = new Element.Block({
-    id: testData.elements[7].id,
+    id: testData.elements[1].id,
     uid: `${org.id}:${testData.projects[0].id}:${testData.elements[1].id}`,
     project: project._id
   });
@@ -712,7 +712,7 @@ function deleteProject(done) {
 
     // Check if elements still exist
     // Note: Elements are deleted with projects
-    return Element.Element.findOne({ id: testData.elements[7].id });
+    return Element.Element.findOne({ id: testData.elements[1].id });
   })
   .then((element) => {
     // Expect no element

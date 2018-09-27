@@ -92,7 +92,8 @@
     },
     {
       "id": "thisisaverylongidnamepleaseacceptmeorbreak",
-      "name": "Long Id"
+      "name": "Long Id",
+      "orgid": "testorg00"
     }
   ],
 
@@ -100,109 +101,38 @@
     {
       "type": "Package",
       "id": "nlp",
-      "name": "Natural Language Processing"
+      "name": "Natural Language Processing",
+      "projectUID": "testorg00:project00"
     },
     {
       "type": "Block",
       "id": "speech-recognition",
       "name": "Speech Recognition",
+      "parent": "nlp",
       "custom": {
         "language": "english"
-      }
+      },
+      "projectUID": "testorg00:project00"
     },
     {
       "type": "Block",
       "id": "text-parser",
-      "name": "Text Parser"
+      "name": "Text Parser",
+      "parent": "nlp",
+      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9",
+      "projectUID": "testorg00:project00"
     },
     {
       "type": "Relationship",
       "id": "speech-to-text",
-      "name": "Speech to Text"
+      "parent": "nlp",
+      "name": "Speech to Text",
+      "source": "speech-recognition",
+      "target": "text-parser",
+      "projectUID": "testorg00:project00"
     },
     {
-      "type": "Package",
-      "id": "0001",
       "name": "In time loop"
-    },
-    {
-      "type": "Block",
-      "id": "0002",
-      "name": "In time loop 2"
-    },
-    {
-      "type": "Relationship",
-      "id": "0003",
-      "name": "Time looping"
-    },
-    {
-      "type": "Block",
-      "id": "0000"
-    },
-    {
-      "id": "elem0",
-      "name": "Mjolnir",
-      "projectUID": "avengers:thor",
-      "type": "Package",
-      "custom": {
-        "location": "Earth",
-        "real": true
-      },
-      "documentation": "This is some documentation."
-    },
-    {
-      "id": "elem1",
-      "name": "Heimdall the Gatekeeper",
-      "projectUID": "avengers:thor",
-      "type": "block",
-      "parent": "elem0"
-    },
-    {
-      "id": "elem2",
-      "name": "Loki brother of Thor",
-      "projectUID": "avengers:thor",
-      "type": "Block",
-      "parent": "elem0",
-      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
-    },
-    {
-      "id": "rel1",
-      "name": "Hate Relationship",
-      "projectUID": "avengers:thor",
-      "type": "Relationship",
-      "source": "elem1",
-      "target": "elem2"
-    },
-    {
-      "id": "elem0",
-      "name": "Thors Hammer",
-      "documentation": "This is some different documentation",
-      "custom": {
-        "real": false,
-        "marvel": false
-      }
-    },
-    {
-      "id": "0000",
-      "name": "Steve Rogers",
-      "projectUID": "avengers:brucebanner",
-      "type": "Block"
-    },
-    {
-      "id": "0001",
-      "name": "Steve Rogers 2",
-      "projectUID": "avengers:brucebanner",
-      "type": "Block"
-    },
-    {
-      "id": "0000",
-      "name": "Captain America"
-    },
-    {
-      "id": "0003",
-      "name": "",
-      "projectUID": "avengers:brucebanner",
-      "type": "Block"
     }
   ],
 
@@ -254,9 +184,8 @@
     {
       "id": "elem2",
       "name": "Frigg wife of Odin",
-      "projectUID": "avengers:thor",
       "type": "BLOCK",
-      "parent": "elem1"
+      "parent": "speech-recognition"
     },
     {
       "id": "elem5",
@@ -265,6 +194,11 @@
       "type": "Block",
       "parent": "elem0",
       "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
+    },
+    {
+      "id": "elem6",
+      "name": "%@^@$#@#",
+      "type": "Block"
     }
   ],
 

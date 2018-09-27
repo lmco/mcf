@@ -130,12 +130,12 @@ function getUser(done) {
 function postUser(done) {
   // Make a user API POST request
   request({
-    url: `${test.url}/api/users/${testData.users[9].username}`,
+    url: `${test.url}/api/users/${testData.users[1].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
     // Creates new user data as POST request body
-    body: JSON.stringify(testData.users[9])
+    body: JSON.stringify(testData.users[1])
   },
   (err, response, body) => {
     // Expect no error
@@ -145,8 +145,8 @@ function postUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal(testData.users[9].username);
-    chai.expect(json.fname).to.equal(testData.users[9].fname);
+    chai.expect(json.username).to.equal(testData.users[1].username);
+    chai.expect(json.fname).to.equal(testData.users[1].fname);
     done();
   });
 }
@@ -221,7 +221,7 @@ function getUsers(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verifies users exist
     chai.expect(body).to.include(testData.users[0].adminUsername);
-    chai.expect(body).to.include(testData.users[9].username);
+    chai.expect(body).to.include(testData.users[1].username);
     done();
   });
 }
@@ -258,13 +258,13 @@ function rejectGetNonexisting(done) {
 function patchUser(done) {
   // Make a PATCH API request
   request({
-    url: `${test.url}/api/users/${testData.users[9].username}`,
+    url: `${test.url}/api/users/${testData.users[1].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     // Set update parameter in request body
     body: JSON.stringify({
-      fname: testData.users[11].fname
+      fname: testData.users[2].fname
     })
   },
   (err, response, body) => {
@@ -275,8 +275,8 @@ function patchUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal(testData.users[11].username);
-    chai.expect(json.fname).to.equal(testData.users[11].fname);
+    chai.expect(json.username).to.equal(testData.users[1].username);
+    chai.expect(json.fname).to.equal(testData.users[2].fname);
     done();
   });
 }
@@ -346,7 +346,7 @@ function rejectDeleteNonexisting(done) {
 function deleteUser(done) {
   // Make a DELETE request
   request({
-    url: `${test.url}/api/users/${testData.users[9].username}`,
+    url: `${test.url}/api/users/${testData.users[1].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -363,7 +363,7 @@ function deleteUser(done) {
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Verifies correct response body
-    chai.expect(json.username).to.equal(testData.users[9].username);
+    chai.expect(json.username).to.equal(testData.users[1].username);
     done();
   });
 }

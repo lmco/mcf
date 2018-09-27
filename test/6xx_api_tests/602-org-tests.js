@@ -107,11 +107,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postOrg(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[9].id}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.orgs[9])
+    body: JSON.stringify(testData.orgs[0])
   },
   (err, response, body) => {
     // Expect no error
@@ -120,8 +120,8 @@ function postOrg(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.orgs[9].id);
-    chai.expect(json.name).to.equal(testData.orgs[9].name);
+    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(json.name).to.equal(testData.orgs[0].name);
     done();
   });
 }
@@ -132,7 +132,7 @@ function postOrg(done) {
  */
 function getOrg(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[9].id}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -142,7 +142,7 @@ function getOrg(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal(testData.orgs[9].name);
+    chai.expect(json.name).to.equal(testData.orgs[0].name);
     done();
   });
 }
@@ -153,11 +153,11 @@ function getOrg(done) {
  */
 function patchOrg(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[10].id}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({ name: testData.orgs[10].name })
+    body: JSON.stringify({ name: testData.orgs[1].name })
   },
   (err, response, body) => {
     // Expect no error
@@ -166,8 +166,8 @@ function patchOrg(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.orgs[10].id);
-    chai.expect(json.name).to.equal(testData.orgs[10].name);
+    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(json.name).to.equal(testData.orgs[1].name);
     done();
   });
 }
@@ -177,11 +177,11 @@ function patchOrg(done) {
  */
 function rejectPatchInvalidName(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[10].id}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({ name: testData.names[7].name })
+    body: JSON.stringify({ name: testData.invalidOrgs[1].name })
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -201,7 +201,7 @@ function rejectPatchInvalidName(done) {
  */
 function rejectPatchIdMismatch(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[10].name}`,
+    url: `${test.url}/api/orgs/${testData.orgs[1].name}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -225,7 +225,7 @@ function rejectPatchIdMismatch(done) {
  */
 function getMemberRoles(done) {
   request({
-    url: `${test.url}/api/orgs/shield/members/${testData.users[0].adminUsername}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.users[0].adminUsername}`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -273,7 +273,7 @@ function rejectPostIdMismatch(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.orgs[9])
+    body: JSON.stringify(testData.orgs[0])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -365,11 +365,11 @@ function rejectPostEmptyName(done) {
  */
 function rejectPostExistingOrg(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[9].id}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({ name: testData.orgs[9].name })
+    body: JSON.stringify({ name: testData.orgs[0].name })
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -419,7 +419,7 @@ function rejectDeleteNonexistingOrg(done) {
  */
 function deleteOrg(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[9].id}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
