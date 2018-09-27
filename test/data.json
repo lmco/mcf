@@ -99,6 +99,7 @@
 
   "elements": [
     {
+<<<<<<< HEAD
       "type": "Package",
       "id": "nlp",
       "name": "Natural Language Processing",
@@ -133,6 +134,30 @@
     },
     {
       "name": "In time loop"
+=======
+      "id": "element00",
+      "name": "Element 00"
+    },
+    {
+      "id": "element01",
+      "name": "Element 01"
+    },
+    {
+      "id": "element02",
+      "name": "Element 02"
+    },
+    {
+      "id": "element03",
+      "name": "Element 03"
+    },
+    {
+      "id": "element04",
+      "name": "Element 04"
+    },
+    {
+      "id": "element05",
+      "name": "Element 05"
+>>>>>>> 130af7f53287e5c4f655b4d947c9945793f55936
     }
   ],
 
@@ -184,12 +209,17 @@
     {
       "id": "elem2",
       "name": "Frigg wife of Odin",
+<<<<<<< HEAD
+=======
+      "projectUID": "testorg00:project00",
+>>>>>>> 130af7f53287e5c4f655b4d947c9945793f55936
       "type": "BLOCK",
       "parent": "speech-recognition"
     },
     {
       "id": "elem5",
       "name": "Loki brother of Thor",
+<<<<<<< HEAD
       "projectUID": "avengers:thor",
       "type": "Block",
       "parent": "elem0",
@@ -198,6 +228,9 @@
     {
       "id": "elem6",
       "name": "%@^@$#@#",
+=======
+      "projectUID": "testorg00:project00",
+>>>>>>> 130af7f53287e5c4f655b4d947c9945793f55936
       "type": "Block"
     }
   ],
