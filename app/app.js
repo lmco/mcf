@@ -46,9 +46,9 @@ module.exports = app;
 // Connect to database, initialize application, and create default admin and
 // default organization if needed.
 db.connect()
-.then(() => initApp())
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
+.then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);
   process.exit(1);
