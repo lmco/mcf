@@ -107,35 +107,6 @@ function initApp() {
     app.use('/', M.require('routes'));
   }
 
-  // Create default admin if it doesn't exist
-  // Check any admin exist
-  User.findOne({ admin: true })
-  .exec((err, user) => {
-    if (err) {
-      throw err;
-    }
-
-    // Check user found
-    if (user === null) {
-      // No user found, create local admin
-      const adminUserData = {
-        username: M.config.server.defaultAdminUsername,
-        password: M.config.server.defaultAdminPassword,
-        provider: 'local',
-        admin: true
-      };
-
-      // Create user via controller
-      UserController.createUser({ admin: true }, adminUserData)
-      .then(() => {
-        M.log.info('Default admin created');
-      })
-      .catch((err2) => {
-        throw (err2);
-      });
-    }
-  });
-
   // Create default org if it doesn't exist
   // TODO: Convert everything into promise with create admin
   // TODO: and create org. Potential async problem MBX-452
@@ -185,6 +156,52 @@ function initApp() {
       });
     }
   });
+
+  function createDefaultAdmin() {
+    return new Promise((resolve, reject) => {
+      Organization.findOne({ id: 'default' })
+      .then(org => {
+        if (org !== null) {
+          return resolve();
+        }
+        else {
+          const defaultOrg = new Organization({
+            id: M.config.server.defaultOrganizationId,
+            name: M.config.server.defaultOrganizationName
+          });
+          defaultOrg.save((saveOrgErr) => {
+            if (saveOrgErr) {
+              throw saveOrgErr;
+            }
+          });
+        }
+      })
+      .catch();
+    });
+  }
+
+  // Create default admin if it doesn't exist
+  function createDefaultOrganiztion() {
+    return new Promise((resolve, reject) => {
+      User.findOne({ admin: true })
+      .then(user => {
+        if (user !== null) {
+          return resolve();
+        }
+        // No user found, create local admin
+        const adminUserData = {
+          username: M.config.server.defaultAdminUsername,
+          password: M.config.server.defaultAdminPassword,
+          provider: 'local',
+          admin: true
+        };
+
+        return UserController.createUser({ admin: true }, adminUserData);
+      })
+      .then(() => resolve())
+      .catch(error => reject(error));
+    });
+  }
 
   // Export the app
   module.exports = app;
