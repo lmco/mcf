@@ -651,7 +651,6 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
 
         // Error Check: check if updated field also exists in the original element.
         if (!element.toJSON().hasOwnProperty(updateField)) {
-          console.log(updateField);
           // Original project does NOT contain updatedField, reject error
           return reject(new M.CustomError(`Element does not contain field ${updateField}.`, 400, 'warn'));
         }
@@ -664,7 +663,6 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
 
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
-          console.log(updateField);
           // field cannot be updated, reject error
           return reject(new M.CustomError(
             `Element property [${updateField}] cannot be changed.`, 403, 'warn'

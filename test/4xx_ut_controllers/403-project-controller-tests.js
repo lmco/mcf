@@ -142,13 +142,8 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createProject(done) {
   // Define and clone the project data
-<<<<<<< HEAD
   const projData = Object.assign({}, testData.projects[0]);
   projData.custom = { buildFor: 'build' };
-=======
-  var projData = Object.assign({}, testData.projects[0]);
-  projData.custom = {'buildFor': 'build'};
->>>>>>> 130af7f53287e5c4f655b4d947c9945793f55936
   projData.orgid = org.id;
 
   // Create the project via project controller
@@ -265,11 +260,7 @@ function updateProjectObject(done) {
  */
 function createProject02(done) {
   // Define and clone the project data
-<<<<<<< HEAD
   const projData = Object.assign({}, testData.projects[2]);
-=======
-  var projData = Object.assign({}, testData.projects[2]);
->>>>>>> 130af7f53287e5c4f655b4d947c9945793f55936
   projData.orgid = org.id;
 
   // Create project
@@ -294,11 +285,7 @@ function createProject02(done) {
  */
 function rejectCreatePeriodName(done) {
   // Define and clone the project data
-<<<<<<< HEAD
   const projData = Object.assign({}, testData.invalidProjects[0]);
-=======
-  var projData = Object.assign({}, testData.invalidProjects[0]);
->>>>>>> 130af7f53287e5c4f655b4d947c9945793f55936
   projData.orgid = org.id;
 
   // Create project
