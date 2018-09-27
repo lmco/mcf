@@ -82,11 +82,16 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
 
     const searchParams = { uid: { $regex: `^${projectUID}` }, deleted: false };
 
-    // Check softDeleted flag true and User Admin true
-    if (softDeleted && reqUser.admin) {
+    // Error Check: Ensure user has permissions to find deleted elements
+    if (softDeleted && !reqUser.admin) {
+      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+    }
+    // Check softDeleted flag true
+    if (softDeleted) {
       // softDeleted flag true and User Admin true, remove deleted: false
       delete searchParams.deleted;
     }
+
 
     // Find elements
     findElementsQuery(searchParams)
@@ -217,8 +222,12 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
     let searchParams = { $and: [{ $or: [{ uid: elemUID },
       { uuid: elemID }] }, { deleted: false }] };
 
-    // Check softDeleted flag true and User Admin true
-    if (softDeleted && reqUser.admin) {
+    // Error Check: Ensure user has permissions to find deleted elements
+    if (softDeleted && !reqUser.admin) {
+      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+    }
+    // Check softDeleted flag true
+    if (softDeleted) {
       // softDeleted flag true and User Admin true, remove deleted: false
       searchParams = { $or: [{ uid: elemUID }, { uuid: elemID }] };
     }
