@@ -27,6 +27,7 @@ html, body {
 body {
     min-height: 100vh;
     font-weight: 300;
+    position: absolute;
 }
 
 /*
@@ -134,6 +135,13 @@ body.lm-dark-theme {
 
 #login-form {
     margin-top: 20%
+}
+
+#root {
+    height: 100%;
+    position: absolute;
+    min-height: 100%;
+    width: 100%;
 }
 
 
