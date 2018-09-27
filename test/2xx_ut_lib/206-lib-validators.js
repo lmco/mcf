@@ -55,6 +55,7 @@ function verifyOrgID(done) {
   chai.expect(RegExp(validators.org.id).test('org3')).to.equal(true);
   chai.expect(RegExp(validators.org.id).test('validorgid')).to.equal(true);
   chai.expect(RegExp(validators.org.id).test('3org-id')).to.equal(true);
+  chai.expect(RegExp(validators.org.id).test('underscore_allowed')).to.equal(true);
 
   // Invalid IDs
   chai.expect(RegExp(validators.org.id).test('Org3')).to.equal(false);
@@ -107,7 +108,7 @@ function verifyProjectName(done) {
   // Invalid names
   chai.expect(RegExp(validators.project.name).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.project.name).test(' space first')).to.equal(false);
-  chai.expect(RegExp(validators.project.name).test('')).to.equal(false);
+
   done();
 }
 
@@ -134,11 +135,11 @@ function verifyElementName(done) {
   chai.expect(RegExp(validators.element.name).test('Lockheed Martin')).to.equal(true);
   chai.expect(RegExp(validators.element.name).test('my elem name')).to.equal(true);
   chai.expect(RegExp(validators.element.name).test('3 numbers 45-')).to.equal(true);
+  chai.expect(RegExp(validators.element.name).test('')).to.equal(true);
 
   // Invalid names
   chai.expect(RegExp(validators.element.name).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.element.name).test(' space first')).to.equal(false);
-  chai.expect(RegExp(validators.element.name).test('')).to.equal(false);
   done();
 }
 
