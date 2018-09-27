@@ -61,7 +61,6 @@ function build(_args) {
   const args = (_args === undefined || _args.length === 0) ? ['--all'] : _args;
 
   // Copy static dependencies to build directory
-  // TODO: Add gulp documentation reference to readme (MBX-463)
   if (args.includes('--all') || args.includes('--copy-deps')) {
     M.log.info('  + Copying dependencies ...');
 
