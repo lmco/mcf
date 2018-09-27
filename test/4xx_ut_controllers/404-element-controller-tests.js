@@ -28,6 +28,7 @@ const ProjController = M.require('controllers.project-controller');
 const ElemController = M.require('controllers.element-controller');
 const User = M.require('models.user');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testData = require(path.join(M.root, 'test', 'data.json'));
@@ -47,7 +48,6 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: Connect to database. Create an admin user, organization, and project
    */
-
   before((done) => {
     // Open the database connection
     db.connect();
@@ -65,11 +65,12 @@ describe(M.getModuleName(module.filename), () => {
       // Set global organization
       org = retOrg;
 
-      // Define project data
-      const proData = testData.projects[11];
+      // Define and clone the project data
+      var projData = Object.assign({}, testData.projects[0]);
+      projData['orgid'] = org.id;
 
       // Create project
-      return ProjController.createProject(adminUser, proData);
+      return ProjController.createProject(adminUser, projData);
     })
     .then((retProj) => {
       // Set global project
@@ -140,16 +141,20 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates a Package
  */
 function createPackage(done) {
-  // Package data
-  const newElement = testData.elements[8];
-
+  // Define and clone the package element data
+  var elemData = Object.assign({}, testData.elements[0]);
+  elemData.type = 'package';
+  elemData.documentation = 'documentation 00';
+  elemData.projectUID = utils.createUID(org.id, proj.id);
+  elemData.uuid = 'f239c90b-8cc2-475c-985c-ef653dc183b9';
+  elemData.custom = {'real': true};
   // Create the element
-  ElemController.createElement(adminUser, newElement)
+  ElemController.createElement(adminUser, elemData)
   .then((retElem) => {
     // Element was created, verify its properties
-    chai.expect(retElem.id).to.equal(testData.elements[8].id);
+    chai.expect(retElem.id).to.equal(elemData.id);
     chai.expect(retElem.custom.real).to.equal(true);
-    chai.expect(retElem.documentation).to.equal(testData.elements[8].documentation);
+    chai.expect(retElem.documentation).to.equal(elemData.documentation);
     done();
   })
   .catch((error) => {
@@ -165,11 +170,11 @@ function createPackage(done) {
  */
 function findElement(done) {
   // Find the element we just created
-  ElemController.findElement(adminUser, org.id, proj.id, testData.elements[8].id)
+  ElemController.findElement(adminUser, org.id, proj.id, testData.elements[0].id)
   .then((retElem) => {
     // Element was found, verify properties
-    chai.expect(retElem.name).to.equal(testData.elements[8].name);
-    chai.expect(retElem.id).to.equal(testData.elements[8].id);
+    chai.expect(retElem.name).to.equal(testData.elements[0].name);
+    chai.expect(retElem.id).to.equal(testData.elements[0].id);
     done();
   })
   .catch((error) => {
@@ -185,17 +190,27 @@ function findElement(done) {
  * package created in the previous test.
  */
 function createChildElement(done) {
-  // Element data
-  const newElement = testData.elements[9];
+  // Define and clone the block element data
+  var elemData = Object.assign({}, testData.elements[1]);
+  elemData.type = 'block';
+  // Set new element's parent
+  elemData.parent = testData.elements[0].id;
+  elemData.projectUID = utils.createUID(org.id, proj.id);
+  elemData.documentation = "document";
+  elemData.custom = {
+    location: 'location 00',
+    real: true,
+    marvel: false
+  };
 
   // Create the element
-  ElemController.createElement(adminUser, newElement)
+  ElemController.createElement(adminUser, elemData)
   .then((retElem) => {
     // Element was created, verify its properties
-    chai.expect(retElem.id).to.equal(testData.elements[9].id);
+    chai.expect(retElem.id).to.equal(elemData.id);
     chai.expect(retElem.parent).to.not.equal(null);
     // Find the parent element
-    return ElemController.findElement(adminUser, org.id, proj.id, testData.elements[9].id);
+    return ElemController.findElement(adminUser, org.id, proj.id, elemData.id);
   })
   .then((retElem2) => {
     // Expect the parent element to contain the new element
@@ -217,11 +232,16 @@ function createChildElement(done) {
  * Expected error thrown: 'Bad Request'
  */
 function rejectElementInvalidParentType(done) {
-  // New element data
-  const newElement = testData.invalidElements[0];
+  // Define and clone the package element data
+  var elemData = Object.assign({}, testData.invalidElements[0]);
+  elemData.type = 'package';
+  // Set new element's parent block element
+  elemData.parent = testData.elements[1].id;
+  elemData.projectUID = utils.createUID(org.id, proj.id);
+
 
   // Create the new element, expected to fail
-  ElemController.createElement(adminUser, newElement)
+  ElemController.createElement(adminUser, elemData)
   .then(() => {
     // Expected createElement() to fail
     // Element was created, force test to fail
@@ -239,16 +259,20 @@ function rejectElementInvalidParentType(done) {
  * @description Verifies block element created with a provided UUID.
  */
 function createBlockWithUUID(done) {
-  // Element data
-  const newElement = testData.elements[10];
+  // Define and clone the block element data
+  var elemData = Object.assign({}, testData.elements[2]);
+  elemData.projectUID = utils.createUID(org.id, proj.id);
+  elemData.parent = testData.elements[0].id;
+  elemData.type = 'block';
+  elemData.uuid = '1b1468af-e307-44c9-a4ba-52936a078ce4';
 
   // Create the element
-  ElemController.createElement(adminUser, newElement)
+  ElemController.createElement(adminUser, elemData)
   .then((retElem) => {
     // Expect element create to succeed, verify element properties
-    chai.expect(retElem.id).to.equal(testData.elements[10].id);
+    chai.expect(retElem.id).to.equal(elemData.id);
     chai.expect(retElem.parent).to.not.equal(null);
-    chai.expect(retElem.uuid).to.equal(testData.elements[10].uuid);
+    chai.expect(retElem.uuid).to.equal(elemData.uuid);
     done();
   })
   .catch((error) => {
@@ -263,14 +287,18 @@ function createBlockWithUUID(done) {
  * @description Verifies elements of type 'Relationship' can be created.
  */
 function createRelationship(done) {
-  // Element data
-  const newElement = testData.elements[11];
+  // Define and clone the relationship element data
+  var elemData = Object.assign({}, testData.elements[3]);
+  elemData.projectUID = utils.createUID(org.id, proj.id);
+  elemData.type = 'relationship';
+  elemData['target'] = testData.elements[0].id;
+  elemData['source'] = testData.elements[1].id;
 
   // Create the relationship
-  ElemController.createElement(adminUser, newElement)
+  ElemController.createElement(adminUser, elemData)
   .then((retElem) => {
     // Expect createElement() to succeed and verify element properties
-    chai.expect(retElem.id).to.equal(testData.elements[11].id);
+    chai.expect(retElem.id).to.equal(elemData.id);
     chai.expect(retElem.target).to.not.equal(null);
     chai.expect(retElem.source).to.not.equal(null);
     done();
@@ -288,11 +316,14 @@ function createRelationship(done) {
  * Expected error thrown: 'Bad Request'
  */
 function rejectCreateElementExistingUUID(done) {
-  // Element data
-  const newElement = testData.invalidElements[1];
+  // Define and clone the  element data
+  var elemData = Object.assign({}, testData.invalidElements[1]);
+  elemData.projectUID = utils.createUID(org.id, proj.id);
+  elemData.type = 'relationship';
+  elemData.parent = testData.elements[1].id;
 
   // Create the element, expected to fail
-  ElemController.createElement(adminUser, newElement)
+  ElemController.createElement(adminUser, elemData)
   .then(() => {
     // Expect createElement() to fail
     // Element create succeeded, force test to fail
@@ -329,11 +360,15 @@ function findElements(done) {
  * @description Verifies an element can be found by UUID
  */
 function findElementByUUID(done) {
+  // Define and clone the element data
+  var elemData = Object.assign({}, testData.elements[2]);
+  elemData.uuid = '1b1468af-e307-44c9-a4ba-52936a078ce4';
+
   // Lookup the element
-  ElemController.findElement(adminUser, org.id, proj.id, testData.elements[10].uuid)
+  ElemController.findElement(adminUser, org.id, proj.id, elemData.uuid)
   .then((element) => {
     // Expect element to be found
-    chai.expect(element.uuid).to.equal(testData.elements[10].uuid);
+    chai.expect(element.uuid).to.equal(elemData.uuid);
     done();
   })
   .catch((error) => {
@@ -348,17 +383,28 @@ function findElementByUUID(done) {
  * @description Verifies an element can be updated.
  */
 function updateElement(done) {
+  // Define and clone the element data
+  var updateElemData = Object.assign({}, testData.elements[2]);
+  // Updated element must keep original id
+  updateElemData.id = testData.elements[0].id;
+  updateElemData.documentation = "document";
+  updateElemData.custom = {
+    location: 'location 00',
+    real: false,
+    marvel: false
+  };
+
   // Update the element with new data
-  ElemController.updateElement(adminUser, org.id, proj.id, testData.elements[8].id,
-    testData.elements[12])
-  .then(() => ElemController.findElement(adminUser, org.id, proj.id, testData.elements[8].id))
+  ElemController.updateElement(adminUser, org.id, proj.id, testData.elements[0].id,
+    updateElemData)
+  .then(() => ElemController.findElement(adminUser, org.id, proj.id, testData.elements[0].id))
   .then((retElem) => {
     // Expect findElement() to succeed
     // Verify the found element's properties
-    chai.expect(retElem.id).to.equal(testData.elements[12].id);
-    chai.expect(retElem.name).to.equal(testData.elements[12].name);
-    chai.expect(retElem.documentation).to.equal(testData.elements[12].documentation);
-    chai.expect(retElem.custom.location).to.equal(testData.elements[8].custom.location);
+    chai.expect(retElem.id).to.equal(updateElemData.id);
+    chai.expect(retElem.name).to.equal(updateElemData.name);
+    chai.expect(retElem.documentation).to.equal(updateElemData.documentation);
+    chai.expect(retElem.custom.location).to.equal(updateElemData.custom.location);
     chai.expect(retElem.custom.real).to.equal(false);
     chai.expect(retElem.custom.marvel).to.equal(false);
     done();
@@ -377,12 +423,12 @@ function updateElement(done) {
  */
 function softDeleteElement(done) {
   // Soft delete the element
-  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[12].id, false)
+  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[1].id, false)
   .then((retElem) => {
     // Verify that the element's deleted field is now true
     chai.expect(retElem.deleted).to.equal(true);
     // Try to find the element and expect it to fail
-    return ElemController.findElement(adminUser, org.id, proj.id, testData.elements[12].id);
+    return ElemController.findElement(adminUser, org.id, proj.id, testData.elements[1].id);
   })
   .then(() => {
     // Expected findElement() to fail
@@ -397,11 +443,11 @@ function softDeleteElement(done) {
     // Find element again
     // NOTE: The 'true' parameter tells the function to include soft-deleted
     // elements in the results
-    return ElemController.findElement(adminUser, org.id, proj.id, testData.elements[12].id, true);
+    return ElemController.findElement(adminUser, org.id, proj.id, testData.elements[1].id, true);
   })
   .then((retElem) => {
     // Find succeeded, verify element properties
-    chai.expect(retElem.id).to.equal(testData.elements[12].id);
+    chai.expect(retElem.id).to.equal(testData.elements[1].id);
     done();
   })
   .catch((error) => {
@@ -418,11 +464,11 @@ function softDeleteElement(done) {
  */
 function hardDeleteElement(done) {
   // Hard delete the element
-  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[12].id, true)
+  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[1].id, true)
   // Then search for the element (including soft-deleted elements)
   .then(() => ElemController
   .findElement(adminUser, org.id, proj.id,
-    testData.elements[12].id, true))
+    testData.elements[1].id, true))
   .then(() => {
     // Expect no element found
     // Element was found, force test to fail

@@ -28,8 +28,8 @@ const path = require('path');
 // MBEE modules
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
-const db = M.require('lib/db');
-const utils = M.require('lib/utils');
+const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
