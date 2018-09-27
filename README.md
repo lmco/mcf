@@ -268,3 +268,30 @@ Alternatively, you can run
 node node_modules/jsdoc/jsdoc.js \
      -u doc app/**/*.js test/**/*.js README.md
 ```
+
+### Docker Documentation
+MBEE can be run in a docker container. The docker functionality includes
+getting logs, cleaning, building, and running the docker container. To run the
+commands, use `--[cmd]` after `node mbee docker`.  To run the container, you
+must first build the container image with `--build`. This will build the docker
+image using the dockerfile that is provided in the mbee code. Below is an
+example of how a docker container can be built:
+
+```bash
+node mbee docker --build
+```
+
+After the image is built the docker container can be run using `--run`. The
+container will be detached, but have an interactive processes. If docker
+container unexpectedly exited, the container will restart. The docker image can
+also be run with a specified MBEE environment variable. Below is an example of
+how a docker container can be run:
+
+```bash
+MBEE_ENV=test node mbee docker --run
+```
+
+To get the logs of the docker container, you can use `--get-logs`. This will
+print out the containers logs, which can be useful if an error has occured. If
+the docker container needs to be rebuilt and the previous build needs to be
+removed, use `--clean` to remove the previous docker build.

@@ -95,10 +95,12 @@ function loadPlugins() {
     const stdout = execSync(commands.join('; '));
     M.log.verbose(stdout.toString());
 
-    // TODO: Reword this comment (add words) (MBX-465)
+    // Try: creates the plug-in path with the plug-in name
     try {
       pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
     }
+    // If try fails,
+    // Catch: logs "Could not install plugin" along with the error
     catch (err) {
       M.log.error(`Could not install plugin ${namespace}, error:`);
       M.log.error(err);
