@@ -39,10 +39,10 @@ default, it uses the `default.cfg` file, but that can be changed by setting the
 file with a name matching the `MBEE_ENV` environment variable. For example,
 if `MBEE_ENV=production`, MBEE will look for the file `config/production.cfg`.
 
-The MBEE config is simply a JSON file that allows comments. MBEE is designed to 
+The MBEE config is simply a JSON file that allows comments. MBEE is designed to
 be largely parameterized by this config file. In this config file you will have
 options to alter the server ports, Docker configurations, enabling and
-disabling components, and swapping out authentication schemes. For a 
+disabling components, and swapping out authentication schemes. For a
 more detailed explanation of the fields supported by the config file, see the
 detailed comments provided [example.cfg](config/example.cfg).
 
@@ -62,9 +62,9 @@ to use your authentication strategy.
 
 ### Building MBEE
 
-1. Install dependencies by running `NODE_ENV=dev yarn install` or 
+1. Install dependencies by running `NODE_ENV=dev yarn install` or
 `npm install --dev`.
-2. Build MBEE by running `node mbee build`. This will build the client-side 
+2. Build MBEE by running `node mbee build`. This will build the client-side
 assets by moving dependencies from `node_modules` into build/public, concatenating and
 minifying client-side JavaScript, processing Sass into CSS, and building JSDoc
 documentation into build/doc.
@@ -270,3 +270,30 @@ Alternatively, you can run
 node node_modules/jsdoc/jsdoc.js \
      -u doc app/**/*.js test/**/*.js README.md
 ```
+
+### Docker Documentation
+MBEE can be run in a docker container. The docker functionality includes
+getting logs, cleaning, building, and running the docker container. To run the
+commands, use `--[cmd]` after `node mbee docker`.  To run the container, you
+must first build the container image with `--build`. This will build the docker
+image using the dockerfile that is provided in the mbee code. Below is an
+example of how a docker container can be built:
+
+```bash
+node mbee docker --build
+```
+
+After the image is built the docker container can be run using `--run`. The
+container will be detached, but have an interactive processes. If docker
+container unexpectedly exited, the container will restart. The docker image can
+also be run with a specified MBEE environment variable. Below is an example of
+how a docker container can be run:
+
+```bash
+MBEE_ENV=test node mbee docker --run
+```
+
+To get the logs of the docker container, you can use `--get-logs`. This will
+print out the containers logs, which can be useful if an error has occured. If
+the docker container needs to be rebuilt and the previous build needs to be
+removed, use `--clean` to remove the previous docker build. 
