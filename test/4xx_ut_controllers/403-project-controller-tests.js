@@ -143,8 +143,8 @@ describe(M.getModuleName(module.filename), () => {
 function createProject(done) {
   // Define and clone the project data
   var projData = Object.assign({}, testData.projects[0]);
-  projData['custom'] = {'buildFor': 'build'};
-  projData['orgid'] = org.id;
+  projData.custom = {'buildFor': 'build'};
+  projData.orgid = org.id;
 
   // Create the project via project controller
   ProjController.createProject(adminUser, projData)
@@ -215,7 +215,7 @@ function updateProjectName(done) {
   const projData1 = Object.assign({}, testData.projects[0]);
 
   // Update project01 name to project02 name
-  projData1['name'] = testData.projects[2].name;
+  projData1.name = testData.projects[2].name;
 
   // Update project
   ProjController.updateProject(adminUser, org.id, testData.projects[0].id, projData1)
@@ -261,7 +261,7 @@ function updateProjectObject(done) {
 function createProject02(done) {
   // Define and clone the project data
   var projData = Object.assign({}, testData.projects[2]);
-  projData['orgid'] = org.id;
+  projData.orgid = org.id;
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -286,7 +286,7 @@ function createProject02(done) {
 function rejectCreatePeriodName(done) {
   // Define and clone the project data
   var projData = Object.assign({}, testData.invalidProjects[0]);
-  projData['orgid'] = org.id;
+  projData.orgid = org.id;
 
   // Create project
   ProjController.createProject(adminUser, projData)
