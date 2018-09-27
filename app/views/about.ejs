@@ -1,21 +1,22 @@
 <%
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************
- //**
+/**
+ * Classification: UNCLASSIFIED
+ *
  * @module views.about
  *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * 
- * @description The about page that decribes what MBEE is and its members.
+ *
+ * @description The about page that describes what MBEE is and its members.
  */
  %>
 
@@ -26,34 +27,36 @@
     <b>Version:</b> <%= info.version%>
   </p>
 
-  <p>The Model-Based Engineering Environment or MBEE is a platform that
-  allows system models to be leveraged in a web-based user interface (UI)
-  for  increased access and ease of use across disciplines and skill sets
-  within an organization. MBEE provides a web-based UI for people to
-  interact with system model data without needing to be a systems modeler
-  themselves.</p>
+  <p>The Model-Based Engineering Environment or MBEE is modeling collaboration tool
+    that integrates system models with multidisciplinary engineering data to enable
+    the system model to be a single-source of truth project data. It makes model
+    data more accessible via a web-based user interface (UI) for ease of use across
+    disciplines and skill sets within an organization. MBEE provides a web-based UI
+    for team members to interact with system model data without needing to be a
+    systems modeler themselves.</p>
 
-  <p>The goal of MBEE is to better communicate data across engineering
-  organizations by implementing the core goals of model-based systems
-  engineering through software tools. MBEE decreases ambiguity by making
-  a single-source of truth for data more achievable through its
-  RESTful API, extensible plugins, and distributed microservices.</p>
+  <p>The goal of MBEE is to better communicate data across engineering organizations
+  by implementing the core goals of model-based systems engineering through
+  software tools. MBEE decreases ambiguity by making a single-source of truth for
+  data more achievable through its RESTful API, extensible plugins, and
+  distributed services.</p>
 
   <br/>
-
+  <!-- TODO: Remove 'our team' section before public release (MBX-370) -->
   <h3>Our Team</h3>
 
-  <p>MBEE is being developed by the Software Engineering team in the Systems
-  Engineering Modernization organization. </p>
-
-  <p>Our software team consists of:
+  <p>MBEE is developed by</p>
   <ul>
-    <li>Josh Kaplan</li>
-    <li>Jake Ursetta</li>
+    <li><a href="mailto:joshua.d.kaplan@lmco.com">Josh Kaplan</a></li>
+    <li><a href="mailto:jake.j.ursetta@lmco.com">Jake Ursetta</a></li>
+    <li><a href="mailto:phillip.lee@lmco.com">Phill Lee</a></li>
+    <li><a href="mailto:austin.j.bieber@lmco.com">Austin Bieber</a></li>
+    <li><a href="mailto:leah.p.delaurell@lmco.com">Leah De Laurell</a></li>
   </ul>
   </p>
 
   <p>To report an issue to our systems team, please visit our
     <a href="https://jira.us.lmco.com/servicedesk">JIRA Service Desk</a>.
+
   </p>
 </div>

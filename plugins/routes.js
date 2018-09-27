@@ -9,13 +9,15 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  This file implements the plugin loading and routing logic.
+ * @description This file implements the plugin loading and routing logic.
  */
 
+// Node modules
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+// NPM Modules
 const express = require('express');
 const pluginRouter = express.Router();
 
@@ -54,16 +56,25 @@ function loadPlugins() {
   const pluginName = M.config.server.plugins.plugins.map(plugin => plugin.name);
 
   files.forEach((f) => {
-    // Delete the directory in no a protected file or not in the config
-    if (!protectedFileNames.includes(f) && !pluginName.includes(f)) {
+    // Skip routes.js
+    if (protectedFileNames.includes(f)) {
+      return;
+    }
+
+    // Removes old plugins
+    if (!pluginName.includes(f)) {
       M.log.info(`Removing plugin '${f}' ...`);
       const c = `rm -rf ${__dirname}/${f}`;
       const stdout = execSync(c);
       M.log.verbose(stdout.toString());
     }
-    // If package.json doesn't exist, skip it
+    // If package.json doesn't exist, it is not a valid plugin. Skip it.
     const pluginPath = path.join(__dirname, f);
     if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
+      M.log.info(`Removing invalid plugin '${f}' ...`);
+      const c = `rm -rf ${__dirname}/${f}`;
+      const stdout = execSync(c);
+      M.log.verbose(stdout.toString());
       return;
     }
 
@@ -74,18 +85,22 @@ function loadPlugins() {
     M.log.info(`Loading plugin '${namespace}' ...`);
 
     // Install the dependencies
+    // TODO: (MBX-456) Make sure Yarn install works if NPM was used earlier
+    const yarnExe = path.join(M.root, 'node_modules', '.bin', 'yarn');
+    const rootNodeModules = path.join('..', '..', 'node_modules');
     const commands = [
       `cd ${pluginPath}`,
-      `yarn install --modules-folder ${path.join('..', '..', 'node_modules')}`,
-      `echo ${(process.platform === 'win32') ? '%errorlevel%' : '$?'}`
+      `${yarnExe} install --modules-folder ${rootNodeModules}`
     ];
     const stdout = execSync(commands.join('; '));
     M.log.verbose(stdout.toString());
 
-    // Install the plugin
-    try { // Handle error in plugin
+    // Try: creates the plug-in path with the plug-in name
+    try {
       pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
     }
+    // If try fails,
+    // Catch: logs "Could not install plugin" along with the error
     catch (err) {
       M.log.error(`Could not install plugin ${namespace}, error:`);
       M.log.error(err);
@@ -96,19 +111,22 @@ function loadPlugins() {
 }
 
 /**
- * Clones the plugin from a Git repository and places in the appropriate
- * location in the plugins directory.
- * @param data
+ * @description Clones the plugin from a Git repository and places in the
+ * appropriate location in the plugins directory.
+ *
+ * @param {Object} data The plugin configuration data
  */
 function clonePluginFromGitRepo(data) {
   // Remove plugin if it already exists in plugins directory
   const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
-  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join('plugins', data.name)}`);
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(M.root, 'plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
   // Set deploy key file permissions
-  if (data.hasOwnProperty('deployKey') && process.platform !== 'win32') {
+  let deployKeyCmd = '';
+  if (data.hasOwnProperty('deployKey')) {
     execSync(`chmod 400 ${data.deployKey}`);
+    deployKeyCmd = `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no" `;
   }
 
   let version = '';
@@ -120,10 +138,8 @@ function clonePluginFromGitRepo(data) {
   }
 
   // Create the git clone command
-  const cmd = [
-    `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no"`,
-    `git clone ${version}${data.source} ${path.join('plugins', data.name)}`
-  ].join(' ');
+  const cmd = `${deployKeyCmd}git clone ${version}${data.source} `
+            + `${path.join(M.root, 'plugins', data.name)}`;
 
   // Clone the repo
   M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
@@ -136,16 +152,19 @@ function clonePluginFromGitRepo(data) {
  * Gets the plugin from a URL and places it in a specified location in the
  * plugins directory.
  * @param data
+ *
+ * TODO: Remove from prc-001 (MBX-370)
  */
 // function getPluginFromURL(data) {
-//  // TODO
+//  // TODO (MBX-203)
 // }
 
 /**
- * Copies the plugin from a local directory to the plugins directory.
- * If the plugin location is already in the local directory, it should do
- * nothing.
- * @param data
+ * @description Copies the plugin from a local directory to the plugins
+ * directory. If the plugin location is already in the local directory, nothing
+ * occurs.
+ *
+ * @param {Object} data The plugin configuration data
  */
 function copyPluginFromLocalDir(data) {
   // Make sure source plugin is not in plugins directory
@@ -155,12 +174,12 @@ function copyPluginFromLocalDir(data) {
 
   // Remove plugin if it already exists in plugins directory
   const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
-  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join('plugins', data.name)}`);
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(M.root, 'plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
   // Generate the copy command
   let cmd = (process.platform === 'win32') ? 'xcopy /E' : 'cp -r ';
-  cmd = `${cmd} ${data.source} ${path.join('plugins', data.name)}`;
+  cmd = `${cmd} ${data.source} ${path.join(M.root, 'plugins', data.name)}`;
 
   // Execute the copy command
   M.log.info(`Copying plugin ${data.name} from ${data.source} ...`);
@@ -172,6 +191,8 @@ function copyPluginFromLocalDir(data) {
 /**
  * Extracts a zip file into the appropriate location in the plugins directory.
  * @param data
+ *
+ * TODO: Remove from prc-001 (MBX-370)
  */
 // function extractZip(data) {
 //
@@ -201,17 +222,21 @@ function copyPluginFromLocalDir(data) {
  * Extracts a tar.gz file into the appropriate location in the plugins
  * directory.
  * @param data
+ *
+ * TODO: Remove from prc-001 (MBX-370)
  */
 // function extractTarGz(data) {
-//   // TODO
+//   // TODO (MBX-204)
 // }
 
 /**
  * Extracts a gzip file into the appropriate location in the plugins directory.
  * @param data
+ *
+ * TODO: Remove from prc-001 (MBX-370)
  */
 // function extractGz(data) {
-//   // TODO
+//   // TODO (MBX-204)
 // }
 
 

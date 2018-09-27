@@ -1,12 +1,12 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/602-org-tests
+ * @module  test.602-org-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI
- * <br/>
+ *
  * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
  * It is not approved for public release or redistribution.<br/>
  *
@@ -16,244 +16,271 @@
  * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  This tests the API controller functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code we want to make sure everything still
- * works as it should. These API controller tests are specifically for the Organization
- * API tests: posting, patching, getting, and deleting orgs. Some tests are
- * conducting with invalid inputs for the org api controlls.
+ * @description This tests the organization API controller functionality:
+ * GET, POST, PATCH, and DELETE of an organization.
  *
- * TODO - fix description
  */
 
-// Load node modules
+// Node modules
+const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
-const mongoose = require('mongoose'); // TODO - remove dep on mongoose
+const path = require('path');
 
-// Load mbee modules
-const User = M.require('models.User');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
+// MBEE modules
+const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-
+// Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 
-
 /* --------------------( Main )-------------------- */
-
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * TODO - describe this function
+   * Before: Create admin user.
    */
   before((done) => {
-    const db = M.require('lib/db'); // TODO M.lib.db
     db.connect();
 
-    // Creating a Requesting Admin
-    const u = M.config.test.username;
-    const p = M.config.test.password;
-    const params = {};
-    const body = {
-      username: u,
-      password: p
-    };
-
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      const ldapuser = reqObj.user;
-      chai.expect(err).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
-          // Setting it equal to global variable
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-          done();
-        });
+    // Create test admin
+    testUtils.createAdminUser()
+    .then(() => {
+      done();
+    })
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
   /**
-   * TODO - add description
+   * After: Delete admin user.
    */
   after((done) => {
-    User.findOne({
-      username: M.config.test.username
-    }, (err, foundUser) => {
-      chai.expect(err).to.equal(null);
-      foundUser.remove((err2) => {
-        chai.expect(err2).to.equal(null);
-        mongoose.connection.close();
-        done();
-      });
+    // Delete test admin
+    testUtils.removeAdminUser()
+    .then(() => {
+      // Disconnect db
+      db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
   /* Execute the tests */
-  it('should GET an empty organization', getOrgs);
-  it('should POST an organization', postOrg01);
-  it('should POST second organization', postOrg02);
-  it('should GET posted organization', getOrg01);
-  it('should PATCH an update to posted organization', patchOrg01);
-  it('should reject a PATCH with invalid name', rejectPatchName);
-  it('should reject a PATCH to the org ID', rejectPatchID);
-  it('should get organization roles for a user', orgRole);
-  it('should reject a get org roles for another user', rejectRole);
-  it('should GET 3 organizations', getThreeOrgs);
-  it('should reject a POST with ID mismatch', postOrg02Err);
-  it('should reject a POST with invalid org id', postInvalidOrg);
-  it('should reject a POST with missing org name', postOrg03);
-  it('should reject a POST with an empty name', postEmptyOrg);
-  it('should reject a POST of a repeat org', postOrg04);
-  it('should DELETE organization', deleteOrg01);
-  it('should DELETE second organization', deleteOrg02);
-  it('should GET 0 organizations', getOrgs03);
+  it('should POST an organization', postOrg);
+  it('should GET posted organization', getOrg);
+  it('should PATCH an update to posted organization', patchOrg);
+  it('should GET a user\'s roles in an organization', getMemberRoles);
+  it('should GET existing organizations', getOrgs);
+  it('should reject a PATCH with invalid name', rejectPatchInvalidName);
+  it('should reject a PATCH to the org ID', rejectPatchIdMismatch);
+  it('should reject a POST with ID mismatch', rejectPostIdMismatch);
+  it('should reject a POST with invalid org id', rejectPostInvalidId);
+  it('should reject a POST with missing org name', rejectPostMissingName);
+  it('should reject a POST with an empty name', rejectPostEmptyName);
+  it('should reject a POST of an existing org', rejectPostExistingOrg);
+  it('should reject a DELETE of a non-existing org', rejectDeleteNonexistingOrg);
+  it('should DELETE organization', deleteOrg);
 });
 
 /* --------------------( Tests )-------------------- */
-// TODO - add descriptions to all functions and fix spacing between functions
-
-
-/** TEST?! Need to ask Josh about testing before any orgs are added to the database.
- * Makes a GET request to /api/org1. This should happen before any orgs
- * are added to the database. So the response should be an empty array.
- * TODO - let's talk about the above, should we expect the DB to be empty?
- *
- * TODO - What happens if we don't want to start with an empty db?
+/**
+ * @description Verifies POST /api/orgs/:orgid creates an organization.
  */
+function postOrg(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(testData.orgs[0])
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(json.name).to.equal(testData.orgs[0].name);
+    done();
+  });
+}
 
+/**
+ * @description Verifies GET /api/orgs/:ordid finds and returns the previously
+ * created organization.
+ */
+function getOrg(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
+    headers: getHeaders()
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.name).to.equal(testData.orgs[0].name);
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/orgs/:orgid updates the provided org fields
+ * on an existing organization.
+ */
+function patchOrg(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({ name: testData.orgs[1].name })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(json.name).to.equal(testData.orgs[1].name);
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH of org fails when invalid org name provided.
+ */
+function rejectPatchInvalidName(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({ name: testData.invalidOrgs[1].name })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 500 Internal Server Error
+    chai.expect(response.statusCode).to.equal(500);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Internal Server Error');
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/orgs/:orgid fails when ID in body does not
+ * match the ID in the URL parameters.
+ */
+function rejectPatchIdMismatch(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[1].name}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify(testData.ids[3])
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs/:orgid/members/:username returns an
+ * object containing that user's roles in the organization.
+ */
+function getMemberRoles(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.users[0].adminUsername}`,
+    headers: getHeaders()
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify the response body
+    const json = JSON.parse(body);
+    chai.expect(json.write).to.equal(true);
+    chai.expect(json.read).to.equal(true);
+    chai.expect(json.admin).to.equal(true);
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs returns the two organizations to which
+ * the user belongs.
+ */
 function getOrgs(done) {
   request({
     url: `${test.url}/api/orgs`,
     headers: getHeaders()
   },
   (err, response, body) => {
-    chai.expect(response.statusCode).to.equal(200);
-    const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(1);
+    // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verifies length of response body
+    const json = JSON.parse(body);
+    chai.expect(json.length).to.equal(2);
     done();
   });
 }
 
-
 /**
- * Makes a POST request to /api/orgs/:orgid to create an org.
- * This is our valid, expected use case.
+ * @description Verifies POST /api/orgs/:orgid fails when ID is body does not
+ * match the ID in the URL parameters.
  */
-function postOrg01(done) {
+function rejectPostIdMismatch(done) {
   request({
-    url: `${test.url}/api/orgs/xmen`,
+    url: `${test.url}/api/orgs/${testData.ids[4].id}`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      name: 'X Men'
-    })
+    body: JSON.stringify(testData.orgs[0])
   },
   (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.name).to.equal('X Men');
+    // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-
-/**
- * Makes a POST request to /api/orgs/:orgid to create an org.
- * This should succeed.
- */
-function postOrg02(done) {
-  request({
-    url: `${test.url}/api/orgs/shield`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      name: 'SHIELD'
-    })
-  },
-  (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal('shield');
-    chai.expect(json.name).to.equal('SHIELD');
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-
-/**
- * Makes a GET request to /api/org1. This should happen before any orgs
- * are added to the database. So the response should be an empty array.
- */
-function getOrg01(done) {
-  request({
-    url: `${test.url}/api/orgs/xmen`,
-    headers: getHeaders()
-  },
-  (err, response, body) => {
-    chai.expect(response.statusCode).to.equal(200);
-    const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('X Men');
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-/**
- * Makes an UPDATE request to api/orgs/org1. This should update the orgninal
- * org1 name: "Organization 1" that was added to the database to name" "
- * Updated Organization 1". This should succeed.
- */
-function patchOrg01(done) {
-  request({
-    url: `${test.url}/api/orgs/xmen`,
-    headers: getHeaders(),
-    method: 'PATCH',
-    body: JSON.stringify({
-      id: 'xmen',
-      name: 'Wolverine'
-    })
-  },
-  (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal('xmen');
-    chai.expect(json.name).to.equal('Wolverine');
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-/**
- * Attempts to make an UPDATE request to api/orgs/org2. This has
- * an invalid name for updating the org and therefore
- * will throw an error.
-<<<<<<< HEAD
-=======
- * Throws an internal service error 500 Internal Service Error
- * JIRA TASK: MBX-220 bug fixes error code
->>>>>>> origin/master
- */
-
-function rejectPatchName(done) {
-  request({
-    url: `${test.url}/api/orgs/shield`,
-    headers: getHeaders(),
-    method: 'PATCH',
-    body: JSON.stringify({
-      id: 'shield',
-      name: ''
-    })
-  },
-  (err, response, body) => {
+    // Expect response status: 400 Bad Request
     chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
     done();
@@ -261,274 +288,170 @@ function rejectPatchName(done) {
 }
 
 /**
- * Attempts to make an UPDATE request to api/orgs/org2. This is updating
- * the org ID and therefore should throw an error.
+ * @description Verifies POST /api/orgs/:orgid fails when invalid ID provided.
  */
-
-function rejectPatchID(done) {
+function rejectPostInvalidId(done) {
   request({
-    url: `${test.url}/api/orgs/shield`,
+    url: `${test.url}/api/orgs/${testData.ids[5].id}`,
     headers: getHeaders(),
-    method: 'PATCH',
-    body: JSON.stringify({
-      id: 'shield'
-    })
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(testData.names[8])
   },
   (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 500 Internal Server Error
+    chai.expect(response.statusCode).to.equal(500);
+    // Verify error message in response
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Internal Server Error');
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid fails when no name field in body.
+ */
+function rejectPostMissingName(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.invalidOrgs[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(testData.invalidOrgs[0])
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
     chai.expect(response.statusCode).to.equal(400);
+    // Verify the error message in the response body
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-/**
- * Makes a request to get the organization roles for
- * the user. This should passwith a 200 code.
- */
-
-function orgRole(done) {
-  request({
-    url: `${test.url}/api/orgs/xmen/members/${M.config.test.username}`,
-    headers: getHeaders()
-  },
-  (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.write).to.equal(true);
-    chai.expect(json.read).to.equal(true);
-    chai.expect(json.admin).to.equal(true);
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-/**
- * Attempts to make a request to get the organization roles for
- * the another user then the request.
- * Not sure if it shoud throw an error or pass.
- */
-function rejectRole(done) {
-  request({
-    url: `${test.url}/api/orgs/xmen/members/${M.config.test.username}`,
-    headers: getHeaders()
-  },
-  (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.write).to.equal(true);
-    chai.expect(json.read).to.equal(true);
-    chai.expect(json.admin).to.equal(true);
-    chai.expect(err).to.equal(null);
     done();
   });
 }
 
 
 /**
- * Makes a GET request to /api/orgs. At this point we should have 3 orgs
- * in the database.
+ * @description Verifies POST /api/orgs/:orgid fails when given an empty/invalid
+ * name field.
  */
-function getThreeOrgs(done) {
+function rejectPostEmptyName(done) {
   request({
-    url: `${test.url}/api/orgs`,
-    headers: getHeaders()
-  },
-  (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.length).to.equal(3);
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-
-/**
- * Makes a POST request to /api/orgs/:orgid to create an org.
- * This deliberately has a mismatch between the URI ID and the body ID.
- * This should respond with a 400 status and the body "Bad Request".
- */
-function postOrg02Err(done) {
-  request({
-    url: `${test.url}/api/orgs/xmen`,
+    url: `${test.url}/api/orgs/${testData.invalidOrgs[1].id}`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: 'shield',
-      name: 'SHIELD'
-    })
+    body: JSON.stringify(testData.invalidOrgs[1])
   },
   (err, response, body) => {
-    chai.expect(response.statusCode).to.equal(400);
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 500 Internal Server Error
+    chai.expect(response.statusCode).to.equal(500);
+    // Verify error message in response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-/**
- * Makes a POST request to /api/orgs/:orgid to create an org.
- * This deliberately provides an invalid org ID and expects a
- * response of 400 Bad Request.
- */
-function postInvalidOrg(done) {
-  request({
-    url: `${test.url}/api/orgs/invalidOrgId`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      name: 'Invalid Organization'
-    })
-  },
-  (err, response) => {
-    chai.expect(response.statusCode).to.not.equal(200);
-    chai.expect(err).to.equal(null);
+    chai.expect(json.message).to.equal('Internal Server Error');
     done();
   });
 }
 
 
 /**
- * Makes a POST request to /api/orgs/:orgid to create an org.
- * This deliberately has a missing name. A 400 Bad Request is expected.
+ * @description Verifies POST /api/orgs/:orgid fails when attempting to create
+ * an org that already exists.
  */
-function postOrg03(done) {
+function rejectPostExistingOrg(done) {
   request({
-    url: `${test.url}/api/orgs/pymparticles`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: 'pymparticles'
-    })
+    body: JSON.stringify({ name: testData.orgs[0].name })
   },
   (err, response, body) => {
-    chai.expect(response.statusCode).to.equal(400);
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
+    // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-
-/**
- * Makes a POST request to /api/orgs/:orgid to create an org.
- * This deliberately has an empty name. A 400 Bad Request is expected.
- */
-function postEmptyOrg(done) {
-  request({
-    url: `${test.url}/api/orgs/emptyOrg`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-
-    })
-  },
-  (err, response, body) => {
-    chai.expect(response.statusCode).to.equal(400);
+    // Expect response status: 403 Forbidden
+    chai.expect(response.statusCode).to.equal(403);
+    // Verify error message in response
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-
-/**
- * Makes a POST request to /api/orgs/:orgid to create an org.
- * This attempts to post an org with an ID that already exists.
- * It should be rejected with a 500 error.
- */
-function postOrg04(done) {
-  request({
-    url: `${test.url}/api/orgs/shield`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      name: 'SHIELD'
-    })
-  },
-  (err, response, body) => {
-    chai.expect(response.statusCode).to.equal(400);
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    chai.expect(err).to.equal(null);
+    chai.expect(json.message).to.equal('Forbidden');
     done();
   });
 }
 
 /**
- * Makes a DELETE request to /api/orgs/:orgid to remove an org.
- * This should succeed.
+ * @description Verifies DELETE /api/orgs:orgid fails when attempting to delete
+ * a non-existing organization.
+ * NOTE: The provided {soft: false}, which defaults to true if not provided.
+ * This option is available to admin users to change the delete behavior from
+ * soft-delete to hard delete.
  */
-function deleteOrg01(done) {
+function rejectDeleteNonexistingOrg(done) {
   request({
-    url: `${test.url}/api/orgs/xmen`,
+    url: `${test.url}/api/orgs/${testData.ids[6].id}`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
-    body: JSON.stringify({
-      soft: false
-    })
-  },
-  function(err, response) {
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-
-/**
- * Makes a DELETE request to /api/orgs/:orgid to remove an org.
- * This should succeed.
- */
-function deleteOrg02(done) {
-  request({
-    url: `${test.url}/api/orgs/shield`,
-    headers: getHeaders(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      soft: false
-    })
-  },
-  function(err, response) {
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(err).to.equal(null);
-    done();
-  });
-}
-
-/**
- * Makes a GET request to /api/orgs. At this point our created orgs
- * should be deleted except for the default org.
- */
-function getOrgs03(done) {
-  request({
-    url: `${test.url}/api/orgs`,
-    headers: getHeaders()
+    body: JSON.stringify({ soft: false })
   },
   function(err, response, body) {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
+    // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
-    chai.expect(json.length).to.equal(1);
+    // Expect response status: 404 Not Found
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify error message in response
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
+    done();
+  });
+}
+
+
+/**
+ * @description Verifies DELETE /api/orgs:orgid deletes an organization.
+ * NOTE: The provided {soft: false}, which defaults to true if not provided.
+ * This option is available to admin users to change the delete behavior from
+ * soft-delete to hard delete.
+ */
+function deleteOrg(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({ hardDelete: true })
+  },
+  function(err, response) {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     done();
   });
 }
 
 /* ----------( Helper Functions )----------*/
-
 /**
- * Produces and returns an object containing common request headers.
+ * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',
     authorization: s
   };
+}
+
+/**
+ * @description Helper function for setting the certificate authorities for each request.
+ */
+function readCaFile() {
+  if (test.hasOwnProperty('ca')) {
+    return fs.readFileSync(`${M.root}/${test.ca}`);
+  }
 }

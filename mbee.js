@@ -1,27 +1,32 @@
 #!/usr/bin/env node
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
-/*
+/**
+ * Classification: UNCLASSIFIED
+ *
  * @module mbee.js
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This file defines and implements the MBEE server functionality.
+ * @description This file defines the MBEE CLI commands and sets up the
+ * global M object.
  */
 
-// Node.js Built-in Modules
-const fs = require('fs');                         // Access the filesystem
-const path = require('path');                     // Find directory paths
-const pkg = require(`${__dirname}/package.json`); // Metadata{version, build #, name, etc.]
+// Node Modules
+const fs = require('fs');     // Access the filesystem
+const path = require('path'); // Find directory paths
+
+// Project Metadata
+const pkg = require(path.join(__dirname, 'package.json'));
+
 
 // The global MBEE helper object
 global.M = {};
@@ -68,7 +73,7 @@ Object.defineProperty(M, 'version4', {
 });
 
 /**
- * This function provides a utility funtion for requiring other MBEE modules in
+ * This function provides a utility function for requiring other MBEE modules in
  * the app directory. The global-require is explicitly disabled here due to the
  * nature of this function.
  */
@@ -83,11 +88,11 @@ Object.defineProperty(M, 'require', {
 });
 
 /**
- * Given a file-name (typically passed in as module.filename),
+ * Given a filename (typically passed in as module.filename),
  * return the module name.
  */
 Object.defineProperty(M, 'getModuleName', {
-  value: fname => fname.split('/')[fname.split('/').length - 1],
+  value: fname => fname.split(path.sep)[fname.split(path.sep).length - 1],
   writable: false,
   enumerable: true
 });
@@ -99,13 +104,18 @@ Object.defineProperty(M, 'root', {
   enumerable: true
 });
 
-// Extract configuration json file and initiate the config object
+// Load the parseJSON library module.
 const parseJSON = M.require('lib.parse-json');
-const configPath = path.join('config', `${M.env}.cfg`);
-const stripComments = parseJSON.removeComments(configPath);
+// Set configuration file path
+const configPath = path.join(M.root, 'config', `${M.env}.cfg`);
+// Read configuration file
+const configContent = fs.readFileSync(configPath).toString();
+// Remove comments from configuration string
+const stripComments = parseJSON.removeComments(configContent);
+// Parse configuration string into JSON object
 const config = JSON.parse(stripComments);
 
-// Check if config secret is set to RANDOM
+// Check if config secret is RANDOM
 if (config.server.secret === 'RANDOM') {
   // Config state is RANDOM, generate and set config secret
   const random1 = Math.random().toString(36).substring(2, 15);
@@ -122,9 +132,6 @@ Object.defineProperty(M, 'config', {
   enumerable: true
 });
 
-/******************************************************************************
- *  Load Library Modules                                                      *
- ******************************************************************************/
 // Check if the module/build folder exist
 const installComplete = fs.existsSync(`${M.root}/node_modules`);
 const buildComplete = fs.existsSync(`${M.root}/build`);
@@ -137,41 +144,41 @@ if (installComplete) {
     writable: false,
     enumerable: true
   });
+
+  // Initialize the CustomError Class
+  Object.defineProperty(M, 'CustomError', {
+    value: M.require('lib.errors').CustomError
+  });
 }
 
 // Make the M object read only and its properties cannot be changed or removed.
 Object.freeze(M);
 
-// Set argument commands for use in configuration lib and main function
-// Example: node mbee.js <subcommand> <opts>
-const subcommand = process.argv.slice(2, 3)[0];
-const opts = process.argv.slice(3);
-
-// Check for start command and build NOT completed
-if (!installComplete) {
-  // eslint-disable-next-line no-console
-  console.log('\n  Error: Must install modules before attempting to run other commands.'
-            + '\n\n  yarn install or npm install\n\n');
-  process.exit(0);
-}
-
-// Check for start command and build NOT completed
-if (subcommand === 'start' && !buildComplete) {
-  // eslint-disable-next-line no-console
-  console.log('\n  Error: Must run build command before attempting to run start.'
-            + '\n\n  node mbee build\n\n');
-  process.exit(0);
-}
-
 // Invoke main
 main();
 
-/******************************************************************************
- *  Main Function                                                             *
- ******************************************************************************/
 function main() {
-  const tasks = ['clean', 'build', 'lint', 'docker', 'start', 'test'];
+  // Set argument commands for use in configuration lib and main function
+  // Example: node mbee.js <subcommand> <opts>
+  const subcommand = process.argv[2];
+  const opts = process.argv.slice(3);
 
+  // Check for start command and build NOT completed
+  if (!installComplete) {
+    // eslint-disable-next-line no-console
+    console.log('\n  Error: Must install modules before attempting to run other commands.'
+      + '\n\n  yarn install or npm install\n\n');
+    process.exit(0);
+  }
+
+  // Check for start command and build NOT completed
+  if (subcommand === 'start' && !buildComplete) {
+    // eslint-disable-next-line no-console
+    console.log('\n  Error: Must run build command before attempting to run start.'
+      + '\n\n  node mbee build\n\n');
+    process.exit(0);
+  }
+  const tasks = ['clean', 'build', 'lint', 'docker', 'start', 'test'];
   if (tasks.includes(subcommand)) {
     // eslint-disable-next-line global-require
     const task = require(path.join(M.root, 'scripts', subcommand));

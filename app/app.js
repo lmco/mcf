@@ -1,25 +1,28 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
-/*
- * app.js
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module app
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Defines the MBEE App. This allows the app to be imported by other modules.
- * The app is imported by the mbee.js script which then runs the server.
+ * @description Defines the MBEE App. Allows MBEE app to be imported by other modules.
+ * This app is imported by start.js script which then runs the server.
  */
 
-// Load node modules
+// Node modules
 const path = require('path');
+
+// NPM modules
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const session = require('express-session');
@@ -28,81 +31,173 @@ const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
 const flash = require('express-flash');
 
-// Load mbee modules
+// MBEE modules
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
+const UserController = M.require('controllers.user-controller');
+const Organization = M.require('models.organization');
+const User = M.require('models.user');
 
-// Connect to database, then initialize application
-db.connect()
-.then(conn => {
-  initApp();
-})
-.catch(err => {
-  M.log.critical(err);
-  process.exit(1);
-});
-
-// TODO: do we need this here if it's at the bottom?
+// Initialize express app and export the object
 const app = express();
 module.exports = app;
 
+// Connect to database, initialize application, and create default admin and
+// default organization if needed.
+db.connect()
+.then(() => createDefaultOrganization())
+.then(() => createDefaultAdmin())
+.then(() => initApp())
+.catch(err => {
+  M.log.critical(err.stack);
+  process.exit(1);
+});
+
 /**
- * Initializes the application and exports the app.js
+ * @description Initializes the application and exports app.js
  */
 function initApp() {
-  // Configure the static/public directory
-  const staticDir = path.join(__dirname, '..', 'build/public');
-  app.use(express.static(staticDir));
+  return new Promise((resolve, reject) => {
+    // Configure the static/public directory
+    const staticDir = path.join(__dirname, '..', 'build', 'public');
+    app.use(express.static(staticDir));
 
-  // Allows receiving JSON in the request body
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
+    // Allows receiving JSON in the request body
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
 
-  // Allow full trace of IP address using LM Proxy
-  app.enable('trust proxy');
+    // Trust proxy for IP logging
+    app.enable('trust proxy');
 
-  // Configures views/templates
-  app.set('view engine', 'ejs');
-  app.set('views', path.join(__dirname, 'views'));
-  app.use(expressLayouts);
+    // Configures ejs views/templates
+    app.set('view engine', 'ejs');
+    app.set('views', path.join(__dirname, 'views'));
+    app.use(expressLayouts);
 
-  /* Configure sessions */
-  // Convenient conversions from ms to other times units
-  const units = utils.timeConversions[M.config.auth.session.units];
-  // Defines session behavior
-  app.use(session({
-    name: 'SESSION_ID',
-    secret: M.config.server.secret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: M.config.auth.session.expires * units },
-    store: new MongoStore({ mongooseConnection: mongoose.connection })
-  }));
+    // Configure sessions
+    const units = utils.timeConversions[M.config.auth.session.units];
+    app.use(session({
+      name: 'SESSION_ID',
+      secret: M.config.server.secret,
+      resave: false,
+      saveUninitialized: false,
+      cookie: { maxAge: M.config.auth.session.expires * units },
+      store: new MongoStore({ mongooseConnection: mongoose.connection })
+    }));
 
-  // Enable flash messages
-  app.use(flash());
+    // Enable flash messages
+    app.use(flash());
 
-  // Log IP address of all incoming requests
-  app.use(middleware.logIP);
+    // Log IP address of all incoming requests
+    app.use(middleware.logIP);
 
-  // Load the API Routes
-  if (M.config.server.api.enabled) {
-    app.use('/api', M.require('api_routes'));
-  }
+    // Load the API Routes
+    if (M.config.server.api.enabled) {
+      app.use('/api', M.require('api-routes'));
+    }
 
-  // Load the plugin routes
-  if (M.config.server.plugins.enabled) {
-    const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
-    const PluginRouter = require(PluginRoutesPath); // eslint-disable-line global-require
-    app.use('/plugins', PluginRouter);
-  }
+    // Load the plugin routes
+    if (M.config.server.plugins.enabled) {
+      const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
+      const PluginRouter = require(PluginRoutesPath); // eslint-disable-line global-require
+      app.use('/plugins', PluginRouter);
+    }
 
-  // Load the UI/other routes
-  if (M.config.server.ui.enabled) {
-    app.use('/', M.require('routes'));
-  }
+    // Load the UI/other routes
+    if (M.config.server.ui.enabled) {
+      app.use('/', M.require('routes'));
+    }
+    return resolve();
+  });
+}
 
-  // Export the app
-  module.exports = app;
+// Create default organization if it does not exist
+function createDefaultOrganization() {
+  return new Promise((resolve, reject) => {
+    // Initialize createdOrg
+    let createdOrg = false;
+    // Initialize userIDs
+    let userIDs = null;
+
+    // Find all users
+    UserController.findUsers({ admin: true })
+    .then(users => {
+      // Set userIDs to the _id of the users array
+      userIDs = users.map(u => u._id);
+      // Search for an organization with id 'default'
+      return Organization.findOne({ id: 'default' });
+    })
+    .then(org => {
+      // Check if org is NOT null
+      if (org !== null) {
+        // Default organization exists, prune user permissions to only include
+        // active users.
+        org.permissions.read = userIDs;
+        org.permissions.write = userIDs;
+        return org.save();
+      }
+      // Set createdOrg to true
+      createdOrg = true;
+      // Default organization does NOT exist, create it and add all active users
+      // to permissions list
+      const defaultOrg = new Organization({
+        id: M.config.server.defaultOrganizationId,
+        name: M.config.server.defaultOrganizationName,
+        permissions: {
+          read: userIDs,
+          write: userIDs
+        }
+      });
+      // Save new default organization
+      return defaultOrg.save();
+    })
+    // Resolve on success of saved organization
+    .then(() => {
+      if (createdOrg) {
+        M.log.info('Default Organization Created');
+      }
+      return resolve();
+    })
+    // Catch and reject error
+    .catch(error => reject(error));
+  });
+}
+
+// Create default admin if a global admin does not exist
+function createDefaultAdmin() {
+  return new Promise((resolve, reject) => {
+    // Initialize userCreated
+    let userCreated = false;
+    // Search for a user who is a global admin
+    User.findOne({ admin: true })
+    .then(user => {
+      // Check if the user is NOT null
+      if (user !== null) {
+        // Global admin already exists, resolve
+        return resolve();
+      }
+      // set userCreated to true
+      userCreated = true;
+      // No global admin exists, create local user as global admin
+      const adminUserData = {
+        // Set username and password of global admin user from configuration.
+        username: M.config.server.defaultAdminUsername,
+        password: M.config.server.defaultAdminPassword,
+        provider: 'local',
+        admin: true
+      };
+      // Save new global admin user
+      return UserController.createUser({ admin: true }, adminUserData);
+    })
+    // Resolve on success of saved admin
+    .then(() => {
+      if (userCreated) {
+        M.log.info('Default Admin Created');
+      }
+      return resolve();
+    })
+    // Catch and reject error
+    .catch(error => reject(error));
+  });
 }

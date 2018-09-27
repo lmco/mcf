@@ -1,4 +1,36 @@
+/**
+ * This file is based on the CSS from Swagger-UI-Express which can be found at
+ * https://github.com/scottie1984/swagger-ui-express. The license file can be
+ * found at https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE.
+ *
+ * The original license is provided below. This file is a modification of the
+ * original CSS. Changes and derivative work are all covered by the LICENSE.md
+ * file at the root of this project.
+ */
 
+/**
+    The MIT License (MIT)
+
+    Copyright (c) 2018 Scott IT London
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+ */
 @import 'variables';
 @charset "UTF-8";
 
@@ -225,7 +257,7 @@ body {
   cursor: pointer;
   -webkit-box-align: center;
   -ms-flex-align: center;
-  align-items: center
+  align-items: center;
 }
 
 .swagger-ui .opblock.opblock-post {
@@ -246,7 +278,7 @@ body {
 .swagger-ui .opblock.opblock-put {
   /*border-color: #fca130;*/
   border-color: $swagger-border-color-put;
-  background: rgba(252, 161, 48, .1)
+  background: $swagger-background-color-put;
 }
 
 .swagger-ui .opblock.opblock-put .opblock-summary-method {
@@ -261,7 +293,7 @@ body {
 .swagger-ui .opblock.opblock-delete {
   /*border-color: #f93e3e;*/
   border-color: $swagger-border-color-delete;
-  background: rgba(249, 62, 62, .1)
+  background: $swagger-background-color-delete;
 }
 
 .swagger-ui .opblock.opblock-delete .opblock-summary-method {
@@ -276,7 +308,7 @@ body {
 .swagger-ui .opblock.opblock-get {
   /*border-color: #61affe;*/
   border-color: $swagger-border-color-get;
-  background: rgba(97, 175, 254, .1)
+  background: $swagger-background-color-get;
 }
 
 .swagger-ui .opblock.opblock-get .opblock-summary-method {
@@ -298,7 +330,7 @@ body {
 }
 
 .swagger-ui .opblock.opblock-patch .opblock-summary {
-  border-color: #50e3c2
+  border-color: $swagger-border-color-patch;
 }
 
 .swagger-ui .opblock.opblock-head {
@@ -1219,7 +1251,11 @@ body {
 
 .swagger-ui table tbody tr td:first-of-type {
   width: 20%;
-  padding: 10px 0
+  padding: 10px 0;
+}
+
+.col {
+    width: unset;
 }
 
 .swagger-ui table thead tr td, .swagger-ui table thead tr th {
@@ -1566,7 +1602,7 @@ body {
 
  .swagger-ui .opblock.opblock-post {
    border-color: $swagger-border-color-post; /*#10a54a;*/
-   background: rgba(241, 241, 241, .1);
+   background: $swagger-background-color-post;
  }
 
  .swagger-ui .opblock.opblock-post .opblock-summary-method {
@@ -1594,11 +1630,6 @@ body {
    border-color: #DADFE1;
  }
 
- .swagger-ui .opblock.opblock-delete {
-   border-color: $swagger-border-color-delete; /*#a41e22;*/
-   background: rgba(241, 241, 241, .1);
- }
-
  .swagger-ui .opblock.opblock-delete .opblock-summary-method {
    background: #fafafa;
    color: #a41e22;
@@ -1607,11 +1638,6 @@ body {
 
  .swagger-ui .opblock.opblock-delete .opblock-summary {
    border-color: #DADFE1;
- }
-
- .swagger-ui .opblock.opblock-get {
-   border-color: $swagger-border-color-get; /*#0f6ab4;*/
-   background: rgba(241, 241, 241, .1);
  }
 
  .swagger-ui .opblock.opblock-get .opblock-summary-method {
@@ -1625,14 +1651,14 @@ body {
  }
 
  .swagger-ui .opblock.opblock-patch {
-   border-color: #c5862b;
-   background: rgba(241, 241, 241, .1);
+   border-color: $swagger-border-color-patch;
+   background: $swagger-background-color-patch;
  }
 
  .swagger-ui .opblock.opblock-patch .opblock-summary-method {
    background: #fafafa;
    color: #c5862b;
-   border: solid 1px #c5862b;
+   border: solid 1px $swagger-border-color-patch;
  }
 
  .swagger-ui .opblock.opblock-patch .opblock-summary {
@@ -1679,4 +1705,8 @@ body {
 
  .swagger-ui .info a:hover {
    color: #0f6ab4;
+ }
+
+ .swagger-ui .tablinks {
+     padding-right: 15px;
  }

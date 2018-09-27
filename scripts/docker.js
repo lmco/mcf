@@ -1,59 +1,54 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * scripts/docker.js
+ * Classification: UNCLASSIFIED
  *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @module scripts.docker
  *
- * This script defines the Docker build and run process. Most of the
- * process is parameterized by the configuration.
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * @description Builds and runs docker containers
  */
 
-/* eslint-disable no-console */
-
-// Load node modules
-const { spawn, spawnSync } = require('child_process');
-
-// If the application is run directly from node, notify the user and fail
-if (module.parent == null) {
+// Error Check - Check if file was run directly or global M object is undefined
+if (module.parent == null || typeof M === 'undefined') {
+  // File was run directly, print error message and exit process
   // eslint-disable-next-line no-console
   console.log('\nError: please use mbee to run this script by using the '
     + 'following command. \n\nnode mbee docker\n');
   process.exit(-1);
 }
 
-/**
- * The Docker command can be used to build a Docker image or run a Docker
- * container. It supports the command line arguments `--clean`, `--build`, and
- * `--run` to clean the previous docker container, build the Docker image, or
- * run the container, respectively. All of these options expect configuration
- * parameters to be defined in the Docker section of the config.json file.
- * The commands are not mutually exclusive, if run together the previous Docker
- * container is stopped and removed, the image is built and then the container
- * is run.
- */
+// Node modules
+const { spawn, spawnSync } = require('child_process');
 
+
+// TODO: Include detailed docker information in readme (MBX-464)
+/**
+ * @description The Docker command can be used to build a Docker image or run a Docker
+ * container. It supports the command line arguments:
+ * --clean
+ * --build`
+ * --run`
+ */
 function docker(args) {
   // Removes the previous docker build.
   if (args.includes('--clean')) {
-    let cmd = null;
-
     // Stop the running container
-    cmd = spawnSync('docker', ['stop', M.config.docker.container.name], { stdio: 'inherit' });
+    let cmd = spawnSync('docker', ['stop', M.config.docker.container.name], { stdio: 'inherit' });
     console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
     console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
     console.log('Docker container stopped'); // eslint-disable-line no-console
 
-    // Remove the container
+    // Remove the container image
     cmd = spawnSync('docker', ['rm', M.config.docker.container.name], { stdio: 'inherit' });
     console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
     console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
@@ -62,32 +57,35 @@ function docker(args) {
 
   // Build the Docker image
   else if (args.includes('--build')) {
-    console.info('Building Docker Image ...');
+    M.log.info('Building Docker Image ...');
 
-    // Build docker by running: "docker build -f .../Dockerfile -t mbee ."
-    const buildArgs = [                                               // Create the build args
+    // Build docker image
+    const buildArgs = [
       'build',
       '-f', M.config.docker.Dockerfile,
       '-t', M.config.docker.image.name, '.'
     ];
-    const cmd = spawn('docker', buildArgs, { stdio: 'inherit' });     // Run the build process
+    // Run build process
+    const cmd = spawn('docker', buildArgs, { stdio: 'inherit' });
     cmd.on('data', (data) => {
-      console.log(data.toString());
+      console.log(data.toString()); // eslint-disable-line no-console
     });
     cmd.on('exit', (code) => {
-      if (code !== 0) {                                                // Fail if exit code != 0
-        console.log('Docker build failed'); // eslint-disable-line no-console
+      // Check if exit code NOT 0
+      if (code !== 0) {
+        // exit code NOT 0, fail
+        M.log.error('Docker build failed');
         process.exit(code);
       }
-      else {                                                          // Log successful build
-        console.log('Docker Image Built.');
+      else {
+        M.log.info('Docker Image Built.');
       }
     });
   }
 
   // Run the Docker container
   else if (args.includes('--run')) {
-    console.log('Running Docker Container ...');
+    M.log.info('Running Docker Container ...');
 
     // Build the "docker run" command
     let rargs = [
@@ -97,31 +95,38 @@ function docker(args) {
       '--restart=always',
       '-e', `MBEE_ENV=${M.env}`
     ];
+    // Check if server http and docker http are enabled
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
+      // http and docker http enabled, open specified ports
       rargs = rargs.concat(['-p', `${M.config.docker.http.port}:${M.config.server.http.port}`]);
     }
+    // Check if server https and docker https are enabled
     if (M.config.server.https.enabled && M.config.docker.https.enabled) {
+      // https and docker https enabled, open specified ports
       rargs = rargs.concat(['-p', `${M.config.docker.https.port}:${M.config.server.https.port}`]);
     }
+    // Set docker image name
     rargs = rargs.concat(['--name', M.config.docker.container.name]);
     rargs = rargs.concat([M.config.docker.image.name]);
-    console.log(rargs);
 
     // Run the Docker container
     const cmd = spawn('docker', rargs, { stdio: 'inherit' });
+    // eslint-disable-next-line no-console
     cmd.on('data', (data) => { console.log(data.toString()); });
     cmd.on('exit', (code) => {
+      // Check if exit code NOT 0
       if (code !== 0) {
-        console.log('Docker run failed');
+        // exit code NOT 0, fail
+        M.log.error('Docker run failed');
         process.exit(code);
       }
     });
-    console.log('Docker Container Running in Background.');
+    M.log.info('Docker Container Running in Background.');
   }
 
   // Get the Docker logs
   else if (args.includes('--get-logs')) {
-    console.log('Getting docker logs ...');
+    M.log.info('Getting docker logs ...');
 
     // Build the "docker run" command
     const rargs = [
@@ -131,17 +136,20 @@ function docker(args) {
 
     // Call the Docker logs command
     const cmd = spawn('docker', rargs, { stdio: 'inherit' });
+    // eslint-disable-next-line no-console
     cmd.on('data', (data) => { console.log(data.toString()); });
     cmd.on('exit', (code) => {
+      // Check if exit code NOT 0
       if (code !== 0) {
-        console.log('Docker logs failed');
+        // exit code NOT 0, fail
+        M.log.error('Docker logs failed');
         process.exit(code);
       }
     });
-    console.log('End of Docker logs.');
+    M.log.info('End of Docker logs.');
   }
   else {
-    console.log('Invalid arguments');
+    M.log.info('Invalid arguments');
   }
 }
 

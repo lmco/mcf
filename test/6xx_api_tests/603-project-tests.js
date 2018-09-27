@@ -1,12 +1,12 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test/603-project-tests
+ * @module  test.603-project-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI
- * <br/>
+ *
  * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
  * It is not approved for public release or redistribution.<br/>
  *
@@ -15,420 +15,375 @@
  *
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description  This tests the API controller functionality. These tests
- * are to make sure the code is working as it should or should not be. Especially,
- * when making changes/ updates to the code. These API controller tests are
- * specifically for the Project API tests: posting, patching, getting, and deleting
- * projects. Some tests are conducting with invalid inputs for the project
- * api controlls.
- *
- * TODO - fix the description
+ * @description This tests the project API controller functionality:
+ * GET, POST, PATCH, and DELETE of a project.
  */
 
-// Load node modules
+// Node modules
+const fs = require('fs');
 const chai = require('chai');
-const mongoose = require('mongoose'); // TODO - remove dependency on mongoose
 const request = require('request');
+const path = require('path');
 
-// Load mbee modules
-const OrgController = M.require('controllers.OrganizationController');
-const AuthController = M.require('lib.auth');
-const User = M.require('models.User');
-const mockExpress = M.require('lib.mock-express');
+// MBEE modules
+const OrgController = M.require('controllers.organization-controller');
+const User = M.require('models.user');
+const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-
+// Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 const test = M.config.test;
 let org = null;
-let user = null;
-
+let adminUser = null;
 
 /* --------------------( Main )-------------------- */
-
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: run before all tests
-   * TODO - describe
+   * Before: Run before all tests.
+   * Create admin user. Create an organization.
    */
   before((done) => {
-    const db = M.require('lib/db'); // TODO - M.lib.db
+    // Connect db
     db.connect();
 
-    // Creating a Requesting Admin
-    const u = M.config.test.username;
-    const p = M.config.test.password;
-    const params = {};
-    const body = {
-      username: u,
-      password: p
-    };
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((user) => {
+      // Set to global admin
+      adminUser = user;
 
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      const ldapuser = reqObj.user;
-      chai.expect(err).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
-          // Setting it equal to global variable
-          user = userUpdate;
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-          // Creating an Organization used in the tests
-          const orgData = {
-            id: 'biochemistry',
-            name: 'Scientist',
-            permissions: {
-              admin: [user._id],
-              write: [user._id],
-              read: [user._id]
-            }
-          };
-          OrgController.createOrg(user, orgData)
-          .then((retOrg) => {
-            org = retOrg;
-            chai.expect(retOrg.id).to.equal('biochemistry');
-            chai.expect(retOrg.name).to.equal('Scientist');
-            chai.expect(retOrg.permissions.read).to.include(user._id.toString());
-            chai.expect(retOrg.permissions.write).to.include(user._id.toString());
-            chai.expect(retOrg.permissions.admin).to.include(user._id.toString());
-            done();
-          })
-          .catch((firsterr) => {
-            const error1 = JSON.parse(firsterr.message);
-            chai.expect(error1.description).to.equal(null);
-            done();
-          });
-        });
+      // Create org
+      return testUtils.createOrganization(user);
+    })
+    .then((retOrg) => {
+      // Set global org
+      org = retOrg;
+
+      // Verify org was created correctly
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
+      chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
+      done();
+    })
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
   /**
-   * After: run after all tests
-   * TODO - describe
+   * After: Delete the organization and admin user.
    */
-
   after((done) => {
-    // Removing the Organization
-    OrgController.removeOrg(user, 'biochemistry', { soft: false })
+    // Remove the Organization
+    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
     .then((retOrg) => {
-      chai.expect(retOrg.id).to.equal('biochemistry');
-      User.findOne({
-        username: M.config.test.username
-      }, (err, foundUser) => {
-        chai.expect(err).to.equal(null);
-        foundUser.remove((err2) => {
-          chai.expect(err2).to.equal(null);
-          mongoose.connection.close();
-          done();
-        });
-      });
+      // Verify deleted org
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+
+      // Find the admin user
+      return User.findOne({ username: adminUser.username });
     })
-    .catch((err2) => {
-      const error2 = JSON.parse(err2.message);
-      chai.expect(error2.description).to.equal(null);
-      mongoose.connection.close();
+    // Remove admin user
+    .then((foundUser) => foundUser.remove())
+    .then(() => {
+      // Disconnect from database
+      db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      // Disconnect from database
+      db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
       done();
     });
   });
 
   /* Execute tests */
-  it('should POST a project to the organization', postProject01);
-  it('should GET the previously posted project', getProject01);
-  it('should reject a POST of invalid name to organization', postBadProject);
-  it('should reject a POST to an organization that doesnt exist', postBadOrg);
-  it('should reject a POST of a name with special characters', postInvalidProject);
-  it('should reject a POST with two different orgs', confusingOrg);
-  it('should PATCH an update to posted project', patchOrg01);
-  it('should reject a PATCH to update with invalid name', badPatch);
-  it('should POST second project', postProject02);
-  it('should DELETE the first project to the organization', deleteProject01).timeout(5000);
-  it('should DELETE the second project to the organization', deleteProject02).timeout(5000);
+  it('should POST a project to the organization', postProject);
+  it('should POST second project', postSecondProject);
+  it('should GET the previously posted project', getProject);
+  it('should PATCH an update to posted project', patchProject);
+  it('should GET the two projects POSTed previously', getAllProjects);
+  it('should reject a POST with two different orgs', rejectPostOrgIdMismatch);
+  it('should reject a DELETE to a non-exisiting project', rejectDeleteNonexistingProject);
+  it('should reject a PATCH to update with invalid name', rejectPatchInvalidField);
+  it('should DELETE the first project to the organization', deleteProject);
+  it('should DELETE the second project to the organization', deleteSecondProject);
 });
 
-
 /* --------------------( Tests )-------------------- */
-// TODO - add descriptions to all functions and fix spacing between functions
-
-
 /**
- * Makes a POST request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should succeed.
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid creates a
+ * project.
  */
-function postProject01(done) {
-  const id = 'hulk';
+function postProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[0].id}`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'Bruce Banner',
-      org: {
-        id: org.id
-      }
-    })
+    body: JSON.stringify(testData.projects[0])
   },
   (err, response, body) => {
-    const json = JSON.parse(body);
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal('hulk');
-    chai.expect(json.name).to.equal('Bruce Banner');
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
+    chai.expect(json.name).to.equal(testData.projects[0].name);
     done();
   });
 }
 
 /**
- * Makes a GET request to /api/orgs/:orgid/projects/:projectid. This should happen after a post
- * to the projects was made to harrypotter. This should succeed.
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid creates a
+ * second project.
  */
-function getProject01(done) {
+function postSecondProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[1].id}`,
     headers: getHeaders(),
-    method: 'GET'
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(testData.projects[1])
   },
   (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('Bruce Banner');
+    chai.expect(json.id).to.equal(testData.projects[1].id);
+    chai.expect(json.name).to.equal(testData.projects[1].name);
     done();
   });
 }
 
 /**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should pass, but the result should be an error.
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid finds and
+ * returns the previously created project.
  */
-function postBadProject(done) {
-  const id = 'Hulkgf3';
+function getProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/Hulkgf3`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[0].id}`,
+    headers: getHeaders()
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response code: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.name).to.equal(testData.projects[0].name);
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH api/orgs/:orgid/projects/:projectid updates the
+ * projects data on an existing project.
+ */
+function patchProject(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[1].id}`,
     headers: getHeaders(),
-    method: 'POST',
+    ca: readCaFile(),
+    method: 'PATCH',
     body: JSON.stringify({
-      id: id,
-      name: 'Betty Ross',
-      org: {
-        id: org.id
-      }
+      name: testData.projects[2].name
     })
   },
   (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response code: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.description).to.equal('Project ID is not valid.');
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.name).to.equal(testData.projects[2].name);
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs/:orgid/projects to find and return all
+ * the projects user has read permissions on.
+ */
+function getAllProjects(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects`,
+    headers: getHeaders()
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response code: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.length).to.equal(2);
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid fails to
+ * create a project with mismatched org ids.
+ */
+function rejectPostOrgIdMismatch(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[1].id}/projects/${testData.projects[3].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(testData.projects[16])
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
     chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should pass, but the result should be an error.
+ * @description Verifies PATCH api/orgs/:orgid/projects/:projectid fails to
+ * update a projects id due to it being an immutable field.
  */
-function postBadOrg(done) {
-  const id = 'blackwidow';
+function rejectPatchInvalidField(done) {
   request({
-    url: `${test.url}/api/orgs/avenger/projects/blackwidow`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[1].id}`,
     headers: getHeaders(),
-    method: 'POST',
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify(testData.invalidProjects[2])
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 403 Forbidden
+    chai.expect(response.statusCode).to.equal(403);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid fails when
+ * attempting to delete a non-existing project.
+ */
+function rejectDeleteNonexistingProject(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.ids[7].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
     body: JSON.stringify({
-      id: id,
-      name: 'Hulks new gf',
-      org: {
-        id: org.id
-      }
+      hardDelete: true
     })
   },
   (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(json.description).to.equal('Org not found.');
-    chai.expect(json.message).to.equal('Not Found');
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 404 Not Found
     chai.expect(response.statusCode).to.equal(404);
-    done();
-  });
-}
-
-/**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This is testing when there is a request with two different orgs.
- * The result should be an error.
- */
-function confusingOrg(done) {
-  const id = 'brucebanner';
-  request({
-    url: `${test.url}/api/orgs/nohulk/projects/actuallyhulk`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'Bruce Banner',
-      org: {
-        id: org.id
-      }
-    })
-  },
-  (err, response, body) => {
+    // Verify error message in response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    chai.expect(json.description).to.equal('Project ID in the body does not match ID in the params.');
-    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(json.message).to.equal('Not Found');
     done();
   });
 }
 
 /**
- * Testing POST with a bad request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should pass, but the result should be an error.
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid delete a
+ * project.
  */
-function postInvalidProject(done) {
-  const id = '!attempthulk7';
+function deleteProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/!attempthulk7`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[0].id}`,
     headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'Invalid Hulk',
-      org: {
-        id: org.id
-      }
-    })
-  },
-  (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    chai.expect(response.statusCode).to.equal(400);
-    done();
-  });
-}
-
-/**
- * Makes an UPDATE request to api/orgs/:orgid/projects/:projectid. This should update the original
- * project name: "Youre a wizard Harry" that was added to the database to name: "I know".
- * This should succeed.
- */
-function patchOrg01(done) {
-  const id = 'hulk';
-  request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
-    headers: getHeaders(),
-    method: 'PATCH',
-    body: JSON.stringify({
-      id: id,
-      name: 'Anger'
-    })
-  },
-  (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal(id);
-    chai.expect(json.name).to.equal('Anger');
-    done();
-  });
-}
-
-/**
- * Makes an UPDATE request to api/orgs/:orgid/projects/:projectid. This will reject an
- * update to project name.
- */
-function badPatch(done) {
-  request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
-    headers: getHeaders(),
-    method: 'PATCH',
-    body: JSON.stringify({
-      id: 'hulktwopointoh',
-      name: 'New Hulk'
-    })
-  },
-  (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(400);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-/**
- * Makes a POST request to /api/orgs/:orgid/projects/:projectid to create a project.
- * This should succeed.
- */
-function postProject02(done) {
-  const id = 'bettyross';
-  request({
-    url: `${test.url}/api/orgs/biochemistry/projects/bettyross`,
-    headers: getHeaders(),
-    method: 'POST',
-    body: JSON.stringify({
-      id: id,
-      name: 'Hulks GF',
-      org: {
-        id: org.id
-      }
-    })
-  },
-  (err, response, body) => {
-    const json = JSON.parse(body);
-    chai.expect(response.statusCode).to.equal(200);
-    chai.expect(json.id).to.equal('bettyross');
-    chai.expect(json.name).to.equal('Hulks GF');
-    done();
-  });
-}
-
-/**
- * Makes a DELETE request to /api/orgs/:orgid/projects/:projectid to remove a project.
- * This should succeed.
- */
-function deleteProject01(done) {
-  request({
-    url: `${test.url}/api/orgs/biochemistry/projects/hulk`,
-    headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      soft: false
+      hardDelete: true
     })
   },
   (err, response) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
 }
 
 /**
- * Makes a DELETE request to /api/orgs/:orgid/projects/:projectid to remove a project.
- * This should succeed.
+ * @description Verify DELETE request to /api/orgs/:orgid/projects/:projectid
+ * to delete the second project.
  */
-function deleteProject02(done) {
+function deleteSecondProject(done) {
   request({
-    url: `${test.url}/api/orgs/biochemistry/projects/bettyross`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[1].id}`,
     headers: getHeaders(),
+    ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      soft: false
+      hardDelete: true
     })
   },
   (err, response) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
 }
-
 
 /* ----------( Helper Functions )----------*/
-
 /**
- * Produces and returns an object containing common request headers.
+ * @description Produces and returns an object containing common request headers.
  */
 function getHeaders() {
-  const c = `${M.config.test.username}:${M.config.test.password}`;
+  const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',
     authorization: s
   };
+}
+
+/**
+ * @description Helper function for setting the certificate authorities for each request.
+ */
+function readCaFile() {
+  if (test.hasOwnProperty('ca')) {
+    return fs.readFileSync(`${M.root}/${test.ca}`);
+  }
 }

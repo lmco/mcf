@@ -1,22 +1,24 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
- * @module  lib.startup
+ * Classification: UNCLASSIFIED
+ *
+ * @module lib.startup
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * Prints an MBEE startup logo.
+ * @description Prints an MBEE startup logo.
  */
 
+// Define colors in logo
 const colors = {
   grey: '\u001b[30m',
   red: '\u001b[31m',
@@ -28,9 +30,12 @@ const colors = {
   light_grey: '\u001b[37m',
   esc: '\u001b[39m'
 };
+
+// Define the primary and secondary colors
 const primary = colors.green;
 const secondary = colors.grey;
 
+// Create the logo
 const logo = {};
 logo['1'] = `${primary}███${secondary}╗${primary
 }   ███${secondary}╗${primary}██████${secondary}╗${
@@ -73,6 +78,7 @@ image['12'] = '               \u001b[33m(%%%)\u001b[39m                   ';
 image['13'] = '                 \u001b[33m!\u001b[39m                     ';
 image['14'] = '\u001b[39m';
 
+// Print the logo to the console
 function printLogo() {
   console.log(image['1']);  // eslint-disable-line no-console
   console.log(image['2']);  // eslint-disable-line no-console

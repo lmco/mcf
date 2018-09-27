@@ -1,30 +1,33 @@
-/*****************************************************************************
- * Classification: UNCLASSIFIED                                              *
- *                                                                           *
- * Copyright (C) 2018, Lockheed Martin Corporation                           *
- *                                                                           *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.       *
- * It is not approved for public release or redistribution.                  *
- *                                                                           *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export *
- * control laws. Contact legal and export compliance prior to distribution.  *
- *****************************************************************************/
 /**
+ * Classification: UNCLASSIFIED
+ *
  * @module lib.db
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description  Defines the database connection. This module defines a
- * connect function which when called connects to the database.
+ * @description Defines database connection functions.
  */
 
-// Load node modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 
 /**
- * Created the connection to the database.
+ * @description Create connection to database.
+ *
+ * @return {Promise} resolve - database connected
+ *                    reject - an error
  */
 module.exports.connect = function() {
   return new Promise((resolve, reject) => {
@@ -36,26 +39,32 @@ module.exports.connect = function() {
     const dbPassword = M.config.db.password;
     let connectURL = 'mongodb://';
 
-    // Create connection with or without authentication
-    if ((dbUsername !== '' && dbPassword !== '') && (dbUsername !== undefined && dbPassword !== undefined)) {
+    // If username/password provided
+    if (dbUsername !== '' && dbPassword !== '' && dbUsername && dbPassword) {
+      // Append username/password to connection URL
       connectURL = `${connectURL + dbUsername}:${dbPassword}@`;
     }
     connectURL = `${connectURL + url}:${dbPort}/${dbName}`;
 
     const options = {};
 
-    // Configure an SSL connection to the database. This can be configured
-    // in the package.json config. The 'ssl' field should be set to true
-    // and the 'sslCAFile' must be provided and reference a file located in /certs.
+    // Configure an SSL connection
+    // The 'sslCAFile' references file located in /certs.
     if (M.config.db.ssl) {
       connectURL += '?ssl=true';
+      // Retrieve CA file from /certs directory
       const caPath = path.join(M.root, 'certs', M.config.db.ca);
       const caFile = fs.readFileSync(caPath, 'utf8');
       options.sslCA = caFile;
+
+      // Enable MongoDB's new url parser
+      options.useNewUrlParser = true;
     }
 
-    mongoose.connect(connectURL, options, (err, msg) => {
+    // Connect to database
+    mongoose.connect(connectURL, options, (err) => {
       if (err) {
+        // If error, reject it
         reject(err);
       }
       resolve();
@@ -64,7 +73,7 @@ module.exports.connect = function() {
 };
 
 /**
- * Closes the connection to the database.
+ * @description Closes connection to database.
  */
 module.exports.disconnect = function() {
   mongoose.connection.close();

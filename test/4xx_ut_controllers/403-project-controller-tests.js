@@ -1,820 +1,761 @@
 /**
- * @module test/403-project-controller
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test.403-project-controller-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description   This tests the Project Controller functionality. These tests
+ * @description  This tests the Project Controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The project controller tests create,
- * update, find, soft delete, hard delte, and permissions of projects. As well
- * as test the controlls with invalid inputs.
+ * update, find, soft delete, hard delete, and permissions of projects. As well
+ * as test the controllers with invalid inputs.
  */
 
-// Load node modules
+// NPM modules
 const chai = require('chai');
-const mongoose = require('mongoose'); // TODO - remove need for mongoose
+const path = require('path');
 
-// Load mbee modules
-const UserController = M.require('controllers.UserController');
-const OrgController = M.require('controllers.OrganizationController');
-const ProjController = M.require('controllers.ProjectController');
-const ElemController = M.require('controllers.ElementController');
-const User = M.require('models.User');
-const Element = M.require('models.Element');
-const AuthController = M.require('lib.auth');
-const mockExpress = M.require('lib.mock-express');
+// MBEE modules
+const UserController = M.require('controllers.user-controller');
+const OrgController = M.require('controllers.organization-controller');
+const ProjController = M.require('controllers.project-controller');
+const Element = M.require('models.element');
+const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-
-let nonAuser = null;
-let allSeeingUser = null;
+// Variables used across test functions
+const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
+let nonAdminUser = null;
+let adminUser = null;
 let org = null;
 let project = null;
 
 
 /* --------------------( Main )-------------------- */
-
-
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * TODO - add description
+   * Before: Create admin and non-admin user. Create organization.
    */
   before((done) => {
-    const db = M.require('lib/db');
+    // Connect db
     db.connect();
 
-    // Creating a Requesting Admin
-    const u = M.config.test.username;
-    const p = M.config.test.password;
-    const params = {};
-    const body = {
-      username: u,
-      password: p
-    };
+    // Create test admin
+    testUtils.createAdminUser()
+    .then((_adminUser) => {
+      // Set global admin user
+      adminUser = _adminUser;
 
-    const reqObj = mockExpress.getReq(params, body);
-    const resObj = mockExpress.getRes();
-    AuthController.authenticate(reqObj, resObj, (err) => {
-      const ldapuser = reqObj.user;
-      chai.expect(err).to.equal(null);
-      chai.expect(ldapuser.username).to.equal(M.config.test.username);
-      User.findOneAndUpdate({ username: u }, { admin: true }, { new: true },
-        (updateErr, userUpdate) => {
-          // Setting it equal to global variable
-          allSeeingUser = userUpdate;
-          chai.expect(updateErr).to.equal(null);
-          chai.expect(userUpdate).to.not.equal(null);
-          // Creating a non admin user
-          const nonAuserData = {
-            username: 'pepperpotts',
-            password: 'gfoftonystark',
-            fname: 'Pepper',
-            lname: 'Potts',
-            admin: false
-          };
-          UserController.createUser(allSeeingUser, nonAuserData)
-          .then((nonAu) => {
-            nonAuser = nonAu;
-            chai.expect(nonAu.username).to.equal('pepperpotts');
-            chai.expect(nonAu.fname).to.equal('Pepper');
-            chai.expect(nonAu.lname).to.equal('Potts');
-            // Creating an organization using in the tests
-            const orgData = {
-              id: 'starkhq',
-              name: 'Stark Headquarts',
-              permissions: {
-                admin: [allSeeingUser._id],
-                write: [allSeeingUser._id],
-                read: [allSeeingUser._id]
-              }
-            };
-            return OrgController.createOrg(allSeeingUser, orgData);
-          })
-          .then((retOrg) => {
-            org = retOrg;
-            chai.expect(retOrg.id).to.equal('starkhq');
-            chai.expect(retOrg.name).to.equal('Stark Headquarts');
-            chai.expect(retOrg.permissions.read).to.include(allSeeingUser._id.toString());
-            chai.expect(retOrg.permissions.write).to.include(allSeeingUser._id.toString());
-            chai.expect(retOrg.permissions.admin).to.include(allSeeingUser._id.toString());
-            done();
-          })
-          .catch((error) => {
-            chai.expect(error.description).to.equal(null);
-            done();
-          });
-        });
+      // Create non-admin user
+      return testUtils.createNonadminUser();
+    })
+    .then((_nonadminUser) => {
+      nonAdminUser = _nonadminUser;
+      chai.expect(nonAdminUser.username).to.equal(testData.users[1].username);
+      chai.expect(nonAdminUser.fname).to.equal(testData.users[1].fname);
+      chai.expect(nonAdminUser.lname).to.equal(testData.users[1].lname);
+    })
+    .then(() => testUtils.createOrganization(adminUser))
+    .then((retOrg) => {
+      org = retOrg;
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
+      chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
+      done();
+    })
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
     });
   });
 
-
   /**
-   * After: run after all tests.
-   * TODO - add description
+   * After: Remove non-admin user and organization.
    */
   after((done) => {
     // Removing the organization created
-    OrgController.removeOrg(allSeeingUser, 'starkhq', { soft: false })
+    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
     .then(() => {
-      // Removing the non admin user
-
-      const userTwo = 'pepperpotts';
-      return UserController.removeUser(allSeeingUser, userTwo);
+      // Removing the non-admin user
+      const userTwo = testData.users[1].username;
+      return UserController.removeUser(adminUser, userTwo);
     })
     .then((delUser2) => {
-      chai.expect(delUser2).to.equal('pepperpotts');
-      User.findOne({
-        username: M.config.test.username
-      }, (err, user) => {
-        chai.expect(err).to.equal(null);
-        user.remove((err2) => {
-          chai.expect(err2).to.equal(null);
-          mongoose.connection.close();
-          done();
-        });
-      });
+      chai.expect(delUser2.username).to.equal(testData.users[1].username);
+      return testUtils.removeAdminUser();
+    })
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
+      done();
     })
     .catch((error) => {
-      chai.expect(error.description).to.equal(null);
-      mongoose.connection.close();
+      db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
 
   /* Execute the tests */
   it('should create a new project', createProject);
-  it('should create elements for the project', createElements);
-  it('should throw an error saying the field cannot be updated', updateFieldError);
+  it('should throw an error saying the field cannot be updated', rejectImmutableField);
   it('should throw an error saying the field is not of type string', updateTypeError);
-  it('should update a project', updateProject);
+  it('should update a project', updateProjectName);
   it('should update a project using the Project object', updateProjectObject);
   it('should create a second project', createProject02);
-  it('should fail to attempt to create a project with a long ID', createLongId);
-  it('should attempt to create a project with a long name', createLongName);
-  it('should reject attempt to create a project with a REALLY long name', createLongName02);
-  it('should reject attempt to create a project with a period in name', createPeriodName);
-  it('should reject creation of a project already made', recreateProject);
-  it('should reject creation of project with invalid ID', noId);
-  it('should reject creation of project with invalid Name', noName);
-  it('should reject creation of project with invalid Org', noOrg);
-  it('should reject creation of project with non-A user', nonACreator);
+  it('should reject attempt to create a project with a period in name', rejectCreatePeriodName);
+  it('should reject creation of a project already made', rejectDuplicateProjectId);
+  it('should reject creation of project with invalid ID', rejectInvalidProjectId);
+  it('should reject creation of project with invalid name', rejectInvalidProjectName);
+  it('should reject creation of project with invalid Org', rejectInvalidOrgId);
+  it('should reject creation of project with non-Admin user', rejectNonAdminCreateProject);
   it('should find a project', findProj);
-  it('should not find a project', noProj);
+  it('should find all projects which user has permissions on', findProjects);
+  it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
-  it('should reject update to the id name', updateID);
-  it('should reject non-A user from finding a project', nonAUser);
-  it('should reject updating due to non-A user', updateNonA);
+  it('should reject update to the id name', rejectProjectId);
+  it('should reject non-Admin user from finding a project', nonAUser);
+  it('should reject updating due to non-Admin user', rejectNonAdminProjectUpdate);
   it('should find the permissions on the project', findPerm);
   it('should set the permissions on the project', setPerm);
   it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
   it('should delete second project', deleteProject02);
-  it('should delete projects that were created with long names', deleteOthers);
 });
 
-
 /* --------------------( Tests )-------------------- */
-
-
 /**
- * Tests creating a project
+ * @description Verifies project is created.
  */
 function createProject(done) {
-  const projData = {
-    id: 'ironman',
-    name: 'Iron man Suite',
-    org: {
-      id: 'starkhq'
-    },
-    custom: {
-      builtFor: 'Tony'
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
-  .then((retProj) => ProjController.findProject(allSeeingUser, 'starkhq', retProj.id))
+  // Define and clone the project data
+  const projData = Object.assign({}, testData.projects[0]);
+  projData.custom = { buildFor: 'build' };
+  projData.orgid = org.id;
+
+  // Create the project via project controller
+  ProjController.createProject(adminUser, projData)
+  .then((retProj) => ProjController.findProject(adminUser, org.id, retProj.id))
   .then((proj) => {
-    chai.expect(proj.id).to.equal('ironman');
-    chai.expect(proj.name).to.equal('Iron man Suite');
-    chai.expect(proj.custom.builtFor).to.equal('Tony');
+    // Set the file-global project
+    project = proj;
+
+    // Verify project was created successfully
+    chai.expect(proj.id).to.equal(testData.projects[0].id);
+    chai.expect(proj.name).to.equal(testData.projects[0].name);
+    chai.expect(proj.custom.builtFor).to.equal(projData.custom.builtFor);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
-
 /**
- * Creates elements for the main project
+ * @description Verifies project object cannot update immutable field.
+ * Expected error thrown: 'Bad Request'
  */
-function createElements(done) {
-  const elem0 = {
-    id: '0000',
-    name: 'smart missiles',
-    project: {
-      id: 'ironman',
-      org: {
-        id: 'starkhq'
-      }
-    },
-    type: 'Block'
-  };
-  ElemController.createElement(allSeeingUser, elem0)
+function rejectImmutableField(done) {
+  // Update project
+  ProjController.updateProject(adminUser, org.id, testData.projects[0].id, testData.ids[0])
   .then(() => {
-    const elem1 = {
-      id: '0001',
-      name: 'JARVIS',
-      project: {
-        id: 'ironman',
-        org: {
-          id: 'starkhq'
-        }
-      },
-      type: 'Block'
-    };
-    return ElemController.createElement(allSeeingUser, elem1);
-  })
-  .then(() => {
+    // Expected updateProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
 
-
 /**
- * Test update to a project field with an
- * invalid attempt at updating the id.
- * This will reject and throw an error.
- */
-function updateFieldError(done) {
-  ProjController.updateProject(allSeeingUser, org.id, 'ironman', { id: 'shouldnotchange' })
-  .then((proj) => {
-    chai.expect(typeof proj).to.equal('undefined');
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal('Users cannot update [id] of Projects.');
-    done();
-  });
-}
-
-
-/**
- * Tests update to a project with an invalid
- * name for the project. This will reject and throw
- * and error.
+ * @description Verifies user CANNOT update project with invalid project name.
+ * Expected error thrown: 'Internal Server Error'
  */
 function updateTypeError(done) {
-  ProjController.updateProject(allSeeingUser, org.id, 'ironman', { name: [] })
-  .then((proj) => {
-    chai.expect(typeof proj).to.equal('undefined');
+  // Update project
+  ProjController.updateProject(adminUser, org.id, testData.projects[0].id, testData.names[2])
+  .then(() => {
+    // Expected updateProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('The Project [name] is not of type String');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
 
-
 /**
- * Test updating a project with a
- * new name.
+ * @description Verifies project updates with new name.
  */
-function updateProject(done) {
-  ProjController.updateProject(allSeeingUser, org.id, 'ironman', { id: 'ironman', name: 'Iron Man' })
+function updateProjectName(done) {
+  // Define and clone the project data
+  const projData1 = Object.assign({}, testData.projects[0]);
+
+  // Update project01 name to project02 name
+  projData1.name = testData.projects[2].name;
+
+  // Update project
+  ProjController.updateProject(adminUser, org.id, testData.projects[0].id, projData1)
   .then((proj) => {
-    chai.expect(proj.name).to.equal('Iron Man');
+    // Verify project name
+    chai.expect(proj.name).to.equal(testData.projects[2].name);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
-
 /**
- * Test updating a project with using project object.
+ * @description Verifies project updates with project model object.
  */
 function updateProjectObject(done) {
-  ProjController.findProject(allSeeingUser, org.id, 'ironman')
+  // Find project
+  ProjController.findProject(adminUser, org.id, testData.projects[0].id)
   .then((projectFound) => {
-    projectFound.name = 'Iron Man Two';
-    return ProjController.updateProject(allSeeingUser, org.id, 'ironman', projectFound);
+    projectFound.name = testData.projects[1].name;
+    return ProjController.updateProject(adminUser, org.id, testData.projects[0].id, projectFound);
   })
   .then((projectUpdated) => {
-    chai.expect(projectUpdated.name).to.equal('Iron Man Two');
+    // Verify project updated
+    chai.expect(projectUpdated.name).to.equal(testData.projects[1].name);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
-
 /**
- * Tests creating a second project
+ * @description Verifies second project is create.
  */
 function createProject02(done) {
-  const projData = {
-    id: 'arcreactor',
-    name: 'Arc Reactor',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
+  // Define and clone the project data
+  const projData = Object.assign({}, testData.projects[2]);
+  projData.orgid = org.id;
+
+  // Create project
+  ProjController.createProject(adminUser, projData)
   .then((proj) => {
-    project = proj;
-    chai.expect(proj.id).to.equal('arcreactor');
-    chai.expect(proj.name).to.equal('Arc Reactor');
+    // Verify project fields
+    chai.expect(proj.id).to.equal(testData.projects[2].id);
+    chai.expect(proj.name).to.equal(testData.projects[2].name);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
-
 /**
- * Tests to see what valid name of the id
- * can be of a project. how long till it breaks...
+ * @description Verifies project name does not contain periods.
+ * Expected error thrown: 'Internal Server Error'
  */
-function createLongId(done) {
-  const projData = {
-    id: 'thisisaverylongidnamepleaseacceptmeorbreak',
-    name: 'Long Id',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
+function rejectCreatePeriodName(done) {
+  // Define and clone the project data
+  const projData = Object.assign({}, testData.invalidProjects[0]);
+  projData.orgid = org.id;
+
+  // Create project
+  ProjController.createProject(adminUser, projData)
   .then(() => {
+    // Expected createProject() to fail
     // Should fail, throw error
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Save failed.');
-    done();
-  });
-}
-
-
-/**
- * Tests to see how long a name of a project can be.
- */
-function createLongName(done) {
-  const projData = {
-    id: 'vlongname',
-    name: 'This is Tony Stark I am writing to see if this is valid are you from here on i am adding more because it worked with what i had at you',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
-  .then((proj) => {
-    chai.expect(proj.id).to.equal('vlongname');
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
 
 /**
- * Tests to see what valid length of the name
- * of project can be.
+ * @description Verifies existing projects CANNOT be recreated.
+ * Expected error thrown: 'Bad Request'
  */
-function createLongName02(done) {
-  const projData = {
-    id: 'vlongnametwo',
-    name: 'This is Tony Stark I am writing to see if this is valid are you from here on i am adding more because it worked with what i had at you i want to see you break because this is gettting really long and I want you to break please break I want to see you break',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
-  .then((proj) => {
-    chai.expect(proj.id).to.equal('vlongnametwo');
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal(null);
-    done();
-  });
-}
+function rejectDuplicateProjectId(done) {
+  // Define and clone the project data
+  const projData = Object.assign({}, testData.projects[2]);
+  projData.orgid = org.id;
 
-/**
- * Tests to see the validation of a name of a project.
- */
-function createPeriodName(done) {
-  const projData = {
-    id: 'period',
-    name: 'This is just to see if a period works....',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
+  // Create project
+  ProjController.createProject(adminUser, projData)
   .then(() => {
-    // Should fail, throw error
+    // Expected createProject() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Project name is not valid.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
 
 /**
- * Test creating a project already existing.
- * This should throw an error stating the project already
- * exists.
+ * @description Verifies user CANNOT create project with invalid ID.
+ * Expected error thrown: 'Internal Server Error'
  */
-function recreateProject(done) {
-  const projData = {
-    id: 'arcreactor',
-    name: 'Small Arc Reactor',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
+function rejectInvalidProjectId(done) {
+  // Define and clone the project data
+  const projData = Object.assign({}, testData.invalidProjects[1]);
+  projData.orgid = org.id;
+
+  // Create project
+  ProjController.createProject(adminUser, projData)
   .then(() => {
-    // error should occur therefore not hit then
-    // failure if does
+    // Expected createProject() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Project already exists.');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
 
 /**
- * Tests creating a project that has no project id input.
- * This should be rejected and throw an error.
+ * @description Verifies user CANNOT create a project without name input.
+ * Expected error thrown: 'Internal Server Error'
  */
-function noId(done) {
-  const projData = {
-    id: '',
-    name: 'denyme',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
+function rejectInvalidProjectName(done) {
+  // Define and clone the project data
+  const projData = Object.assign({}, testData.invalidProjects[2]);
+  projData.orgid = org.id;
+
+  // Create project
+  ProjController.createProject(adminUser, projData)
   .then(() => {
-    // error should occur therefore not hit then
-    // failure if does
+    // Expected createProject() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Project ID is not valid.');
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
 
 /**
- * Tests creating a project that has no name input.
- * This should be rejected and throw an error.
+ * @description Verifies user CANNOT create project with blank organization id.
+ * Expected error thrown: 'Not Found'
  */
-function noName(done) {
-  const projData = {
-    id: 'imfake',
-    name: '',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
+function rejectInvalidOrgId(done) {
+  // Define and clone the project data
+  const projData = Object.assign({}, testData.invalidProjects[3]);
+  projData.orgid = '';
+
+  // Create project
+  ProjController.createProject(adminUser, projData)
   .then(() => {
-    // error should occur therefore not hit then
-    // failure if does
+    // Expected createProject() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Project name is not valid.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
 
 /**
- * Test creating a project that has no organization id.
- * This should be rejected and throw an error.
+ * @description Verifies non-admin CANNOT create a project.
+ * Note: non-admin is NOT a site wide admin
+ *       non-admin does NOT have write permissions with Org
+ * Expected error thrown: 'Forbidden'
  */
-function noOrg(done) {
-  const projData = {
-    id: 'imfake',
-    name: 'starkhq',
-    org: {
-      id: ''
-    }
-  };
-  ProjController.createProject(allSeeingUser, projData)
+function rejectNonAdminCreateProject(done) {
+  // Define and clone the project data
+  const projData = Object.assign({}, testData.invalidProjects[0]);
+  projData.orgid = org.id;
+
+  // Create project
+  ProjController.createProject(nonAdminUser, projData)
   .then(() => {
-    // error should occur therefore not hit then
-    // failure if does
+    // Expected createProject() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Org not found.');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
 
 /**
- * Tests for creating a project using a non admin user.
- * Should output error.
+ * @description Verify project created in createProject() is found.
  */
-
-function nonACreator(done) {
-  const projData = {
-    id: 'iamnoadmin',
-    name: 'dontmakeme',
-    org: {
-      id: 'starkhq'
-    }
-  };
-  ProjController.createProject(nonAuser, projData)
-  .then(() => {
-    // error should occur therefore not hit then
-    // failure if does
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal('User does not have permissions.');
-    done();
-  });
-}
-
-
-/**
- * Test for finding the project that was
- * just created above.
- */
-
 function findProj(done) {
-  const orgId = 'starkhq';
-  const projId = 'ironman';
-  ProjController.findProject(allSeeingUser, orgId, projId)
+  const orgId = org.id;
+  const projId = testData.projects[2].id;
+
+  // Find project
+  ProjController.findProject(adminUser, orgId, projId)
   .then((proj) => {
-    chai.expect(proj.id).to.equal('ironman');
-    chai.expect(proj.name).to.equal('Iron Man Two');
+    // Verify project fields
+    chai.expect(proj.id).to.equal(testData.projects[2].id);
+    chai.expect(proj.name).to.equal(testData.projects[2].name);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
- * Test for finding a project that does not exist.
- * An error should be thrown.
+ * @description Verify projects the user has access to findProjects() is found.
  */
+function findProjects(done) {
+  // Define and clone the user data
+  const userData = Object.assign({}, testData.users[2]);
 
-function noProj(done) {
-  const orgId = 'starkhq';
-  const projId = 'fakeproj';
-  ProjController.findProject(allSeeingUser, orgId, projId)
+  // Set to admin user
+  userData.admin = true;
+
+  let adminUser2 = null;
+  UserController.createUser(adminUser, userData)
+  .then((newUser) => {
+    adminUser2 = newUser;
+
+    return OrgController.createOrg(newUser, testData.orgs[1]);
+  })
   .then(() => {
-    // error should occur therefore not hit then
-    // failure if does
+    // Define and clone the project data
+    const projData = Object.assign({}, testData.projects[1]);
+    projData.orgid = org.id;
+    return ProjController.createProject(adminUser2, projData);
+  })
+  .then(() => ProjController.findProjects(adminUser, org.id))
+  .then((projs) => {
+    // Verify project fields
+    chai.expect(projs.length).to.equal(3);
+    return OrgController.removeOrg(adminUser2, testData.orgs[1].id, true);
+  })
+  .then(() => {
+    UserController.removeUser(adminUser, testData.users[2].username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies NONEXISTENT project does not exist.
+ * Expected error thrown: 'Not Found'
+ */
+function rejectFindNonexistentProject(done) {
+  const orgId = org.id;
+  const projId = testData.ids[1].id;
+
+  // Find project
+  ProjController.findProject(adminUser, orgId, projId)
+  .then(() => {
+    // Expected findProject() to fail
+    // Should not execute, force test to fail
     chai.expect(true).to.equal(false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Project not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
 
 /**
- * Test for finding a project using a non admin user.
- * An error should be thrown.
+ * @description Verifies non-admin user CANNOT find project
+ * Note: non-admin is NOT a site wide admin
+ *       non-admin does NOT have read permissions with Org
+ * Expected error thrown: 'Forbidden'
  */
-
 function nonAUser(done) {
-  const orgId = 'starkhq';
-  const projId = 'ironman';
-  ProjController.findProject(nonAuser, orgId, projId)
+  const orgId = org.id;
+  const projId = testData.projects[1].id;
+
+  // Find project
+  ProjController.findProject(nonAdminUser, orgId, projId)
   .then(() => {
-    // error should occur therefore not hit then
-    // failure if does
+    // Expected findProject() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('User does not have permission.');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
 
 /**
- * Test for updating a project.
+ * @description Verifies project updates.
  */
-
 function updateProj(done) {
-  const orgId = 'starkhq';
-  const projId = 'ironman';
-  const updateData = {
-    name: 'Tony Stark',
-    custom: {
-      builtFor: 'Rhodey',
-      version: 2.0
-    }
-  };
-  ProjController.updateProject(allSeeingUser, orgId, projId, updateData)
-  .then(() => ProjController.findProject(allSeeingUser, orgId, projId))
+  // Define and clone the project data
+  const projId = testData.projects[0].id;
+  const updateProjData = Object.assign({}, testData.projects[1]);
+  // Note: New project id must not change. Keep same project ID
+  updateProjData.id = projId;
+  updateProjData.custom = { builtFor: 'built', version: '0.0' };
+
+  // Update project
+  ProjController.updateProject(adminUser, org.id, projId, updateProjData)
+  .then(() => ProjController.findProject(adminUser, org.id, projId))
   .then((proj) => {
-    chai.expect(proj.id).to.equal('ironman');
-    chai.expect(proj.name).to.equal('Tony Stark');
-    chai.expect(proj.custom.builtFor).to.equal('Rhodey');
-    chai.expect(proj.custom.version).to.equal(2.0);
+    // Verify project fields
+    chai.expect(proj.id).to.equal(updateProjData.id);
+    chai.expect(proj.name).to.equal(updateProjData.name);
+    chai.expect(proj.custom.builtFor).to.equal(updateProjData.custom.builtFor);
+    chai.expect(proj.custom.version).to.equal(updateProjData.custom.version);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
- * Tests for updating the projects id name.
- * An error should be thrown.
+ * @description Verifies immutable project Id CANNOT be updated.
+ * Expected error thrown: 'Bad Request'
  */
+function rejectProjectId(done) {
+  const orgId = org.id;
+  const projId = testData.projects[1].id;
+  const updateProjData = testData.ids[2];
 
-function updateID(done) {
-  const orgId = 'starkhq';
-  const projId = 'ironman';
-  const updateData = {
-    id: 'newironman'
-  };
-  ProjController.updateProject(allSeeingUser, orgId, projId, updateData)
-  .then((proj) => {
-    chai.expect(proj.id).to.equal('newironman');
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal('Users cannot update [id] of Projects.');
-    done();
-  });
-}
-
-/**
- * Tests for updating a project with a non admin user.
- * An error should be thrown.
- */
-
-function updateNonA(done) {
-  const orgId = 'starkhq';
-  const projId = 'arcreactor';
-  const updateData = {
-    name: 'Baby Arc Reactor'
-  };
-  ProjController.updateProject(nonAuser, orgId, projId, updateData)
+  // Update project
+  ProjController.updateProject(adminUser, orgId, projId, updateProjData)
   .then(() => {
-    // should never come in then
-    // should throw error incase
+    // Expected updateProject() to fail
+    // Should not execute, force test to fail
     chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('User does not have permission.');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }
 
 /**
- * Tests finding all permisions on the project.
+ * @description Verifies non-admin CANNOT update project.
+ * Note: non-admin is NOT a site wide admin
+ *       non-admin does NOT have admin permissions with project
+ * Expected error thrown: 'Forbidden'
+ */
+function rejectNonAdminProjectUpdate(done) {
+  const orgId = org.id;
+  const projId = testData.projects[1].id;
+  const updateProjData = { name: 'New Name' };
+
+  // Update project
+  ProjController.updateProject(nonAdminUser, orgId, projId, updateProjData)
+  .then(() => {
+    // Expected updateProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
+ * @description Verifies correct permissions found on project.
  */
 function findPerm(done) {
-  ProjController.findPermissions(allSeeingUser, org.id, 'ironman', allSeeingUser)
+  // Find permissions
+  ProjController.findPermissions(adminUser, adminUser.username, org.id, testData.projects[0].id)
   .then((perm) => {
+    // Verfy permissions
     chai.expect(perm.read).to.equal(true);
     chai.expect(perm.write).to.equal(true);
     chai.expect(perm.admin).to.equal(true);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
- * Tests setting permissions on the project where you need
- * permission to the org before permissions can be set to
- * the project.
+ * @description Admin user sets then verifies non-admin has write/read
+ * permissions on project.
  */
 function setPerm(done) {
-  OrgController.setPermissions(allSeeingUser, 'starkhq', nonAuser, 'write')
-  .then(() => ProjController.setPermissions(allSeeingUser, 'starkhq', project.id.toString(), nonAuser, 'write'))
-  .then(() => ProjController.findProject(allSeeingUser, 'starkhq', project.id.toString()))
+  // Admin sets permissions for non-admin
+  ProjController.setPermissions(adminUser, org.id, project.id.toString(),
+    nonAdminUser.username, 'write')
+  .then(() => ProjController.findProject(adminUser, org.id, project.id.toString()))
   .then((retProj) => {
-    chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAuser._id.toString());
-    chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAuser._id.toString());
+    // Verify permissions for non-admin
+    chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAdminUser._id.toString());
+    chai.expect(retProj.permissions.read[1]._id.toString()).to.equal(nonAdminUser._id.toString());
     chai.expect(retProj.permissions.admin.length).to.equal(1);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal(null);
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
 
 /**
- * Tests soft-deleting a project
+ * @description Verifies project NOT found after soft-deletion.
+ * Expected error thrown: 'Not Found'
  */
 function softDeleteProject(done) {
-  ProjController.removeProject(allSeeingUser, org.id, 'ironman', { soft: true })
-  .then(() => ProjController.findProject(allSeeingUser, org.id, 'ironman'))
-  .then((proj2) => {
-    chai.expect(proj2).to.equal(null);
+  // Create an element via the Element model
+  const elem = new Element.Block({
+    id: testData.elements[1].id,
+    uid: `${org.id}:${testData.projects[0].id}:${testData.elements[1].id}`,
+    project: project._id
+  });
+
+  // Save the element
+  elem.save()
+  // Soft-delete the project
+  .then(() => ProjController.removeProject(adminUser, org.id, project.id, false))
+  // Find project
+  .then(() => ProjController.findProject(adminUser, org.id, project.id))
+  .then(() => {
+    // Expected findProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Project not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
 
 /**
- * Tests deleting a project
+ * @description Verifies project NOT found after deletion.
+ * Expected error thrown: 'Not Found'
  */
 function deleteProject(done) {
-  ProjController.removeProject(allSeeingUser, org.id, 'ironman', { soft: false })
-  .then(() => ProjController.findProject(allSeeingUser, org.id, 'ironman'))
-  .then((proj2) => {
-    chai.expect(proj2).to.equal(null);
-    // Check if elements still exist
-    Element.Element.find({ id: '0000' })
-    .populate()
-    .exec((findElementError, element) => {
-      chai.expect(element).to.equal(null);
-      done();
-    });
+  // Hard-delete the project
+  ProjController.removeProject(adminUser, org.id, project.id, true)
+  .then(() => ProjController.findProject(adminUser, org.id, project.id))
+  .then(() => {
+    // Expected findProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Project not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
+
+    // Check if elements still exist
+    // Note: Elements are deleted with projects
+    return Element.Element.findOne({ id: testData.elements[1].id });
+  })
+  .then((element) => {
+    // Expect no element
+    chai.expect(element).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }
 
 /**
- * Tests deleting second project
+ * @description Verifies project NOT found after deletion.
+ * Expected error thrown: 'Not Found'
  */
 function deleteProject02(done) {
-  ProjController.removeProject(allSeeingUser, org.id, 'arcreactor', { soft: false })
-  .then(() => ProjController.findProject(allSeeingUser, org.id, 'arcreactor'))
-  .then((proj2) => {
-    chai.expect(proj2).to.equal(null);
+  // Remove project
+  ProjController.removeProject(adminUser, org.id, testData.projects[2].id, true)
+  .then(() => ProjController.findProject(adminUser, org.id, testData.projects[2].id))
+  .then(() => {
+    // Expected findProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
     done();
   })
   .catch((error) => {
-    chai.expect(error.description).to.equal('Project not found.');
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
-  });
-}
-
-/**
- * Tests deleting all the other projects created
- */
-function deleteOthers(done) {
-  ProjController.removeProject(allSeeingUser, org.id, 'vlongname', { soft: false })
-  .then(() => ProjController.findProject(allSeeingUser, org.id, 'vlongname'))
-  .then((proj) => {
-    chai.expect(proj).to.equal(null);
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.description).to.equal('Project not found.');
-    ProjController.removeProject(allSeeingUser, org.id, 'vlongnametwo', { soft: false })
-    .then(() => ProjController.findProject(allSeeingUser, org.id, 'vlongnametwo'))
-    .then((proj2) => {
-      chai.expect(proj2).to.equal(null);
-      done();
-    })
-    .catch((error2) => {
-      chai.expect(error2.description).to.equal('Project not found.');
-      done();
-    });
   });
 }
