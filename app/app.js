@@ -39,153 +39,165 @@ const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
 
-// Connect to database, then initialize application
-db.connect()
-.then(conn => {
-  initApp();
-})
-.catch(err => {
-  M.log.critical(err);
-  process.exit(1);
-});
-
 // Initialize express app and export the object
 const app = express();
 module.exports = app;
+
+// Connect to database, initialize application, and create default admin and
+// default organization if needed.
+db.connect()
+.then(() => createDefaultOrganization())
+.then(() => createDefaultAdmin())
+.then(() => initApp())
+.catch(err => {
+  M.log.critical(err.stack);
+  process.exit(1);
+});
 
 /**
  * @description Initializes the application and exports app.js
  */
 function initApp() {
-  // Configure the static/public directory
-  const staticDir = path.join(__dirname, '..', 'build', 'public');
-  app.use(express.static(staticDir));
+  return new Promise((resolve, reject) => {
+    // Configure the static/public directory
+    const staticDir = path.join(__dirname, '..', 'build', 'public');
+    app.use(express.static(staticDir));
 
-  // Allows receiving JSON in the request body
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
+    // Allows receiving JSON in the request body
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
 
-  // Trust proxy for IP logging
-  app.enable('trust proxy');
+    // Trust proxy for IP logging
+    app.enable('trust proxy');
 
-  // Configures ejs views/templates
-  app.set('view engine', 'ejs');
-  app.set('views', path.join(__dirname, 'views'));
-  app.use(expressLayouts);
+    // Configures ejs views/templates
+    app.set('view engine', 'ejs');
+    app.set('views', path.join(__dirname, 'views'));
+    app.use(expressLayouts);
 
-  // Configure sessions
-  const units = utils.timeConversions[M.config.auth.session.units];
-  app.use(session({
-    name: 'SESSION_ID',
-    secret: M.config.server.secret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: M.config.auth.session.expires * units },
-    store: new MongoStore({ mongooseConnection: mongoose.connection })
-  }));
+    // Configure sessions
+    const units = utils.timeConversions[M.config.auth.session.units];
+    app.use(session({
+      name: 'SESSION_ID',
+      secret: M.config.server.secret,
+      resave: false,
+      saveUninitialized: false,
+      cookie: { maxAge: M.config.auth.session.expires * units },
+      store: new MongoStore({ mongooseConnection: mongoose.connection })
+    }));
 
-  // Enable flash messages
-  app.use(flash());
+    // Enable flash messages
+    app.use(flash());
 
-  // Log IP address of all incoming requests
-  app.use(middleware.logIP);
+    // Log IP address of all incoming requests
+    app.use(middleware.logIP);
 
-  // Load the API Routes
-  if (M.config.server.api.enabled) {
-    app.use('/api', M.require('api-routes'));
-  }
-
-  // Load the plugin routes
-  if (M.config.server.plugins.enabled) {
-    const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
-    const PluginRouter = require(PluginRoutesPath); // eslint-disable-line global-require
-    app.use('/plugins', PluginRouter);
-  }
-
-  // Load the UI/other routes
-  if (M.config.server.ui.enabled) {
-    app.use('/', M.require('routes'));
-  }
-
-  // Create default admin if it doesn't exist
-  // Check any admin exist
-  User.findOne({ admin: true })
-  .exec((err, user) => {
-    if (err) {
-      throw err;
+    // Load the API Routes
+    if (M.config.server.api.enabled) {
+      app.use('/api', M.require('api-routes'));
     }
 
-    // Check user found
-    if (user === null) {
-      // No user found, create local admin
+    // Load the plugin routes
+    if (M.config.server.plugins.enabled) {
+      const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
+      const PluginRouter = require(PluginRoutesPath); // eslint-disable-line global-require
+      app.use('/plugins', PluginRouter);
+    }
+
+    // Load the UI/other routes
+    if (M.config.server.ui.enabled) {
+      app.use('/', M.require('routes'));
+    }
+    return resolve();
+  });
+}
+
+// Create default organization if it does not exist
+function createDefaultOrganization() {
+  return new Promise((resolve, reject) => {
+    // Initialize createdOrg
+    let createdOrg = false;
+    // Initialize userIDs
+    let userIDs = null;
+
+    // Find all users
+    UserController.findUsers({ admin: true })
+    .then(users => {
+      // Set userIDs to the _id of the users array
+      userIDs = users.map(u => u._id);
+      // Search for an organization with id 'default'
+      return Organization.findOne({ id: 'default' });
+    })
+    .then(org => {
+      // Check if org is NOT null
+      if (org !== null) {
+        // Default organization exists, prune user permissions to only include
+        // active users.
+        org.permissions.read = userIDs;
+        org.permissions.write = userIDs;
+        return org.save();
+      }
+      // Set createdOrg to true
+      createdOrg = true;
+      // Default organization does NOT exist, create it and add all active users
+      // to permissions list
+      const defaultOrg = new Organization({
+        id: M.config.server.defaultOrganizationId,
+        name: M.config.server.defaultOrganizationName,
+        permissions: {
+          read: userIDs,
+          write: userIDs
+        }
+      });
+      // Save new default organization
+      return defaultOrg.save();
+    })
+    // Resolve on success of saved organization
+    .then(() => {
+      if (createdOrg) {
+        M.log.info('Default Organization Created');
+      }
+      return resolve();
+    })
+    // Catch and reject error
+    .catch(error => reject(error));
+  });
+}
+
+// Create default admin if a global admin does not exist
+function createDefaultAdmin() {
+  return new Promise((resolve, reject) => {
+    // Initialize userCreated
+    let userCreated = false;
+    // Search for a user who is a global admin
+    User.findOne({ admin: true })
+    .then(user => {
+      // Check if the user is NOT null
+      if (user !== null) {
+        // Global admin already exists, resolve
+        return resolve();
+      }
+      // set userCreated to true
+      userCreated = true;
+      // No global admin exists, create local user as global admin
       const adminUserData = {
+        // Set username and password of global admin user from configuration.
         username: M.config.server.defaultAdminUsername,
         password: M.config.server.defaultAdminPassword,
         provider: 'local',
         admin: true
       };
-
-      // Create user via controller
-      UserController.createUser({ admin: true }, adminUserData)
-      .then(() => {
-        M.log.info('Default admin created');
-      })
-      .catch((err2) => {
-        throw (err2);
-      });
-    }
+      // Save new global admin user
+      return UserController.createUser({ admin: true }, adminUserData);
+    })
+    // Resolve on success of saved admin
+    .then(() => {
+      if (userCreated) {
+        M.log.info('Default Admin Created');
+      }
+      return resolve();
+    })
+    // Catch and reject error
+    .catch(error => reject(error));
   });
-
-  // Create default org if it doesn't exist
-  // TODO: Convert everything into promise with create admin
-  // TODO: and create org. Potential async problem MBX-452
-  Organization.findOne({ id: 'default' })
-  .exec((err, org) => {
-    if (err) {
-      throw err;
-    }
-
-    // If the default org does not exist, create it
-    if (org === null) {
-      const defaultOrg = new Organization({
-        id: M.config.server.defaultOrganizationId,
-        name: M.config.server.defaultOrganizationName
-      });
-      defaultOrg.save((saveOrgErr) => {
-        if (saveOrgErr) {
-          throw saveOrgErr;
-        }
-      });
-    }
-    else {
-      // Prune current users to ensure no deleted
-      // users are still part of the org
-      UserController.findUsers({ admin: true })
-      .then((users) => {
-        const newList = [];
-
-        // Add all existing users to the read list
-        Object.keys(users).forEach((user) => {
-          newList.push(users[user]._id);
-        });
-
-        // Give users read/write access
-        org.permissions.read = newList;
-        org.permissions.write = newList;
-
-        // Save the updated org
-        org.save((saveOrgErr) => {
-          if (saveOrgErr) {
-            throw saveOrgErr;
-          }
-        });
-      })
-      .catch((err2) => {
-        throw err2;
-      });
-    }
-  });
-
-  // Export the app
-  module.exports = app;
 }
