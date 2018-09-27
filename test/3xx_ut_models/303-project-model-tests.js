@@ -28,8 +28,8 @@ const path = require('path');
 // MBEE modules
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
-const db = M.require('lib/db');
-const utils = M.require('lib/utils');
+const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -195,14 +195,19 @@ function deleteProject(done) {
 function verifyProjectFieldMaxChar(done) {
   // Create a new model project
   const newProject = new Project({
-    id: testData.projects[2].id,
-    name: testData.projects[2].name,
+    id: testData.projects[3].id,
+    name: testData.projects[3].name,
     org: org._id,
-    uid: `${org.id}:${testData.projects[2].id}`
+    uid: `${org.id}:${testData.projects[3].id}`
   });
 
   // Save project model object to database
-  newProject.save((error) => {
+  newProject.save()
+  .then(() => {
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
     // Expected error thrown: 'Project validation failed: id: Too many characters in username'
     chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username');
     done();

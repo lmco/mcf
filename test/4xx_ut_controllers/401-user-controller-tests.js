@@ -120,7 +120,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createNewUser(done) {
   // Create user data
-  const userData = testData.users[3];
+  const userData = testData.users[1];
 
   // Create user via controller
   UserController.createUser(adminUser, userData)
@@ -129,10 +129,10 @@ function createNewUser(done) {
     nonAdminUser = newUser;
 
     // Verify user created properly
-    chai.expect(newUser.username).to.equal(testData.users[3].username);
-    chai.expect(newUser.fname).to.equal(testData.users[3].fname);
-    chai.expect(newUser.lname).to.equal(testData.users[3].lname);
-    chai.expect(newUser.custom.location).to.equal(testData.users[3].custom.location);
+    chai.expect(newUser.username).to.equal(testData.users[1].username);
+    chai.expect(newUser.fname).to.equal(testData.users[1].fname);
+    chai.expect(newUser.lname).to.equal(testData.users[1].lname);
+    chai.expect(newUser.custom.location).to.equal(testData.users[1].custom.location);
     done();
   })
   .catch((error) => {
@@ -149,7 +149,7 @@ function createNewUser(done) {
  */
 function rejectUserCreateByNonAdmin(done) {
   // Create user data
-  const userData = testData.users[4];
+  const userData = testData.users[3];
 
   // Create user via controller
   UserController.createUser(nonAdminUser, userData)
@@ -172,7 +172,7 @@ function rejectUserCreateByNonAdmin(done) {
  */
 function rejectInvalidCreate(done) {
   // Create user data
-  const userData = testData.users[5];
+  const userData = testData.invalidUsers[1];
 
   // Create user via controller
   UserController.createUser(adminUser, userData)
@@ -195,7 +195,7 @@ function rejectInvalidCreate(done) {
  */
 function rejectDuplicateUser(done) {
   // Create user data
-  const userData = testData.users[6];
+  const userData = testData.users[1];
 
   // Create user via controller
   UserController.createUser(adminUser, userData)
@@ -217,16 +217,16 @@ function rejectDuplicateUser(done) {
  */
 function updateFirstName(done) {
   // Create user data
-  const username = testData.users[3].username;
-  const userData = { fname: `${testData.users[3].fname}edit` };
+  const username = testData.users[1].username;
+  const userData = { fname: `${testData.users[1].fname}edit` };
 
   // Updates user via controller
   UserController.updateUser(adminUser, username, userData)
   .then((updatedUser) => {
     // Verifies user controller updates first name
-    chai.expect(updatedUser.username).to.equal(testData.users[3].username);
-    chai.expect(updatedUser.fname).to.equal(`${testData.users[3].fname}edit`);
-    chai.expect(updatedUser.lname).to.equal(testData.users[3].lname);
+    chai.expect(updatedUser.username).to.equal(testData.users[1].username);
+    chai.expect(updatedUser.fname).to.equal(`${testData.users[1].fname}edit`);
+    chai.expect(updatedUser.lname).to.equal(testData.users[1].lname);
     done();
   })
   .catch((error) => {
@@ -243,7 +243,7 @@ function updateFirstName(done) {
  */
 function rejectInvalidLastNameUpdate(done) {
   // Create user data
-  const username = testData.users[3].username;
+  const username = testData.users[1].username;
   const userData = testData.names[0];
   // Update user via controller
   UserController.updateUser(adminUser, username, userData)
@@ -266,7 +266,7 @@ function rejectInvalidLastNameUpdate(done) {
  */
 function rejectUsernameUpdate(done) {
   // Create user data
-  const username = testData.users[3].username;
+  const username = testData.users[1].username;
   const userData = testData.usernames[0];
 
   // Update user via controller
@@ -290,7 +290,7 @@ function rejectUsernameUpdate(done) {
  */
 function rejectUserUpdateByNonAdmin(done) {
   // Create user data
-  const username = testData.users[3].username;
+  const username = testData.users[1].username;
   const userData = testData.names[3];
 
   // Update user via controller
@@ -313,15 +313,15 @@ function rejectUserUpdateByNonAdmin(done) {
  */
 function findExistingUser(done) {
   // Create user data
-  const username = testData.users[3].username;
+  const username = testData.users[1].username;
 
   // Find user via controller
   UserController.findUser(adminUser, username)
   .then((searchUser) => {
     // Found a user, verify user data
-    chai.expect(searchUser.username).to.equal(testData.users[3].username);
-    chai.expect(searchUser.fname).to.equal(`${testData.users[3].fname}edit`);
-    chai.expect(searchUser.lname).to.equal(testData.users[3].lname);
+    chai.expect(searchUser.username).to.equal(testData.users[1].username);
+    chai.expect(searchUser.fname).to.equal(`${testData.users[1].fname}edit`);
+    chai.expect(searchUser.lname).to.equal(testData.users[1].lname);
     done();
   })
   .catch((error) => {
@@ -361,7 +361,7 @@ function rejectFindNonExistentUser(done) {
  */
 function rejectDeleteByNonAdmin(done) {
   // Create user data
-  const username = testData.users[3].username;
+  const username = testData.users[1].username;
 
   // Delete user via controller
   UserController.removeUser(nonAdminUser, username)
@@ -407,12 +407,12 @@ function rejectDeleteSelf(done) {
  */
 function deleteUser(done) {
   // Create user data
-  const username = testData.users[3].username;
+  const username = testData.users[1].username;
 
   // Delete user via controller
   UserController.removeUser(adminUser, username)
   // Remove user succeeded, attempt to find user
-  .then(() => UserController.findUser(adminUser, testData.users[3].username))
+  .then(() => UserController.findUser(adminUser, testData.users[1].username))
   .then(() => {
     // Expect findUser() to fail
     // Should not execute, force test to fail

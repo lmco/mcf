@@ -71,14 +71,15 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
 
       // Define project data
-      const projData = testData.projects[15];
+      const projData = testData.projects[0];
+      projData.orgid = org.id;
       // Create project
       return ProjController.createProject(adminUser, projData);
     })
     .then((retProj) => {
       proj = retProj;
-      chai.expect(retProj.id).to.equal(testData.projects[15].id);
-      chai.expect(retProj.name).to.equal(testData.projects[15].name);
+      chai.expect(retProj.id).to.equal(testData.projects[0].id);
+      chai.expect(retProj.name).to.equal(testData.projects[0].name);
       done();
     })
     .catch((error) => {
@@ -137,11 +138,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postElement01(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.elements[13])
+    body: JSON.stringify(testData.elements[0])
   },
   (err, response, body) => {
     // Expect no error
@@ -150,7 +151,7 @@ function postElement01(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[13].id);
+    chai.expect(json.id).to.equal(testData.elements[0].id);
     done();
   });
 }
@@ -161,11 +162,11 @@ function postElement01(done) {
  */
 function postElement02(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[14].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.elements[14])
+    body: JSON.stringify(testData.elements[1])
   },
   (err, response, body) => {
     // Expect no error
@@ -174,7 +175,7 @@ function postElement02(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[14].id);
+    chai.expect(json.id).to.equal(testData.elements[1].id);
     done();
   });
 }
@@ -185,7 +186,7 @@ function postElement02(done) {
  */
 function getElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -197,7 +198,7 @@ function getElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[13].id);
+    chai.expect(json.id).to.equal(testData.elements[0].id);
     done();
   });
 }
@@ -231,12 +232,12 @@ function getElements(done) {
  */
 function patchElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
-      name: testData.elements[15].name
+      name: testData.elements[2].name
     })
   },
   (err, response, body) => {
@@ -246,7 +247,7 @@ function patchElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal(testData.elements[15].name);
+    chai.expect(json.name).to.equal(testData.elements[2].name);
     done();
   });
 }
@@ -257,11 +258,11 @@ function patchElement(done) {
  */
 function rejectPostElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[16].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.invalidElements[2].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.elements[16])
+    body: JSON.stringify(testData.invalidElements[2])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -304,7 +305,7 @@ function rejectGetElement(done) {
  */
 function rejectPatchElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -354,7 +355,7 @@ function rejectDeleteNonexistingElement(done) {
  */
 function deleteElement01(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[13].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -369,7 +370,7 @@ function deleteElement01(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[13].id);
+    chai.expect(json.id).to.equal(testData.elements[0].id);
 
     done();
   });
@@ -381,7 +382,7 @@ function deleteElement01(done) {
  */
 function deleteElement02(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[14].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -396,7 +397,7 @@ function deleteElement02(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[14].id);
+    chai.expect(json.id).to.equal(testData.elements[1].id);
 
     done();
   });

@@ -134,11 +134,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postProject(done) {
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[12].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.projects[12])
+    body: JSON.stringify(testData.projects[0])
   },
   (err, response, body) => {
     // Expect no error
@@ -147,8 +147,8 @@ function postProject(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.projects[12].id);
-    chai.expect(json.name).to.equal(testData.projects[12].name);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
+    chai.expect(json.name).to.equal(testData.projects[0].name);
     done();
   });
 }
@@ -159,11 +159,11 @@ function postProject(done) {
  */
 function postSecondProject(done) {
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[13].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.projects[13])
+    body: JSON.stringify(testData.projects[1])
   },
   (err, response, body) => {
     // Expect no error
@@ -172,8 +172,8 @@ function postSecondProject(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.projects[13].id);
-    chai.expect(json.name).to.equal(testData.projects[13].name);
+    chai.expect(json.id).to.equal(testData.projects[1].id);
+    chai.expect(json.name).to.equal(testData.projects[1].name);
     done();
   });
 }
@@ -184,7 +184,7 @@ function postSecondProject(done) {
  */
 function getProject(done) {
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[12].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[0].id}`,
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -194,7 +194,7 @@ function getProject(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal(testData.projects[12].name);
+    chai.expect(json.name).to.equal(testData.projects[0].name);
     done();
   });
 }
@@ -205,12 +205,12 @@ function getProject(done) {
  */
 function patchProject(done) {
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[14].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
-      name: testData.projects[14].name
+      name: testData.projects[2].name
     })
   },
   (err, response, body) => {
@@ -220,7 +220,7 @@ function patchProject(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal(testData.projects[14].name);
+    chai.expect(json.name).to.equal(testData.projects[2].name);
     done();
   });
 }
@@ -252,7 +252,7 @@ function getAllProjects(done) {
  */
 function rejectPostOrgIdMismatch(done) {
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[16].id}`,
+    url: `${test.url}/api/orgs/${testData.orgs[1].id}/projects/${testData.projects[3].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -276,11 +276,11 @@ function rejectPostOrgIdMismatch(done) {
  */
 function rejectPatchInvalidField(done) {
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[14].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(testData.projects[17])
+    body: JSON.stringify(testData.invalidProjects[2])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -326,7 +326,7 @@ function rejectDeleteNonexistingProject(done) {
  */
 function deleteProject(done) {
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[14].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -349,7 +349,7 @@ function deleteProject(done) {
  */
 function deleteSecondProject(done) {
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[13].id}`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
