@@ -135,7 +135,7 @@ pipeline {
                         sh "MBEE_ENV=test node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
                     }
                     else if (env.JOB_NAME == 'dev.mbee.us.lmco.com') {
-                        // Removes any existing production running containers
+                        // Removes any existing production running container127.0.s
                         sh 'MBEE_ENV=production node mbee docker --clean'
 
                         // Runs the production container in the background
