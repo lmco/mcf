@@ -100,7 +100,7 @@ function loadPlugins() {
       pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
     }
     // If try fails,
-    // Catch: logs the plugin could not be installed along with the error
+    // Catch: logs "Could not install plugin" along with the error
     catch (err) {
       M.log.error(`Could not install plugin ${namespace}, error:`);
       M.log.error(err);
