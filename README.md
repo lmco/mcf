@@ -94,6 +94,11 @@ different behavior between approaches.
 In short, you can also build MBEE with `npm run build`, `yarn build`, or
 `node scripts/build.js`. They'll all do the same thing.
 
+It is possible to build individual pieces of MBEE as well. By default, running
+the build script will build all pieces of MBEE, or by providing the subcommand
+--all or --copy-deps. Additional subcommands are --sass, --react and --jsdoc to
+build the sass, react and jsdoc files respectively.
+
 ### Running MBEE
 
 The fastest and easiest way to run MBEE is to run `node mbee start`. This will
