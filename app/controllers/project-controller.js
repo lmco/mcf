@@ -86,12 +86,12 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
 
     const searchParams = { uid: { $regex: `^${orgID}:` }, deleted: false };
 
-    // Error Check: Ensure user has permissions to find deleted orgs
+    // Error Check: Ensure user has permissions to find deleted projects
     if (softDeleted && !reqUser.admin) {
       return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
     }
-    // softDeleted flag true and User Admin true, remove deleted: false
-    if (softDeleted && reqUser.admin) {
+    // softDeleted flag true, remove deleted: false
+    if (softDeleted) {
       delete searchParams.deleted;
     }
 
@@ -228,12 +228,12 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
     // Set search Params for projUID and deleted = false
     const searchParams = { uid: projUID, deleted: false };
 
-    // Error Check: Ensure user has permissions to find deleted orgs
+    // Error Check: Ensure user has permissions to find deleted projects
     if (softDeleted && !reqUser.admin) {
       return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
     }
-    // softDeleted flag true and User Admin true, remove deleted: false
-    if (softDeleted && reqUser.admin) {
+    // softDeleted flag true, remove deleted: false
+    if (softDeleted) {
       delete searchParams.deleted;
     }
 

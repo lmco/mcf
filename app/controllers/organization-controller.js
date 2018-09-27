@@ -87,8 +87,8 @@ function findOrgs(reqUser, softDeleted = false) {
     if (softDeleted && !reqUser.admin) {
       return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
     }
-    // softDeleted flag true and User Admin true, remove deleted: false
-    if (softDeleted && reqUser.admin) {
+    // softDeleted flag true, remove deleted: false
+    if (softDeleted) {
       delete searchParams.deleted;
     }
 
@@ -141,8 +141,8 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
     if (softDeleted && !reqUser.admin) {
       return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
     }
-    // softDeleted flag true and User Admin true, remove deleted: false
-    if (softDeleted && reqUser.admin) {
+    // softDeleted flag true, remove deleted: false
+    if (softDeleted) {
       delete searchParams.deleted;
     }
 
