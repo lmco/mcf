@@ -53,6 +53,7 @@ const utils = M.require('lib.utils');
  * @description This function finds all organizations a user belongs to.
  *
  * @param {User} reqUser - The user whose organizations to find
+ * @param {Boolean} softDeleted - The optional flag to denote searching for deleted orgs
  *
  * @return {Promise} resolve - Array of found organization objects
  *                    reject - error
@@ -67,11 +68,32 @@ const utils = M.require('lib.utils');
  * });
  *
  */
-function findOrgs(reqUser) {
+function findOrgs(reqUser, softDeleted = false) {
   return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+
     const userID = sani.sanitize(reqUser._id);
+
+    // Set search Params for orgid and deleted = false
+    const searchParams = { 'permissions.read': userID, deleted: false };
+
+    // Error Check: Ensure user has permissions to find deleted orgs
+    if (softDeleted && !reqUser.admin) {
+      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+    }
+    // softDeleted flag true and User Admin true, remove deleted: false
+    if (softDeleted && reqUser.admin) {
+      delete searchParams.deleted;
+    }
+
     // Find Organizations user has read access
-    findOrgsQuery({ 'permissions.read': userID, deleted: false })
+    findOrgsQuery(searchParams)
     .then((orgs) => resolve(orgs))
     .catch((error) => reject(error));
   });
@@ -103,19 +125,24 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
+
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
     // Set search Params for orgid and deleted = false
     const searchParams = { id: orgID, deleted: false };
 
-    // Check softDeleted flag true and User Admin true
+    // Error Check: Ensure user has permissions to find deleted orgs
+    if (softDeleted && !reqUser.admin) {
+      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+    }
+    // softDeleted flag true and User Admin true, remove deleted: false
     if (softDeleted && reqUser.admin) {
-      // softDeleted flag true and User Admin true, remove deleted: false
       delete searchParams.deleted;
     }
 
