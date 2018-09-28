@@ -18,11 +18,15 @@
 #
 ###############################################################################
 FROM node:6.14.1-alpine
-MAINTAINER Leah De Laurell <leah.p.delaurell@lmco.com>
-WORKDIR /mbee
+MAINTAINER Josh Kaplan <joshua.d.kaplan@lmco.com>
+WORKDIR /lm/mbee
 
 # Set proxy environment variables
-ENV NO_PROXY=127.0.0.1,localhost\
+ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
+    HTTPS_PROXY="http://proxy-lmi.global.lmco.com:80" \
+    http_proxy="http://proxy-lmi.global.lmco.com:80" \
+    https_proxy="http://proxy-lmi.global.lmco.com:80" \
+    NO_PROXY=127.0.0.1,localhost,*.lmco.com \
     NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Install dependencies
@@ -37,7 +41,6 @@ COPY ./certs certs
 RUN chmod 400 certs/*
 
 # Install Yarn Modules
-# TODO: Eventually need to switch these names out with public release
 RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
     && yarn config set cafile "certs/LockheedMartinCertificateAuthority.pem" \
     && yarn config set strict-ssl false \
@@ -55,17 +58,9 @@ RUN mkdir logs \
     && mkdir -p plugins \
     && mkdir -p build \
     && mkdir -p public \
-    && mkdir -p app \
-
-# Create the Database
-RUN mkdir -p data/db \
- && nohup mongod --dbpath /mbee/data/db --bind_ip 127.0.0.1&
-
-VOLUME data/db
+    && mkdir -p app
 
 # Copy Project
-COPY ./config/*.cfg config/
-COPY ./config/*.json config/
 COPY ./scripts scripts
 COPY ./mbee.js mbee.js
 COPY ./plugins plugins
@@ -73,5 +68,5 @@ COPY ./build build
 COPY ./app  app
 COPY ./README.md README.md
 
-# Run server
+#Install the configuration and run the server
 CMD ["node", "mbee.js", "start"]
