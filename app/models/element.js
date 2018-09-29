@@ -240,7 +240,7 @@ ElementSchema.pre('save', function(next) {
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'delete', 'deletedOn', 'documentation', 'custom'];
+  return ['name', 'documentation', 'custom'];
 };
 
 

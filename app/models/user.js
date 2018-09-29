@@ -268,7 +268,7 @@ UserSchema.methods.verifyPassword = function(pass) {
  * @memberOf UserSchema
  */
 UserSchema.methods.getValidUpdateFields = function() {
-  return ['fname', 'preferredName', 'lname', 'email', 'deletedOn', 'custom'];
+  return ['fname', 'preferredName', 'lname', 'email', 'custom'];
 };
 
 /**
