@@ -144,7 +144,7 @@ ProjectSchema.methods.getPermissionLevels = function() {
  * @memberof ProjectSchema
  */
 ProjectSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'delete', 'deletedOn', 'custom'];
+  return ['name', 'custom'];
 };
 
 /**
