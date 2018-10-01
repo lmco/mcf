@@ -37,22 +37,9 @@ router.route('/doc/api')
 /**
  * Both routes map to the same controller. The controller method handles
  * the logic of checking for the page parameter.
- * // TODO: Remove this in prc-001, keep in masters MBX-370
- */
-router.route('/doc/flight-manual')
-.get(Middleware.logRoute, UIController.renderFlightManual);
-router.route('/doc/flight-manual/:page')
-.get(Middleware.logRoute, UIController.renderFlightManual);
-
-/**
- * Both routes map to the same controller. The controller method handles
- * the logic of checking for the page parameter.
- * // TODO: Remove this in prc-001 if needed, keep in masters
  */
 router.route('/doc/developers')
-.get(Middleware.logRoute, UIController.renderJSDoc);
-router.route('/doc/developers/:page')
-.get(Middleware.logRoute, UIController.renderJSDoc);
+.get(Middleware.logRoute, ((req, res) => res.redirect('/doc/index.html')));
 
 /* ---------- Authenticated Routes ----------*/
 /**
@@ -81,7 +68,6 @@ router.route('/about')
 );
 
 /* This renders the home page for logged in users */
-// TODO: Create a simple yet professional looking homepage
 router.route('/')
 .get(
   AuthController.authenticate,
@@ -89,14 +75,6 @@ router.route('/')
   UIController.home
 );
 
-/* This renders the home page for logged in users */
-// TODO: Remove this in prc-001, keep in masters MBX-370
-router.route('/:org/:project')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.mbee
-);
 
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.
@@ -108,12 +86,5 @@ router.route('/logout')
   UIController.logout
 );
 
-/* Renders the admin console */ // TODO: Remove this in prc-001, keep in masters MBX-370
-router.route('/admin/console')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.admin
-);
 
 module.exports = router;

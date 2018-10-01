@@ -1,5 +1,5 @@
 /**
- * Classification: UNLASSIFIED
+ * Classification: UNCLASSIFIED
  *
  * @module plugin.routes
  *
@@ -149,17 +149,6 @@ function clonePluginFromGitRepo(data) {
 }
 
 /**
- * Gets the plugin from a URL and places it in a specified location in the
- * plugins directory.
- * @param data
- *
- * TODO: Remove from prc-001 (MBX-370)
- */
-// function getPluginFromURL(data) {
-//  // TODO (MBX-203)
-// }
-
-/**
  * @description Copies the plugin from a local directory to the plugins
  * directory. If the plugin location is already in the local directory, nothing
  * occurs.
@@ -187,57 +176,5 @@ function copyPluginFromLocalDir(data) {
   M.log.verbose(stdout.toString());
   M.log.info('Copy complete');
 }
-
-/**
- * Extracts a zip file into the appropriate location in the plugins directory.
- * @param data
- *
- * TODO: Remove from prc-001 (MBX-370)
- */
-// function extractZip(data) {
-//
-//   getPluginFromURL(data);
-//
-//   if (process.platform !== 'win32') {
-//     // Check if plugin already exists
-//     try {
-//       const lscmd = [`ls ${path.join(plugins, data.name)}`]
-//       const lsstdout = execSync(lscmd);
-//     }
-//     catch (err) {
-//       // Unzip the file
-//       const cmd = [`unzip ${data.source} -d ${path.join(plugins, data.name)}`].join(' ');
-//       const stdout = execSync(cmd);
-//       M.log.verbose(stdout.toString());
-//
-//       // Delete the zip
-//       const cmd2 = [`rm ${data.source}`].join(' ');
-//       const stdout2 = execSync(cmd2);
-//       M.log.verbose(stdout2.toString());
-//     }
-//   }
-// }
-
-/**
- * Extracts a tar.gz file into the appropriate location in the plugins
- * directory.
- * @param data
- *
- * TODO: Remove from prc-001 (MBX-370)
- */
-// function extractTarGz(data) {
-//   // TODO (MBX-204)
-// }
-
-/**
- * Extracts a gzip file into the appropriate location in the plugins directory.
- * @param data
- *
- * TODO: Remove from prc-001 (MBX-370)
- */
-// function extractGz(data) {
-//   // TODO (MBX-204)
-// }
-
 
 module.exports = pluginRouter;

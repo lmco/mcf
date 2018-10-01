@@ -1,10 +1,9 @@
 {
   "opts": {
-      "template": "app/ui/jsdoc-template",
+      "template": "",
       "encoding": "utf8",
       "destination": "./build/doc",
-      "recurse": true,
-      "tutorials": "./doc"
+      "recurse": true
   },
   "source": {
       "include": ["app", "README.md", "test"],
