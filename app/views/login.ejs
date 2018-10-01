@@ -43,22 +43,12 @@
     <div class="form-group">
       <input id="next" name="next" type="hidden" class="form-control"  value="<%= next %>">
     </div>
-    <%
-    // TODO: Remove from prc-001 before public release (MBX-370)
-    // Note this is of type "button" not "submit". This makes sure the button does not submit
-    // the form, but instead triggers the warning modal.
-    // Note the top-level container will also trigger the modal on an ENTER key press
-    %>
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#login-warning">
       Login
     </button>
   </form>
 </div>
 
-<%
-  // TODO: Remove for public release (MBX-370)
-// This is the modal that displays the IPM-111 warning.
-%>
 <div id="login-warning" class="modal" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">

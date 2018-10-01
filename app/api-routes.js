@@ -131,9 +131,6 @@ api.route('/version')
   APIController.version
 );
 
-
-// TODO: MBX-370, Remove Post, Patch, and Delete documentation before public release
-
 /**
  * @swagger
  * /api/orgs:
@@ -372,7 +369,6 @@ api.route('/orgs/:orgid')
   APIController.deleteOrg
 );
 
-// TODO: MBX-370 Remove batch post, patch, and delete of projects
 /**
  * @swagger
  * /api/orgs/:orgid/projects:
@@ -1130,8 +1126,6 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
   APIController.deleteProjectRole
 );
 
-
-// TODO: Remove batch operation except GET from below MBX-370
 /**
  * @swagger
  * /api/orgs/:orgid/projects/:projectid/elements:
@@ -1455,8 +1449,6 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
   APIController.deleteElement
 );
 
-
-// TODO: Remove all batch operations except GET below, MBX-370
 /**
  * @swagger
  * /api/users:

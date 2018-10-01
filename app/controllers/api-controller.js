@@ -5,13 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin J Bieber <austin.j.bieber@lmco.com>
@@ -241,7 +235,6 @@ function getOrgs(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release (MBX-370)
  * POST /api/orgs
  *
  * @description Accepts an array of JSON objects containing organization data.
@@ -257,7 +250,6 @@ function postOrgs(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release (MBX-370)
  * PATCH /api/orgs
  *
  * @description Accepts an array of JSON objects containing organization data.
@@ -274,7 +266,6 @@ function patchOrgs(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release (MBX-370)
  * DELETE /api/orgs
  *
  * @description This function will soft-delete all orgs.
@@ -612,7 +603,6 @@ function getProjects(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release (MBX-370)
  * POST /api/org/:orgid/projects
  *
  * @description Accepts an array of JSON objects containing project data.
@@ -626,7 +616,6 @@ function postProjects(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release (MBX-370)
  * PATCH /api/org/:orgid/projects
  *
  * @description Accepts an array of JSON objects containing project data.
@@ -643,7 +632,6 @@ function patchProjects(req, res) {
 }
 
 /**
- * TODO: Remove function prior to public release (MBX-370)
  * DELETE /api/org/:orgid/projects
  *
  * @description This function will soft-delete all projects.
