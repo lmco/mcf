@@ -5,7 +5,9 @@
  *
  * @copyright  Copyright (c) 2018, Lockheed Martin Corporation
  *
- * @license  MIT
+ * @license  LMPI - Lockheed Martin Proprietary Information
+ *
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This file implements the plugin loading and routing logic.
  */
@@ -83,7 +85,10 @@ function loadPlugins() {
 
     // Install the dependencies
     const dependencies = pkg.dependencies;
+    // Loop through plugin dependencies
     for (let i = 0; i < dependencies.length; i++) {
+      // Add dependency to node_modules without errasing existing node_modules
+      // directory
       const commands = [
         `yarn add --dev ${dependencies[i]} && yarn remove ${dependencies[i]}`
       ];
@@ -96,8 +101,8 @@ function loadPlugins() {
     try {
       pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
     }
-      // If try fails,
-      // Catch: logs "Could not install plugin" along with the error
+    // If try fails,
+    // Catch: logs "Could not install plugin" along with the error
     catch (err) {
       M.log.error(`Could not install plugin ${namespace}, error:`);
       M.log.error(err);
@@ -136,7 +141,7 @@ function clonePluginFromGitRepo(data) {
 
   // Create the git clone command
   const cmd = `${deployKeyCmd}git clone ${version}${data.source} `
-    + `${path.join(M.root, 'plugins', data.name)}`;
+            + `${path.join(M.root, 'plugins', data.name)}`;
 
   // Clone the repo
   M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
