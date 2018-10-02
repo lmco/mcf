@@ -35,7 +35,6 @@ const { execSync } = require('child_process');
 const gulp = require('gulp');
 const concat = require('gulp-concat');
 const sass = require('gulp-sass');
-const react = require('gulp-react');
 
 
 /**
@@ -68,20 +67,6 @@ function build(_args) {
     gulp.src('./app/ui/img/**/*')
     .pipe(gulp.dest('build/public/img'));
 
-    // Copy React
-    // TODO: remove from PRC-001 (MBX-370)
-    gulp.src('./node_modules/react/umd/react.production.min.js')
-    .pipe(react())
-    .pipe(concat('react.min.js'))
-    .pipe(gulp.dest('build/public/js'));
-
-    // Copy ReactDOM
-    // TODO: remove from PRC-001 (MBX-370)
-    gulp.src('./node_modules/react-dom/umd/react-dom.production.min.js')
-    .pipe(react())
-    .pipe(concat('react-dom.min.js'))
-    .pipe(gulp.dest('build/public/js'));
-
     // Copy Swagger CSS
     gulp.src('./node_modules/swagger-ui-express/static/*.css')
     .pipe(gulp.dest('build/public/css'));
@@ -107,14 +92,8 @@ function build(_args) {
     .pipe(gulp.dest('build/public/js'));
 
     // Copy MBEE JS
-    // TODO: remove from PRC-001 (MBX-370)
     gulp.src('./app/ui/js/**/*.js')
     .pipe(concat('mbee.js'))
-    .pipe(gulp.dest('build/public/js'));
-
-    // Copy JSDoc JS
-    gulp.src('./app/ui/jsdoc-template/static/**/*.js')
-    .pipe(concat('jsdoc.js'))
     .pipe(gulp.dest('build/public/js'));
   }
 
@@ -125,21 +104,6 @@ function build(_args) {
     .pipe(sass({ outputStyle: 'compressed' })
     .on('error', sass.logError))
     .pipe(gulp.dest('build/public/css'));
-  }
-
-  // Builds the React libraries into client-side JS
-  // TODO: remove from PRC-001 (MBX-370)
-  if (args.includes('--all') || args.includes('--react')) {
-    M.log.info('  + Building react ...');
-    // Build React
-    gulp.src('./app/ui/react-components/**/*.jsx')
-    .pipe(react())
-    .pipe(concat('mbee-react.js'))
-    .pipe(gulp.dest('build/public/js'));
-    // Build ReactDOM
-    gulp.src('./app/ui/react-renderers/**/*.jsx')
-    .pipe(react())
-    .pipe(gulp.dest('build/public/js'));
   }
 
   // Build JSDoc

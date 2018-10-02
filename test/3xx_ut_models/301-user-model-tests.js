@@ -5,13 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -71,7 +65,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createUser(done) {
   // Create a new User object
-  const user = new User(testData.users[2]);
+  const user = new User(testData.users[1]);
   // Save user object to the database
   user.save()
   .then(() => done())
@@ -89,14 +83,14 @@ function createUser(done) {
  */
 function getUser(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({ username: testData.users[2].username, deletedOn: null })
+  User.findOne({ username: testData.users[1].username, deletedOn: null })
   .then((user) => {
     // Check first, last, and preferred name
-    chai.expect(user.fname).to.equal(testData.users[2].fname);
-    chai.expect(user.lname).to.equal(testData.users[2].lname);
-    chai.expect(user.preferredName).to.equal(testData.users[2].preferredName);
+    chai.expect(user.fname).to.equal(testData.users[1].fname);
+    chai.expect(user.lname).to.equal(testData.users[1].lname);
+    chai.expect(user.preferredName).to.equal(testData.users[1].preferredName);
     // Check the name
-    chai.expect(user.name).to.equal(`${testData.users[2].fname} ${testData.users[2].lname}`);
+    chai.expect(user.name).to.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
     done();
   })
   .catch((error) => {
@@ -113,9 +107,9 @@ function getUser(done) {
  */
 function verifyValidPassword(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({ username: testData.users[2].username, deletedOn: null })
+  User.findOne({ username: testData.users[1].username, deletedOn: null })
   // Verify the user's password
-  .then((user) => user.verifyPassword(testData.users[2].password))
+  .then((user) => user.verifyPassword(testData.users[1].password))
   .then((result) => {
     // expected - verifyPassword() returned true
     chai.expect(result).to.equal(true);
@@ -135,7 +129,7 @@ function verifyValidPassword(done) {
  */
 function verifyInvalidPassword(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({ username: testData.users[2].username, deletedOn: null })
+  User.findOne({ username: testData.users[1].username, deletedOn: null })
   // Attempt to verify the user's incorrect password
   .then((user) => user.verifyPassword('incorrectPassword'))
   .then((result) => {
@@ -157,16 +151,16 @@ function verifyInvalidPassword(done) {
  */
 function updateUser(done) {
   // Find and updated the user created in the previous createUser test.
-  User.findOneAndUpdate({ username: testData.users[2].username },
-    { fname: `${testData.users[2].fname}edit`, lname: testData.users[2].lname })
+  User.findOneAndUpdate({ username: testData.users[1].username },
+    { fname: `${testData.users[1].fname}edit`, lname: testData.users[1].lname })
   // Find the updated user
   .then((user) => User.findOne({ username: user.username }))
   .then((userUpdated) => {
     // Check the user has the updated first and last name.
-    chai.expect(userUpdated.username).to.equal(testData.users[2].username);
-    chai.expect(userUpdated.fname).to.equal(`${testData.users[2].fname}edit`);
-    chai.expect(userUpdated.lname).to.equal(testData.users[2].lname);
-    chai.expect(userUpdated.name).to.equal(`${testData.users[2].fname}edit ${testData.users[2].lname}`);
+    chai.expect(userUpdated.username).to.equal(testData.users[1].username);
+    chai.expect(userUpdated.fname).to.equal(`${testData.users[1].fname}edit`);
+    chai.expect(userUpdated.lname).to.equal(testData.users[1].lname);
+    chai.expect(userUpdated.name).to.equal(`${testData.users[1].fname}edit ${testData.users[1].lname}`);
     done();
   })
   .catch((error) => {
@@ -181,7 +175,6 @@ function updateUser(done) {
  * @description Checks that a user can be soft deleted.
  */
 function softDeleteUser(done) {
-  // TODO (JU) - remove before public release (MBX-370)
   // LM: Changed from findOneAndUpdate to a findOne and Save
   // Note: findOneAndUpdate does not call setters, and was causing strange
   // behavior with the deleted and deletedOn fields.
@@ -189,7 +182,7 @@ function softDeleteUser(done) {
 
   // Find the user previously created and updated in createUser and updateUser
   // tests.
-  User.findOne({ username: testData.users[2].username })
+  User.findOne({ username: testData.users[1].username })
   .then((user) => {
     // Set the User deleted field
     user.deleted = true;
@@ -217,10 +210,10 @@ function softDeleteUser(done) {
  */
 function getSoftDeletedUser(done) {
   // Finds the user who was previously soft deleted in softDeleteUser
-  User.findOne({ username: testData.users[2].username })
+  User.findOne({ username: testData.users[1].username })
   .then((user) => {
     // Check the correct user was found
-    chai.expect(user.username).to.equal(testData.users[2].username);
+    chai.expect(user.username).to.equal(testData.users[1].username);
     done();
   })
   .catch((error) => {
@@ -236,7 +229,7 @@ function getSoftDeletedUser(done) {
  */
 function deleteUser(done) {
   // Find the previously created user from the createUser test.
-  User.findOne({ username: testData.users[2].username })
+  User.findOne({ username: testData.users[1].username })
   // Delete the user
   .then(user => user.remove())
   .then(() => done())

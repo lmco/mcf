@@ -5,264 +5,95 @@
       "adminPassword": "test12345"
     },
     {
-      "username": "nonadmin_user",
+      "username": "nonadminuser01",
       "password": "Password123",
       "preferredName": "nonadmin user",
       "fname": "userFirstname",
       "lname": "userLastname",
-      "admin": false
-    },
-    {
-      "username": "ironman",
-      "password": "JaRvIs100",
-      "fname": "Tony",
-      "preferredName": "Tony",
-      "lname": "Stark",
-      "email": "tony.stark@starkindustries.com",
-      "provider": "local",
-      "admin": false
-    },
-    {
-      "username": "blackpanther",
-      "password": "Forwakanda123",
-      "fname": "Tchalla",
-      "lname": "Panther",
+      "admin": false,
       "custom": {
-        "location": "Wakanda"
+        "location": "Location01"
       }
     },
     {
-      "username": "njobu",
-      "password": "fatheroferik",
-      "fname": "NJobi",
-      "lname": "Panther Dad"
+      "username": "nonadminuser02",
+      "password": "Password123",
+      "preferredName": "nonadmin user",
+      "fname": "userFirstname",
+      "lname": "userLastname",
+      "admin": false,
+      "custom": {
+        "location": "Location02"
+      }
     },
     {
-      "username": "",
-      "password": "iamnotblackpanther",
-      "fname": "Not",
-      "lname": "Black Panther"
-    },
-    {
-      "username": "blackpanther",
-      "password": "Nottherealone123",
-      "fname": "Tchalla",
-      "lname": "Panther"
-    },
-    {
-      "username": "groot",
-      "password": "Iamgroot123",
-      "fname": "Groot",
-      "lname": "Tree",
-      "admin": false
-    },
-    {
-      "username": "pepperpotts",
-      "password": "Gfoftonystark123",
-      "fname": "Pepper",
-      "lname": "Potts",
-      "admin": false
-    },
-    {
-      "username": "deadpool",
-      "password": "Babyhands123",
-      "fname": "Wade",
-      "lname": "Wilson"
-    },
-    {
-      "username": "deadpoolsbff",
-      "password": "Bartender123",
-      "fname": "Weasel",
-      "lname": "Bff"
-    },
-    {
-      "username": "deadpool",
-      "fname": "Mr Wade"
-    },
-    {
-      "username": "secondadminuser",
-      "password": "password!123",
-      "fname": "Second",
-      "preferredName": "Admin User",
-      "lname": "AdminUser",
-      "admin": true
+      "username": "nonadminuser03",
+      "password": "Password123",
+      "preferredName": "nonadmin user",
+      "fname": "userFirstname",
+      "lname": "userLastname",
+      "admin": false,
+      "custom": {
+        "location": "Location03"
+      }
     }
   ],
 
   "orgs": [
     {
-        "id": "avengers",
-        "name": "Avengers"
-    },
-    {
-        "id": "stark-industries",
-        "name": "Stark Industries"
-    },
-    {
-      "id": "boombox",
-      "name": "Star Lords Boombox",
+      "id": "testorg00",
+      "name": "Test Organization 00",
       "custom": {
-        "leader": "Star Lord"
+        "leader": "Test Leader 00"
       }
     },
     {
-      "id": "gaurdians",
-      "name": "Gaurdians of Galaxy",
-      "permissions": {
-        "admin": "[adminUser._id]",
-        "write": "[adminUser._id]",
-        "read": "[adminUser._id]"
-      }
-    },
-    {
-      "id": "boombox",
-      "name": "Stolen boombox",
+      "id": "testorg01",
+      "name": "Test Organization 01",
       "custom": {
-        "leader": "Groot",
-        "musicType": "I am Groot"
+        "leader": "Test Leader 01"
       }
     },
     {
-      "id": "boombox",
-      "name": "Back to Star Lord",
+      "id": "testorg02",
+      "name": "Test Organization 02",
       "custom": {
-        "leader": "Groot",
-        "musicType": "I am Groot"
+        "leader": "Test Leader 02"
       }
     },
     {
-      "id": "boombox",
-      "name": "Star Lord Walkman"
-    },
-    {
-      "id": "starkhq",
-      "name": "Stark Headquarts"
-    },
-    {
-      "id": "asgard",
-      "name": "Asgard"
-    },
-    {
-      "id": "shield",
-      "name": "SHIELD"
-    },
-    {
-      "id": "shield",
-      "name": "Hydra"
-    },
-    {
-      "id": "biochemistry",
-      "name": "Scientist",
-      "permissions": {
-        "admin": "[updatedUser._id]",
-        "write": "[updatedUser._id]",
-        "read": "[updatedUser._id]"
+      "id": "testorg03",
+      "name": "Test Organization 03",
+      "custom": {
+        "leader": "Test Leader 03"
       }
     },
     {
-      "id": "nineteenforty",
-      "name": "World War Two"
+      "id": "testorg04",
+      "name": "Test Organization 04",
+      "custom": {
+        "leader": "Test Leader 04"
+      }
     }
   ],
 
   "projects": [
     {
-      "id": "ultron",
-      "name": "Ultron Analysis"
+      "id": "project00",
+      "name": "Project 00"
     },
     {
-      "id": "jarvis",
-      "name": "Just a Rather Very Intelligent System"
+      "id": "project01",
+      "name": "Project 01"
+    },
+    {
+      "id": "project02",
+      "name": "Project 02"
     },
     {
       "id": "thisisaverylongidnamepleaseacceptmeorbreak",
-      "name": "Long Id"
-    },
-    {
-      "id": "timeloop",
-      "name": "Time Gem"
-    },
-    {
-      "id": "godslayer",
-      "name": "God Slayer"
-    },
-    {
-      "id": "ironman",
-      "name": "Iron man Suite",
-      "orgid": "avengers",
-      "custom": {
-        "builtFor": "Tony"
-      }
-    },
-    {
-      "id": "ironman",
-      "name": "Iron Man"
-    },
-    {
-      "id": "ironman",
-      "name": "Iron Man Two"
-    },
-    {
-      "id": "arcreactor",
-      "name": "Arc Reactor",
-      "orgid": "avengers"
-    },
-    {
-      "id": "iamnoadmin",
-      "name": "dontmakeme",
-      "orgid": "avengers"
-    },
-    {
-      "id": "ironman",
-      "name": "Tony Stark",
-      "custom": {
-        "builtFor": "Rhodey",
-        "version": 2.0
-      }
-    },
-    {
-      "id": "thor",
-      "name": "Thor Odinson",
-      "orgid": "avengers"
-    },
-    {
-      "id": "hulk",
-      "name": "Bruce Banner",
-      "orgid": "avengers"
-    },
-    {
-      "id": "bettyross",
-      "name": "Hulks GF",
-      "orgid": "avengers"
-    },
-    {
-      "id": "hulk",
-      "name": "Anger",
-      "orgid": "avengers"
-    },
-    {
-      "id": "brucebanner",
-      "name": "Bruce Banner",
-      "orgid": "avengers"
-    },
-    {
-      "id": "rebirth",
-      "name": "Super Soldier Serum",
-      "orgid": "incorrectavengers"
-    },
-    {
-      "id": "hulktwopointoh",
-      "name": "New Hulk"
-    },
-    {
-      "id": "nickfury",
-      "name": "Nick Fury",
-      "orgid": "avengers"
-    },
-    {
-      "id": "mariahill",
-      "name": "Maria Hill",
-      "orgid": "avengers"
+      "name": "Long Id",
+      "orgid": "testorg00"
     }
   ],
 
@@ -270,109 +101,38 @@
     {
       "type": "Package",
       "id": "nlp",
-      "name": "Natural Language Processing"
+      "name": "Natural Language Processing",
+      "projectUID": "testorg00:project00"
     },
     {
       "type": "Block",
       "id": "speech-recognition",
       "name": "Speech Recognition",
+      "parent": "nlp",
       "custom": {
         "language": "english"
-      }
+      },
+      "projectUID": "testorg00:project00"
     },
     {
       "type": "Block",
       "id": "text-parser",
-      "name": "Text Parser"
+      "name": "Text Parser",
+      "parent": "nlp",
+      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9",
+      "projectUID": "testorg00:project00"
     },
     {
       "type": "Relationship",
       "id": "speech-to-text",
-      "name": "Speech to Text"
+      "parent": "nlp",
+      "name": "Speech to Text",
+      "source": "speech-recognition",
+      "target": "text-parser",
+      "projectUID": "testorg00:project00"
     },
     {
-      "type": "Package",
-      "id": "0001",
       "name": "In time loop"
-    },
-    {
-      "type": "Block",
-      "id": "0002",
-      "name": "In time loop 2"
-    },
-    {
-      "type": "Relationship",
-      "id": "0003",
-      "name": "Time looping"
-    },
-    {
-      "type": "Block",
-      "id": "0000"
-    },
-    {
-      "id": "elem0",
-      "name": "Mjolnir",
-      "projectUID": "avengers:thor",
-      "type": "Package",
-      "custom": {
-        "location": "Earth",
-        "real": true
-      },
-      "documentation": "This is some documentation."
-    },
-    {
-      "id": "elem1",
-      "name": "Heimdall the Gatekeeper",
-      "projectUID": "avengers:thor",
-      "type": "block",
-      "parent": "elem0"
-    },
-    {
-      "id": "elem2",
-      "name": "Loki brother of Thor",
-      "projectUID": "avengers:thor",
-      "type": "Block",
-      "parent": "elem0",
-      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
-    },
-    {
-      "id": "rel1",
-      "name": "Hate Relationship",
-      "projectUID": "avengers:thor",
-      "type": "Relationship",
-      "source": "elem1",
-      "target": "elem2"
-    },
-    {
-      "id": "elem0",
-      "name": "Thors Hammer",
-      "documentation": "This is some different documentation",
-      "custom": {
-        "real": false,
-        "marvel": false
-      }
-    },
-    {
-      "id": "0000",
-      "name": "Steve Rogers",
-      "projectUID": "avengers:brucebanner",
-      "type": "Block"
-    },
-    {
-      "id": "0001",
-      "name": "Steve Rogers 2",
-      "projectUID": "avengers:brucebanner",
-      "type": "Block"
-    },
-    {
-      "id": "0000",
-      "name": "Captain America"
-    },
-    {
-      "id": "0003",
-      "name": "",
-      "projectUID": "avengers:brucebanner",
-      "type": "Block"
     }
   ],
 
@@ -382,6 +142,12 @@
       "password": "Deadpool123",
       "fname": "Baby",
       "lname": "Legs"
+    },
+    {
+      "username": "",
+      "password": "iamnotblackpanther",
+      "fname": "Not",
+      "lname": "Black Panther"
     }
   ],
 
@@ -398,23 +164,19 @@
   "invalidProjects": [
     {
       "id": "period",
-      "name": "This is just to see if a period works....",
-      "orgid": "avengers"
+      "name": "This is just to see if a period works...."
     },
     {
-      "id": "",
-      "name": "denyme",
-      "orgid": "avengers"
-    },
-    {
-      "id": "imfake",
-      "name": "",
-      "orgid": "avengers"
+      "id": "INVALIDID",
+      "name": "invalidid"
     },
     {
       "id": "imfake",
-      "name": "avengers",
-      "orgid": ""
+      "name": ""
+    },
+    {
+      "id": "imfake",
+      "name": "avengers"
     }
   ],
 
@@ -422,9 +184,9 @@
     {
       "id": "elem2",
       "name": "Frigg wife of Odin",
-      "projectUID": "avengers:thor",
+      "projectUID": "testorg00:project00",
       "type": "BLOCK",
-      "parent": "elem1"
+      "parent": "speech-recognition"
     },
     {
       "id": "elem5",
@@ -433,6 +195,11 @@
       "type": "Block",
       "parent": "elem0",
       "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
+    },
+    {
+      "id": "elem6",
+      "name": "%@^@$#@#",
+      "type": "Block"
     }
   ],
 

@@ -26,19 +26,14 @@
 // circular references between controllers.
 module.exports = {
   home,
-  mbee,
-  admin,
   swaggerDoc,
   showAboutPage,
-  renderFlightManual,
-  renderJSDoc,
   showLoginPage,
   login,
   logout
 };
 
 // Node modules
-const fs = require('fs');
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
@@ -58,31 +53,6 @@ function home(req, res) {
   });
 }
 
-/**
- * This renders the primary MBEE application UI.
- * It parses the request parameters in the URL to determine how to render
- * the MBEE view.
- * // TODO: Remove this in prc-001, keep in masters MBX-370
- */
-function mbee(req, res) {
-  return utils.render(req, res, 'mbee', {
-    org: sani.sanitize(req.params.org),
-    project: sani.sanitize(req.params.project),
-    title: 'MBEE | Model-Based Engineering Environment'
-  });
-}
-
-/**
- * This function will render the admin console.
- * The admin console provides a place for global administrators to
- * maintain the MBEE application.
- * // TODO: Remove this in prc-001, keep in masters MBX-370
- */
-function admin(req, res) {
-  return utils.render(req, res, 'admin', {
-    title: 'Admin | Model-Based Engineering Environment'
-  });
-}
 
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc
@@ -142,38 +112,8 @@ function showAboutPage(req, res) {
 }
 
 /**
- * @description Renders the documentation.
- * // TODO: Remove this in prc-001, keep in masters MBX-370
- */
-function renderFlightManual(req, res) {
-  if (!req.params.hasOwnProperty('page')) {
-    return res.redirect('flight-manual/index.html');
-  }
-  const page = sani.html(req.params.page);
-  // renter the page
-  return utils.render(req, res, 'fm', {
-    content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8')
-  });
-}
-
-/**
- * @description Renders the developer documentation.
- * // TODO: evaluate rather to remove this in prc-001, keep in masters MBX-370
- */
-function renderJSDoc(req, res) {
-  if (!req.params.hasOwnProperty('page')) {
-    return res.redirect('developers/index.html');
-  }
-  const page = sani.html(req.params.page);
-  // renter the page
-  return utils.render(req, res, 'jsdoc', {
-    content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8')
-  });
-}
-
-/**
- * @description This page renders the login screen. If a get query parameter called
- * "next" is passed in the URL, the next url rendered as a hidden input
+ * @description This page renders the login screen. If a get query parameter
+ * called "next" is passed in the URL, the next url rendered as a hidden input
  * to tell the login process where to redirect the user after a successful
  * login.
  */

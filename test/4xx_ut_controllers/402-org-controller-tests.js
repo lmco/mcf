@@ -84,7 +84,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing organization
-    OrgController.removeOrg(adminUser, testData.orgs[3].id, true)
+    OrgController.removeOrg(adminUser, org.id, true)
     // Removing non-admin user
     .then(() => UserController.removeUser(adminUser, newUser.username))
     .then((delUser2) => {
@@ -143,20 +143,20 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createNewOrg(done) {
   // Create org data
-  const orgData = testData.orgs[2];
+  const orgData = testData.orgs[0];
 
   // Create org via controller
   OrgController.createOrg(adminUser, orgData)
   // Find newly created org
-  .then(() => OrgController.findOrg(adminUser, testData.orgs[2].id))
+  .then(() => OrgController.findOrg(adminUser, testData.orgs[0].id))
   .then((retOrg) => {
     // Verify org created properly
-    chai.expect(retOrg.id).to.equal(testData.orgs[2].id);
-    chai.expect(retOrg.name).to.equal(testData.orgs[2].name);
+    chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+    chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
     chai.expect(retOrg.permissions.read[0].id).to.equal(adminUser._id.toString());
     chai.expect(retOrg.permissions.write[0].id).to.equal(adminUser._id.toString());
     chai.expect(retOrg.permissions.admin[0].id).to.equal(adminUser._id.toString());
-    chai.expect(retOrg.custom.leader).to.equal('Star Lord');
+    chai.expect(retOrg.custom.leader).to.equal(testData.orgs[0].custom.leader);
     done();
   })
   .catch((error) => {
@@ -172,7 +172,7 @@ function createNewOrg(done) {
  */
 function createSecondOrg(done) {
   // Creates org data
-  const orgData = testData.orgs[3];
+  const orgData = testData.orgs[1];
 
   // Creates org via the controller
   OrgController.createOrg(adminUser, orgData)
@@ -181,8 +181,8 @@ function createSecondOrg(done) {
     org = retOrg;
 
     // Verify org created properly
-    chai.expect(retOrg.id).to.equal(testData.orgs[3].id);
-    chai.expect(retOrg.name).to.equal(testData.orgs[3].name);
+    chai.expect(retOrg.id).to.equal(testData.orgs[1].id);
+    chai.expect(retOrg.name).to.equal(testData.orgs[1].name);
     chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
     chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
     chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
@@ -201,10 +201,10 @@ function createSecondOrg(done) {
  */
 function findExistingOrg(done) {
   // Find org previously created
-  OrgController.findOrg(adminUser, testData.orgs[2].id)
+  OrgController.findOrg(adminUser, testData.orgs[0].id)
   .then((retOrg) => {
     // Verify org was found
-    chai.expect(retOrg.name).to.equal(testData.orgs[2].name);
+    chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
     done();
   })
   .catch((error) => {
@@ -221,7 +221,7 @@ function findExistingOrg(done) {
  */
 function rejectUpdateImmutableField(done) {
   // Update organization
-  OrgController.updateOrg(adminUser, testData.orgs[2].id, testData.invalidPermissions[0])
+  OrgController.updateOrg(adminUser, testData.orgs[0].id, testData.invalidPermissions[0])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
@@ -241,7 +241,7 @@ function rejectUpdateImmutableField(done) {
  */
 function rejectUpdateBadType(done) {
   // Update organization
-  OrgController.updateOrg(adminUser, testData.orgs[2].id, testData.names[2])
+  OrgController.updateOrg(adminUser, testData.orgs[0].id, testData.names[2])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
@@ -261,7 +261,7 @@ function rejectUpdateBadType(done) {
  */
 function rejectNonAdminUpdate(done) {
   // Update org
-  OrgController.updateOrg(newUser, testData.orgs[2].id, testData.names[3])
+  OrgController.updateOrg(newUser, testData.orgs[0].id, testData.names[3])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
@@ -280,17 +280,17 @@ function rejectNonAdminUpdate(done) {
  */
 function updateOrg(done) {
   // Create org data
-  const orgData = testData.orgs[4];
+  const orgData = testData.orgs[0];
 
   // Update organization via org controller
-  OrgController.updateOrg(adminUser, testData.orgs[4].id, orgData)
+  OrgController.updateOrg(adminUser, testData.orgs[0].id, orgData)
   // Find updated org
-  .then(() => OrgController.findOrg(adminUser, testData.orgs[4].id))
+  .then(() => OrgController.findOrg(adminUser, testData.orgs[0].id))
   .then((retOrg) => {
     // Verify org was updated
-    chai.expect(retOrg.name).to.equal(testData.orgs[4].name);
-    chai.expect(retOrg.custom.leader).to.equal(testData.orgs[4].custom.leader);
-    chai.expect(retOrg.custom.musicType).to.equal(testData.orgs[4].custom.musicType);
+    chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
+    chai.expect(retOrg.custom.leader).to.equal(testData.orgs[0].custom.leader);
+    chai.expect(retOrg.custom.musicType).to.equal(testData.orgs[0].custom.musicType);
     done();
   })
   .catch((error) => {
@@ -306,16 +306,16 @@ function updateOrg(done) {
  */
 function updateOrgObject(done) {
   // Find existing organization
-  OrgController.findOrg(adminUser, testData.orgs[4].id)
+  OrgController.findOrg(adminUser, testData.orgs[0].id)
   .then((retOrg) => {
     // Update model object: org name
-    retOrg.name = testData.orgs[5].name;
+    retOrg.name = testData.orgs[2].name;
     // Update org via org controller
-    return OrgController.updateOrg(adminUser, testData.orgs[4].id, retOrg);
+    return OrgController.updateOrg(adminUser, testData.orgs[0].id, retOrg);
   })
   .then((retOrgUpdate) => {
     // Verify model object was updated
-    chai.expect(retOrgUpdate.name).to.equal(testData.orgs[5].name);
+    chai.expect(retOrgUpdate.name).to.equal(testData.orgs[2].name);
     done();
   })
   .catch((error) => {
@@ -350,7 +350,7 @@ function findAllExistingOrgs(done) {
  */
 function softDeleteExistingOrg(done) {
   // Soft delete an org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[5].id, false)
+  OrgController.removeOrg(adminUser, testData.orgs[0].id, false)
   .then((retOrg) => {
     // Expect the deleted flag on the returned org to be set to true
     chai.expect(retOrg.deleted).to.equal(true);
@@ -369,7 +369,7 @@ function softDeleteExistingOrg(done) {
  * Expected error thrown: 'Not Found'
  */
 function rejectFindSoftDelOrg(done) {
-  OrgController.findOrg(adminUser, testData.orgs[5].id)
+  OrgController.findOrg(adminUser, testData.orgs[0].id)
   .then(() => {
     // Expected findOrg() to fail
     // No org should be found, force test to fail
@@ -389,9 +389,9 @@ function rejectFindSoftDelOrg(done) {
  */
 function deleteExistingOrg(done) {
   // Deletes org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[5].id, true)
+  OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
   // Find deleted org
-  .then(() => OrgController.findOrg(adminUser, testData.orgs[5].id))
+  .then(() => OrgController.findOrg(adminUser, testData.orgs[0].id))
   .then(() => {
     // Expected findOrg() to fail
     // Should not execute, force test to fail
@@ -410,29 +410,29 @@ function deleteExistingOrg(done) {
  */
 function softDeleteProjectAndOrg(done) {
   // Create an org via controller
-  OrgController.createOrg(adminUser, testData.orgs[6])
+  OrgController.createOrg(adminUser, testData.orgs[3])
   .then((retOrg) => {
     // Create the project via the model
     const proj = new Project({
-      id: testData.projects[4].id,
-      name: testData.projects[4].name,
+      id: testData.projects[0].id,
+      name: testData.projects[0].name,
       org: retOrg._id,
-      uid: utils.createUID(testData.orgs[6].id, testData.projects[4].id)
+      uid: utils.createUID(testData.orgs[3].id, testData.projects[0].id)
     });
 
     // Save the project to the database
     return proj.save();
   })
   // Soft delete org via controller
-  .then(() => OrgController.removeOrg(adminUser, testData.orgs[6].id, false))
+  .then(() => OrgController.removeOrg(adminUser, testData.orgs[3].id, false))
   // Find org via controller
-  .then(() => OrgController.findOrg(adminUser, testData.orgs[6].id, true))
+  .then(() => OrgController.findOrg(adminUser, testData.orgs[3].id, true))
   .then((retOrg) => {
     // Expect organization deleted field to be true
     chai.expect(retOrg.deleted).to.equal(true);
 
     // Find project
-    return Project.findOne({ id: testData.projects[4].id });
+    return Project.findOne({ id: testData.projects[0].id });
   })
   .then((foundProj) => {
     // Expect found project's deleted parameter to be true
@@ -453,9 +453,9 @@ function softDeleteProjectAndOrg(done) {
  */
 function hardDeleteProjectAndOrg(done) {
   // Delete an org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[6].id, true)
+  OrgController.removeOrg(adminUser, testData.orgs[3].id, true)
   // Find deleted org
-  .then(() => OrgController.findOrg(adminUser, testData.orgs[6].id))
+  .then(() => OrgController.findOrg(adminUser, testData.orgs[3].id))
   .then(() => {
     // Expected findOrg() to fail
     // Should not execute, force test to fail
@@ -467,7 +467,7 @@ function hardDeleteProjectAndOrg(done) {
     chai.expect(error.message).to.equal('Not Found');
 
     // Find deleted project
-    return Project.findOne({ id: testData.projects[4].id });
+    return Project.findOne({ id: testData.projects[0].id });
   })
   .then((proj) => {
     // Expect there to be no projects found
@@ -551,7 +551,7 @@ function setUserOrgRole(done) {
  */
 function rejectUserRole(done) {
   // Set permissions via controller
-  OrgController.setPermissions(adminUser, testData.orgs[6].id, adminUser.username, 'REMOVE_ALL')
+  OrgController.setPermissions(adminUser, testData.orgs[3].id, adminUser.username, 'REMOVE_ALL')
   .then(() => {
     // Expected setPermissions() to fail
     // Should not execute, force test to fail
@@ -594,9 +594,9 @@ function getMembers(done) {
   OrgController.findAllPermissions(adminUser, org.id.toString())
   .then((members) => {
     // Verify user permissions are correct
-    chai.expect(members.nonadmin_user.read).to.equal(true);
-    chai.expect(members.nonadmin_user.write).to.equal(true);
-    chai.expect(members.nonadmin_user.admin).to.equal(false);
+    chai.expect(members.nonadminuser01.read).to.equal(true);
+    chai.expect(members.nonadminuser01.write).to.equal(true);
+    chai.expect(members.nonadminuser01.admin).to.equal(false);
     chai.expect(members[adminUser.username].read).to.equal(true);
     chai.expect(members[adminUser.username].write).to.equal(true);
     chai.expect(members[adminUser.username].admin).to.equal(true);
@@ -678,7 +678,7 @@ function rejectGetUserRoles(done) {
  */
 function rejectInvalidPermission(done) {
   // Set permissions via controller
-  OrgController.setPermissions(adminUser, testData.orgs[3].id, newUser.username,
+  OrgController.setPermissions(adminUser, testData.orgs[1].id, newUser.username,
     testData.invalidPermissions[1].permissions)
   .then(() => {
     // Expected setPermissions() to fail

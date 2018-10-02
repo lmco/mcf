@@ -15,17 +15,11 @@
  *
  * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This class Defines functions which can return mock express
- * functions for use in the test framework.
- */
-
-/**
- * mock_express.js
- *
- * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
- *
  * @description This defines test functions which can be used by
  * routes in order to implement test functions
+ *
+ * TODO (jk): As of 9/29/18 (v0.5.0), this file is unused. If still unused in a
+ * few months of a few releases. Remove this file.
  */
 
 module.exports.getReq = function getReq(params, body) {
