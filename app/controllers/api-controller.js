@@ -1222,6 +1222,7 @@ function postElement(req, res) {
   }
 
   // Set projectUID in request body
+  req.body.id = req.params.elementid;
   req.body.projectUID = projUID;
 
   // Create element with provided parameters
