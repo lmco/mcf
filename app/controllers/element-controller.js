@@ -351,6 +351,8 @@ function createElement(reqUser, element) {
     const splitProjectUID = utils.parseUID(sani.sanitize(element.projectUID));
     const elemUID = utils.createUID(splitProjectUID[0], splitProjectUID[1], elemID);
     const elementType = utils.toTitleCase(sani.html(element.type));
+
+    // Initialize foundProject
     let foundProj = null;
 
     // Error Check: make sure the project exists
@@ -361,6 +363,7 @@ function createElement(reqUser, element) {
         return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
+      // Set foundProject to the found project
       foundProj = proj;
 
       // Error check - check if the element already exists
