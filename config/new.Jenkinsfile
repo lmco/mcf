@@ -59,7 +59,7 @@ pipeline {
                     if (env.JOB_NAME == 'Stage') {
                         // Build
                         echo "Building Stage Environment"
-                        sh 'node mbee build'
+                        sh 'MBEE_ENV=stage node mbee build'
 
                         // Verify build
                         sh 'ls -l'
@@ -94,10 +94,11 @@ pipeline {
                         echo "Building Production Docker"
                         sh "MBEE_ENV=production node mbee docker --build"
                     }
-                    else if (env.JOB_NAME == 'LeahPipeline1') {
+                    else if (env.JOB_NAME == 'Test') {
                         // Build
+                        echo "${CONFIG}"
                         echo "Building Leah's Environment"
-                        sh 'MBEE_ENV=stage node mbee build'
+                        sh 'node mbee build'
 
                         // Verify build
                         sh 'ls -l'
@@ -105,7 +106,7 @@ pipeline {
                         sh "sed -i 's/NO_BUILD_NUMBER/${BUILD_NUMBER}/g' package.json"
 
                         echo "Building Leah's Docker"
-                        sh "MBEE_ENV=stage node mbee docker --build"
+                        sh "node mbee docker --build"
                     }
                 }
             }
@@ -142,13 +143,13 @@ pipeline {
                         echo "Running Production Environment"
                         sh "MBEE_ENV=production node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
                     }
-                    else if (env.JOB_NAME == 'LeahPipeline1') {
+                    else if (env.JOB_NAME == 'Test') {
                         // Removes any existing production running containers
-                        sh 'MBEE_ENV=stage node mbee docker --clean'
+                        sh 'node mbee docker --clean'
 
                         // Runs the production container in the background
                         echo "Running Leah's Environment"
-                        sh "MBEE_ENV=stage node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
+                        sh "node mbee docker --run -v ${WORKSPACE}/config:/lm/mbee/config"
                     }
                 }
             }
@@ -168,8 +169,8 @@ pipeline {
                         else if (env.JOB_NAME == 'merge-request') {
                             sh 'MBEE_ENV=test node mbee test --bail true --reporter mocha-junit-reporter --grep "^[0-6]"'
                         }
-                        else if (env.JOB_NAME == 'LeahPipeline1') {
-                            sh 'MBEE_ENV=stage node mbee test --bail true --reporter mocha-junit-reporter --grep "^[0-6]"'
+                        else if (env.JOB_NAME == 'Test') {
+                            sh 'node mbee test --bail true --reporter mocha-junit-reporter --grep "^[0-6]"'
                         }
                         else {
                             echo "Tests did not run."
@@ -192,9 +193,9 @@ pipeline {
             // running test analysis
             junit 'test-results.xml'
             // Gets the logs and prints them to the console
-            sh 'MBEE_ENV=stage node mbee docker --get-logs'
+            sh 'node mbee docker --get-logs'
             // Removes any test containers
-            sh 'MBEE_ENV=stage node mbee docker --clean'
+            sh 'node mbee docker --clean'
         }
 
        /**
