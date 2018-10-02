@@ -1,7 +1,6 @@
 config/dev*.json*
 config/dev*.cfg*
 config/default*.cfg*
-certs/
 db/
 docs/
 logs/*.log
