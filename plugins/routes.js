@@ -1,13 +1,11 @@
 /**
- * Classification: UNCLASSIFIED
+ * Classification: UNLASSIFIED
  *
  * @module plugin.routes
  *
  * @copyright  Copyright (c) 2018, Lockheed Martin Corporation
  *
- * @license  LMPI - Lockheed Martin Proprietary Information
- *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @license  MIT
  *
  * @description This file implements the plugin loading and routing logic.
  */
@@ -25,7 +23,6 @@ const protectedFileNames = ['routes.js'];
 
 // Load the plugins
 loadPlugins();
-
 
 /**
  * Actually loads the plugins by copying them from their source location into
@@ -85,15 +82,15 @@ function loadPlugins() {
     M.log.info(`Loading plugin '${namespace}' ...`);
 
     // Install the dependencies
-    // TODO: (MBX-456) Make sure Yarn install works if NPM was used earlier
-    const yarnExe = path.join(M.root, 'node_modules', '.bin', 'yarn');
-    const rootNodeModules = path.join('..', '..', 'node_modules');
-    const commands = [
-      `cd ${pluginPath}`,
-      `${yarnExe} install --modules-folder ${rootNodeModules}`
-    ];
-    const stdout = execSync(commands.join('; '));
-    M.log.verbose(stdout.toString());
+    const dependencies = pkg.dependencies;
+    for (let i = 0; i < dependencies.length; i++) {
+      const commands = [
+        `yarn add --dev ${dependencies[i]} && yarn remove ${dependencies[i]}`
+      ];
+      const stdout = execSync(commands.join('; '));
+      M.log.verbose(stdout.toString());
+    }
+
 
     // Try: creates the plug-in path with the plug-in name
     try {
@@ -139,7 +136,7 @@ function clonePluginFromGitRepo(data) {
 
   // Create the git clone command
   const cmd = `${deployKeyCmd}git clone ${version}${data.source} `
-            + `${path.join(M.root, 'plugins', data.name)}`;
+    + `${path.join(M.root, 'plugins', data.name)}`;
 
   // Clone the repo
   M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
