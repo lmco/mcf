@@ -134,6 +134,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft delete all elements', softDeleteAllElements);
   it('should fail finding all non-soft-deleted elements', verifyFindNonSoftDelElem);
   it('should hard delete all elements', hardDeleteAllElements);
+  it('should create element with blank name', verifyBlankElemName);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -512,6 +513,29 @@ function hardDeleteAllElements(done) {
   .catch((error) => {
     // Expected error thrown: 'Not Found'
     chai.expect(error.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Verifies that elements with blank names can be created.
+ */
+function verifyBlankElemName(done) {
+  // Element data
+  const newElement = testData.elements[5];
+  newElement.projectUID = utils.createUID(org.id, proj.id);
+
+  // Create the element
+  ElemController.createElement(adminUser, newElement)
+  .then((retElem) => {
+    // Expect element create to succeed, verify element properties
+    chai.expect(retElem.name).to.equal(testData.elements[5].name);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
