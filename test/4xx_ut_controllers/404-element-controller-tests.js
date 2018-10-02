@@ -132,7 +132,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
   it('should soft delete all elements', softDeleteAllElements);
-  it('should fail finding all non-soft-deleted elements', verifyFindNonSoftDelElem);
+  it('should fail finding all non-soft-deleted elements', rejectFindNonSoftDelElem);
   it('should hard delete all elements', hardDeleteAllElements);
 });
 
@@ -478,18 +478,18 @@ function softDeleteAllElements(done) {
  * elements by default.
  * Expected error thrown: 'Not Found'
  */
-function verifyFindNonSoftDelElem(done) {
+function rejectFindNonSoftDelElem(done) {
   // Find elements which have NOT been soft-deleted
   ElemController.findElements(adminUser, org.id, proj.id)
-  .then(() => {
-    // Expect no elements found
-    // Elements were found, force test to fail
-    chai.assert(true === false);
+  .then((elements) => {
+    // Expect elements array to be empty
+    chai.expect(elements.length).to.equal(0);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Not Found'
-    chai.expect(error.message).to.equal('Not Found');
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -503,15 +503,15 @@ function hardDeleteAllElements(done) {
   // Delete all elements in project
   ElemController.removeElements(adminUser, [proj], true)
   .then(() => ElemController.findElements(adminUser, org.id, proj.id))
-  .then(() => {
-    // Expect no elements found
-    // Elements were found, force test to fail
-    chai.assert(true === false);
+  .then((elements) => {
+    // Expect elements array to be empty
+    chai.expect(elements.length).to.equal(0);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Not Found'
-    chai.expect(error.message).to.equal('Not Found');
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }

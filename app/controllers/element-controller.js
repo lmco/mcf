@@ -96,12 +96,11 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     // Find elements
     findElementsQuery(searchParams)
     .then((elements) => {
-      // Error Check: ensure user is part of the project
-      if (!elements[0].project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
-      }
+      // Filter results to only the projects on which user has read access
+      const res = elements.filter(e => e.project.getPermissions(reqUser).read || reqUser.admin);
 
-      return resolve(elements);
+      // Return resulting project
+      return resolve(res);
     })
     .catch((error) => reject(error));
   });
@@ -235,6 +234,12 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
     // Find elements
     findElementsQuery(searchParams)
     .then((elements) => {
+      // Error Check: ensure at least one element was found
+      if (elements.length === 0) {
+        // No elements found, reject error
+        return reject(new M.CustomError('Element not found.', 404, 'warn'));
+      }
+
       // Error Check: ensure no more than one element was found
       if (elements.length > 1) {
         return reject(new M.CustomError('More than one element found.', 400, 'warn'));
@@ -274,15 +279,15 @@ function findElementsQuery(elementQuery) {
     // Find elements
     Element.Element.find(elementQuery)
     .populate('parent project source target contains')
-    .then((arrElements) => {
-      // Error Check: ensure an at least one element was found
-      if (arrElements.length === 0) {
-        return reject(new M.CustomError('No elements found.', 404, 'warn'));
+    .then((arrElements) => resolve(arrElements))
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError) {
+        return reject(error);
       }
-
-      return resolve(arrElements);
-    })
-    .catch((error) => reject(error));
+      // If it's not a CustomError, create one and reject
+      return reject(new M.CustomError(error.message, 500, 'warn'));
+    });
   });
 }
 
@@ -346,6 +351,7 @@ function createElement(reqUser, element) {
     const splitProjectUID = utils.parseUID(sani.sanitize(element.projectUID));
     const elemUID = utils.createUID(splitProjectUID[0], splitProjectUID[1], elemID);
     const elementType = utils.toTitleCase(sani.html(element.type));
+    let foundProj = null;
 
     // Error Check: make sure the project exists
     ProjController.findProject(reqUser, splitProjectUID[0], splitProjectUID[1])
@@ -355,53 +361,52 @@ function createElement(reqUser, element) {
         return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
+      foundProj = proj;
+
       // Error check - check if the element already exists
       // Must nest promises since the catch uses proj, returned from findProject.
-      findElementsQuery({ $or: [{ uid: elemUID }, { uuid: uuid }] })
-      .then(() => reject(new M.CustomError('Element already exists.', 400, 'warn')))
-      .catch((findError) => {
-        // This is ok, we don't want the element to already exist.
-        if (findError.description === 'No elements found.') {
-          // Error Check - NOT included element type
-          if (!Element.Element.getValidTypes().includes(elementType)) {
-            return reject(new M.CustomError('Invalid element type.', 400, 'warn'));
-          }
+      return findElementsQuery({ $or: [{ uid: elemUID }, { uuid: uuid }] });
+    })
+    .then((elements) => {
+      // Error Check: ensure no elements were found
+      if (elements.length > 0) {
+        return reject(new M.CustomError('Element already exists.', 400, 'warn'));
+      }
 
-          // Create the new element
-          const elemData = {
-            orgID: splitProjectUID[0],
-            elemID: elemID,
-            elemName: elemName,
-            project: proj,
-            elemUID: elemUID,
-            parentID: parentID,
-            custom: custom,
-            documentation: documentation,
-            uuid: uuid
-          };
+      // Error Check - NOT included element type
+      if (!Element.Element.getValidTypes().includes(elementType)) {
+        return reject(new M.CustomError('Invalid element type.', 400, 'warn'));
+      }
 
-          // Check element type
-          if (elementType === 'Relationship') {
-            createRelationshipHelper(reqUser, elemData, element)
-            .then((newElement) => resolve(newElement))
-            .catch((createRelationshipError) => reject(createRelationshipError));
-          }
-          else if (elementType === 'Package') {
-            createPackageHelper(reqUser, elemData)
-            .then((newElement) => resolve(newElement))
-            .catch((createRelationshipError) => reject(createRelationshipError));
-          }
-          else {
-            createBlockHelper(reqUser, elemData)
-            .then((newElement) => resolve(newElement))
-            .catch((createRelationshipError) => reject(createRelationshipError));
-          }
-        }
-        else {
-          // Some other error, return it.
-          return reject(findError);
-        }
-      });
+      // Create the new element
+      const elemData = {
+        orgID: splitProjectUID[0],
+        elemID: elemID,
+        elemName: elemName,
+        project: foundProj,
+        elemUID: elemUID,
+        parentID: parentID,
+        custom: custom,
+        documentation: documentation,
+        uuid: uuid
+      };
+
+      // Check element type
+      if (elementType === 'Relationship') {
+        createRelationshipHelper(reqUser, elemData, element)
+        .then((newElement) => resolve(newElement))
+        .catch((createRelationshipError) => reject(createRelationshipError));
+      }
+      else if (elementType === 'Package') {
+        createPackageHelper(reqUser, elemData)
+        .then((newElement) => resolve(newElement))
+        .catch((createRelationshipError) => reject(createRelationshipError));
+      }
+      else {
+        createBlockHelper(reqUser, elemData)
+        .then((newElement) => resolve(newElement))
+        .catch((createRelationshipError) => reject(createRelationshipError));
+      }
     })
     .catch((findProjectError) => reject(findProjectError));
   });

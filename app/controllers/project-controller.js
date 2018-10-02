@@ -107,7 +107,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
       // Return resulting project
       return resolve(res);
     })
-    .catch((orgFindErr) => reject(orgFindErr));
+    .catch((error) => reject(error));
   });
 }
 
