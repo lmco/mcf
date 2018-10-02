@@ -476,20 +476,19 @@ function softDeleteAllElements(done) {
 /**
  * @description Verifies that findElements() does not return soft-deleted
  * elements by default.
- * Expected error thrown: 'Not Found'
  */
 function verifyFindNonSoftDelElem(done) {
   // Find elements which have NOT been soft-deleted
   ElemController.findElements(adminUser, org.id, proj.id)
-  .then(() => {
-    // Expect no elements found
-    // Elements were found, force test to fail
-    chai.assert(true === false);
+  .then((elements) => {
+    // Expect elements array to be empty
+    chai.expect(elements.length).to.equal(0);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Not Found'
-    chai.expect(error.message).to.equal('Not Found');
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
@@ -497,21 +496,20 @@ function verifyFindNonSoftDelElem(done) {
 /**
  * @description Verifies hard-delete of multiple elements by deleting
  * all elements in a project.
- * Expected error thrown: 'Not Found'
  */
 function hardDeleteAllElements(done) {
   // Delete all elements in project
   ElemController.removeElements(adminUser, [proj], true)
   .then(() => ElemController.findElements(adminUser, org.id, proj.id))
-  .then(() => {
-    // Expect no elements found
-    // Elements were found, force test to fail
-    chai.assert(true === false);
+  .then((elements) => {
+    // Expect elements array to be empty
+    chai.expect(elements.length).to.equal(0);
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Not Found'
-    chai.expect(error.message).to.equal('Not Found');
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
