@@ -12,8 +12,7 @@
 /**
  * Jenkinsfile
  *
- * Josh Kaplan
- * joshua.d.kaplan@lmco.com
+ * Leah De Laurell
  *
  * This file defines the build pipeline for Jenkins.
  */
@@ -41,15 +40,15 @@ pipeline {
         stage('Build') {
             steps {
                 // Build
-                sh 'yarn install --dev'
-                sh 'MBEE_ENV=production node mbee build'
+                sh 'yarn install'
+                sh 'node mbee build'
                 sh "sed -i 's/NO_BUILD_NUMBER/$BUILD_NUMBER/g' package.json"
 
                 // Verify build
                 sh 'ls -l'
 
                 // Build the docker image
-                sh 'MBEE_ENV=production node mbee docker --build'
+                sh 'node mbee docker --build'
             }
         }
 

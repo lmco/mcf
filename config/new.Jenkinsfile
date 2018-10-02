@@ -38,7 +38,7 @@ pipeline {
 
                 // checking to see if there are orphan volumes
                 // potentially need to delete all of the volumes
-                // sh 'docker volume ls'
+                sh 'docker volume ls'
             }
         }
 
@@ -59,7 +59,7 @@ pipeline {
                     if (env.JOB_NAME == 'Stage') {
                         // Build
                         echo "Building Stage Environment"
-                        sh 'MBEE_ENV=stage node mbee build'
+                        sh 'node mbee build'
 
                         // Verify build
                         sh 'ls -l'
