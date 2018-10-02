@@ -311,7 +311,7 @@ function updateBlock(done) {
  * @description Verifies that elements with blank names can be created.
  */
 function verifyBlankElemName(done) {
-  // Create the root package element object
+  // Create the block element object
   const newElement = new Element.Block({
     id: testData.elements[5].id,
     uid: `${org.id}:${project.id}:${testData.elements[5].id}`,
@@ -320,17 +320,14 @@ function verifyBlankElemName(done) {
     parent: null
   });
 
-  // Save the root package element to the database
+  // Save the block element to the database
   newElement.save()
-  // Find the root package element
-  .then(() => Element.Block.findOne({
-    uid: `${org.id}:${project.id}:${testData.elements[5].id}` }))
   .then((retElement) => {
-    // Check the root package element saved correctly
+    // Check the block element saved correctly
     chai.expect(retElement.uid).to.equal(
       `${org.id}:${project.id}:${testData.elements[5].id}`
     );
-    chai.expect(retElement.type).to.equal(testData.elements[5].type);
+    chai.expect(retElement.name).to.equal(testData.elements[5].name);
     done();
   })
   .catch((error) => {
