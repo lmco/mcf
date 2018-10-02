@@ -96,10 +96,10 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     // Find elements
     findElementsQuery(searchParams)
     .then((elements) => {
-      // Filter results to only the projects on which user has read access
+      // Filter results to only the elements on which user has read access
       const res = elements.filter(e => e.project.getPermissions(reqUser).read || reqUser.admin);
 
-      // Return resulting project
+      // Return resulting elements
       return resolve(res);
     })
     .catch((error) => reject(error));
