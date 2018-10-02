@@ -1,5 +1,5 @@
 /**
- * Classification: UNLASSIFIED
+ * Classification: UNCLASSIFIED
  *
  * @module plugin.routes
  *
@@ -96,8 +96,8 @@ function loadPlugins() {
     try {
       pluginRouter.use(`/${namespace}`, require(entrypoint)); // eslint-disable-line global-require
     }
-    // If try fails,
-    // Catch: logs "Could not install plugin" along with the error
+      // If try fails,
+      // Catch: logs "Could not install plugin" along with the error
     catch (err) {
       M.log.error(`Could not install plugin ${namespace}, error:`);
       M.log.error(err);
