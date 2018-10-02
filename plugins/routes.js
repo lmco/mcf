@@ -26,7 +26,6 @@ const protectedFileNames = ['routes.js'];
 // Load the plugins
 loadPlugins();
 
-
 /**
  * Actually loads the plugins by copying them from their source location into
  * the plugins directory, then loops over those plugins to "require" them and
@@ -85,15 +84,18 @@ function loadPlugins() {
     M.log.info(`Loading plugin '${namespace}' ...`);
 
     // Install the dependencies
-    // TODO: (MBX-456) Make sure Yarn install works if NPM was used earlier
-    const yarnExe = path.join(M.root, 'node_modules', '.bin', 'yarn');
-    const rootNodeModules = path.join('..', '..', 'node_modules');
-    const commands = [
-      `cd ${pluginPath}`,
-      `${yarnExe} install --modules-folder ${rootNodeModules}`
-    ];
-    const stdout = execSync(commands.join('; '));
-    M.log.verbose(stdout.toString());
+    const dependencies = pkg.dependencies;
+    // Loop through plugin dependencies
+    for (let i = 0; i < dependencies.length; i++) {
+      // Add dependency to node_modules without errasing existing node_modules
+      // directory
+      const commands = [
+        `yarn add --dev ${dependencies[i]} && yarn remove ${dependencies[i]}`
+      ];
+      const stdout = execSync(commands.join('; '));
+      M.log.verbose(stdout.toString());
+    }
+
 
     // Try: creates the plug-in path with the plug-in name
     try {
