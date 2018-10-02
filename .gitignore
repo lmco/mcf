@@ -1,6 +1,7 @@
 config/dev*.json*
 config/dev*.cfg*
 config/default*.cfg*
+certs/
 db/
 docs/
 logs/*.log
@@ -9,6 +10,7 @@ plugins/*
 !plugins/routes.js
 public/
 yarn.lock
+package-lock.json
 *.log
 *.DS_Store
 .idea/
