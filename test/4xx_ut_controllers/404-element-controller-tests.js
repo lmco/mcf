@@ -132,7 +132,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
   it('should soft delete all elements', softDeleteAllElements);
-  it('should fail finding all non-soft-deleted elements', rejectFindNonSoftDelElem);
+  it('should fail finding all non-soft-deleted elements', verifyFindNonSoftDelElem);
   it('should hard delete all elements', hardDeleteAllElements);
 });
 
@@ -476,9 +476,8 @@ function softDeleteAllElements(done) {
 /**
  * @description Verifies that findElements() does not return soft-deleted
  * elements by default.
- * Expected error thrown: 'Not Found'
  */
-function rejectFindNonSoftDelElem(done) {
+function verifyFindNonSoftDelElem(done) {
   // Find elements which have NOT been soft-deleted
   ElemController.findElements(adminUser, org.id, proj.id)
   .then((elements) => {
@@ -497,7 +496,6 @@ function rejectFindNonSoftDelElem(done) {
 /**
  * @description Verifies hard-delete of multiple elements by deleting
  * all elements in a project.
- * Expected error thrown: 'Not Found'
  */
 function hardDeleteAllElements(done) {
   // Delete all elements in project
