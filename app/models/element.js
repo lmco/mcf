@@ -105,7 +105,7 @@ const ElementSchema = new mongoose.Schema({
     required: false,
     match: RegExp(validators.element.name),
     maxlength: [64, 'Element name is too long'],
-    minlength: [2, 'Element name is too short']
+    minlength: [0, 'Element name is too short']
   },
   project: {
     type: mongoose.Schema.Types.ObjectId,

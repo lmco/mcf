@@ -133,6 +133,11 @@
     },
     {
       "name": "In time loop"
+    },
+    {
+      "id": "blankelemname",
+      "name": "",
+      "type": "Block"
     }
   ],
 
@@ -232,7 +237,7 @@
       "name": "Invalid Organization"
     },
     {
-      "name": ""
+      "name": "%%"
     }
   ],
 
