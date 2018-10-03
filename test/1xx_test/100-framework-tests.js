@@ -56,4 +56,3 @@ function assertionsTest(done) {
   done();
 }
 
-// amother one bites the dust
