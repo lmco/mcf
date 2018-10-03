@@ -55,7 +55,3 @@ function assertionsTest(done) {
   chai.expect({}).to.not.equal({});         // Tests object reference
   done();
 }
-
-function fakeTest(done){
-  done();
-}
