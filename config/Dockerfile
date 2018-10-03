@@ -23,7 +23,7 @@ WORKDIR /lm/mbee
 # Prerequisites for MongoDB install
 RUN dpkg-divert --local --rename --add /etc/init.d/mongod
 RUN ln -s /bin/true /etc/init.d/mongod
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+#RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
 RUN echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/4.0 multiverse" | tee -i /etc/apt/sources.list.d/mongodb-org-4.0.list
 
 # Install dependencies
