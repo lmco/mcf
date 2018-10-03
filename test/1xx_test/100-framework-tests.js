@@ -34,7 +34,6 @@ const chai = require('chai');
 describe(M.getModuleName(module.filename), () => {
   it('should run an empty test case', emptyTest);
   it('should run simple assertions', assertionsTest);
-  it('should run a fake test', fakeTest);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -57,6 +56,3 @@ function assertionsTest(done) {
   done();
 }
 
-function fakeTest(done) {
-  done();
-}
