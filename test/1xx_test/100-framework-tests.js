@@ -34,6 +34,7 @@ const chai = require('chai');
 describe(M.getModuleName(module.filename), () => {
   it('should run an empty test case', emptyTest);
   it('should run simple assertions', assertionsTest);
+  it('should run a fake test', fakeTest);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -53,5 +54,9 @@ function assertionsTest(done) {
   chai.expect('0').to.not.equal(0);         // Tests type casting
   chai.expect(0.1 + 0.2).to.not.equal(0.3); // Tests floating point precision
   chai.expect({}).to.not.equal({});         // Tests object reference
+  done();
+}
+
+function fakeTest(done) {
   done();
 }
