@@ -634,12 +634,59 @@ function patchProjects(req, res) {
 /**
  * DELETE /api/org/:orgid/projects
  *
- * @description This function will soft-delete all projects.
+ * @description This function deletes multiple projects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} res response object with deleted projects.
  */
 function deleteProjects(req, res) {
-  return res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize hardDelete and findSoftDeleted variables
+  let hardDelete = false;
+
+  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+    hardDelete = req.body.hardDelete;
+  }
+
+  let deleteQuery = {};
+
+  // No projects provided, delete all projects in the org
+  if (!req.body.hasOwnProperty('projects')) {
+    // Query finds all projects that start with 'orgid:'
+    deleteQuery = { uid: { $regex: `^${req.params.orgid}:` } };
+  }
+  // Project objects provided, delete all
+  else if (req.body.projects.every(p => typeof p === 'object')) {
+    // Query finds all projects by their uid
+    deleteQuery = { uid: { $in: req.body.projects.map(p => p.uid) } };
+  }
+  // Project IDs provided, delete all
+  else if (req.body.projects.every(p => typeof p === 'string')) {
+    // Query finds all projects by their id and whose uid start with 'orgid:'
+    deleteQuery = { $and: [{ uid: { $regex: `^${req.params.orgid}:` } },
+      { id: { $in: req.body.projects } }] };
+  }
+
+  console.log(deleteQuery.$and);
+  console.log(deleteQuery.$and[1]);
+
+  // Remove the specified projects
+  // NOTE: removeProject() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.removeProjects(req.user, deleteQuery, hardDelete)
+  .then((projects) => {
+    // Return 200: OK and the deleted project
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(projects));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -1060,7 +1107,7 @@ function patchUser(req, res) {
 }
 
 /**
- * DELERE /api/users/:username
+ * DELETE /api/users/:username
  *
  * @description Takes a username in the URI along with delete options in the
  * body and deletes the corresponding user.

@@ -447,14 +447,23 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
       return reject(new M.CustomError('The default organization cannot be deleted.', 403, 'warn'));
     }
 
+    // Define org variable
+    let org = null;
+
     // Find the organization
     findOrg(reqUser, organizationID, true)
-    .then((org) => {
+    .then((foundOrg) => {
+      // Set org variable
+      org = foundOrg;
+      return ProjController.findProjects(reqUser, organizationID, true);
+    })
+    .then((projects) => {
+      const projectQuery = { uid: projects.map(p => p.uid) };
       // Hard delete
       if (hardDelete) {
         Organization.deleteOne({ id: org.id })
         // Delete all projects in the org
-        .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
+        .then(() => ProjController.removeProjects(reqUser, projectQuery, hardDelete))
         .then(() => resolve(org))
         .catch((error) => reject(error));
       }
@@ -462,7 +471,7 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
       else {
         Organization.updateOne({ id: org.id }, { deleted: true })
         // Soft-delete all projects in the org
-        .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
+        .then(() => ProjController.removeProjects(reqUser, projectQuery, hardDelete))
         .then(() => {
           // Set the returned org deleted field to true since updateOne()
           // returns a query not the updated org.

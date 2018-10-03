@@ -115,13 +115,13 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  * @description The function deletes all projects for an org.
  *
  * @param {User} reqUser - The object containing the requesting user.
- * @param {Object} arrOrganizations - The organization ID for the org the project belongs to.
+ * @param {Object} removeQuery - A query to determine which projects to delete.
  * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
  *
  * @return {Array} array of deleted projects
  *
  * @example
- * removeProjects({User}, [{Org1}, {Org2}], false)
+ * removeProjects({User}, ['proj1', 'proj2', ...], false)
  * .then(function(projects) {
  *   // Do something with the deleted projects
  * })
@@ -129,11 +129,11 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  *   M.log.error(error);
  * });
  */
-function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
+function removeProjects(reqUser, removeQuery, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof arrOrganizations === 'object', 'Organizations array is not an object.');
+      assert.ok(typeof removeQuery === 'object', 'Remove query is not an object.');
       assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
@@ -146,44 +146,34 @@ function removeProjects(reqUser, arrOrganizations, hardDelete = false) {
           + ' delete a project.', 403, 'warn'));
     }
 
-    // Initialize the query object
-    const deleteQuery = { $or: [] };
-    let arrDeletedProjects = [];
+    // Define foundProjects
+    let foundProjects = null;
 
-    // Loop through each org
-    Object(arrOrganizations).forEach((org) => {
-      // Error Check: ensure user has permissions to delete projects on each org
-      if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new M.CustomError(
-          `User does not have permission to delete projects in the org ${org.name}.`, 403, 'warn'
-        ));
-      }
-      // Add org to deleteQuery
-      deleteQuery.$or.push({ org: org._id });
-      arrDeletedProjects = arrDeletedProjects.concat(org.projects);
-    });
+    // Find the projects to check permissions
+    findProjectsQuery(removeQuery)
+    .then((arrProjects) => {
+      // Set foundProjects
+      foundProjects = arrProjects;
+      console.log(foundProjects.length);
+      console.log(removeQuery);
 
-    // If there are no projects to delete
-    if (deleteQuery.$or.length === 0) {
-      return resolve();
-    }
-
-    // Hard delete projects
-    if (hardDelete) {
-      Project.deleteMany(deleteQuery)
-      // Delete elements in associated projects
-      .then(() => ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete))
-      .then(() => resolve(arrDeletedProjects))
-      .catch((error) => reject(error));
-    }
-    // Soft delete projects
-    else {
-      Project.updateMany(deleteQuery, { deleted: true })
-      // Delete elements in associated projects
-      .then(() => ElementController.removeElements(reqUser, arrDeletedProjects, hardDelete))
-      .then(() => resolve(arrDeletedProjects))
-      .catch((error) => reject(error));
-    }
+      // Error Check: ensure user has permission to delete each project
+      Object(arrProjects).forEach((project) => {
+        if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
+          // User does not have permissions and is not a site-wide admin, reject
+          return reject(new M.CustomError('User does not have permission to '
+            + `delete the project ${project.id}.`, 403, 'warn'));
+        }
+      });
+      // If hardDelete, remove projects otherwise update projects.
+      return (hardDelete)
+        ? Project.deleteMany(removeQuery)
+        : Project.updateMany(removeQuery, { deleted: true });
+    })
+    // Delete elements in associated projects
+    .then(() => ElementController.removeElements(reqUser, foundProjects, hardDelete))
+    .then(() => resolve(foundProjects))
+    .catch((error) => reject(error));
   });
 }
 
