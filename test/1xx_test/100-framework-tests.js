@@ -56,3 +56,6 @@ function assertionsTest(done) {
   done();
 }
 
+function fakeTest(done){
+  done();
+}
