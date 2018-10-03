@@ -57,14 +57,14 @@ describe(M.getModuleName(module.filename), () => {
  */
 function cleanDB(done) {
   // Remove users
-  User.remove({})
+  User.deleteMany({})
 
   // Remove all orgs except for the 'default' org.
-  .then(() => Organization.remove({ name: { $ne: 'default' } }))
+  .then(() => Organization.deleteMany({ name: { $ne: 'default' } }))
   // Remove projects
-  .then(() => Project.remove({}))
+  .then(() => Project.deleteMany({}))
   // Remove elements
-  .then(() => Element.Element.remove({}))
+  .then(() => Element.Element.deleteMany({}))
   .then(() => done())
   .catch(error => {
     M.log.error(error);
