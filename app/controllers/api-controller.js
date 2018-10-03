@@ -829,7 +829,7 @@ function deleteProject(req, res) {
   }
 
   // Remove the specified project
-  // NOTE: removeProject() sanitizes req.params.orgid and req.params.projecid
+  // NOTE: removeProject() sanitizes req.params.orgid and req.params.projectid
   ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid, hardDelete)
   .then((project) => {
     // Return 200: OK and the deleted project
