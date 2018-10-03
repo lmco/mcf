@@ -674,9 +674,6 @@ function deleteProjects(req, res) {
       { id: { $in: req.body.projects } }] };
   }
 
-  console.log(deleteQuery.$and);
-  console.log(deleteQuery.$and[1]);
-
   // Remove the specified projects
   // NOTE: removeProject() sanitizes req.params.orgid and req.params.projectid
   ProjectController.removeProjects(req.user, deleteQuery, hardDelete)

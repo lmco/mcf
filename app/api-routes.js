@@ -428,11 +428,45 @@ api.route('/orgs/:orgid')
  *   delete:
  *     tags:
  *       - projects
- *     description: Not implemented, reserved for future use. If implemented,
- *                  this would delete all projects in the organization.
+ *     description: Deletes multiple projects either by the organization or by
+ *                  a supplied list in the body of the request.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose projects to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing delete projects options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             projects:
+ *               type: object
+ *               description: An array of projects to delete. Can either be the
+ *                            project objects or the ids of the projects. If the
+ *                            list is not provided, all projects under the
+ *                            organization will be deleted.
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the project should be hard deleted or
+ *                            not. The user must be a global admin or project admin to hard delete.
+ *                            Defaults to false.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  */
 api.route('/orgs/:orgid/projects')
 .get(

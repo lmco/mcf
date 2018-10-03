@@ -154,8 +154,6 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
     .then((arrProjects) => {
       // Set foundProjects
       foundProjects = arrProjects;
-      console.log(foundProjects.length);
-      console.log(removeQuery);
 
       // Error Check: ensure user has permission to delete each project
       Object(arrProjects).forEach((project) => {
