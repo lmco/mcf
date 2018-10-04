@@ -183,6 +183,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
       if (error instanceof M.CustomError) {
         return reject(error);
       }
+
       // If it's not a CustomError, the create failed so delete all successfully
       // created projects and reject the error.
       return Project.deleteMany(findQuery)

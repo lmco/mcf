@@ -185,13 +185,13 @@ function createProject(done) {
  * @description Verifies creation of multiple projects
  */
 function createMultipleProjects(done) {
-  const newprojects = [
+  const newProjects = [
     testData.projects[4],
     testData.projects[5]
   ];
 
   // Create new projects
-  ProjController.createProjects(adminUser, org.id, newprojects)
+  ProjController.createProjects(adminUser, org.id, newProjects)
   .then((projects) => {
     // Verify the projects were created
     chai.expect(projects.length).to.equal(2);
