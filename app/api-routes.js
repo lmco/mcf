@@ -414,10 +414,37 @@ api.route('/orgs/:orgid')
  *   post:
  *     tags:
  *       - projects
- *     description: Not implemented, reserved for future use.
+ *     description: Creates multiple projects from the supplied data in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose projects to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing project objects to be created.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             projects:
+ *               type: object
+ *               description: An array of projects to create. Each project must
+ *                            contain the name and id of that project.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   patch:
  *     tags:
  *       - projects
