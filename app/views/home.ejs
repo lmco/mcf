@@ -19,24 +19,52 @@
  * @description The MBEE home page
  */
  %>
-<div id="splash-row" class="row align-items-center">
-  <div class="col-md-2">
-  </div>
-  <div class="col-md-8" style="text-align: center;">
-      <div class="row align-items-center">
-          <div class="col-5" style="text-align: right;">
-              <img src="/img/logo.png" height="180" alt="" style="margin-bottom: 20px;">
-          </div>
-          <div class="col-7" style="text-align: left;">
-            <h1>MBEE</h1>
-            <h2>Model-Based Engineering Environment</h2>
-          </div>
+<div class="mbee-home">
+  <div class="row align-items-center">
+      <div class="col-md-2">
       </div>
-    <div><i class="fas fa-bluetooth"></i></div>
+      <div class="col-md-8" style="text-align: center;">
+          <div class="row align-items-center splash-row">
+              <div class="col-5" style="text-align: right;">
+                  <img src="/img/logo.png" height="180" alt="" style="margin-bottom: 20px;">
+              </div>
+              <div class="col-7" style="text-align: left;">
+                <h1>MBEE</h1>
+                <h2>Model-Based Engineering Environment</h2>
+              </div>
+          </div>
+        <div>
+          <h1>Welcome, <%= user.preferredName %></h1>
+        </div>
+          <div class="home-links">
+              <a href="/organizations" class="home-link">
+                  <div class="home-link-icon">
+                      <i class="fas fa-boxes"></i>
+                  </div>
+                  <div class="home-link-label">
+                      <p>Your Organizations</p>
+                  </div>
+              </a>
+              <a href="/projects" class="home-link">
+                  <div class="home-link-icon">
+                      <i class="fas fa-box"></i>
+                  </div>
+                  <div class="home-link-label">
+                      <p>Your Projects</p>
+                  </div>
+              </a>
+              <a href="/users" class="home-link">
+                  <div class="home-link-icon">
+                      <i class="fas fa-user-secret"></i>
+                  </div>
+                  <div class="home-link-label">
+                      <p>You</p>
+                  </div>
+              </a>
+          </div>
 
-  </div>
-  <div class="col-md-2">
+      </div>
+      <div class="col-md-2">
+      </div>
   </div>
 </div>
-
-

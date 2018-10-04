@@ -18,6 +18,9 @@
  */
 
 @import 'variables';
+@import '../font-awesome/fontawesome';
+@import '../font-awesome/solid';
+@import '../font-awesome/brands';
 
 /******************************************************************************
 /*                                  General                                   *
@@ -29,7 +32,7 @@ html, body {
 
 body {
     min-height: 100vh;
-    font-weight: ;
+    font-weight: 300;
 }
 
 .container, .container-fluid {
@@ -49,40 +52,26 @@ body {
 /******************************************************************************/
 //LM Light Theme (default)
 //This is the default color scheme.
-body.lm-light-theme {
-    background: $lm-light-background;
-    color: $lm-light-color;
-}
-.lm-light-theme.dropdown-menu {
+.mbee-theme {
+        background-color: $mbee-background;
+        color: $mbee-color;
 
-}
+    .form-control{
+        background: #343a40;
+        color: #FFF;
+        border: 1px solid #495057;
 
-// LM Dark Theme
-// This defines the dark theme for MBEE.
-body.lm-dark-theme {
-    background: $lm-dark-background;
-    color: $lm-dark-color;
-}
-.lm-dark-theme .dropdown-menu {
-    background: $lm-dark-background;
-    color: $lm-dark-color;
-}
-.lm-dark-theme a {
-    color: #76b8ff;
-}
+        :focus {
+            background: #343a40;
+            color: $mbee-color;
+            border: 1px solid #495057;
+        }
+    }
 
-.lm-dark-theme a:hover {
-    color: #62aeff;
-}
-.lm-dark-theme .form-control {
-    background: #343a40;
-    color: #FFF;
-    border: 1px solid #495057;
-}
-.lm-dark-theme .form-control:focus {
-    background: #343a40;
-    color: $lm-dark-color;
-    border: 1px solid #495057;
+    .dropdown-menu {
+        background: $mbee-background;
+        color: $mbee-color;
+    }
 }
 
 /******************************************************************************
@@ -96,7 +85,7 @@ body.lm-dark-theme {
     top: 0;
     z-index: 1000;
     /*padding: .5rem 1rem .3rem 1rem;*/
-    .navbar-banner  {
+    .navbar-banner {
         /*height: 40px;*/
         top: $banner-height;
     }
@@ -127,7 +116,7 @@ body.lm-dark-theme {
 /*                             Navigation Side-Bar                            *
 /******************************************************************************/
 .nav-sidebar {
-    background: darken($lm-light-background, 5);
+    background: darken($mbee-background, 5);
     color: inherit;
     position: fixed; /* Fixed Sidebar (stay in place on scroll) */
     top: $navbar-height;
@@ -140,7 +129,7 @@ body.lm-dark-theme {
         bottom: $banner-height
     }
     .nav-sidebar-list {
-        background: darken($lm-light-background,5);
+        background: darken($mbee-background,5);
         color: inherit;
         .nav-sidebar-list-item {
             border-top: 1px solid rgba(0,0,0,.125);
@@ -151,7 +140,7 @@ body.lm-dark-theme {
                 color: inherit;
             }
             :hover {
-                background: darken($lm-light-background, 10);
+                background: darken($mbee-background, 10);
             }
             .nav-sidebar-item {
                 display: flex;
@@ -228,7 +217,7 @@ body.lm-dark-theme {
         width: 100%;
         border-top: 1px solid rgba(0,0,0,.125);
         &:hover {
-            background: darken($lm-light-background,10);
+            background: darken($mbee-background,10);
         }
     }
 }
@@ -259,8 +248,58 @@ body.lm-dark-theme {
 /******************************************************************************
 /*                             Home Page Styling                              *
 /******************************************************************************/
-.mbee-home{
+.mbee-home {
+    .splash-row {
+        position: relative;
+        padding-top: 50px;
+        height: 75%;
+        width: 100%;
+        font-family: 'Helvetica Neue', Helvetica;
 
+        h1 {
+            font-weight: 100;
+            font-size: 114px;
+            line-height: 0.8;
+            color: #e7e7e8;
+        }
+
+        h2 {
+            font-weight: 100;
+            font-size: 18px;
+            color: #FFC610;
+            padding-left: 4px;
+        }
+    }
+
+    .home-links {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 80px;
+        height: 100%;
+        width: 100%;
+
+        a:hover {
+            background: darken($mbee-background, 10);
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .home-link {
+            border-radius: 15px;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            width: 160px;
+
+            .home-link-icon {
+                font-size: 50px;
+            }
+
+            .home-link-label {
+            }
+        }
+    }
 }
 
 /******************************************************************************
@@ -298,7 +337,7 @@ body.lm-dark-theme {
         padding: 0;
         height: 65px;
         :hover {
-            background: darken($lm-light-background, 10);
+            background: darken($mbee-background, 10);
         }
         .org-card-header {
             display: flex;
@@ -376,7 +415,7 @@ body.lm-dark-theme {
         border-bottom: 1px solid rgb(225, 225, 225);
         margin-bottom: -1px;
         :hover {
-            background: darken($lm-light-background, 5);
+            background: darken($mbee-background, 5);
             text-decoration: none;
         }
         a {
