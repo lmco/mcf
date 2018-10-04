@@ -14,7 +14,6 @@
  *
  * Leah De Laurell
  * leah.p.delaurell@lmco.com
- * i hate making new pipelines
  */
 
 pipeline {
