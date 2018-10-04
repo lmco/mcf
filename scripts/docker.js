@@ -99,8 +99,7 @@ function docker(args) {
       '-d',
       '-it',
       '--restart=always',
-      '-e', `MBEE_ENV=${M.env}`,
-      '-v', `${M.root}/data:/lm/mbee/data`
+      '-e', `MBEE_ENV=${M.env}`
     ].concat(args.slice(1));
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
       // http and docker http enabled, open specified ports
