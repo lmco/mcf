@@ -51,6 +51,11 @@ function docker(args) {
     console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
     console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
     console.log('Docker container removed'); // eslint-disable-line no-console
+
+    cmd = spawnSync('docker', ['volume', 'rm', './data'], { stdio: 'inherit' });
+    console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
+    console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
+    console.log('Docker container removed'); // eslint-disable-line no-console
   }
 
   // Build the Docker image
