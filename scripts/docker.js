@@ -40,6 +40,7 @@ const { spawn, spawnSync } = require('child_process');
 function docker(args) {
   if(args.includes('--volume')) {
     // Remove the docker volume created
+    // Not sure this will work
     let cmd = spawnSync('docker', ['volume', 'rm', './data'], { stdio: 'inherit' });
     console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
     console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
