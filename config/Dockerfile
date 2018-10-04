@@ -40,7 +40,7 @@ RUN chmod 400 certs/*
 
 # Configure Yarn
 RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
-    && yarn config set cafile "./cert/LockheedMartinCertificateAuthority.pem" \
+    && yarn config set cafile "./certs/LockheedMartinCertificateAuthority.pem" \
     && yarn config set http-proxy "http://proxy-lmi.global.lmco.com" \
     && yarn config set https-proxy "http://proxy-lmi.global.lmco.com"
 
