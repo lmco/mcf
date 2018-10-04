@@ -38,6 +38,14 @@ const { spawn, spawnSync } = require('child_process');
  * --run`
  */
 function docker(args) {
+  if(args.includes('--volume')) {
+    // Remove the docker volume created
+    let cmd = spawnSync('docker', ['volume', 'rm', './data'], { stdio: 'inherit' });
+    console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
+    console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
+    console.log('Docker container removed'); // eslint-disable-line no-console
+  }
+
   // Removes the previous docker build.
   if (args.includes('--clean')) {
     // Stop the running container
@@ -48,12 +56,6 @@ function docker(args) {
 
     // Remove the container image
     cmd = spawnSync('docker', ['rm', M.config.docker.container.name], { stdio: 'inherit' });
-    console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
-    console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
-    console.log('Docker container removed'); // eslint-disable-line no-console
-
-    // Remove the docker volume created
-    cmd = spawnSync('docker', ['volume', 'rm', './data'], { stdio: 'inherit' });
     console.log('stdout:', cmd.stdout); // eslint-disable-line no-console
     console.log('stderr:', cmd.stderr); // eslint-disable-line no-console
     console.log('Docker container removed'); // eslint-disable-line no-console
