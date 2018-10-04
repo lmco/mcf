@@ -26,6 +26,7 @@
 module.exports = {
   findOrgs,
   createOrgs,
+  removeOrgs,
   findOrg,
   findOrgsQuery,
   createOrg,
@@ -172,6 +173,59 @@ function createOrgs(reqUser, arrOrgs) {
       return Organization.deleteMany(findQuery)
       .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
       .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+    });
+  });
+}
+
+/**
+ * @description This functions deletes multiple orgs at a time.
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {Object} query - The query used to find/delete orgs
+ * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
+ *
+ * @return {Promise} Deleted organization object
+ *
+ * @example
+ * createOrg({User}, { id: 'orgid' }, true)
+ * .then(function(orgs) {
+ *   // Do something with the newly deleted orgs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function removeOrgs(reqUser, query, hardDelete = false) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof query === 'object', 'Remove query is not an object.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
+    }
+    catch (error) {
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 403;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+    }
+
+    // If hard delete, delete orgs, otherwise update orgs
+    return (hardDelete)
+      ? Organization.deleteMany(query)
+      : Organization.updateMany(query, { deleted: true })
+    // Delete all projects in the orgs
+    .then((deleteQuery) => ProjController.removeProjects(reqUser, QUERY, hardDelete))
+    .then(() => resolve(org))
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError) {
+        return reject(error);
+      }
+      // If it's not a CustomError, create one and reject
+      return reject(new M.CustomError(error.message, 500, 'warn'));
     });
   });
 }
