@@ -18,7 +18,6 @@
  */
 
 @import 'variables';
-@import 'font-awesome-scss/fontawesome';
 
 /******************************************************************************
 /*                                  General                                   *
@@ -30,7 +29,7 @@ html, body {
 
 body {
     min-height: 100vh;
-    font-weight: 300;
+    font-weight: ;
 }
 
 .container, .container-fluid {

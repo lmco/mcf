@@ -63,10 +63,6 @@ function build(_args) {
   if (args.includes('--all') || args.includes('--copy-deps')) {
     M.log.info('  + Copying dependencies ...');
 
-    // Copy webfonts
-    gulp.src('./app/ui/webfonts/**/*')
-    .pipe(gulp.dest('build/public/webfonts'));
-
     // Copy images
     gulp.src('./app/ui/img/**/*')
     .pipe(gulp.dest('build/public/img'));
