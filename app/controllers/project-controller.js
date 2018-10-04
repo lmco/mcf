@@ -95,8 +95,10 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
       delete searchParams.deleted;
     }
 
+    // Error Check - ensure the organization exists
+    OrgController.findOrg(reqUser, organizationID, softDeleted)
     // Find projects
-    findProjectsQuery(searchParams)
+    .then(() => findProjectsQuery(searchParams))
     .then((projects) => {
       // Filter results to only the projects on which user has read access
       let res = projects.filter(project => project.getPermissions(reqUser).read || reqUser.admin);
