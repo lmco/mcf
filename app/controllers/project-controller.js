@@ -26,6 +26,7 @@
 // circular references between controllers.
 module.exports = {
   createProject,
+  createProjects,
   findAllPermissions,
   findProjectsQuery,
   findPermissions,
@@ -108,6 +109,86 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
       return resolve(res);
     })
     .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description The function creates multiple projects.
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The ID of the organization to add projects to.
+ * @param {Object} arrProjects - The object containing project data to create.
+ *
+ * @return {Array} Array of created projects
+ *
+ * @example
+ * createProjects({User}, [{Proj1}, {Proj2}, ...])
+ * .then(function(projects) {
+ *   // Do something with the new projects
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createProjects(reqUser, organizationID, arrProjects) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof arrProjects === 'object', 'Project array is not an object.');
+      let index = 1;
+      Object(arrProjects).forEach((project) => {
+        assert.ok(project.hasOwnProperty('id'), `Project #${index} is missing an id.`);
+        assert.ok(typeof project.id === 'string', `Project #${index}'s id is not a string.`);
+        index++;
+      });
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+
+    // Create the find query
+    const findQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(organizationID)}:` } },
+      { id: { $in: sani.sanitize(arrProjects.map(p => p.id)) } }] };
+
+    // Find any existing projects that match the query
+    findProjectsQuery(findQuery)
+    .then((projects) => {
+      // Error Check- ensure no projects already exist
+      if (projects.length > 0) {
+        // Get the ids of the projects that already exist
+        const existingIDs = projects.map(p => p.id);
+        return reject(new M.CustomError(`Project(s) with the following id(s) ' +
+          'already exists: [${existingIDs.toString()}].`, 403, 'warn'));
+      }
+
+      // Find the organization
+      return OrgController.findOrg(reqUser, organizationID);
+    })
+    .then((org) => {
+      // Set the uid and org for each project
+      Object(arrProjects).forEach((project) => {
+        project.uid = utils.createUID(org.id, project.id);
+        project.org = org;
+      });
+
+      // Convert each project into a project object
+      const projObjects = arrProjects.map(p => new Project(p));
+
+      // Create the projects
+      return Project.create(projObjects);
+    })
+    .then((createdProjects) => resolve(createdProjects))
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError) {
+        return reject(error);
+      }
+      // If it's not a CustomError, the create failed so delete all successfully
+      // created projects and reject the error.
+      return Project.deleteMany(findQuery)
+      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
+      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+    });
   });
 }
 

@@ -605,14 +605,36 @@ function getProjects(req, res) {
 /**
  * POST /api/org/:orgid/projects
  *
- * @description Accepts an array of JSON objects containing project data.
- * Attempts to create each of the projects. If any of the projects
- * fail, the entire request fails and none of the projects are created.
+ * @description This function creates multiple projects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} res response object with created projects.
  */
 function postProjects(req, res) {
-  return res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: check if projects list included in req.body
+  if (!req.body.hasOwnProperty('projects')) {
+    const error = new M.CustomError('Projects array not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Create the specified projects
+  // NOTE: createProjects() sanitizes req.params.orgid and the projects
+  ProjectController.createProjects(req.user, req.params.orgid, req.body.projects)
+  .then((projects) => {
+    // Return 200: OK and the new project
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(projects));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -664,8 +686,9 @@ function deleteProjects(req, res) {
   }
   // Project objects provided, delete all
   else if (req.body.projects.every(p => typeof p === 'object')) {
-    // Query finds all projects by their uid
-    deleteQuery = { uid: { $in: req.body.projects.map(p => p.uid) } };
+    // Query finds all projects by their id and whose uid start with 'orgid:'
+    deleteQuery = { $and: [{ uid: { $regex: `^${req.params.orgid}:` } },
+      { id: { $in: req.body.projects.map(p => p.id) } }] };
   }
   // Project IDs provided, delete all
   else if (req.body.projects.every(p => typeof p === 'string')) {
@@ -673,12 +696,16 @@ function deleteProjects(req, res) {
     deleteQuery = { $and: [{ uid: { $regex: `^${req.params.orgid}:` } },
       { id: { $in: req.body.projects } }] };
   }
+  else {
+    const error = new M.CustomError('Projects array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
 
   // Remove the specified projects
-  // NOTE: removeProject() sanitizes req.params.orgid and req.params.projectid
+  // NOTE: removeProjects() sanitizes the deleteQuery
   ProjectController.removeProjects(req.user, deleteQuery, hardDelete)
   .then((projects) => {
-    // Return 200: OK and the deleted project
+    // Return 200: OK and the deleted projects
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(projects));
   })
