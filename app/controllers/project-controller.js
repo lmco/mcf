@@ -122,7 +122,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  * @return {Array} Array of created projects
  *
  * @example
- * createProjects({User}, [{Proj1}, {Proj2}, ...])
+ * createProjects({User}, 'orgID', [{Proj1}, {Proj2}, ...])
  * .then(function(projects) {
  *   // Do something with the new projects
  * })
@@ -203,7 +203,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
  * @return {Array} array of deleted projects
  *
  * @example
- * removeProjects({User}, ['proj1', 'proj2', ...], false)
+ * removeProjects({User}, { uid: 'org:proj' }, false)
  * .then(function(projects) {
  *   // Do something with the deleted projects
  * })
