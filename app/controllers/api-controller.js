@@ -237,16 +237,42 @@ function getOrgs(req, res) {
 /**
  * POST /api/orgs
  *
- * @description Accepts an array of JSON objects containing organization data.
- * Attempts to create each of the organizations. If any of the organizations
- * fail, the entire request fails and none of the organizations are created.
+ * @description Creates multiple orgs from an array of objects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res - Response object with orgs' public data
  */
 function postOrgs(req, res) {
-  // TODO - Discuss the possibility of batch creation of orgs. (MBX-353)
-  // We may need to look into using transactions with mongo to make this work.
-  res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: ensure org data array is provided in the body
+  if (!req.body.hasOwnProperty('orgs')) {
+    const error = new M.CustomError('Orgs array not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Create organizations in request body
+  // NOTE: createOrgs() sanitizes req.body.orgs
+  OrgController.createOrgs(req.user, req.body.orgs)
+  .then((orgs) => {
+    // Return only public organization data
+    const orgsPublicData = [];
+    for (let i = 0; i < orgs.length; i++) {
+      orgsPublicData.push(orgs[i].getPublicData());
+    }
+
+    // Return 200: OK and public org data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(orgsPublicData));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**

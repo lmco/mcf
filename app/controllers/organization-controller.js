@@ -25,6 +25,7 @@
 // circular references between controllers.
 module.exports = {
   findOrgs,
+  createOrgs,
   findOrg,
   findOrgsQuery,
   createOrg,
@@ -96,6 +97,82 @@ function findOrgs(reqUser, softDeleted = false) {
     findOrgsQuery(searchParams)
     .then((orgs) => resolve(orgs))
     .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description This functions creates multiple orgs at a time
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {Object} arrOrgs - Array of new org data
+ *
+ * @return {Promise} Created organization object
+ *
+ * @example
+ * createOrg({User}, [{Org1}, {Org2}, ...])
+ * .then(function(orgs) {
+ *   // Do something with the newly created orgs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createOrgs(reqUser, arrOrgs) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof arrOrgs === 'object', 'Orgs array is not an object');
+      let index = 1;
+      // Ensure each org in arrOrgs has an ID that is a string
+      Object(arrOrgs).forEach((org) => {
+        assert.ok(org.hasOwnProperty('id'), `Org #${index} does not contain an id.`);
+        assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
+        index++;
+      });
+    }
+    catch (error) {
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 403;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+    }
+
+    // Create the find query
+    const findQuery = { id: { $in: sani.sanitize(arrOrgs.map(o => o.id)) } };
+
+    // Ensure no orgs are already created
+    findOrgsQuery(findQuery)
+    .then((foundOrgs) => {
+      // Error Check: ensure no orgs have already been created
+      if (foundOrgs.length > 0) {
+        // Get the ID's of the conflicting orgs
+        const foundIDs = foundOrgs.map(o => o.id);
+        return reject(new M.CustomError('Org(s) with the following ID(s) already'
+          + ` exists: [${foundIDs.toString()}.`, 403, 'warn'));
+      }
+
+      // Convert each object in arrOrgs into an Org object
+      const orgObjects = arrOrgs.map(o => new Organization(o));
+
+      // Save the organizations
+      return Organization.create(orgObjects);
+    })
+    .then((createdOrgs) => resolve(createdOrgs))
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError) {
+        return reject(error);
+      }
+
+      // If it's not a CustomError, the create failed so delete all successfully
+      // created orgs and reject the error.
+      return Organization.deleteMany(findQuery)
+      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
+      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+    });
   });
 }
 
