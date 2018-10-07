@@ -75,6 +75,14 @@ router.route('/')
   UIController.home
 );
 
+/* This renders the home page for logged in users */
+router.route('/organizations')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.organizations
+);
+
 
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.

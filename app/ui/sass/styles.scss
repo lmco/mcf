@@ -320,7 +320,11 @@ body {
 /*                              MBEE Card Helper                              *
 /******************************************************************************/
 .card {
+    background: rgba(28, 29, 31, 0.5);
     margin-bottom: 10px;
+    color: #fff;
+    border-color: #656565;
+
     [aria-expanded="false"] .icon-open {
         display: none;
     }
@@ -352,8 +356,8 @@ body {
                 width: 30%;
                 justify-content: start;
                 align-items: center;
-                img {
-                    max-height: 80%;
+                i {
+                    font-size: 2em;
                 }
                 h4 {
                     padding-left: 20px;
@@ -370,7 +374,7 @@ body {
             .org-card-header-stats {
                 display: flex;
                 height: 100%;
-                width: 30%;
+                width: 40%;
                 justify-content: flex-end;
                 align-items: center;
                 .org-card-header-stats-projects {
@@ -379,10 +383,6 @@ body {
                     height: 100%;
                     justify-content: center;
                     align-items: center;
-                    img {
-                        width: 30px;
-                        max-height: 90%;
-                    }
                     span {
                         padding-left: 12px;
                     }
@@ -393,10 +393,6 @@ body {
                     height: 100%;
                     justify-content: center;
                     align-items: center;
-                    img {
-                        width: 30px;
-                        max-height: 90%;
-                    }
                     span {
                         padding-left: 12px;
                     }
@@ -415,7 +411,7 @@ body {
         border-bottom: 1px solid rgb(225, 225, 225);
         margin-bottom: -1px;
         :hover {
-            background: darken($mbee-background, 5);
+            background: darken($mbee-background, 10);
             text-decoration: none;
         }
         a {

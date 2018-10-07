@@ -26,6 +26,7 @@
 // circular references between controllers.
 module.exports = {
   home,
+  organizations,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -38,6 +39,7 @@ const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE modules
+const OrgController = M.require('controllers.organization-controller');
 const User = M.require('models.user');
 const crypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
@@ -53,6 +55,22 @@ function home(req, res) {
   });
 }
 
+/**
+ * Renders the home page.
+ */
+function organizations(req, res) {
+  OrgController.findOrgs(req.user)
+  .then(orgs => {
+    return utils.render(req, res, 'organizations', {
+      orgs: orgs,
+      title: 'MBEE | Model-Based Engineering Environment'
+    });
+  })
+  .catch(error => {
+    M.log.error(error);
+    res.redirect('/');
+  });
+}
 
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc
