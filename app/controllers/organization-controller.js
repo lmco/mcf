@@ -467,10 +467,13 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
           + `delete the organization [${org.name}].`, 403, 'warn'));
       }
 
+      // Find existing projects for provided organization
       return ProjController.findProjects(reqUser, organizationID, true);
     })
     .then((projects) => {
+      // Initialize delete query
       const projectQuery = { uid: projects.map(p => p.uid) };
+
       // Hard delete
       if (hardDelete) {
         Organization.deleteOne({ id: org.id })

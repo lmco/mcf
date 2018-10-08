@@ -257,6 +257,7 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
     })
     // Delete elements in associated projects
     .then(() => ElementController.removeElements(reqUser, foundProjects, hardDelete))
+    // Return deleted projects
     .then(() => resolve(foundProjects))
     .catch((error) => reject(error));
   });

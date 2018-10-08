@@ -415,7 +415,8 @@ function deleteOrg(req, res) {
   // Initialize hardDelete variable
   let hardDelete = false;
 
-  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
     hardDelete = req.body.hardDelete;
   }
 
@@ -629,7 +630,7 @@ function postProjects(req, res) {
   // NOTE: createProjects() sanitizes req.params.orgid and the projects
   ProjectController.createProjects(req.user, req.params.orgid, req.body.projects)
   .then((projects) => {
-    // Return 200: OK and the new project
+    // Return 200: OK and the new projects
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(projects));
   })
@@ -673,10 +674,12 @@ function deleteProjects(req, res) {
   // Initialize hardDelete and findSoftDeleted variables
   let hardDelete = false;
 
-  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
     hardDelete = req.body.hardDelete;
   }
 
+  // Initialize the delete query object
   let deleteQuery = {};
 
   // No projects provided, delete all projects in the org
@@ -696,6 +699,7 @@ function deleteProjects(req, res) {
     deleteQuery = { $and: [{ uid: { $regex: `^${req.params.orgid}:` } },
       { id: { $in: req.body.projects } }] };
   }
+  // No valid project data was provided, reject
   else {
     const error = new M.CustomError('Projects array contains invalid types.', 400, 'warn');
     return res.status(error.status).send(error);
@@ -851,7 +855,8 @@ function deleteProject(req, res) {
   // Initialize hardDelete variable
   let hardDelete = false;
 
-  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
     hardDelete = req.body.hardDelete;
   }
 
@@ -1363,7 +1368,8 @@ function deleteElement(req, res) {
   // Initialize hardDelete variable
   let hardDelete = false;
 
-  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
     hardDelete = req.body.hardDelete;
   }
 
