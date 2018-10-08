@@ -165,6 +165,11 @@ function createProjects(reqUser, organizationID, arrProjects) {
       return OrgController.findOrg(reqUser, organizationID);
     })
     .then((org) => {
+      // Error Check: ensure user has write permissions on org
+      if (!org.getPermissions(reqUser).write) {
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      }
+
       // Set the uid and org for each project
       Object(arrProjects).forEach((project) => {
         project.uid = utils.createUID(org.id, project.id);
