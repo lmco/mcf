@@ -14,7 +14,6 @@
  *
  * Leah De Laurell
  * leah.p.delaurell@lmco.com
- * glad to know everything over all works kind of
  */
 
 pipeline {
