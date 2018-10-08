@@ -166,7 +166,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
     })
     .then((org) => {
       // Error Check: ensure user has write permissions on org
-      if (!org.getPermissions(reqUser).write) {
+      if (!org.getPermissions(reqUser).write && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
@@ -180,7 +180,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
       const projObjects = arrProjects.map(p => new Project(p));
 
       // Create the projects
-      return Project.create(projObjects);
+      return Project.create(sani.mongo(projObjects));
     })
     .then((createdProjects) => resolve(createdProjects))
     .catch((error) => {
