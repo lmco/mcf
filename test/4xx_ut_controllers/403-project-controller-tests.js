@@ -123,6 +123,7 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a new project', createProject);
+  it('should create multiple projects', createMultipleProjects);
   it('should throw an error saying the field cannot be updated', rejectImmutableField);
   it('should throw an error saying the field is not of type string', updateTypeError);
   it('should update a project', updateProjectName);
@@ -146,6 +147,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
   it('should delete second project', deleteProject02);
+  it('should remove multiple projects', deleteMultipleProjects);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -175,6 +177,30 @@ function createProject(done) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies creation of multiple projects
+ */
+function createMultipleProjects(done) {
+  const newProjects = [
+    testData.projects[4],
+    testData.projects[5]
+  ];
+
+  // Create new projects
+  ProjController.createProjects(adminUser, org.id, newProjects)
+  .then((projects) => {
+    // Verify the projects were created
+    chai.expect(projects.length).to.equal(2);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }
@@ -486,13 +512,11 @@ function findProjects(done) {
   .then(() => ProjController.findProjects(adminUser, org.id))
   .then((projs) => {
     // Verify project fields
-    chai.expect(projs.length).to.equal(3);
+    chai.expect(projs.length).to.equal(5);
     return OrgController.removeOrg(adminUser2, testData.orgs[1].id, true);
   })
-  .then(() => {
-    UserController.removeUser(adminUser, testData.users[2].username);
-    done();
-  })
+  .then(() => UserController.removeUser(adminUser, testData.users[2].username))
+  .then(() => done())
   .catch((error) => {
     M.log.error(error);
     // Expect no error
@@ -756,6 +780,31 @@ function deleteProject02(done) {
   .catch((error) => {
     // Expected error thrown: 'Not Found'
     chai.expect(error.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Verifies projects NOT found after deletion.
+ */
+function deleteMultipleProjects(done) {
+  // Define query to find projects
+  const query = { uid: { $in: [`${org.id}:${testData.projects[1].id}`,
+    `${org.id}:${testData.projects[4].id}`,
+    `${org.id}:${testData.projects[5].id}`] } };
+
+  // Remove projects
+  ProjController.removeProjects(adminUser, query, true)
+  .then(() => ProjController.findProjects(adminUser, org.id, true))
+  .then((foundProjects) => {
+    // Expect foundProjects array to be empty
+    chai.expect(foundProjects.length).to.equal(0);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
     done();
   });
 }
