@@ -671,7 +671,7 @@ function deleteProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Initialize hardDelete and findSoftDeleted variables
+  // Initialize hardDelete variable
   let hardDelete = false;
 
   // If hardDelete flag was provided, set the variable hardDelete
