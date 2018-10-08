@@ -56,10 +56,12 @@ module.exports.connect = function() {
       const caPath = path.join(M.root, 'certs', M.config.db.ca);
       const caFile = fs.readFileSync(caPath, 'utf8');
       options.sslCA = caFile;
-
-      // Enable MongoDB's new url parser
-      options.useNewUrlParser = true;
     }
+
+    // Remove mongoose deprecation warnings
+    mongoose.set('useFindAndModify', false);
+    mongoose.set('useNewUrlParser', true);
+    mongoose.set('useCreateIndex', true);
 
     // Connect to database
     mongoose.connect(connectURL, options, (err) => {

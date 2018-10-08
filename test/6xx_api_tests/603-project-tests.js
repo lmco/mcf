@@ -117,14 +117,18 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   it('should POST a project to the organization', postProject);
   it('should POST second project', postSecondProject);
+  it('should reject POST multiple invalid projects', rejectPostMultipleInvalidProjects);
+  it('should POST multiple projects', postMultipleProjects);
   it('should GET the previously posted project', getProject);
   it('should PATCH an update to posted project', patchProject);
-  it('should GET the two projects POSTed previously', getAllProjects);
+  it('should GET the four projects POSTed previously', getAllProjects);
   it('should reject a POST with two different orgs', rejectPostOrgIdMismatch);
-  it('should reject a DELETE to a non-exisiting project', rejectDeleteNonexistingProject);
+  it('should reject a DELETE to a non-existing project', rejectDeleteNonexistingProject);
   it('should reject a PATCH to update with invalid name', rejectPatchInvalidField);
   it('should DELETE the first project to the organization', deleteProject);
   it('should DELETE the second project to the organization', deleteSecondProject);
+  it('should DELETE multiple projects at once', deleteMultipleProjects);
+  it('should reject DELETE multiple invalid projects', rejectDeleteMultipleInvalidProjects);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -174,6 +178,58 @@ function postSecondProject(done) {
     const json = JSON.parse(body);
     chai.expect(json.id).to.equal(testData.projects[1].id);
     chai.expect(json.name).to.equal(testData.projects[1].name);
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/projects rejects when an invalid
+ * project is supplied.
+ */
+function rejectPostMultipleInvalidProjects(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify({
+      projects: [testData.projects[4], testData.projects[5], testData.projects[3]]
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 500 Internal Server Error
+    chai.expect(response.statusCode).to.equal(500);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Internal Server Error');
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/projects creates multiple
+ * projects.
+ */
+function postMultipleProjects(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify({
+      projects: [testData.projects[4], testData.projects[5]]
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.length).to.equal(2);
     done();
   });
 }
@@ -241,7 +297,7 @@ function getAllProjects(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(4);
     done();
   });
 }
@@ -362,6 +418,57 @@ function deleteSecondProject(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
+}
+
+/**
+ * @description Verify DELETE request to /api/orgs/:orgid/projects to delete
+ * multiple projects.
+ */
+function deleteMultipleProjects(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      projects: [testData.projects[4], testData.projects[5]],
+      hardDelete: true
+    })
+  },
+  (err, response) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
+}
+
+/**
+ * @description Verify DELETE request to /api/orgs/:orgid/projects with invalid
+ * project array content is rejected.
+ */
+function rejectDeleteMultipleInvalidProjects(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      projects: [true, testData.projects[5]],
+      hardDelete: true
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

@@ -415,7 +415,8 @@ function deleteOrg(req, res) {
   // Initialize hardDelete variable
   let hardDelete = false;
 
-  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
     hardDelete = req.body.hardDelete;
   }
 
@@ -605,14 +606,36 @@ function getProjects(req, res) {
 /**
  * POST /api/org/:orgid/projects
  *
- * @description Accepts an array of JSON objects containing project data.
- * Attempts to create each of the projects. If any of the projects
- * fail, the entire request fails and none of the projects are created.
+ * @description This function creates multiple projects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} res response object with created projects.
  */
 function postProjects(req, res) {
-  return res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: check if projects list included in req.body
+  if (!req.body.hasOwnProperty('projects')) {
+    const error = new M.CustomError('Projects array not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Create the specified projects
+  // NOTE: createProjects() sanitizes req.params.orgid and the projects
+  ProjectController.createProjects(req.user, req.params.orgid, req.body.projects)
+  .then((projects) => {
+    // Return 200: OK and the new projects
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(projects));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -634,12 +657,64 @@ function patchProjects(req, res) {
 /**
  * DELETE /api/org/:orgid/projects
  *
- * @description This function will soft-delete all projects.
+ * @description This function deletes multiple projects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} res response object with deleted projects.
  */
 function deleteProjects(req, res) {
-  return res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Initialize the delete query object
+  let deleteQuery = {};
+
+  // No projects provided, delete all projects in the org
+  if (!req.body.hasOwnProperty('projects')) {
+    // Query finds all projects that start with 'orgid:'
+    deleteQuery = { uid: { $regex: `^${req.params.orgid}:` } };
+  }
+  // Project objects provided, delete all
+  else if (req.body.projects.every(p => typeof p === 'object')) {
+    // Query finds all projects by their id and whose uid start with 'orgid:'
+    deleteQuery = { $and: [{ uid: { $regex: `^${req.params.orgid}:` } },
+      { id: { $in: req.body.projects.map(p => p.id) } }] };
+  }
+  // Project IDs provided, delete all
+  else if (req.body.projects.every(p => typeof p === 'string')) {
+    // Query finds all projects by their id and whose uid start with 'orgid:'
+    deleteQuery = { $and: [{ uid: { $regex: `^${req.params.orgid}:` } },
+      { id: { $in: req.body.projects } }] };
+  }
+  // No valid project data was provided, reject
+  else {
+    const error = new M.CustomError('Projects array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Remove the specified projects
+  // NOTE: removeProjects() sanitizes the deleteQuery
+  ProjectController.removeProjects(req.user, deleteQuery, hardDelete)
+  .then((projects) => {
+    // Return 200: OK and the deleted projects
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(projects));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -780,12 +855,13 @@ function deleteProject(req, res) {
   // Initialize hardDelete variable
   let hardDelete = false;
 
-  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
     hardDelete = req.body.hardDelete;
   }
 
   // Remove the specified project
-  // NOTE: removeProject() sanitizes req.params.orgid and req.params.projecid
+  // NOTE: removeProject() sanitizes req.params.orgid and req.params.projectid
   ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid, hardDelete)
   .then((project) => {
     // Return 200: OK and the deleted project
@@ -1060,7 +1136,7 @@ function patchUser(req, res) {
 }
 
 /**
- * DELERE /api/users/:username
+ * DELETE /api/users/:username
  *
  * @description Takes a username in the URI along with delete options in the
  * body and deletes the corresponding user.
@@ -1292,7 +1368,8 @@ function deleteElement(req, res) {
   // Initialize hardDelete variable
   let hardDelete = false;
 
-  if (typeof req.body.hasOwnProperty('hardDelete') === 'boolean') {
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
     hardDelete = req.body.hardDelete;
   }
 
