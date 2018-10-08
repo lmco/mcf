@@ -7,5 +7,6 @@ mongod --dbpath /lm/mbee/data/db \
        --bind_ip 127.0.0.1 \
        --fork \
        --logpath /lm/mbee/data/db/log/mbee-db.log
+
 sleep 2
 node mbee start
