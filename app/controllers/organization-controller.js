@@ -564,7 +564,6 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(reqUser.admin, 'User does not have permissions.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
@@ -578,14 +577,39 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
       return reject(new M.CustomError('The default organization cannot be deleted.', 403, 'warn'));
     }
 
+    // Error Check: ensure reqUser is a global admin if hard deleting
+    if (!reqUser.admin && hardDelete) {
+      return reject(new M.CustomError('User does not have permissions to '
+        + 'hard delete.', 403, 'warn'));
+    }
+
+    // Define org variable
+    let org = null;
+
     // Find the organization
     findOrg(reqUser, organizationID, true)
-    .then((org) => {
+    .then((foundOrg) => {
+      // Set org variable
+      org = foundOrg;
+
+      // Error Check: ensure user is a global admin or org admin
+      if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
+        return reject(new M.CustomError('User does not have permissions to '
+          + `delete the organization [${org.name}].`, 403, 'warn'));
+      }
+
+      // Find existing projects for provided organization
+      return ProjController.findProjects(reqUser, organizationID, true);
+    })
+    .then((projects) => {
+      // Initialize delete query
+      const projectQuery = { uid: projects.map(p => p.uid) };
+
       // Hard delete
       if (hardDelete) {
         Organization.deleteOne({ id: org.id })
         // Delete all projects in the org
-        .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
+        .then(() => ProjController.removeProjects(reqUser, projectQuery, hardDelete))
         .then(() => resolve(org))
         .catch((error) => reject(error));
       }
@@ -593,7 +617,7 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
       else {
         Organization.updateOne({ id: org.id }, { deleted: true })
         // Soft-delete all projects in the org
-        .then(() => ProjController.removeProjects(reqUser, [org], hardDelete))
+        .then(() => ProjController.removeProjects(reqUser, projectQuery, hardDelete))
         .then(() => {
           // Set the returned org deleted field to true since updateOne()
           // returns a query not the updated org.
