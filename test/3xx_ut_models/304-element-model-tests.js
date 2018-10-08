@@ -118,6 +118,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a relationship between blocks', createRelationship);
   it('should find a block', findBlock);
   it('should update a block', updateBlock);
+  it('should create element with blank name', verifyBlankElemName);
   it('should delete all elements', deleteElements);
 });
 
@@ -307,6 +308,37 @@ function updateBlock(done) {
 }
 
 /**
+ * @description Verifies that elements with blank names can be created.
+ */
+function verifyBlankElemName(done) {
+  // Create the block element object
+  const newElement = new Element.Block({
+    id: testData.elements[5].id,
+    uid: `${org.id}:${project.id}:${testData.elements[5].id}`,
+    name: testData.elements[5].name,
+    project: project._id,
+    parent: null
+  });
+
+  // Save the block element to the database
+  newElement.save()
+  .then((retElement) => {
+    // Check the block element saved correctly
+    chai.expect(retElement.uid).to.equal(
+      `${org.id}:${project.id}:${testData.elements[5].id}`
+    );
+    chai.expect(retElement.name).to.equal(testData.elements[5].name);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
  * @description Delete the previously created block, relationship and package
  */
 function deleteElements(done) {
@@ -321,6 +353,10 @@ function deleteElements(done) {
   // Find and delete the element of type 'Package'
   .then(() => Element.Package.findOneAndRemove({
     uid: `${org.id}:${project.id}:${testData.elements[0].id}` }))
+
+  // Find and delete the other elements
+  .then(() => Element.Block.findOneAndRemove({
+    uid: `${org.id}:${project.id}:${testData.elements[5].id}` }))
 
   // Attempt to find any elements
   .then(() => Element.Element.find())
