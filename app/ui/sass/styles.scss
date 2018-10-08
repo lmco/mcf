@@ -110,6 +110,13 @@ body {
             }
         }
     }
+
+    .dropdown-menu {
+        background: white;
+        :hover {
+            background: darken(white, 10)
+        }
+    }
 }
 
 /******************************************************************************
