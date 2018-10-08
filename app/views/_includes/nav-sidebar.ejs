@@ -1,0 +1,49 @@
+<%
+const navList = sidebar.list;
+const navListArr = Object.keys(navList);
+%>
+
+<div id="nav-sidebar" class="nav-sidebar sidebar-full" aria-expanded="true">
+
+  <div class="nav-sidebar-header-full">
+    <h2> <%=sidebar.heading%> </h2>
+  </div>
+
+  <div class="nav-sidebar-header-min">
+    <i class="<%=sidebar.icon%> nav-sidebar-logo">
+    </i>
+  </div>
+
+  <ul class="nav-sidebar-list">
+    <% for (let i = 0; i < navListArr.length; i++) { %>
+    <li class="nav-sidebar-list-item">
+      <a href="<%= navList[navListArr[i]].link%>">
+        <div class="nav-sidebar-item-min">
+          <i class="<%= navList[navListArr[i]].icon%> nav-sidebar-logo">
+          </i>
+        </div>
+        <div class="nav-sidebar-item-full">
+          <i class="<%= navList[navListArr[i]].icon%> nav-sidebar-logo">
+          </i>
+          <span> <%= navListArr[i]%> </span>
+        </div>
+
+      </a>
+    </li>
+    <% } %>
+  </ul>
+
+  <a onclick="toggleSidebar()" class="sidebar-toggle">
+    <div class="nav-sidebar-item-min">
+      <i class="fas fa-angle-double-right nav-sidebar-logo">
+      </i>
+    </div>
+    <div class="nav-sidebar-item-full">
+      <i class="fas fa-angle-double-left nav-sidebar-logo">
+      </i>
+      <span> Collapse </span>
+    </div>
+
+  </a>
+
+</div>

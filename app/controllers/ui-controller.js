@@ -27,6 +27,7 @@
 module.exports = {
   home,
   organizations,
+  organization,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -71,6 +72,39 @@ function organizations(req, res) {
     res.redirect('/');
   });
 }
+
+
+function organization(req, res) {
+  OrgController.findOrg(req.user, req.params.orgid)
+  .then(org => utils.render(req, res, 'organization', {
+    name: 'organization',
+    title: 'MBEE | Model-Based Engineering Environment',
+    sidebar: {
+      heading: 'Organization',
+      icon: 'fas fa-boxes',
+      list: {
+        Projects: {
+          icon: 'fas fa-box',
+          link: '#projects'
+        },
+        Members: {
+          icon: 'fas fa-users',
+          link: '#members'
+        },
+        Settings: {
+          icon: 'fas fa-cog',
+          link: '#settings'
+        }
+      }
+    },
+    org: org
+  }))
+  .catch(err => {
+    M.log.error(err);
+    return res.redirect('/');
+  });
+}
+
 
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc
