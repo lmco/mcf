@@ -636,7 +636,7 @@ function findPerm(done) {
   // Find permissions
   ProjController.findPermissions(adminUser, adminUser.username, org.id, testData.projects[0].id)
   .then((perm) => {
-    // Verfy permissions
+    // Verify permissions
     chai.expect(perm.read).to.equal(true);
     chai.expect(perm.write).to.equal(true);
     chai.expect(perm.admin).to.equal(true);
