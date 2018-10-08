@@ -179,7 +179,13 @@ function createProjects(reqUser, organizationID, arrProjects) {
       });
 
       // Convert each project into a project object
-      const projObjects = arrProjects.map(p => new Project(p));
+      const projObjects = arrProjects.map(p => {
+        const projObject = new Project(p);
+        projObject.permissions.read.push(reqUser._id);
+        projObject.permissions.write.push(reqUser._id);
+        projObject.permissions.admin.push(reqUser._id);
+        return projObject;
+      });
 
       // Create the projects
       return Project.create(sani.mongo(projObjects));

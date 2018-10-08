@@ -119,6 +119,7 @@ OrganizationSchema.methods.getPublicData = function() {
   this.permissions.read = this.permissions.read.map(u => u.getPublicData());
   this.permissions.write = this.permissions.write.map(u => u.getPublicData());
   this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
+
   // Return the organization
   return this;
 };

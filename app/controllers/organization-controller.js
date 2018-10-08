@@ -155,11 +155,16 @@ function createOrgs(reqUser, arrOrgs) {
           + ` exists: [${foundIDs.toString()}.`, 403, 'warn'));
       }
 
-      // Convert each object in arrOrgs into an Org object
-      const orgObjects = arrOrgs.map(o => new Organization(o));
-
+      // Convert each object in arrOrgs into an Org object and set permissions
+      const orgObjects = arrOrgs.map(o => {
+        const orgObject = new Organization(o);
+        orgObject.permissions.read.push(reqUser._id);
+        orgObject.permissions.write.push(reqUser._id);
+        orgObject.permissions.admin.push(reqUser._id);
+        return orgObject;
+      });
       // Save the organizations
-      return Organization.create(orgObjects);
+      return Organization.create(sani.mongo(orgObjects));
     })
     .then((createdOrgs) => resolve(createdOrgs))
     .catch((error) => {
@@ -199,26 +204,50 @@ function removeOrgs(reqUser, query, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(reqUser.admin, 'User does not have permissions.');
       assert.ok(typeof query === 'object', 'Remove query is not an object.');
       assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      let statusCode = 400;
-      // Return a 403 if request is permissions related
-      if (error.message.includes('permissions')) {
-        statusCode = 403;
-      }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
-    // If hard delete, delete orgs, otherwise update orgs
-    return (hardDelete)
-      ? Organization.deleteMany(query)
-      : Organization.updateMany(query, { deleted: true })
-    // Delete all projects in the orgs
-    .then((deleteQuery) => ProjController.removeProjects(reqUser, QUERY, hardDelete))
-    .then(() => resolve(org))
+    // Error Check: ensure reqUser is a global admin if hard deleting
+    if (!reqUser.admin && hardDelete) {
+      return reject(new M.CustomError('User does not have permissions to '
+        + 'hard delete.', 403, 'warn'));
+    }
+
+    // Define found orgs array
+    let foundOrgs = [];
+
+    // Find the orgs the user wishes to delete
+    findOrgsQuery(query)
+    .then((orgs) => {
+      // Set foundOrgs
+      foundOrgs = orgs;
+
+      // Error Check: ensure user is a global admin or org admin
+      Object(orgs).forEach((org) => {
+        if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
+          return reject(new M.CustomError('User does not have permissions to '
+            + `delete the organization [${org.name}].`, 403, 'warn'));
+        }
+      });
+
+      // If hard delete, delete orgs, otherwise update orgs
+      return (hardDelete)
+        ? Organization.deleteMany(query)
+        : Organization.updateMany(query, { deleted: true });
+    })
+    .then(() => {
+      // Create delete query to remove projects
+      const projectDeleteQuery = { org: { $in: foundOrgs.map(o => o._id) } };
+
+      // Delete all projects in the orgs
+      return ProjController.removeProjects(reqUser, projectDeleteQuery, hardDelete);
+    })
+    // Return the deleted orgs
+    .then(() => resolve(foundOrgs))
     .catch((error) => {
       // If error is a CustomError, reject it
       if (error instanceof M.CustomError) {

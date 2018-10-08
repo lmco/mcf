@@ -83,10 +83,8 @@ describe(M.getModuleName(module.filename), () => {
    * After: Delete admin user, non-admin user, and organization.
    */
   after((done) => {
-    // Removing organization
-    OrgController.removeOrg(adminUser, org.id, true)
     // Removing non-admin user
-    .then(() => UserController.removeUser(adminUser, newUser.username))
+    UserController.removeUser(adminUser, newUser.username)
     .then((delUser2) => {
       chai.expect(delUser2.username).to.equal(testData.users[1].username);
       // Find admin user
@@ -112,7 +110,7 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a new org', createNewOrg);
-  it('should create a second org', createSecondOrg);
+  it('should create multiple orgs at the same time', createMultipleOrgs);
   it('should find an existing org', findExistingOrg);
   it('should reject update on immutable field', rejectUpdateImmutableField);
   it('should reject update of a field to an invalid type', rejectUpdateBadType);
@@ -135,6 +133,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should remove a users role within an org', removeUserRole);
   it('should reject get permissions of user whose not in org', rejectGetUserRoles);
   it('should reject set permissions to an invalid permission type', rejectInvalidPermission);
+  it('should delete multiple orgs at the same time', removeMultipleOrgs);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -168,24 +167,22 @@ function createNewOrg(done) {
 }
 
 /**
- * @description Creates a second organization using the org controller.
+ * @description Create multiple organizations at the same time
  */
-function createSecondOrg(done) {
-  // Creates org data
-  const orgData = testData.orgs[1];
+function createMultipleOrgs(done) {
+  // Create array with org data
+  const newOrgs = [
+    testData.orgs[1],
+    testData.orgs[4]
+  ];
 
-  // Creates org via the controller
-  OrgController.createOrg(adminUser, orgData)
-  .then((retOrg) => {
-    // Set org equal to global org for later use
-    org = retOrg;
-
-    // Verify org created properly
-    chai.expect(retOrg.id).to.equal(testData.orgs[1].id);
-    chai.expect(retOrg.name).to.equal(testData.orgs[1].name);
-    chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
-    chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
-    chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
+  // Create the orgs
+  OrgController.createOrgs(adminUser, newOrgs)
+  .then((orgs) => {
+    // Verify correct number of orgs created
+    chai.expect(orgs.length).to.equal(2);
+    // Set file-wide org variable
+    org = orgs[0];
     done();
   })
   .catch((error) => {
@@ -334,7 +331,7 @@ function findAllExistingOrgs(done) {
   OrgController.findOrgs(adminUser)
   .then((orgs) => {
     // Verify correct number of orgs was returned
-    chai.expect(orgs.length).to.equal(3);
+    chai.expect(orgs.length).to.equal(4);
     done();
   })
   .catch((error) => {
@@ -689,6 +686,31 @@ function rejectInvalidPermission(done) {
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
     chai.expect(error.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+/**
+ * @description Removes multiple orgs at the same time
+ */
+function removeMultipleOrgs(done) {
+  // Create query to remove orgs
+  const deleteQuery = { id: { $in: [
+    testData.orgs[1].id,
+    testData.orgs[4].id
+  ] } };
+
+  // Delete the organizations
+  OrgController.removeOrgs(adminUser, deleteQuery, true)
+  .then((orgs) => {
+    // Check that correct number of orgs were deleted
+    chai.expect(orgs.length).to.equal(2);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
