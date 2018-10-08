@@ -15,6 +15,7 @@
  * Leah De Laurell
  *
  * This file defines the build pipeline for Jenkins.
+ * youre being stupid jenkins
  */
 
 pipeline {
