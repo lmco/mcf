@@ -65,11 +65,11 @@ describe(M.getModuleName(module.filename), function() {
  * collections.
  */
 function cleanDB(done) {
-  User.remove({}) // Remove users
+  User.deleteMany({}) // Remove users
   // Remove all orgs except for the 'default' org.
-  .then(() => Organization.remove({ name: { $ne: 'default' } }))  // Remove orgs
-  .then(() => Project.remove({}))  // Remove projects
-  .then(() => Element.Element.remove({}))  // Remove elements
+  .then(() => Organization.deleteMany({ name: { $ne: 'default' } }))  // Remove orgs
+  .then(() => Project.deleteMany({}))  // Remove projects
+  .then(() => Element.Element.deleteMany({}))  // Remove elements
   .then(() => done())
   .catch(error => {
     M.log.error(error);
