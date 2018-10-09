@@ -175,12 +175,12 @@ function createProjects(reqUser, organizationID, arrProjects) {
       // Set the uid and org for each project
       Object(arrProjects).forEach((project) => {
         project.uid = utils.createUID(org.id, project.id);
-        project.org = org;
+        project.org = org._id;
       });
 
       // Convert each project into a project object
       const projObjects = arrProjects.map(p => {
-        const projObject = new Project(p);
+        const projObject = new Project(sani.sanitize(p));
         projObject.permissions.read.push(reqUser._id);
         projObject.permissions.write.push(reqUser._id);
         projObject.permissions.admin.push(reqUser._id);
@@ -188,7 +188,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
       });
 
       // Create the projects
-      return Project.create(sani.mongo(projObjects));
+      return Project.create(projObjects);
     })
     .then((createdProjects) => resolve(createdProjects))
     .catch((error) => {
@@ -428,9 +428,9 @@ function createProject(reqUser, project) {
     }
 
     // Sanitize query inputs
-    const projID = sani.html(project.id);
-    const projName = sani.html(project.name);
-    const orgID = sani.html(project.orgid);
+    const projID = sani.sanitize(project.id);
+    const projName = sani.sanitize(project.name);
+    const orgID = sani.sanitize(project.orgid);
 
     // Initialize function-wide variables
     let org = null;
@@ -810,7 +810,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
     }
 
     // Sanitize input
-    const permType = sani.html(role);
+    const permType = sani.sanitize(role);
 
     // Initialize setUser
     let setUser = null;

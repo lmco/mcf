@@ -157,14 +157,14 @@ function createOrgs(reqUser, arrOrgs) {
 
       // Convert each object in arrOrgs into an Org object and set permissions
       const orgObjects = arrOrgs.map(o => {
-        const orgObject = new Organization(o);
+        const orgObject = new Organization(sani.sanitize(o));
         orgObject.permissions.read.push(reqUser._id);
         orgObject.permissions.write.push(reqUser._id);
         orgObject.permissions.admin.push(reqUser._id);
         return orgObject;
       });
       // Save the organizations
-      return Organization.create(sani.mongo(orgObjects));
+      return Organization.create(orgObjects);
     })
     .then((createdOrgs) => resolve(createdOrgs))
     .catch((error) => {
@@ -403,7 +403,7 @@ function createOrg(reqUser, newOrgData) {
       if (utils.checkExists(['custom'], newOrgData)) {
         assert.ok(typeof newOrgData.custom === 'object',
           'Custom in request body is not an object.');
-        custom = sani.html(newOrgData.custom);
+        custom = sani.sanitize(newOrgData.custom);
       }
     }
     catch (error) {
@@ -416,8 +416,8 @@ function createOrg(reqUser, newOrgData) {
     }
 
     // Sanitize query inputs
-    const orgID = sani.html(newOrgData.id);
-    const orgName = sani.html(newOrgData.name);
+    const orgID = sani.sanitize(newOrgData.id);
+    const orgName = sani.sanitize(newOrgData.name);
 
     // Check if org already exists
     findOrgsQuery({ id: orgID })
