@@ -69,7 +69,6 @@ function test(_args) {
     _args.push('19');
   }
 
-  // lalalal
   // Allocate options variable for mocha
   const opts = {};
 
