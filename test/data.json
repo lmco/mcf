@@ -94,6 +94,14 @@
       "id": "thisisaverylongidnamepleaseacceptmeorbreak",
       "name": "Long Id",
       "orgid": "testorg00"
+    },
+    {
+      "id": "project4",
+      "name": "Project 04"
+    },
+    {
+      "id": "project05",
+      "name": "Project 05"
     }
   ],
 
