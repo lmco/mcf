@@ -26,8 +26,9 @@
 // circular references between controllers.
 module.exports = {
   home,
-  organizations,
+  organizationList,
   organization,
+  projectList,
   project,
   swaggerDoc,
   showAboutPage,
@@ -41,6 +42,7 @@ const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE modules
+const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const ElementController = M.require('controllers.element-controller');
@@ -68,7 +70,7 @@ function home(req, res) {
 /**
  * Renders the organization list page.
  */
-function organizations(req, res) {
+function organizationList(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
     // redirect to the login screen
@@ -77,7 +79,7 @@ function organizations(req, res) {
   // get all organizations the user is a member of
   OrgController.findOrgs(req.user)
   // Render the organization page with the list of orgs
-  .then(orgs => utils.render(req, res, 'organizations', {
+  .then(orgs => utils.render(req, res, 'organization-list', {
     orgs: orgs,
     title: 'MBEE | Model-Based Engineering Environment'
   }))
@@ -131,6 +133,35 @@ function organization(req, res) {
 }
 
 /**
+ * Renders the organization list page.
+ */
+function projectList(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // get all organizations the user is a member of
+  UserController.findUser(req.user, req.user.username)
+  // Render the organization page with the list of orgs
+  .then(foundUser => {
+    const projects = foundUser.proj.read;
+    projects.forEach(proj => {
+      proj.ref = utils.parseUID(proj.uid).join('/');
+    });
+    utils.render(req, res, 'project-list', {
+      title: 'MBEE | Model-Based Engineering Environment',
+      projects: projects
+    });
+  })
+  // If error, redirect to home
+  .catch(error => {
+    M.log.error(error);
+    res.redirect('/');
+  });
+}
+
+/**
  * Renders an organization page.
  */
 function project(req, res) {
@@ -139,13 +170,13 @@ function project(req, res) {
     // redirect to the login screen
     res.redirect('/login');
   }
-  let project = null;
+  let proj = null;
   let elements = null;
   // Find organization
   ProjController.findProject(req.user, req.params.orgid, req.params.projectid)
   // Render organization page including nav-sidebar
   .then(foundProject => {
-    project = foundProject;
+    proj = foundProject;
     return ElementController.findElements(req.user, req.params.orgid, req.params.projectid);
   })
   .then(foundElements => {
@@ -172,7 +203,7 @@ function project(req, res) {
           }
         }
       },
-      project: project,
+      project: proj,
       elements: elements
     });
   })

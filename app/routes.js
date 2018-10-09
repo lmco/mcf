@@ -80,7 +80,15 @@ router.route('/organizations')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.organizations
+  UIController.organizationList
+);
+
+/* This renders the organization list page for logged in users */
+router.route('/projects')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.projectList
 );
 
 /**
