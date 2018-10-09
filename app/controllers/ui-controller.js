@@ -63,7 +63,7 @@ function home(req, res) {
 }
 
 /**
- * Renders the home page.
+ * Renders the organization list page.
  */
 function organizations(req, res) {
   // Sanity check: confirm req.user exists
@@ -87,9 +87,18 @@ function organizations(req, res) {
   });
 }
 
-
+/**
+ * Renders an organization page.
+ */
 function organization(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Find organization
   OrgController.findOrg(req.user, req.params.orgid)
+  // Render organization page including nav-sidebar
   .then(org => utils.render(req, res, 'organization', {
     name: 'organization',
     title: 'MBEE | Model-Based Engineering Environment',
@@ -113,9 +122,10 @@ function organization(req, res) {
     },
     org: org
   }))
+  // If error, redirect to organization list
   .catch(err => {
     M.log.error(err);
-    return res.redirect('/');
+    return res.redirect('/organizations');
   });
 }
 
