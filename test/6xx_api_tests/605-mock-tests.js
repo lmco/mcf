@@ -91,12 +91,14 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET the posted user', getUser);
   it('should PATCH a user', patchUser);
   it('should DELETE a user', deleteUser);
+  it('should POST an org', postOrg);
+  // it('should DELETE an org', deleteOrg);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Makes a GET request to /api/users/:username. Verifies GET
- * request to user API.
+ * @description Makes a GET mock request to the API Controller. Verifies GET
+ * mock request to user API.
  */
 function getUsers(done) {
   // Create request object
@@ -122,6 +124,10 @@ function getUsers(done) {
   apiController.getUsers(req, res);
 }
 
+/**
+ * @description Makes a POST mock request to the API Controller. Verifies POST
+ * mock request to user API.
+ */
 function postUser(done) {
   // Create request object
   const body = testData.users[1];
@@ -147,6 +153,10 @@ function postUser(done) {
   apiController.postUser(req, res);
 }
 
+/**
+ * @description Makes a GET mock request to the API Controller. Verifies GET
+ * mock request to user API.
+ */
 function getUser(done) {
   // Create request object
   const body = {};
@@ -172,6 +182,10 @@ function getUser(done) {
   apiController.getUser(req, res);
 }
 
+/**
+ * @description Makes a PATCH mock request to the API Controller. Verifies PATCH
+ * mock request to user API.
+ */
 function patchUser(done) {
   // Create request object
   const body = testData.names[6];
@@ -197,7 +211,10 @@ function patchUser(done) {
   apiController.patchUser(req, res);
 }
 
-
+/**
+ * @description Makes a DELETE mock request to the API Controller. Verifies
+ * DELETE mock request to user API.
+ */
 function deleteUser(done) {
   // Create request object
   const body = {};
@@ -213,11 +230,85 @@ function deleteUser(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
+    chai.expect(json.username).to.equal(testData.users[1].username);
     done();
   };
 
   // DELETEs a user via api controller
   apiController.deleteUser(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to create an organization.
+ */
+function postOrg(done) {
+  // Create request object
+  const body = testData.orgs[0];
+  const params = { orgid: testData.orgs[0].id };
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies the response code: 200 OK
+  res.status = function status(code) {
+    chai.expect(code).to.equal(200);
+    return this;
+  };
+  // Provides headers to response object
+  res.header = function header(a, b) {
+    return this;
+  };
+  // Verifies status code and headers
+  //resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.username).to.equal(testData.orgs[0].id);
+    chai.expect(json.name).to.equal(testData.orgs[0].name);
+    return _data
+    done();
+  };
+
+  // POSTs a user via api controller
+  const resReturn = apiController.postOrg(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete an organization.
+ */
+function deleteOrg(done) {
+  // Create request object
+  const body = {};
+  const params = { orgid: testData.orgs[0].id };
+  const method = 'DELETE';
+  const res = {};
+
+  const req = getReq(params, body, method);
+
+  // Verifies the response code: 200 OK
+  res.status = function status(code) {
+    //chai.expect(code).to.equal(200);
+    return this;
+  };
+  // Provides headers to response object
+  res.header = function header(a, b) {
+    return this;
+  };
+  // Verifies status code and headers
+  //resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    done();
+  };
+
+  // DELETEs a user via api controller
+  apiController.deleteOrg(req, res);
 }
 
 /* ----------( Helper Functions )----------*/
