@@ -75,7 +75,7 @@ router.route('/')
   UIController.home
 );
 
-/* This renders the home page for logged in users */
+/* This renders the organization list page for logged in users */
 router.route('/organizations')
 .get(
   AuthController.authenticate,
@@ -104,7 +104,7 @@ router.param('orgid', (req, res, next, orgid) => {
   }
 });
 
-/* This renders an organization for a users */
+/* This renders an organization for a user */
 router.route('/:orgid')
 .get(
   AuthController.authenticate,
