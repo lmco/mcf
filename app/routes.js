@@ -100,7 +100,7 @@ router.param('orgid', (req, res, next, orgid) => {
     next();
   }
   else {
-    return res.status(404).send('Not Found');
+    return res.redirect('/organizations');
   }
 });
 
