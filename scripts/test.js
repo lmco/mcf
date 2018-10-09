@@ -58,23 +58,27 @@ function test(_args) {
 
   // LM: Default timeout changed to 5000
   // Add default timeout if not provided
-  //if (!_args.includes('--timeout')) {
-  //  _args.push('--timeout=5000');
-  //}
+  if (!_args.includes('--timeout')) {
+    _args.push('--timeout');
+    _args.push('5000');
+  }
 
   // Add default slow speed if not provided
   if (!_args.includes('--slow')) {
-    _args.push('--slow=19');
+    _args.push('--slow');
+    _args.push('19');
   }
 
-  _args.push('--reporter');
-  _args.push('mocha-junit-reporter');
+  //if (!_args.includes('--reporter')) {
+  //  _args.push('--reporter');
+  //  _args.push('mocha-junit-reporter');
+  //}
 
   // Allocate options variable for mocha
   const opts = {};
 
   // Loop through _args array and load the opts object
-  for (let i = 0; i < _args.length; i += 3) {
+  for (let i = 0; i < _args.length; i += 2) {
     // Check the arg starts with '--'
     if (RegExp(/^(--)/).test(_args[i])) {
       // The arg started with '--', remove '--' and load the arg in to the opts
@@ -87,7 +91,6 @@ function test(_args) {
       process.exit(-1);
     }
   }
-
   // Create mocha object with options
   const mocha = new Mocha(opts);
   // Set the test directory
