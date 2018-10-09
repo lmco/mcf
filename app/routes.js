@@ -104,12 +104,31 @@ router.param('orgid', (req, res, next, orgid) => {
   }
 });
 
+// Parameter validation for the 'orgid' param
+// eslint-disable-next-line consistent-return
+router.param('projectid', (req, res, next, project) => {
+  if (RegExp(Validators.project.id).test(project)) {
+    next();
+  }
+  else {
+    return res.redirect('/projects');
+  }
+});
+
 /* This renders an organization for a user */
 router.route('/:orgid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
   UIController.organization
+);
+
+/* This renders an organization for a user */
+router.route('/:orgid/:projectid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.project
 );
 
 
