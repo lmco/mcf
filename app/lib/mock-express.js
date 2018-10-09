@@ -22,7 +22,7 @@
  * few months of a few releases. Remove this file.
  */
 
-module.exports.getReq = function getReq(params, body) {
+module.exports.getReq = function getReq(params, body, headers, user, session) {
   // Error-Check
   if (typeof params !== 'object') {
     throw M.CustomError('params is not of type object.');

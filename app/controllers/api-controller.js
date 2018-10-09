@@ -1013,6 +1013,7 @@ function deleteProjectRole(req, res) {
  * @return {Object} res response object with users' public data
  */
 function getUsers(req, res) {
+  console.log(req);
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
