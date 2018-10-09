@@ -24,6 +24,7 @@
 // circular references between controllers.
 module.exports = {
   findUsers,
+  createUsers,
   findUser,
   findUsersQuery,
   createUser,
@@ -84,6 +85,114 @@ function findUsers(reqUser, softDeleted = false) {
     findUsersQuery(searchParams)
     .then((users) => resolve(users))
     .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description This function creates multiple users.
+ *
+ * @param {User} reqUser - The requesting user.
+ * @param {Array} arrNewUsers - Array containing new user objects.
+ *
+ * @returns {Promise} The newly created users.
+ *
+ * @example
+ * createUser({User}, [{User1}, {User2}, ...])
+ * .then(function(users) {
+ *   // Do something with the newly created users
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createUsers(reqUser, arrNewUsers) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof arrNewUsers === 'object', 'List of new user data is not an array.');
+      let index = 1;
+      // Inspect each user object for a username
+      Object(arrNewUsers).forEach((userObject) => {
+        assert.ok(userObject.hasOwnProperty('username'), `Username not provided user #${index}.`);
+        assert.ok(typeof userObject.username === 'string',
+          `Username in user #${index} is not a string.`);
+        index++;
+      });
+    }
+    catch (error) {
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 403;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+    }
+
+    // Define function-wide variables
+    let createdUsers = [];
+    let created = false;
+
+    // Create find query
+    const findQuery = { username: { $in: sani.sanitize(arrNewUsers.map(u => u.username)) } };
+
+    // Attempt to find existing users
+    findUsersQuery(findQuery)
+    .then((users) => {
+      // Error Check: ensure no users with matching usernames already exist
+      if (users.length > 0) {
+        // One or more users exists, reject
+        return reject(new M.CustomError('User(s) with matching username(s) '
+          + ` already exist: [${users.map(u => u.username).toString()}].`, 403, 'warn'));
+      }
+
+      // Create user objects
+      const userObjects = arrNewUsers.map(u => new User(u));
+
+      // Set created flag to true
+      created = true;
+
+      // Save new user objects
+      return User.create(userObjects);
+    })
+    .then((newUsers) => {
+      // Set function-wide users list
+      createdUsers = newUsers;
+
+      // Find the default organization
+      return OrgController.findOrg(reqUser, M.config.server.defaultOrganizationId);
+    })
+    .then((defaultOrg) => {
+      // Loop through each created user
+      Object(createdUsers).forEach((user) => {
+        // Add each user to read/write list of default org
+        defaultOrg.permissions.read.push(user._id.toString());
+        defaultOrg.permissions.write.push(user._id.toString());
+      });
+
+      // Save the updated default org
+      return defaultOrg.save();
+    })
+    // Return the new users
+    .then(() => resolve(createdUsers))
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError) {
+        return reject(error);
+      }
+
+      // Sanity Check: If not a CustomError but users not yet created,
+      // make it a CustomError and reject, this should never happen
+      if (!created) {
+        return reject(new M.CustomError(error.message, 500, 'warn'));
+      }
+
+      // If it's not a CustomError, the create failed so delete all successfully
+      // created users and reject the error.
+      return User.deleteMany(findQuery)
+      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
+      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+    });
   });
 }
 

@@ -26,6 +26,7 @@ const chai = require('chai');
 
 // MBEE modules
 const UserController = M.require('controllers.user-controller');
+const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const db = M.require('lib.db');
 
@@ -100,6 +101,7 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a user', createNewUser);
+  // it('should create multiple users', createMultipleUsers);
   it('should reject creating a user with non-admin user', rejectUserCreateByNonAdmin);
   it('should reject creating a user with no username', rejectInvalidCreate);
   it('should reject creating an already existing user', rejectDuplicateUser);
@@ -133,6 +135,49 @@ function createNewUser(done) {
     chai.expect(newUser.fname).to.equal(testData.users[1].fname);
     chai.expect(newUser.lname).to.equal(testData.users[1].lname);
     chai.expect(newUser.custom.location).to.equal(testData.users[1].custom.location);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies creation of multiple users at the same time
+ */
+function createMultipleUsers(done) {
+  // Create array of user data
+  const userArray = [
+    testData.users[2],
+    testData.users[4]
+  ];
+
+  // Define function-wide users array
+  let createdUsers = [];
+
+  // Create new users
+  UserController.createUsers(adminUser, userArray)
+  .then((users) => {
+    // Verify returned user data
+    chai.expect(users.length).to.equal(2);
+    chai.expect(users[0].username).to.equal(testData.users[2].username);
+    chai.expect(users[1].username).to.equal(testData.users[4].username);
+
+    // Set createdUsers array
+    createdUsers = users;
+
+    // Find the default org
+    return Organization.findOne({ id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultOrg) => {
+    // Verify users have been added to default org
+    chai.expect(defaultOrg.permissions.read).to.include(createdUsers[0]._id.toString());
+    chai.expect(defaultOrg.permissions.read).to.include(createdUsers[1]._id.toString());
+    chai.expect(defaultOrg.permissions.write).to.include(createdUsers[0]._id.toString());
+    chai.expect(defaultOrg.permissions.write).to.include(createdUsers[1]._id.toString());
     done();
   })
   .catch((error) => {
