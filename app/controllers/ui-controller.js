@@ -72,13 +72,11 @@ function organizations(req, res) {
   }
   // get all organizations the user is a member of
   OrgController.findOrgs(req.user)
-  .then(orgs => {
-    // Render the organization page with the list of orgs
-    return utils.render(req, res, 'organizations', {
-      orgs: orgs,
-      title: 'MBEE | Model-Based Engineering Environment'
-    });
-  })
+  // Render the organization page with the list of orgs
+  .then(orgs => utils.render(req, res, 'organizations', {
+    orgs: orgs,
+    title: 'MBEE | Model-Based Engineering Environment'
+  }))
   // If error, redirect to home
   .catch(error => {
     M.log.error(error);

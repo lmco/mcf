@@ -86,6 +86,8 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should POST an organization', postOrg);
+  it('should reject a POST with multiple invalid orgs', postInvalidOrgs);
+  it('should POST multiple orgs', postOrgs);
   it('should GET posted organization', getOrg);
   it('should PATCH an update to posted organization', patchOrg);
   it('should GET a user\'s roles in an organization', getMemberRoles);
@@ -97,8 +99,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a POST with missing org name', rejectPostMissingName);
   it('should reject a POST with an empty name', rejectPostEmptyName);
   it('should reject a POST of an existing org', rejectPostExistingOrg);
-  it('should reject a DELETE of a non-existing org', rejectDeleteNonexistingOrg);
+  it('should reject a DELETE of a non-existing org', rejectDeleteNonExistingOrg);
+  it('should reject a DELETE of orgs with invalid param', rejectDeleteOrgs);
   it('should DELETE organization', deleteOrg);
+  it('should DELETE multiple organizations', deleteOrgs);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -127,7 +131,53 @@ function postOrg(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:ordid finds and returns the previously
+ * @description Verifies POST /api/orgs rejects when an invalid org is supplied.
+ */
+function postInvalidOrgs(done) {
+  request({
+    url: `${test.url}/api/orgs`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify({ orgs: [testData.orgs[0], testData.orgs[2]] })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 403 Forbidden
+    chai.expect(response.statusCode).to.equal(403);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs creates multiple organizations.
+ */
+function postOrgs(done) {
+  request({
+    url: `${test.url}/api/orgs`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify({ orgs: [testData.orgs[2], testData.orgs[3]] })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.length).to.equal(2);
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs/:orgid finds and returns the previously
  * created organization.
  */
 function getOrg(done) {
@@ -258,7 +308,7 @@ function getOrgs(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verifies length of response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(4);
     done();
   });
 }
@@ -384,13 +434,10 @@ function rejectPostExistingOrg(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs:orgid fails when attempting to delete
+ * @description Verifies DELETE /api/orgs/orgid fails when attempting to delete
  * a non-existing organization.
- * NOTE: The provided {soft: false}, which defaults to true if not provided.
- * This option is available to admin users to change the delete behavior from
- * soft-delete to hard delete.
  */
-function rejectDeleteNonexistingOrg(done) {
+function rejectDeleteNonExistingOrg(done) {
   request({
     url: `${test.url}/api/orgs/${testData.ids[6].id}`,
     headers: getHeaders(),
@@ -399,7 +446,7 @@ function rejectDeleteNonexistingOrg(done) {
     body: JSON.stringify({ soft: false })
   },
   function(err, response, body) {
-    // Expect no error (request succeeds)
+    // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 404 Not Found
     chai.expect(response.statusCode).to.equal(404);
@@ -410,12 +457,31 @@ function rejectDeleteNonexistingOrg(done) {
   });
 }
 
+/**
+ * @description Verifies DELETE /api/orgs fails when hardDelete is not a boolean.
+ */
+function rejectDeleteOrgs(done) {
+  request({
+    url: `${test.url}/api/orgs`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({ orgs: [testData.orgs[2], testData.orgs[3]], hardDelete: 3 })
+  },
+  function(err, response, body) {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
 
 /**
- * @description Verifies DELETE /api/orgs:orgid deletes an organization.
- * NOTE: The provided {soft: false}, which defaults to true if not provided.
- * This option is available to admin users to change the delete behavior from
- * soft-delete to hard delete.
+ * @description Verifies DELETE /api/orgs/:orgid deletes an organization.
  */
 function deleteOrg(done) {
   request({
@@ -424,6 +490,26 @@ function deleteOrg(done) {
     ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({ hardDelete: true })
+  },
+  function(err, response) {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs deletes multiple organizations.
+ */
+function deleteOrgs(done) {
+  request({
+    url: `${test.url}/api/orgs`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({ orgs: [testData.orgs[2], testData.orgs[3]], hardDelete: true })
   },
   function(err, response) {
     // Expect no error
