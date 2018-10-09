@@ -69,11 +69,7 @@ function test(_args) {
     _args.push('19');
   }
 
-  //if (!_args.includes('--reporter')) {
-  //  _args.push('--reporter');
-  //  _args.push('mocha-junit-reporter');
-  //}
-
+  // lalalal
   // Allocate options variable for mocha
   const opts = {};
 
@@ -91,7 +87,6 @@ function test(_args) {
       process.exit(-1);
     }
   }
-  
   // Create mocha object with options
   const mocha = new Mocha(opts);
   // Set the test directory
