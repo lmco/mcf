@@ -86,7 +86,11 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should test the mock request', testMock);
+  it('should GET users', getUsers);
+  it('should POST a user', postUser);
+  it('should GET the posted user', getUser);
+  it('should PATCH a user', patchUser);
+  it('should DELETE a user', deleteUser);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -94,12 +98,127 @@ describe(M.getModuleName(module.filename), () => {
  * @description Makes a GET request to /api/users/:username. Verifies GET
  * request to user API.
  */
-function testMock(done) {
-  mockbody = {};
-  mockparams = {};
+function getUsers(done) {
+  // Create request object
+  const body = {};
+  const params = {};
+  const method = 'GET';
+  const req = getReq(params, body, method);
 
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.getUsers(req, res);
 }
 
+function postUser(done) {
+  // Create request object
+  const body = testData.users[1];
+  const params = { username: testData.users[1].username };
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.username).to.equal(testData.users[1].username);
+    chai.expect(json.fname).to.equal(testData.users[1].fname);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.postUser(req, res);
+}
+
+function getUser(done) {
+  // Create request object
+  const body = {};
+  const params = { username: testData.users[1].username };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.username).to.equal(testData.users[1].username);
+    chai.expect(json.fname).to.equal(testData.users[1].fname);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.getUser(req, res);
+}
+
+function patchUser(done) {
+  // Create request object
+  const body = testData.names[6];
+  const params = { username: testData.users[1].username };
+  const method = 'PATCH';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.username).to.equal(testData.users[1].username);
+    chai.expect(json.fname).to.equal(testData.names[6].fname);
+    done();
+  };
+
+  // PATCHs a user via api controller
+  apiController.patchUser(req, res);
+}
+
+
+function deleteUser(done) {
+  // Create request object
+  const body = {};
+  const params = { username: testData.users[1].username };
+  const method = 'DELETE';
+  const res = {};
+
+  const req = getReq(params, body, method);
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    done();
+  };
+
+  // DELETEs a user via api controller
+  apiController.deleteUser(req, res);
+}
 
 /* ----------( Helper Functions )----------*/
 /**
@@ -112,7 +231,7 @@ function testMock(done) {
  * @param session
  * @returns {{headers: {}, params: Object, body: *, user: {}, session: {}}}
  */
-module.exports.getReq = function getReq(params, body, session) {
+function getReq(params, body, method) {
   // Error-Check
   if (typeof params !== 'object') {
     throw M.CustomError('params is not of type object.');
@@ -123,13 +242,31 @@ module.exports.getReq = function getReq(params, body, session) {
 
   return {
     headers: getHeaders(),
+    method: method,
     params: params,
     body: body,
-    user: testData.users[1],
+    user: testData.users[0],
     session: {}
   };
-};
+}
 
+/**
+ * @description This is a common function used in every test run to verify the
+ * status code of the api request and provide the headers.
+ *
+ * @param {Object} res - Response Object
+ */
+function resFunctions(res) {
+  // Verifies the response code: 200 OK
+  res.status = function status(code) {
+    chai.expect(code).to.equal(200);
+    return this;
+  };
+  // Provides headers to response object
+  res.header = function header(a, b) {
+    return this;
+  };
+}
 
 /**
  * @description Helper function for setting the request header.
@@ -141,13 +278,4 @@ function getHeaders() {
     'Content-Type': 'application/json',
     authorization: basicAuthHeader
   };
-}
-
-/**
- * @description Helper function for setting the certificate authorities for each request.
- */
-function readCaFile() {
-  if (test.hasOwnProperty('ca')) {
-    return fs.readFileSync(`${M.root}/${test.ca}`);
-  }
 }
