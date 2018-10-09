@@ -41,6 +41,13 @@ router.route('/doc/api')
 router.route('/doc/developers')
 .get(Middleware.logRoute, ((req, res) => res.redirect('/doc/index.html')));
 
+/* This renders the about page */
+router.route('/about')
+.get(
+  Middleware.logRoute,
+  UIController.showAboutPage
+);
+
 /* ---------- Authenticated Routes ----------*/
 /**
  * GET shows the login page.
@@ -59,14 +66,6 @@ router.route('/login')
   UIController.login
 );
 
-/* This renders the about page */
-router.route('/about')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.showAboutPage
-);
-
 /* This renders the home page for logged in users */
 router.route('/')
 .get(
@@ -82,7 +81,6 @@ router.route('/organizations')
   Middleware.logRoute,
   UIController.organizations
 );
-
 
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.
