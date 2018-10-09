@@ -26,6 +26,7 @@
 // circular references between controllers.
 module.exports = {
   home,
+  organizations,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -38,6 +39,7 @@ const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE modules
+const OrgController = M.require('controllers.organization-controller');
 const User = M.require('models.user');
 const crypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
@@ -48,11 +50,41 @@ const validators = M.require('lib.validators');
  * Renders the home page.
  */
 function home(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Render the MBEE home screen
   return utils.render(req, res, 'home', {
     title: 'MBEE | Model-Based Engineering Environment'
   });
 }
 
+/**
+ * Renders the home page.
+ */
+function organizations(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // get all organizations the user is a member of
+  OrgController.findOrgs(req.user)
+  .then(orgs => {
+    // Render the organization page with the list of orgs
+    return utils.render(req, res, 'organizations', {
+      orgs: orgs,
+      title: 'MBEE | Model-Based Engineering Environment'
+    });
+  })
+  // If error, redirect to home
+  .catch(error => {
+    M.log.error(error);
+    res.redirect('/');
+  });
+}
 
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc
@@ -161,6 +193,11 @@ function login(req, res) {
  * req.session.token object.
  */
 function logout(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    // redirect to the login screen
+    res.redirect('/login');
+  }
   // destroy the session
   req.user = null;
   req.session.destroy();
