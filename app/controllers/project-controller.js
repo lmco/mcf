@@ -467,14 +467,8 @@ function createProject(reqUser, project) {
       return newProject.save();
     })
     .then((createdProject) => resolve(createdProject))
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }
 
@@ -578,13 +572,8 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       return project.save();
     })
     .then((updatedProject) => resolve(updatedProject))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }
 
@@ -889,6 +878,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
     // Resolve updated project
     .then(() => resolve(updatedProject))
     // Reject  error
-    .catch((error) => reject(error));
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 } // Closing function

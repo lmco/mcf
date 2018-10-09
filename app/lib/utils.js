@@ -261,7 +261,6 @@ module.exports.toTitleCase = function(word) {
   return titleCasedString;
 };
 
-
 /**
  * @description Checks that two objects are equal by stringifying them and
  * comparing the resulting strings.
@@ -277,4 +276,25 @@ module.exports.deepEqual = function(a, b) {
   catch (error) {
     return false;
   }
+};
+
+/**
+ * @description Returns custom error with status code if matched.
+ * Otherwise original error is returned.
+ *
+ * @param {Object} error - Error result
+ */
+module.exports.createCustomError = function(error) {
+  // If error is a CustomError, reject it
+  if (error instanceof M.CustomError) {
+    return error;
+  }
+
+  // Check for ValidationError
+  if (error.name === 'ValidationError') {
+    return new M.CustomError(error.message, 400, 'warn');
+  }
+
+  // Error with default Internal error
+  return new M.CustomError(error.message, 500, 'warn');
 };

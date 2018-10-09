@@ -39,6 +39,7 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
+const utils = M.require('lib.utils');
 
 // eslint consistent-return rule is disabled for this file. The rule may not fit
 // controller-related functions as returns are inconsistent.
@@ -245,14 +246,8 @@ function createUser(reqUser, newUserData) {
       return orgs[0].save();
     })
     .then(() => resolve(createdUser))
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }
 
@@ -342,13 +337,8 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       return user.save();
     })
     .then((updatedUser) => resolve(updatedUser))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }
 
@@ -456,6 +446,7 @@ function removeUser(reqUser, usernameToDelete) {
     })
     /* eslint-enable no-loop-func */
     .then((user) => resolve(user))
-    .catch((error) => reject(error));
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }

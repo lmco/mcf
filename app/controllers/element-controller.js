@@ -489,13 +489,8 @@ function createRelationshipHelper(reqUser, elemData, elemInfo) {
       return newElement.save();
     })
     .then(() => resolve(newElement))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }
 
@@ -541,13 +536,8 @@ function createPackageHelper(reqUser, elemData) {
       return newElement.save();
     })
     .then(() => resolve(newElement))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }
 
@@ -592,13 +582,8 @@ function createBlockHelper(reqUser, elemData) {
       return newElement.save();
     })
     .then(() => resolve(newElement))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }
 
@@ -714,13 +699,8 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       return element.save();
     })
     .then((updatedElement) => resolve(updatedElement))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }
 
@@ -767,7 +747,8 @@ function updateParent(reqUser, orgID, projID, elemID, newElement) {
       return parentElement.save();
     })
     .then((updatedElement) => resolve(updatedElement._id))
-    .catch((error) => reject(error));
+    // Return reject with custom error
+    .catch((error) => reject(utils.createCustomError(error)));
   });
 }
 
@@ -830,7 +811,8 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
         element.deleted = true;
         element.save()
         .then(() => resolve(element))
-        .catch((error) => reject(error));
+        // Return reject with custom error
+        .catch((error) => reject(utils.createCustomError(error)));
       }
     })
     .catch((error) => reject(error));

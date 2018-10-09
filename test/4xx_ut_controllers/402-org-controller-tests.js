@@ -217,7 +217,7 @@ function findExistingOrg(done) {
 
 /**
  * @description Verifies a user CANNOT update permissions.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectUpdateImmutableField(done) {
   // Update organization
@@ -229,7 +229,7 @@ function rejectUpdateImmutableField(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });
@@ -237,7 +237,7 @@ function rejectUpdateImmutableField(done) {
 
 /**
  * @description Verifies updateOrg fails given invalid data.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectUpdateBadType(done) {
   // Update organization
@@ -249,8 +249,8 @@ function rejectUpdateBadType(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
