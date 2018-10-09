@@ -26,7 +26,7 @@ const router = express.Router();
 const UIController = M.require('controllers.ui-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
-const Validators = M.require('lib.validators')
+const Validators = M.require('lib.validators');
 
 /* ---------- Unauthenticated Routes ----------*/
 /**
@@ -41,6 +41,13 @@ router.route('/doc/api')
  */
 router.route('/doc/developers')
 .get(Middleware.logRoute, ((req, res) => res.redirect('/doc/index.html')));
+
+/* This renders the about page */
+router.route('/about')
+.get(
+  Middleware.logRoute,
+  UIController.showAboutPage
+);
 
 /* ---------- Authenticated Routes ----------*/
 /**
@@ -58,14 +65,6 @@ router.route('/login')
   Middleware.logRoute,
   AuthController.doLogin,
   UIController.login
-);
-
-/* This renders the about page */
-router.route('/about')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.showAboutPage
 );
 
 /* This renders the home page for logged in users */
