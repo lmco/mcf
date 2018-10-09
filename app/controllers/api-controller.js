@@ -1092,7 +1092,7 @@ function getUsers(req, res) {
   }
 
   // Get all users in MBEE
-  UserController.findUsers(req.user)
+  UserController.findUsers(x.user)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
