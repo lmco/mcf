@@ -265,6 +265,8 @@ ElementSchema.pre('validate', function() {
 
       // Add _id of new element to parents 'contain' list
       parent.contains.push(this._id);
+
+      // Save updated parent element
       return parent.save();
     })
     .then(() => resolve())
@@ -299,13 +301,17 @@ RelationshipSchema.pre('validate', function() {
     const targetUID = utils.createUID(uidParts[0], uidParts[1], this.$target);
     const sourceUID = utils.createUID(uidParts[0], uidParts[1], this.$source);
 
-    // Find the target to make sure it exists
+    // Find the target element
     Element.findOne({ uid: targetUID }) // eslint-disable-line no-use-before-define
     .then((target) => {
+      // Set relationship target reference
       this.target = target;
+
+      // Find the source element
       return Element.findOne({ uid: sourceUID }); // eslint-disable-line no-use-before-define
     })
     .then((source) => {
+      // Set relationship source reference
       this.source = source;
       return resolve();
     })
