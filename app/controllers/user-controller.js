@@ -25,6 +25,7 @@
 module.exports = {
   findUsers,
   createUsers,
+  removeUsers,
   findUser,
   findUsersQuery,
   createUser,
@@ -193,6 +194,30 @@ function createUsers(reqUser, arrNewUsers) {
       .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
       .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
     });
+  });
+}
+
+/**
+ * @description This function deletes multiple users
+ *
+ * @param {User} reqUser - The requesting user.
+ * @param {Object} query - The query used to update/delete users.
+ * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
+ *
+ * @returns {Promise} The newly deleted users.
+ *
+ * @example
+ * removeUser({User}, { username: 'username' }, true)
+ * .then(function(users) {
+ *   // Do something with the deleted users
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function removeUsers(reqUser, query, hardDelete = false) {
+  return new Promise((resolve, reject) => {
+
   });
 }
 
