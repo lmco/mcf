@@ -226,11 +226,18 @@ function removeOrgs(reqUser, query, hardDelete = false) {
       // Set foundOrgs
       foundOrgs = orgs;
 
-      // Error Check: ensure user is a global admin or org admin
+      // Loop through each found org
       Object(orgs).forEach((org) => {
+        // Error Check: ensure user is a global admin or org admin
         if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
           return reject(new M.CustomError('User does not have permissions to '
             + `delete the organization [${org.name}].`, 403, 'warn'));
+        }
+
+        // Error Check: ensure reqUser is not deleting the default org
+        if (org.id === M.config.server.defaultOrganizationId) {
+          // orgID is default, reject error.
+          return reject(new M.CustomError('The default organization cannot be deleted.', 403, 'warn'));
         }
       });
 
