@@ -58,6 +58,7 @@ const validators = M.require('lib.validators');
 function home(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/ executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -73,6 +74,7 @@ function home(req, res) {
 function organizationList(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/organizations executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -96,6 +98,7 @@ function organizationList(req, res) {
 function organization(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/:orgid executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -133,20 +136,24 @@ function organization(req, res) {
 }
 
 /**
- * Renders the organization list page.
+ * Renders the project list page.
  */
 function projectList(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/projects executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
-  // get all organizations the user is a member of
+  // Find the requesting user
   UserController.findUser(req.user, req.user.username)
-  // Render the organization page with the list of orgs
+  // Render the project page with the list of projects
   .then(foundUser => {
+    // Create list of projects
     const projects = foundUser.proj.read;
+    // Loop through list and create reference page for each project
     projects.forEach(proj => {
+      // set ref to split of uid and join with forward slashes
       proj.ref = utils.parseUID(proj.uid).join('/');
     });
     utils.render(req, res, 'project-list', {
@@ -167,6 +174,7 @@ function projectList(req, res) {
 function project(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/:orgid/:projectid executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -210,7 +218,7 @@ function project(req, res) {
   // If error, redirect to organization list
   .catch(err => {
     M.log.error(err);
-    return res.redirect('/organizations');
+    return res.redirect('/projects');
   });
 }
 
@@ -324,6 +332,7 @@ function login(req, res) {
 function logout(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/logout executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
