@@ -468,7 +468,7 @@ function createProject(reqUser, project) {
     })
     .then((createdProject) => resolve(createdProject))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -573,7 +573,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
     })
     .then((updatedProject) => resolve(updatedProject))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -879,6 +879,6 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
     .then(() => resolve(updatedProject))
     // Reject  error
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 } // Closing function

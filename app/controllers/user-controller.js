@@ -247,7 +247,7 @@ function createUser(reqUser, newUserData) {
     })
     .then(() => resolve(createdUser))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -338,7 +338,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
     })
     .then((updatedUser) => resolve(updatedUser))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -447,6 +447,6 @@ function removeUser(reqUser, usernameToDelete) {
     /* eslint-enable no-loop-func */
     .then((user) => resolve(user))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

@@ -406,7 +406,7 @@ function createElement(reqUser, element) {
     })
     .then(() => resolve(newElement))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -523,7 +523,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
     })
     .then((updatedElement) => resolve(updatedElement))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -588,7 +588,7 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
         element.save()
         .then(() => resolve(element))
         // Return reject with custom error
-        .catch((error) => reject(utils.createCustomError(error)));
+        .catch((error) => reject(M.CustomError.parseCustomError(error)));
       }
     })
     .catch((error) => reject(error));

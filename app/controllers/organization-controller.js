@@ -278,7 +278,7 @@ function createOrg(reqUser, newOrgData) {
     })
     .then((createdOrg) => resolve(createdOrg))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -395,7 +395,7 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
     })
     .then(updatedOrg => resolve(updatedOrg))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -645,7 +645,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
     })
     .then((savedOrg) => resolve(savedOrg))
     // Return reject with custom error
-    .catch((error) => reject(utils.createCustomError(error)));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
