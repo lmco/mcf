@@ -1,24 +1,17 @@
-###############################################################################
-# Classification: UNCLASSIFIED                                                #
-#                                                                             #
-# Copyright (C) 2018, Lockheed Martin Corporation                             #
-#                                                                             #
-# LMPI WARNING: This file is Lockheed Martin Proprietary Information.         #
-# It is not approved for public release or redistribution.                    #
-#                                                                             #
-# EXPORT CONTROL WARNING: This software may be subject to applicable export   #
-# control laws. Contact legal and export compliance prior to distribution.    #
-###############################################################################
+##
+# Classification: UNCLASSIFIED                                                                                                        #
 #
-# Dockerfile
+# @module config.Dockerfile
 #
-# Josh Kaplan <joshua.d.kaplan@lmco.com>
+# @copyright Copyright (C) 2018, Lockheed Martin Corporation
 #
-# This Dockerfile defines the Docker build for MBEE.
+# @license MIT
+# Made by leah
 #
-###############################################################################
-FROM node:6.14.1-alpine
-MAINTAINER Josh Kaplan <joshua.d.kaplan@lmco.com>
+# @description This Dockerfile defines the Docker build for MBEE.
+##
+FROM node:6.14.1
+MAINTAINER Lockheed Martin
 WORKDIR /lm/mbee
 
 # Set proxy environment variables
@@ -26,24 +19,29 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     HTTPS_PROXY="http://proxy-lmi.global.lmco.com:80" \
     http_proxy="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
-    NO_PROXY=127.0.0.1,localhost,*.lmco.com \
-    NODE_TLS_REJECT_UNAUTHORIZED=0
+    NO_PROXY=127.0.0.1,localhost
+
+# Prerequisites for MongoDB install
+RUN dpkg-divert --local --rename --add /etc/init.d/mongod
+RUN ln -s /bin/true /etc/init.d/mongod
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+RUN echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/4.0 multiverse" | tee -i /etc/apt/sources.list.d/mongodb-org-4.0.list
 
 # Install dependencies
-RUN apk upgrade \
-    && apk update \
-    && apk add git \
-    && apk add openssh-client
+RUN apt-get -y upgrade \
+ && apt-get -y update \
+ && apt-get install -y git \
+ && apt-get install -y openssh-client \
+ && apt-get install -y --force-yes mongodb-org
 
-# Install certs
+# Install certs - If you have certs in a certs directory, uncomment the following lines
 RUN mkdir -p certs
 COPY ./certs certs
 RUN chmod 400 certs/*
 
-# Install Yarn Modules
+# Configure Yarn
 RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
-    && yarn config set cafile "certs/LockheedMartinCertificateAuthority.pem" \
-    && yarn config set strict-ssl false \
+    && yarn config set cafile "./certs/LockheedMartinCertificateAuthority.pem" \
     && yarn config set http-proxy "http://proxy-lmi.global.lmco.com" \
     && yarn config set https-proxy "http://proxy-lmi.global.lmco.com"
 
@@ -51,18 +49,18 @@ RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
 COPY ./package.json package.json
 RUN yarn install --production
 
-# Create Project Directory Structure
+# Create project directory structure
 RUN mkdir logs \
     && mkdir -p config \
     && mkdir -p scripts \
     && mkdir -p plugins \
     && mkdir -p build \
     && mkdir -p public \
-    && mkdir -p app
+    && mkdir -p app \
+    && mkdir -p /lm/mbee/data/db/log
 
 # Copy Project
-COPY ./config/*.cfg config/
-COPY ./config/*.json config/
+COPY ./config config
 COPY ./scripts scripts
 COPY ./mbee.js mbee.js
 COPY ./plugins plugins
@@ -70,5 +68,17 @@ COPY ./build build
 COPY ./app  app
 COPY ./README.md README.md
 
+# Make entrypoint.sh an executable
+RUN chmod +x /lm/mbee/config/entrypoint.sh
+
+# Define a volume
+VOLUME data
+
+# Expose ports
+EXPOSE 6233
+EXPOSE 6234
+EXPOSE 27024
+
 # Run server
-CMD ["node", "mbee.js", "start"]
+ENTRYPOINT /lm/mbee/config/entrypoint.sh
+
