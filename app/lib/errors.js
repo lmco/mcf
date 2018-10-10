@@ -158,7 +158,7 @@ module.exports.CustomError = class CustomError extends Error {
       return newError;
     }
 
-    // Error with default Internal error
+    // Unknown error,default to Internal Server Error
     const newError = new M.CustomError(error.message, 500, 'warn');
     newError.stack = strStack;
   }
