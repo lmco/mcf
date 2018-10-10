@@ -25,6 +25,7 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 // Expose `ElementController`
@@ -237,16 +238,36 @@ function getOrgs(req, res) {
 /**
  * POST /api/orgs
  *
- * @description Accepts an array of JSON objects containing organization data.
- * Attempts to create each of the organizations. If any of the organizations
- * fail, the entire request fails and none of the organizations are created.
+ * @description Creates multiple orgs from an array of objects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res - Response object with orgs' public data
  */
 function postOrgs(req, res) {
-  // TODO - Discuss the possibility of batch creation of orgs. (MBX-353)
-  // We may need to look into using transactions with mongo to make this work.
-  res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: ensure org data array is provided in the body
+  if (!req.body.hasOwnProperty('orgs')) {
+    const error = new M.CustomError('Orgs array not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Create organizations in request body
+  // NOTE: createOrgs() sanitizes req.body.orgs
+  OrgController.createOrgs(req.user, req.body.orgs)
+  .then((orgs) => {
+    // Return 200: OK and created orgs
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(orgs));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -268,14 +289,61 @@ function patchOrgs(req, res) {
 /**
  * DELETE /api/orgs
  *
- * @description This function will soft-delete all orgs.
+ * @description Deletes multiple orgs from an array of objects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res - Response object with orgs' public data
  */
 function deleteOrgs(req, res) {
-  // TODO - Discuss and define behavior for how orgs wil be deleted (MBX-355)
-  // or if it is necessary.
-  res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Initialize the delete query object
+  let deleteQuery = {};
+
+  // No orgs provided, return an error
+  if (!req.body.hasOwnProperty('orgs')) {
+    const error = new M.CustomError('Array of orgs not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+  // Org objects provided, delete all
+  if (req.body.orgs.every(o => typeof o === 'object')) {
+    // Query finds all orgs by their id
+    deleteQuery = { id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
+  }
+  // Org IDs provided, delete all
+  else if (req.body.orgs.every(o => typeof o === 'string')) {
+    // Query finds all orgs by their id
+    deleteQuery = { id: { $in: sani.sanitize(req.body.orgs) } };
+  }
+  // No valid org data was provided, reject
+  else {
+    const error = new M.CustomError('Orgs array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Remove the specified orgs
+  OrgController.removeOrgs(req.user, deleteQuery, hardDelete)
+  .then((orgs) => {
+    // Return 200: OK and the deleted orgs
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(orgs));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -685,19 +753,19 @@ function deleteProjects(req, res) {
   // No projects provided, delete all projects in the org
   if (!req.body.hasOwnProperty('projects')) {
     // Query finds all projects that start with 'orgid:'
-    deleteQuery = { uid: { $regex: `^${req.params.orgid}:` } };
+    deleteQuery = { uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } };
   }
   // Project objects provided, delete all
   else if (req.body.projects.every(p => typeof p === 'object')) {
     // Query finds all projects by their id and whose uid start with 'orgid:'
-    deleteQuery = { $and: [{ uid: { $regex: `^${req.params.orgid}:` } },
-      { id: { $in: req.body.projects.map(p => p.id) } }] };
+    deleteQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
+      { id: { $in: sani.sanitize(req.body.projects.map(p => p.id)) } }] };
   }
   // Project IDs provided, delete all
   else if (req.body.projects.every(p => typeof p === 'string')) {
     // Query finds all projects by their id and whose uid start with 'orgid:'
-    deleteQuery = { $and: [{ uid: { $regex: `^${req.params.orgid}:` } },
-      { id: { $in: req.body.projects } }] };
+    deleteQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
+      { id: { $in: sani.sanitize(req.body.projects) } }] };
   }
   // No valid project data was provided, reject
   else {
@@ -706,7 +774,6 @@ function deleteProjects(req, res) {
   }
 
   // Remove the specified projects
-  // NOTE: removeProjects() sanitizes the deleteQuery
   ProjectController.removeProjects(req.user, deleteQuery, hardDelete)
   .then((projects) => {
     // Return 200: OK and the deleted projects

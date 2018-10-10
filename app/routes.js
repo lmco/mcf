@@ -26,6 +26,7 @@ const router = express.Router();
 const UIController = M.require('controllers.ui-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
+const Validators = M.require('lib.validators');
 
 /* ---------- Unauthenticated Routes ----------*/
 /**
@@ -74,7 +75,7 @@ router.route('/')
   UIController.home
 );
 
-/* This renders the home page for logged in users */
+/* This renders the organization list page for logged in users */
 router.route('/organizations')
 .get(
   AuthController.authenticate,
@@ -90,6 +91,44 @@ router.route('/logout')
   AuthController.authenticate,
   Middleware.logRoute,
   UIController.logout
+);
+
+// Parameter validation for the 'orgid' param
+// eslint-disable-next-line consistent-return
+router.param('orgid', (req, res, next, orgid) => {
+  if (RegExp(Validators.org.id).test(orgid)) {
+    next();
+  }
+  else {
+    return res.redirect('/organizations');
+  }
+});
+
+// Parameter validation for the 'orgid' param
+// eslint-disable-next-line consistent-return
+router.param('projectid', (req, res, next, project) => {
+  if (RegExp(Validators.project.id).test(project)) {
+    next();
+  }
+  else {
+    return res.redirect('/projects');
+  }
+});
+
+/* This renders an organization for a user */
+router.route('/:orgid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.organization
+);
+
+/* This renders an organization for a user */
+router.route('/:orgid/:projectid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.project
 );
 
 

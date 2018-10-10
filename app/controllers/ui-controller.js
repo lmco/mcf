@@ -27,6 +27,8 @@
 module.exports = {
   home,
   organizations,
+  organization,
+  project,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -40,6 +42,8 @@ const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE modules
 const OrgController = M.require('controllers.organization-controller');
+const ProjController = M.require('controllers.project-controller');
+const ElementController = M.require('controllers.element-controller');
 const User = M.require('models.user');
 const crypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
@@ -62,7 +66,7 @@ function home(req, res) {
 }
 
 /**
- * Renders the home page.
+ * Renders the organization list page.
  */
 function organizations(req, res) {
   // Sanity check: confirm req.user exists
@@ -72,19 +76,113 @@ function organizations(req, res) {
   }
   // get all organizations the user is a member of
   OrgController.findOrgs(req.user)
-  .then(orgs => {
-    // Render the organization page with the list of orgs
-    return utils.render(req, res, 'organizations', {
-      orgs: orgs,
-      title: 'MBEE | Model-Based Engineering Environment'
-    });
-  })
+  // Render the organization page with the list of orgs
+  .then(orgs => utils.render(req, res, 'organizations', {
+    orgs: orgs,
+    title: 'MBEE | Model-Based Engineering Environment'
+  }))
   // If error, redirect to home
   .catch(error => {
     M.log.error(error);
     res.redirect('/');
   });
 }
+
+/**
+ * Renders an organization page.
+ */
+function organization(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Find organization
+  OrgController.findOrg(req.user, req.params.orgid)
+  // Render organization page including nav-sidebar
+  .then(org => utils.render(req, res, 'organization', {
+    name: 'organization',
+    title: 'MBEE | Model-Based Engineering Environment',
+    sidebar: {
+      heading: 'Organization',
+      icon: 'fas fa-boxes',
+      list: {
+        Projects: {
+          icon: 'fas fa-box',
+          link: '#projects'
+        },
+        Members: {
+          icon: 'fas fa-users',
+          link: '#members'
+        },
+        Settings: {
+          icon: 'fas fa-cog',
+          link: '#settings'
+        }
+      }
+    },
+    org: org
+  }))
+  // If error, redirect to organization list
+  .catch(err => {
+    M.log.error(err);
+    return res.redirect('/organizations');
+  });
+}
+
+/**
+ * Renders an organization page.
+ */
+function project(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  let proj = null;
+  let elements = null;
+  // Find organization
+  ProjController.findProject(req.user, req.params.orgid, req.params.projectid)
+  // Render organization page including nav-sidebar
+  .then(foundProject => {
+    proj = foundProject;
+    return ElementController.findElements(req.user, req.params.orgid, req.params.projectid);
+  })
+  .then(foundElements => {
+    elements = foundElements;
+    utils.render(req, res, 'project', {
+      name: 'project',
+      title: 'MBEE | Model-Based Engineering Environment',
+      sidebar: {
+        heading: 'Project',
+        icon: 'fas fa-box',
+        list: {
+          Elements: {
+            icon: 'fas fa-project-diagram',
+            link: '#elements'
+          },
+
+          Members: {
+            icon: 'fas fa-users',
+            link: '#members'
+          },
+          Settings: {
+            icon: 'fas fa-cog',
+            link: '#settings'
+          }
+        }
+      },
+      project: proj,
+      elements: elements
+    });
+  })
+  // If error, redirect to organization list
+  .catch(err => {
+    M.log.error(err);
+    return res.redirect('/organizations');
+  });
+}
+
 
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc

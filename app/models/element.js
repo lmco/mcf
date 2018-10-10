@@ -39,11 +39,15 @@
  * either the root package or some other package in the hierarchy).</p>
  */
 
+// Node.js modules
+const assert = require('assert');
+
 // NPM modules
 const mongoose = require('mongoose');
 const uuidv4 = require('uuid/v4');
 
 // MBEE modules
+const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 
 // Mongoose options - for discriminators
@@ -230,6 +234,89 @@ ElementSchema.pre('save', function(next) {
     this.uuid = uuidv4();
   }
   next();
+});
+
+/**
+ * @description Pre-validate actions for all elements
+ * @memberOf ElementSchema
+ */
+ElementSchema.pre('validate', function() {
+  return new Promise((resolve, reject) => {
+    // If element has no parent or parent is already defined, return
+    if (this.$parent === null || this.$parent === undefined) {
+      return resolve();
+    }
+
+    // Create the parent UID for searching
+    const uidParts = utils.parseUID(this.uid);
+    const parentUID = utils.createUID(uidParts[0], uidParts[1], this.$parent);
+
+    // Find the parent to update it
+    Element.findOne({ uid: parentUID }) // eslint-disable-line no-use-before-define
+    .then((parent) => {
+      // Error Check: ensure parent element type is package
+      if (parent.type !== 'Package') {
+        // Parent Element type is not package, throw error
+        return reject(new M.CustomError('Parent element is not of type Package.', 400, 'warn'));
+      }
+
+      // Set parent field of new element
+      this.parent = parent;
+
+      // Add _id of new element to parents 'contain' list
+      parent.contains.push(this._id);
+
+      // Save updated parent element
+      return parent.save();
+    })
+    .then(() => resolve())
+    .catch((error) => reject(new M.CustomError(error.message, 500, 'warn')));
+  });
+});
+
+/**
+ * @description Pre-validate actions for a relationship.
+ * @memberOf RelationshipSchema
+ */
+RelationshipSchema.pre('validate', function() {
+  return new Promise((resolve, reject) => {
+    // If source and target are already defined, return
+    if (this.source !== undefined && this.target !== undefined) {
+      return resolve();
+    }
+
+    // Error Check: ensure target and source are provided
+    try {
+      assert.ok(this.hasOwnProperty('$target'), 'Element target not provided.');
+      assert.ok(this.hasOwnProperty('$source'), 'Element source not provided.');
+      assert.ok(typeof this.$target === 'string', 'Element target is not a string.');
+      assert.ok(typeof this.$source === 'string', 'Element source is not a string');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+
+    // Create the target and source UIDs for searching
+    const uidParts = utils.parseUID(this.uid);
+    const targetUID = utils.createUID(uidParts[0], uidParts[1], this.$target);
+    const sourceUID = utils.createUID(uidParts[0], uidParts[1], this.$source);
+
+    // Find the target element
+    Element.findOne({ uid: targetUID }) // eslint-disable-line no-use-before-define
+    .then((target) => {
+      // Set relationship target reference
+      this.target = target;
+
+      // Find the source element
+      return Element.findOne({ uid: sourceUID }); // eslint-disable-line no-use-before-define
+    })
+    .then((source) => {
+      // Set relationship source reference
+      this.source = source;
+      return resolve();
+    })
+    .catch((error) => reject(new M.CustomError(error.message, 500, 'warn')));
+  });
 });
 
 
