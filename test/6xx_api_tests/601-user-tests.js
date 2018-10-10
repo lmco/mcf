@@ -256,11 +256,11 @@ function rejectInvalidUsernamePost(done) {
     // Expect request to succeed
     chai.expect(err).to.equal(null);
     // Expect status 400 Bad Request
-    chai.expect(response.statusCode).to.equal(500);
+    chai.expect(response.statusCode).to.equal(400);
     // Parse body to JSON object
     const json = JSON.parse(body);
     // Expected response error: 'Bad Request'
-    chai.expect(json.message).to.equal('Internal Server Error');
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

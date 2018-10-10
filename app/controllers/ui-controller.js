@@ -26,8 +26,9 @@
 // circular references between controllers.
 module.exports = {
   home,
-  organizations,
+  organizationList,
   organization,
+  projectList,
   project,
   swaggerDoc,
   showAboutPage,
@@ -41,6 +42,7 @@ const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE modules
+const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const ElementController = M.require('controllers.element-controller');
@@ -56,6 +58,7 @@ const validators = M.require('lib.validators');
 function home(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/ executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -68,16 +71,17 @@ function home(req, res) {
 /**
  * Renders the organization list page.
  */
-function organizations(req, res) {
+function organizationList(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/organizations executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
   // get all organizations the user is a member of
   OrgController.findOrgs(req.user)
   // Render the organization page with the list of orgs
-  .then(orgs => utils.render(req, res, 'organizations', {
+  .then(orgs => utils.render(req, res, 'organization-list', {
     orgs: orgs,
     title: 'MBEE | Model-Based Engineering Environment'
   }))
@@ -94,6 +98,7 @@ function organizations(req, res) {
 function organization(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/:orgid executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -131,11 +136,45 @@ function organization(req, res) {
 }
 
 /**
+ * Renders the project list page.
+ */
+function projectList(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/projects executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Find the requesting user
+  UserController.findUser(req.user, req.user.username)
+  // Render the project page with the list of projects
+  .then(foundUser => {
+    // Create list of projects
+    const projects = foundUser.proj.read;
+    // Loop through list and create reference page for each project
+    projects.forEach(proj => {
+      // set ref to split of uid and join with forward slashes
+      proj.ref = utils.parseUID(proj.uid).join('/');
+    });
+    utils.render(req, res, 'project-list', {
+      title: 'MBEE | Model-Based Engineering Environment',
+      projects: projects
+    });
+  })
+  // If error, redirect to home
+  .catch(error => {
+    M.log.error(error);
+    res.redirect('/');
+  });
+}
+
+/**
  * Renders an organization page.
  */
 function project(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/:orgid/:projectid executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -179,7 +218,7 @@ function project(req, res) {
   // If error, redirect to organization list
   .catch(err => {
     M.log.error(err);
-    return res.redirect('/organizations');
+    return res.redirect('/projects');
   });
 }
 
@@ -293,6 +332,7 @@ function login(req, res) {
 function logout(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
+    M.log.critical(new M.CustomError('/logout executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
