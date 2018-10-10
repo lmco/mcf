@@ -282,7 +282,7 @@ function rejectPostElement(done) {
  */
 function rejectGetElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[8].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[6].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -309,7 +309,7 @@ function rejectPatchElement(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(testData.names[9])
+    body: JSON.stringify(testData.names[8])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -329,7 +329,7 @@ function rejectPatchElement(done) {
  */
 function rejectDeleteNonexistingElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[8].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[6].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',

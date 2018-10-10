@@ -234,7 +234,7 @@ function getUsers(done) {
 function rejectGetNonexisting(done) {
   // Make GET API request
   request({
-    url: `${test.url}/api/users/${testData.usernames[3].username}`,
+    url: `${test.url}/api/users/${testData.usernames[1].username}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -289,12 +289,12 @@ function patchUser(done) {
 function rejectPatchNonexisting(done) {
   // Make a PATCH API request
   request({
-    url: `${test.url}/api/users/${testData.usernames[4].username}`,
+    url: `${test.url}/api/users/${testData.usernames[1].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     // Set update parameter in request body
-    body: JSON.stringify(testData.names[6])
+    body: JSON.stringify(testData.names[5])
   },
   (err, response, body) => {
     // Expect no error
@@ -317,7 +317,7 @@ function rejectPatchNonexisting(done) {
 function rejectDeleteNonexisting(done) {
   // Make a DELETE request
   request({
-    url: `${test.url}/api/users/${testData.usernames[4].username}`,
+    url: `${test.url}/api/users/${testData.usernames[1].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
