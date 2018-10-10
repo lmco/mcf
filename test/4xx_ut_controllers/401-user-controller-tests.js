@@ -101,6 +101,7 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a user', createNewUser);
+  it('should reject creating multiple users when one is invalid', rejectCreateMultipleUsersInvalid);
   it('should create multiple users', createMultipleUsers);
   it('should reject creating a user with non-admin user', rejectUserCreateByNonAdmin);
   it('should reject creating a user with no username', rejectInvalidCreate);
@@ -142,6 +143,32 @@ function createNewUser(done) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Rejects creation of multiple users when one is invalid.
+ * Expected error thrown: 'Internal Server Error'
+ */
+function rejectCreateMultipleUsersInvalid(done) {
+  // Create array of user data
+  const userArray = [
+    testData.invalidUsers[0],
+    testData.users[4]
+  ];
+
+  // Create new users
+  UserController.createUsers(adminUser, userArray)
+  .then(() => {
+    // Expect createUsers() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
     done();
   });
 }
