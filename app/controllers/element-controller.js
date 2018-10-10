@@ -404,7 +404,8 @@ function createElement(reqUser, element) {
       // Save the element
       return elemObject.save();
     })
-    .then(() => resolve(newElement))
+    .then((newElement) => resolve(newElement))
+
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

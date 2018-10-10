@@ -148,7 +148,7 @@ module.exports.CustomError = class CustomError extends Error {
         strStack = strStack.concat(error.errors[value].stack);
       });
     }
-    console.log(error);
+
     // Check for ValidationError
     if (error.name === 'ValidationError') {
       let newError = new M.CustomError(error.message, 400, 'warn');
