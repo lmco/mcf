@@ -80,7 +80,15 @@ router.route('/organizations')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.organizations
+  UIController.organizationList
+);
+
+/* This renders the project list page for logged in users */
+router.route('/projects')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.projectList
 );
 
 /**
@@ -104,7 +112,7 @@ router.param('orgid', (req, res, next, orgid) => {
   }
 });
 
-// Parameter validation for the 'orgid' param
+// Parameter validation for the 'projectid' param
 // eslint-disable-next-line consistent-return
 router.param('projectid', (req, res, next, project) => {
   if (RegExp(Validators.project.id).test(project)) {
@@ -123,7 +131,7 @@ router.route('/:orgid')
   UIController.organization
 );
 
-/* This renders an organization for a user */
+/* This renders a project for a user */
 router.route('/:orgid/:projectid')
 .get(
   AuthController.authenticate,
