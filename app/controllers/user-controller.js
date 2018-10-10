@@ -39,7 +39,6 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
-const utils = M.require('lib.utils');
 
 // eslint consistent-return rule is disabled for this file. The rule may not fit
 // controller-related functions as returns are inconsistent.

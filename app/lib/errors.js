@@ -123,8 +123,10 @@ module.exports.CustomError = class CustomError extends Error {
   }
 
   /**
-   * @description Returns custom error with status code if matched. CustomError includes ValidatorError
-   * error stack. If no CustomError are matched, original error is returned.
+   * @description Returns custom error with status code if matched.
+   * CustomError includes ValidatorError error stack.
+   *
+   * If no CustomError are matched, original error is returned.
    *
    * @param {Object} error - Error result
    */
@@ -138,12 +140,12 @@ module.exports.CustomError = class CustomError extends Error {
     let strStack = '';
 
     // Extract error, add to stack
-    strStack = strStack.concat(error.stack)
+    strStack = strStack.concat(error.stack);
 
     // Check if ValidatorError array exist
     if (error.errors) {
       // Loop through ValidatorError array
-      Object.keys(error.errors).forEach ((value) => {
+      Object.keys(error.errors).forEach((value) => {
         // Extract current error, add to stack
         strStack = strStack.concat(error.errors[value].stack);
       });
@@ -151,15 +153,14 @@ module.exports.CustomError = class CustomError extends Error {
 
     // Check for ValidationError
     if (error.name === 'ValidationError') {
-      let newError = new M.CustomError(error.message, 400, 'warn');
+      const newError = new M.CustomError(error.message, 400, 'warn');
       newError.stack = strStack;
       return newError;
     }
 
     // Error with default Internal error
-    let newError = new M.CustomError(error.message, 500, 'warn');
+    const newError = new M.CustomError(error.message, 500, 'warn');
     newError.stack = strStack;
-    return
-  };
+  }
 
 };
