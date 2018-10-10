@@ -86,7 +86,7 @@ function test(_args) {
       process.exit(-1);
     }
   }
-  
+
   // Create mocha object with options
   const mocha = new Mocha(opts);
   // Set the test directory
