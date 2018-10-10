@@ -60,6 +60,8 @@ module.exports = {
   postProjectRole,
   deleteProjectRole,
   getUsers,
+  postUsers,
+  deleteUsers,
   getUser,
   postUser,
   patchUser,
@@ -1093,6 +1095,107 @@ function getUsers(req, res) {
 
   // Get all users in MBEE
   UserController.findUsers(req.user)
+  .then((users) => {
+    res.header('Content-Type', 'application/json');
+
+    // Return 200: OK and public user data
+    const publicUsers = users.map(u => u.getPublicData());
+    return res.status(200).send(formatJSON(publicUsers));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * POST /api/users
+ *
+ * @description Creates multiple users
+ * NOTE: Admin only.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with users' public data
+ */
+function postUsers(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: check if users list included in req.body
+  if (!req.body.hasOwnProperty('users')) {
+    const error = new M.CustomError('Users array not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Create users
+  // NOTE: createUsers() sanitizes req.body.users
+  UserController.createUsers(req.user, req.body.users)
+  .then((users) => {
+    res.header('Content-Type', 'application/json');
+
+    // Return 200: OK and public user data
+    const publicUsers = users.map(u => u.getPublicData());
+    return res.status(200).send(formatJSON(publicUsers));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * DELETE /api/users
+ *
+ * @description Deletes multiple users
+ * NOTE: Admin only.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with users' public data
+ */
+function deleteUsers(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Initialize the delete query object
+  let deleteQuery = {};
+
+  // No users provided, return an error
+  if (!req.body.hasOwnProperty('users')) {
+    const error = new M.CustomError('Array of users not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+  // User objects provided, delete all
+  if (req.body.users.every(u => typeof u === 'object')) {
+    // Query finds all users by their username
+    deleteQuery = { username: { $in: sani.sanitize(req.body.users.map(u => u.username)) } };
+  }
+  // Usernames provided, delete all
+  else if (req.body.users.every(u => typeof u === 'string')) {
+    // Query finds all orgs by their id
+    deleteQuery = { username: { $in: sani.sanitize(req.body.users) } };
+  }
+  // No valid user data was provided, reject
+  else {
+    const error = new M.CustomError('User array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Remove the specified users
+  UserController.removeUsers(req.user, deleteQuery, hardDelete)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
