@@ -184,14 +184,14 @@ function rejectInvalidCreate(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies createsUser() CANNOT recreate existing username.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectDuplicateUser(done) {
   // Create user data
@@ -239,7 +239,7 @@ function updateFirstName(done) {
 
 /**
  * @description Verify that update fails when given invalid input.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidLastNameUpdate(done) {
   // Create user data
@@ -254,8 +254,8 @@ function rejectInvalidLastNameUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }

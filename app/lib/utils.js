@@ -261,7 +261,6 @@ module.exports.toTitleCase = function(word) {
   return titleCasedString;
 };
 
-
 /**
  * @description Checks that two objects are equal by stringifying them and
  * comparing the resulting strings.

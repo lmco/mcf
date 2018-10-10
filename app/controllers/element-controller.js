@@ -405,13 +405,9 @@ function createElement(reqUser, element) {
       return elemObject.save();
     })
     .then((newElement) => resolve(newElement))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -527,17 +523,13 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       return element.save();
     })
     .then((updatedElement) => resolve(updatedElement))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
 /**
+==== BASE ====
  * @description This function deletes an element.
  *
  * @param {User} reqUser  The user object of the requesting user.
@@ -596,7 +588,8 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
         element.deleted = true;
         element.save()
         .then(() => resolve(element))
-        .catch((error) => reject(error));
+        // Return reject with custom error
+        .catch((error) => reject(M.CustomError.parseCustomError(error)));
       }
     })
     .catch((error) => reject(error));

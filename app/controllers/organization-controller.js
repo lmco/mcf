@@ -444,14 +444,8 @@ function createOrg(reqUser, newOrgData) {
       return newOrg.save();
     })
     .then((createdOrg) => resolve(createdOrg))
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -567,13 +561,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
       return org.save();
     })
     .then(updatedOrg => resolve(updatedOrg))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -822,13 +811,8 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
       return org.save();
     })
     .then((savedOrg) => resolve(savedOrg))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 

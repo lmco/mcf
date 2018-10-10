@@ -207,7 +207,7 @@ function createMultipleProjects(done) {
 
 /**
  * @description Verifies project object cannot update immutable field.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectImmutableField(done) {
   // Update project
@@ -219,7 +219,7 @@ function rejectImmutableField(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });
@@ -227,7 +227,7 @@ function rejectImmutableField(done) {
 
 /**
  * @description Verifies user CANNOT update project with invalid project name.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function updateTypeError(done) {
   // Update project
@@ -239,8 +239,8 @@ function updateTypeError(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -319,7 +319,7 @@ function createProject02(done) {
 
 /**
  * @description Verifies project name does not contain periods.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectCreatePeriodName(done) {
   // Define and clone the project data
@@ -335,15 +335,15 @@ function rejectCreatePeriodName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies existing projects CANNOT be recreated.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectDuplicateProjectId(done) {
   // Define and clone the project data
@@ -359,7 +359,7 @@ function rejectDuplicateProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });
@@ -367,7 +367,7 @@ function rejectDuplicateProjectId(done) {
 
 /**
  * @description Verifies user CANNOT create project with invalid ID.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectId(done) {
   // Define and clone the project data
@@ -383,15 +383,15 @@ function rejectInvalidProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies user CANNOT create a project without name input.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectName(done) {
   // Define and clone the project data
@@ -407,8 +407,8 @@ function rejectInvalidProjectName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -605,7 +605,7 @@ function updateProj(done) {
 
 /**
  * @description Verifies immutable project Id CANNOT be updated.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectProjectId(done) {
   const orgId = org.id;
@@ -621,7 +621,7 @@ function rejectProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });

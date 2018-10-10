@@ -245,14 +245,8 @@ function createUser(reqUser, newUserData) {
       return orgs[0].save();
     })
     .then(() => resolve(createdUser))
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -342,13 +336,8 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       return user.save();
     })
     .then((updatedUser) => resolve(updatedUser))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -456,6 +445,7 @@ function removeUser(reqUser, usernameToDelete) {
     })
     /* eslint-enable no-loop-func */
     .then((user) => resolve(user))
-    .catch((error) => reject(error));
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
