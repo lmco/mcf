@@ -1,0 +1,83 @@
+<%
+const org = project.org;
+const members = project.permissions.read;
+%>
+
+<div class="container">
+
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Home</a></li>
+      <li class="breadcrumb-item"><a href="/<%= org.id%>"><%= org.name%></a></li>
+      <li class="breadcrumb-item active" aria-current="page"><%= project.name%></li>
+    </ol>
+  </nav>
+
+  <hr class="mb-4">
+
+  <h1 class="display-4"><%= project.name%></h1>
+
+  <h3 id="elements" class="mt-3">Elements</h3>
+  <% if (elements.length > 0) { %>
+
+  <ul class="mbee-list">
+    <% for (let i = 0; i < elements.length; i++) { %>
+    <li class="mbee-list-item">
+      <a href="<%=org.id%>/<%=project.id%>/<%=elements[i].name%>">
+        <div class="element-list-item">
+
+          <div class="element-list-title">
+            <%=elements[i].name%>
+          </div>
+
+        </div>
+      </a>
+
+    </li>
+    <% } %>
+  </ul>
+
+  <% } else { %>
+  <p> This Organization does not currently contain any elements</p>
+  <% } %>
+
+
+  <h3 id="members" class="mt-5">Members</h3>
+
+  <% if (members.length > 0) { %>
+  <ul class="mbee-list">
+    <% for (let i = 0; i < members.length; i++) { %>
+
+    <li class="mbee-list-item">
+
+      <div class="member-list-item">
+
+        <div class="member-list-title">
+          <i class="fas fa-users icon-close">
+          </i>
+          <span><%=members[i].name%></span>
+        </div>
+
+        <div class="member-list-stats">
+          <div class="member-list-stats-email">
+            <i class="fas fa-envelope"
+                 data-toggle="tooltip"
+                 data-placement="top"
+                 title="Email">
+            </i>
+            <span><%= members[i].email%></span>
+          </div>
+        </div>
+      </div>
+
+    </li>
+    <% } %>
+  </ul>
+
+  <% } else { %>
+  <p> This project does not contain any members</p>
+  <% } %>
+
+
+
+</div>
