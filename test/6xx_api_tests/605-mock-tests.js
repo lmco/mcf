@@ -87,20 +87,74 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
+  // ASK IF WE ARE ALLOWED TO GET OUR OWN PERMISSIONS USING GET ROLES????
+  // need to do:
+  // all batch orgs
+  // all batch projects,
+  // all roles stuff (figure out errors)
+  // whoami
+  // login?
   /* Execute tests */
+  it('should tell user who user is', whoami)
   it('should GET all users', getUsers);
   it('should POST a user', postUser);
   it('should GET the posted user', getUser);
   it('should PATCH a user', patchUser);
-  it('should DELETE a user', deleteUser);
   it('should POST an org', postOrg);
+  it('should POST an org role', postOrgRole);
+  it('should GET an org role', getOrgRole);
+  // This test works except I dont know how to get the lenght
+  // It doesn't like what I did
+  // it('should GET all org roles', getAllOrgRoles);
+  it('should DELETE an org role', deleteOrgRole);
   it('should GET the posted org', getOrg);
   it('should PATCH an org', patchOrg);
   it('should GET all orgs user has access to', getOrgs);
+  it('should POST a project', postProject);
+  it('should POST a project role', postProjectRole);
+  it('should GET a project role', getProjectRole);
+  // Issues with delete projectRole
+  // it('should DELETE a project role', deleteProjectRole);
+  it('should PATCH a project', patchProject);
+  it('should GET the previously patched project', getProject);
+  it('should POST an element', postElement);
+  it('should GET an element', getElement);
+  it('should PATCH an element', patchElement);
+  it('should DELETE an element', deleteElement);
+  it('should DELETE a project', deleteProject);
+  it('should DELETE a user', deleteUser);
   it('should DELETE an org', deleteOrg);
 });
 
 /* --------------------( Tests )-------------------- */
+/**
+ * @description Verifies mock whoami request to get current user.
+ */
+function whoami(done) {
+  // Create request object
+  const body = {};
+  const params = {};
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.username).to.equal(testData.users[0].adminUsername);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.whoami(req, res);
+}
+
+
 /**
  * @description Verifies mock GET request to get all the users.
  */
@@ -213,32 +267,6 @@ function patchUser(done) {
 }
 
 /**
- * @description Verifies mock DELETE request to delete the user.
- */
-function deleteUser(done) {
-  // Create request object
-  const body = {};
-  const params = { username: testData.users[1].username };
-  const method = 'DELETE';
-  const res = {};
-
-  const req = getReq(params, body, method);
-
-  // Verifies status code and headers
-  resFunctions(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.username).to.equal(testData.users[1].username);
-    done();
-  };
-
-  // DELETEs a user via api controller
-  apiController.deleteUser(req, res);
-}
-
-/**
  * @description Verifies mock POST request to create an organization.
  */
 function postOrg(done) {
@@ -256,7 +284,7 @@ function postOrg(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data)
+    const json = JSON.parse(_data);
     chai.expect(json.id).to.equal(testData.orgs[0].id);
     chai.expect(json.name).to.equal(testData.orgs[0].name);
     done();
@@ -264,6 +292,125 @@ function postOrg(done) {
 
   // POSTs a user via api controller
   apiController.postOrg(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to create an organization role.
+ */
+function postOrgRole(done) {
+  // Create request object
+  const body = testData.roles[0];
+  const params = {
+    orgid: testData.orgs[0].id,
+    username: testData.users[1].username };
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(json.permissions.read.length).to.equal(2);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.postOrgRole(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get an organization role.
+ */
+function getOrgRole(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: testData.orgs[0].id,
+    username: testData.users[1].username
+  };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.write).to.equal(true);
+    chai.expect(json.read).to.equal(true);
+    chai.expect(json.admin).to.equal(false);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.getOrgRole(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get all organization roles.
+ */
+function getAllOrgRoles(done) {
+  // Create request object
+  const body = {};
+  const params = { orgid: testData.orgs[0].id };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.getAllOrgMemRoles(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete an organization role.
+ */
+function deleteOrgRole(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: testData.orgs[0].id,
+    username: testData.users[1].username
+  };
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.permissions.read.length).to.equal(1);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.deleteOrgRole(req, res);
 }
 
 /**
@@ -349,6 +496,378 @@ function getOrgs(done) {
   apiController.getOrgs(req, res);
 }
 
+/**
+ * @description Verifies mock POST request to create a project.
+ */
+function postProject(done) {
+  // Create request object
+  const body = testData.projects[0];
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
+    chai.expect(json.name).to.equal(testData.projects[0].name);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.postProject(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to create a project role.
+ */
+function postProjectRole(done) {
+  // Create request object
+  const body = testData.roles[0];
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    username: testData.users[1].username
+  };
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
+    chai.expect(json.permissions.read.length).to.equal(2);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.postProjectRole(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get a project role.
+ */
+function getProjectRole(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    username: testData.users[1].username
+  };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.write).to.equal(true);
+    chai.expect(json.read).to.equal(true);
+    chai.expect(json.admin).to.equal(false);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.getProjMemRole(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete a project role.
+ */
+function deleteProjectRole(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    username: testData.users[1].username
+  };
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    console.log(json);
+    //chai.expect(json.permissions.read.length).to.equal(1);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.deleteProjectRole(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update a project.
+ */
+function patchProject(done) {
+  // Create request object
+  const body = testData.names[10];
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'PATCH';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
+    chai.expect(json.name).to.equal(testData.names[10].name);
+    done();
+  };
+
+  // PATCHs a user via api controller
+  apiController.patchProject(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get a project.
+ */
+function getProject(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
+    chai.expect(json.name).to.equal(testData.names[10].name);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.getProject(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to create an element.
+ */
+function postElement(done) {
+  // Create request object
+  const body = testData.elements[0];
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    elementid: testData.elements[0].id
+  };
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.elements[0].id);
+    chai.expect(json.name).to.equal(testData.elements[0].name);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.postElement(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get an element.
+ */
+function getElement(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    elementid: testData.elements[0].id
+  };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.elements[0].id);
+    chai.expect(json.name).to.equal(testData.elements[0].name);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.getElement(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update an element.
+ */
+function patchElement(done) {
+  // Create request object
+  const body = testData.names[10];
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    elementid: testData.elements[0].id
+  };
+  const method = 'PATCH';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.elements[0].id);
+    chai.expect(json.name).to.equal(testData.names[10].name);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.patchElement(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete an element.
+ */
+function deleteElement(done) {
+  // Create request object
+  const body = { hardDelete: true };
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    elementid: testData.elements[0].id
+  };
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.elements[0].id);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.deleteElement(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete a project.
+ */
+function deleteProject(done) {
+  // Create request object
+  const body = { hardDelete: true };
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.deleteProject(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete the user.
+ */
+function deleteUser(done) {
+  // Create request object
+  const body = {};
+  const params = { username: testData.users[1].username };
+  const method = 'DELETE';
+  const res = {};
+
+  const req = getReq(params, body, method);
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.username).to.equal(testData.users[1].username);
+    done();
+  };
+
+  // DELETEs a user via api controller
+  apiController.deleteUser(req, res);
+}
 
 /**
  * @description Verifies mock DELETE request to delete an organization.

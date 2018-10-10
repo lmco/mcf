@@ -249,7 +249,7 @@
       "fname": "Updated First Name"
     },
     {
-      "name": "New Org Name"
+      "name": "New Name"
     }
   ],
 
@@ -291,6 +291,12 @@
     },
     {
       "permissions": "overlord"
+    }
+  ],
+
+  "roles": [
+    {
+      "role": "write"
     }
   ]
 }
