@@ -139,13 +139,13 @@ function project(req, res) {
     // redirect to the login screen
     res.redirect('/login');
   }
-  let project = null;
+  let proj = null;
   let elements = null;
   // Find organization
   ProjController.findProject(req.user, req.params.orgid, req.params.projectid)
   // Render organization page including nav-sidebar
   .then(foundProject => {
-    project = foundProject;
+    proj = foundProject;
     return ElementController.findElements(req.user, req.params.orgid, req.params.projectid);
   })
   .then(foundElements => {
@@ -172,7 +172,7 @@ function project(req, res) {
           }
         }
       },
-      project: project,
+      project: proj,
       elements: elements
     });
   })
