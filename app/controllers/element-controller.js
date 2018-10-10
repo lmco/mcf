@@ -327,19 +327,19 @@ function createElement(reqUser, element) {
       assert.ok(typeof element.type === 'string', 'Element type in request body is not a string.');
 
       if (typeof element.name === 'string') {
-        elemName = sani.html(element.name);
+        elemName = sani.sanitize(element.name);
       }
       if (typeof element.parent === 'string') {
-        parentID = sani.html(element.parent);
+        parentID = sani.sanitize(element.parent);
       }
       if (typeof element.custom === 'object') {
-        custom = sani.html(element.custom);
+        custom = sani.sanitize(element.custom);
       }
       if (typeof element.documentation === 'string') {
-        documentation = sani.html(element.documentation);
+        documentation = sani.sanitize(element.documentation);
       }
       if (typeof element.uuid === 'string') {
-        uuid = sani.html(element.uuid);
+        uuid = sani.sanitize(element.uuid);
       }
     }
     catch (error) {
@@ -350,7 +350,7 @@ function createElement(reqUser, element) {
     const elemID = sani.sanitize(element.id);
     const splitProjectUID = utils.parseUID(sani.sanitize(element.projectUID));
     const elemUID = utils.createUID(splitProjectUID[0], splitProjectUID[1], elemID);
-    const elementType = utils.toTitleCase(sani.html(element.type));
+    const elementType = utils.toTitleCase(sani.sanitize(element.type));
 
     // Initialize foundProject
     let foundProj = null;
