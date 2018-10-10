@@ -101,7 +101,7 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a user', createNewUser);
-  // it('should create multiple users', createMultipleUsers);
+  it('should create multiple users', createMultipleUsers);
   it('should reject creating a user with non-admin user', rejectUserCreateByNonAdmin);
   it('should reject creating a user with no username', rejectInvalidCreate);
   it('should reject creating an already existing user', rejectDuplicateUser);
@@ -114,6 +114,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject deleting a user with a non-admin user', rejectDeleteByNonAdmin);
   it('should reject deleting themselves', rejectDeleteSelf);
   it('should delete a user', deleteUser);
+  it('should delete multiple users', deleteMultipleUsers);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -467,6 +468,32 @@ function deleteUser(done) {
   .catch((error) => {
     // Expected error thrown: 'Not Found'
     chai.expect(error.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Deletes multiple users at the same time from the database. Also
+ * removes users from organizations they are apart of.
+ */
+function deleteMultipleUsers(done) {
+  // Create query to delete users
+  const deleteQuery = { username: { $in: [
+    testData.users[2].username,
+    testData.users[4].username
+  ] } };
+
+  // Delete the users
+  UserController.removeUsers(adminUser, deleteQuery, true)
+  .then((deletedUsers) => {
+    // Verify returned data
+    chai.expect(deletedUsers.length).to.equal(2);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }

@@ -153,10 +153,34 @@ api.route('/version')
  *   post:
  *     tags:
  *       - organizations
- *     description: Not implemented, reserved for future use.
+ *     description: Creates multiple organizations from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing the organization data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - orgs
+ *           properties:
+ *             orgs:
+ *               type: object
+ *               description: A list of objects containing organization data.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   patch:
  *     tags:
  *       - organizations
@@ -167,11 +191,40 @@ api.route('/version')
  *   delete:
  *     tags:
  *       - organizations
- *     description: Not implemented, reserved for future use.
- *                  When implemented this will delete all organizations.
+ *     description: Deletes multiple organizations from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing the organization data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - orgs
+ *           properties:
+ *             orgs:
+ *               type: object
+ *               description: An array of orgs to delete. Can either be the
+ *                            org objects or the ids of the orgs.
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the org should be hard
+ *                            deleted or not. The user must be a global admin
+ *                            to hard delete. Defaults to false.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  */
 api.route('/orgs')
 .get(
@@ -481,7 +534,7 @@ api.route('/orgs/:orgid')
  *             hardDelete:
  *               type: boolean
  *               description: The boolean indicating if the project should be hard deleted or
- *                            not. The user must be a global admin or project admin to hard delete.
+ *                            not. The user must be a global admin to hard delete.
  *                            Defaults to false.
  *     responses:
  *       200:
@@ -701,7 +754,7 @@ api.route('/orgs/:orgid/projects')
  *             hardDelete:
  *               type: boolean
  *               description: The boolean indicating if the project should be hard deleted or
- *                            not. The user must be a global admin or project admin to hard delete.
+ *                            not. The user must be a global admin to hard delete.
  *                            Defaults to false.
  *     responses:
  *       200:
@@ -1472,7 +1525,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *             hardDelete:
  *               type: boolean
  *               description: The boolean indicating if the element should be hard deleted or
- *                            not. The user must be a global admin or project admin to hard delete.
+ *                            not. The user must be a global admin to hard delete.
  *                            Defaults to false.
  *     responses:
  *       200:
