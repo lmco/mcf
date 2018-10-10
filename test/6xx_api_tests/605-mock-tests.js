@@ -88,20 +88,21 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should GET users', getUsers);
+  it('should GET all users', getUsers);
   it('should POST a user', postUser);
   it('should GET the posted user', getUser);
   it('should PATCH a user', patchUser);
   it('should DELETE a user', deleteUser);
   it('should POST an org', postOrg);
+  it('should GET the posted org', getOrg);
   it('should PATCH an org', patchOrg);
+  it('should GET all orgs user has access to', getOrgs);
   it('should DELETE an org', deleteOrg);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Makes a GET mock request to the API Controller. Verifies GET
- * mock request to user API.
+ * @description Verifies mock GET request to get all the users.
  */
 function getUsers(done) {
   // Create request object
@@ -128,8 +129,7 @@ function getUsers(done) {
 }
 
 /**
- * @description Makes a POST mock request to the API Controller. Verifies POST
- * mock request to user API.
+ * @description Verifies mock POST request to create a user.
  */
 function postUser(done) {
   // Create request object
@@ -157,8 +157,7 @@ function postUser(done) {
 }
 
 /**
- * @description Makes a GET mock request to the API Controller. Verifies GET
- * mock request to user API.
+ * @description Verifies mock GET request to get the previously posted user.
  */
 function getUser(done) {
   // Create request object
@@ -186,8 +185,7 @@ function getUser(done) {
 }
 
 /**
- * @description Makes a PATCH mock request to the API Controller. Verifies PATCH
- * mock request to user API.
+ * @description Verifies mock PATCH request to update the user.
  */
 function patchUser(done) {
   // Create request object
@@ -215,8 +213,7 @@ function patchUser(done) {
 }
 
 /**
- * @description Makes a DELETE mock request to the API Controller. Verifies
- * DELETE mock request to user API.
+ * @description Verifies mock DELETE request to delete the user.
  */
 function deleteUser(done) {
   // Create request object
@@ -270,6 +267,34 @@ function postOrg(done) {
 }
 
 /**
+ * @description Verifies mock GET request to get an organization.
+ */
+function getOrg(done) {
+  // Create request object
+  const body = {};
+  const params = { orgid: testData.orgs[0].id };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(json.name).to.equal(testData.orgs[0].name);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.getOrg(req, res);
+}
+
+/**
  * @description Verifies mock PATCH request to update an organization.
  */
 function patchOrg(done) {
@@ -296,6 +321,34 @@ function patchOrg(done) {
   // PATCHs a user via api controller
   apiController.patchOrg(req, res);
 }
+
+/**
+ * @description Verifies mock GET request to get all organizations.
+ */
+function getOrgs(done) {
+  // Create request object
+  const body = {};
+  const params = {};
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // GETs users via api controller
+  apiController.getOrgs(req, res);
+}
+
 
 /**
  * @description Verifies mock DELETE request to delete an organization.
