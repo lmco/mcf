@@ -6,6 +6,7 @@
 # @copyright Copyright (C) 2018, Lockheed Martin Corporation
 #
 # @license MIT
+# Made by leah
 #
 # @description This Dockerfile defines the Docker build for MBEE.
 ##
