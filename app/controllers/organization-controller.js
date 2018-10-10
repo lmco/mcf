@@ -25,6 +25,8 @@
 // circular references between controllers.
 module.exports = {
   findOrgs,
+  createOrgs,
+  removeOrgs,
   findOrg,
   findOrgsQuery,
   createOrg,
@@ -96,6 +98,171 @@ function findOrgs(reqUser, softDeleted = false) {
     findOrgsQuery(searchParams)
     .then((orgs) => resolve(orgs))
     .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description This functions creates multiple orgs at a time
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {Object} arrOrgs - Array of new org data
+ *
+ * @return {Promise} Created organization object
+ *
+ * @example
+ * createOrg({User}, [{Org1}, {Org2}, ...])
+ * .then(function(orgs) {
+ *   // Do something with the newly created orgs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createOrgs(reqUser, arrOrgs) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof arrOrgs === 'object', 'Orgs array is not an object');
+      let index = 1;
+      // Ensure each org in arrOrgs has an ID that is a string
+      Object(arrOrgs).forEach((org) => {
+        assert.ok(org.hasOwnProperty('id'), `Org #${index} does not contain an id.`);
+        assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
+        index++;
+      });
+    }
+    catch (error) {
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 403;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+    }
+
+    // Create the find query
+    const findQuery = { id: { $in: sani.sanitize(arrOrgs.map(o => o.id)) } };
+
+    // Ensure no orgs are already created
+    findOrgsQuery(findQuery)
+    .then((foundOrgs) => {
+      // Error Check: ensure no orgs have already been created
+      if (foundOrgs.length > 0) {
+        // Get the ID's of the conflicting orgs
+        const foundIDs = foundOrgs.map(o => o.id);
+        return reject(new M.CustomError('Org(s) with the following ID(s) already'
+          + ` exists: [${foundIDs.toString()}.`, 403, 'warn'));
+      }
+
+      // Convert each object in arrOrgs into an Org object and set permissions
+      const orgObjects = arrOrgs.map(o => {
+        const orgObject = new Organization(sani.sanitize(o));
+        orgObject.permissions.read.push(reqUser._id);
+        orgObject.permissions.write.push(reqUser._id);
+        orgObject.permissions.admin.push(reqUser._id);
+        return orgObject;
+      });
+      // Save the organizations
+      return Organization.create(orgObjects);
+    })
+    .then((createdOrgs) => resolve(createdOrgs))
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError) {
+        return reject(error);
+      }
+
+      // If it's not a CustomError, the create failed so delete all successfully
+      // created orgs and reject the error.
+      return Organization.deleteMany(findQuery)
+      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
+      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+    });
+  });
+}
+
+/**
+ * @description This functions deletes multiple orgs at a time.
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {Object} query - The query used to find/delete orgs
+ * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
+ *
+ * @return {Promise} Deleted organization object
+ *
+ * @example
+ * createOrg({User}, { id: 'orgid' }, true)
+ * .then(function(orgs) {
+ *   // Do something with the newly deleted orgs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function removeOrgs(reqUser, query, hardDelete = false) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof query === 'object', 'Remove query is not an object.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+
+    // Error Check: ensure reqUser is a global admin if hard deleting
+    if (!reqUser.admin && hardDelete) {
+      return reject(new M.CustomError('User does not have permissions to '
+        + 'hard delete.', 403, 'warn'));
+    }
+
+    // Define found orgs array
+    let foundOrgs = [];
+
+    // Find the orgs the user wishes to delete
+    findOrgsQuery(query)
+    .then((orgs) => {
+      // Set foundOrgs
+      foundOrgs = orgs;
+
+      // Loop through each found org
+      Object(orgs).forEach((org) => {
+        // Error Check: ensure user is a global admin or org admin
+        if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
+          return reject(new M.CustomError('User does not have permissions to '
+            + `delete the organization [${org.name}].`, 403, 'warn'));
+        }
+
+        // Error Check: ensure reqUser is not deleting the default org
+        if (org.id === M.config.server.defaultOrganizationId) {
+          // orgID is default, reject error.
+          return reject(new M.CustomError('The default organization cannot be deleted.', 403, 'warn'));
+        }
+      });
+
+      // If hard delete, delete orgs, otherwise update orgs
+      return (hardDelete)
+        ? Organization.deleteMany(query)
+        : Organization.updateMany(query, { deleted: true });
+    })
+    .then(() => {
+      // Create delete query to remove projects
+      const projectDeleteQuery = { org: { $in: foundOrgs.map(o => o._id) } };
+
+      // Delete all projects in the orgs
+      return ProjController.removeProjects(reqUser, projectDeleteQuery, hardDelete);
+    })
+    // Return the deleted orgs
+    .then(() => resolve(foundOrgs))
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError) {
+        return reject(error);
+      }
+      // If it's not a CustomError, create one and reject
+      return reject(new M.CustomError(error.message, 500, 'warn'));
+    });
   });
 }
 
@@ -236,7 +403,7 @@ function createOrg(reqUser, newOrgData) {
       if (utils.checkExists(['custom'], newOrgData)) {
         assert.ok(typeof newOrgData.custom === 'object',
           'Custom in request body is not an object.');
-        custom = sani.html(newOrgData.custom);
+        custom = sani.sanitize(newOrgData.custom);
       }
     }
     catch (error) {
@@ -249,8 +416,8 @@ function createOrg(reqUser, newOrgData) {
     }
 
     // Sanitize query inputs
-    const orgID = sani.html(newOrgData.id);
-    const orgName = sani.html(newOrgData.name);
+    const orgID = sani.sanitize(newOrgData.id);
+    const orgName = sani.sanitize(newOrgData.name);
 
     // Check if org already exists
     findOrgsQuery({ id: orgID })

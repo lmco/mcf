@@ -327,19 +327,19 @@ function createElement(reqUser, element) {
       assert.ok(typeof element.type === 'string', 'Element type in request body is not a string.');
 
       if (typeof element.name === 'string') {
-        elemName = sani.html(element.name);
+        elemName = sani.sanitize(element.name);
       }
       if (typeof element.parent === 'string') {
-        parentID = sani.html(element.parent);
+        parentID = sani.sanitize(element.parent);
       }
       if (typeof element.custom === 'object') {
-        custom = sani.html(element.custom);
+        custom = sani.sanitize(element.custom);
       }
       if (typeof element.documentation === 'string') {
-        documentation = sani.html(element.documentation);
+        documentation = sani.sanitize(element.documentation);
       }
       if (typeof element.uuid === 'string') {
-        uuid = sani.html(element.uuid);
+        uuid = sani.sanitize(element.uuid);
       }
     }
     catch (error) {
@@ -350,7 +350,7 @@ function createElement(reqUser, element) {
     const elemID = sani.sanitize(element.id);
     const splitProjectUID = utils.parseUID(sani.sanitize(element.projectUID));
     const elemUID = utils.createUID(splitProjectUID[0], splitProjectUID[1], elemID);
-    const elementType = utils.toTitleCase(sani.html(element.type));
+    const elementType = utils.toTitleCase(sani.sanitize(element.type));
 
     // Initialize foundProject
     let foundProj = null;
@@ -381,217 +381,30 @@ function createElement(reqUser, element) {
         return reject(new M.CustomError('Invalid element type.', 400, 'warn'));
       }
 
-      // Create the new element
-      const elemData = {
-        orgID: splitProjectUID[0],
-        elemID: elemID,
-        elemName: elemName,
+      // Create the new element object
+      const elemObject = new Element[elementType]({
+        id: elemID,
+        name: elemName,
         project: foundProj,
-        elemUID: elemUID,
-        parentID: parentID,
+        uid: elemUID,
         custom: custom,
         documentation: documentation,
         uuid: uuid
-      };
-
-      // Check element type
-      if (elementType === 'Relationship') {
-        createRelationshipHelper(reqUser, elemData, element)
-        .then((newElement) => resolve(newElement))
-        .catch((createRelationshipError) => reject(createRelationshipError));
-      }
-      else if (elementType === 'Package') {
-        createPackageHelper(reqUser, elemData)
-        .then((newElement) => resolve(newElement))
-        .catch((createRelationshipError) => reject(createRelationshipError));
-      }
-      else {
-        createBlockHelper(reqUser, elemData)
-        .then((newElement) => resolve(newElement))
-        .catch((createRelationshipError) => reject(createRelationshipError));
-      }
-    })
-    .catch((findProjectError) => reject(findProjectError));
-  });
-}
-
-/**
- * @description Handles additional steps of creating a relationship element.
- *
- * @param {User} reqUser - The user object of the requesting user.
- * @param {Object} elemData - The object containing the sanitized element data.
- * @param {Object} elemInfo - The JSON object containing the element data. Should contain
- *                            a source and target field.
- *
- * @return {Promise} resolve - new relationship element
- *                   reject -  error
- *
- * @example
- * createRelationshipHelper({User}, {Element}, { id: 'elementID', project: {id: 'projectID'}})
- * .then(function(element) {
- *   // Do something with the newly created relationship
- * })
- * .catch(function(error) {
- *   M.log.error(error);
- * });
- *
- */
-function createRelationshipHelper(reqUser, elemData, elemInfo) {
-  return new Promise((resolve, reject) => {
-    // Error Check: ensure input parameters are valid
-    try {
-      assert.ok(elemInfo.hasOwnProperty('target'), 'Element target not provided.');
-      assert.ok(elemInfo.hasOwnProperty('source'), 'Element source not provided.');
-      assert.ok(typeof elemInfo.target === 'string', 'Element target is not a string.');
-      assert.ok(typeof elemInfo.source === 'string', 'Element source is not a string');
-    }
-    catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
-    }
-
-    // Sanitize inputs
-    const targetElementId = sani.html(elemInfo.target);
-    const sourceElementId = sani.html(elemInfo.source);
-
-    // Initialize function variables
-    let foundTarget = null;
-    let newElement = null;
-
-    // Find the target to make sure it exists
-    findElement(reqUser, elemData.orgID, elemData.project.id, targetElementId)
-    .then((targetElement) => {
-      // Set foundTarget
-      foundTarget = targetElement;
-      // Find the source Element
-      return findElement(reqUser, elemData.orgID, elemData.project.id, sourceElementId);
-    })
-    .then((foundSource) => {
-      // Create a new relationship
-      newElement = new Element.Relationship({
-        id: elemData.elemID,
-        name: elemData.elemName,
-        project: elemData.project._id,
-        uid: elemData.elemUID,
-        target: foundTarget._id,
-        source: foundSource._id,
-        custom: elemData.custom,
-        documentation: elemData.documentation,
-        uuid: elemData.uuid
       });
 
-      return updateParent(reqUser, elemData.orgID,
-        elemData.project.id, elemData.parentID, newElement);
-    })
-    .then((parentElementID) => {
-      newElement.parent = parentElementID;
+      // Set the hidden parent field, used by middleware
+      elemObject.$parent = parentID;
 
-      // Save the new element
-      return newElement.save();
-    })
-    .then(() => resolve(newElement))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
+      // If relationship, set hidden source and target, used by middleware
+      if (elementType === 'Relationship') {
+        elemObject.$target = element.target;
+        elemObject.$source = element.source;
       }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
-  });
-}
 
-/**
- * @description Handles additional steps of creating an element package.
- *  Note: CreateElement() already sanitizes input. This function is private.
- *
- * @param {User} reqUser - The user object of the requesting user.
- * @param {Object} elemData - The object containing the sanitized element data.
- *
- * @return {Promise} resolve - new package element
- *                   reject -  error
- *
- * @example
- * createPackageHelper({User}, {Element})
- * .then(function(element) {
- *   // Do something with the newly created package
- * })
- * .catch(function(error) {
- *   M.log.error(error);
- * });
- *
- */
-function createPackageHelper(reqUser, elemData) {
-  return new Promise((resolve, reject) => {
-    const newElement = new Element.Package({
-      id: elemData.elemID,
-      name: elemData.elemName,
-      project: elemData.project._id,
-      uid: elemData.elemUID,
-      custom: elemData.custom,
-      documentation: elemData.documentation,
-      uuid: elemData.uuid
-    });
-
-    // Update parent element
-    updateParent(reqUser, elemData.orgID,
-      elemData.project.id, elemData.parentID, newElement)
-    .then((parentElementID) => {
-      newElement.parent = parentElementID;
-
-      // Save the new element
-      return newElement.save();
+      // Save the element
+      return elemObject.save();
     })
-    .then(() => resolve(newElement))
-    .catch((error) => {
-      // If the error is not a custom error
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
-  });
-}
-
-/**
- * @description Handles additional steps of creating a element block.
- * Note: CreateElement() already sanitizes input. This function is private.
- *
- * @param {User} reqUser - The user object of the requesting user.
- * @param {Object} elemData - The object containing the sanitized element data.
- *
- * @return {Promise} resolve - new block element
- *                   reject -  error
- *
- * @example
- * createBlockHelper({User}, {Element})
- * .then(function(element) {
- *   // DO something with the newly created block
- * })
- * .catch(function(error) {
- *   M.log.error(error);
- * });
- *
- */
-function createBlockHelper(reqUser, elemData) {
-  return new Promise((resolve, reject) => {
-    const newElement = new Element.Block({
-      id: elemData.elemID,
-      name: elemData.elemName,
-      project: elemData.project._id,
-      uid: elemData.elemUID,
-      custom: elemData.custom,
-      documentation: elemData.documentation,
-      uuid: elemData.uuid
-    });
-
-    updateParent(reqUser, elemData.orgID,
-      elemData.project.id, elemData.parentID, newElement)
-    .then((parentElementID) => {
-      newElement.parent = parentElementID;
-
-      // Save the new element
-      return newElement.save();
-    })
-    .then(() => resolve(newElement))
+    .then((newElement) => resolve(newElement))
     .catch((error) => {
       // If the error is not a custom error
       if (error instanceof M.CustomError) {
@@ -721,53 +534,6 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       }
       return reject(new M.CustomError(error.message, 500, 'warn'));
     });
-  });
-}
-
-/**
- * @description This function updates the parent element.
- *
- * @param {User} reqUser - The user object of the requesting user.
- * @param {String} orgID - The organization ID.
- * @param {String} projID - The project ID.
- * @param {String} elemID - The element ID.
- * @param {Element} newElement - The new child element.
- *
- * @return {Promise} resolve - Updated element id
- *                   reject -  error
- *
- * @example
- * updateParent({User}, 'orgID', 'projectID', 'elementID', {Element})
- * .then(function(_id) {
- *   // Do something with the parents _id
- * })
- * .catch(function(error) {
- *   M.log.error(error);
- * });
- */
-function updateParent(reqUser, orgID, projID, elemID, newElement) {
-  return new Promise((resolve, reject) => {
-    // Handle case where there is no parent element provided
-    if (elemID === null) {
-      return resolve(null);
-    }
-    // Find the parent element
-    findElement(reqUser, orgID, projID, elemID)
-    .then((parentElement) => {
-      // Check if parent element type is package
-      if (parentElement.type !== 'Package') {
-        // Parent Element type is not package, throw error
-        return reject(new M.CustomError('Parent element is not of type Package.', 400, 'warn'));
-      }
-
-      // Add _id to Parent Element Array
-      parentElement.contains.push(newElement._id);
-
-      // Save the updated parentElement
-      return parentElement.save();
-    })
-    .then((updatedElement) => resolve(updatedElement._id))
-    .catch((error) => reject(error));
   });
 }
 
