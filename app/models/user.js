@@ -24,6 +24,7 @@ const crypto = require('crypto');
 
 // NPM modules
 const mongoose = require('mongoose');
+const createOn = M.require('models.plugin.createdOn');
 
 // MBEE Modules
 const validators = M.require('lib.validators');
@@ -106,14 +107,6 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: 'local'
   },
-  createdOn: {
-    type: Date,
-    default: Date.now,
-    set: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
-      // Prevents this field from being altered
-      return this.createdOn;
-    }
-  },
   updatedOn: {
     type: Date,
     default: Date.now,
@@ -180,6 +173,7 @@ UserSchema.virtual('name')
   return `${this.fname} ${this.lname}`;
 });
 
+UserSchema.plugin(createOn);
 
 /* ---------------------------( User Middleware )---------------------------- */
 
