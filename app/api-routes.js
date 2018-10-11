@@ -1620,10 +1620,32 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *   post:
  *     tags:
  *       - users
- *     description: Not implemented, reserved for future use.
+ *     description: Creates multiple users from the supplied data in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing user objects to be created.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             users:
+ *               type: object
+ *               description: An array of users to create. Each user must
+ *                            contain the username of that user.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   patch:
  *     tags:
  *       - users
@@ -1634,10 +1656,36 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *   delete:
  *     tags:
  *       - users
- *     description: Not implemented, reserved for future use.
+ *     description: Deletes multiple users from the supplied list in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing user objects to be created.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             users:
+ *               type: object
+ *               description: An array of users to delete. Can either be a list
+ *                            of user objects or of usernames.
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the users should be hard
+ *                            deleted or not. Defaults to false.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  */
 api.route('/users')
 .get(
@@ -1650,7 +1698,7 @@ api.route('/users')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.notImplemented
+  APIController.postUsers
 )
 .patch(
   AuthController.authenticate,
@@ -1662,7 +1710,7 @@ api.route('/users')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.notImplemented
+  APIController.deleteUsers
 );
 
 /**
