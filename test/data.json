@@ -107,6 +107,7 @@
       "id": "project05",
       "name": "Project 05"
     }
+
   ],
 
   "elements": [
@@ -155,25 +156,25 @@
 
   "invalidUsers": [
     {
-      "username": "!babyLegs",
-      "password": "Deadpool123",
-      "fname": "Baby",
-      "lname": "Legs"
+      "username": "!invalidUsername",
+      "password": "InvalidUser123",
+      "fname": "Invalid",
+      "lname": "Username"
     },
     {
       "username": "",
-      "password": "iamnotblackpanther",
-      "fname": "Not",
-      "lname": "Black Panther"
+      "password": "Thisisapassword123",
+      "fname": "firstName",
+      "lname": "lastName"
     }
   ],
 
   "invalidOrgs": [
     {
-      "id": "pymparticles"
+      "id": "invalidorg00"
     },
     {
-      "id": "xmen",
+      "id": "invalidorg01",
       "name": ""
     }
   ],
@@ -193,22 +194,22 @@
     },
     {
       "id": "imfake",
-      "name": "avengers"
+      "name": "invalidproject"
     }
   ],
 
   "invalidElements": [
     {
-      "id": "elem2",
-      "name": "Frigg wife of Odin",
+      "id": "elem00",
+      "name": "invalid element 00",
       "projectUID": "testorg00:project00",
       "type": "BLOCK",
       "parent": "speech-recognition"
     },
     {
-      "id": "elem5",
-      "name": "Loki brother of Thor",
-      "projectUID": "avengers:thor",
+      "id": "elem01",
+      "name": "invalid element 01",
+      "projectUID": "testorg00:project00",
       "type": "Block",
       "parent": "elem0",
       "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
@@ -222,52 +223,46 @@
 
   "names": [
     {
-      "lname": "KLAW@#$"
+      "lname": "InvalidLastName@#$"
     },
     {
-      "lname": "Faker"
+      "lname": "InvalidField"
     },
     {
       "name": []
     },
     {
-      "name": "betterreject"
+      "name": "Nonadmin cannot update"
     },
     {
-      "name": "New Name"
+      "name": "Default cannot update"
     },
     {
-      "name": "Baby Arc Reactor"
-    },
-    {
-      "fname": "Weapon X"
-    },
-    {
-      "name": "%%% INVALID NAME %%%"
+      "fname": "Cannot update"
     },
     {
       "name": "Invalid Organization"
     },
     {
+      "name": ""
+    },
+    {
       "name": "%%"
+    },
+    {
+      "fname": "Updated First Name"
+    },
+    {
+      "name": "New Name"
     }
   ],
 
   "usernames": [
     {
-      "username": "goldpanther"
+      "username": "nousernamechange"
     },
     {
-      "username": "nopanther"
-    },
-    {
-      "username": "weasel"
-    },
-    {
-      "username": "pool"
-    },
-    {
-      "username": "francis"
+      "username": "nouser"
     }],
 
   "ids": [
@@ -275,28 +270,22 @@
       "id": "shouldnotchange"
     },
     {
-      "id": "fakeproj"
+      "id": "noproject"
     },
     {
-      "id" : "newironman"
+      "id" : "noupdatable"
     },
     {
-      "id": "mismatched"
-    },
-    {
-      "id":"xmen"
+      "id": "mismatchedid"
     },
     {
       "id": "invalidOrgId"
     },
     {
-      "id": "fakshield"
+      "id": "noorg"
     },
     {
-      "id": "nohulk"
-    },
-    {
-      "id": "33"
+      "id": "noelement"
     }
   ],
 
@@ -307,5 +296,12 @@
     {
       "permissions": "overlord"
     }
+  ],
+
+  "roles": [
+    {
+      "role": "write"
+    }
   ]
 }
+

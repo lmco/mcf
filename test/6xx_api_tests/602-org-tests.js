@@ -319,7 +319,7 @@ function getOrgs(done) {
  */
 function rejectPostIdMismatch(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.ids[4].id}`,
+    url: `${test.url}/api/orgs/${testData.ids[3].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -342,11 +342,11 @@ function rejectPostIdMismatch(done) {
  */
 function rejectPostInvalidId(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.ids[5].id}`,
+    url: `${test.url}/api/orgs/${testData.ids[4].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.names[8])
+    body: JSON.stringify(testData.names[6])
   },
   (err, response, body) => {
     // Expect no error
@@ -439,7 +439,7 @@ function rejectPostExistingOrg(done) {
  */
 function rejectDeleteNonExistingOrg(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.ids[6].id}`,
+    url: `${test.url}/api/orgs/${testData.ids[5].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
