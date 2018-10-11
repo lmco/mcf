@@ -20,9 +20,7 @@
  */
 
 // Node modules
-const fs = require('fs');
 const chai = require('chai');
-const request = require('request');
 const path = require('path');
 
 // MBEE modules
@@ -33,7 +31,6 @@ const apiController = M.require('controllers.api-controller');
 // Variables used across test functions
 const testData = require(path.join(M.root, 'test', 'data.json'));
 const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
-const test = M.config.test;
 let adminUser = null;
 
 /* --------------------( Main )-------------------- */
@@ -88,7 +85,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should tell user who user is', whoami)
+  it('should tell user who user is', whoami);
   it('should GET all users', getUsers);
   it('should POST a user', postUser);
   it('should GET the posted user', getUser);
@@ -171,7 +168,7 @@ function getUsers(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(1);
     done();
   };
 

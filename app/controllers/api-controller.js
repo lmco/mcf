@@ -496,9 +496,7 @@ function deleteOrg(req, res) {
     return res.status(200).send(formatJSON(org));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -625,10 +623,7 @@ function getAllOrgMemRoles(req, res) {
     return res.status(200).send(formatJSON(members));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    return res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /* -----------------------( Project API Endpoints )-------------------------- */
