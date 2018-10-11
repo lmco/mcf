@@ -487,6 +487,7 @@ function deleteOrg(req, res) {
   if (req.body.hasOwnProperty('hardDelete')) {
     hardDelete = req.body.hardDelete;
   }
+
   // Remove the specified organization
   // NOTE: removeOrg() sanitizes req.params.orgid
   OrgController.removeOrg(req.user, req.params.orgid, hardDelete)
