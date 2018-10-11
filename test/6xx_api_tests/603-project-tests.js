@@ -121,10 +121,12 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple projects', postMultipleProjects);
   it('should GET the previously posted project', getProject);
   it('should PATCH an update to posted project', patchProject);
+  it('should PATCH an update to multiple projects', patchMultipleProjects);
   it('should GET the four projects POSTed previously', getAllProjects);
   it('should reject a POST with two different orgs', rejectPostOrgIdMismatch);
   it('should reject a DELETE to a non-existing project', rejectDeleteNonexistingProject);
   it('should reject a PATCH to update with invalid name', rejectPatchInvalidField);
+  it('should reject a PATCH of unique field to multiple projects', rejectPatchUniqueFieldProjects);
   it('should DELETE the first project to the organization', deleteProject);
   it('should DELETE the second project to the organization', deleteSecondProject);
   it('should DELETE multiple projects at once', deleteMultipleProjects);
@@ -282,6 +284,36 @@ function patchProject(done) {
 }
 
 /**
+ * @description Verifies PATCH api/orgs/:orgid/projects updates multiple
+ * projects at the same time.
+ */
+function patchMultipleProjects(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      projects: [testData.projects[4], testData.projects[5]],
+      update: { custom: { department: 'Space' }, name: 'Useless Project' }
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json[0].name).to.equal('Useless Project');
+    chai.expect(json[1].name).to.equal('Useless Project');
+    chai.expect(json[0].custom.department).to.equal('Space');
+    chai.expect(json[1].custom.department).to.equal('Space');
+    done();
+  });
+}
+
+/**
  * @description Verifies GET /api/orgs/:orgid/projects to find and return all
  * the projects user has read permissions on.
  */
@@ -337,6 +369,33 @@ function rejectPatchInvalidField(done) {
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify(testData.invalidProjects[2])
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 403 Forbidden
+    chai.expect(response.statusCode).to.equal(403);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH api/orgs/:orgid/projects fails when updating a
+ * unique field.
+ */
+function rejectPatchUniqueFieldProjects(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      projects: [testData.projects[4], testData.projects[5]],
+      update: { id: 'sameproj' }
+    })
   },
   (err, response, body) => {
     // Expect no error (request succeeds)

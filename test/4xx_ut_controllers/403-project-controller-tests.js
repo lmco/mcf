@@ -128,6 +128,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should throw an error saying the field is not of type string', updateTypeError);
   it('should update a project', updateProjectName);
   it('should update a project using the Project object', updateProjectObject);
+  it('should update multiple projects', updateMultipleProjects);
   it('should create a second project', createProject02);
   it('should reject attempt to create a project with a period in name', rejectCreatePeriodName);
   it('should reject creation of a project already made', rejectDuplicateProjectId);
@@ -283,6 +284,42 @@ function updateProjectObject(done) {
   .then((projectUpdated) => {
     // Verify project updated
     chai.expect(projectUpdated.name).to.equal(testData.projects[1].name);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates multiple projects at the same time.
+ */
+function updateMultipleProjects(done) {
+  // Create query to update projects
+  const updateQuery = { id: { $in: [
+    testData.projects[4].id,
+    testData.projects[5].id
+  ] } };
+
+  // Create list of update parameters
+  const updateObj = {
+    custom: {
+      department: 'Space'
+    },
+    name: 'Useless Project'
+  };
+
+  // Update projects
+  ProjController.updateProjects(adminUser, updateQuery, updateObj)
+  .then((projects) => {
+    // Verify returned data
+    chai.expect(projects[0].name).to.equal(updateObj.name);
+    chai.expect(projects[1].name).to.equal(updateObj.name);
+    chai.expect(projects[0].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(projects[1].custom.department).to.equal(updateObj.custom.department);
     done();
   })
   .catch((error) => {
