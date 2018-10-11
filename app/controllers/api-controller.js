@@ -301,12 +301,12 @@ function patchOrgs(req, res) {
     const error = new M.CustomError('Array of orgs not provided in body.', 400, 'warn');
     return res.status(error.status).send(error);
   }
-  // Org objects provided, update all
+  // Org objects provided, delete all
   if (req.body.orgs.every(o => typeof o === 'object')) {
     // Query finds all orgs by their id
     updateQuery = { id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
   }
-  // Org IDs provided, update all
+  // Org IDs provided, delete all
   else if (req.body.orgs.every(o => typeof o === 'string')) {
     // Query finds all orgs by their id
     updateQuery = { id: { $in: sani.sanitize(req.body.orgs) } };
@@ -773,6 +773,20 @@ function patchProjects(req, res) {
   if (!req.body.hasOwnProperty('update')) {
     const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
     return res.status(error.status).send(error);
+  }
+
+  // Error Check: ensure req.params.orgid was provided and is a string
+  if (!req.params.hasOwnProperty('orgid')) {
+    // orgid not provided, reject
+    const error = new M.CustomError('orgid was not provided in params.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+  else {
+    if (typeof req.params.orgid !== 'string') {
+      // orgid not a string, reject
+      const error = new M.CustomError('orgid in request params is not a string.', 400, 'warn');
+      return res.status(error.status).send(error);
+    }
   }
 
   // No projects provided, update all projects in the org
