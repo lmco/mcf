@@ -288,8 +288,7 @@ function postOrg(done) {
 }
 
 /**
- * @description Verifies mock POST request to add a user to an organization
- * role.
+ * @description Verifies mock POST request to add a user to an organization.
  */
 function postOrgRole(done) {
   // Create request object
