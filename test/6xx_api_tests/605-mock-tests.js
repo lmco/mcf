@@ -87,11 +87,6 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
-  // ASK IF WE ARE ALLOWED TO GET OUR OWN PERMISSIONS USING GET ROLES????
-  // need to do:
-  // all batch projects,
-  // all roles stuff (figure out errors)
-  // login?
   /* Execute tests */
   it('should tell user who user is', whoami)
   it('should GET all users', getUsers);
@@ -109,6 +104,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST a project', postProject);
   it('should POST a project role', postProjectRole);
   it('should GET a project role', getProjectRole);
+  it('should GET all project roles', getProjectRoles);
   // MBX-533 Bug Fix: Uncomment when deleteProjectRole fixed
   // it('should DELETE a project role', deleteProjectRole);
   it('should PATCH a project', patchProject);
@@ -122,6 +118,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should DELETE an org', deleteOrg);
   it('should POST multiple orgs', postOrgs);
   it('should POST multiple projects', postProjects);
+  it('should GET multiple projects', getProjects);
   it('should DELETE multple projects', deleteProjects);
   it('should DELETE orgs', deleteOrgs);
 });
@@ -592,6 +589,36 @@ function getProjectRole(done) {
   apiController.getProjMemRole(req, res);
 }
 
+/**
+ * @description Verifies mock GET request to get all project roles.
+ */
+function getProjectRoles(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(Object.keys(json).length).to.equal(2);
+    done();
+  };
+
+  // GETs all project member roles
+  apiController.getAllProjMemRoles(req, res);
+}
+
 // MBX-533 Bug Fix: Uncomment when deleteProjectRole is fixed
 // /**
 //  * @description Verifies mock DELETE request to delete a project role.
@@ -991,6 +1018,33 @@ function deleteProjects(done) {
 
   // DELETEs multiple projects
   apiController.deleteProjects(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get multiple projects.
+ */
+function getProjects(done) {
+  // Create request object
+  const body = { };
+  const params = { orgid: testData.orgs[1].id };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // POSTs multiple projects
+  apiController.getProjects(req, res);
 }
 
 /**
