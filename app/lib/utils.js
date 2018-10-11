@@ -277,3 +277,65 @@ module.exports.deepEqual = function(a, b) {
     return false;
   }
 };
+
+/**
+ * @description Returns all paths within an object
+ */
+module.exports.getObjectPaths = function(obj, parent = null) {
+  // Define list of return paths
+  let retPaths = [];
+
+  // If obj is not an object and never was, return empty array
+  if (typeof obj !== 'object' && parent === null) {
+    return [];
+  }
+
+  // If obj is not an object, return parent
+  if (typeof obj !== 'object') {
+    return [parent];
+  }
+
+  // Loop through all the keys
+  Object.keys(obj).forEach((key) => {
+    if (parent !== null) {
+      retPaths = retPaths.concat(this.getObjectPaths(obj[key], `${parent}.${key}`));
+    }
+    else {
+      retPaths= retPaths.concat(this.getObjectPaths(obj[key], `${key}`));
+    }
+  });
+
+  // Return paths
+  return retPaths;
+};
+
+/**
+ * @description Adds or changes values in an object, based on data from the
+ * second parameter.
+ *
+ * @param {Object} originalObj - The original object, which will be updated with
+ *                               values from the second object.
+ * @param {Object} updateObj - The object containing new or changed fields that
+ *                             will be added/changed in the original object.
+ */
+module.exports.updateAndCombineObjects= function(originalObj, updateObj) {
+  // Get all existing keys for the first object
+  const firstKeys = Object.keys(originalObj);
+
+  // Loop through all of the keys in the second object
+  Object.keys(updateObj).forEach((key) => {
+    // If the key is not in the first object, add it
+    if (!firstKeys.includes(key)) {
+      originalObj[key] = updateObj[key];
+    }
+    // If the key is in the first object, and it's value is a nested object,
+    // recursively call this function with the value of each object
+    else if (typeof originalObj[key] === 'object' && typeof updateObj[key] === 'object') {
+      this.updateAndCombineObjects(originalObj[key], updateObj[key]);
+    }
+    // Key exists in originalObj, but original value isn't an object, replace it
+    else {
+      originalObj[key] = updateObj[key];
+    }
+  });
+};

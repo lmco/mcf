@@ -72,7 +72,11 @@
       "id": "testorg04",
       "name": "Test Organization 04",
       "custom": {
-        "leader": "Test Leader 04"
+        "leader": "Test Leader 04",
+        "location": {
+          "country": "USA",
+          "state": "CA"
+        }
       }
     }
   ],

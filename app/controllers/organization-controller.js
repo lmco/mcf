@@ -26,6 +26,7 @@
 module.exports = {
   findOrgs,
   createOrgs,
+  updateOrgs,
   removeOrgs,
   findOrg,
   findOrgsQuery,
@@ -179,6 +180,132 @@ function createOrgs(reqUser, arrOrgs) {
       .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
       .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
     });
+  });
+}
+
+/**
+ * @description This function updates multiple orgs at once.
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {Object} query - The query used to find/update orgs
+ * @param {Object} updateInfo - An object containing updated organization data
+ *
+ * @return {Promise} updated org
+ *
+ * @example
+ * updateOrg({User}, 'orgID', { name: 'Different Org Name' })
+ * .then(function(org) {
+ *   // Do something with the newly updated org
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function updateOrgs(reqUser, query, updateInfo) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof query === 'object', 'Update query is not an object.');
+      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+
+    // Define flag for updating 'Mixed' fields and foundOrgs array
+    let containsMixed = false;
+    let foundOrgs = [];
+
+    // Loop through each desired update
+    Object.keys(updateInfo).forEach((key) => {
+      // Error Check: ensure user can update ech field
+      if (!Organization.schema.methods.getValidUpdateFields().includes(key)) {
+        return reject(new M.CustomError(
+          `Organization property [${key}] cannot be changed.`, 403, 'warn'
+        ));
+      }
+
+      // Error Check: ensure parameter is not unique
+      if (Organization.schema.obj[key].unique) {
+        return reject(new M.CustomError(
+          `Cannot use batch update on the unique field [${key}].`, 403, 'warn'
+        ));
+      }
+
+      // If the field is a mixed field, set the flag
+      if (Organization.schema.obj[key].type.schemaName === 'Mixed') {
+        containsMixed = true;
+      }
+    });
+
+    // Find the organizations to update
+    findOrgsQuery(query)
+    .then((orgs) => {
+      // Set foundOrgs array
+      foundOrgs = orgs;
+
+      // Loop through each found org
+      Object(orgs).forEach((org) => {
+        // Error Check: ensure user has permission to update org
+        if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
+          return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        }
+
+        // Error Check: ensure user isn't trying to update the default org
+        if (org.id === M.config.server.defaultOrganizationId) {
+          return reject(new M.CustomError(
+            'The default organization cannot be updated.', 403, 'warn'
+          ));
+        }
+      });
+
+     // If updating a mixed field, update each org individually
+     if (containsMixed) {
+       M.log.info('Updating orgs.... this could take a while.');
+       // Create array of promises
+       let promises = [];
+       // Loop through each organization
+       Object(orgs).forEach((org) => {
+         // Loop through each update
+         Object.keys(updateInfo).forEach((key) => {
+           // If a 'Mixed' field
+           if (Organization.schema.obj[key].type.schemaName === 'Mixed') {
+             // Merge changes into original 'Mixed' field
+             utils.updateAndCombineObjects(org[key], sani.sanitize(updateInfo[key]));
+
+             // Mark that the 'Mixed' field has been modified
+             org.markModified(key);
+           }
+           else {
+             // Update the value in the org
+             org[key] = sani.sanitize(updateInfo[key]);
+           }
+         });
+
+         // Add org.save() to promise array
+         promises.push(org.save());
+       });
+
+       // Once all promises complete, return
+       return Promise.all(promises);
+     }
+     // No mixed field update, update all together
+     else {
+       return Organization.updateMany(query, updateInfo);
+     }
+    })
+    .then((orgs) => {
+      // Check if some of the orgs in updateMany failed
+      if (!containsMixed && orgs.n !== foundOrgs.length) {
+        // The number updated does not match the number attempted, log it
+        M.log.error('Some of the following organizations failed to update: '
+        + `[${foundOrgs.map(o => o.id)}].`);
+      }
+
+      // Return found orgs
+      return resolve(foundOrgs);
+    })
+    .catch((error) => M.CustomError.parseCustomError(error));
   });
 }
 
@@ -540,11 +667,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
             return reject(new M.CustomError(`${updateField} must be an object`, 400, 'warn'));
           }
 
-          // Update each value in the object
-          // eslint-disable-next-line no-loop-func
-          Object.keys(orgUpdated[updateField]).forEach((key) => {
-            org.custom[key] = sani.sanitize(orgUpdated[updateField][key]);
-          });
+          // Add and replace parameters of the type 'Mixed'
+          utils.updateAndCombineObjects(org[updateField], orgUpdated[updateField]);
 
           // Mark mixed fields as updated, required for mixed fields to update in mongoose
           // http://mongoosejs.com/docs/schematypes.html#mixed
