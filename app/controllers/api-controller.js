@@ -301,12 +301,12 @@ function patchOrgs(req, res) {
     const error = new M.CustomError('Array of orgs not provided in body.', 400, 'warn');
     return res.status(error.status).send(error);
   }
-  // Org objects provided, delete all
+  // Org objects provided, update all
   if (req.body.orgs.every(o => typeof o === 'object')) {
     // Query finds all orgs by their id
     updateQuery = { id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
   }
-  // Org IDs provided, delete all
+  // Org IDs provided, update all
   else if (req.body.orgs.every(o => typeof o === 'string')) {
     // Query finds all orgs by their id
     updateQuery = { id: { $in: sani.sanitize(req.body.orgs) } };
