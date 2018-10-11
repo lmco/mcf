@@ -986,7 +986,7 @@ function patchOrgs(done) {
     done();
   };
 
-  // POSTs multiple orgs
+  // PATCHs multiple orgs
   apiController.patchOrgs(req, res);
 }
 

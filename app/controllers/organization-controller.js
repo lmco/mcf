@@ -190,12 +190,12 @@ function createOrgs(reqUser, arrOrgs) {
  * @param {Object} query - The query used to find/update orgs
  * @param {Object} updateInfo - An object containing updated organization data
  *
- * @return {Promise} updated org
+ * @return {Promise} updated orgs
  *
  * @example
- * updateOrg({User}, 'orgID', { name: 'Different Org Name' })
- * .then(function(org) {
- *   // Do something with the newly updated org
+ * updateOrgs({User}, { id: 'orgid' }, { name: 'Different Org Name' })
+ * .then(function(orgs) {
+ *   // Do something with the newly updated orgs
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -289,8 +289,8 @@ function updateOrgs(reqUser, query, updateInfo) {
         // Once all promises complete, return
         return Promise.all(promises);
       }
-      // No mixed field update, update all together
 
+      // No mixed field update, update all together
       return Organization.updateMany(query, updateInfo);
     })
     .then((orgs) => {
