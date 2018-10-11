@@ -318,7 +318,7 @@ function postOrgRole(done) {
 }
 
 /**
- * @description Verifies mock to GET a users role within an organization.
+ * @description Verifies mock GET a users role within an organization.
  */
 function getOrgRole(done) {
   // Create request object
