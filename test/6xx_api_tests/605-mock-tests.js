@@ -89,8 +89,6 @@ describe(M.getModuleName(module.filename), () => {
 
   // ASK IF WE ARE ALLOWED TO GET OUR OWN PERMISSIONS USING GET ROLES????
   // need to do:
-  // all batch orgs
-  // the delete orgs is not deleting the orgs
   // all batch projects,
   // all roles stuff (figure out errors)
   // login?
@@ -103,9 +101,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST an org', postOrg);
   it('should POST an org role', postOrgRole);
   it('should GET an org role', getOrgRole);
-  // This test works except I dont know how to get the lenght
-  // It doesn't like what I did
-  // it('should GET all org roles', getAllOrgRoles);
+  it('should GET all org roles', getAllOrgRoles);
   it('should DELETE an org role', deleteOrgRole);
   it('should GET the posted org', getOrg);
   it('should PATCH an org', patchOrg);
@@ -113,7 +109,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST a project', postProject);
   it('should POST a project role', postProjectRole);
   it('should GET a project role', getProjectRole);
-  // Issues with delete projectRole
+  // MBX-533 Bug Fix: Uncomment when deleteProjectRole fixed
   // it('should DELETE a project role', deleteProjectRole);
   it('should PATCH a project', patchProject);
   it('should GET the previously patched project', getProject);
@@ -124,8 +120,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should DELETE a project', deleteProject);
   it('should DELETE a user', deleteUser);
   it('should DELETE an org', deleteOrg);
-  // it('should POST orgs', postOrgs);
-  // it('should DELETE orgs', deleteOrgs);
+  it('should POST multiple orgs', postOrgs);
+  it('should POST multiple projects', postProjects);
+  it('should DELETE multple projects', deleteProjects);
+  it('should DELETE orgs', deleteOrgs);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -152,7 +150,7 @@ function whoami(done) {
     done();
   };
 
-  // GETs users via api controller
+  // GETs requesting user
   apiController.whoami(req, res);
 }
 
@@ -180,7 +178,7 @@ function getUsers(done) {
     done();
   };
 
-  // GETs users via api controller
+  // GETs all users
   apiController.getUsers(req, res);
 }
 
@@ -208,7 +206,7 @@ function postUser(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // POSTs a user
   apiController.postUser(req, res);
 }
 
@@ -236,7 +234,7 @@ function getUser(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // POSTs a user
   apiController.getUser(req, res);
 }
 
@@ -264,7 +262,7 @@ function patchUser(done) {
     done();
   };
 
-  // PATCHs a user via api controller
+  // PATCHs a user
   apiController.patchUser(req, res);
 }
 
@@ -292,7 +290,7 @@ function postOrg(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // POSTs an org
   apiController.postOrg(req, res);
 }
 
@@ -322,7 +320,7 @@ function postOrgRole(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // POSTs an org role
   apiController.postOrgRole(req, res);
 }
 
@@ -354,7 +352,7 @@ function getOrgRole(done) {
     done();
   };
 
-  // GETs users via api controller
+  // GETs an org member role
   apiController.getOrgRole(req, res);
 }
 
@@ -377,11 +375,11 @@ function getAllOrgRoles(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(Object.keys(json).length).to.equal(2);
     done();
   };
 
-  // GETs users via api controller
+  // GETs all org member roles
   apiController.getAllOrgMemRoles(req, res);
 }
 
@@ -411,7 +409,7 @@ function deleteOrgRole(done) {
     done();
   };
 
-  // GETs users via api controller
+  // DELETEs an org role
   apiController.deleteOrgRole(req, res);
 }
 
@@ -439,7 +437,7 @@ function getOrg(done) {
     done();
   };
 
-  // GETs users via api controller
+  // GETs an org
   apiController.getOrg(req, res);
 }
 
@@ -467,7 +465,7 @@ function patchOrg(done) {
     done();
   };
 
-  // PATCHs a user via api controller
+  // PATCHs an org
   apiController.patchOrg(req, res);
 }
 
@@ -494,7 +492,7 @@ function getOrgs(done) {
     done();
   };
 
-  // GETs users via api controller
+  // GETs all orgs
   apiController.getOrgs(req, res);
 }
 
@@ -525,7 +523,7 @@ function postProject(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // POSTs a project
   apiController.postProject(req, res);
 }
 
@@ -557,7 +555,7 @@ function postProjectRole(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // POSTs a project role
   apiController.postProjectRole(req, res);
 }
 
@@ -590,41 +588,41 @@ function getProjectRole(done) {
     done();
   };
 
-  // GETs users via api controller
+  // GETs a project member role
   apiController.getProjMemRole(req, res);
 }
 
-/**
- * @description Verifies mock DELETE request to delete a project role.
- */
-function deleteProjectRole(done) {
-  // Create request object
-  const body = {};
-  const params = {
-    orgid: testData.orgs[0].id,
-    projectid: testData.projects[0].id,
-    username: testData.users[1].username
-  };
-  const method = 'DELETE';
-  const req = getReq(params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  resFunctions(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    console.log(json);
-    //chai.expect(json.permissions.read.length).to.equal(1);
-    done();
-  };
-
-  // GETs users via api controller
-  apiController.deleteProjectRole(req, res);
-}
+// MBX-533 Bug Fix: Uncomment when deleteProjectRole is fixed
+// /**
+//  * @description Verifies mock DELETE request to delete a project role.
+//  */
+// function deleteProjectRole(done) {
+//   // Create request object
+//   const body = {};
+//   const params = {
+//     orgid: testData.orgs[0].id,
+//     projectid: testData.projects[0].id,
+//     username: testData.users[1].username
+//   };
+//   const method = 'DELETE';
+//   const req = getReq(params, body, method);
+//
+//   // Set response as empty object
+//   const res = {};
+//
+//   // Verifies status code and headers
+//   resFunctions(res);
+//
+//   // Verifies the response data
+//   res.send = function send(_data) {
+//     const json = JSON.parse(_data);
+//     chai.expect(json.permissions.read.length).to.equal(1);
+//     done();
+//   };
+//
+//   // DELETEs a project role
+//   apiController.deleteProjectRole(req, res);
+// }
 
 /**
  * @description Verifies mock PATCH request to update a project.
@@ -653,7 +651,7 @@ function patchProject(done) {
     done();
   };
 
-  // PATCHs a user via api controller
+  // PATCHs a project
   apiController.patchProject(req, res);
 }
 
@@ -684,7 +682,7 @@ function getProject(done) {
     done();
   };
 
-  // GETs users via api controller
+  // GETs a project
   apiController.getProject(req, res);
 }
 
@@ -716,7 +714,7 @@ function postElement(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // POSTs an element
   apiController.postElement(req, res);
 }
 
@@ -748,7 +746,7 @@ function getElement(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // GETs an element
   apiController.getElement(req, res);
 }
 
@@ -780,7 +778,7 @@ function patchElement(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // PATCHs an element
   apiController.patchElement(req, res);
 }
 
@@ -811,7 +809,7 @@ function deleteElement(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // DELETEs an element
   apiController.deleteElement(req, res);
 }
 
@@ -841,7 +839,7 @@ function deleteProject(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // DELETEs a project
   apiController.deleteProject(req, res);
 }
 
@@ -867,7 +865,7 @@ function deleteUser(done) {
     done();
   };
 
-  // DELETEs a user via api controller
+  // DELETEs a user
   apiController.deleteUser(req, res);
 }
 
@@ -894,12 +892,12 @@ function deleteOrg(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // DELETEs an org
   apiController.deleteOrg(req, res);
 }
 
 /**
- * @description Verifies mock POST request to create an organization.
+ * @description Verifies mock POST request to create multiple organizations.
  */
 function postOrgs(done) {
   // Create request object
@@ -926,22 +924,22 @@ function postOrgs(done) {
     done();
   };
 
-  // POSTs a user via api controller
+  // POSTs multiple orgs
   apiController.postOrgs(req, res);
 }
 
 /**
- * @description Verifies mock POST request to create an organization.
+ * @description Verifies mock POST request to create multiple projects.
  */
-function deleteOrgs(done) {
+function postProjects(done) {
   // Create request object
   const body = {
-    orgs: [
-      testData.orgs[1],
-      testData.orgs[2]
+    projects: [
+      testData.projects[4],
+      testData.projects[5]
     ]
   };
-  const params = {};
+  const params = { orgid: testData.orgs[1].id };
   const method = 'POST';
   const req = getReq(params, body, method);
 
@@ -954,13 +952,77 @@ function deleteOrgs(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    console.log(json);
-    //chai.expect(json.id).to.equal(testData.orgs[0].id);
-    //chai.expect(json.name).to.equal(testData.orgs[0].name);
+    chai.expect(json.length).to.equal(2);
     done();
   };
 
-  // POSTs a user via api controller
+  // POSTs multiple projects
+  apiController.postProjects(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete multiple projects.
+ */
+function deleteProjects(done) {
+  // Create request object
+  const body = {
+    projects: [
+      testData.projects[4],
+      testData.projects[5]
+    ],
+    hardDelete: true
+  };
+  const params = { orgid: testData.orgs[1].id };
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // DELETEs multiple projects
+  apiController.deleteProjects(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete multiple organizations.
+ */
+function deleteOrgs(done) {
+  // Create request object
+  const body = {
+    orgs: [
+      testData.orgs[1],
+      testData.orgs[2]
+    ],
+    hardDelete: true
+  };
+  const params = {};
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // DELETEs multiple orgs
   apiController.deleteOrgs(req, res);
 }
 
@@ -968,12 +1030,10 @@ function deleteOrgs(done) {
 /**
  * @description Helper function for setting the request parameters.
  *
- * @param params
- * @param body
- * @param headers
- * @param user
- * @param session
- * @returns {{headers: {}, params: Object, body: *, user: {}, session: {}}}
+ * @param {Object} params - Parameters for API req
+ * @param {Object} body - Body for API req
+ * @param {String} method - API method of req
+ * @returns {Object} req - Request Object
  */
 function getReq(params, body, method) {
   // Error-Check
@@ -995,7 +1055,7 @@ function getReq(params, body, method) {
 }
 
 /**
- * @description This is a common function used in every test run to verify the
+ * @description This is a common function used in every test to verify the
  * status code of the api request and provide the headers.
  *
  * @param {Object} res - Response Object

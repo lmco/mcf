@@ -625,7 +625,10 @@ function getAllOrgMemRoles(req, res) {
     return res.status(200).send(formatJSON(members));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    return res.status(error.status).send(error);
+  });
 }
 
 /* -----------------------( Project API Endpoints )-------------------------- */
