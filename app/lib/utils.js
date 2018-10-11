@@ -279,37 +279,6 @@ module.exports.deepEqual = function(a, b) {
 };
 
 /**
- * @description Returns all paths within an object
- */
-module.exports.getObjectPaths = function(obj, parent = null) {
-  // Define list of return paths
-  let retPaths = [];
-
-  // If obj is not an object and never was, return empty array
-  if (typeof obj !== 'object' && parent === null) {
-    return [];
-  }
-
-  // If obj is not an object, return parent
-  if (typeof obj !== 'object') {
-    return [parent];
-  }
-
-  // Loop through all the keys
-  Object.keys(obj).forEach((key) => {
-    if (parent !== null) {
-      retPaths = retPaths.concat(this.getObjectPaths(obj[key], `${parent}.${key}`));
-    }
-    else {
-      retPaths = retPaths.concat(this.getObjectPaths(obj[key], `${key}`));
-    }
-  });
-
-  // Return paths
-  return retPaths;
-};
-
-/**
  * @description Adds or changes values in an object, based on data from the
  * second parameter.
  *
