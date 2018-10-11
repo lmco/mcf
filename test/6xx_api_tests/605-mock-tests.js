@@ -90,9 +90,9 @@ describe(M.getModuleName(module.filename), () => {
   // ASK IF WE ARE ALLOWED TO GET OUR OWN PERMISSIONS USING GET ROLES????
   // need to do:
   // all batch orgs
+  // the delete orgs is not deleting the orgs
   // all batch projects,
   // all roles stuff (figure out errors)
-  // whoami
   // login?
   /* Execute tests */
   it('should tell user who user is', whoami)
@@ -124,6 +124,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should DELETE a project', deleteProject);
   it('should DELETE a user', deleteUser);
   it('should DELETE an org', deleteOrg);
+  // it('should POST orgs', postOrgs);
+  // it('should DELETE orgs', deleteOrgs);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -896,6 +898,72 @@ function deleteOrg(done) {
   apiController.deleteOrg(req, res);
 }
 
+/**
+ * @description Verifies mock POST request to create an organization.
+ */
+function postOrgs(done) {
+  // Create request object
+  const body = {
+    orgs: [
+      testData.orgs[1],
+      testData.orgs[2]
+    ]
+  };
+  const params = {};
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.postOrgs(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to create an organization.
+ */
+function deleteOrgs(done) {
+  // Create request object
+  const body = {
+    orgs: [
+      testData.orgs[1],
+      testData.orgs[2]
+    ]
+  };
+  const params = {};
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    console.log(json);
+    //chai.expect(json.id).to.equal(testData.orgs[0].id);
+    //chai.expect(json.name).to.equal(testData.orgs[0].name);
+    done();
+  };
+
+  // POSTs a user via api controller
+  apiController.deleteOrgs(req, res);
+}
+
 /* ----------( Helper Functions )----------*/
 /**
  * @description Helper function for setting the request parameters.
@@ -935,7 +1003,7 @@ function getReq(params, body, method) {
 function resFunctions(res) {
   // Verifies the response code: 200 OK
   res.status = function status(code) {
-    //chai.expect(code).to.equal(200);
+    chai.expect(code).to.equal(200);
     return this;
   };
   // Provides headers to response object
