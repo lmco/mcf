@@ -301,7 +301,7 @@ module.exports.getObjectPaths = function(obj, parent = null) {
       retPaths = retPaths.concat(this.getObjectPaths(obj[key], `${parent}.${key}`));
     }
     else {
-      retPaths= retPaths.concat(this.getObjectPaths(obj[key], `${key}`));
+      retPaths = retPaths.concat(this.getObjectPaths(obj[key], `${key}`));
     }
   });
 
@@ -318,7 +318,7 @@ module.exports.getObjectPaths = function(obj, parent = null) {
  * @param {Object} updateObj - The object containing new or changed fields that
  *                             will be added/changed in the original object.
  */
-module.exports.updateAndCombineObjects= function(originalObj, updateObj) {
+module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
   // Get all existing keys for the first object
   const firstKeys = Object.keys(originalObj);
 

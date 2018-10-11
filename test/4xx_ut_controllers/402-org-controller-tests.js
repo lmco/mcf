@@ -346,8 +346,6 @@ function updateMultipleOrgs(done) {
 
   // Update orgs
   OrgController.updateOrgs(adminUser, updateQuery, updateObj)
-  // Find the updated orgs
-  .then(() => OrgController.findOrgsQuery(updateQuery))
   .then((orgs) => {
     // Verify returned data
     chai.expect(orgs[0].custom.leader).to.equal(testData.orgs[1].custom.leader);

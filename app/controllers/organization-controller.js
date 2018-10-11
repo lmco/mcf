@@ -259,40 +259,39 @@ function updateOrgs(reqUser, query, updateInfo) {
         }
       });
 
-     // If updating a mixed field, update each org individually
-     if (containsMixed) {
-       M.log.info('Updating orgs.... this could take a while.');
-       // Create array of promises
-       let promises = [];
-       // Loop through each organization
-       Object(orgs).forEach((org) => {
-         // Loop through each update
-         Object.keys(updateInfo).forEach((key) => {
-           // If a 'Mixed' field
-           if (Organization.schema.obj[key].type.schemaName === 'Mixed') {
-             // Merge changes into original 'Mixed' field
-             utils.updateAndCombineObjects(org[key], sani.sanitize(updateInfo[key]));
+      // If updating a mixed field, update each org individually
+      if (containsMixed) {
+        M.log.info('Updating orgs.... this could take a while.');
+        // Create array of promises
+        const promises = [];
+        // Loop through each organization
+        Object(orgs).forEach((org) => {
+          // Loop through each update
+          Object.keys(updateInfo).forEach((key) => {
+            // If a 'Mixed' field
+            if (Organization.schema.obj[key].type.schemaName === 'Mixed') {
+              // Merge changes into original 'Mixed' field
+              utils.updateAndCombineObjects(org[key], sani.sanitize(updateInfo[key]));
 
-             // Mark that the 'Mixed' field has been modified
-             org.markModified(key);
-           }
-           else {
-             // Update the value in the org
-             org[key] = sani.sanitize(updateInfo[key]);
-           }
-         });
+              // Mark that the 'Mixed' field has been modified
+              org.markModified(key);
+            }
+            else {
+              // Update the value in the org
+              org[key] = sani.sanitize(updateInfo[key]);
+            }
+          });
 
-         // Add org.save() to promise array
-         promises.push(org.save());
-       });
+          // Add org.save() to promise array
+          promises.push(org.save());
+        });
 
-       // Once all promises complete, return
-       return Promise.all(promises);
-     }
-     // No mixed field update, update all together
-     else {
-       return Organization.updateMany(query, updateInfo);
-     }
+        // Once all promises complete, return
+        return Promise.all(promises);
+      }
+      // No mixed field update, update all together
+
+      return Organization.updateMany(query, updateInfo);
     })
     .then((orgs) => {
       // Check if some of the orgs in updateMany failed
@@ -302,9 +301,11 @@ function updateOrgs(reqUser, query, updateInfo) {
         + `[${foundOrgs.map(o => o.id)}].`);
       }
 
-      // Return found orgs
-      return resolve(foundOrgs);
+      // Find the updated orgs to return them
+      return findOrgsQuery(query);
     })
+    // Return the updated orgs
+    .then((updatedOrgs) => resolve(updatedOrgs))
     .catch((error) => M.CustomError.parseCustomError(error));
   });
 }
