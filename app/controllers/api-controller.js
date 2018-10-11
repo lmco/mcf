@@ -227,6 +227,12 @@ function getOrgs(req, res) {
       orgsPublicData.push(orgs[i].getPublicData());
     }
 
+    // Verify orgs public data array is not empty
+    if (orgsPublicData.length === 0) {
+      const error = new M.CustomError('No orgs found.', 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+
     // Return 200: OK and public org data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(orgsPublicData));
@@ -663,6 +669,13 @@ function getProjects(req, res) {
     for (let i = 0; i < projects.length; i++) {
       projectPublicData.push(projects[i].getPublicData());
     }
+
+    // Verify project public data array is not empty
+    if (projectPublicData.length === 0) {
+      const error = new M.CustomError('No projects found.', 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(projectPublicData));
