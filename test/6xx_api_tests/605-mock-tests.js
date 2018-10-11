@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.601-user-tests
+ * @module  test.605-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -42,8 +42,7 @@ let adminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests. Find
-   * non-admin user and elevate to admin user.
+   * Before: Run before all tests. Creates the admin user.
    */
   before((done) => {
     // Connect to the database
@@ -102,7 +101,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST a project role', postProjectRole);
   it('should GET a project role', getProjectRole);
   it('should GET all project roles', getProjectRoles);
-  // MBX-533 Bug Fix: Uncomment when deleteProjectRole fixed
+  // TODO: MBX-533 Bug Fix: Uncomment when deleteProjectRole fixed
   // it('should DELETE a project role', deleteProjectRole);
   it('should PATCH a project', patchProject);
   it('should GET the previously patched project', getProject);
@@ -289,7 +288,8 @@ function postOrg(done) {
 }
 
 /**
- * @description Verifies mock POST request to create an organization role.
+ * @description Verifies mock POST request to add a user to an organization
+ * role.
  */
 function postOrgRole(done) {
   // Create request object
@@ -319,7 +319,7 @@ function postOrgRole(done) {
 }
 
 /**
- * @description Verifies mock GET request to get an organization role.
+ * @description Verifies mock to GET a users role within an organization.
  */
 function getOrgRole(done) {
   // Create request object
@@ -378,7 +378,8 @@ function getAllOrgRoles(done) {
 }
 
 /**
- * @description Verifies mock DELETE request to delete an organization role.
+ * @description Verifies mock DELETE request to remove a user from an
+ * organization.
  */
 function deleteOrgRole(done) {
   // Create request object
@@ -522,7 +523,7 @@ function postProject(done) {
 }
 
 /**
- * @description Verifies mock POST request to create a project role.
+ * @description Verifies mock POST request to add a user to a project.
  */
 function postProjectRole(done) {
   // Create request object
@@ -618,7 +619,7 @@ function getProjectRoles(done) {
 
 // MBX-533 Bug Fix: Uncomment when deleteProjectRole is fixed
 // /**
-//  * @description Verifies mock DELETE request to delete a project role.
+//  * @description Verifies mock DELETE request to remove a user from a project.
 //  */
 // function deleteProjectRole(done) {
 //   // Create request object
@@ -985,6 +986,33 @@ function postProjects(done) {
 }
 
 /**
+ * @description Verifies mock GET request to get multiple projects.
+ */
+function getProjects(done) {
+  // Create request object
+  const body = { };
+  const params = { orgid: testData.orgs[1].id };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // POSTs multiple projects
+  apiController.getProjects(req, res);
+}
+
+/**
  * @description Verifies mock DELETE request to delete multiple projects.
  */
 function deleteProjects(done) {
@@ -1015,33 +1043,6 @@ function deleteProjects(done) {
 
   // DELETEs multiple projects
   apiController.deleteProjects(req, res);
-}
-
-/**
- * @description Verifies mock GET request to get multiple projects.
- */
-function getProjects(done) {
-  // Create request object
-  const body = { };
-  const params = { orgid: testData.orgs[1].id };
-  const method = 'GET';
-  const req = getReq(params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  resFunctions(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(2);
-    done();
-  };
-
-  // POSTs multiple projects
-  apiController.getProjects(req, res);
 }
 
 /**
@@ -1084,6 +1085,7 @@ function deleteOrgs(done) {
  * @param {Object} params - Parameters for API req
  * @param {Object} body - Body for API req
  * @param {String} method - API method of req
+ *
  * @returns {Object} req - Request Object
  */
 function getReq(params, body, method) {
