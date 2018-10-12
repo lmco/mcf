@@ -455,7 +455,7 @@ function hardDeleteElement(done) {
  */
 function softDeleteAllElements(done) {
   // Delete all elements in project
-  ElemController.removeElements(adminUser, [proj], false)
+  ElemController.removeElements(adminUser, { project: proj._id }, false)
   // Find all existing elements in project, including soft-deleted elements
   .then(() => ElemController.findElements(adminUser, org.id, proj.id, true))
   .then((retElems) => {
@@ -499,7 +499,7 @@ function verifyFindNonSoftDelElem(done) {
  */
 function hardDeleteAllElements(done) {
   // Delete all elements in project
-  ElemController.removeElements(adminUser, [proj], true)
+  ElemController.removeElements(adminUser, { project: proj._id }, true)
   .then(() => ElemController.findElements(adminUser, org.id, proj.id))
   .then((elements) => {
     // Expect elements array to be empty

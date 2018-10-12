@@ -66,6 +66,7 @@ module.exports = {
   deleteUser,
   whoami,
   getElements,
+  deleteElements,
   getElement,
   postElement,
   patchElement,
@@ -1256,7 +1257,7 @@ function whoami(req, res) {
 
 /* -----------------------( Elements API Endpoints )------------------------- */
 /**
- * GET /api/orgs/:orgid/projects/:projectid/elements/
+ * GET /api/orgs/:orgid/projects/:projectid/elements
  *
  * @description Takes an orgid and projectid in the URI and returns all elements
  * of the project.
@@ -1286,6 +1287,71 @@ function getElements(req, res) {
   ElementController.findElements(req.user, req.params.orgid, req.params.projectid, softDeleted)
   .then((elements) => {
     // Return a 200: OK and elements
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * DELETE /api/orgs/:orgid/projects/:projectid/elements
+ *
+ * @description Deletes multiple elements at the same time
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with elements
+ */
+function deleteElements(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Initialize the delete query object
+  let deleteQuery = {};
+
+  // No elements provided, delete all elements in the project
+  if (!req.body.hasOwnProperty('element')) {
+    // Query finds all elements that start with 'orgid:projectid:'
+    deleteQuery = { uid: { $regex: `^${sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid
+    ))}:` } };
+  }
+  // Element objects provided, delete all
+  else if (req.body.elements.every(e => typeof e === 'object')) {
+    // Query finds all element by their uid
+    deleteQuery = { uid: { $in: sani.sanitize(req.body.elements.map(e => e.uid)) } };
+  }
+  // Element IDs provided, delete all
+  else if (req.body.elements.every(e => typeof e === 'string')) {
+    // Query finds all elements by their uid, generated from orgid and projectid
+    // in the request parameters
+    deleteQuery = { uid: { $in: sani.sanitize(req.body.elements.map(
+      e => utils.createUID(req.params.orgid, req.params.projectid, e.uid)
+    )) } };
+  }
+  // No valid element data was provided, reject
+  else {
+    const error = new M.CustomError('Elements array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Remove the specified elements
+  ElementController.removeElements(req.user, deleteQuery, hardDelete)
+  .then((elements) => {
+    // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(elements));
   })

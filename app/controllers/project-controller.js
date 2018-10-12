@@ -264,7 +264,13 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
         : Project.updateMany(removeQuery, { deleted: true });
     })
     // Delete elements in associated projects
-    .then(() => ElementController.removeElements(reqUser, foundProjects, hardDelete))
+    .then(() => {
+      // Create delete query to remove elements
+      const elementDeleteQuery = { project: { $in: foundProjects.map(p => p._id) } };
+
+      // Delete all elements in the projects
+      return ElementController.removeElements(reqUser, elementDeleteQuery, hardDelete);
+    })
     // Return deleted projects
     .then(() => resolve(foundProjects))
     .catch((error) => reject(error));
@@ -621,37 +627,32 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
       ));
     }
 
+    // Define foundProject
+    let foundProject = null;
+
     // Find the project
     findProject(reqUser, organizationID, projectID, true)
     .then((project) => {
+      // Set foundProject
+      foundProject = project;
+
       // Error Check: ensure user has permissions to delete project
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
-      // Hard delete
-      if (hardDelete) {
-        Project.deleteOne({ id: project.id })
-        // Delete all elements in that project
-        .then(() => ElementController.removeElements(reqUser, [project], hardDelete))
-        .then(() => resolve(project))
-        .catch((error) => reject(error));
-      }
-      // Soft delete
-      else {
-        Project.updateOne({ id: project.id }, { deleted: true })
-        // Soft-delete all elements in the project
-        .then(() => ElementController.removeElements(reqUser, [project], hardDelete))
-        .then(() => {
-          // Set the returned project deleted field to true since updateOne()
-          // returns a query not the updated project.
-          project.deleted = true;
-          return resolve(project);
-        })
-        .catch((error) => reject(error));
-      }
+      // Initialize element delete query
+      const elementDeleteQuery = { uid: { $regex: `^${foundProject.uid}` } };
+
+      // Delete all elements on the project
+      return ElementController.removeElements(reqUser, elementDeleteQuery, hardDelete);
     })
-    .catch((error) => reject(error));
+    // If hard delete, delete project, otherwise update project
+    .then(() => ((hardDelete)
+      ? Project.deleteOne({ id: foundProject.id })
+      : Project.updateOne({ id: foundProject.id }, { deleted: true })))
+    .then(() => resolve(foundProject))
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
