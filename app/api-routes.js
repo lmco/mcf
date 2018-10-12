@@ -1632,7 +1632,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *       - application/json
  *     parameters:
  *       - name: content
- *         description: The object containing user objects to be created.
+ *         description: The object containing user objects to be deleted.
  *         in: body
  *         required: true
  *         schema:

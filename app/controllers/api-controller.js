@@ -1185,7 +1185,7 @@ function deleteUsers(req, res) {
   }
   // Usernames provided, delete all
   else if (req.body.users.every(u => typeof u === 'string')) {
-    // Query finds all orgs by their id
+    // Query finds all users by their username
     deleteQuery = { username: { $in: sani.sanitize(req.body.users) } };
   }
   // No valid user data was provided, reject
