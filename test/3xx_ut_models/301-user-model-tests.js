@@ -151,16 +151,19 @@ function verifyInvalidPassword(done) {
  */
 function updateUser(done) {
   // Find and updated the user created in the previous createUser test.
-  User.findOneAndUpdate({ username: testData.users[1].username },
-    { fname: `${testData.users[1].fname}edit`, lname: testData.users[1].lname })
-  // Find the updated user
-  .then((user) => User.findOne({ username: user.username }))
-  .then((userUpdated) => {
-    // Check the user has the updated first and last name.
-    chai.expect(userUpdated.username).to.equal(testData.users[1].username);
-    chai.expect(userUpdated.fname).to.equal(`${testData.users[1].fname}edit`);
-    chai.expect(userUpdated.lname).to.equal(testData.users[1].lname);
-    chai.expect(userUpdated.name).to.equal(`${testData.users[1].fname}edit ${testData.users[1].lname}`);
+  User.findOne({ username: testData.users[1].username})
+  .then((foundUser)=>{
+    foundUser.fname = `${testData.users[1].fname}edit`
+    foundUser.lname = testData.users[1].lname;
+    foundUser.username = 'phill';
+    //foundUser.createdOn = '2020-10-11 18:24:39.602';
+    return foundUser.save();
+    })
+  .then((updatedUser) => {
+    chai.expect(updatedUser.username).to.equal(testData.users[1].username);
+    chai.expect(updatedUser.fname).to.equal(`${testData.users[1].fname}edit`);
+    chai.expect(updatedUser.lname).to.equal(testData.users[1].lname);
+    chai.expect(updatedUser.name).to.equal(`${testData.users[1].fname}edit ${testData.users[1].lname}`);
     done();
   })
   .catch((error) => {

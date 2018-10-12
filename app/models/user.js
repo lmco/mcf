@@ -24,10 +24,10 @@ const crypto = require('crypto');
 
 // NPM modules
 const mongoose = require('mongoose');
-const createOn = M.require('models.plugin.createdOn');
 
 // MBEE Modules
 const validators = M.require('lib.validators');
+const createdOn = M.require('models.plugin.createdOn');
 
 
 /* ----------------------------( Element Model )----------------------------- */
@@ -71,7 +71,16 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    match: RegExp(validators.user.username)
+    match: RegExp(validators.user.username),
+    set: function (v) {
+      if (typeof this.username === 'undefined') {
+        return v;
+      }
+      else if (v != this.username){
+        return new M.CustomError('Username cannot be changed.', 400, 'warn');
+      }
+      return this.username;
+    }
   },
   password: {
     type: String,
@@ -173,7 +182,7 @@ UserSchema.virtual('name')
   return `${this.fname} ${this.lname}`;
 });
 
-UserSchema.plugin(createOn);
+UserSchema.plugin(createdOn);
 
 /* ---------------------------( User Middleware )---------------------------- */
 

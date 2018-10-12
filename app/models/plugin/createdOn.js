@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module models.plugin.timestamp
+ * @module models.plugin.createdOn
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -19,16 +19,52 @@
  * for createdOn, UpdatedOn, and DeletedOn.
  */
 
-module.exports = exports = function createdOnPlugin (schema, options) {
-  schema.add({ createdOn: Date });
-
-  schema.pre('save', function (next) {
-    this.createdOn = new Date.now();
-    next();
+module.exports = function createdOnPlugin (schema, options) {
+  console.log('~~~~createdOnPlugin~~~');
+  schema.add({
+    createdOn: {
+      type: Date,
+      default: Date.now(),
+      set: function (_createdOn) {
+        // Set created on field for the first time
+        if (typeof this.createdOn === 'undefined') {
+          return Date.now();
+        }
+        // Cannot modify createdOn, return custom error
+        else if (_createdOn != this.createdOn){
+          return new M.CustomError('Username cannot be changed.', 400, 'warn');
+        }
+        return this.createdOn;
+      }
+    },
+    deletedOn: {
+      type: Date,
+      default: null,
+    },
+    updatedOn: {
+      type: Date,
+      default: Date.now,
+      set: Date.now
+    }
   });
 
+  /*
+  schema.pre('save', function (next) {
+
+    // Set a value for createdOn only if it is null
+    console.log("this.createdOn: ",this.createdOn);
+    if (typeof this.createdOn === 'undefined') {
+      console.log('Setting date');
+      this.createdOn = Date.now();
+    }
+    next();
+  });*/
+
+
+/*
   if (options && options.index) {
     schema.path('createdOn').index(options.index);
   }
+  */
 }
 
