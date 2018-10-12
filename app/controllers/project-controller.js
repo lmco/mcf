@@ -227,40 +227,33 @@ function createProjects(reqUser, organizationID, arrProjects) {
  */
 function updateProjects(reqUser, query, updateInfo) {
   return new Promise((resolve, reject) => {
-    // Error Check: ensure input parameters are valid
-    try {
-      assert.ok(typeof query === 'object', 'Update query is not an object.');
-      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
-    }
-    catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
-    }
-
     // Define flag for updating 'Mixed' fields and foundProjects array
     let containsMixed = false;
     let foundProjects = [];
 
-    // Loop through each desired update
-    Object.keys(updateInfo).forEach((key) => {
-      // Error Check: ensure user can update ech field
-      if (!Project.schema.methods.getValidUpdateFields().includes(key)) {
-        return reject(new M.CustomError(
-          `Project property [${key}] cannot be changed.`, 403, 'warn'
-        ));
-      }
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof query === 'object', 'Update query is not an object.');
+      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
+      // Loop through each desired update
+      Object.keys(updateInfo).forEach((key) => {
+        // Error Check: ensure user can update ech field
+        assert.ok(Project.schema.methods.getValidUpdateFields().includes(key),
+          `Project property [${key}] cannot be changed.`);
 
-      // Error Check: ensure parameter is not unique
-      if (Project.schema.obj[key].unique) {
-        return reject(new M.CustomError(
-          `Cannot use batch update on the unique field [${key}].`, 403, 'warn'
-        ));
-      }
+        // Error Check: ensure parameter is not unique
+        assert.ok(!Project.schema.obj[key].unique,
+          `Cannot use batch update on the unique field [${key}].`);
 
-      // If the field is a mixed field, set the flag
-      if (Project.schema.obj[key].type.schemaName === 'Mixed') {
-        containsMixed = true;
-      }
-    });
+        // If the field is a mixed field, set the flag
+        if (Project.schema.obj[key].type.schemaName === 'Mixed') {
+          containsMixed = true;
+        }
+      });
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
 
     // Find the projects to update
     findProjectsQuery(query)

@@ -400,11 +400,11 @@ function rejectPatchUniqueFieldProjects(done) {
   (err, response, body) => {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
-    // Expect response status: 403 Forbidden
-    chai.expect(response.statusCode).to.equal(403);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
     // Verify error message in response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Forbidden');
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }
