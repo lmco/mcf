@@ -309,7 +309,7 @@ function updateMultipleProjects(done) {
     custom: {
       department: 'Space'
     },
-    name: 'Useless Project'
+    name: 'New Project Name'
   };
 
   // Update projects
