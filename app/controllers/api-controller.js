@@ -279,17 +279,60 @@ function postOrgs(req, res) {
 /**
  * PATCH /api/orgs
  *
- * @description Accepts an array of JSON objects containing organization data.
- * This function expects each of the organizations to already exist (this
- * should be updating them). If any of the organization updates fail, the
- * entire request fails.
+ * @description Updates multiple orgs from an array of objects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res - Response object with orgs' public data
  */
 function patchOrgs(req, res) {
-  // TODO - Discuss the possibility of batch updates to orgs by passing (MBX-354)
-  // an array of existing orgs. Must define behavior for this.
-  res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize the delete query object
+  let updateQuery = {};
+
+  // Error Check: ensure update was provided in body
+  if (!req.body.hasOwnProperty('update')) {
+    const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // No orgs provided, return an error
+  if (!req.body.hasOwnProperty('orgs')) {
+    const error = new M.CustomError('Array of orgs not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+  // Org objects provided, update all
+  if (req.body.orgs.every(o => typeof o === 'object')) {
+    // Query finds all orgs by their id
+    updateQuery = { id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
+  }
+  // Org IDs provided, update all
+  else if (req.body.orgs.every(o => typeof o === 'string')) {
+    // Query finds all orgs by their id
+    updateQuery = { id: { $in: sani.sanitize(req.body.orgs) } };
+  }
+  // No valid org data was provided, reject
+  else {
+    const error = new M.CustomError('Orgs array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified orgs
+  // NOTE: updateOrgs() sanitizes req.body.update
+  OrgController.updateOrgs(req.user, updateQuery, req.body.update)
+  .then((orgs) => {
+    // Return 200: OK and the updated orgs
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(orgs));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**

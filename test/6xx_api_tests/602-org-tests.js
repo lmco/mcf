@@ -90,10 +90,12 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple orgs', postOrgs);
   it('should GET posted organization', getOrg);
   it('should PATCH an update to posted organization', patchOrg);
+  it('should PATCH an update to multiple orgs', patchMultipleOrgs);
   it('should GET a user\'s roles in an organization', getMemberRoles);
   it('should GET existing organizations', getOrgs);
   it('should reject a PATCH with invalid name', rejectPatchInvalidName);
   it('should reject a PATCH to the org ID', rejectPatchIdMismatch);
+  it('should reject a PATCH of unique field to multiple orgs', rejectPatchUniqueFieldOrgs);
   it('should reject a POST with ID mismatch', rejectPostIdMismatch);
   it('should reject a POST with invalid org id', rejectPostInvalidId);
   it('should reject a POST with missing org name', rejectPostMissingName);
@@ -223,6 +225,34 @@ function patchOrg(done) {
 }
 
 /**
+ * @description Verifies PATCH /api/orgs updates multiple orgs at the same time.
+ */
+function patchMultipleOrgs(done) {
+  request({
+    url: `${test.url}/api/orgs`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      orgs: [testData.orgs[2], testData.orgs[3]],
+      update: { custom: { department: 'Space', location: { country: 'USA' } } }
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json[0].custom.leader).to.equal(testData.orgs[2].custom.leader);
+    chai.expect(json[0].custom.department).to.equal('Space');
+    chai.expect(json[0].custom.location.country).to.equal('USA');
+    done();
+  });
+}
+
+/**
  * @description Verifies PATCH of org fails when invalid org name provided.
  */
 function rejectPatchInvalidName(done) {
@@ -256,6 +286,32 @@ function rejectPatchIdMismatch(done) {
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify(testData.ids[3])
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/orgs fails when updating a unique field.
+ */
+function rejectPatchUniqueFieldOrgs(done) {
+  request({
+    url: `${test.url}/api/orgs`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      orgs: [testData.orgs[2], testData.orgs[3]],
+      update: { name: 'Same org' }
+    })
   },
   (err, response, body) => {
     // Expect no error (request succeeds)

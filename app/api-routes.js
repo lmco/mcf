@@ -169,7 +169,7 @@ api.route('/version')
  *           properties:
  *             orgs:
  *               type: object
- *               description: A list of objects containing organization data.
+ *               description: An array of objects containing organization data.
  *     responses:
  *       200:
  *         description: OK
@@ -184,10 +184,39 @@ api.route('/version')
  *   patch:
  *     tags:
  *       - organizations
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple organizations from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing the organization data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - orgs
+ *           properties:
+ *             orgs:
+ *               type: object
+ *               description: An array of orgs to update. Can either be the
+ *                            org objects or the ids of the orgs.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the orgs
+ *                            and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - organizations
