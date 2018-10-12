@@ -283,7 +283,7 @@ function updateProjectObject(done) {
   .then((projectUpdated) => {
     // Verify project updated
     chai.expect(projectUpdated.name).to.equal(testData.projects[1].name);
-    done();.
+    done();
   })
   .catch((error) => {
     M.log.error(error);
