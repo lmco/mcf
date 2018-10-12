@@ -213,7 +213,7 @@ function updateOrgs(reqUser, query, updateInfo) {
       assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
       // Loop through each desired update
       Object.keys(updateInfo).forEach((key) => {
-        // Error Check: ensure user can update ech field
+        // Error Check: ensure user can update each field
         assert.ok(Organization.schema.methods.getValidUpdateFields().includes(key),
           `Organization property [${key}] cannot be changed.`);
 
