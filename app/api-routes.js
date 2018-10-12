@@ -90,13 +90,13 @@ api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
  *       - application/json
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to login returns session token data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to login due to invalid credentials.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to login due to not having access to MBEE.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to login due to a server side issue.
  */
 api.route('/login')
 .post(
@@ -118,11 +118,11 @@ api.route('/login')
  *       - application/json
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to get version returns version.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to login due to not having access to MBEE.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to get version due to a server side issue.
  */
 api.route('/version')
 .get(
@@ -143,13 +143,13 @@ api.route('/version')
  *       - application/json
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET orgs returns orgs data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET orgs due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET orgs due to not having permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET orgs due to a server side issue.
  *   post:
  *     tags:
  *       - organizations
@@ -172,15 +172,15 @@ api.route('/version')
  *               description: A list of objects containing organization data.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST orgs returns posted orgs data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST orgs due to invalid field in orgs data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST orgs due to not having permissions.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST orgs due to an already existing orgs with same id.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST orgs due to a server side issue.
  *   patch:
  *     tags:
  *       - organizations
@@ -216,15 +216,15 @@ api.route('/version')
  *                            to hard delete. Defaults to false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE orgs returns deleted orgs data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE orgs due to invalid orgs data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE orgs due to not having permissions.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE orgs due to TODO: FIGURE OUT FORBIDDEN
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH org due to a server side issue.
  */
 api.route('/orgs')
 .get(
@@ -266,15 +266,15 @@ api.route('/orgs')
  *         type: string
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET org returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET org due to invalid id field.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET org due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET org due to org not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET org due to a server side issue.
  *   post:
  *     tags:
  *       - organizations
@@ -313,15 +313,15 @@ api.route('/orgs')
  *               description: Custom JSON data that can be added to an organization
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST org returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST org due to invalid field in data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST org due to not having permissions.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST org due to an already existing org with same id.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST org due to a server side issue.
  *
  *   patch:
  *     tags:
@@ -350,17 +350,17 @@ api.route('/orgs')
  *               description: The updated custom JSON data of the organization.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH org returns updated org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, FAILED to PATCH org due to invalid update data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, FAILED to PATCH org due to not having permissions.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, FAILED to PATCH org due to updating an immutable field.
  *       404:
- *         description: Not Found
+ *         description: Not Found, FAILED to PATCH org due to not finding org.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH org due to a server side issue.
  *
  *   delete:
  *     tags:
@@ -388,17 +388,17 @@ api.route('/orgs')
  *                            false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE org return deleted org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE org due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE org due to not having permissions.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE org due to TODO: FIGURE OUT FORBIDEN DELETE
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to DELETE org due to not finding org.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE org due to a server side issue.
  */
 api.route('/orgs/:orgid')
 .get(
@@ -452,17 +452,18 @@ api.route('/orgs/:orgid')
  *                            deleted projects.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET projects returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET projects due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET projects due to not having permissions to org.
  *       403:
- *         description: Forbidden
+ *       // TODO- Ask austin why this is a 403 error and not a 401
+ *         description: Forbidden, Failed to GET projects due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET projects due to projects not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET projects due to a server side issue.
  *
  *   post:
  *     tags:
@@ -489,9 +490,9 @@ api.route('/orgs/:orgid')
  *                            contain the name and id of that project.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST projects returns project data
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST projects returns project
  *       401:
  *         description: Unauthorized
  *       403:
