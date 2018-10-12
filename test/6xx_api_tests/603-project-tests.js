@@ -136,7 +136,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies GET /api/orgs/:orgid/projects/ rejects when there are
  * no projects.
- * Expected error thrown: 'Not Found'
+ * Expected error thrown: 404 'Not Found'
  */
 function rejectGetProjects(done) {
   request({
