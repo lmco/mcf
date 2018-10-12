@@ -115,6 +115,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
+  it('should reject a GET all projects with no project found', rejectGetProjects);
   it('should POST a project to the organization', postProject);
   it('should POST second project', postSecondProject);
   it('should reject POST multiple invalid projects', rejectPostMultipleInvalidProjects);
@@ -132,6 +133,28 @@ describe(M.getModuleName(module.filename), () => {
 });
 
 /* --------------------( Tests )-------------------- */
+/**
+ * @description Verifies GET /api/orgs/:orgid/projects/ rejects when there are
+ * no projects.
+ * Expected error thrown: 'Not Found'
+ */
+function rejectGetProjects(done) {
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/`,
+    headers: getHeaders()
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response code: 404 Not Found
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
+    done();
+  });
+}
+
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid creates a
  * project.
