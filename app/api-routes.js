@@ -532,10 +532,40 @@ api.route('/orgs/:orgid')
  *   patch:
  *     tags:
  *       - projects
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple projects from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing the project data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - projects
+ *             - update
+ *           properties:
+ *             projects:
+ *               type: object
+ *               description: An array of projects to update. Can either be the
+ *                            project objects or the ids of the projects.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the
+ *                            projects and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - projects
