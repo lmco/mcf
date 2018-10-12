@@ -1649,10 +1649,36 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *   patch:
  *     tags:
  *       - users
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple users from the supplied list in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing user objects to be updated.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             users:
+ *               type: object
+ *               description: An array of users to update. Can either be a list
+ *                            of user objects or of usernames.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the users
+ *                            and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - users
@@ -1704,7 +1730,7 @@ api.route('/users')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.notImplemented
+  APIController.patchUsers
 )
 .delete(
   AuthController.authenticate,

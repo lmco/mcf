@@ -61,6 +61,7 @@ module.exports = {
   deleteProjectRole,
   getUsers,
   postUsers,
+  patchUsers,
   deleteUsers,
   getUser,
   postUser,
@@ -1185,6 +1186,66 @@ function postUsers(req, res) {
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * PATCH /api/users
+ *
+ * @description Updates multiple users
+ * NOTE: Admin only.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with users' public data
+ */
+function patchUsers(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize the update query object
+  let updateQuery = {};
+
+  // Error Check: ensure update was provided in body
+  if (!req.body.hasOwnProperty('update')) {
+    const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // No users provided, return an error
+  if (!req.body.hasOwnProperty('users')) {
+    const error = new M.CustomError('Array of users not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+  // User objects provided, update all
+  if (req.body.users.every(u => typeof u === 'object')) {
+    // Query finds all users by their username
+    updateQuery = { username: { $in: sani.sanitize(req.body.users.map(u => u.username)) } };
+  }
+  // Usernames provided, update all
+  else if (req.body.users.every(u => typeof u === 'string')) {
+    // Query finds all users by their username
+    updateQuery = { username: { $in: sani.sanitize(req.body.users) } };
+  }
+  // No valid user data was provided, reject
+  else {
+    const error = new M.CustomError('Users array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified users
+  // NOTE: updateUsers() sanitizes req.body.update
+  UserController.updateUsers(req.user, updateQuery, req.body.update)
+    .then((users) => {
+      // Return 200: OK and the updated users
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(formatJSON(users));
+    })
+    // If an error was thrown, return it and its status
+    .catch((error) => res.status(error.status).send(error));
 }
 
 /**
