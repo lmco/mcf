@@ -775,19 +775,19 @@ function patchProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: ensure req.params.orgid was provided and is a string
+  // Error Check: ensure req.params.orgid was provided
   if (!req.params.hasOwnProperty('orgid')) {
     // orgid not provided, reject
     const error = new M.CustomError('orgid was not provided in params.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
+  // Error Check: ensure req.params.orgid is a string
   if (typeof req.params.orgid !== 'string') {
     // orgid not a string, reject
     const error = new M.CustomError('orgid in request params is not a string.', 400, 'warn');
     return res.status(error.status).send(error);
   }
-
 
   // No projects provided, update all projects in the org
   if (!req.body.hasOwnProperty('projects')) {
