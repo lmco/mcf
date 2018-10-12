@@ -136,7 +136,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies GET /api/orgs/:orgid/projects/ rejects when there are
  * no projects.
- * Expected error thrown: 404 'Not Found'
+ * Expected error thrown: 'Not Found'
  */
 function rejectGetProjects(done) {
   request({
@@ -146,7 +146,7 @@ function rejectGetProjects(done) {
   (err, response, body) => {
     // Expect no error
     chai.expect(err).to.equal(null);
-    // Expect response code: 200 OK
+    // Expect response code: 404 Not Found
     chai.expect(response.statusCode).to.equal(404);
     // Verify response body
     const json = JSON.parse(body);
