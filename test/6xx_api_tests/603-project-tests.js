@@ -134,8 +134,9 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid finds and
- * returns the previously created project.
+ * @description Verifies GET /api/orgs/:orgid/projects/ rejects when there are
+ * no projects.
+ * Expected error thrown: 'Not Found'
  */
 function rejectGetProjects(done) {
   request({
