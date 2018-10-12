@@ -229,7 +229,7 @@ function getOrgs(req, res) {
 
     // Verify orgs public data array is not empty
     if (orgsPublicData.length === 0) {
-      const error = new M.CustomError('No orgs found.', 400, 'warn');
+      const error = new M.CustomError('No orgs found.', 404, 'warn');
       return res.status(error.status).send(error);
     }
 
@@ -672,7 +672,7 @@ function getProjects(req, res) {
 
     // Verify project public data array is not empty
     if (projectPublicData.length === 0) {
-      const error = new M.CustomError('No projects found.', 400, 'warn');
+      const error = new M.CustomError('No projects found.', 404, 'warn');
       return res.status(error.status).send(error);
     }
 
