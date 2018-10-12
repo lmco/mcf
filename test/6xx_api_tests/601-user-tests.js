@@ -95,6 +95,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should get all users', getUsers);
   it('should reject getting a user that does not exist', rejectGetNonexisting);
   it('should update a user', patchUser);
+  it('should PATCH multiple users at a time', patchMultipleUsers);
+  it('should reject a PATCH of unique field', rejectPatchUniqueFieldUsers);
   it('should reject an update a user that does not exist', rejectPatchNonexisting);
   it('should reject deleting a user that doesnt exist', rejectDeleteNonexisting);
   it('should delete a user', deleteUser);
@@ -339,6 +341,63 @@ function patchUser(done) {
     // Verifies correct response body
     chai.expect(json.username).to.equal(testData.users[1].username);
     chai.expect(json.fname).to.equal(testData.users[2].fname);
+    done();
+  });
+}
+
+/**
+ * @description Makes a PATCH request to /api/users/. Verifies updating multiple
+ * user's first names via a PATCH request.
+ */
+function patchMultipleUsers(done) {
+  // Make a PATCH API request
+  request({
+    url: `${test.url}/api/users`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    // Set update parameter in request body
+    body: JSON.stringify({
+      users: [testData.users[2], testData.users[4]],
+      update: { fname: 'Bob' }
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Verifies status 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Parse body to JSON object
+    const json = JSON.parse(body);
+    // Verifies correct response body
+    chai.expect(json[0].fname).to.equal('Bob');
+    chai.expect(json[1].fname).to.equal('Bob');
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/users fails when updating a unique field.
+ */
+function rejectPatchUniqueFieldUsers(done) {
+  request({
+    url: `${test.url}/api/users`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      users: [testData.users[2], testData.users[4]],
+      update: { username: 'sameuser' }
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

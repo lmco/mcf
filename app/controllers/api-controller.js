@@ -1239,13 +1239,13 @@ function patchUsers(req, res) {
   // Update the specified users
   // NOTE: updateUsers() sanitizes req.body.update
   UserController.updateUsers(req.user, updateQuery, req.body.update)
-    .then((users) => {
-      // Return 200: OK and the updated users
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(formatJSON(users));
-    })
-    // If an error was thrown, return it and its status
-    .catch((error) => res.status(error.status).send(error));
+  .then((users) => {
+    // Return 200: OK and the updated users
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(users));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
