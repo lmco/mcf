@@ -766,7 +766,7 @@ function patchProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Initialize the delete query object
+  // Initialize the update query object
   let updateQuery = {};
 
   // Error Check: ensure update was provided in body
@@ -781,13 +781,13 @@ function patchProjects(req, res) {
     const error = new M.CustomError('orgid was not provided in params.', 400, 'warn');
     return res.status(error.status).send(error);
   }
-  else {
-    if (typeof req.params.orgid !== 'string') {
-      // orgid not a string, reject
-      const error = new M.CustomError('orgid in request params is not a string.', 400, 'warn');
-      return res.status(error.status).send(error);
-    }
+
+  if (typeof req.params.orgid !== 'string') {
+    // orgid not a string, reject
+    const error = new M.CustomError('orgid in request params is not a string.', 400, 'warn');
+    return res.status(error.status).send(error);
   }
+
 
   // No projects provided, update all projects in the org
   if (!req.body.hasOwnProperty('projects')) {
