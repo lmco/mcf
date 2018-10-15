@@ -96,7 +96,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject getting a user that does not exist', rejectGetNonexisting);
   it('should update a user', patchUser);
   it('should reject an update a user that does not exist', rejectPatchNonexisting);
-  it('should reject deleting a user that doesnt exist', rejectDeleteNonexisting);
+  it('should reject deleting a user that doesnt exist', rejectDeleteNonExisting);
   it('should delete a user', deleteUser);
   it('should DELETE multiple users at a time', deleteMultipleUsers);
   it('should reject a DELETE with no users array in request body', rejectDeleteNoUsers);
@@ -376,7 +376,7 @@ function rejectPatchNonexisting(done) {
  * user CANNOT DELETE a non-existing user.
  * Expected response error: 'Not Found'
  */
-function rejectDeleteNonexisting(done) {
+function rejectDeleteNonExisting(done) {
   // Make a DELETE request
   request({
     url: `${test.url}/api/users/${testData.usernames[4].username}`,
@@ -412,7 +412,7 @@ function deleteUser(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
-    // Set soft delete parameter in request body
+    // Set hard delete parameter in request body
     body: JSON.stringify({
       hardDelete: true
     })

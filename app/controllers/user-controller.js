@@ -111,7 +111,7 @@ function createUsers(reqUser, arrNewUsers) {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(reqUser.admin, 'User does not have permissions.');
-      assert.ok(typeof arrNewUsers === 'object', 'List of new user data is not an array.');
+      assert.ok(Array.isArray(arrNewUsers), 'List of new user data is not an array.');
       let index = 1;
       // Inspect each user object for a username
       Object(arrNewUsers).forEach((userObject) => {
@@ -178,7 +178,7 @@ function createUsers(reqUser, arrNewUsers) {
     .then(() => resolve(createdUsers))
     .catch((error) => {
       // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
+      if (error instanceof M.CustomError && !created) {
         return reject(error);
       }
 
