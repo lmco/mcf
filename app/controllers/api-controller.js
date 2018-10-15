@@ -1311,6 +1311,15 @@ function deleteElements(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['elements', 'hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -1332,15 +1341,19 @@ function deleteElements(req, res) {
   // Element objects provided, delete all
   else if (req.body.elements.every(e => typeof e === 'object')) {
     // Query finds all element by their uid
-    deleteQuery = { uid: { $in: sani.sanitize(req.body.elements.map(e => e.uid)) } };
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid, e.id
+    )));
+    deleteQuery = { uid: { $in: uids } };
   }
   // Element IDs provided, delete all
   else if (req.body.elements.every(e => typeof e === 'string')) {
     // Query finds all elements by their uid, generated from orgid and projectid
     // in the request parameters
-    deleteQuery = { uid: { $in: sani.sanitize(req.body.elements.map(
-      e => utils.createUID(req.params.orgid, req.params.projectid, e.uid)
-    )) } };
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid, e
+    )));
+    deleteQuery = { uid: { $in: uids } };
   }
   // No valid element data was provided, reject
   else {
