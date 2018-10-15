@@ -107,11 +107,10 @@ function authenticate(req, res, next) {
       // Error check - username/password not empty
       if (!username || !password || username === '' || password === '') {
         M.log.debug('Username or password not provided.');
-
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
-          : res.redirect(`/login?next=${req.originalUrl}`);
+          : res.redirect('/login');
       }
 
       // Handle Basic Authentication
@@ -247,16 +246,6 @@ function authenticate(req, res, next) {
     username = sani.sanitize(req.body.username);
     password = req.body.password;
 
-    // Error check - username/password not empty
-    if (!username || !password || username === '' || password === '') {
-      M.log.debug('Username or password not provided.');
-      req.flash('loginError', 'Username or password not provided.');
-
-      // return proper error for API route or redirect for UI
-      return (req.originalUrl.startsWith('/api'))
-        ? res.status(401).send('Unauthorized')
-        : res.redirect(`/login?next=${req.originalUrl}`);
-    }
     // Handle Basic Authentication
     AuthModule.handleBasicAuth(req, res, username, password)
     .then(user => {
@@ -284,6 +273,15 @@ function authenticate(req, res, next) {
         ? res.status(401).send('Unauthorized')
         : res.redirect('back');
     });
+  }
+  else if (!username || !password || username === '' || password === '') {
+    M.log.debug('Username or password not provided.');
+    req.flash('loginError', 'Username or password not provided.');
+
+    // return proper error for API route or redirect for UI
+    return (req.originalUrl.startsWith('/api'))
+      ? res.status(401).send('Unauthorized')
+      : res.redirect('back');
   }
   else {
     M.log.verbose(`"${req.originalUrl}" requested with`
