@@ -550,11 +550,24 @@ function deleteMultipleUsers(done) {
     testData.users[4].username
   ] } };
 
+  // Define users array
+  let users = [];
+
   // Delete the users
   UserController.removeUsers(adminUser, deleteQuery, true)
   .then((deletedUsers) => {
+    // Set users
+    users = deletedUsers;
     // Verify returned data
     chai.expect(deletedUsers.length).to.equal(2);
+
+    // Find the default org
+    return Organization.findOne({ id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultorg) => {
+    // Verify deleted users are not in default org
+    chai.expect(defaultorg.permissions.read).to.not.have.members([users[0]._id, users[1]._id]);
+    chai.expect(defaultorg.permissions.write).to.not.have.members([users[0]._id, users[1]._id]);
     done();
   })
   .catch((error) => {

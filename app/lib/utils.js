@@ -279,8 +279,7 @@ module.exports.deepEqual = function(a, b) {
 };
 
 /**
- * @description Adds or changes values in an object, based on data from the
- * second parameter.
+ * @description Adds/updates values in original object based on update object.
  *
  * @param {Object} originalObj - The original object, which will be updated with
  *                               values from the second object.
@@ -288,17 +287,17 @@ module.exports.deepEqual = function(a, b) {
  *                             will be added/changed in the original object.
  */
 module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
-  // Get all existing keys for the first object
+  // Get all existing keys for originalObject
   const firstKeys = Object.keys(originalObj);
 
-  // Loop through all of the keys in the second object
+  // Loop through all of the keys in updateObject
   Object.keys(updateObj).forEach((key) => {
-    // If the key is not in the first object, add it
+    // If the key is not in originalObject, add it
     if (!firstKeys.includes(key)) {
       originalObj[key] = updateObj[key];
     }
-    // If the key is in the first object, and it's value is a nested object,
-    // recursively call this function with the value of each object
+    // If the key is in originalObject, and it's value is a nested object,
+    // recursively call this function with the value of the key/value pair
     else if (typeof originalObj[key] === 'object' && typeof updateObj[key] === 'object') {
       this.updateAndCombineObjects(originalObj[key], updateObj[key]);
     }
