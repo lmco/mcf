@@ -16,6 +16,7 @@
 
 // Node.js Modules
 const path = require('path');
+const assert = require('assert');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -1271,26 +1272,27 @@ function postUsers(req, res) {
  * @return {Object} res response object with users' public data
  */
 function patchUsers(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+  // Ensure request body and parameters are formatted properly
+  try {
+    assert.ok(req.hasOwnProperty('user'), 'Request Failed');
+    assert.ok(req.body.hasOwnProperty('update'), 'Update object was not provided in body.');
+    assert.ok(typeof req.body.update === 'object', 'Update parameter is not an object.');
+    assert.ok(req.body.hasOwnProperty('users'), 'Array of users not provided in body.');
+    assert.ok(Array.isArray(req.body.users), 'Users parameter is not an array.');
+  }
+  catch (message) {
+    // Set status code
+    let status = 400;
+    if (message === 'Request Failed') status = 500;
+
+    // Create and return error
+    const error = new M.CustomError(message, status, 'warn');
+    return res.status(status).send(error);
   }
 
   // Initialize the update query object
   let updateQuery = {};
 
-  // Error Check: ensure update was provided in body
-  if (!req.body.hasOwnProperty('update')) {
-    const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
-  // No users provided, return an error
-  if (!req.body.hasOwnProperty('users')) {
-    const error = new M.CustomError('Array of users not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
   // User objects provided, update all
   if (req.body.users.every(u => typeof u === 'object')) {
     // Query finds all users by their username
