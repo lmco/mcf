@@ -56,7 +56,7 @@ describe(M.getModuleName(module.filename), function() {
    * Execute the tests
    */
   it('clean database', cleanDB);
-  it('should create the default org if it doesnt exist', createDefaultOrg);
+  it('should create the default org if it doesn\'t exist', createDefaultOrg);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -67,7 +67,7 @@ describe(M.getModuleName(module.filename), function() {
 function cleanDB(done) {
   User.deleteMany({}) // Remove users
   // Remove all orgs except for the 'default' org.
-  .then(() => Organization.deleteMany({ name: { $ne: M.config.server.defaultOrganizationId } }))
+  .then(() => Organization.deleteMany({ id: { $ne: M.config.server.defaultOrganizationId } }))
   .then(() => Project.deleteMany({}))  // Remove projects
   .then(() => Element.Element.deleteMany({}))  // Remove elements
   .then(() => done())
