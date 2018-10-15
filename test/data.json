@@ -36,6 +36,17 @@
       "custom": {
         "location": "Location03"
       }
+    },
+    {
+      "username": "nonadminuser04",
+      "password": "Password123",
+      "preferredName": "nonadmin user",
+      "fname": "userFirstname",
+      "lname": "userLastname",
+      "admin": false,
+      "custom": {
+        "location": "Location04"
+      }
     }
   ],
 
