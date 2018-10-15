@@ -110,7 +110,7 @@ function authenticate(req, res, next) {
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
-          : res.redirect('/login');
+          : res.redirect('back');
       }
 
       // Handle Basic Authentication
