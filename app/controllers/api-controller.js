@@ -16,6 +16,7 @@
 
 // Node.js Modules
 const path = require('path');
+const assert = require('assert');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -68,6 +69,7 @@ module.exports = {
   deleteUser,
   whoami,
   getElements,
+  patchElements,
   getElement,
   postElement,
   patchElement,
@@ -1503,6 +1505,87 @@ function getElements(req, res) {
   ElementController.findElements(req.user, req.params.orgid, req.params.projectid, softDeleted)
   .then((elements) => {
     // Return a 200: OK and elements
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/elements
+ *
+ * @description Updates multiple projects at a time.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with updated elements
+ */
+function patchElements(req, res) {
+  // Ensure request parameters and body are properly formatted
+  try {
+    assert.ok(req.hasOwnProperty('user'), 'Request Failed');
+    // Check if invalid key passed in
+    Object.keys(req.body).forEach((key) => {
+      // If invalid key, reject
+      assert.ok(['elements', 'update'].includes(key), `Invalid parameter: ${key}`);
+    });
+    assert.ok(req.body.hasOwnProperty('update'), 'Update object was not provided in body.');
+    assert.ok(req.params.hasOwnProperty('orgid'), 'orgid was not provided in params.');
+    assert.ok(typeof req.params.orgid === 'string', 'orgid in request params is not a string.');
+    assert.ok(req.params.hasOwnProperty('projectid'), 'projectid was not provided in params.');
+    assert.ok(typeof req.params.projectid === 'string',
+      'projectid in request params is not a string.');
+  }
+  catch (message) {
+    // If req.user is not provided, set status code to 500
+    let status = 400;
+    if (message === 'Request Failed') status = 500;
+
+    // Create and return error
+    const error = new M.CustomError(message, status, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize the update query object
+  let updateQuery = {};
+
+  // No elements provided, update all elements in the project
+  if (!req.body.hasOwnProperty('elements')) {
+    // Query finds all elements that start with 'orgid:projectid:'
+    updateQuery = { uid: { $regex: `^${sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid
+    ))}:` } };
+  }
+  // Element objects provided, update all
+  else if (req.body.elements.every(e => typeof e === 'object')) {
+    // Query finds all element by their uid
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid, e.id
+    )));
+    updateQuery = { uid: { $in: uids } };
+  }
+  // Element IDs provided, update all
+  else if (req.body.elements.every(e => typeof e === 'string')) {
+    // Query finds all elements by their uid, generated from orgid and projectid
+    // in the request parameters
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid, e
+    )));
+    updateQuery = { uid: { $in: uids } };
+  }
+  // No valid element data was provided, reject
+  else {
+    const error = new M.CustomError('Elements array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified projects
+  // NOTE: updateElements() sanitizes req.body.update
+  ElementController.updateElements(req.user, updateQuery, req.body.update)
+  .then((elements) => {
+    // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(elements));
   })

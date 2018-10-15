@@ -123,9 +123,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET the previously posted element', getElement);
   it('should GET all elements for a project', getElements);
   it('should PATCH an elements name', patchElement);
+  it('should PATCH an update to multiple elements', patchMultipleElements);
   it('should reject a POST with an invalid name field', rejectPostElement);
   it('should reject a GET to a non-existing element', rejectGetElement);
   it('should reject a PATCH with an invalid name', rejectPatchElement);
+  it('should reject a PATCH invalid field to multiple elements', rejectPatchInvalidFieldElements);
   it('should reject a DELETE with a non-existing element', rejectDeleteNonexistingElement);
   it('should DELETE the previously created element', deleteElement01);
   it('should DELETE the second previously created element', deleteElement02);
@@ -253,6 +255,36 @@ function patchElement(done) {
 }
 
 /**
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements
+ * updates multiple elements at the same time.
+ */
+function patchMultipleElements(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      elements: [testData.elements[0], testData.elements[1]],
+      update: { custom: { department: 'Space' }, name: 'New Element Name' }
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json[0].name).to.equal('New Element Name');
+    chai.expect(json[1].name).to.equal('New Element Name');
+    chai.expect(json[0].custom.department).to.equal('Space');
+    chai.expect(json[1].custom.department).to.equal('Space');
+    done();
+  });
+}
+
+/**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
  * fails to creates an element with an empty/invalid name field.
  */
@@ -310,6 +342,33 @@ function rejectPatchElement(done) {
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify(testData.names[8])
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements
+ * fails to update a unique field.
+ */
+function rejectPatchInvalidFieldElements(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      elements: [testData.elements[0], testData.elements[1]],
+      update: { id: 'newid' }
+    })
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
