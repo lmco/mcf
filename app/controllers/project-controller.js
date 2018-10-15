@@ -101,16 +101,8 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     OrgController.findOrg(reqUser, organizationID, softDeleted)
     // Find projects
     .then(() => findProjectsQuery(searchParams))
-    .then((projects) => {
-      // Filter results to only the projects on which user has read access
-      let res = projects.filter(project => project.getPermissions(reqUser).read || reqUser.admin);
-
-      // Map project public data to results
-      res = res.map(project => project.getPublicData());
-
-      // Return resulting project
-      return resolve(res);
-    })
+    .then((projects) => resolve(projects
+    .filter(project => project.getPermissions(reqUser).read || reqUser.admin)))
     .catch((error) => reject(error));
   });
 }

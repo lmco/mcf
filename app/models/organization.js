@@ -116,12 +116,19 @@ OrganizationSchema.virtual('projects', {
  */
 OrganizationSchema.methods.getPublicData = function() {
   // Map read, write, and admin references to only contain user public data
-  this.permissions.read = this.permissions.read.map(u => u.getPublicData());
-  this.permissions.write = this.permissions.write.map(u => u.getPublicData());
-  this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
+  const permissions = {
+    read: this.permissions.read.map(u => u.getPublicData()),
+    write: this.permissions.write.map(u => u.getPublicData()),
+    admin: this.permissions.admin.map(u => u.getPublicData())
+  };
 
-  // Return the organization
-  return this;
+  // Return the organization public fields
+  return {
+    id: this.id,
+    name: this.name,
+    permissions: permissions,
+    custom: this.custom
+  };
 };
 
 /**

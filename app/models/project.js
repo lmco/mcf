@@ -34,17 +34,17 @@ const validators = M.require('lib.validators');
  *
  * @property {String} id - The project's non-unique id.
  * @property {Organization} org - A reference to the project's organization.
- * @property {String} uid - The projects unique id namespaced using a
+ * @property {String} uid - The projects unique id name-spaced using a
  * project's organization.
  * @property {String} name - The project's non-unique project name.
  * @property {User} permissions - An object whose keys identify a projects's
  * roles. The key values are an array of references to users who hold those
  * roles.
- * @property {User} permissions.read - An array of refrences to Users who have
+ * @property {User} permissions.read - An array of references to Users who have
  * read access
- * @property {User} permissions.write - An array of refrences to Users who have
+ * @property {User} permissions.write - An array of references to Users who have
  * write access
- * @property {User} permissions.admin - An array of refrences to Users who have
+ * @property {User} permissions.admin - An array of references to Users who have
  * admin access
  * @property {Date} deletedOn - The date a project was soft deleted or null if
  * not soft deleted
@@ -124,11 +124,22 @@ const ProjectSchema = new mongoose.Schema({
  */
 ProjectSchema.methods.getPublicData = function() {
   // Map read, write, and admin references to only contain user public data
-  this.permissions.read = this.permissions.read.map(u => u.getPublicData());
-  this.permissions.write = this.permissions.write.map(u => u.getPublicData());
-  this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
-  // Return the project
-  return this;
+  const permissions = {
+    read: this.permissions.read.map(u => u.getPublicData()),
+    write: this.permissions.write.map(u => u.getPublicData()),
+    admin: this.permissions.admin.map(u => u.getPublicData())
+  };
+
+  // Return the projects public fields
+  return {
+    id: this.id,
+    org: this.org,
+    uid: this.uid,
+    name: this.name,
+    permissions: permissions,
+    custom: this.custom,
+    visibility: this.visibility
+  };
 };
 
 /**
