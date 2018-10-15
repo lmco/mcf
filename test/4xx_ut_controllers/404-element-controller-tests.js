@@ -129,6 +129,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should find all elements for a project', findElements);
   it('should find an element by its uuid', findElementByUUID);
   it('should update an element', updateElement);
+  it('should update multiple elements', updateMultipleElements);
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
   it('should soft delete all elements', softDeleteAllElements);
@@ -374,6 +375,41 @@ function updateElement(done) {
     // Verify the found element's properties
     chai.expect(retElem.id).to.equal(testData.elements[0].id);
     chai.expect(retElem.name).to.equal(testData.elements[4].name);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates multiple elements at the same time.
+ */
+function updateMultipleElements(done) {
+  // Create query to update elements
+  const uids = [utils.createUID(org.id, proj.id, testData.elements[0].id),
+    utils.createUID(org.id, proj.id, testData.elements[1].id)];
+  const updateQuery = { uid: { $in: uids } };
+
+  // Create list of update parameters
+  const updateObj = {
+    custom: {
+      department: 'Space'
+    },
+    name: 'New Element Name'
+  };
+
+  // Update elements
+  ElemController.updateElements(adminUser, updateQuery, updateObj)
+  .then((elements) => {
+    // Verify returned data
+    chai.expect(elements[0].name).to.equal(updateObj.name);
+    chai.expect(elements[1].name).to.equal(updateObj.name);
+    chai.expect(elements[0].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(elements[1].custom.department).to.equal(updateObj.custom.department);
     done();
   })
   .catch((error) => {

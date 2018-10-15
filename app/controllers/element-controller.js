@@ -28,7 +28,8 @@ module.exports = {
   findElements,
   removeElement,
   removeElements,
-  updateElement
+  updateElement,
+  updateElements
 };
 
 // Node.js Modules
@@ -103,6 +104,118 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
       return resolve(res);
     })
     .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description This function updates found elements from a given query.
+ *
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {Object} query -The query used to find/update elements.
+ * @param {Object} updateInfo - An object containing updated elements data
+ *
+ * @return {Promise} resolve - array of updated elements
+ *                   reject -  error
+ *
+ * @example
+ * updateElements({User}, { project: 'projectid' }, { name: 'New Element Name' })
+ * .then(function(elements) {
+ *   // Do something with the updated elements
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function updateElements(reqUser, query, updateInfo) {
+  return new Promise((resolve, reject) => {
+    // Define flag for updating 'Mixed' fields and foundElements array
+    let containsMixed = false;
+    let foundElements = [];
+
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof query === 'object', 'Update query is not an object.');
+      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
+      // Loop through each desired update
+      Object.keys(updateInfo).forEach((key) => {
+        // Error Check: ensure user can update each field
+        assert.ok(Element.Element.schema.methods.getValidUpdateFields().includes(key),
+          `Element property [${key}] cannot be changed.`);
+
+        // Error Check: ensure parameter is not unique
+        assert.ok(!Element.Element.schema.obj[key].unique,
+          `Cannot use batch update on the unique field [${key}].`);
+
+        // If the field is a mixed field, set the flag
+        if (Element.Element.schema.obj[key].type.schemaName === 'Mixed') {
+          containsMixed = true;
+        }
+      });
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+    // Find the elements to update
+    findElementsQuery(query)
+    .then((elements) => {
+      // Set foundElements array
+      foundElements = elements;
+
+      // Loop through each found elements
+      elements.forEach((element) => {
+        // Error Check: ensure user has permission to update element
+        if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
+          return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        }
+      });
+
+      // If updating a mixed field, update each element individually
+      if (containsMixed) {
+        M.log.info('Updating elements.... this could take a while.');
+        // Create array of promises
+        const promises = [];
+        // Loop through each element
+        elements.forEach((element) => {
+          // Loop through each update
+          Object.keys(updateInfo).forEach((key) => {
+            // If a 'Mixed' field
+            if (Element.Element.schema.obj[key].type.schemaName === 'Mixed') {
+              // Merge changes into original 'Mixed' field
+              utils.updateAndCombineObjects(element[key], sani.sanitize(updateInfo[key]));
+              // Mark that the 'Mixed' field has been modified
+              element.markModified(key);
+            }
+            else {
+              // Update the value in the element
+              element[key] = sani.sanitize(updateInfo[key]);
+            }
+          });
+
+          // Add element.save() to promise array
+          promises.push(element.save());
+        });
+
+        // Once all promises complete, return
+        return Promise.all(promises);
+      }
+
+      // No mixed field update, update all together
+      return Element.Element.updateMany(query, updateInfo);
+    })
+    .then((retQuery) => {
+      // Check if some of the elements in updateMany failed
+      if (!containsMixed && retQuery.n !== foundElements.length) {
+        // The number updated does not match the number attempted, log it
+        M.log.error('Some of the following elements failed to update: '
+          + `[${foundElements.map(e => e.uid)}].`);
+      }
+
+      // Find the updated elements to return them
+      return findElementsQuery(query);
+    })
+    // Return the updated elements
+    .then((updatedElements) => resolve(updatedElements))
+    .catch((error) => M.CustomError.parseCustomError(error));
   });
 }
 
