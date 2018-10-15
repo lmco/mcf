@@ -16,6 +16,7 @@
 
 // Node.js Modules
 const path = require('path');
+const assert = require('assert');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -61,6 +62,7 @@ module.exports = {
   deleteProjectRole,
   getUsers,
   postUsers,
+  patchUsers,
   deleteUsers,
   getUser,
   postUser,
@@ -1253,6 +1255,67 @@ function postUsers(req, res) {
     // Return 200: OK and public user data
     const publicUsers = users.map(u => u.getPublicData());
     return res.status(200).send(formatJSON(publicUsers));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * PATCH /api/users
+ *
+ * @description Updates multiple users
+ * NOTE: Admin only.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with users' public data
+ */
+function patchUsers(req, res) {
+  // Ensure request body and parameters are formatted properly
+  try {
+    assert.ok(req.hasOwnProperty('user'), 'Request Failed');
+    assert.ok(req.body.hasOwnProperty('update'), 'Update object was not provided in body.');
+    assert.ok(typeof req.body.update === 'object', 'Update parameter is not an object.');
+    assert.ok(req.body.hasOwnProperty('users'), 'Array of users not provided in body.');
+    assert.ok(Array.isArray(req.body.users), 'Users parameter is not an array.');
+  }
+  catch (message) {
+    // Set status code
+    let status = 400;
+    if (message === 'Request Failed') status = 500;
+
+    // Create and return error
+    const error = new M.CustomError(message, status, 'warn');
+    return res.status(status).send(error);
+  }
+
+  // Initialize the update query object
+  let updateQuery = {};
+
+  // User objects provided, update all
+  if (req.body.users.every(u => typeof u === 'object')) {
+    // Query finds all users by their username
+    updateQuery = { username: { $in: sani.sanitize(req.body.users.map(u => u.username)) } };
+  }
+  // Usernames provided, update all
+  else if (req.body.users.every(u => typeof u === 'string')) {
+    // Query finds all users by their username
+    updateQuery = { username: { $in: sani.sanitize(req.body.users) } };
+  }
+  // No valid user data was provided, reject
+  else {
+    const error = new M.CustomError('Users array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified users
+  // NOTE: updateUsers() sanitizes req.body.update
+  UserController.updateUsers(req.user, updateQuery, req.body.update)
+  .then((users) => {
+    // Return 200: OK and the updated users
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(users));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
