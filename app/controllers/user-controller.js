@@ -24,6 +24,8 @@
 // circular references between controllers.
 module.exports = {
   findUsers,
+  createUsers,
+  removeUsers,
   findUser,
   findUsersQuery,
   createUser,
@@ -84,6 +86,230 @@ function findUsers(reqUser, softDeleted = false) {
     findUsersQuery(searchParams)
     .then((users) => resolve(users))
     .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description This function creates multiple users.
+ *
+ * @param {User} reqUser - The requesting user.
+ * @param {Array} arrNewUsers - Array containing new user objects.
+ *
+ * @returns {Promise} The newly created users.
+ *
+ * @example
+ * createUser({User}, [{User1}, {User2}, ...])
+ * .then(function(users) {
+ *   // Do something with the newly created users
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createUsers(reqUser, arrNewUsers) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(Array.isArray(arrNewUsers), 'List of new user data is not an array.');
+      let index = 1;
+      // Inspect each user object for a username
+      Object(arrNewUsers).forEach((userObject) => {
+        assert.ok(userObject.hasOwnProperty('username'), `Username not provided user #${index}.`);
+        assert.ok(typeof userObject.username === 'string',
+          `Username in user #${index} is not a string.`);
+        index++;
+      });
+    }
+    catch (error) {
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 403;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+    }
+
+    // Define function-wide variables
+    let createdUsers = [];
+    let created = false;
+
+    // Create find query
+    const findQuery = { username: { $in: sani.sanitize(arrNewUsers.map(u => u.username)) } };
+
+    // Attempt to find existing users
+    findUsersQuery(findQuery)
+    .then((users) => {
+      // Error Check: ensure no users with matching usernames already exist
+      if (users.length > 0) {
+        // One or more users exists, reject
+        return reject(new M.CustomError('User(s) with matching username(s) '
+          + ` already exist: [${users.map(u => u.username).toString()}].`, 403, 'warn'));
+      }
+
+      // Create user objects
+      const userObjects = arrNewUsers.map(u => new User(sani.sanitize(u)));
+
+      // Set created flag to true
+      created = true;
+
+      // Save new user objects
+      return User.create(userObjects);
+    })
+    .then((newUsers) => {
+      // Set function-wide users list
+      createdUsers = newUsers;
+
+      // Find the default organization
+      return OrgController.findOrg(reqUser, M.config.server.defaultOrganizationId);
+    })
+    .then((defaultOrg) => {
+      // Loop through each created user
+      Object(createdUsers).forEach((user) => {
+        // Add each user to read/write list of default org
+        defaultOrg.permissions.read.push(user._id.toString());
+        defaultOrg.permissions.write.push(user._id.toString());
+      });
+
+      // Save the updated default org
+      return defaultOrg.save();
+    })
+    // Return the new users
+    .then(() => resolve(createdUsers))
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError && !created) {
+        return reject(error);
+      }
+
+      // Sanity Check: If not a CustomError but users not yet created,
+      // make it a CustomError and reject, this should never happen
+      if (!created) {
+        return reject(new M.CustomError(error.message, 500, 'warn'));
+      }
+
+      // If it's not a CustomError, the create failed so delete all successfully
+      // created users and reject the error.
+      return User.deleteMany(findQuery)
+      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
+      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+    });
+  });
+}
+
+/**
+ * @description This function deletes multiple users
+ *
+ * @param {User} reqUser - The requesting user.
+ * @param {Object} query - The query used to update/delete users.
+ * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
+ *
+ * @returns {Promise} The newly deleted users.
+ *
+ * @example
+ * removeUser({User}, { username: 'username' }, true)
+ * .then(function(users) {
+ *   // Do something with the deleted users
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function removeUsers(reqUser, query, hardDelete = false) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof query === 'object', 'Remove query is not an object.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
+    }
+    catch (error) {
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 403;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+    }
+
+    // Define foundUsers array and findQuery
+    let foundUsers = [];
+    let findQuery = {};
+
+    // Find the users
+    findUsersQuery(query)
+    .then((users) => {
+      // Set foundUsers and findQuery
+      foundUsers = users;
+      findQuery = { 'permissions.read': { $in: foundUsers.map(u => u._id) } };
+
+      // Find matching orgs
+      return OrgController.findOrgsQuery(findQuery);
+    })
+    .then((orgs) => {
+      // Create an array of promises
+      const promises = [];
+
+      // Loop through each org
+      Object(orgs).forEach((org) => {
+        // Remove users from permissions list in each org
+        org.permissions.read = org.permissions.read
+        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        org.permissions.write = org.permissions.write
+        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        org.permissions.admin = org.permissions.admin
+        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+
+        // Add save operation to list of promises
+        promises.push(org.save());
+      });
+
+      // Save all orgs and return once all are saved
+      return Promise.all(promises);
+    })
+    // Find all projects the users are apart of
+    .then(() => ProjController.findProjectsQuery(findQuery))
+    .then((projects) => {
+      // Create an array of promises
+      const promises = [];
+
+      // Loop through each project
+      Object(projects).forEach((proj) => {
+        // Remove users from permissions list in each project
+        proj.permissions.read = proj.permissions.read
+        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        proj.permissions.write = proj.permissions.write
+        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        proj.permissions.admin = proj.permissions.admin
+        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+
+        // Add save operation to list of promises
+        promises.push(proj.save());
+      });
+
+      // Save all projects and return once all are saved
+      return Promise.all(promises);
+    })
+    // If hardDelete, delete users, otherwise update them
+    .then(() => ((hardDelete)
+      ? User.deleteMany(query)
+      : User.updateMany(query, { deleted: true })))
+    .then((responseQuery) => {
+      // Handle case where not all users are successfully deleted/updated
+      if (responseQuery.n !== foundUsers.length) {
+        M.log.error('Some of the following users failed to delete: '
+        + `[${foundUsers.map(u => u.username)}].`);
+      }
+      return resolve(foundUsers);
+    })
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError) {
+        return reject(error);
+      }
+      // If it's not a CustomError, create one and reject
+      return reject(new M.CustomError(error.message, 500, 'warn'));
+    });
   });
 }
 
@@ -394,55 +620,54 @@ function removeUser(reqUser, usernameToDelete) {
       );
     })
     /* eslint-disable no-loop-func */
-    .then((arrOrgs) => {
+    .then((orgs) => {
+      // Create an array of promises
+      const promises = [];
+
       // Loop through organization array
-      for (let i = 0; i < arrOrgs.length; i++) {
+      Object(orgs).forEach((org) => {
         // Remove user from permissions list in each org
-        arrOrgs[i].permissions.read = arrOrgs[i].permissions.read
+        org.permissions.read = org.permissions.read
         .filter(user => user._id.toString() !== userToDelete._id.toString());
-        arrOrgs[i].permissions.write = arrOrgs[i].permissions.write
+        org.permissions.write = org.permissions.write
         .filter(user => user._id.toString() !== userToDelete._id.toString());
-        arrOrgs[i].permissions.admin = arrOrgs[i].permissions.admin
+        org.permissions.admin = org.permissions.admin
         .filter(user => user._id.toString() !== userToDelete._id.toString());
 
-        // Save updated org
-        arrOrgs[i].save((error) => {
-          // If error, log it
-          if (error) {
-            M.log.error(error);
-            M.log.warn(`${userToDelete} was not removed from org ${arrOrgs[i].id}.`);
-          }
-        });
-      }
+        // Add save operation to list of promises
+        promises.push(org.save());
+      });
 
-      // Find projects the user has read permissions on
-      return ProjController.findProjectsQuery(
-        { 'permissions.read': userToDelete._id, deleted: false }
-      );
+      // Save all orgs and return once all are saved
+      return Promise.all(promises);
     })
+    // Find projects the user has read permissions on
+    .then(() => ProjController.findProjectsQuery(
+      { 'permissions.read': userToDelete._id, deleted: false }
+    ))
     .then((projects) => {
+      // Create an array of promises
+      const promises = [];
+
       // Loop through projects
-      for (let i = 0; i < projects.length; i++) {
+      Object(projects).forEach((proj) => {
         // Remove user from permissions list in each project
-        projects[i].permissions.read = projects[i].permissions.read
+        proj.permissions.read = proj.permissions.read
         .filter(user => user._id.toString() !== userToDelete._id.toString());
-        projects[i].permissions.write = projects[i].permissions.write
+        proj.permissions.write = proj.permissions.write
         .filter(user => user._id.toString() !== userToDelete._id.toString());
-        projects[i].permissions.admin = projects[i].permissions.admin
+        proj.permissions.admin = proj.permissions.admin
         .filter(user => user._id.toString() !== userToDelete._id.toString());
 
-        // Save updated project
-        projects[i].save((error) => {
-          // If error, log it
-          if (error) {
-            M.log.critical(`${userToDelete} was not removed from project ${projects[i].id}.`);
-          }
-        });
-      }
+        // Add save operation to list of promises
+        promises.push(proj.save());
+      });
 
-      // Remove the user
-      return userToDelete.remove();
+      // Save all projects and return once all are saved
+      return Promise.all(promises);
     })
+    // Remove the user
+    .then(() => userToDelete.remove())
     /* eslint-enable no-loop-func */
     .then((user) => resolve(user))
     // Return reject with custom error
