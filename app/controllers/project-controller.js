@@ -35,7 +35,8 @@ module.exports = {
   removeProject,
   removeProjects,
   setPermissions,
-  updateProject
+  updateProject,
+  updateProjects
 };
 
 // Node.js Modules
@@ -203,6 +204,119 @@ function createProjects(reqUser, organizationID, arrProjects) {
       .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
       .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
     });
+  });
+}
+
+/**
+ * @description This function updates multiple projects at the same time.
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {Object} query - The query used to find/update projects
+ * @param {Object} updateInfo - An object containing updated project data
+ *
+ * @return {Promise} updated projects
+ *
+ * @example
+ * updateProjects({User}, { id: 'proj1' }, { name: 'Different Proj Name' })
+ * .then(function(projects) {
+ *   // Do something with the newly updated projects
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function updateProjects(reqUser, query, updateInfo) {
+  return new Promise((resolve, reject) => {
+    // Define flag for updating 'Mixed' fields and foundProjects array
+    let containsMixed = false;
+    let foundProjects = [];
+
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof query === 'object', 'Update query is not an object.');
+      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
+      // Loop through each desired update
+      Object.keys(updateInfo).forEach((key) => {
+        // Error Check: ensure user can update each field
+        assert.ok(Project.schema.methods.getValidUpdateFields().includes(key),
+          `Project property [${key}] cannot be changed.`);
+
+        // Error Check: ensure parameter is not unique
+        assert.ok(!Project.schema.obj[key].unique,
+          `Cannot use batch update on the unique field [${key}].`);
+
+        // If the field is a mixed field, set the flag
+        if (Project.schema.obj[key].type.schemaName === 'Mixed') {
+          containsMixed = true;
+        }
+      });
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+
+    // Find the projects to update
+    findProjectsQuery(query)
+    .then((projects) => {
+      // Set foundProjects array
+      foundProjects = projects;
+
+      // Loop through each found project
+      Object(projects).forEach((proj) => {
+        // Error Check: ensure user has permission to update proj
+        if (!proj.getPermissions(reqUser).admin && !reqUser.admin) {
+          return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        }
+      });
+
+      // If updating a mixed field, update each project individually
+      if (containsMixed) {
+        M.log.info('Updating projects.... this could take a while.');
+        // Create array of promises
+        const promises = [];
+        // Loop through each project
+        Object(projects).forEach((proj) => {
+          // Loop through each update
+          Object.keys(updateInfo).forEach((key) => {
+            // If a 'Mixed' field
+            if (Project.schema.obj[key].type.schemaName === 'Mixed') {
+              // Merge changes into original 'Mixed' field
+              utils.updateAndCombineObjects(proj[key], sani.sanitize(updateInfo[key]));
+
+              // Mark that the 'Mixed' field has been modified
+              proj.markModified(key);
+            }
+            else {
+              // Update the value in the proj
+              proj[key] = sani.sanitize(updateInfo[key]);
+            }
+          });
+
+          // Add proj.save() to promise array
+          promises.push(proj.save());
+        });
+
+        // Once all promises complete, return
+        return Promise.all(promises);
+      }
+
+      // No mixed field update, update all together
+      return Project.updateMany(query, updateInfo);
+    })
+    .then((retQuery) => {
+      // Check if some of the projects in updateMany failed
+      if (!containsMixed && retQuery.n !== foundProjects.length) {
+        // The number updated does not match the number attempted, log it
+        M.log.error('Some of the following projects failed to update: '
+          + `[${foundProjects.map(o => o.id)}].`);
+      }
+
+      // Find the updated projects to return them
+      return findProjectsQuery(query);
+    })
+    // Return the updated projects
+    .then((updatedProjects) => resolve(updatedProjects))
+    .catch((error) => M.CustomError.parseCustomError(error));
   });
 }
 

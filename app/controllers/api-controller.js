@@ -60,6 +60,8 @@ module.exports = {
   postProjectRole,
   deleteProjectRole,
   getUsers,
+  postUsers,
+  deleteUsers,
   getUser,
   postUser,
   patchUser,
@@ -227,6 +229,12 @@ function getOrgs(req, res) {
       orgsPublicData.push(orgs[i].getPublicData());
     }
 
+    // Verify orgs public data array is not empty
+    if (orgsPublicData.length === 0) {
+      const error = new M.CustomError('No orgs found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
     // Return 200: OK and public org data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(orgsPublicData));
@@ -273,17 +281,60 @@ function postOrgs(req, res) {
 /**
  * PATCH /api/orgs
  *
- * @description Accepts an array of JSON objects containing organization data.
- * This function expects each of the organizations to already exist (this
- * should be updating them). If any of the organization updates fail, the
- * entire request fails.
+ * @description Updates multiple orgs from an array of objects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res - Response object with orgs' public data
  */
 function patchOrgs(req, res) {
-  // TODO - Discuss the possibility of batch updates to orgs by passing (MBX-354)
-  // an array of existing orgs. Must define behavior for this.
-  res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize the delete query object
+  let updateQuery = {};
+
+  // Error Check: ensure update was provided in body
+  if (!req.body.hasOwnProperty('update')) {
+    const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // No orgs provided, return an error
+  if (!req.body.hasOwnProperty('orgs')) {
+    const error = new M.CustomError('Array of orgs not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+  // Org objects provided, delete all
+  if (req.body.orgs.every(o => typeof o === 'object')) {
+    // Query finds all orgs by their id
+    updateQuery = { id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
+  }
+  // Org IDs provided, delete all
+  else if (req.body.orgs.every(o => typeof o === 'string')) {
+    // Query finds all orgs by their id
+    updateQuery = { id: { $in: sani.sanitize(req.body.orgs) } };
+  }
+  // No valid org data was provided, reject
+  else {
+    const error = new M.CustomError('Orgs array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified orgs
+  // NOTE: updateOrgs() sanitizes req.body.update
+  OrgController.updateOrgs(req.user, updateQuery, req.body.update)
+  .then((orgs) => {
+    // Return 200: OK and the updated orgs
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(orgs));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -663,6 +714,13 @@ function getProjects(req, res) {
     for (let i = 0; i < projects.length; i++) {
       projectPublicData.push(projects[i].getPublicData());
     }
+
+    // Verify project public data array is not empty
+    if (projectPublicData.length === 0) {
+      const error = new M.CustomError('No projects found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(projectPublicData));
@@ -709,17 +767,75 @@ function postProjects(req, res) {
 /**
  * PATCH /api/org/:orgid/projects
  *
- * @description Accepts an array of JSON objects containing project data.
- * This function expects each of the projects to already exist (this
- * should be updating them). If any of the project updates fail, the
- * entire request fails.
+ * @description This function updates multiple projects.
  *
- * This method is not yet implemented.
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
  *
- * TODO (jk) - Implement batchPatch Multiple batch to projects in a single operation. (MBX-356)
+ * @return {Object} res response object with updated projects.
  */
 function patchProjects(req, res) {
-  return res.status(501).send('Not Implemented.');
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize the update query object
+  let updateQuery = {};
+
+  // Error Check: ensure update was provided in body
+  if (!req.body.hasOwnProperty('update')) {
+    const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: ensure req.params.orgid was provided
+  if (!req.params.hasOwnProperty('orgid')) {
+    // orgid not provided, reject
+    const error = new M.CustomError('orgid was not provided in params.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: ensure req.params.orgid is a string
+  if (typeof req.params.orgid !== 'string') {
+    // orgid not a string, reject
+    const error = new M.CustomError('orgid in request params is not a string.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // No projects provided, update all projects in the org
+  if (!req.body.hasOwnProperty('projects')) {
+    // Query finds all projects that start with 'orgid:'
+    updateQuery = { uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } };
+  }
+  // Project objects provided, update all
+  else if (req.body.projects.every(p => typeof p === 'object')) {
+    // Query finds all projects by their id and whose uid start with 'orgid:'
+    updateQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
+      { id: { $in: sani.sanitize(req.body.projects.map(p => p.id)) } }] };
+  }
+  // Project IDs provided, update all
+  else if (req.body.projects.every(p => typeof p === 'string')) {
+    // Query finds all projects by their id and whose uid start with 'orgid:'
+    updateQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
+      { id: { $in: sani.sanitize(req.body.projects) } }] };
+  }
+  // No valid project data was provided, reject
+  else {
+    const error = new M.CustomError('Projects array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+  // Update the specified projects
+  // NOTE: updateProjects() sanitizes req.body.update
+  ProjectController.updateProjects(req.user, updateQuery, req.body.update)
+  .then((projects) => {
+    // Return 200: OK and the updated projects
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(projects));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -1093,6 +1209,107 @@ function getUsers(req, res) {
 
   // Get all users in MBEE
   UserController.findUsers(req.user)
+  .then((users) => {
+    res.header('Content-Type', 'application/json');
+
+    // Return 200: OK and public user data
+    const publicUsers = users.map(u => u.getPublicData());
+    return res.status(200).send(formatJSON(publicUsers));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * POST /api/users
+ *
+ * @description Creates multiple users
+ * NOTE: Admin only.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with users' public data
+ */
+function postUsers(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: check if users list included in req.body
+  if (!req.body.hasOwnProperty('users')) {
+    const error = new M.CustomError('Users array not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Create users
+  // NOTE: createUsers() sanitizes req.body.users
+  UserController.createUsers(req.user, req.body.users)
+  .then((users) => {
+    res.header('Content-Type', 'application/json');
+
+    // Return 200: OK and public user data
+    const publicUsers = users.map(u => u.getPublicData());
+    return res.status(200).send(formatJSON(publicUsers));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * DELETE /api/users
+ *
+ * @description Deletes multiple users
+ * NOTE: Admin only.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with users' public data
+ */
+function deleteUsers(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Initialize the delete query object
+  let deleteQuery = {};
+
+  // No users provided, return an error
+  if (!req.body.hasOwnProperty('users')) {
+    const error = new M.CustomError('Array of users not provided in body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+  // User objects provided, delete all
+  if (req.body.users.every(u => typeof u === 'object')) {
+    // Query finds all users by their username
+    deleteQuery = { username: { $in: sani.sanitize(req.body.users.map(u => u.username)) } };
+  }
+  // Usernames provided, delete all
+  else if (req.body.users.every(u => typeof u === 'string')) {
+    // Query finds all users by their username
+    deleteQuery = { username: { $in: sani.sanitize(req.body.users) } };
+  }
+  // No valid user data was provided, reject
+  else {
+    const error = new M.CustomError('User array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Remove the specified users
+  UserController.removeUsers(req.user, deleteQuery, hardDelete)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 

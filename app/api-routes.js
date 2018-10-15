@@ -148,6 +148,8 @@ api.route('/version')
  *         description: Bad Request, Failed to GET orgs due to invalid data.
  *       401:
  *         description: Unauthorized, Failed to GET orgs due to not being logged in.
+ *       404:
+ *         description: Not Found, Failed to GET orgs due to orgs not existing.
  *       500:
  *         description: Internal Server Error, Failed to GET orgs due to a server side issue.
  *   post:
@@ -169,7 +171,7 @@ api.route('/version')
  *           properties:
  *             orgs:
  *               type: object
- *               description: A list of objects containing organization data.
+ *               description: An array of objects containing organization data.
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST orgs returns orgs' data.
@@ -184,10 +186,39 @@ api.route('/version')
  *   patch:
  *     tags:
  *       - organizations
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple organizations from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing the organization data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - orgs
+ *           properties:
+ *             orgs:
+ *               type: object
+ *               description: An array of orgs to update. Can either be the
+ *                            org objects or the ids of the orgs.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the orgs
+ *                            and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - organizations
@@ -501,10 +532,40 @@ api.route('/orgs/:orgid')
  *   patch:
  *     tags:
  *       - projects
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple projects from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing the project data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - projects
+ *             - update
+ *           properties:
+ *             projects:
+ *               type: object
+ *               description: An array of projects to update. Can either be the
+ *                            project objects or the ids of the projects.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the
+ *                            projects and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - projects
@@ -1591,10 +1652,32 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *   post:
  *     tags:
  *       - users
- *     description: Not implemented, reserved for future use.
+ *     description: Creates multiple users from the supplied data in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing user objects to be created.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             users:
+ *               type: object
+ *               description: An array of users to create. Each user must
+ *                            contain the username of that user.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   patch:
  *     tags:
  *       - users
@@ -1605,10 +1688,36 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *   delete:
  *     tags:
  *       - users
- *     description: Not implemented, reserved for future use.
+ *     description: Deletes multiple users from the supplied list in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing user objects to be deleted.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             users:
+ *               type: object
+ *               description: An array of users to delete. Can either be a list
+ *                            of user objects or of usernames.
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the users should be hard
+ *                            deleted or not. Defaults to false.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  */
 api.route('/users')
 .get(
@@ -1621,7 +1730,7 @@ api.route('/users')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.notImplemented
+  APIController.postUsers
 )
 .patch(
   AuthController.authenticate,
@@ -1633,7 +1742,7 @@ api.route('/users')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.notImplemented
+  APIController.deleteUsers
 );
 
 /**

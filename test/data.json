@@ -36,6 +36,17 @@
       "custom": {
         "location": "Location03"
       }
+    },
+    {
+      "username": "nonadminuser04",
+      "password": "Password123",
+      "preferredName": "nonadmin user",
+      "fname": "userFirstname",
+      "lname": "userLastname",
+      "admin": false,
+      "custom": {
+        "location": "Location04"
+      }
     }
   ],
 
@@ -72,7 +83,11 @@
       "id": "testorg04",
       "name": "Test Organization 04",
       "custom": {
-        "leader": "Test Leader 04"
+        "leader": "Test Leader 04",
+        "location": {
+          "country": "USA",
+          "state": "CA"
+        }
       }
     }
   ],

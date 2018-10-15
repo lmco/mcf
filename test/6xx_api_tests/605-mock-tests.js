@@ -113,9 +113,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should DELETE a user', deleteUser);
   it('should DELETE an org', deleteOrg);
   it('should POST multiple orgs', postOrgs);
+  it('should PATCH multiple orgs', patchOrgs);
   it('should POST multiple projects', postProjects);
+  it('should PATCH multiple projects', patchProjects);
   it('should GET multiple projects', getProjects);
-  it('should DELETE multple projects', deleteProjects);
+  it('should DELETE multiple projects', deleteProjects);
   it('should DELETE orgs', deleteOrgs);
 });
 
@@ -953,6 +955,43 @@ function postOrgs(done) {
 }
 
 /**
+ * @description Verifies mock PATCH request to update multiple orgs.
+ */
+function patchOrgs(done) {
+  // Create request object
+  const body = {
+    orgs: [
+      testData.orgs[1],
+      testData.orgs[2]
+    ],
+    update: { custom: { department: 'Space', location: { country: 'USA' } } }
+  };
+  const params = {};
+  const method = 'PATCH';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    chai.expect(json[0].custom.leader).to.equal(testData.orgs[1].custom.leader);
+    chai.expect(json[0].custom.department).to.equal('Space');
+    chai.expect(json[0].custom.location.country).to.equal('USA');
+    done();
+  };
+
+  // PATCHs multiple orgs
+  apiController.patchOrgs(req, res);
+}
+
+
+/**
  * @description Verifies mock POST request to create multiple projects.
  */
 function postProjects(done) {
@@ -982,6 +1021,42 @@ function postProjects(done) {
 
   // POSTs multiple projects
   apiController.postProjects(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update multiple projects.
+ */
+function patchProjects(done) {
+  // Create request object
+  const body = {
+    projects: [
+      testData.projects[4],
+      testData.projects[5]
+    ],
+    update: { custom: { department: 'Space' }, name: 'Useless Project' }
+  };
+  const params = { orgid: testData.orgs[1].id };
+  const method = 'PATCH';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json[0].name).to.equal('Useless Project');
+    chai.expect(json[1].name).to.equal('Useless Project');
+    chai.expect(json[0].custom.department).to.equal('Space');
+    chai.expect(json[1].custom.department).to.equal('Space');
+    done();
+  };
+
+  // PATCHs multiple projects
+  apiController.patchProjects(req, res);
 }
 
 /**
