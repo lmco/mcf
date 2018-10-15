@@ -83,12 +83,19 @@ router.route('/organizations')
   UIController.organizationList
 );
 
-/* This renders the project list page for logged in users */
+/* This renders the project page for logged in users */
 router.route('/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
   UIController.projectList
+);
+
+/* This renders the test element page */
+router.route('/elements')
+.get(
+  Middleware.logRoute,
+  UIController.elementTest
 );
 
 /**

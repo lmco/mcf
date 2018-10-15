@@ -127,12 +127,12 @@ body {
 .nav-sidebar {
     background: darken($mbee-background, 5);
     color: inherit;
-    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    position: absolute; /* Fixed Sidebar (stay in place on scroll) */
     top: $navbar-height;
     left: 0;
     bottom: 0;
     z-index: 1000;
-    overflow-x: hidden;
+    overflow: hidden;
     &.nav-sidebar-banner {
         top: $banner-height + $navbar-height;
         bottom: $banner-height
@@ -235,10 +235,10 @@ body {
 /*                           Main Content Container                           *
 /******************************************************************************/
 .content {
+    position: absolute;
+    width: 100vw;
     margin-top: $navbar-height;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 10px;
     overflow-y: scroll;
     &.content-banner {
         margin-top: $banner-height + $navbar-height;
@@ -246,11 +246,11 @@ body {
     // Adjust the margins of the content with the sidebar
     // NOTE: Order matters, min will override full and so it must come last.
     &.sidebar-full {
-        margin-left: $nav-sidebar-full-width;
+        padding-left: $nav-sidebar-full-width + 10;
     }
 
     &.sidebar-min {
-        margin-left: $nav-sidebar-min-width;
+        padding-left: $nav-sidebar-min-width + 10;
     }
 }
 
@@ -328,6 +328,39 @@ body {
 /*                            Project Page Styling                            *
 /******************************************************************************/
 .mbee-project {
+
+}
+
+/******************************************************************************
+/*                            Project Tree Styling                            *
+/******************************************************************************/
+.element {
+    padding: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    display: none;
+
+    &.model-package {
+
+    }
+
+    &.model-block {
+        padding-left: 15px+16px;
+    }
+    &.model-relationship {
+        padding-left: 15px+16px;
+    }
+
+    &.expanded {
+        display: block;
+    }
+
+    .element-container {
+       :hover {
+           background: lighten($mbee-background,10);
+        }
+    }
+
 
 }
 

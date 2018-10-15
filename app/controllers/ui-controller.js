@@ -30,6 +30,7 @@ module.exports = {
   organization,
   projectList,
   project,
+  elementTest,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -50,6 +51,7 @@ const User = M.require('models.user');
 const crypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const elementSort = M.require('lib.element-sort');
 const validators = M.require('lib.validators');
 
 /**
@@ -219,6 +221,22 @@ function project(req, res) {
   .catch(err => {
     M.log.error(err);
     return res.redirect('/projects');
+  });
+}
+
+function elementTest(req, res) {
+  ElementController.findElements(req.user, req.params.orgid, req.params.projectid)
+  .then(elementsList => {
+    const elementTree = elementSort.CreateElementsTree(elementsList);
+    utils.render(req, res, 'element-test-tree', {
+      name: 'element-test-tree',
+      title: 'MBEE | Model-Based Engineering Environment',
+      elementTree: elementTree
+    });
+  })
+  .catch((error) => {
+    M.log.error(error);
+    res.redirect('/projects');
   });
 }
 

@@ -81,7 +81,7 @@
 <!-- Custom Scripts -->
 <script>
   $(document).ready(function() {
-    $(".collapsible").click(function(){
+    $(".collapsible").click(function() {
       $(this).next("div").slideToggle(100);
     });
   });
@@ -105,6 +105,13 @@
   function toggleSidebar() {
     document.getElementById("nav-sidebar").classList.toggle("sidebar-min");
     document.getElementById("content").classList.toggle("sidebar-min");
+  };
+
+  function toggleExpand(itemClass) {
+    var elementList = document.getElementsByClassName(itemClass)
+    for (let i = 0; i < elementList.length; i++) {
+      elementList[i].classList.toggle("expanded")
+    }
   };
 
 </script>

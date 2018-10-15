@@ -91,9 +91,12 @@ function build(_args) {
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
     .pipe(gulp.dest('build/public/js'));
 
+    // Copy mxGraph JS
+    gulp.src('./node_modules/mxgraph/javascript/**/*')
+    .pipe(gulp.dest('build/public/mxgraph'));
+
     // Copy MBEE JS
-    gulp.src('./app/ui/js/**/*.js')
-    .pipe(concat('mbee.js'))
+    gulp.src('./app/ui/js/mbee.js')
     .pipe(gulp.dest('build/public/js'));
   }
 
