@@ -60,7 +60,7 @@ function cleanDB(done) {
   User.deleteMany({})
 
   // Remove all orgs except for the 'default' org.
-  .then(() => Organization.deleteMany({ name: { $ne: 'default' } }))
+  .then(() => Organization.deleteMany({ name: { $ne: M.config.server.defaultOrganizationId } }))
   // Remove projects
   .then(() => Project.deleteMany({}))
   // Remove elements

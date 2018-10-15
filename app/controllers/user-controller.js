@@ -460,7 +460,7 @@ function createUser(reqUser, newUserData) {
     .then((user) => {
       createdUser = user;
       // Find the default organization
-      return OrgController.findOrgsQuery({ id: 'default' });
+      return OrgController.findOrgsQuery({ id: M.config.server.defaultOrganizationId });
     })
     .then((orgs) => {
       // Add user to default org read/write permissions
