@@ -107,6 +107,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creating a user with no username', rejectInvalidCreate);
   it('should reject creating an already existing user', rejectDuplicateUser);
   it('should update the users first name', updateFirstName);
+  it('should update multiple users', updateMultipleUsers);
   it('should reject updating the last name with an invalid name', rejectInvalidLastNameUpdate);
   it('should reject updating the users username', rejectUsernameUpdate);
   it('should reject update from a non-admin user', rejectUserUpdateByNonAdmin);
@@ -300,6 +301,45 @@ function updateFirstName(done) {
     chai.expect(updatedUser.username).to.equal(testData.users[1].username);
     chai.expect(updatedUser.fname).to.equal(`${testData.users[1].fname}edit`);
     chai.expect(updatedUser.lname).to.equal(testData.users[1].lname);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates multiple users at the same time.
+ */
+function updateMultipleUsers(done) {
+  // Create query to update users
+  const updateQuery = { username: { $in: [
+    testData.users[2].username,
+    testData.users[4].username
+  ] } };
+
+  // Create list of update parameters
+  const updateObj = {
+    custom: {
+      department: 'Space',
+      location: {
+        country: 'USA'
+      }
+    },
+    fname: 'Bob'
+  };
+
+  // Update users
+  UserController.updateUsers(adminUser, updateQuery, updateObj)
+  .then((users) => {
+    // Verify returned data
+    chai.expect(users[0].fname).to.equal(updateObj.fname);
+    chai.expect(users[1].fname).to.equal(updateObj.fname);
+    chai.expect(users[0].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(users[1].custom.department).to.equal(updateObj.custom.department);
     done();
   })
   .catch((error) => {
