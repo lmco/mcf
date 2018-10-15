@@ -274,6 +274,7 @@ function authenticate(req, res, next) {
         : res.redirect('back');
     });
   }
+  // Verify if credentials are empty or null
   else if (!username || !password || username === '' || password === '') {
     M.log.debug('Username or password not provided.');
     req.flash('loginError', 'Username or password not provided.');
