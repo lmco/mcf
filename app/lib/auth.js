@@ -260,12 +260,7 @@ function authenticate(req, res, next) {
     })
     .catch(err => {
       M.log.error(err.stack);
-      if (err.description === 'Invalid username or password.') {
-        req.flash('loginError', err.description);
-      }
-      else {
-        req.flash('loginError', 'Internal Server Error');
-      }
+      req.flash('loginError', 'Invalid username or password.');
 
       // return proper error for API route or redirect for UI
       // 'back' returns to the original login?next=originalUrl
@@ -275,19 +270,9 @@ function authenticate(req, res, next) {
     });
   }
   // Verify if credentials are empty or null
-  else if (!username || !password || username === '' || password === '') {
+  else {
     M.log.debug('Username or password not provided.');
     req.flash('loginError', 'Username or password not provided.');
-
-    // return proper error for API route or redirect for UI
-    return (req.originalUrl.startsWith('/api'))
-      ? res.status(401).send('Unauthorized')
-      : res.redirect('back');
-  }
-  else {
-    M.log.verbose(`"${req.originalUrl}" requested with`
-      + ' no valid authentication method provided.'
-      + ' Redirecting to "/login" ...');
 
     // return proper error for API route or redirect for UI
     return (req.originalUrl.startsWith('/api'))
