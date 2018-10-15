@@ -1323,7 +1323,7 @@ function deleteElements(req, res) {
   let deleteQuery = {};
 
   // No elements provided, delete all elements in the project
-  if (!req.body.hasOwnProperty('element')) {
+  if (!req.body.hasOwnProperty('elements')) {
     // Query finds all elements that start with 'orgid:projectid:'
     deleteQuery = { uid: { $regex: `^${sani.sanitize(utils.createUID(
       req.params.orgid, req.params.projectid
