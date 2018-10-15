@@ -210,15 +210,15 @@ api.route('/version')
  *                            and their corresponding values.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH orgs returns orgs' data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH orgs due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH orgs due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH orgs due to an already existing org with same id.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH orgs due to a server side issue.
  *   delete:
  *     tags:
  *       - organizations
@@ -557,15 +557,15 @@ api.route('/orgs/:orgid')
  *                            projects and their corresponding values.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH project returns project data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH project due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH project due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH project due to updating an immutable field.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH project due to server side issue.
  *   delete:
  *     tags:
  *       - projects
@@ -1669,15 +1669,15 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *                            contain the username of that user.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST users returns public users data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST users due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST users due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST users due to not having permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST users due to server side issue.
  *   patch:
  *     tags:
  *       - users
@@ -1709,15 +1709,15 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *                            deleted or not. Defaults to false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE users return users data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE users due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE users due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE users due to not having permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE users due to server side issue.
  */
 api.route('/users')
 .get(
