@@ -107,29 +107,29 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
 }
 
 /**
- * @description This function removes all elements attached to a project.
+ * @description This function removes multiple elements
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {Object} arrProjects - Array of projects whose elements will be deleted.
+ * @param {Object} query - The query used to find/delete elements
  * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete.
  *
- * @return {Promise} resolve - query: { "acknowledged" : XXXX, "deletedCount" : X }
+ * @return {Promise} resolve - deleted elements
  *                   reject -  error
  *
  * @example
- * removeElements({User}, [{Project1}, {Project2}], 'false')
- * .then(function(query) {
- *   // Do something with the returned query
+ * removeElements({User}, { proj: 'projID' }, 'false')
+ * .then(function(elements) {
+ *   // Do something with the deleted elements
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
  */
-function removeElements(reqUser, arrProjects, hardDelete = false) {
+function removeElements(reqUser, query, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(Array.isArray(arrProjects), 'Project Array is not an array.');
+      assert.ok(typeof query === 'object', 'Remove query is not an object.');
       assert.ok(typeof hardDelete === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
@@ -143,37 +143,32 @@ function removeElements(reqUser, arrProjects, hardDelete = false) {
       ));
     }
 
-    // Initialize the query object
-    const deleteQuery = { $or: [] };
+    // Define found elements array
+    let foundElements = [];
+    // Find the elements to delete
+    findElementsQuery(query)
+    .then((elements) => {
+      // Set foundElements
+      foundElements = elements;
 
-    // Loop through each project
-    Object(arrProjects).forEach((project) => {
-      // Error Check: ensure user has permissions to delete elements on each project
-      if (!project.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission to delete elements'
-          + ` on the project ${project.name}`, 403, 'warn'));
-      }
-      // Add project to deleteQuery
-      deleteQuery.$or.push({ project: project._id });
-    });
+      // Loop through each found element
+      Object(elements).forEach((element) => {
+        // Error Check: ensure user is global admin or project writer
+        if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
+          return reject(new M.CustomError('User does not have permissions to '
+              + `delete elements in the project [${element.project.name}].`, 403, 'warn'));
+        }
+      });
 
-    // If there are no elements to delete
-    if (deleteQuery.$or.length === 0) {
-      return resolve();
-    }
-
-    // Hard delete elements
-    if (hardDelete) {
-      Element.Element.deleteMany(deleteQuery)
-      .then((elements) => resolve(elements))
-      .catch((error) => reject(error));
-    }
-    // Soft delete elements
-    else {
-      Element.Element.updateMany(deleteQuery, { deleted: true })
-      .then((elements) => resolve(elements))
-      .catch((error) => reject(error));
-    }
+      // If hard delete, delete elements, otherwise update elements
+      return (hardDelete)
+        ? Element.Element.deleteMany(query)
+        : Element.Element.updateMany(query, { deleted: true });
+    })
+    // Return the deleted elements
+    .then(() => resolve(foundElements))
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
