@@ -25,6 +25,7 @@
 module.exports = {
   findUsers,
   createUsers,
+  updateUsers,
   removeUsers,
   findUser,
   findUsersQuery,
@@ -41,6 +42,7 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
+const utils = M.require('lib.utils');
 
 // eslint consistent-return rule is disabled for this file. The rule may not fit
 // controller-related functions as returns are inconsistent.
@@ -194,6 +196,115 @@ function createUsers(reqUser, arrNewUsers) {
       .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
       .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
     });
+  });
+}
+
+/**
+ * @description This function updates multiple user at a time.
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {Object} query - The query used to find/update users
+ * @param {Object} updateInfo - An object containing updated user data
+ *
+ * @return {Promise} updated users
+ *
+ * @example
+ * updateUsers({User}, { username: 'user' }, { fname: 'Different First Name' })
+ * .then(function(users) {
+ *   // Do something with the newly updated users
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function updateUsers(reqUser, query, updateInfo) {
+  return new Promise((resolve, reject) => {
+    // Define flag for updating 'Mixed' fields and foundUsers array
+    let containsMixed = false;
+    let foundUsers = [];
+
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof query === 'object', 'Update query is not an object.');
+      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
+      // Loop through each desired update
+      Object.keys(updateInfo).forEach((key) => {
+        // Error Check: ensure user can update each field
+        assert.ok(User.schema.methods.getValidUpdateFields().includes(key),
+          `User property [${key}] cannot be changed.`);
+
+        // Error Check: ensure parameter is not unique
+        assert.ok(!User.schema.obj[key].unique,
+          `Cannot use batch update on the unique field [${key}].`);
+
+        // If the field is a mixed field, set the flag
+        if (User.schema.obj[key].type.schemaName === 'Mixed') {
+          containsMixed = true;
+        }
+      });
+    }
+    catch (error) {
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permissions')) {
+        statusCode = 403;
+      }
+      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+    }
+
+    // Find the users to update
+    findUsersQuery(query)
+    .then((users) => {
+      // Set foundUsers array
+      foundUsers = users;
+
+      // If updating a mixed field, update each user individually
+      if (containsMixed) {
+        M.log.info('Updating users.... this could take a while.');
+        // Create array of promises
+        const promises = [];
+        // Loop through each user
+        Object(users).forEach((user) => {
+          // Loop through each update
+          Object.keys(updateInfo).forEach((key) => {
+            // If a 'Mixed' field
+            if (User.schema.obj[key].type.schemaName === 'Mixed') {
+              // Merge changes into original 'Mixed' field
+              utils.updateAndCombineObjects(user[key], sani.sanitize(updateInfo[key]));
+              // Mark that the 'Mixed' field has been modified
+              user.markModified(key);
+            }
+            else {
+              // Update the value in the user
+              user[key] = sani.sanitize(updateInfo[key]);
+            }
+          });
+
+          // Add user.save() to promise array
+          promises.push(user.save());
+        });
+
+        // Once all promises complete, return
+        return Promise.all(promises);
+      }
+
+      // No mixed field update, update all together
+      return User.updateMany(query, updateInfo);
+    })
+    .then((retQuery) => {
+      // Check if some of the users in updateMany failed
+      if (!containsMixed && retQuery.n !== foundUsers.length) {
+        // The number updated does not match the number attempted, log it
+        M.log.error('Some of the following users failed to update: '
+          + `[${foundUsers.map(o => o.id)}].`);
+      }
+      // Find the updated users to return them
+      return findUsersQuery(query);
+    })
+    // Return the updated users
+    .then((updatedUsers) => resolve(updatedUsers))
+    .catch((error) => M.CustomError.parseCustomError(error));
   });
 }
 
@@ -541,11 +652,9 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
             ));
           }
 
-          // Update each value in the object
-          // eslint-disable-next-line no-loop-func
-          Object.keys(newUserData[userUpdateFields[i]]).forEach((key) => {
-            user.custom[key] = sani.sanitize(newUserData[userUpdateFields[i]][key]);
-          });
+          // Add and replace parameters of the type 'Mixed'
+          utils.updateAndCombineObjects(user[userUpdateFields[i]],
+            newUserData[userUpdateFields[i]]);
 
           // Mark mixed fields as updated, required for mixed fields to update in mongoose
           // http://mongoosejs.com/docs/schematypes.html#mixed
@@ -553,7 +662,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
         }
         else {
           // Schema type is not mixed
-          // Sanitize field and update field in project object
+          // Sanitize field and update field in user object
           user[userUpdateFields[i]] = sani.sanitize(newUserData[userUpdateFields[i]]);
         }
       }

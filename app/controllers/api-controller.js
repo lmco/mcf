@@ -62,6 +62,7 @@ module.exports = {
   deleteProjectRole,
   getUsers,
   postUsers,
+  patchUsers,
   deleteUsers,
   getUser,
   postUser,
@@ -69,7 +70,11 @@ module.exports = {
   deleteUser,
   whoami,
   getElements,
+<<<<<<< HEAD
   patchElements,
+=======
+  deleteElements,
+>>>>>>> master
   getElement,
   postElement,
   patchElement,
@@ -1261,6 +1266,67 @@ function postUsers(req, res) {
 }
 
 /**
+ * PATCH /api/users
+ *
+ * @description Updates multiple users
+ * NOTE: Admin only.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with users' public data
+ */
+function patchUsers(req, res) {
+  // Ensure request body and parameters are formatted properly
+  try {
+    assert.ok(req.hasOwnProperty('user'), 'Request Failed');
+    assert.ok(req.body.hasOwnProperty('update'), 'Update object was not provided in body.');
+    assert.ok(typeof req.body.update === 'object', 'Update parameter is not an object.');
+    assert.ok(req.body.hasOwnProperty('users'), 'Array of users not provided in body.');
+    assert.ok(Array.isArray(req.body.users), 'Users parameter is not an array.');
+  }
+  catch (message) {
+    // Set status code
+    let status = 400;
+    if (message === 'Request Failed') status = 500;
+
+    // Create and return error
+    const error = new M.CustomError(message, status, 'warn');
+    return res.status(status).send(error);
+  }
+
+  // Initialize the update query object
+  let updateQuery = {};
+
+  // User objects provided, update all
+  if (req.body.users.every(u => typeof u === 'object')) {
+    // Query finds all users by their username
+    updateQuery = { username: { $in: sani.sanitize(req.body.users.map(u => u.username)) } };
+  }
+  // Usernames provided, update all
+  else if (req.body.users.every(u => typeof u === 'string')) {
+    // Query finds all users by their username
+    updateQuery = { username: { $in: sani.sanitize(req.body.users) } };
+  }
+  // No valid user data was provided, reject
+  else {
+    const error = new M.CustomError('Users array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified users
+  // NOTE: updateUsers() sanitizes req.body.update
+  UserController.updateUsers(req.user, updateQuery, req.body.update)
+  .then((users) => {
+    // Return 200: OK and the updated users
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(users));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
  * DELETE /api/users
  *
  * @description Deletes multiple users
@@ -1475,7 +1541,7 @@ function whoami(req, res) {
 
 /* -----------------------( Elements API Endpoints )------------------------- */
 /**
- * GET /api/orgs/:orgid/projects/:projectid/elements/
+ * GET /api/orgs/:orgid/projects/:projectid/elements
  *
  * @description Takes an orgid and projectid in the URI and returns all elements
  * of the project.
@@ -1586,6 +1652,83 @@ function patchElements(req, res) {
   ElementController.updateElements(req.user, updateQuery, req.body.update)
   .then((elements) => {
     // Return 200: OK and the updated elements
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements));
+  })
+  // If an error was thrown, return it and its status
+    .catch((error) => res.status(error.status).send(error));
+}
+
+/*
+ * DELETE /api/orgs/:orgid/projects/:projectid/elements
+ *
+ * @description Deletes multiple elements at the same time
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ * @return {Object} res response object with elements
+ */
+function deleteElements(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['elements', 'hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Initialize the delete query object
+  let deleteQuery = {};
+
+  // No elements provided, delete all elements in the project
+  if (!req.body.hasOwnProperty('elements')) {
+    // Query finds all elements that start with 'orgid:projectid:'
+    deleteQuery = { uid: { $regex: `^${sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid
+    ))}:` } };
+  }
+  // Element objects provided, delete all
+  else if (req.body.elements.every(e => typeof e === 'object')) {
+    // Query finds all element by their uid
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid, e.id
+    )));
+    deleteQuery = { uid: { $in: uids } };
+  }
+  // Element IDs provided, delete all
+  else if (req.body.elements.every(e => typeof e === 'string')) {
+    // Query finds all elements by their uid, generated from orgid and projectid
+    // in the request parameters
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid, e
+    )));
+    deleteQuery = { uid: { $in: uids } };
+  }
+  // No valid element data was provided, reject
+  else {
+    const error = new M.CustomError('Elements array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Remove the specified elements
+  ElementController.removeElements(req.user, deleteQuery, hardDelete)
+  .then((elements) => {
+    // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(elements));
   })

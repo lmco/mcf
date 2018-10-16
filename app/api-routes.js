@@ -1394,11 +1394,50 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *   delete:
  *     tags:
  *       - elements
- *     description: Not implemented, reserved for future use. If implemented,
- *                  this would delete all elements in a project.
+ *     description: Deletes multiple elements either by the org and project or by
+ *                  a supplied list in the body of the request.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose projects to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project whose elements to delete.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing delete elements options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             projects:
+ *               type: object
+ *               description: An array of elements to delete. Can either be the
+ *                            element objects or the ids of the elements. If the
+ *                            list is not provided, all elements under the
+ *                            project will be deleted.
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the element should be
+ *                            hard deleted or not. The user must be a global
+ *                            admin to hard delete. Defaults to false.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  */
 api.route('/orgs/:orgid/projects/:projectid/elements')
 .get(
@@ -1419,7 +1458,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.deleteElements
 );
 
 /**
@@ -1711,10 +1750,36 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *   patch:
  *     tags:
  *       - users
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple users from the supplied list in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing user objects to be updated.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             users:
+ *               type: object
+ *               description: An array of users to update. Can either be a list
+ *                            of user objects or of usernames.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the users
+ *                            and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - users
@@ -1766,7 +1831,7 @@ api.route('/users')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.notImplemented
+  APIController.patchUsers
 )
 .delete(
   AuthController.authenticate,
