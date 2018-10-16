@@ -70,11 +70,8 @@ module.exports = {
   deleteUser,
   whoami,
   getElements,
-<<<<<<< HEAD
   patchElements,
-=======
   deleteElements,
->>>>>>> master
   getElement,
   postElement,
   patchElement,
@@ -1656,7 +1653,7 @@ function patchElements(req, res) {
     return res.status(200).send(formatJSON(elements));
   })
   // If an error was thrown, return it and its status
-    .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /*
