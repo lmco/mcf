@@ -1176,7 +1176,7 @@ function deleteProjectRole(req, res) {
   // Remove permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
   ProjectController.setPermissions(req.user, req.params.orgid,
-    req.params.projectid, req.params.username, req.body.role)
+    req.params.projectid, req.params.username, 'REMOVE_ALL')
   .then((project) => {
     // Return 200: OK and updated project
     res.header('Content-Type', 'application/json');

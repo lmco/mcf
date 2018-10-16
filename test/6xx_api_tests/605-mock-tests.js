@@ -101,8 +101,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST a project role', postProjectRole);
   it('should GET a project role', getProjectRole);
   it('should GET all project roles', getProjectRoles);
-  // TODO: MBX-533 Bug Fix: Uncomment when deleteProjectRole fixed
-  // it('should DELETE a project role', deleteProjectRole);
+  it('should DELETE a project role', deleteProjectRole);
   it('should PATCH a project', patchProject);
   it('should GET the previously patched project', getProject);
   it('should POST an element', postElement);
@@ -618,37 +617,36 @@ function getProjectRoles(done) {
   apiController.getAllProjMemRoles(req, res);
 }
 
-// MBX-533 Bug Fix: Uncomment when deleteProjectRole is fixed
-// /**
-//  * @description Verifies mock DELETE request to remove a user from a project.
-//  */
-// function deleteProjectRole(done) {
-//   // Create request object
-//   const body = {};
-//   const params = {
-//     orgid: testData.orgs[0].id,
-//     projectid: testData.projects[0].id,
-//     username: testData.users[1].username
-//   };
-//   const method = 'DELETE';
-//   const req = getReq(params, body, method);
-//
-//   // Set response as empty object
-//   const res = {};
-//
-//   // Verifies status code and headers
-//   resFunctions(res);
-//
-//   // Verifies the response data
-//   res.send = function send(_data) {
-//     const json = JSON.parse(_data);
-//     chai.expect(json.permissions.read.length).to.equal(1);
-//     done();
-//   };
-//
-//   // DELETEs a project role
-//   apiController.deleteProjectRole(req, res);
-// }
+/**
+ * @description Verifies mock DELETE request to remove a user from a project.
+ */
+function deleteProjectRole(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    username: testData.users[1].username
+  };
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.permissions.read.length).to.equal(1);
+    done();
+  };
+
+  // DELETEs a project role
+  apiController.deleteProjectRole(req, res);
+}
 
 /**
  * @description Verifies mock PATCH request to update a project.
