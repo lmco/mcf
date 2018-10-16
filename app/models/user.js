@@ -129,7 +129,7 @@ const UserSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_provider !== this.provider) {
         // Immutable field, return error
-        return new M.CustomError('Username cannot be changed.', 400, 'warn');
+        return new M.CustomError('Provider cannot be changed.', 400, 'warn');
       }
       // No change, return the value
       return this.provider;

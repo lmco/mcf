@@ -16,7 +16,7 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Middleware plugin that extends models.
- * Allows time stamping: createdOn, UpdatedOn, DeletedOn.
+ * Allows time stamping: createdOn, UpdatedOn, DeletedOn and deleted.
  */
 
 module.exports = function createdOnPlugin(schema, options) {
