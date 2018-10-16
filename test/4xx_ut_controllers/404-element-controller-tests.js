@@ -125,6 +125,7 @@ describe(M.getModuleName(module.filename), () => {
     + 'non-package parent', rejectElementInvalidParentType);
   it('should create a block element', createBlockWithUUID);
   it('should create a relationship', createRelationship);
+  it('should create multiple elements', createMultipleElements);
   it('should fail creating an element with existing uuid', rejectCreateElementExistingUUID);
   it('should find all elements for a project', findElements);
   it('should find an element by its uuid', findElementByUUID);
@@ -289,6 +290,35 @@ function createRelationship(done) {
 }
 
 /**
+ * @description Creates multiple elements at a time
+ */
+function createMultipleElements(done) {
+  // Create array of new element objects
+  const newElements = [
+    testData.elements[7],
+    testData.elements[6],
+    testData.elements[8],
+    testData.elements[9],
+    testData.elements[11],
+    testData.elements[10]
+  ];
+
+  // Create new elements
+  ElemController.createElements(adminUser, org.id, proj.id, newElements)
+  .then((elements) => {
+    // Verify the elements were created
+    chai.expect(elements.length).to.equal(6);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
  * @description Verifies UUID is unique.
  * Expected error thrown: 'Bad Request'
  */
@@ -320,7 +350,7 @@ function findElements(done) {
   ElemController.findElements(adminUser, org.id, proj.id)
   .then((retElems) => {
     // Expect 4 elements to be found
-    chai.expect(retElems.length).to.equal(4);
+    chai.expect(retElems.length).to.equal(10);
     done();
   })
   .catch((error) => {
@@ -460,7 +490,7 @@ function softDeleteAllElements(done) {
   .then(() => ElemController.findElements(adminUser, org.id, proj.id, true))
   .then((retElems) => {
     // Find succeeded, verify elements were returned
-    chai.expect(retElems.length).to.equal(3);
+    chai.expect(retElems.length).to.equal(9);
     // Verify elements deleted field is set to true
     chai.expect(retElems[0].deleted).to.equal(true);
     done();

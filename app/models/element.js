@@ -325,14 +325,14 @@ RelationshipSchema.pre('validate', function() {
     Element.findOne({ uid: targetUID }) // eslint-disable-line no-use-before-define
     .then((target) => {
       // Set relationship target reference
-      this.target = target;
+      this.target = this.target || target;
 
       // Find the source element
       return Element.findOne({ uid: sourceUID }); // eslint-disable-line no-use-before-define
     })
     .then((source) => {
       // Set relationship source reference
-      this.source = source;
+      this.source = this.source || source;
       return resolve();
     })
     .catch((error) => reject(new M.CustomError(error.message, 500, 'warn')));

@@ -162,6 +162,46 @@
       "id": "blankelemname",
       "name": "",
       "type": "Block"
+    },
+    {
+      "id": "batchelem1",
+      "name": "Batch Element 1",
+      "type": "Package",
+      "parent": null
+    },
+    {
+      "id": "batchelem2",
+      "name": "Batch Element 2",
+      "type": "Package",
+      "parent": "batchelem1"
+    },
+    {
+      "id": "batchelem3",
+      "name": "Batch Element 3",
+      "type": "Block",
+      "parent": "batchelem1"
+    },
+    {
+      "id": "batchelem4",
+      "name": "Batch Element 4",
+      "type": "Block",
+      "parent": "batchelem2"
+    },
+    {
+      "id": "batchelem5",
+      "name": "Batch Element 5",
+      "type": "Relationship",
+      "parent": "batchelem2",
+      "source": "batchelem3",
+      "target": "batchelem4"
+    },
+    {
+      "id": "batchelem6",
+      "name": "Batch Element 6",
+      "type": "Relationship",
+      "parent": "batchelem2",
+      "source": "batchelem3",
+      "target": "batchelem5"
     }
   ],
 

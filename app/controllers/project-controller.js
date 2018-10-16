@@ -148,7 +148,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
     // Find any existing projects that match the query
     findProjectsQuery(findQuery)
     .then((projects) => {
-      // Error Check- ensure no projects already exist
+      // Error Check: ensure no projects already exist
       if (projects.length > 0) {
         // Get the ids of the projects that already exist
         const existingIDs = projects.map(p => p.id);
