@@ -277,3 +277,33 @@ module.exports.deepEqual = function(a, b) {
     return false;
   }
 };
+
+/**
+ * @description Adds/updates values in original object based on update object.
+ *
+ * @param {Object} originalObj - The original object, which will be updated with
+ *                               values from the second object.
+ * @param {Object} updateObj - The object containing new or changed fields that
+ *                             will be added/changed in the original object.
+ */
+module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
+  // Get all existing keys for originalObject
+  const firstKeys = Object.keys(originalObj);
+
+  // Loop through all of the keys in updateObject
+  Object.keys(updateObj).forEach((key) => {
+    // If the key is not in originalObject, add it
+    if (!firstKeys.includes(key)) {
+      originalObj[key] = updateObj[key];
+    }
+    // If the key is in originalObject, and it's value is a nested object,
+    // recursively call this function with the value of the key/value pair
+    else if (typeof originalObj[key] === 'object' && typeof updateObj[key] === 'object') {
+      this.updateAndCombineObjects(originalObj[key], updateObj[key]);
+    }
+    // Key exists in originalObj, but original value isn't an object, replace it
+    else {
+      originalObj[key] = updateObj[key];
+    }
+  });
+};

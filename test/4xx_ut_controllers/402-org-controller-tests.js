@@ -117,6 +117,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject update from non admin user', rejectNonAdminUpdate);
   it('should update an orgs name', updateOrg);
   it('should update an orgs name using model object', updateOrgObject);
+  it('should update multiple orgs at the same time', updateMultipleOrgs);
   it('should find all orgs a user has access to', findAllExistingOrgs);
   it('should soft delete an existing org', softDeleteExistingOrg);
   it('should delete an existing org', deleteExistingOrg);
@@ -313,6 +314,46 @@ function updateOrgObject(done) {
   .then((retOrgUpdate) => {
     // Verify model object was updated
     chai.expect(retOrgUpdate.name).to.equal(testData.orgs[2].name);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates multiple organizations at the same time.
+ */
+function updateMultipleOrgs(done) {
+  // Create query to update orgs
+  const updateQuery = { id: { $in: [
+    testData.orgs[1].id,
+    testData.orgs[4].id
+  ] } };
+
+  // Create list of update parameters
+  const updateObj = {
+    custom: {
+      department: 'Space',
+      location: {
+        country: 'USA'
+      }
+    }
+  };
+
+  // Update orgs
+  OrgController.updateOrgs(adminUser, updateQuery, updateObj)
+  .then((orgs) => {
+    // Verify returned data
+    chai.expect(orgs[0].custom.leader).to.equal(testData.orgs[1].custom.leader);
+    chai.expect(orgs[0].custom.location.country).to.equal(updateObj.custom.location.country);
+    chai.expect(orgs[0].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(orgs[1].custom.leader).to.equal(testData.orgs[4].custom.leader);
+    chai.expect(orgs[1].custom.location.state).to.equal(testData.orgs[4].custom.location.state);
+    chai.expect(orgs[1].custom.location.country).to.equal(updateObj.custom.location.country);
     done();
   })
   .catch((error) => {

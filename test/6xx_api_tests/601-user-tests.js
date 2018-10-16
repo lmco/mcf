@@ -88,14 +88,20 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   it('should get a username', getUser);
   it('should create a user', postUser);
+  it('should POST multiple users at a time', postMultipleUsers);
+  it('should reject a POST to create multiple, existing users', rejectPostMultipleExistingUsers);
   it('should find out the user with the /whoami api tag', whoAmI);
   it('should reject creating a user with invalid username', rejectInvalidUsernamePost);
   it('should get all users', getUsers);
   it('should reject getting a user that does not exist', rejectGetNonexisting);
   it('should update a user', patchUser);
+  it('should PATCH multiple users at a time', patchMultipleUsers);
+  it('should reject a PATCH of unique field', rejectPatchUniqueFieldUsers);
   it('should reject an update a user that does not exist', rejectPatchNonexisting);
-  it('should reject deleting a user that doesnt exist', rejectDeleteNonexisting);
+  it('should reject deleting a user that doesnt exist', rejectDeleteNonExisting);
   it('should delete a user', deleteUser);
+  it('should DELETE multiple users at a time', deleteMultipleUsers);
+  it('should reject a DELETE with no users array in request body', rejectDeleteNoUsers);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -147,6 +153,64 @@ function postUser(done) {
     // Verifies correct response body
     chai.expect(json.username).to.equal(testData.users[1].username);
     chai.expect(json.fname).to.equal(testData.users[1].fname);
+    done();
+  });
+}
+
+/**
+ * @description Makes a POST request to /api/users. Verifies POST request for
+ * multiple users.
+ */
+function postMultipleUsers(done) {
+  // Make a user API POST request
+  request({
+    url: `${test.url}/api/users`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify({
+      users: [testData.users[2], testData.users[4]]
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Verifies status 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Parse body to JSON object
+    const json = JSON.parse(body);
+    // Verifies correct response body
+    chai.expect(json[0].username).to.equal(testData.users[2].username);
+    chai.expect(json[1].username).to.equal(testData.users[4].username);
+    done();
+  });
+}
+
+/**
+ * @description Makes an invalid POST request to /api/users. Verifies request
+ * rejects due to already existing users
+ * Expected response error: 'Forbidden'
+ */
+function rejectPostMultipleExistingUsers(done) {
+  // Make a user API POST request
+  request({
+    url: `${test.url}/api/users`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify({
+      users: [testData.users[1], testData.users[3]]
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect status 403 Forbidden
+    chai.expect(response.statusCode).to.equal(403);
+    // Parse body to JSON object
+    const json = JSON.parse(body);
+    // Expected response error: 'Forbidden'
+    chai.expect(json.message).to.equal('Forbidden');
     done();
   });
 }
@@ -234,7 +298,7 @@ function getUsers(done) {
 function rejectGetNonexisting(done) {
   // Make GET API request
   request({
-    url: `${test.url}/api/users/${testData.usernames[3].username}`,
+    url: `${test.url}/api/users/${testData.usernames[1].username}`,
     headers: getHeaders(),
     ca: readCaFile()
   },
@@ -282,6 +346,63 @@ function patchUser(done) {
 }
 
 /**
+ * @description Makes a PATCH request to /api/users/. Verifies updating multiple
+ * user's first names via a PATCH request.
+ */
+function patchMultipleUsers(done) {
+  // Make a PATCH API request
+  request({
+    url: `${test.url}/api/users`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    // Set update parameter in request body
+    body: JSON.stringify({
+      users: [testData.users[2], testData.users[4]],
+      update: { fname: 'Bob' }
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Verifies status 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Parse body to JSON object
+    const json = JSON.parse(body);
+    // Verifies correct response body
+    chai.expect(json[0].fname).to.equal('Bob');
+    chai.expect(json[1].fname).to.equal('Bob');
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/users fails when updating a unique field.
+ */
+function rejectPatchUniqueFieldUsers(done) {
+  request({
+    url: `${test.url}/api/users`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      users: [testData.users[2], testData.users[4]],
+      update: { username: 'sameuser' }
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+/**
  * @description Makes an invalid PATCH request to /api/users/:username. Verifies
  * user CANNOT update non-existing user via PATCH request.
  * Expected response error: 'Not Found'
@@ -289,12 +410,12 @@ function patchUser(done) {
 function rejectPatchNonexisting(done) {
   // Make a PATCH API request
   request({
-    url: `${test.url}/api/users/${testData.usernames[4].username}`,
+    url: `${test.url}/api/users/${testData.usernames[1].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     // Set update parameter in request body
-    body: JSON.stringify(testData.names[6])
+    body: JSON.stringify(testData.names[5])
   },
   (err, response, body) => {
     // Expect no error
@@ -314,10 +435,10 @@ function rejectPatchNonexisting(done) {
  * user CANNOT DELETE a non-existing user.
  * Expected response error: 'Not Found'
  */
-function rejectDeleteNonexisting(done) {
+function rejectDeleteNonExisting(done) {
   // Make a DELETE request
   request({
-    url: `${test.url}/api/users/${testData.usernames[4].username}`,
+    url: `${test.url}/api/users/${testData.usernames[1].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -350,9 +471,9 @@ function deleteUser(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
-    // Set soft delete parameter in request body
+    // Set hard delete parameter in request body
     body: JSON.stringify({
-      soft: false
+      hardDelete: true
     })
   },
   (err, response, body) => {
@@ -364,6 +485,64 @@ function deleteUser(done) {
     const json = JSON.parse(body);
     // Verifies correct response body
     chai.expect(json.username).to.equal(testData.users[1].username);
+    done();
+  });
+}
+
+/**
+ * @description Makes a DELETE request to /api/users. Verifies DELETE request
+ * of multiple users.
+ */
+function deleteMultipleUsers(done) {
+  // Make a DELETE request
+  request({
+    url: `${test.url}/api/users`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      hardDelete: true,
+      users: [testData.users[2], testData.users[4]]
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Verifies status 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Parse body to JSON object
+    const json = JSON.parse(body);
+    // Verifies correct response body
+    chai.expect(json.length).to.equal(2);
+    done();
+  });
+}
+
+/**
+ * @description Makes a DELETE request to /api/users. Verifies rejection of
+ * request do to no users array being provided in request body.
+ * Expected response error: 'Bad Request'
+ */
+function rejectDeleteNoUsers(done) {
+  // Make a DELETE request
+  request({
+    url: `${test.url}/api/users`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      hardDelete: true
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Verifies status 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Parse body to JSON object
+    const json = JSON.parse(body);
+    // Expected response error: 'Bad Request'
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

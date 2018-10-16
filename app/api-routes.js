@@ -148,6 +148,8 @@ api.route('/version')
  *         description: Bad Request
  *       401:
  *         description: Unauthorized
+ *       404:
+ *         description: Not Found
  *       500:
  *         description: Internal Server Error
  *   post:
@@ -169,7 +171,7 @@ api.route('/version')
  *           properties:
  *             orgs:
  *               type: object
- *               description: A list of objects containing organization data.
+ *               description: An array of objects containing organization data.
  *     responses:
  *       200:
  *         description: OK
@@ -184,10 +186,39 @@ api.route('/version')
  *   patch:
  *     tags:
  *       - organizations
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple organizations from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing the organization data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - orgs
+ *           properties:
+ *             orgs:
+ *               type: object
+ *               description: An array of orgs to update. Can either be the
+ *                            org objects or the ids of the orgs.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the orgs
+ *                            and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - organizations
@@ -501,10 +532,40 @@ api.route('/orgs/:orgid')
  *   patch:
  *     tags:
  *       - projects
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple projects from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing the project data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - projects
+ *             - update
+ *           properties:
+ *             projects:
+ *               type: object
+ *               description: An array of projects to update. Can either be the
+ *                            project objects or the ids of the projects.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the
+ *                            projects and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - projects
@@ -1303,11 +1364,50 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *   delete:
  *     tags:
  *       - elements
- *     description: Not implemented, reserved for future use. If implemented,
- *                  this would delete all elements in a project.
+ *     description: Deletes multiple elements either by the org and project or by
+ *                  a supplied list in the body of the request.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose projects to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project whose elements to delete.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing delete elements options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             projects:
+ *               type: object
+ *               description: An array of elements to delete. Can either be the
+ *                            element objects or the ids of the elements. If the
+ *                            list is not provided, all elements under the
+ *                            project will be deleted.
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the element should be
+ *                            hard deleted or not. The user must be a global
+ *                            admin to hard delete. Defaults to false.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  */
 api.route('/orgs/:orgid/projects/:projectid/elements')
 .get(
@@ -1328,7 +1428,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.deleteElements
 );
 
 /**
@@ -1591,24 +1691,98 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *   post:
  *     tags:
  *       - users
- *     description: Not implemented, reserved for future use.
+ *     description: Creates multiple users from the supplied data in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing user objects to be created.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             users:
+ *               type: object
+ *               description: An array of users to create. Each user must
+ *                            contain the username of that user.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   patch:
  *     tags:
  *       - users
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple users from the supplied list in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing user objects to be updated.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             users:
+ *               type: object
+ *               description: An array of users to update. Can either be a list
+ *                            of user objects or of usernames.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the users
+ *                            and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - users
- *     description: Not implemented, reserved for future use.
+ *     description: Deletes multiple users from the supplied list in the body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing user objects to be deleted.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             users:
+ *               type: object
+ *               description: An array of users to delete. Can either be a list
+ *                            of user objects or of usernames.
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the users should be hard
+ *                            deleted or not. Defaults to false.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  */
 api.route('/users')
 .get(
@@ -1621,19 +1795,19 @@ api.route('/users')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.notImplemented
+  APIController.postUsers
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.notImplemented
+  APIController.patchUsers
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.notImplemented
+  APIController.deleteUsers
 );
 
 /**
