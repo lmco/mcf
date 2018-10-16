@@ -23,6 +23,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
+const timestamp = M.require('models.plugin.timestamp');
 
 
 /* ----------------------------( Project Model )----------------------------- */
@@ -60,17 +61,59 @@ const ProjectSchema = new mongoose.Schema({
     required: true,
     index: true,
     match: RegExp(validators.project.id),
-    maxlength: [36, 'Too many characters in username']
+    maxlength: [36, 'Too many characters in username'],
+    set: function(_id) {
+      // Check value undefined
+      if (typeof this.id === 'undefined') {
+        // Return value to set it
+        return _id;
+      }
+      // Check value NOT equal to db value
+      if (_id !== this.id) {
+        // Immutable field, return error
+        return new M.CustomError('ID cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.id;
+    }
   },
   org: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
-    required: true
+    required: true,
+    set: function(_org) {
+      // Check value undefined
+      if (typeof this.org === 'undefined') {
+        // Return value to set it
+        return _org;
+      }
+      // Check value NOT equal to db value
+      if (_org !== this.org) {
+        // Immutable field, return error
+        return new M.CustomError('Assigned org cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.org;
+    }
   },
   uid: {
     type: String,
     unique: true,
-    required: true
+    required: true,
+    set: function(_uid) {
+      // Check value undefined
+      if (typeof this.uid === 'undefined') {
+        // Return value to set it
+        return _uid;
+      }
+      // Check value NOT equal to db value
+      if (_uid !== this.uid) {
+        // Immutable field, return error
+        return new M.CustomError('UID cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.uid;
+    }
   },
   name: {
     type: String,
@@ -91,20 +134,6 @@ const ProjectSchema = new mongoose.Schema({
       ref: 'User'
     }]
   },
-  deletedOn: {
-    type: Date,
-    default: null
-  },
-  deleted: {
-    type: Boolean,
-    default: false,
-    set: function(v) {
-      if (v) {
-        this.deletedOn = Date.now();
-      }
-      return v;
-    }
-  },
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -115,6 +144,9 @@ const ProjectSchema = new mongoose.Schema({
   }
 });
 
+/* ---------------------------( Model Plugin )---------------------------- */
+// Use timestamp model plugin
+ProjectSchema.plugin(timestamp);
 
 /* ---------------------------( Project Methods )---------------------------- */
 

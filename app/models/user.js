@@ -27,6 +27,7 @@ const mongoose = require('mongoose');
 
 // MBEE Modules
 const validators = M.require('lib.validators');
+const timestamp = M.require('models.plugin.timestamp');
 
 
 /* ----------------------------( Element Model )----------------------------- */
@@ -70,7 +71,21 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    match: RegExp(validators.user.username)
+    match: RegExp(validators.user.username),
+    set: function(_username) {
+      // Check value undefined
+      if (typeof this.username === 'undefined') {
+        // Return value to set it
+        return _username;
+      }
+      // Check value NOT equal to db value
+      if (_username !== this.username) {
+        // Immutable field, return error
+        return new M.CustomError('Username cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.username;
+    }
   },
   password: {
     type: String,
@@ -104,24 +119,21 @@ const UserSchema = new mongoose.Schema({
   },
   provider: {
     type: String,
-    default: 'local'
-  },
-  createdOn: {
-    type: Date,
-    default: Date.now,
-    set: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
-      // Prevents this field from being altered
-      return this.createdOn;
+    default: 'local',
+    set: function(_provider) {
+      // Check value undefined
+      if (typeof this.provider === 'undefined') {
+        // Return value to set it
+        return _provider;
+      }
+      // Check value NOT equal to db value
+      if (_provider !== this.provider) {
+        // Immutable field, return error
+        return new M.CustomError('Provider cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.provider;
     }
-  },
-  updatedOn: {
-    type: Date,
-    default: Date.now,
-    set: Date.now
-  },
-  deletedOn: {
-    type: Date,
-    default: null
   },
   deleted: {
     type: Boolean,
@@ -180,9 +192,11 @@ UserSchema.virtual('name')
   return `${this.fname} ${this.lname}`;
 });
 
+/* ---------------------------( Model Plugin )---------------------------- */
+// Use timestamp model plugin
+UserSchema.plugin(timestamp);
 
 /* ---------------------------( User Middleware )---------------------------- */
-
 /**
  * @description Run our pre-defined setters on find.
  * @memberOf UserSchema
@@ -208,9 +222,6 @@ UserSchema.pre('findOne', function(next) {
  * @memberOf UserSchema
  */
 UserSchema.pre('save', function(next) {
-  // Run updatedOn setter
-  this.updatedOn = '';
-
   // Hash plaintext password
   if (this.password) {
     crypto.pbkdf2(this.password, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
@@ -240,9 +251,7 @@ UserSchema.post('save', function(doc, next) {
   });
 });
 
-
 /* -----------------------------( User Methods )----------------------------- */
-
 /**
  * @description Verifies a password matches the stored hashed password.
  *
@@ -288,15 +297,11 @@ UserSchema.methods.getPublicData = function() {
   };
 };
 
-
 /* ---------------------------( User Properties )---------------------------- */
-
 // Required for virtual getters
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });
 
-
 /* -------------------------( User Schema Export )--------------------------- */
-
 // Export mongoose model as 'User'
 module.exports = mongoose.model('User', UserSchema);
