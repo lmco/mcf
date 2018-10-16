@@ -31,7 +31,6 @@ const utils = M.require('lib.utils');
 
 // Expose `ElementController`
 module.exports = {
-  notImplemented,
   swaggerJSON,
   login,
   test,
@@ -70,6 +69,7 @@ module.exports = {
   deleteUser,
   whoami,
   getElements,
+  postElements,
   patchElements,
   deleteElements,
   getElement,
@@ -88,19 +88,6 @@ module.exports = {
  */
 function formatJSON(obj) {
   return JSON.stringify(obj, null, M.config.server.api.json.indent);
-}
-
-/**
- * @description This function is used for routes that are not yet implemented.
- * It returns a 501: Not Implemented response.
- *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- *
- * @return {Object} res - Response object with no implemented status
- */
-function notImplemented(req, res) {
-  return res.status(501).send('Not Implemented.');
 }
 
 /**
@@ -750,7 +737,7 @@ function postProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: check if projects list included in req.body
+  // Error Check: check if projects array included in req.body
   if (!req.body.hasOwnProperty('projects')) {
     const error = new M.CustomError('Projects array not in request body.', 400, 'warn');
     return res.status(error.status).send(error);
@@ -1568,6 +1555,42 @@ function getElements(req, res) {
   ElementController.findElements(req.user, req.params.orgid, req.params.projectid, softDeleted)
   .then((elements) => {
     // Return a 200: OK and elements
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * POST /api/orgs/:orgid/projects/:projectid/elements
+ *
+ * @description Creates multiple projects at a time.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with created elements
+ */
+function postElements(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: check if elements array included in req.body
+  if (!req.body.hasOwnProperty('elements')) {
+    const error = new M.CustomError('Elements array not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Create the specified elements
+  // NOTE: createElements() sanitizes req.params.orgid, req.params.projectid and the elements
+  ElementController.createElements(req.user, req.params.orgid,
+    req.params.projectid, req.body.elements)
+  .then((elements) => {
+    // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(elements));
   })
