@@ -124,7 +124,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
   it('should reject find of soft-deleted org', rejectFindSoftDelOrg);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
-  it('should reject update of default org', updateDefaultOrg);
+  it('should reject update of default org', rejectUpdateDefaultOrg);
   it('should reject delete of default org', rejectDefaultOrgDelete);
   it('should add a user to an org', setUserOrgRole);
   it('should reject user changing their permissions', rejectUserRole);
@@ -524,9 +524,9 @@ function hardDeleteProjectAndOrg(done) {
  * @description Verifies default organization CANNOT be updated.
  * Expected error thrown: 'Forbidden'
  */
-function updateDefaultOrg(done) {
+function rejectUpdateDefaultOrg(done) {
   // Update default org
-  OrgController.updateOrg(adminUser, 'default', testData.names[4])
+  OrgController.updateOrg(adminUser, M.config.server.defaultOrganizationId, testData.names[4])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
@@ -546,7 +546,7 @@ function updateDefaultOrg(done) {
  */
 function rejectDefaultOrgDelete(done) {
   // Delete default org
-  OrgController.removeOrg(adminUser, 'default', true)
+  OrgController.removeOrg(adminUser, M.config.server.defaultOrganizationId, true)
   .then(() => {
     // Expected removeOrg() to fail
     // Should not execute, force test to fail

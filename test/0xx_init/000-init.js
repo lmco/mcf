@@ -56,7 +56,7 @@ describe(M.getModuleName(module.filename), function() {
    * Execute the tests
    */
   it('clean database', cleanDB);
-  it('should create the default org if it doesnt exist', createDefaultOrg);
+  it('should create the default org if it doesn\'t exist', createDefaultOrg);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -67,7 +67,7 @@ describe(M.getModuleName(module.filename), function() {
 function cleanDB(done) {
   User.deleteMany({}) // Remove users
   // Remove all orgs except for the 'default' org.
-  .then(() => Organization.deleteMany({ name: { $ne: 'default' } }))  // Remove orgs
+  .then(() => Organization.deleteMany({ id: { $ne: M.config.server.defaultOrganizationId } }))
   .then(() => Project.deleteMany({}))  // Remove projects
   .then(() => Element.Element.deleteMany({}))  // Remove elements
   .then(() => done())
@@ -85,13 +85,13 @@ function cleanDB(done) {
  * @description Creates the default org if it doesn't already exist
  */
 function createDefaultOrg(done) {
-  Organization.findOne({ id: 'default' })
+  Organization.findOne({ id: M.config.server.defaultOrganizationId })
   .exec((err, org) => {
     chai.expect(err).to.equal(null);
     if (org === null) {
       const defOrg = new Organization({
-        id: 'default',
-        name: 'default'
+        id: M.config.server.defaultOrganizationId,
+        name: M.config.server.defaultOrganizationName
       });
       defOrg.save((saveErr) => {
         chai.expect(saveErr).to.equal(null);

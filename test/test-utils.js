@@ -65,7 +65,7 @@ module.exports.createNonadminUser = function() {
       newUser = user;
 
       // Find the default organization
-      return Organization.find({ id: 'default' });
+      return Organization.find({ id: M.config.server.defaultOrganizationId });
     })
     .then((orgs) => {
       // Add user to default org read/write permissions
@@ -114,7 +114,7 @@ module.exports.createAdminUser = function() {
       newAdminUser = user;
 
       // Find the default organization
-      return Organization.find({ id: 'default' });
+      return Organization.find({ id: M.config.server.defaultOrganizationId });
     })
     .then((orgs) => {
       // Add user to default org read/write permissions
@@ -145,7 +145,7 @@ module.exports.removeNonadminUser = function() {
       userToDelete = foundUser;
       return foundUser.remove();
     })
-    .then(() => Organization.find({ id: 'default' }))
+    .then(() => Organization.find({ id: M.config.server.defaultOrganizationId }))
     .then((orgs) => {
       // Remove user from permissions list in each project
       orgs[0].permissions.read = orgs[0].permissions.read
@@ -175,7 +175,7 @@ module.exports.removeAdminUser = function() {
       userToDelete = foundUser;
       return foundUser.remove();
     })
-    .then(() => Organization.find({ id: 'default' }))
+    .then(() => Organization.find({ id: M.config.server.defaultOrganizationId }))
     .then((orgs) => {
       // Remove user from permissions list in each project
       orgs[0].permissions.read = orgs[0].permissions.read
