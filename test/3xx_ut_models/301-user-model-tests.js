@@ -155,10 +155,8 @@ function updateUser(done) {
   .then((foundUser)=>{
     foundUser.fname = `${testData.users[1].fname}edit`
     foundUser.lname = testData.users[1].lname;
-    foundUser.username = 'phill';
-    //foundUser.createdOn = '2020-10-11 18:24:39.602';
     return foundUser.save();
-    })
+  })
   .then((updatedUser) => {
     chai.expect(updatedUser.username).to.equal(testData.users[1].username);
     chai.expect(updatedUser.fname).to.equal(`${testData.users[1].fname}edit`);

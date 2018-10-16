@@ -23,6 +23,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
+const timestamp = M.require('models.plugin.timestamp');
 
 
 /* ----------------------------( Project Model )----------------------------- */
@@ -91,20 +92,6 @@ const ProjectSchema = new mongoose.Schema({
       ref: 'User'
     }]
   },
-  deletedOn: {
-    type: Date,
-    default: null
-  },
-  deleted: {
-    type: Boolean,
-    default: false,
-    set: function(v) {
-      if (v) {
-        this.deletedOn = Date.now();
-      }
-      return v;
-    }
-  },
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -115,6 +102,9 @@ const ProjectSchema = new mongoose.Schema({
   }
 });
 
+/* ---------------------------( Model Plugin )---------------------------- */
+// Use timestamp model plugin
+ProjectSchema.plugin(timestamp);
 
 /* ---------------------------( Project Methods )---------------------------- */
 

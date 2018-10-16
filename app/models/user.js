@@ -27,7 +27,7 @@ const mongoose = require('mongoose');
 
 // MBEE Modules
 const validators = M.require('lib.validators');
-const createdOn = M.require('models.plugin.createdOn');
+const timestamp = M.require('models.plugin.timestamp');
 
 
 /* ----------------------------( Element Model )----------------------------- */
@@ -72,11 +72,11 @@ const UserSchema = new mongoose.Schema({
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
     match: RegExp(validators.user.username),
-    set: function (v) {
+    set: function (_username) {
       if (typeof this.username === 'undefined') {
-        return v;
+        return _username;
       }
-      else if (v != this.username){
+      else if (_username != this.username){
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }
       return this.username;
@@ -115,15 +115,6 @@ const UserSchema = new mongoose.Schema({
   provider: {
     type: String,
     default: 'local'
-  },
-  updatedOn: {
-    type: Date,
-    default: Date.now,
-    set: Date.now
-  },
-  deletedOn: {
-    type: Date,
-    default: null
   },
   deleted: {
     type: Boolean,
@@ -182,10 +173,11 @@ UserSchema.virtual('name')
   return `${this.fname} ${this.lname}`;
 });
 
-UserSchema.plugin(createdOn);
+/* ---------------------------( Model Plugin )---------------------------- */
+// Use timestamp model plugin
+UserSchema.plugin(timestamp);
 
 /* ---------------------------( User Middleware )---------------------------- */
-
 /**
  * @description Run our pre-defined setters on find.
  * @memberOf UserSchema
@@ -211,9 +203,6 @@ UserSchema.pre('findOne', function(next) {
  * @memberOf UserSchema
  */
 UserSchema.pre('save', function(next) {
-  // Run updatedOn setter
-  this.updatedOn = '';
-
   // Hash plaintext password
   if (this.password) {
     crypto.pbkdf2(this.password, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
@@ -243,9 +232,7 @@ UserSchema.post('save', function(doc, next) {
   });
 });
 
-
 /* -----------------------------( User Methods )----------------------------- */
-
 /**
  * @description Verifies a password matches the stored hashed password.
  *
@@ -291,15 +278,11 @@ UserSchema.methods.getPublicData = function() {
   };
 };
 
-
 /* ---------------------------( User Properties )---------------------------- */
-
 // Required for virtual getters
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });
 
-
 /* -------------------------( User Schema Export )--------------------------- */
-
 // Export mongoose model as 'User'
 module.exports = mongoose.model('User', UserSchema);

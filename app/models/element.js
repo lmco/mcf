@@ -49,6 +49,7 @@ const uuidv4 = require('uuid/v4');
 // MBEE modules
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
+const timestamp = M.require('models.plugin.timestamp');
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };
@@ -128,32 +129,6 @@ const ElementSchema = new mongoose.Schema({
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
-  },
-  createdOn: {
-    type: Date,
-    default: Date.now,
-    set: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
-      return this.createdOn;
-    }
-  },
-  updatedOn: {
-    type: Date,
-    default: Date.now,
-    set: Date.now
-  },
-  deletedOn: {
-    type: Date,
-    default: null
-  },
-  deleted: {
-    type: Boolean,
-    default: false,
-    set: function(v) {
-      if (v) {
-        this.deletedOn = Date.now();
-      }
-      return v;
-    }
   }
 }, options); // end of ElementSchema
 
@@ -208,6 +183,9 @@ const PackageSchema = new mongoose.Schema({
   }]
 }, options);
 
+/* ---------------------------( Model Plugin )---------------------------- */
+// Use timestamp model plugin
+ElementSchema.plugin(timestamp);
 
 /* --------------------------( Element Middleware )-------------------------- */
 

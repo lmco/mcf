@@ -23,7 +23,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
-
+const timestamp = M.require('models.plugin.timestamp');
 
 /* -------------------------( Organization Schema )-------------------------- */
 
@@ -58,7 +58,16 @@ const OrganizationSchema = new mongoose.Schema({
     index: true,
     unique: true,
     match: RegExp(validators.org.id),
-    maxlength: [64, 'Too many characters in ID']
+    maxlength: [64, 'Too many characters in ID'],
+    set: function (_id) {
+      if (typeof this.id === 'undefined') {
+        return _id;
+      }
+      else if (_id != this.id){
+        return new M.CustomError('Org ID cannot be changed.', 400, 'warn');
+      }
+      return this.id;
+    }
   },
   name: {
     type: String,
@@ -80,20 +89,6 @@ const OrganizationSchema = new mongoose.Schema({
       ref: 'User'
     }]
   },
-  deletedOn: {
-    type: Date,
-    default: null
-  },
-  deleted: {
-    type: Boolean,
-    default: false,
-    set: function(v) {
-      if (v) {
-        this.deletedOn = Date.now();
-      }
-      return v;
-    }
-  },
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -107,6 +102,9 @@ OrganizationSchema.virtual('projects', {
   justOne: false
 });
 
+/* ---------------------------( Model Plugin )---------------------------- */
+// Use timestamp model plugin
+OrganizationSchema.plugin(timestamp);
 
 /* -------------------------( Organization Methods )------------------------- */
 
