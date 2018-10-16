@@ -62,14 +62,14 @@ const ProjectSchema = new mongoose.Schema({
     index: true,
     match: RegExp(validators.project.id),
     maxlength: [36, 'Too many characters in username'],
-    set: function (_id) {
+    set: function(_id) {
       // Check value undefined
       if (typeof this.id === 'undefined') {
         // Return value to set it
         return _id;
       }
       // Check value NOT equal to db value
-      else if (_id != this.id){
+      if (_id !== this.id) {
         // Immutable field, return error
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }
@@ -81,14 +81,14 @@ const ProjectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
     required: true,
-    set: function (_org) {
+    set: function(_org) {
       // Check value undefined
       if (typeof this.org === 'undefined') {
         // Return value to set it
         return _org;
       }
       // Check value NOT equal to db value
-      else if (_org != this.org){
+      if (_org !== this.org) {
         // Immutable field, return error
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }
@@ -100,14 +100,14 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true,
-    set: function (_uid) {
+    set: function(_uid) {
       // Check value undefined
       if (typeof this.uid === 'undefined') {
         // Return value to set it
         return _uid;
       }
       // Check value NOT equal to db value
-      else if (_uid != this.uid){
+      if (_uid !== this.uid) {
         // Immutable field, return error
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }

@@ -86,14 +86,14 @@ const ElementSchema = new mongoose.Schema({
     match: RegExp(validators.element.id),
     maxlength: [64, 'Element ID is too long'],
     minlength: [2, 'Element ID is too short'],
-    set: function (_id) {
+    set: function(_id) {
       // Check value undefined
       if (typeof this.id === 'undefined') {
         // Return value to set it
         return _id;
       }
       // Check value NOT equal to db value
-      else if (_id != this.id){
+      if (_id !== this.id) {
         // Immutable field, return error
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }
@@ -109,14 +109,14 @@ const ElementSchema = new mongoose.Schema({
     match: RegExp(validators.element.uid),
     maxlength: [255, 'Element UID is too long'],
     minlength: [2, 'Element UID is too short'],
-    set: function (_uid) {
+    set: function(_uid) {
       // Check value undefined
       if (typeof this.uid === 'undefined') {
         // Return value to set it
         return _uid;
       }
       // Check value NOT equal to db value
-      else if (_uid != this.uid){
+      if (_uid !== this.uid) {
         // Immutable field, return error
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }
@@ -144,14 +144,14 @@ const ElementSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'Project',
-    set: function (_proj) {
+    set: function(_proj) {
       // Check value undefined
       if (typeof this.proj === 'undefined') {
         // Return value to set it
         return _proj;
       }
       // Check value NOT equal to db value
-      else if (_proj != this.proj){
+      if (_proj !== this.proj) {
         // Immutable field, return error
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }

@@ -72,14 +72,14 @@ const UserSchema = new mongoose.Schema({
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
     match: RegExp(validators.user.username),
-    set: function (_username) {
+    set: function(_username) {
       // Check value undefined
       if (typeof this.username === 'undefined') {
         // Return value to set it
         return _username;
       }
       // Check value NOT equal to db value
-      else if (_username != this.username){
+      if (_username !== this.username) {
         // Immutable field, return error
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }
@@ -119,15 +119,15 @@ const UserSchema = new mongoose.Schema({
   },
   provider: {
     type: String,
-    //default: 'local', TODO: discuess how to handle provider
-    set: function (_provider) {
+    default: 'local',
+    set: function(_provider) {
       // Check value undefined
       if (typeof this.provider === 'undefined') {
         // Return value to set it
         return _provider;
       }
       // Check value NOT equal to db value
-      else if (_provider != this.provider){
+      if (_provider !== this.provider) {
         // Immutable field, return error
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }

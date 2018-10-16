@@ -151,9 +151,9 @@ function verifyInvalidPassword(done) {
  */
 function updateUser(done) {
   // Find and updated the user created in the previous createUser test.
-  User.findOne({ username: testData.users[1].username})
-  .then((foundUser)=>{
-    foundUser.fname = `${testData.users[1].fname}edit`
+  User.findOne({ username: testData.users[1].username })
+  .then((foundUser) => {
+    foundUser.fname = `${testData.users[1].fname}edit`;
     foundUser.lname = testData.users[1].lname;
     return foundUser.save();
   })

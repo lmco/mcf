@@ -142,7 +142,7 @@ function findOrg(done) {
 function updateOrg(done) {
   // Find and update the org created in the previous createOrg() test
   Org.findOne({ id: testData.orgs[0].id })
-  .then((foundOrg)=>{
+  .then((foundOrg) => {
     foundOrg.name = testData.orgs[0].name;
     return foundOrg.save();
   })

@@ -16,7 +16,7 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Plugin that extends models.
- * Allows timestamping: createdOn, UpdatedOn, DeletedOn and delete.
+ * Allows time stamping: createdOn, UpdatedOn, DeletedOn and delete.
  */
 
 module.exports = function createdOnPlugin(schema, options) {
@@ -44,7 +44,7 @@ module.exports = function createdOnPlugin(schema, options) {
     }
   });
 
-  schema.pre('save', function (next) {
+  schema.pre('save', function(next) {
     // updateOn is protected
     if (this.isModified('updateOn')) {
       next(new M.CustomError('updateOn is protected and cannot be changed.', 400, 'warn'));
@@ -53,7 +53,7 @@ module.exports = function createdOnPlugin(schema, options) {
     if (this.isModified('createdOn')) {
       next(new M.CustomError('createOn cannot be changed.', 400, 'warn'));
     }
-    // Set updated on field
+    // Update time
     this.updatedOn = Date.now();
 
     return next();

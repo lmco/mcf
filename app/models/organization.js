@@ -59,14 +59,14 @@ const OrganizationSchema = new mongoose.Schema({
     unique: true,
     match: RegExp(validators.org.id),
     maxlength: [64, 'Too many characters in ID'],
-    set: function (_id) {
+    set: function(_id) {
       // Check value undefined
       if (typeof this.id === 'undefined') {
         // Return value to set it
         return _id;
       }
       // Check value NOT equal to db value
-      else if (_id != this.id){
+      if (_id !== this.id) {
         // Immutable field, return error
         return new M.CustomError('Username cannot be changed.', 400, 'warn');
       }
