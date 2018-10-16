@@ -1357,10 +1357,40 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *   patch:
  *     tags:
  *       - elements
- *     description: Not implemented, reserved for future use.
+ *     description: Updates multiple elements from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: content
+ *         description: The object containing the element data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - elements
+ *             - update
+ *           properties:
+ *             elements:
+ *               type: object
+ *               description: An array of elements to update. Can either be the
+ *                            element objects or the ids of the elements.
+ *             update:
+ *               type: object
+ *               description: An object containing fields to update in the
+ *                            elements and their corresponding values.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal Server Error
  *   delete:
  *     tags:
  *       - elements
@@ -1423,7 +1453,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.patchElements
 )
 .delete(
   AuthController.authenticate,

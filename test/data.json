@@ -126,7 +126,10 @@
       "type": "Package",
       "id": "nlp",
       "name": "Natural Language Processing",
-      "projectUID": "testorg00:project00"
+      "projectUID": "testorg00:project00",
+      "custom": {
+        "language": "english"
+      }
     },
     {
       "type": "Block",
@@ -144,6 +147,9 @@
       "name": "Text Parser",
       "parent": "nlp",
       "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9",
+      "custom": {
+        "language": "english"
+      },
       "projectUID": "testorg00:project00"
     },
     {
@@ -153,6 +159,9 @@
       "name": "Speech to Text",
       "source": "speech-recognition",
       "target": "text-parser",
+      "custom": {
+        "language": "english"
+      },
       "projectUID": "testorg00:project00"
     },
     {
