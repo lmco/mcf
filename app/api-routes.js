@@ -42,7 +42,7 @@ const Middleware = M.require('lib.middleware');
  *        connection can be established.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to test the API is up.
  */
 api.get('/test', Middleware.logRoute, APIController.test);
 
@@ -58,7 +58,7 @@ api.get('/test', Middleware.logRoute, APIController.test);
  *       - application/json
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to get the swagger doc.
  */
 api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
 
@@ -90,13 +90,13 @@ api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
  *       - application/json
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to login returns session token data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to login due to invalid credentials.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to login due to not having permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to login due to a server side issue.
  */
 api.route('/login')
 .post(
@@ -118,11 +118,11 @@ api.route('/login')
  *       - application/json
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to get version returns version.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to get version due to not having permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to get version due to a server side issue.
  */
 api.route('/version')
 .get(
@@ -143,15 +143,15 @@ api.route('/version')
  *       - application/json
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET orgs returns orgs' data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET orgs due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET orgs due to not being logged in.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET orgs due to orgs not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET orgs due to a server side issue.
  *   post:
  *     tags:
  *       - organizations
@@ -174,15 +174,15 @@ api.route('/version')
  *               description: An array of objects containing organization data.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST orgs returns orgs' data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST orgs due to invalid field in orgs' data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST orgs due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST orgs due to an already existing orgs with same id.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST orgs due to a server side issue.
  *   patch:
  *     tags:
  *       - organizations
@@ -210,15 +210,15 @@ api.route('/version')
  *                            and their corresponding values.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH orgs returns orgs' data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH orgs due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH orgs due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH orgs due to an already existing org with same id.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH orgs due to a server side issue.
  *   delete:
  *     tags:
  *       - organizations
@@ -247,15 +247,15 @@ api.route('/version')
  *                            to hard delete. Defaults to false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE orgs returns deleted orgs' data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE orgs due to invalid orgs' data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE orgs due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE orgs due to not having permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH org due to a server side issue.
  */
 api.route('/orgs')
 .get(
@@ -297,15 +297,15 @@ api.route('/orgs')
  *         type: string
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET org returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET org due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET org due to not being logged in.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET org due an existing org with same id.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET org due to a server side issue.
  *   post:
  *     tags:
  *       - organizations
@@ -344,15 +344,15 @@ api.route('/orgs')
  *               description: Custom JSON data that can be added to an organization
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST org returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST org due to invalid field in data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST org due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST org due to an existing org with same id.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST org due to a server side issue.
  *
  *   patch:
  *     tags:
@@ -381,17 +381,17 @@ api.route('/orgs')
  *               description: The updated custom JSON data of the organization.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH org returns updated org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, FAILED to PATCH org due to invalid update data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, FAILED to PATCH org due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, FAILED to PATCH org due to updating an immutable field.
  *       404:
- *         description: Not Found
+ *         description: Not Found, FAILED to PATCH org due to not finding org.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH org due to a server side issue.
  *
  *   delete:
  *     tags:
@@ -419,17 +419,17 @@ api.route('/orgs')
  *                            false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE org return deleted org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE org due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE org due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE org due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to DELETE org due to not finding org.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE org due to a server side issue.
  */
 api.route('/orgs/:orgid')
 .get(
@@ -483,17 +483,17 @@ api.route('/orgs/:orgid')
  *                            deleted projects.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET projects returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET projects due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET projects due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET projects due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET projects due to projects not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET projects due to a server side issue.
  *
  *   post:
  *     tags:
@@ -520,15 +520,15 @@ api.route('/orgs/:orgid')
  *                            contain the name and id of that project.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST projects returns project data
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST projects due to invalid project data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST projects due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST projects due to project ids already existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST projects due to a server side issue.
  *   patch:
  *     tags:
  *       - projects
@@ -557,15 +557,15 @@ api.route('/orgs/:orgid')
  *                            projects and their corresponding values.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH project returns project data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH project due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH project due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH project due to updating an immutable field.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH project due to server side issue.
  *   delete:
  *     tags:
  *       - projects
@@ -599,15 +599,15 @@ api.route('/orgs/:orgid')
  *                            Defaults to false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE projects return deleted project data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE project due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE project due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE project due to not having permissions on org.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE org due to a server side issue.
  */
 api.route('/orgs/:orgid/projects')
 .get(
@@ -665,17 +665,17 @@ api.route('/orgs/:orgid/projects')
  *                            deleted project.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET project returns project data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET project due to invalid id field.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET project due to not not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET project due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET project due to project with given id not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET project due to a server side issue.
  *
  *   post:
  *     tags:
@@ -732,17 +732,17 @@ api.route('/orgs/:orgid/projects')
  *                            private or internal. Defaults to private if not included.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST project return project data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST project due to invalid project data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST project due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST project due posting with an already existing id.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to POST project due to org not being found.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST project due to a server side issue.
  *
  *   patch:
  *     tags:
@@ -776,17 +776,17 @@ api.route('/orgs/:orgid/projects')
  *               description: The updated custom data for the project.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH project returns updated project data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH project due to invalid update data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH project due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH project due to updating an immutable field.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to PATCH project due to not finding project.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH project due to a server side issue.
  *
  *   delete:
  *     tags:
@@ -819,17 +819,17 @@ api.route('/orgs/:orgid/projects')
  *                            Defaults to false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE project return deleted project data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE project due to invalid project data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE project due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE project due to not having permissions on org.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to DELETE project due to not finding project.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE project due to server side issue.
  */
 api.route('/orgs/:orgid/projects/:projectid')
 .get(
@@ -871,17 +871,17 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         type: string
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET members from org returns list of members.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET members due to invalid org data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET members due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET members due to not having permissions on org.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET members from org due to org not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET members due to a server side issue.
  */
 api.route('/orgs/:orgid/members')
 .get(
@@ -912,17 +912,17 @@ api.route('/orgs/:orgid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET user from org returns public user data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET user from org due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET user due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET user due to not having permissions
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET user due to not finding user or org.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET user due to server side issue.
  *
  *   post:
  *     tags:
@@ -955,17 +955,17 @@ api.route('/orgs/:orgid/members')
  *               description: The role the user will be set to on the organization.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST org user role returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST org user role due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST org user role due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST org user role due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to POST org user role due to not finding org.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST user role due to server side issue.
  *
  *   patch:
  *     tags:
@@ -998,17 +998,17 @@ api.route('/orgs/:orgid/members')
  *               description: The role the user will be set to on the organization.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH org user role returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH org user role due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH org user role due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH org user role due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to PATCH org user role due to org not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed ot PATCH user role due to server side issue.
  *
  *   delete:
  *     tags:
@@ -1029,17 +1029,17 @@ api.route('/orgs/:orgid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE user role returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE user role due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE user role due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE user role due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to DELETE user role due to org not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE user role due to server side issue.
  */
 api.route('/orgs/:orgid/members/:username')
 .get(
@@ -1087,17 +1087,17 @@ api.route('/orgs/:orgid/members/:username')
  *         type: string
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET project members returns list of members.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET project members due to invalid project data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET project members due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET project members due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET project members due to org not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET members due to server side issue.
  */
 api.route('/orgs/:orgid/projects/:projectid/members')
 .get(
@@ -1133,17 +1133,17 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET user from project returns user public data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET user from project due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET user from project due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET user from project due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET user from project due to org not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET user due to server side issue.
  *
  *   post:
  *     tags:
@@ -1181,17 +1181,17 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *               description: The role the user will be set to on the project.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST project user role returns project data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST project user role due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST project user role due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST project user role due to not having permissisons.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to POST project user role due to project not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST user role due to server side issue.
  *
  *   patch:
  *     tags:
@@ -1229,17 +1229,17 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *               description: The role the user will be set to on the project.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH project user role returns project data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH project user role due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH project user role due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH project user role due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to PATCH project user role due to project not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH user role due to server side issue.
  *
  *   delete:
  *     tags:
@@ -1265,17 +1265,17 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *         type: string
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE project user role returns org data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE project user role due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE project user role due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE project user role due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to DELETE project user role due to project not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE user role due to server side issue.
  */
 api.route('/orgs/:orgid/projects/:projectid/members/:username')
 .get(
@@ -1335,17 +1335,17 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *                            deleted elements.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET elements returns elements data
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET elements due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET elements due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET elements due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET elements due to a non existing project or org.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET elements due to server side issue.
  *
  *   post:
  *     tags:
@@ -1470,17 +1470,17 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *                            find a soft deleted element.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET element returns element data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET element due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET element due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET element due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET element due to element not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET element due to server side issue.
  *
  *   post:
  *     tags:
@@ -1529,17 +1529,17 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *               description: Custom JSON data that can be added to the element.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeded to POST element returns element data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST element due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST element due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST element due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to POST element due to project/org not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST element due to server side issue.
  *
  *   patch:
  *     tags:
@@ -1581,17 +1581,17 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *               description: The updated custom JSON data for the element.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH element returns element data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH element due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH element due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH element due to updating an immutable field.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to PATCH element due to element does not exist.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH element due to server side issue.
  *
  *   delete:
  *     tags:
@@ -1629,17 +1629,17 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *                            Defaults to false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE element returns element data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE element due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE element due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE element due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to DELETE element due to element not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE element due to server side issue.
  */
 api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
 .get(
@@ -1676,17 +1676,17 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *       - N/A
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET users returns public user data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET users due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET users due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET users due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET users due to not finding any users.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET users due to server side issue.
  *
  *   post:
  *     tags:
@@ -1708,15 +1708,15 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *                            contain the username of that user.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST users returns public users data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST users due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST users due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to POST users due to not having permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST users due to server side issue.
  *   patch:
  *     tags:
  *       - users
@@ -1774,15 +1774,15 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *                            deleted or not. Defaults to false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE users return users data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE users due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE users due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE users due to not having permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE users due to server side issue.
  */
 api.route('/users')
 .get(
@@ -1819,17 +1819,17 @@ api.route('/users')
  *     description: Returns the currently logged in user's public information
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET current user information returns user public data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET current user information due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET user information due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET user information due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET current user information due to not finding user.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET user info due to server side issue.
  */
 api.route('/users/whoami')
 .get(
@@ -1855,17 +1855,17 @@ api.route('/users/whoami')
  *         in: URI
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to GET user returns user public data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to GET user due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to GET user due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to GET user due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to GET user due to user not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to GET user due to server side issue.
  *
  *   post:
  *     tags:
@@ -1914,17 +1914,15 @@ api.route('/users/whoami')
  *               description: Custom JSON data that can be added to a user.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to POST user returns public user data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to POST user due to invalid information.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to POST user due to not being logged in.
  *       403:
- *         description: Forbidden
- *       404:
- *         description: Not Found
+ *         description: Forbidden, Failed to POST user due to using username that already exists.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to POST user due to server side issue.
  *
  *   patch:
  *     tags:
@@ -1965,17 +1963,17 @@ api.route('/users/whoami')
  *               description: The updated custom JSON data for the user.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH user returns public user data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH user due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH user due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH user due updating an immutable field.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed ot PATCH user due to user not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed ot PATCH user due to server side issue.
  *
  *   delete:
  *     tags:
@@ -1991,17 +1989,17 @@ api.route('/users/whoami')
  *         in: URI
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE user returns user public data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE user due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE user due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE user due to not having permissions.
  *       404:
- *         description: Not Found
+ *         description: Not Found, Failed to DELETE user due to user not existing.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE user due to server side issues.
  */
 api.route('/users/:username')
 .get(
