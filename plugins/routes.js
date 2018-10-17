@@ -195,7 +195,7 @@ function downloadPluginFromWebsite(data) {
   const httpProxy = 'http://proxy-lmi.global.lmco.com:80';
 
   // Create directory for plugin
-  const stdoutMkdirCmd = execSync( `mkdir -r ${path.join(M.root, 'plugins', data.name)}`);
+  const stdoutMkdirCmd = execSync(`mkdir -p ${path.join(M.root, 'plugins', data.name)}`);
   M.log.verbose(stdoutMkdirCmd.toString());
 
   // Zip files
@@ -210,7 +210,7 @@ function downloadPluginFromWebsite(data) {
 
     // Unzipping downloaded file
     M.log.info(`Unzipping ${fileName}...`);
-    const unzipCmd = execSync(`unzip ${fileName}`);
+    const unzipCmd = execSync(`unzip -y ${fileName}`);
     M.log.verbose(unzipCmd.toString());
     M.log.info('Unzip complete.');
   }
