@@ -1187,7 +1187,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *       401:
  *         description: Unauthorized, Failed to POST project user role due to not being logged in.
  *       403:
- *         description: Forbidden, Failed to POST project user role due to not having permissisons.
+ *         description: Forbidden, Failed to POST project user role due to not having permissions.
  *       404:
  *         description: Not Found, Failed to POST project user role due to project not existing.
  *       500:
@@ -1419,15 +1419,17 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *                            elements and their corresponding values.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH elements, returns elements data
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH elements due to invalid
+ *                      data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH element due to not being logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH elements due to not having
+ *                      permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH elements due to server side issue.
  *   delete:
  *     tags:
  *       - elements
@@ -1466,15 +1468,19 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *                            admin to hard delete. Defaults to false.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to DELETE elements, returns elements data
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to DELETE elements due to invalid
+ *                      data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to DELETE element due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to DELETE elements due to not having
+ *                      permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to DELETE elements due to
+ *                      server side issue.
  */
 api.route('/orgs/:orgid/projects/:projectid/elements')
 .get(
@@ -1596,7 +1602,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *               description: Custom JSON data that can be added to the element.
  *     responses:
  *       200:
- *         description: OK, Succeded to POST element returns element data.
+ *         description: OK, Succeeded to POST element returns element data.
  *       400:
  *         description: Bad Request, Failed to POST element due to invalid data.
  *       401:
@@ -1808,15 +1814,18 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *                            and their corresponding values.
  *     responses:
  *       200:
- *         description: OK
+ *         description: OK, Succeeded to PATCH users, returns public users data.
  *       400:
- *         description: Bad Request
+ *         description: Bad Request, Failed to PATCH users due to invalid data.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized, Failed to PATCH users due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden, Failed to PATCH users due to not having
+ *                      permissions.
  *       500:
- *         description: Internal Server Error
+ *         description: Internal Server Error, Failed to PATCH users due to
+ *                      server side issue.
  *   delete:
  *     tags:
  *       - users
