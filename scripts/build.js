@@ -84,7 +84,7 @@ function build(_args) {
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Jquery JS
-    gulp.src('./node_modules/jquery/dist/jquery.min.js')
+    gulp.src('./node_modules/jquery/dist/jquery.js/jquery.min.js')
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Popper JS

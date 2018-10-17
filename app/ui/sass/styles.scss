@@ -236,10 +236,12 @@ body {
 /******************************************************************************/
 .content {
     position: absolute;
+    top: 0;
+    bottom: 0;
     width: 100vw;
     margin-top: $navbar-height;
     padding: 10px;
-    overflow-y: scroll;
+    overflow-y: hidden;
     &.content-banner {
         margin-top: $banner-height + $navbar-height;
     }
@@ -338,30 +340,66 @@ body {
     padding: 10px;
     padding-left: 15px;
     padding-right: 15px;
-    display: none;
+    display: flex;
+    flex-direction: column;
 
-    &.model-package {
+    &.type-package {
 
     }
 
-    &.model-block {
+    &.type-block {
         padding-left: 15px+16px;
     }
-    &.model-relationship {
+    &.type-relationship {
         padding-left: 15px+16px;
     }
 
-    &.expanded {
-        display: block;
+    &.closed {
+        display: none;
     }
 
     .element-container {
        :hover {
            background: lighten($mbee-background,10);
         }
+        .dropdown-icon {
+            i {
+                &.closed {
+                    display: none;
+                }
+            }
+        }
     }
 
 
+}
+
+.tree-sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #ffffff;
+    height: 100vh;
+    width: 350px;
+
+    background: lighten($mbee-background, 5);
+    color: inherit;
+
+    .element-content {
+        .element-detail {
+            display: flex;
+            align-content: space-evenly;
+
+            padding: 15px;
+
+            .element-detail-key {
+                width: 50%;
+            }
+            .element-detail-value {
+                width: 50%;
+            }
+        }
+    }
 }
 
 /******************************************************************************

@@ -107,12 +107,22 @@
     document.getElementById("content").classList.toggle("sidebar-min");
   };
 
-  function toggleExpand(itemClass) {
-    var elementList = document.getElementsByClassName(itemClass)
+  function toggleClosed(itemClass) {
+    const elementList = document.getElementsByClassName(itemClass)
     for (let i = 0; i < elementList.length; i++) {
-      elementList[i].classList.toggle("expanded")
+      elementList[i].classList.toggle("closed")
     }
   };
+
+  $(document).ready(function() {
+    $('.element-title').click(function() {
+      jQuery.get('/api/orgs/software-org/projects/software-proj/elements/root-package', function
+        (data) {
+        $('.element-info-name').replaceWith(data.name)
+      })
+    });
+  });
+
 
 </script>
 

@@ -1,68 +1,51 @@
 <%
-function preOrderTreeTraversal(tree, array) {
-  array.push(tree.element);
-  if (tree.hasOwnProperty('children') && tree.children.length > 0) {
-    for (let i = 0; i < tree.children.length; i++) {
-      preOrderTreeTraversal(tree.children[i], array);
-    }
-  }
+// Set uid, name, and type
+const uid = root.element.uid;
+const name = root.element.name;
+const type = root.element.type.toLowerCase();
+
+// Set Icon
+let icon = null;
+if (type === 'package') {
+  icon = 'fas fa-boxes'
+}
+else if (type === 'relationship') {
+  icon = 'fas fa-exchange-alt'
+}
+else {
+  icon = 'fas fa-box'
 }
 
-function renderElement() {
-
-}
+const parentRef = (root.element.parent) ? `${root.element.parent.uid}-child` : ''
+const childRef = (root.hasOwnProperty('children')) ? `${root.element.uid}-child` : ''
+const closed = (root.element.parent) ? 'closed' : ''
 
  %>
-
-
-<div class="element model-package arc-reactor expanded">
+<div class="element type-<%= type %> <%= uid %> <%= parentRef %> <%= closed %>">
   <div class="element-container">
-    <a class="expand-icon" onclick=toggleExpand('arc-reactor-child')>
-      <i class="fas fa-angle-right"></i>
-    </a>
 
+    <% if (type === 'package') { %>
+    <a class="dropdown-icon"onclick=toggleClosed("<%= childRef %>")>
+      <i class="fas fa-angle-right <%= childRef %>"></i>
+      <i class="fas fa-angle-down <%= childRef %> closed"></i>
+    </a>
+    <% } %>
     <a class="element-title">
-      <i class="fas fa-boxes"></i>
-      <span>Arc Reactor</span>
+      <i class="<%= icon %>"></i>
+      <span><%= name %></span>
     </a>
   </div>
 
+    <%
+    if (root.hasOwnProperty('children') && root.children.length > 0) {
+      for (let i = 0; i < root.children.length; i++) {
+        let child = root.children[i];
+    %>
+    <%- include('element-tree-render', {root: child}) %>
+    <%
+      }
+    }
+    %>
 
-  <div class="element model-block cooling-system arc-reactor-child">
-    <a class="element-title">
-      <i class="fas fa-square"></i>
-      <span>Cooling System</span>
-    </a>
-  </div>
-
-  <div class="element model-package fusion-assembly arc-reactor-child">
-    <a class="element-title" onclick=toggleExpand('fusion-assembly-child')>
-      <i class="fas fa-angle-right"></i>
-      <i class="fas fa-boxes"></i>
-      <span>Fusion Assembly</span>
-    </a>
-
-    <div class="element model-block radiation-shield fusion-assembly-child">
-      <a class="element-title">
-        <i class="fas fa-square"></i>
-        <span>Radiation Shield</span>
-      </a>
-    </div>
-
-    <div class="element model-block radiation-shield-frame fusion-assembly-child">
-      <a class="element-title">
-        <i class="fas fa-square"></i>
-        <span>Radiation Shield Frame</span>
-      </a>
-    </div>
-
-    <div class="element model-relationship radiation-shield-mount fusion-assembly-child">
-      <a class="element-title">
-        <i class="fas fa-square"></i>
-        <span>Radiation Shield Mount</span>
-      </a>
-    </div>
-
-  </div>
 
 </div>

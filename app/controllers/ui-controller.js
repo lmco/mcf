@@ -191,6 +191,7 @@ function project(req, res) {
   })
   .then(foundElements => {
     elements = foundElements;
+    const elementTree = elementSort.CreateElementsTree(elements);
     utils.render(req, res, 'project', {
       name: 'project',
       title: 'MBEE | Model-Based Engineering Environment',
@@ -214,7 +215,7 @@ function project(req, res) {
         }
       },
       project: proj,
-      elements: elements
+      elements: elementTree
     });
   })
   // If error, redirect to organization list
