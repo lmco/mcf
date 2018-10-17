@@ -115,6 +115,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should PATCH multiple orgs', patchOrgs);
   it('should POST multiple projects', postProjects);
   it('should PATCH multiple projects', patchProjects);
+  it('should POST multiple elements', postElements);
+  it('should PATCH multiple elements', patchElements);
+  it('should GET multiple elements', getElements);
+  it('should DELETE multiple elements', deleteElements);
   it('should GET multiple projects', getProjects);
   it('should DELETE multiple projects', deleteProjects);
   it('should DELETE orgs', deleteOrgs);
@@ -1055,6 +1059,151 @@ function patchProjects(done) {
 
   // PATCHs multiple projects
   apiController.patchProjects(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to create multiple elements.
+ */
+function postElements(done) {
+  // Create request object
+  const body = {
+    elements: [
+      testData.elements[0],
+      testData.elements[1],
+      testData.elements[2],
+      testData.elements[3],
+      testData.elements[7],
+      testData.elements[6],
+      testData.elements[8],
+      testData.elements[9],
+      testData.elements[11],
+      testData.elements[10]
+    ]
+  };
+  const params = { orgid: testData.orgs[1].id, projectid: testData.projects[4].id };
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(10);
+    done();
+  };
+
+  // POSTs multiple elements
+  apiController.postElements(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update multiple elements.
+ */
+function patchElements(done) {
+  // Create request object
+  const body = {
+    elements: [
+      testData.elements[0],
+      testData.elements[1],
+      testData.elements[2],
+      testData.elements[3],
+      testData.elements[7]
+    ],
+    update: { name: 'Updated Elements' }
+  };
+  const params = { orgid: testData.orgs[1].id, projectid: testData.projects[4].id };
+  const method = 'PATCH';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(5);
+    chai.expect(json[2].name).to.equal('Updated Elements');
+    done();
+  };
+
+  // PATCHs multiple elements
+  apiController.patchElements(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get multiple elements.
+ */
+function getElements(done) {
+  // Create request object
+  const body = {};
+  const params = { orgid: testData.orgs[1].id, projectid: testData.projects[4].id };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(10);
+    done();
+  };
+
+  // GETs multiple elements
+  apiController.getElements(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete multiple elements.
+ */
+function deleteElements(done) {
+  // Create request object
+  const body = {
+    elements: [
+      testData.elements[0],
+      testData.elements[1],
+      testData.elements[2],
+      testData.elements[3],
+      testData.elements[7],
+      testData.elements[6],
+      testData.elements[8],
+      testData.elements[9],
+      testData.elements[11],
+      testData.elements[10]
+    ],
+    hardDelete: true
+  };
+  const params = { orgid: testData.orgs[1].id, projectid: testData.projects[4].id };
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(10);
+    done();
+  };
+
+  // DELETEs multiple elements
+  apiController.deleteElements(req, res);
 }
 
 /**

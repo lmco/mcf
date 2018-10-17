@@ -307,21 +307,21 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
     })
     .then((createdPackages) => {
       // Add createdPackages to createdElements array
-      createdElements = createdPackages;
+      createdElements = createdPackages || [];
 
       // Create blocks second
       return Element.Element.create(blockArray);
     })
     .then((createdBlocks) => {
       // Add createdBlocks to createdElements array
-      createdElements = createdElements.concat(createdBlocks);
+      createdElements = createdElements.concat(createdBlocks || []);
 
       // Create relationships third
       return Element.Element.create(relationshipArray);
     })
     .then((createdRelationships) => {
       // Add createdRelationships to createdElements array
-      createdElements = createdElements.concat(createdRelationships);
+      createdElements = createdElements.concat(createdRelationships || []);
 
       // Return all of the created elements
       return resolve(createdElements);
