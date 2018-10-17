@@ -118,9 +118,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should POST an element', postElement01);
-  it('should POST a second element', postElement02);
-  it('should POST a third element', postElement03);
+  it('should POST an element', postElement);
+  it('should POST multiple elements', postMultipleElements);
   it('should GET the previously posted element', getElement);
   it('should GET all elements for a project', getElements);
   it('should PATCH an elements name', patchElement);
@@ -130,7 +129,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PATCH with an invalid name', rejectPatchElement);
   it('should reject a PATCH invalid field to multiple elements', rejectPatchInvalidFieldElements);
   it('should reject a DELETE with a non-existing element', rejectDeleteNonexistingElement);
-  it('should DELETE the previously created element', deleteElement01);
+  it('should DELETE the previously created element', deleteElement);
   it('should DELETE multiple elements', deleteMultipleElements);
 });
 
@@ -139,7 +138,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
  * creates an element.
  */
-function postElement01(done) {
+function postElement(done) {
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
@@ -160,16 +159,18 @@ function postElement01(done) {
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * creates a second element.
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements
+ * creates multiple elements
  */
-function postElement02(done) {
+function postMultipleElements(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.elements[1])
+    body: JSON.stringify({
+      elements: [testData.elements[1], testData.elements[2], testData.elements[3]]
+    })
   },
   (err, response, body) => {
     // Expect no error
@@ -178,31 +179,7 @@ function postElement02(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[1].id);
-    done();
-  });
-}
-
-/**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * creates a third element.
- */
-function postElement03(done) {
-  request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[2].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(testData.elements[2])
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[2].id);
+    chai.expect(json.length).to.equal(3);
     done();
   });
 }
@@ -248,7 +225,7 @@ function getElements(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(3);
+    chai.expect(json.length).to.equal(4);
     done();
   });
 }
@@ -437,7 +414,7 @@ function rejectDeleteNonexistingElement(done) {
  * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
  * deletes the previously created element.
  */
-function deleteElement01(done) {
+function deleteElement(done) {
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
@@ -471,7 +448,7 @@ function deleteMultipleElements(done) {
     ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      elements: [testData.elements[1], testData.elements[2]],
+      elements: [testData.elements[1], testData.elements[2], testData.elements[3]],
       hardDelete: true
     })
   },
@@ -482,8 +459,7 @@ function deleteMultipleElements(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json[0].id).to.equal(testData.elements[1].id);
-    chai.expect(json[1].id).to.equal(testData.elements[2].id);
+    chai.expect(json.length).to.equal(3);
     done();
   });
 }
