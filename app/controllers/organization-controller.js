@@ -290,8 +290,10 @@ function updateOrgs(reqUser, query, updateInfo) {
       // Check if some of the orgs in updateMany failed
       if (!containsMixed && orgs.n !== foundOrgs.length) {
         // The number updated does not match the number attempted, log it
-        M.log.error('Some of the following organizations failed to update: '
-        + `[${foundOrgs.map(o => o.id)}].`);
+        return reject(new M.CustomError(
+          'Some of the following organizations failed to update: '
+        + `[${foundOrgs.map(o => o.id)}].`, 500, 'error'
+        ));
       }
 
       // Find the updated orgs to return them

@@ -206,8 +206,10 @@ function updateElements(reqUser, query, updateInfo) {
       // Check if some of the elements in updateMany failed
       if (!containsMixed && retQuery.n !== foundElements.length) {
         // The number updated does not match the number attempted, log it
-        M.log.error('Some of the following elements failed to update: '
-          + `[${foundElements.map(e => e.uid)}].`);
+        return reject(new M.CustomError(
+          'Some of the following elements failed to update: '
+          + `[${foundElements.map(e => e.uid)}].`, 500, 'error'
+        ));
       }
 
       // Find the updated elements to return them

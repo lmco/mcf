@@ -1595,11 +1595,6 @@ function patchElements(req, res) {
       assert.ok(['elements', 'update'].includes(key), `Invalid parameter: ${key}`);
     });
     assert.ok(req.body.hasOwnProperty('update'), 'Update object was not provided in body.');
-    assert.ok(req.params.hasOwnProperty('orgid'), 'orgid was not provided in params.');
-    assert.ok(typeof req.params.orgid === 'string', 'orgid in request params is not a string.');
-    assert.ok(req.params.hasOwnProperty('projectid'), 'projectid was not provided in params.');
-    assert.ok(typeof req.params.projectid === 'string',
-      'projectid in request params is not a string.');
   }
   catch (message) {
     // If req.user is not provided, set status code to 500
