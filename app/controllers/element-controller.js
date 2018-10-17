@@ -182,12 +182,12 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       element.uid = uid;
 
       // If element has uuid, add it to list
-      if (element.uuid !== undefined) {
+      if (element.hasOwnProperty('uuid')) {
         arrUUID.push(element.uuid);
       }
 
       // If element doesn't have parent, add it
-      if (element.parent === undefined) {
+      if (element.hasOwnProperty('parent')) {
         element.parent = null;
       }
     });
@@ -203,16 +203,22 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         // Get the ids of the elements that already exist
         const existingIDs = elements.map(e => e.id);
         const existingUUIDs = elements.filter(e => arrUUID.includes(e.uuid));
+        let message = '';
 
         // If an element with matching uuid exists
         if (existingUUIDs.length > 0) {
-          return reject(new M.CustomError(`Elements(s) with the following uuid(s) ' +
-      'already exists: [${existingUUIDs.toString()}].`, 403, 'warn'));
+          message += `Elements(s) with the following uuid(s) ' +
+          'already exists: [${existingUUIDs.toString()}].`;
         }
 
-        // Elements with matching ids exist
-        return reject(new M.CustomError(`Elements(s) with the following id(s) ' +
-      'already exists: [${existingIDs.toString()}].`, 403, 'warn'));
+        // If an elements with matching id exists
+        if (existingIDs.length > 0) {
+          message += ` Elements(s) with the following id(s) ' +
+          'already exists: [${existingIDs.toString()}].`;
+        }
+
+        // Reject error
+        return reject(M.CustomError(message, 403, 'warn'));
       }
 
       // Find the project
