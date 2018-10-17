@@ -21,7 +21,7 @@ const childRef = (root.hasOwnProperty('children')) ? `${root.element.uid}-child`
 const closed = (root.element.parent) ? 'closed' : ''
 
  %>
-<div class="element type-<%= type %> <%= uid %> <%= parentRef %> <%= closed %>">
+<div id="<%= uid %>" class="element type-<%= type %> <%= uid %> <%= parentRef %> <%= closed %>">
   <div class="element-container">
 
     <% if (type === 'package') { %>

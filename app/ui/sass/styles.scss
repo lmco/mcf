@@ -377,26 +377,56 @@ body {
 .tree-sidebar {
     position: absolute;
     top: 0;
-    right: 0;
+    right: -350px;
     background: #ffffff;
     height: 100vh;
     width: 350px;
+    overflow-y: scroll;
+
+    &.tree-sidebar-active {
+        right: 0;
+        transition: right .2s;
+    }
 
     background: lighten($mbee-background, 5);
     color: inherit;
 
+    .close-tree-sidebar {
+        position: absolute;
+        left: 10px;
+        color: #ffc700
+    }
+
+    .element-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-top: 10px;
+
+        h2 {
+            padding-left: 10px;
+            margin: 0;
+        }
+    }
+
     .element-content {
-        .element-detail {
+        .element-item {
             display: flex;
-            align-content: space-evenly;
-
+            justify-content: space-between;
             padding: 15px;
+            padding-top: 5px;
+            padding-bottom: 5px;
 
-            .element-detail-key {
-                width: 50%;
+            .element-key {
+                color: darken($mbee-color,20);
+                display: flex;
+                width: 40%;
+                justify-content: flex-start;
             }
-            .element-detail-value {
-                width: 50%;
+            .element-value {
+                display: flex;
+                width: 60%;
+                justify-content: flex-start;
             }
         }
     }

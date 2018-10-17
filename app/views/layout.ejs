@@ -110,16 +110,28 @@
   function toggleClosed(itemClass) {
     const elementList = document.getElementsByClassName(itemClass)
     for (let i = 0; i < elementList.length; i++) {
-      elementList[i].classList.toggle("closed")
+      elementList[i].classList.toggle("closed");
     }
   };
 
   $(document).ready(function() {
+    $('.close-tree-sidebar').click(function() {
+      $('.tree-sidebar').removeClass('tree-sidebar-active');
+    });
+
     $('.element-title').click(function() {
       jQuery.get('/api/orgs/software-org/projects/software-proj/elements/root-package', function
         (data) {
-        $('.element-info-name').replaceWith(data.name)
-      })
+        $('.tree-sidebar').addClass('tree-sidebar-active');
+        $('.element-item-name-value').html(data.name);
+        $('.element-item-id-value').html(data.id);
+        $('.element-item-parent-value').html((data.parent) ? data.parent.name : 'No Parent.');
+        $('.element-item-created-value').html(data.createdOn);
+        $('.element-item-updated-value').html(data.updatedOn);
+        $('.element-item-custom-value').html(data.custom || 'No Custom Data.');
+        $('.element-item-documentation-value').html(data.documentation || 'No ' +
+          'Documentation.');
+      });
     });
   });
 
