@@ -152,6 +152,15 @@ function createUsers(reqUser, arrNewUsers) {
       // Create user objects
       const userObjects = arrNewUsers.map(u => new User(sani.sanitize(u)));
 
+      // Error Check: ensure password is provided if local strategy
+      userObjects.forEach((user) => {
+        if (user.password === undefined && user.provider === 'local') {
+          return reject(new M.CustomError(
+            `Password is required for local user [${user.username}`, 403, 'warn'
+          ));
+        }
+      });
+
       // Set created flag to true
       created = true;
 
@@ -564,6 +573,11 @@ function createUser(reqUser, newUserData) {
 
       // Create the new user
       const user = new User(sani.sanitize(newUserData));
+
+      // Error Check: ensure password is provided if local strategy
+      if (user.password === undefined && user.provider === 'local') {
+        return reject(new M.CustomError('Password is required for local users', 403, 'warn'));
+      }
 
       // Save new user
       return user.save();
