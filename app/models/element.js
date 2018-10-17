@@ -146,17 +146,17 @@ const ElementSchema = new mongoose.Schema({
     ref: 'Project',
     set: function(_proj) {
       // Check value undefined
-      if (typeof this.proj === 'undefined') {
+      if (typeof this.project === 'undefined') {
         // Return value to set it
         return _proj;
       }
       // Check value NOT equal to db value
-      if (_proj !== this.proj) {
+      if (_proj !== this.project) {
         // Immutable field, return error
         return new M.CustomError('Assigned project cannot be changed.', 400, 'warn');
       }
       // No change, return the value
-      return this.proj;
+      return this.project;
     }
   },
   parent: {
