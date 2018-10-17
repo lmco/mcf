@@ -23,6 +23,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
+const timestamp = M.require('models.plugin.timestamp');
 
 
 /* ----------------------------( Project Model )----------------------------- */
@@ -34,17 +35,17 @@ const validators = M.require('lib.validators');
  *
  * @property {String} id - The project's non-unique id.
  * @property {Organization} org - A reference to the project's organization.
- * @property {String} uid - The projects unique id namespaced using a
+ * @property {String} uid - The projects unique id name-spaced using a
  * project's organization.
  * @property {String} name - The project's non-unique project name.
  * @property {User} permissions - An object whose keys identify a projects's
  * roles. The key values are an array of references to users who hold those
  * roles.
- * @property {User} permissions.read - An array of refrences to Users who have
+ * @property {User} permissions.read - An array of references to Users who have
  * read access
- * @property {User} permissions.write - An array of refrences to Users who have
+ * @property {User} permissions.write - An array of references to Users who have
  * write access
- * @property {User} permissions.admin - An array of refrences to Users who have
+ * @property {User} permissions.admin - An array of references to Users who have
  * admin access
  * @property {Date} deletedOn - The date a project was soft deleted or null if
  * not soft deleted
@@ -60,17 +61,59 @@ const ProjectSchema = new mongoose.Schema({
     required: true,
     index: true,
     match: RegExp(validators.project.id),
-    maxlength: [36, 'Too many characters in username']
+    maxlength: [36, 'Too many characters in username'],
+    set: function(_id) {
+      // Check value undefined
+      if (typeof this.id === 'undefined') {
+        // Return value to set it
+        return _id;
+      }
+      // Check value NOT equal to db value
+      if (_id !== this.id) {
+        // Immutable field, return error
+        return new M.CustomError('ID cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.id;
+    }
   },
   org: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
-    required: true
+    required: true,
+    set: function(_org) {
+      // Check value undefined
+      if (typeof this.org === 'undefined') {
+        // Return value to set it
+        return _org;
+      }
+      // Check value NOT equal to db value
+      if (_org !== this.org) {
+        // Immutable field, return error
+        return new M.CustomError('Assigned org cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.org;
+    }
   },
   uid: {
     type: String,
     unique: true,
-    required: true
+    required: true,
+    set: function(_uid) {
+      // Check value undefined
+      if (typeof this.uid === 'undefined') {
+        // Return value to set it
+        return _uid;
+      }
+      // Check value NOT equal to db value
+      if (_uid !== this.uid) {
+        // Immutable field, return error
+        return new M.CustomError('UID cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.uid;
+    }
   },
   name: {
     type: String,
@@ -91,20 +134,6 @@ const ProjectSchema = new mongoose.Schema({
       ref: 'User'
     }]
   },
-  deletedOn: {
-    type: Date,
-    default: null
-  },
-  deleted: {
-    type: Boolean,
-    default: false,
-    set: function(v) {
-      if (v) {
-        this.deletedOn = Date.now();
-      }
-      return v;
-    }
-  },
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -115,6 +144,9 @@ const ProjectSchema = new mongoose.Schema({
   }
 });
 
+/* ---------------------------( Model Plugin )---------------------------- */
+// Use timestamp model plugin
+ProjectSchema.plugin(timestamp);
 
 /* ---------------------------( Project Methods )---------------------------- */
 
@@ -124,11 +156,22 @@ const ProjectSchema = new mongoose.Schema({
  */
 ProjectSchema.methods.getPublicData = function() {
   // Map read, write, and admin references to only contain user public data
-  this.permissions.read = this.permissions.read.map(u => u.getPublicData());
-  this.permissions.write = this.permissions.write.map(u => u.getPublicData());
-  this.permissions.admin = this.permissions.admin.map(u => u.getPublicData());
-  // Return the project
-  return this;
+  const permissions = {
+    read: this.permissions.read.map(u => u.getPublicData()),
+    write: this.permissions.write.map(u => u.getPublicData()),
+    admin: this.permissions.admin.map(u => u.getPublicData())
+  };
+
+  // Return the projects public fields
+  return {
+    id: this.id,
+    org: this.org,
+    uid: this.uid,
+    name: this.name,
+    permissions: permissions,
+    custom: this.custom,
+    visibility: this.visibility
+  };
 };
 
 /**

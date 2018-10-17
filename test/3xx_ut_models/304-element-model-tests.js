@@ -122,7 +122,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should delete all elements', deleteElements);
 });
 
-
 /* --------------------( Tests )-------------------- */
 /**
  * @description Creates a root package element for test data project

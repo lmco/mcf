@@ -125,8 +125,8 @@ function createDefaultOrganization() {
     .then(users => {
       // Set userIDs to the _id of the users array
       userIDs = users.map(u => u._id);
-      // Search for an organization with id 'default'
-      return Organization.findOne({ id: 'default' });
+      // Find the default organization
+      return Organization.findOne({ id: M.config.server.defaultOrganizationId });
     })
     .then(org => {
       // Check if org is NOT null

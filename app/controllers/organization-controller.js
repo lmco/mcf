@@ -608,7 +608,7 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
     }
 
     // Error Check: ensure the org being updated is not the default org
-    if (organizationID === 'default') {
+    if (organizationID === M.config.server.defaultOrganizationId) {
       // orgID is default, reject error
       return reject(new M.CustomError('Cannot update the default org.', 403, 'warn'));
     }
@@ -715,7 +715,7 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
     }
 
     // Error Check: ensure reqUser is not deleting the default org
-    if (organizationID === 'default') {
+    if (organizationID === M.config.server.defaultOrganizationId) {
       // orgID is default, reject error.
       return reject(new M.CustomError('The default organization cannot be deleted.', 403, 'warn'));
     }

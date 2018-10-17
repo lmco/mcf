@@ -101,16 +101,8 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     OrgController.findOrg(reqUser, organizationID, softDeleted)
     // Find projects
     .then(() => findProjectsQuery(searchParams))
-    .then((projects) => {
-      // Filter results to only the projects on which user has read access
-      let res = projects.filter(project => project.getPermissions(reqUser).read || reqUser.admin);
-
-      // Map project public data to results
-      res = res.map(project => project.getPublicData());
-
-      // Return resulting project
-      return resolve(res);
-    })
+    .then((projects) => resolve(projects
+    .filter(project => project.getPermissions(reqUser).read || reqUser.admin)))
     .catch((error) => reject(error));
   });
 }
@@ -884,7 +876,7 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being deleted.
- * @param {String} searchedUsername - The username of the user who's permissions are being set.
+ * @param {String} setUsername - The username of the user who's permissions are being set.
  * @param {String} role - The permission level or type being set for the use
  *
  * @return {Promise} resolve - updated organization object
@@ -972,12 +964,12 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
         }
         else {
           // Remove user from projectPermission
-          projectPermission = projectPermission
           // eslint-disable-next-line no-loop-func
-          .filter(user => setUser.username === user.username);
+          projectPermission = projectPermission.filter(user => setUser.username !== user.username);
         }
+        // Set the project permissions list to the update list
+        project.permissions[permissionLevels[i]] = projectPermission;
       }
-
       // Save updated project
       return project.save();
     })
