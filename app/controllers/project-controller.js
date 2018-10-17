@@ -301,7 +301,7 @@ function updateProjects(reqUser, query, updateInfo) {
         // The number updated does not match the number attempted, log it
         return reject(new M.CustomError(
           'Some of the following projects failed to update: '
-          + `[${foundProjects.map(o => o.id)}].`, 500, 'error'
+          + `[${foundProjects.map(p => p.id)}].`, 500, 'error'
         ));
       }
 

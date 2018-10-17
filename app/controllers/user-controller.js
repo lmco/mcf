@@ -298,7 +298,7 @@ function updateUsers(reqUser, query, updateInfo) {
         // The number updated does not match the number attempted, log it
         return reject(new M.CustomError(
           'Some of the following users failed to update: '
-          + `[${foundUsers.map(o => o.id)}].`, 500, 'error'
+          + `[${foundUsers.map(u => u.id)}].`, 500, 'error'
         ));
       }
       // Find the updated users to return them
