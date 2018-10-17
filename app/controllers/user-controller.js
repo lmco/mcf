@@ -305,8 +305,10 @@ function updateUsers(reqUser, query, updateInfo) {
       // Check if some of the users in updateMany failed
       if (!containsMixed && retQuery.n !== foundUsers.length) {
         // The number updated does not match the number attempted, log it
-        M.log.error('Some of the following users failed to update: '
-          + `[${foundUsers.map(o => o.id)}].`);
+        return reject(new M.CustomError(
+          'Some of the following users failed to update: '
+          + `[${foundUsers.map(u => u.id)}].`, 500, 'error'
+        ));
       }
       // Find the updated users to return them
       return findUsersQuery(query);
