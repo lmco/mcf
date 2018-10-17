@@ -195,7 +195,8 @@ function downloadPluginFromWebsite(data) {
   const httpProxy = 'http://proxy-lmi.global.lmco.com:80';
 
   // Create directory for plugin
-  const stdoutMkdirCmd = execSync(`mkdir -p ${path.join(M.root, 'plugins', data.name)}`);
+  const dirName = path.join(M.root, 'plugins', data.name);
+  const stdoutMkdirCmd = execSync(`mkdir -p ${dirName}`);
   M.log.verbose(stdoutMkdirCmd.toString());
 
   // Zip files
@@ -210,7 +211,7 @@ function downloadPluginFromWebsite(data) {
 
     // Unzipping downloaded file
     M.log.info(`Unzipping ${fileName}...`);
-    const unzipCmd = execSync(`unzip -y ${fileName}`);
+    const unzipCmd = execSync(`unzip ${fileName} -d ${dirName}`);
     M.log.verbose(unzipCmd.toString());
     M.log.info('Unzip complete.');
   }
@@ -226,7 +227,7 @@ function downloadPluginFromWebsite(data) {
 
     // Extracting downloaded file
     M.log.info(`Extracting ${fileName}...`);
-    const unzipCmd = execSync(`tar xvzf ${fileName}`);
+    const unzipCmd = execSync(`tar xvzf ${fileName} -C ${dirName}`);
     M.log.verbose(unzipCmd.toString());
     M.log.info('Extraction complete.');
   }
@@ -242,7 +243,7 @@ function downloadPluginFromWebsite(data) {
 
     // Extracting downloaded file
     M.log.info(`Extracting ${fileName}...`);
-    const unzipCmd = execSync(`gunzip ${fileName}`);
+    const unzipCmd = execSync(`gunzip -c ${fileName} > ${dirName}`);
     M.log.verbose(unzipCmd.toString());
     M.log.info('Extraction complete.');
   }
