@@ -195,7 +195,7 @@ function project(req, res) {
       const uid = utils.parseUID(element.uid);
       element.apiRef = `/api/orgs/${uid[0]}/projects/${uid[1]}/elements/${uid[2]}`;
     });
-    const elementTree = elementSort.CreateElementsTree(elements);
+    const elementTree = elementSort.createElementsTree(elements);
     utils.render(req, res, 'project', {
       name: 'project',
       title: 'MBEE | Model-Based Engineering Environment',
@@ -232,7 +232,7 @@ function project(req, res) {
 function elementTest(req, res) {
   ElementController.findElements(req.user, req.params.orgid, req.params.projectid)
   .then(elementsList => {
-    const elementTree = elementSort.CreateElementsTree(elementsList);
+    const elementTree = elementSort.createElementsTree(elementsList);
     utils.render(req, res, 'element-test-tree', {
       name: 'element-test-tree',
       title: 'MBEE | Model-Based Engineering Environment',

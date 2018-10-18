@@ -20,18 +20,18 @@
 
 module.exports = {
   sortElementsArray,
-  CreateElementsTree
+  createElementsTree
 };
 
 function sortElementsArray(elementArr) {
-  const elementTree = CreateElementsTree(elementArr);
+  const elementTree = createElementsTree(elementArr);
   const sortedElementArr = [];
 
   preOrderTreeTraversal(elementTree, sortedElementArr);
   return sortedElementArr;
 }
 
-function CreateElementsTree(elementList) {
+function createElementsTree(elementList) {
   const elementTree = {};
 
   let root = null;
