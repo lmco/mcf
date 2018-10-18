@@ -83,7 +83,7 @@ router.route('/organizations')
   UIController.organizationList
 );
 
-/* This renders the project page for logged in users */
+/* This renders the project list page for logged in users */
 router.route('/projects')
 .get(
   AuthController.authenticate,
