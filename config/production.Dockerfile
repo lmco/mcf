@@ -20,18 +20,11 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost
 
-# Prerequisites for MongoDB install
-RUN dpkg-divert --local --rename --add /etc/init.d/mongod
-RUN ln -s /bin/true /etc/init.d/mongod
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
-RUN echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/4.0 multiverse" | tee -i /etc/apt/sources.list.d/mongodb-org-4.0.list
-
 # Install dependencies
 RUN apt-get -y upgrade \
  && apt-get -y update \
  && apt-get install -y git \
- && apt-get install -y openssh-client \
- && apt-get install -y --force-yes mongodb-org
+ && apt-get install -y openssh-client
 
 # Install certs - If you have certs in a certs directory, uncomment the following lines
 RUN mkdir -p certs
@@ -55,8 +48,7 @@ RUN mkdir logs \
     && mkdir -p plugins \
     && mkdir -p build \
     && mkdir -p public \
-    && mkdir -p app \
-    && mkdir -p /lm/mbee/data/db/log
+    && mkdir -p app
 
 # Copy Project
 COPY ./config config
@@ -67,16 +59,9 @@ COPY ./build build
 COPY ./app  app
 COPY ./README.md README.md
 
-# Make entrypoint.sh an executable
-RUN chmod +x /lm/mbee/config/entrypoint.sh
-
-# Define a volume
-VOLUME data
-
 # Expose ports
 EXPOSE 6233
 EXPOSE 6234
-EXPOSE 27024
 
 # Run server
-ENTRYPOINT /lm/mbee/config/entrypoint.sh
+CMD ["node", "mbee.js", "start"]
