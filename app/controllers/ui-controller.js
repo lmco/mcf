@@ -30,6 +30,7 @@ module.exports = {
   organization,
   projectList,
   project,
+  whoami,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -169,7 +170,7 @@ function projectList(req, res) {
 }
 
 /**
- * Renders an organization page.
+ * Renders an project page.
  */
 function project(req, res) {
   // Sanity check: confirm req.user exists
@@ -222,6 +223,44 @@ function project(req, res) {
   });
 }
 
+/**
+ * Renders the organization list page.
+ */
+function whoami(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/whoami executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // get all organizations the user is a member of
+  UserController.findUser(req.user, req.user.username)
+  // Render the project page with the list of projects
+  .then(foundUser => utils.render(req, res, 'user', {
+    user: foundUser,
+    title: 'MBEE | Model-Based Engineering Environment',
+    name: foundUser.username,
+    sidebar: {
+      heading: 'User',
+      icon: 'fas fa-boxes',
+      list: {
+        Projects: {
+          icon: 'fas fa-box',
+          link: '#projects'
+        },
+        Settings: {
+          icon: 'fas fa-cog',
+          link: '#settings'
+        }
+      }
+    },
+  }))
+  // If error, redirect to home
+  .catch(error => {
+    M.log.error(error);
+    res.redirect('/');
+  });
+}
 
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc

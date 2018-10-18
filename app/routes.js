@@ -75,6 +75,15 @@ router.route('/')
   UIController.home
 );
 
+/* This renders the user page for logged in users */
+router.route('/whoami')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.whoami
+);
+
+
 /* This renders the organization list page for logged in users */
 router.route('/organizations')
 .get(
