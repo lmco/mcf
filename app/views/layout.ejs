@@ -120,8 +120,15 @@
     });
 
     $('.element-title').click(function() {
-      jQuery.get('/api/orgs/software-org/projects/software-proj/elements/root-package', function
-        (data) {
+      $('.tree-sidebar').addClass('tree-sidebar-active');
+      $('.element-item-name-value').html('Loading...');
+      $('.element-item-id-value').html('Loading...');
+      $('.element-item-parent-value').html('Loading...');
+      $('.element-item-created-value').html('Loading...');
+      $('.element-item-updated-value').html('Loading...');
+      $('.element-item-custom-value').html('Loading...');
+      $('.element-item-documentation-value').html('Loading...');
+      jQuery.get($(this).attr('id') , function(data) {
         $('.tree-sidebar').addClass('tree-sidebar-active');
         $('.element-item-name-value').html(data.name);
         $('.element-item-id-value').html(data.id);

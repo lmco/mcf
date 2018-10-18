@@ -3,6 +3,7 @@
 const uid = root.element.uid;
 const name = root.element.name;
 const type = root.element.type.toLowerCase();
+const apiRef = root.element.apiRef;
 
 // Set Icon
 let icon = null;
@@ -19,9 +20,9 @@ else {
 const parentRef = (root.element.parent) ? `${root.element.parent.uid}-child` : ''
 const childRef = (root.hasOwnProperty('children')) ? `${root.element.uid}-child` : ''
 const closed = (root.element.parent) ? 'closed' : ''
-
  %>
-<div id="<%= uid %>" class="element type-<%= type %> <%= uid %> <%= parentRef %> <%= closed %>">
+
+<div class="element type-<%= type %> <%= uid %> <%= parentRef %> <%= closed %>">
   <div class="element-container">
 
     <% if (type === 'package') { %>
@@ -30,7 +31,7 @@ const closed = (root.element.parent) ? 'closed' : ''
       <i class="fas fa-angle-down <%= childRef %> closed"></i>
     </a>
     <% } %>
-    <a class="element-title">
+    <a id="<%= apiRef %>" class="element-title">
       <i class="<%= icon %>"></i>
       <span><%= name %></span>
     </a>

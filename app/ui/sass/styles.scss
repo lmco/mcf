@@ -241,7 +241,7 @@ body {
     width: 100vw;
     margin-top: $navbar-height;
     padding: 10px;
-    overflow-y: hidden;
+    overflow-y: scroll;
     &.content-banner {
         margin-top: $banner-height + $navbar-height;
     }
@@ -336,42 +336,45 @@ body {
 /******************************************************************************
 /*                            Project Tree Styling                            *
 /******************************************************************************/
-.element {
-    padding: 10px;
-    padding-left: 15px;
-    padding-right: 15px;
-    display: flex;
-    flex-direction: column;
+.element-tree-container {
+    background: darken($mbee-background, 10);
 
-    &.type-package {
+    .element {
+        padding: 10px;
+        padding-left: 15px;
+        padding-right: 15px;
+        display: flex;
+        flex-direction: column;
 
-    }
+        &.type-package {
 
-    &.type-block {
-        padding-left: 15px+16px;
-    }
-    &.type-relationship {
-        padding-left: 15px+16px;
-    }
-
-    &.closed {
-        display: none;
-    }
-
-    .element-container {
-       :hover {
-           background: lighten($mbee-background,10);
         }
-        .dropdown-icon {
-            i {
-                &.closed {
-                    display: none;
+
+        &.type-block {
+            padding-left: 15px+16px;
+        }
+        &.type-relationship {
+            padding-left: 15px+16px;
+        }
+
+        &.closed {
+            display: none;
+        }
+
+        .element-container {
+            :hover {
+                background: lighten($mbee-background,10);
+                cursor: pointer;
+            }
+            .dropdown-icon {
+                i {
+                    &.closed {
+                        display: none;
+                    }
                 }
             }
         }
     }
-
-
 }
 
 .tree-sidebar {
@@ -394,7 +397,8 @@ body {
     .close-tree-sidebar {
         position: absolute;
         left: 10px;
-        color: #ffc700
+        color: #ffc700;
+        cursor: pointer;
     }
 
     .element-header {
