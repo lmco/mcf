@@ -192,7 +192,7 @@ function downloadPluginFromWebsite(data) {
   M.log.verbose(stdoutRmCmd.toString());
 
   // Proxy information
-  const httpProxy = 'http://proxy-lmi.global.lmco.com:80';
+  const httpProxy = M.config.server.proxy;
 
   // Create directory for plugin
   const dirName = path.join(M.root, 'plugins', data.name);
