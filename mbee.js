@@ -143,6 +143,11 @@ if (installComplete) {
   Object.defineProperty(M, 'CustomError', {
     value: M.require('lib.errors').CustomError
   });
+
+  // Initialize the CustomEmitter Class
+  Object.defineProperty(M, 'Event', {
+    value: M.require('lib.events')
+  });
 }
 
 // Make the M object read only and its properties cannot be changed or removed.
