@@ -95,7 +95,7 @@ function build(_args) {
     gulp.src('./node_modules/mxgraph/javascript/**/*')
     .pipe(gulp.dest('build/public/mxgraph'));
 
-    // Copy mxGraph JS
+    // Copy Font-Awesome dependencies
     gulp.src('./node_modules/@fortawesome/fontawesome-free/webfonts/**/*')
     .pipe(gulp.dest('build/public/webfonts'));
 
