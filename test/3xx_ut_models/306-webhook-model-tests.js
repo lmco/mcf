@@ -64,10 +64,10 @@ function createWebhook(done) {
 
   // Save webhook to database
   webhook.save()
-  .then((webhook) => {
+  .then((createdWebhook) => {
     // Verify results
-    chai.expect(webhook.id).to.equal(testData.webhooks[0].id);
-    chai.expect(webhook.triggers.length).to.equal(testData.webhooks[0].triggers.length);
+    chai.expect(createdWebhook.id).to.equal(testData.webhooks[0].id);
+    chai.expect(createdWebhook.triggers.length).to.equal(testData.webhooks[0].triggers.length);
     done();
   })
   .catch((error) => {

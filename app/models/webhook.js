@@ -16,7 +16,7 @@
 const request = require('request');
 
 // NMP modules
-const mongoose= require('mongoose');
+const mongoose = require('mongoose');
 
 // MBEE modules
 const timestamp = M.require('models.plugin.timestamp');
@@ -76,7 +76,7 @@ const WebhookSchema = new mongoose.Schema({
 WebhookSchema.plugin(timestamp);
 
 
-/*--------------------------( Webhook Middleware )----------------------------*/
+/* --------------------------( Webhook Middleware )----------------------------*/
 
 WebhookSchema.post('save', function(doc, next) {
   doc.addEventListener();
@@ -84,7 +84,7 @@ WebhookSchema.post('save', function(doc, next) {
 });
 
 
-/*----------------------------( Webhook Methods )-----------------------------*/
+/* ----------------------------( Webhook Methods )-----------------------------*/
 
 /**
  * @description Adds an event listener to the global event emitter
