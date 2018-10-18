@@ -91,13 +91,6 @@ router.route('/projects')
   UIController.projectList
 );
 
-/* This renders the test element page */
-router.route('/elements')
-.get(
-  Middleware.logRoute,
-  UIController.elementTest
-);
-
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */

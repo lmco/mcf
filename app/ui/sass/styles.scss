@@ -20,9 +20,9 @@
  */
 
 @import 'variables';
-@import '../font-awesome/fontawesome';
-@import '../font-awesome/solid';
-@import '../font-awesome/brands';
+@import '../../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome';
+@import '../../../node_modules/@fortawesome/fontawesome-free/scss/solid';
+@import '../../../node_modules/@fortawesome/fontawesome-free/scss/brands';
 
 /******************************************************************************
 /*                                  General                                   *

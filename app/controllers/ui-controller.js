@@ -30,7 +30,6 @@ module.exports = {
   organization,
   projectList,
   project,
-  elementTest,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -55,7 +54,7 @@ const elementSort = M.require('lib.element-sort');
 const validators = M.require('lib.validators');
 
 /**
- * Renders the home page.
+ * @description Renders the home page.
  */
 function home(req, res) {
   // Sanity check: confirm req.user exists
@@ -71,7 +70,7 @@ function home(req, res) {
 }
 
 /**
- * Renders the organization list page.
+ * @description Renders the organization list page.
  */
 function organizationList(req, res) {
   // Sanity check: confirm req.user exists
@@ -95,7 +94,7 @@ function organizationList(req, res) {
 }
 
 /**
- * Renders an organization page.
+ * @description Renders an organization page.
  */
 function organization(req, res) {
   // Sanity check: confirm req.user exists
@@ -138,7 +137,7 @@ function organization(req, res) {
 }
 
 /**
- * Renders the project list page.
+ * @description Renders the project list page.
  */
 function projectList(req, res) {
   // Sanity check: confirm req.user exists
@@ -171,7 +170,7 @@ function projectList(req, res) {
 }
 
 /**
- * Renders an organization page.
+ * @description Renders a project page.
  */
 function project(req, res) {
   // Sanity check: confirm req.user exists
@@ -228,23 +227,6 @@ function project(req, res) {
     return res.redirect('/projects');
   });
 }
-
-function elementTest(req, res) {
-  ElementController.findElements(req.user, req.params.orgid, req.params.projectid)
-  .then(elementsList => {
-    const elementTree = elementSort.createElementsTree(elementsList);
-    utils.render(req, res, 'element-test-tree', {
-      name: 'element-test-tree',
-      title: 'MBEE | Model-Based Engineering Environment',
-      elementTree: elementTree
-    });
-  })
-  .catch((error) => {
-    M.log.error(error);
-    res.redirect('/projects');
-  });
-}
-
 
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc

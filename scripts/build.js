@@ -84,7 +84,7 @@ function build(_args) {
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Jquery JS
-    gulp.src('./node_modules/jquery/dist/jquery.js')
+    gulp.src('./node_modules/jquery/dist/jquery.min.js')
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Popper JS
@@ -94,6 +94,10 @@ function build(_args) {
     // Copy mxGraph JS
     gulp.src('./node_modules/mxgraph/javascript/**/*')
     .pipe(gulp.dest('build/public/mxgraph'));
+
+    // Copy mxGraph JS
+    gulp.src('./node_modules/@fortawesome/fontawesome-free/webfonts/**/*')
+    .pipe(gulp.dest('build/public/webfonts'));
 
     // Copy MBEE JS
     gulp.src('./app/ui/js/mbee.js')
