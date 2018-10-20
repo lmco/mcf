@@ -141,13 +141,15 @@ function findOrg(done) {
  */
 function updateOrg(done) {
   // Find and update the org created in the previous createOrg() test
-  Org.findOneAndUpdate({ id: testData.orgs[0].id }, { name: testData.orgs[0].name })
-  // Find the updated org
-  .then((org) => Org.findOne({ id: org.id }))
-  .then((org) => {
+  Org.findOne({ id: testData.orgs[0].id })
+  .then((foundOrg) => {
+    foundOrg.name = testData.orgs[0].name;
+    return foundOrg.save();
+  })
+  .then((updatedOrg) => {
     // Verify org is updated correctly
-    chai.expect(org.id).to.equal(testData.orgs[0].id);
-    chai.expect(org.name).to.equal(testData.orgs[0].name);
+    chai.expect(updatedOrg.id).to.equal(testData.orgs[0].id);
+    chai.expect(updatedOrg.name).to.equal(testData.orgs[0].name);
     done();
   })
   .catch((error) => {

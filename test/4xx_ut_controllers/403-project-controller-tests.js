@@ -128,6 +128,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should throw an error saying the field is not of type string', updateTypeError);
   it('should update a project', updateProjectName);
   it('should update a project using the Project object', updateProjectObject);
+  it('should update multiple projects', updateMultipleProjects);
   it('should create a second project', createProject02);
   it('should reject attempt to create a project with a period in name', rejectCreatePeriodName);
   it('should reject creation of a project already made', rejectDuplicateProjectId);
@@ -207,7 +208,7 @@ function createMultipleProjects(done) {
 
 /**
  * @description Verifies project object cannot update immutable field.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectImmutableField(done) {
   // Update project
@@ -219,7 +220,7 @@ function rejectImmutableField(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });
@@ -227,7 +228,7 @@ function rejectImmutableField(done) {
 
 /**
  * @description Verifies user CANNOT update project with invalid project name.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function updateTypeError(done) {
   // Update project
@@ -239,8 +240,8 @@ function updateTypeError(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -294,6 +295,42 @@ function updateProjectObject(done) {
 }
 
 /**
+ * @description Updates multiple projects at the same time.
+ */
+function updateMultipleProjects(done) {
+  // Create query to update projects
+  const updateQuery = { id: { $in: [
+    testData.projects[4].id,
+    testData.projects[5].id
+  ] } };
+
+  // Create list of update parameters
+  const updateObj = {
+    custom: {
+      department: 'Space'
+    },
+    name: 'New Project Name'
+  };
+
+  // Update projects
+  ProjController.updateProjects(adminUser, updateQuery, updateObj)
+  .then((projects) => {
+    // Verify returned data
+    chai.expect(projects[0].name).to.equal(updateObj.name);
+    chai.expect(projects[1].name).to.equal(updateObj.name);
+    chai.expect(projects[0].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(projects[1].custom.department).to.equal(updateObj.custom.department);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
  * @description Verifies second project is create.
  */
 function createProject02(done) {
@@ -319,7 +356,7 @@ function createProject02(done) {
 
 /**
  * @description Verifies project name does not contain periods.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectCreatePeriodName(done) {
   // Define and clone the project data
@@ -335,15 +372,15 @@ function rejectCreatePeriodName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies existing projects CANNOT be recreated.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectDuplicateProjectId(done) {
   // Define and clone the project data
@@ -359,7 +396,7 @@ function rejectDuplicateProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });
@@ -367,7 +404,7 @@ function rejectDuplicateProjectId(done) {
 
 /**
  * @description Verifies user CANNOT create project with invalid ID.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectId(done) {
   // Define and clone the project data
@@ -383,15 +420,15 @@ function rejectInvalidProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies user CANNOT create a project without name input.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidProjectName(done) {
   // Define and clone the project data
@@ -407,8 +444,8 @@ function rejectInvalidProjectName(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -605,7 +642,7 @@ function updateProj(done) {
 
 /**
  * @description Verifies immutable project Id CANNOT be updated.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectProjectId(done) {
   const orgId = org.id;
@@ -621,7 +658,7 @@ function rejectProjectId(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });

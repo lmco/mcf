@@ -117,13 +117,14 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject update from non admin user', rejectNonAdminUpdate);
   it('should update an orgs name', updateOrg);
   it('should update an orgs name using model object', updateOrgObject);
+  it('should update multiple orgs at the same time', updateMultipleOrgs);
   it('should find all orgs a user has access to', findAllExistingOrgs);
   it('should soft delete an existing org', softDeleteExistingOrg);
   it('should delete an existing org', deleteExistingOrg);
   it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
   it('should reject find of soft-deleted org', rejectFindSoftDelOrg);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
-  it('should reject update of default org', updateDefaultOrg);
+  it('should reject update of default org', rejectUpdateDefaultOrg);
   it('should reject delete of default org', rejectDefaultOrgDelete);
   it('should add a user to an org', setUserOrgRole);
   it('should reject user changing their permissions', rejectUserRole);
@@ -214,7 +215,7 @@ function findExistingOrg(done) {
 
 /**
  * @description Verifies a user CANNOT update permissions.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectUpdateImmutableField(done) {
   // Update organization
@@ -226,7 +227,7 @@ function rejectUpdateImmutableField(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
+    // Expected error thrown: 'Forbidden'
     chai.expect(error.message).to.equal('Forbidden');
     done();
   });
@@ -234,7 +235,7 @@ function rejectUpdateImmutableField(done) {
 
 /**
  * @description Verifies updateOrg fails given invalid data.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectUpdateBadType(done) {
   // Update organization
@@ -246,8 +247,8 @@ function rejectUpdateBadType(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -313,6 +314,46 @@ function updateOrgObject(done) {
   .then((retOrgUpdate) => {
     // Verify model object was updated
     chai.expect(retOrgUpdate.name).to.equal(testData.orgs[2].name);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates multiple organizations at the same time.
+ */
+function updateMultipleOrgs(done) {
+  // Create query to update orgs
+  const updateQuery = { id: { $in: [
+    testData.orgs[1].id,
+    testData.orgs[4].id
+  ] } };
+
+  // Create list of update parameters
+  const updateObj = {
+    custom: {
+      department: 'Space',
+      location: {
+        country: 'USA'
+      }
+    }
+  };
+
+  // Update orgs
+  OrgController.updateOrgs(adminUser, updateQuery, updateObj)
+  .then((orgs) => {
+    // Verify returned data
+    chai.expect(orgs[0].custom.leader).to.equal(testData.orgs[1].custom.leader);
+    chai.expect(orgs[0].custom.location.country).to.equal(updateObj.custom.location.country);
+    chai.expect(orgs[0].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(orgs[1].custom.leader).to.equal(testData.orgs[4].custom.leader);
+    chai.expect(orgs[1].custom.location.state).to.equal(testData.orgs[4].custom.location.state);
+    chai.expect(orgs[1].custom.location.country).to.equal(updateObj.custom.location.country);
     done();
   })
   .catch((error) => {
@@ -483,9 +524,9 @@ function hardDeleteProjectAndOrg(done) {
  * @description Verifies default organization CANNOT be updated.
  * Expected error thrown: 'Forbidden'
  */
-function updateDefaultOrg(done) {
+function rejectUpdateDefaultOrg(done) {
   // Update default org
-  OrgController.updateOrg(adminUser, 'default', testData.names[4])
+  OrgController.updateOrg(adminUser, M.config.server.defaultOrganizationId, testData.names[4])
   .then(() => {
     // Expected updateOrg() to fail
     // Should not execute, force test to fail
@@ -505,7 +546,7 @@ function updateDefaultOrg(done) {
  */
 function rejectDefaultOrgDelete(done) {
   // Delete default org
-  OrgController.removeOrg(adminUser, 'default', true)
+  OrgController.removeOrg(adminUser, M.config.server.defaultOrganizationId, true)
   .then(() => {
     // Expected removeOrg() to fail
     // Should not execute, force test to fail

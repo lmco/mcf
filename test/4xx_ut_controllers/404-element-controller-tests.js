@@ -125,10 +125,12 @@ describe(M.getModuleName(module.filename), () => {
     + 'non-package parent', rejectElementInvalidParentType);
   it('should create a block element', createBlockWithUUID);
   it('should create a relationship', createRelationship);
+  it('should create multiple elements', createMultipleElements);
   it('should fail creating an element with existing uuid', rejectCreateElementExistingUUID);
   it('should find all elements for a project', findElements);
   it('should find an element by its uuid', findElementByUUID);
   it('should update an element', updateElement);
+  it('should update multiple elements', updateMultipleElements);
   it('should soft delete an element', softDeleteElement);
   it('should hard delete an element', hardDeleteElement);
   it('should soft delete all elements', softDeleteAllElements);
@@ -289,6 +291,35 @@ function createRelationship(done) {
 }
 
 /**
+ * @description Creates multiple elements at a time
+ */
+function createMultipleElements(done) {
+  // Create array of new element objects
+  const newElements = [
+    testData.elements[7],
+    testData.elements[6],
+    testData.elements[8],
+    testData.elements[9],
+    testData.elements[11],
+    testData.elements[10]
+  ];
+
+  // Create new elements
+  ElemController.createElements(adminUser, org.id, proj.id, newElements)
+  .then((elements) => {
+    // Verify the elements were created
+    chai.expect(elements.length).to.equal(6);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
  * @description Verifies UUID is unique.
  * Expected error thrown: 'Bad Request'
  */
@@ -320,7 +351,7 @@ function findElements(done) {
   ElemController.findElements(adminUser, org.id, proj.id)
   .then((retElems) => {
     // Expect 4 elements to be found
-    chai.expect(retElems.length).to.equal(4);
+    chai.expect(retElems.length).to.equal(10);
     done();
   })
   .catch((error) => {
@@ -374,6 +405,41 @@ function updateElement(done) {
     // Verify the found element's properties
     chai.expect(retElem.id).to.equal(testData.elements[0].id);
     chai.expect(retElem.name).to.equal(testData.elements[4].name);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates multiple elements at the same time.
+ */
+function updateMultipleElements(done) {
+  // Create query to update elements
+  const uids = [utils.createUID(org.id, proj.id, testData.elements[0].id),
+    utils.createUID(org.id, proj.id, testData.elements[1].id)];
+  const updateQuery = { uid: { $in: uids } };
+
+  // Create list of update parameters
+  const updateObj = {
+    custom: {
+      department: 'Space'
+    },
+    name: 'New Element Name'
+  };
+
+  // Update elements
+  ElemController.updateElements(adminUser, updateQuery, updateObj)
+  .then((elements) => {
+    // Verify returned data
+    chai.expect(elements[0].name).to.equal(updateObj.name);
+    chai.expect(elements[1].name).to.equal(updateObj.name);
+    chai.expect(elements[0].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(elements[1].custom.department).to.equal(updateObj.custom.department);
     done();
   })
   .catch((error) => {
@@ -455,12 +521,12 @@ function hardDeleteElement(done) {
  */
 function softDeleteAllElements(done) {
   // Delete all elements in project
-  ElemController.removeElements(adminUser, [proj], false)
+  ElemController.removeElements(adminUser, { project: proj._id }, false)
   // Find all existing elements in project, including soft-deleted elements
   .then(() => ElemController.findElements(adminUser, org.id, proj.id, true))
   .then((retElems) => {
     // Find succeeded, verify elements were returned
-    chai.expect(retElems.length).to.equal(3);
+    chai.expect(retElems.length).to.equal(9);
     // Verify elements deleted field is set to true
     chai.expect(retElems[0].deleted).to.equal(true);
     done();
@@ -499,7 +565,7 @@ function verifyFindNonSoftDelElem(done) {
  */
 function hardDeleteAllElements(done) {
   // Delete all elements in project
-  ElemController.removeElements(adminUser, [proj], true)
+  ElemController.removeElements(adminUser, { project: proj._id }, true)
   .then(() => ElemController.findElements(adminUser, org.id, proj.id))
   .then((elements) => {
     // Expect elements array to be empty

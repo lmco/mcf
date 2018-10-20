@@ -107,11 +107,10 @@ function authenticate(req, res, next) {
       // Error check - username/password not empty
       if (!username || !password || username === '' || password === '') {
         M.log.debug('Username or password not provided.');
-
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Unauthorized')
-          : res.redirect(`/login?next=${req.originalUrl}`);
+          : res.redirect('back');
       }
       // Handle Basic Authentication
       AuthModule.handleBasicAuth(req, res, username, password)
@@ -246,16 +245,6 @@ function authenticate(req, res, next) {
     username = sani.sanitize(req.body.username);
     password = req.body.password;
 
-    // Error check - username/password not empty
-    if (!username || !password || username === '' || password === '') {
-      M.log.debug('Username or password not provided.');
-      req.flash('loginError', 'Username or password not provided.');
-
-      // return proper error for API route or redirect for UI
-      return (req.originalUrl.startsWith('/api'))
-        ? res.status(401).send('Unauthorized')
-        : res.redirect(`/login?next=${req.originalUrl}`);
-    }
     // Handle Basic Authentication
     AuthModule.handleBasicAuth(req, res, username, password)
     .then(user => {
@@ -270,12 +259,7 @@ function authenticate(req, res, next) {
     })
     .catch(err => {
       M.log.error(err.stack);
-      if (err.description === 'Invalid username or password.') {
-        req.flash('loginError', err.description);
-      }
-      else {
-        req.flash('loginError', 'Internal Server Error');
-      }
+      req.flash('loginError', 'Invalid username or password.');
 
       // return proper error for API route or redirect for UI
       // 'back' returns to the original login?next=originalUrl
@@ -284,15 +268,15 @@ function authenticate(req, res, next) {
         : res.redirect('back');
     });
   }
+  // Verify if credentials are empty or null
   else {
-    M.log.verbose(`"${req.originalUrl}" requested with`
-      + ' no valid authentication method provided.'
-      + ' Redirecting to "/login" ...');
+    M.log.debug('Username or password not provided.');
+    req.flash('loginError', 'Username or password not provided.');
 
     // return proper error for API route or redirect for UI
     return (req.originalUrl.startsWith('/api'))
       ? res.status(401).send('Unauthorized')
-      : res.redirect(`/login?next=${req.originalUrl}`);
+      : res.redirect('back');
   }
 }
 

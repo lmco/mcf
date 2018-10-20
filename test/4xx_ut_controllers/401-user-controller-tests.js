@@ -26,6 +26,7 @@ const chai = require('chai');
 
 // MBEE modules
 const UserController = M.require('controllers.user-controller');
+const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const db = M.require('lib.db');
 
@@ -100,10 +101,13 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a user', createNewUser);
+  it('should reject creating multiple users when one is invalid', rejectCreateMultipleUsersInvalid);
+  it('should create multiple users', createMultipleUsers);
   it('should reject creating a user with non-admin user', rejectUserCreateByNonAdmin);
   it('should reject creating a user with no username', rejectInvalidCreate);
   it('should reject creating an already existing user', rejectDuplicateUser);
   it('should update the users first name', updateFirstName);
+  it('should update multiple users', updateMultipleUsers);
   it('should reject updating the last name with an invalid name', rejectInvalidLastNameUpdate);
   it('should reject updating the users username', rejectUsernameUpdate);
   it('should reject update from a non-admin user', rejectUserUpdateByNonAdmin);
@@ -112,6 +116,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject deleting a user with a non-admin user', rejectDeleteByNonAdmin);
   it('should reject deleting themselves', rejectDeleteSelf);
   it('should delete a user', deleteUser);
+  it('should delete multiple users', deleteMultipleUsers);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -133,6 +138,75 @@ function createNewUser(done) {
     chai.expect(newUser.fname).to.equal(testData.users[1].fname);
     chai.expect(newUser.lname).to.equal(testData.users[1].lname);
     chai.expect(newUser.custom.location).to.equal(testData.users[1].custom.location);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Rejects creation of multiple users when one is invalid.
+ * Expected error thrown: 'Internal Server Error'
+ */
+function rejectCreateMultipleUsersInvalid(done) {
+  // Create array of user data
+  const userArray = [
+    testData.invalidUsers[0],
+    testData.users[4]
+  ];
+
+  // Create new users
+  UserController.createUsers(adminUser, userArray)
+  .then(() => {
+    // Expect createUsers() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Internal Server Error'
+    chai.expect(error.message).to.equal('Internal Server Error');
+    done();
+  });
+}
+
+/**
+ * @description Verifies creation of multiple users at the same time
+ */
+function createMultipleUsers(done) {
+  // Create array of user data
+  const userArray = [
+    testData.users[2],
+    testData.users[4]
+  ];
+
+  // Define function-wide users array
+  let createdUsers = [];
+
+  // Create new users
+  UserController.createUsers(adminUser, userArray)
+  .then((users) => {
+    // Verify returned user data
+    chai.expect(users.length).to.equal(2);
+    chai.expect(users[0].username).to.equal(testData.users[2].username);
+    chai.expect(users[1].username).to.equal(testData.users[4].username);
+
+    // Set createdUsers array
+    createdUsers = users;
+
+    // Find the default org
+    return Organization.findOne({ id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultOrg) => {
+    // Verify users have been added to default org
+    chai.expect(defaultOrg.permissions.read).to.include(createdUsers[0]._id.toString());
+    chai.expect(defaultOrg.permissions.read).to.include(createdUsers[1]._id.toString());
+    chai.expect(defaultOrg.permissions.write).to.include(createdUsers[0]._id.toString());
+    chai.expect(defaultOrg.permissions.write).to.include(createdUsers[1]._id.toString());
     done();
   })
   .catch((error) => {
@@ -184,14 +258,14 @@ function rejectInvalidCreate(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
 
 /**
  * @description Verifies createsUser() CANNOT recreate existing username.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectDuplicateUser(done) {
   // Create user data
@@ -238,8 +312,47 @@ function updateFirstName(done) {
 }
 
 /**
+ * @description Updates multiple users at the same time.
+ */
+function updateMultipleUsers(done) {
+  // Create query to update users
+  const updateQuery = { username: { $in: [
+    testData.users[2].username,
+    testData.users[4].username
+  ] } };
+
+  // Create list of update parameters
+  const updateObj = {
+    custom: {
+      department: 'Space',
+      location: {
+        country: 'USA'
+      }
+    },
+    fname: 'Bob'
+  };
+
+  // Update users
+  UserController.updateUsers(adminUser, updateQuery, updateObj)
+  .then((users) => {
+    // Verify returned data
+    chai.expect(users[0].fname).to.equal(updateObj.fname);
+    chai.expect(users[1].fname).to.equal(updateObj.fname);
+    chai.expect(users[0].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(users[1].custom.department).to.equal(updateObj.custom.department);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
  * @description Verify that update fails when given invalid input.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectInvalidLastNameUpdate(done) {
   // Create user data
@@ -254,8 +367,8 @@ function rejectInvalidLastNameUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -422,6 +535,45 @@ function deleteUser(done) {
   .catch((error) => {
     // Expected error thrown: 'Not Found'
     chai.expect(error.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Deletes multiple users at the same time from the database. Also
+ * removes users from organizations they are apart of.
+ */
+function deleteMultipleUsers(done) {
+  // Create query to delete users
+  const deleteQuery = { username: { $in: [
+    testData.users[2].username,
+    testData.users[4].username
+  ] } };
+
+  // Define users array
+  let users = [];
+
+  // Delete the users
+  UserController.removeUsers(adminUser, deleteQuery, true)
+  .then((deletedUsers) => {
+    // Set users
+    users = deletedUsers;
+    // Verify returned data
+    chai.expect(deletedUsers.length).to.equal(2);
+
+    // Find the default org
+    return Organization.findOne({ id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultorg) => {
+    // Verify deleted users are not in default org
+    chai.expect(defaultorg.permissions.read).to.not.have.members([users[0]._id, users[1]._id]);
+    chai.expect(defaultorg.permissions.write).to.not.have.members([users[0]._id, users[1]._id]);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }

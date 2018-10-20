@@ -49,6 +49,7 @@ const uuidv4 = require('uuid/v4');
 // MBEE modules
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
+const timestamp = M.require('models.plugin.timestamp');
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };
@@ -84,7 +85,21 @@ const ElementSchema = new mongoose.Schema({
     required: true,
     match: RegExp(validators.element.id),
     maxlength: [64, 'Element ID is too long'],
-    minlength: [2, 'Element ID is too short']
+    minlength: [2, 'Element ID is too short'],
+    set: function(_id) {
+      // Check value undefined
+      if (typeof this.id === 'undefined') {
+        // Return value to set it
+        return _id;
+      }
+      // Check value NOT equal to db value
+      if (_id !== this.id) {
+        // Immutable field, return error
+        return new M.CustomError('ID cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.id;
+    }
   },
   uid: {
     type: String,
@@ -93,7 +108,21 @@ const ElementSchema = new mongoose.Schema({
     unique: true,
     match: RegExp(validators.element.uid),
     maxlength: [255, 'Element UID is too long'],
-    minlength: [2, 'Element UID is too short']
+    minlength: [2, 'Element UID is too short'],
+    set: function(_uid) {
+      // Check value undefined
+      if (typeof this.uid === 'undefined') {
+        // Return value to set it
+        return _uid;
+      }
+      // Check value NOT equal to db value
+      if (_uid !== this.uid) {
+        // Immutable field, return error
+        return new M.CustomError('UID cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.uid;
+    }
   },
   uuid: {
     type: String,
@@ -114,7 +143,21 @@ const ElementSchema = new mongoose.Schema({
   project: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'Project'
+    ref: 'Project',
+    set: function(_proj) {
+      // Check value undefined
+      if (typeof this.project === 'undefined') {
+        // Return value to set it
+        return _proj;
+      }
+      // Check value NOT equal to db value
+      if (_proj !== this.project) {
+        // Immutable field, return error
+        return new M.CustomError('Assigned project cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.project;
+    }
   },
   parent: {
     type: mongoose.Schema.Types.ObjectId,
@@ -128,32 +171,6 @@ const ElementSchema = new mongoose.Schema({
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
-  },
-  createdOn: {
-    type: Date,
-    default: Date.now,
-    set: function(v) { // eslint-disable-line no-unused-vars, arrow-body-style
-      return this.createdOn;
-    }
-  },
-  updatedOn: {
-    type: Date,
-    default: Date.now,
-    set: Date.now
-  },
-  deletedOn: {
-    type: Date,
-    default: null
-  },
-  deleted: {
-    type: Boolean,
-    default: false,
-    set: function(v) {
-      if (v) {
-        this.deletedOn = Date.now();
-      }
-      return v;
-    }
   }
 }, options); // end of ElementSchema
 
@@ -208,6 +225,9 @@ const PackageSchema = new mongoose.Schema({
   }]
 }, options);
 
+/* ---------------------------( Model Plugin )---------------------------- */
+// Use timestamp model plugin
+ElementSchema.plugin(timestamp);
 
 /* --------------------------( Element Middleware )-------------------------- */
 
@@ -305,14 +325,14 @@ RelationshipSchema.pre('validate', function() {
     Element.findOne({ uid: targetUID }) // eslint-disable-line no-use-before-define
     .then((target) => {
       // Set relationship target reference
-      this.target = target;
+      this.target = this.target || target;
 
       // Find the source element
       return Element.findOne({ uid: sourceUID }); // eslint-disable-line no-use-before-define
     })
     .then((source) => {
       // Set relationship source reference
-      this.source = source;
+      this.source = this.source || source;
       return resolve();
     })
     .catch((error) => reject(new M.CustomError(error.message, 500, 'warn')));
