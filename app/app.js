@@ -38,7 +38,7 @@ const middleware = M.require('lib.middleware');
 const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
-const Webhook = M.require('models.webhook');
+// const Webhook = M.require('models.webhook');
 
 // Initialize express app and export the object
 const app = express();
@@ -207,14 +207,14 @@ function createDefaultAdmin() {
 }
 
 function syncWebhookEvents() {
-  return new Promise((resolve, reject) => {
-    Webhook.find({})
-    .then((webhooks) => {
-      webhooks.forEach((webhook) => {
-        webhook.addEventListener();
-      });
-      return resolve();
-    })
-    .catch((error) => reject(error));
-  });
+  // return new Promise((resolve, reject) => {
+  //   Webhook.find({})
+  //   .then((webhooks) => {
+  //     webhooks.forEach((webhook) => {
+  //       webhook.addEventListener();
+  //     });
+  //     return resolve();
+  //   })
+  //   .catch((error) => reject(error));
+  // });
 }
