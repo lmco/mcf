@@ -21,7 +21,7 @@ const Webhook = M.require('models.webhook');
 /**
  * @description The CustomEmitter class. It extends Nodes build in event emitter
  * by pulling all webhooks in the from the database and adding the listeners to
- * the CustomEmitter object. This is done upon instantiation of the object.
+ * the CustomEmitter object. This is done upon instantiation of the object
  */
 class CustomEmitter extends EventEmitter {
 
