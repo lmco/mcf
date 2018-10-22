@@ -663,6 +663,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
             return reject(new M.CustomError(`${updateField} must be an object`, 400, 'warn'));
           }
 
+          console.log(org[updateField]);
+          console.log(orgUpdated[updateField]);
           // Add and replace parameters of the type 'Mixed'
           utils.updateAndCombineObjects(org[updateField], orgUpdated[updateField]);
 
@@ -682,7 +684,10 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
     })
     .then(updatedOrg => resolve(updatedOrg))
     // Return reject with custom error
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => {
+      M.log.error(error.stack);
+      reject(M.CustomError.parseCustomError(error))
+    });
   });
 }
 
@@ -722,6 +727,8 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
       return reject(new M.CustomError('The default organization cannot be deleted.', 403, 'warn'));
     }
 
+    console.log(reqUser.admin);
+    console.log(hardDelete);
     // Error Check: ensure reqUser is a global admin if hard deleting
     if (!reqUser.admin && hardDelete) {
       return reject(new M.CustomError('User does not have permissions to '

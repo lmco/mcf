@@ -28,6 +28,7 @@ module.exports = {
   home,
   organizationList,
   organization,
+  organizationEdit,
   projectList,
   project,
   swaggerDoc,
@@ -129,6 +130,37 @@ function organization(req, res) {
     },
     org: org
   }))
+  // If error, redirect to organization list
+  .catch(err => {
+    M.log.error(err);
+    return res.redirect('/organizations');
+  });
+}
+
+/**
+ * @description Renders an organization page.
+ */
+function organizationEdit(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/:orgid/edit executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Find organization
+  OrgController.findOrg(req.user, req.params.orgid)
+  // Render organization page including nav-sidebar
+  .then(org => {
+    if (!req.user.admin
+      && !org.permissions.admin.map(u => u.username).includes(req.user.username)) {
+      return res.redirect(`/${org.id}`);
+    }
+    utils.render(req, res, 'organization-edit', {
+      name: 'organization-edit',
+      title: 'MBEE | Model-Based Engineering Environment',
+      org: org
+    });
+  })
   // If error, redirect to organization list
   .catch(err => {
     M.log.error(err);

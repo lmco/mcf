@@ -131,6 +131,14 @@ router.route('/:orgid')
   UIController.organization
 );
 
+/* This renders an organization for a user */
+router.route('/:orgid/edit')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.organizationEdit
+);
+
 /* This renders a project for a user */
 router.route('/:orgid/:projectid')
 .get(
