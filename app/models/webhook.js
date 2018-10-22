@@ -19,6 +19,7 @@ const request = require('request');
 const mongoose = require('mongoose');
 
 // MBEE modules
+const EventEmitter = M.require('lib.events');
 const timestamp = M.require('models.plugin.timestamp');
 
 /* ---------------------------( Webhook Schema )----------------------------- */
@@ -115,7 +116,7 @@ WebhookSchema.methods.addEventListener = function() {
   // For each trigger
   this.triggers.forEach((trigger) => {
     // Add listener to event emitter
-    M.Event.on(trigger, (eventData) => {
+    EventEmitter.on(trigger, (eventData) => {
       // For every response in the Webhook responses list
       this.responses.forEach((response) => {
         // Send an HTTP request to given URL

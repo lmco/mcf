@@ -62,7 +62,7 @@ module.exports.connect = function() {
     mongoose.set('useFindAndModify', false);
     mongoose.set('useNewUrlParser', true);
     mongoose.set('useCreateIndex', true);
-
+    console.log('Database connected!');
     // Connect to database
     mongoose.connect(connectURL, options, (err) => {
       if (err) {
