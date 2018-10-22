@@ -91,6 +91,10 @@ function build(_args) {
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
     .pipe(gulp.dest('build/public/js'));
 
+    // Copy Font-Awesome dependencies
+    gulp.src('./node_modules/@fortawesome/fontawesome-free/webfonts/**/*')
+    .pipe(gulp.dest('build/public/webfonts'));
+
     // Copy MBEE JS
     gulp.src('./app/ui/js/**/*.js')
     .pipe(concat('mbee.js'))
