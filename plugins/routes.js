@@ -203,7 +203,7 @@ function downloadPluginFromWebsite(data) {
   let unzipCmd = null;
 
   // .zip files
-  if (data.source.endsWith('.zip') ) {
+  if (data.source.endsWith('.zip')) {
     // Set name and unzip command
     fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.zip`;
     unzipCmd = `unzip ${fileName} -d ${dirName}`;
