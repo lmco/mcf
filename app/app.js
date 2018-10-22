@@ -208,7 +208,7 @@ function createDefaultAdmin() {
 
 function syncWebhookEvents() {
   return new Promise((resolve, reject) => {
-  Webhook.find({})
+    Webhook.find({})
     .then((webhooks) => {
       webhooks.forEach((webhook) => {
         webhook.addEventListener();
