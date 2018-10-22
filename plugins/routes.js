@@ -199,6 +199,7 @@ function downloadPluginFromWebsite(data) {
   const stdoutMkdirCmd = execSync(`mkdir -p ${dirName}`);
   M.log.verbose(stdoutMkdirCmd.toString());
 
+  // Setting parameters
   let fileName = null;
   let unzipCmd = null;
 
