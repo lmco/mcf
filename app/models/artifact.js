@@ -29,23 +29,37 @@ const validators = M.require('lib.validators');
 const timestamp = M.require('models.plugin.timestamp');
 
 const ArtifactSchema = new mongoose.Schema({
-  id:{
+  id: {
     type: String,
     required: true,
-    index: true
+    index: true,
+    unique: true,
+    match: RegExp(validators.artifact.id),
+    maxlength: [255, 'Element ID is too long'],
+    minlength: [2, 'Element ID is too short'],
+    set: function(_id) {
+      // Check value undefined
+      if (typeof this.id === 'undefined') {
+        // Return value to set it
+        return _id;
+      }
+      // Check value NOT equal to db value
+      if (_id !== this.id) {
+        // Immutable field, return error
+        return new M.CustomError('UID cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.id;
+    }
   },
   hash: {
     type: String,
-    required: true
+    required: true,
+    index: false
   },
   filename : {
     type: String,
     required: true,
-  },
-  data: Buffer, //TODO: remove later
-  location: {
-    type: String,
-    require: true
   },
   contentType: {
     type: String,

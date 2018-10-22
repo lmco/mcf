@@ -179,3 +179,23 @@ module.exports.url = {
   // starts with one and only one '/'
   next: '^(\/)(?!\/)' // eslint-disable-line no-useless-escape
 };
+
+/**
+ * @description Regular Expressions to validate artifact data
+ *
+ * filename:
+ *   - MUST start with a lowercase letter, uppercase letter, or number
+ *   - MUST only include lowercase letters, uppercase letters, numbers,
+ *     '-', or whitespace
+ *   - MUST be of length 1 or more
+ * uuid:
+ *   - MUST follow the following format: xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+ *     where x is a number or a lowercase letter from a-f
+ *   Examples:
+ *     - f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+ *
+ */
+module.exports.artifact = {
+  filename: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
+  uuid: '([a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12})'
+};

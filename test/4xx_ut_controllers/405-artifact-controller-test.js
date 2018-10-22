@@ -19,6 +19,8 @@ const path = require('path'); // Find directory paths
 
 // MBEE modules
 const ArtifactController = M.require('controllers.artifact-controller');
+const OrgController = M.require('controllers.organization-controller');
+const ProjController = M.require('controllers.project-controller');
 const User = M.require('models.user');
 const db = M.require('lib.db');
 
@@ -26,6 +28,8 @@ const db = M.require('lib.db');
 const testData = require(path.join(M.root, 'test', 'data.json'));
 const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
+let org = null;
+let proj = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -36,17 +40,35 @@ let adminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Create admin user.
+   * After: Connect to database. Create an admin user, organization, and project
    */
   before((done) => {
-    // Connect to the database
+    // Open the database connection
     db.connect();
 
     // Create test admin
     testUtils.createAdminUser()
-    .then((user) => {
+    .then((_adminUser) => {
       // Set global admin user
-      adminUser = user;
+      adminUser = _adminUser;
+
+      // Create organization
+      return testUtils.createOrganization(adminUser);
+    })
+    .then((retOrg) => {
+      // Set global organization
+      org = retOrg;
+
+      // Define project data
+      const projData = testData.projects[0];
+      projData.orgid = org.id;
+
+      // Create project
+      return ProjController.createProject(adminUser, projData);
+    })
+    .then((retProj) => {
+      // Set global project
+      proj = retProj;
       done();
     })
     .catch((error) => {
@@ -58,28 +80,28 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Delete admin user.
+   * After: Remove Organization and project.
+   * Close database connection.
    */
   after((done) => {
-    // Find the admin user
-    User.findOne({
-      username: testData.users[0].adminUsername
-    }, (error, user) => {
-      // Expect no error
-      chai.expect(error).to.equal(null);
-
-      // Delete admin user
-      user.remove((error2) => {
-        // Expect no error
-        chai.expect(error2).to.equal(null);
-
-        // Disconnect from the database
-        db.disconnect();
-        done();
+    // Remove organization
+    // Note: Projects under organization will also be removed
+    OrgController.removeOrg(adminUser, org.id, true)
+    .then(() => {
+      // Once db items are removed, remove reqUser
+      // close the db connection and finish
+      User.findOne({
+        username: adminUser.username
+      }, (error, foundUser) => {
+        chai.expect(error).to.equal(null);
+        foundUser.remove((error2) => {
+          chai.expect(error2).to.equal(null);
+          db.disconnect();
+          done();
+        });
       });
     })
     .catch((error) => {
-      // Disconnect from the database
       db.disconnect();
 
       M.log.error(error);
@@ -92,8 +114,9 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should upload an artifact', uploadArtifact);
   it('should upload second artifact with same file', uploadSecondArtifact);
-  //it('should write out an artifact file', updateArtifact);
-  it('should delete an artifact', deleteArtifactFile);
+  it('should write out an artifact file', updateArtifact);
+  //it('should delete an artifact', deleteArtifactFile);
+  //it('should delete second artifact', deleteSecondArtifactFile);
 
 });
 
@@ -112,7 +135,7 @@ function uploadArtifact(done) {
     location: imgPath
   }
   // Create artifact
-  ArtifactController.createArtifact(adminUser, artifactObjData, artifactPNG)
+  ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[0].filename);
@@ -124,7 +147,6 @@ function uploadArtifact(done) {
     chai.expect(error.message).to.equal(null);
     done();
   });
-
 }
 
 /**
@@ -143,7 +165,7 @@ function uploadSecondArtifact(done) {
     location: imgPath
   }
   // Create artifact
-  ArtifactController.createArtifact(adminUser, artifactObjData, artifactPNG)
+  ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[1].filename);
@@ -159,18 +181,58 @@ function uploadSecondArtifact(done) {
 }
 
 /**
- * @description Finds an artifact via model and writes to a file.
+ * @description Updates an existing artifact.
  */
 function writeArtifactFile(done) {
-  done();
+  let imgPath = path.join(M.root, testData.artifacts[1].location, testData.artifacts[1].filename);
+  artifactPNG = fs.readFileSync(imgPath);
+
+  artifactObjData = {
+    id: testData.artifacts[1].id,
+    contentType: 'png',
+    filename: testData.artifacts[1].filename,
+    location: imgPath
+  }
+  // Create artifact
+  ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
+  .then((artifact) => {
+    // Verify artifact created properly
+    chai.expect(artifact.filename).to.equal(testData.artifacts[1].filename);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
 }
 
 /**
- * @description Finds an artifact via model and writes to a file.
+ * @description Deletes the first artifact.
  */
 function deleteArtifactFile(done) {
   // Create artifact
-  ArtifactController.deleteArtifact(adminUser, testData.artifacts[0].id)
+  ArtifactController.deleteArtifact(adminUser, org, proj, testData.artifacts[0].id)
+  .then((artifact) => {
+    // Verify artifact deleted properly
+    console.log(artifact);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Deletes the second artifact.
+ */
+function deleteSecondArtifactFile(done) {
+  // Create artifact
+  ArtifactController.deleteArtifact(adminUser, org, proj, testData.artifacts[1].id)
   .then((artifact) => {
     // Verify artifact deleted properly
     console.log(artifact);
