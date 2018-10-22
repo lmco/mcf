@@ -50,10 +50,11 @@ const User = M.require('models.user');
 const crypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const elementSort = M.require('lib.element-sort');
 const validators = M.require('lib.validators');
 
 /**
- * Renders the home page.
+ * @description Renders the home page.
  */
 function home(req, res) {
   // Sanity check: confirm req.user exists
@@ -69,7 +70,7 @@ function home(req, res) {
 }
 
 /**
- * Renders the organization list page.
+ * @description Renders the organization list page.
  */
 function organizationList(req, res) {
   // Sanity check: confirm req.user exists
@@ -93,7 +94,7 @@ function organizationList(req, res) {
 }
 
 /**
- * Renders an organization page.
+ * @description Renders an organization page.
  */
 function organization(req, res) {
   // Sanity check: confirm req.user exists
@@ -136,7 +137,7 @@ function organization(req, res) {
 }
 
 /**
- * Renders the project list page.
+ * @description Renders the project list page.
  */
 function projectList(req, res) {
   // Sanity check: confirm req.user exists
@@ -169,7 +170,7 @@ function projectList(req, res) {
 }
 
 /**
- * Renders an organization page.
+ * @description Renders a project page.
  */
 function project(req, res) {
   // Sanity check: confirm req.user exists
@@ -189,6 +190,11 @@ function project(req, res) {
   })
   .then(foundElements => {
     elements = foundElements;
+    elements.forEach(element => {
+      const uid = utils.parseUID(element.uid);
+      element.apiRef = `/api/orgs/${uid[0]}/projects/${uid[1]}/elements/${uid[2]}`;
+    });
+    const elementTree = elementSort.createElementsTree(elements);
     utils.render(req, res, 'project', {
       name: 'project',
       title: 'MBEE | Model-Based Engineering Environment',
@@ -212,7 +218,7 @@ function project(req, res) {
         }
       },
       project: proj,
-      elements: elements
+      elements: elementTree
     });
   })
   // If error, redirect to organization list
@@ -221,7 +227,6 @@ function project(req, res) {
     return res.redirect('/projects');
   });
 }
-
 
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc
