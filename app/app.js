@@ -33,12 +33,12 @@ const flash = require('express-flash');
 
 // MBEE modules
 const db = M.require('lib.db');
-const events = M.require('lib.events');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
 const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
+const Webhook = M.require('models.webhook');
 
 // Initialize express app and export the object
 const app = express();
@@ -49,7 +49,7 @@ module.exports = app;
 db.connect()
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
-.then(() => events.syncEvents())
+.then(() => Webhook.syncEvents())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);

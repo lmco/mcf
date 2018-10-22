@@ -133,6 +133,25 @@ WebhookSchema.methods.addEventListener = function() {
   });
 };
 
+/**
+ * @description Retrieves all webhooks from the database, and adds them to the
+ * event listener.
+ *
+ * @memberOf WebhookSchema
+ */
+WebhookSchema.statics.syncEvents = function() {
+  return new Promise((resolve, reject) => {
+    this.model('Webhook').find({})
+    .then((webhooks) => {
+      webhooks.forEach((webhook) => {
+        webhook.addEventListener();
+      });
+      return resolve();
+    })
+    .catch((error) => reject(error));
+  });
+};
+
 
 /* --------------------------( Webhook Properties )-------------------------- */
 
