@@ -24,6 +24,7 @@
 // circular references between controllers.
 module.exports = {
   createElement,
+  createElements,
   findElement,
   findElements,
   removeElement,
@@ -108,6 +109,245 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
 }
 
 /**
+ * @description This function creates multiple elements.
+ *
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {String} organizationID - The ID of the organization housing the project.
+ * @param {String} projectID - The ID of the project to add elements to.
+ * @param {Object} arrElements - The object containing element data to create.
+ *
+ * @return {Promise} resolve - created elements
+ *                   reject -  error
+ *
+ * @example
+ * createElements({User}, 'orgID', 'projID', [{Elem1}, {Elem2}, ...])
+ * .then(function(elements) {
+ *   // Do something with the created elements
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createElements(reqUser, organizationID, projectID, arrElements) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof arrElements === 'object', 'Project array is not an object.');
+      let index = 1;
+      // Loop through each element, checking for valid ids and types
+      Object(arrElements).forEach((element) => {
+        assert.ok(element.hasOwnProperty('id'), `Element #${index} is missing an id.`);
+        assert.ok(typeof element.id === 'string', `Element #${index}'s id is not a string.`);
+        assert.ok(element.hasOwnProperty('type'), `Element #${index} is missing a type.`);
+        assert.ok(Element.Element.getValidTypes().includes(element.type),
+          `Element #${index} has an invalid type of ${element.type}.`);
+        // If element is a relationship, ensure source/target exist
+        if (utils.toTitleCase(element.type) === 'Relationship') {
+          assert.ok(element.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+          assert.ok(typeof element.target === 'string',
+            `Element #${index}'s target is not a string.`);
+          assert.ok(element.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+          assert.ok(typeof element.source === 'string',
+            `Element #${index}'s source is not a string.`);
+        }
+        index++;
+      });
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+
+    // Sanitize organizationID and projectID
+    const orgID = sani.sanitize(organizationID);
+    const projID = sani.sanitize(projectID);
+
+    // Initialize UID list, UUID list, created boolean and createdElements array
+    const arrUID = [];
+    const arrUUID = [];
+    let created = false;
+    let createdElements = [];
+
+    // Define arrays of different element types
+    const packageArray = [];
+    const relationshipArray = [];
+    const blockArray = [];
+
+    // Loop through each element
+    arrElements.forEach((element) => {
+      // Generate UIDs for every element
+      const uid = utils.createUID(orgID, projID, element.id);
+      arrUID.push(uid);
+      element.uid = uid;
+
+      // If element has uuid, add it to list
+      if (element.hasOwnProperty('uuid')) {
+        arrUUID.push(element.uuid);
+      }
+
+      // If element doesn't have parent, add it
+      if (element.hasOwnProperty('parent')) {
+        element.parent = null;
+      }
+    });
+
+    // Generate find query
+    const findQuery = { $or: [{ uid: { $in: arrUID } }, { uuid: { $in: arrUUID } }] };
+
+    // Find any existing elements that match the query
+    findElementsQuery(findQuery)
+    .then((elements) => {
+      // Error Check: ensure no elements already exist
+      if (elements.length > 0) {
+        // Get the ids of the elements that already exist
+        const existingIDs = elements.map(e => e.id);
+        const existingUUIDs = elements.filter(e => arrUUID.includes(e.uuid));
+        let message = '';
+
+        // If an element with matching uuid exists
+        if (existingUUIDs.length > 0) {
+          message += `Elements(s) with the following uuid(s) ' +
+          'already exists: [${existingUUIDs.toString()}].`;
+        }
+
+        // If an elements with matching id exists
+        if (existingIDs.length > 0) {
+          message += ` Elements(s) with the following id(s) ' +
+          'already exists: [${existingIDs.toString()}].`;
+        }
+
+        // Reject error
+        return reject(M.CustomError(message, 403, 'warn'));
+      }
+
+      // Find the project
+      return ProjController.findProject(reqUser, orgID, projID);
+    })
+    .then((proj) => {
+      // Error Check: ensure user has write permissions on project
+      if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      }
+
+      // Set the project for each element and convert to element objects
+      arrElements.forEach((element) => {
+        // Create element data object
+        const elemData = {
+          id: element.id,
+          name: element.name,
+          project: proj._id,
+          uid: element.uid,
+          uuid: element.uuid,
+          documentation: element.documentation,
+          custom: element.custom
+        };
+
+        // Add element to correct type array
+        if (utils.toTitleCase(element.type) === 'Package') {
+          // Create package object
+          const pack = new Element.Package(sani.sanitize(elemData));
+
+          // Set hidden parent field used by middleware
+          pack.$parent = element.parent;
+
+          // Add package to packageArray
+          packageArray.push(pack);
+        }
+        else if (utils.toTitleCase(element.type) === 'Relationship') {
+          // Create relationship object
+          const rel = new Element.Relationship(sani.sanitize(elemData));
+
+          // Set hidden source, target, and parent fields used by middleware
+          rel.$source = element.source;
+          rel.$target = element.target;
+          rel.$parent = element.parent;
+
+          // Add relationship to relationshipArray
+          relationshipArray.push(rel);
+        }
+        else {
+          // Create block object
+          const block = new Element.Block(sani.sanitize(elemData));
+
+          // Set hidden parent field used by middleware
+          block.$parent = element.parent;
+
+          // Add block to blockArray
+          blockArray.push(block);
+        }
+      });
+
+      // Create array of package ids
+      const packIDs = packageArray.map(p => p.id);
+      // For each package
+      packageArray.forEach((pack) => {
+        // If the packages parent is also being created, set its _id
+        if (packIDs.includes(pack.$parent)) {
+          pack.parent = packageArray.filter(p => p.id === pack.$parent)[0]._id;
+          pack.$parent = null;
+        }
+      });
+
+      // Create array of relationship ids
+      const relIDs = relationshipArray.map(r => r.id);
+      // For each relationship
+      relationshipArray.forEach((rel) => {
+        // If the relationships target is also being created, set its _id
+        if (relIDs.includes(rel.$target)) {
+          rel.target = relationshipArray.filter(r => r.id === rel.$target)[0]._id;
+        }
+
+        // If the relationships source is also being created, set its _id
+        if (relIDs.includes(rel.$source)) {
+          rel.source = relationshipArray.filter(r => r.id === rel.$source)[0]._id;
+        }
+      });
+
+
+      // Set created boolean to true
+      created = true;
+
+      // Create packages first
+      return Element.Element.create(packageArray);
+    })
+    .then((createdPackages) => {
+      // Add createdPackages to createdElements array
+      createdElements = createdPackages || [];
+
+      // Create blocks second
+      return Element.Element.create(blockArray);
+    })
+    .then((createdBlocks) => {
+      // Add createdBlocks to createdElements array
+      createdElements = createdElements.concat(createdBlocks || []);
+
+      // Create relationships third
+      return Element.Element.create(relationshipArray);
+    })
+    .then((createdRelationships) => {
+      // Add createdRelationships to createdElements array
+      createdElements = createdElements.concat(createdRelationships || []);
+
+      // Return all of the created elements
+      return resolve(createdElements);
+    })
+    .catch((error) => {
+      // If error is a CustomError, reject it
+      if (error instanceof M.CustomError && !created) {
+        return reject(error);
+      }
+
+      // If it's not a CustomError, the create failed so delete all successfully
+      // created elements and reject the error.
+      return Element.Element.deleteMany({ uid: { $in: arrUID } })
+      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
+      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+    });
+  });
+}
+
+/**
  * @description This function updates found elements from a given query.
  *
  * @param {User} reqUser - The user object of the requesting user.
@@ -155,6 +395,7 @@ function updateElements(reqUser, query, updateInfo) {
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
+
     // Find the elements to update
     findElementsQuery(query)
     .then((elements) => {
@@ -222,7 +463,7 @@ function updateElements(reqUser, query, updateInfo) {
 }
 
 /**
- * @description This function removes multiple elements
+ * @description This function removes multiple elements.
  *
  * @param {User} reqUser - The user object of the requesting user.
  * @param {Object} query - The query used to find/delete elements

@@ -1350,10 +1350,47 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *   post:
  *     tags:
  *       - elements
- *     description: Not implemented, reserved for future use.
+ *     description: Creates multiple elements from the data provided in the
+ *                  request body.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the elements.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing the element data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - elements
+ *           properties:
+ *             elements:
+ *               type: object
+ *               description: An array of element objects to create.
  *     responses:
- *       501:
- *         description: Not Implemented
+ *       200:
+ *         description: OK, Succeeded to POST element, return element data.
+ *       400:
+ *         description: Bad Request, Failed to POST elements due to invalid element data.
+ *       401:
+ *         description: Unauthorized, Failed to POST elements due to not being logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST elements due to permissions or already
+ *                      existing elements.
+ *       404:
+ *         description: Not Found, Failed to GET project or organization.
+ *       500:
+ *         description: Internal Server Error, Failed to POST elements due to a server side issue.
  *   patch:
  *     tags:
  *       - elements
@@ -1454,7 +1491,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.notImplemented
+  APIController.postElements
 )
 .patch(
   AuthController.authenticate,
