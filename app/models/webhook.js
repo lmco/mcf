@@ -121,6 +121,7 @@ WebhookSchema.methods.addEventListener = function() {
     EventEmitter.on(trigger, (eventData) => {
       // For every response in the Webhook responses list
       this.responses.forEach((response) => {
+        console.log('ran'); // eslint-disable-line no-console
         // Send an HTTP request to given URL
         request({
           url: response.url,
