@@ -233,7 +233,7 @@ function downloadPluginFromWebsite(data) {
   M.log.verbose(stdoutCurl.toString());
   M.log.info('Download complete.');
 
-  // Unzipping downloaded file
+  // Extracting downloaded file
   M.log.info(`Extracting ${fileName}...`);
   const execCmd = execSync(unzipCmd);
   M.log.verbose(execCmd.toString());
