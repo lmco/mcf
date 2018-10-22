@@ -323,6 +323,11 @@ body {
 /*                         Organization Page Styling                          *
 /******************************************************************************/
 .mbee-organization {
+    .org-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
 }
 
