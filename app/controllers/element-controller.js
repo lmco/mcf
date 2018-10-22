@@ -709,7 +709,7 @@ function createElement(reqUser, element) {
     // Error Check: make sure the project exists
     ProjController.findProject(reqUser, splitProjectUID[0], splitProjectUID[1])
     .then((proj) => {
-      // Error check: make sure user has write permission on project
+      // Error check: make sure user has write permissions on project
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
