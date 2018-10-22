@@ -23,11 +23,16 @@ const path = require('path');
 const chai = require('chai');
 
 // MBEE modules
+const Org = M.require('models.organization');
+const Project = M.require('models.project');
 const Webhook = M.require('models.webhook');
 const db = M.require('lib/db');
 
 /* --------------------( Test Data )-------------------- */
+// Variables used across test functions
 const testData = require(path.join(M.root, 'test', 'data.json'));
+let org = null;
+let project = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -40,12 +45,70 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Runs before all tests . Opens the database connection.
    */
-  before(() => db.connect());
+  /**
+   * Before: runs before all tests
+   */
+  before((done) => {
+    db.connect();
+
+    // Create the organization model object
+    const newOrg = new Org({
+      id: testData.orgs[0].id,
+      name: testData.orgs[0].name
+    });
+
+    // Save the organization model object to the database
+    newOrg.save()
+    .then((retOrg) => {
+      // Update organization for test data
+      org = retOrg;
+
+      // Create the project model object
+      const newProject = new Project({
+        id: testData.projects[1].id,
+        name: testData.projects[1].name,
+        org: org._id,
+        uid: `${org.id}:${testData.projects[1].id}`
+      });
+
+        // Save the project model object to the database
+      return newProject.save();
+    })
+    .then((retProj) => {
+      // Update project for test data
+      project = retProj;
+
+      done();
+    })
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
+  });
 
   /**
    * Runs after all tests. Close database connection.
    */
-  after(() => db.disconnect());
+  after((done) => {
+    // Remove the project created in before()
+    Project.findOneAndRemove({ uid: project.uid })
+    // Remove the org created in before()
+    .then(() => Org.findOneAndRemove({ id: org.id }))
+    .then(() => {
+      db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
+  });
 
   /* Execute the tests */
   it('should create a webhook', createWebhook);
@@ -60,7 +123,13 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createWebhook(done) {
   // Create webhook object
-  const webhook = new Webhook(testData.webhooks[0]);
+  const webhook = new Webhook({
+    id: testData.webhooks[0].id,
+    name: testData.webhooks[0].name,
+    project: project,
+    triggers: testData.webhooks[0].triggers,
+    responses: testData.webhooks[0].responses
+  });
 
   // Save webhook to database
   webhook.save()
