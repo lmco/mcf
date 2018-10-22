@@ -97,3 +97,15 @@ module.exports.inspectToken = function inspectToken(token) {
   // Decrypt input and return parsed data
   return JSON.parse(module.exports.decrypt(token));
 };
+
+/**
+ * @description Performs md5 hash with hex encoding.
+ *
+ * @params {Object} data - Data to md5 hash
+ * @return {String} hash of data
+ */
+module.exports.md5Hash = function md5Hash(data) {
+  // Decrypt input and return parsed data
+  return crypto.createHash('md5').update(data).digest('hex');
+};
+

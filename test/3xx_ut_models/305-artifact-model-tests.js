@@ -13,14 +13,18 @@
  */
 
 // Node modules
-const path = require('path');
-const chai = require('chai');
+const chai = require('chai'); // Test framework
+const fs = require('fs');     // Access the filesystem
+const path = require('path'); // Find directory paths
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
 const db = M.require('lib.db');
+const mbeeCrypto = M.require('lib.crypto');
 
 /* --------------------( Test Data )-------------------- */
 const testData = require(path.join(M.root, 'test', 'data.json'));
+let artifactPNG = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -45,19 +49,30 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a user', createUser);
+  it('should upload an artifact', uploadArtifact);
+  it('should write out an artifact file', writeArtifactFile);
+  it('should delete an artifact', deleteArtifactFile);
 
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a user via model and save it to the database.
+ * @description Creates an artifact via model and save it to the database.
  */
 function uploadArtifact(done) {
-  // Create a new User object
-  const user = new Artifact(testData.users[1]);
+  // Upload new artifact
+  const artifact = new Artifact();
+  artifact.contentType= 'png';
+  artifact.id = testData.artifacts[0].id;
+  artifact.filename = testData.artifacts[0].filename;
+  artifact.location = testData.artifacts[0].location;
+  let imgPath = path.join(M.root, artifact.location, artifact.filename)
+
+  artifactPNG = fs.readFileSync(imgPath);
+  artifact.hash = mbeeCrypto.md5Hash(artifactPNG);
+
   // Save user object to the database
-  user.save()
+  artifact.save()
   .then(() => done())
   .catch((error) => {
     M.log.error(error);
@@ -65,4 +80,69 @@ function uploadArtifact(done) {
     chai.expect(error).to.equal(null);
     done();
   });
+}
+
+/**
+ * @description Finds an artifact via model and writes to a file.
+ */
+function writeArtifactFile(done) {
+  console.log(artifactPNG);
+  // Find the artifact previously uploaded.
+  Artifact.findOne({ id: testData.artifacts[0].id, deletedOn: null })
+  .then((artifact) => {
+    console.log(artifact);
+    const fileDest = `/tmp/${artifact.filename}`;
+    fs.writeFile(fileDest, artifactPNG, function(error){
+      if (error){
+        // Error occurred, log it
+        M.log.error(error);
+      }
+    });
+
+    // Verifies file was NOT created
+    if (fs.exists(fileDest, (exist) => {
+      // Check file NOT exist
+      if (!exist){
+        console.log(error);
+        // Missing file, error out
+        throw new M.CustomError('Artifact file not generated.');
+      }
+      done();
+    }));
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Finds an artifact via model and writes to a file.
+ */
+function deleteArtifactFile(done) {
+  // Find the previously created user from the createUser test.
+  Artifact.findOne({ id: testData.artifacts[0].id})
+  // Delete the user
+  .then((artifact) => {
+    console.log(artifact);
+    console.log(`/tmp/${artifact.filename}`);
+    // Remove artifact from filesystem
+    fs.unlink(`/tmp/${artifact.filename}`, (error) => {
+      if (error) throw new M.CustomError(error.message,400,'Artifact file could not be removed');
+    })
+
+    // Remove artifact from database
+    artifact.remove();
+  })
+  .then(() => done())
+  .catch(error => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
+
+
 }

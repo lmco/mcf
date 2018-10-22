@@ -31,6 +31,7 @@ const User = M.require('models.user');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const Element = M.require('models.element');
+const Artifact = M.require('models.artifact');
 const UserController = M.require('controllers.user-controller');
 const db = M.require('lib.db');
 
@@ -70,6 +71,7 @@ function cleanDB(done) {
   .then(() => Organization.deleteMany({ id: { $ne: M.config.server.defaultOrganizationId } }))
   .then(() => Project.deleteMany({}))  // Remove projects
   .then(() => Element.Element.deleteMany({}))  // Remove elements
+  .then(() => Artifact.deleteMany({}))  // Remove artifacts
   .then(() => done())
   .catch(error => {
     M.log.error(error);

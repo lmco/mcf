@@ -19,20 +19,51 @@
  * Allows for artifacts to be stored. Artifacts are arbitrary data and
  * include: PDFs, images, zip files, other archives.
  */
+
+// NPM modules
+const mongoose = require('mongoose');
+
+// MBEE modules
+const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
+const timestamp = M.require('models.plugin.timestamp');
+
 const ArtifactSchema = new mongoose.Schema({
-  id: id,
-  data: Buffer,
-  contentType: String,
-  ref: 'User',
-
-
-
-
+  id:{
+    type: String,
+    required: true,
+    index: true
+  },
+  hash: {
+    type: String,
+    required: true
+  },
+  filename : {
+    type: String,
+    required: true,
+  },
+  data: Buffer, //TODO: remove later
+  location: {
+    type: String,
+    require: true
+  },
+  contentType: {
+    type: String,
+    require: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Project'
+  }
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
 // Use timestamp model plugin
-UserSchema.plugin(timestamp);
+ArtifactSchema.plugin(timestamp);
 
 /* ---------------------------( User Middleware )---------------------------- */
 

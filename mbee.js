@@ -145,6 +145,13 @@ if (installComplete) {
   });
 }
 
+// Initialize artifact storage path
+Object.defineProperty(M, 'artifactPath', {
+  value: path.join(M.root,M.config.artifact.path),
+  writable: false,
+  enumerable: true
+});
+
 // Make the M object read only and its properties cannot be changed or removed.
 Object.freeze(M);
 
