@@ -30,6 +30,7 @@ const timestamp = M.require('models.plugin.timestamp');
  *
  * @property {String} id - The webhooks unique ID.
  * @property {String} name - The webhooks name.
+ * @property {Project} project - A reference to a webhook's project.
  * @property {Array} triggers - The events that trigger this webhook.
  * @property {Array} responseURL - An array containing URLs to contact when the
  * webhook is triggered.
@@ -45,6 +46,25 @@ const WebhookSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
+  },
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'Project',
+    set: function(_proj) {
+      // Check value undefined
+      if (typeof this.project === 'undefined') {
+        // Return value to set it
+        return _proj;
+      }
+      // Check value NOT equal to db value
+      if (_proj !== this.project) {
+        // Immutable field, return error
+        return new M.CustomError('Assigned project cannot be changed.', 400, 'warn');
+      }
+      // No change, return the value
+      return this.project;
+    }
   },
   triggers: [{
     type: String,
@@ -87,7 +107,7 @@ WebhookSchema.post('save', function(doc, next) {
 /* ----------------------------( Webhook Methods )-----------------------------*/
 
 /**
- * @description Adds an event listener to the global event emitter
+ * @description Adds an event listener to the global event emitter.
  *
  * @memberOf WebhookSchema
  */
