@@ -10,7 +10,7 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Tests the webhook model by performing various actions
- * such as a create, update, find and delete. The test Does NOT test the
+ * such as a create, find, update, and delete. The test Does NOT test the
  * webhook controller but instead directly manipulates data using the
  * database interface to check the webhook model's methods, validators,
  * setters, and getters.
