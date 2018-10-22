@@ -199,54 +199,45 @@ function downloadPluginFromWebsite(data) {
   const stdoutMkdirCmd = execSync(`mkdir -p ${dirName}`);
   M.log.verbose(stdoutMkdirCmd.toString());
 
-  // Zip files
-  if (data.source.endsWith('.zip')) {
-    // Downloading from website
-    M.log.info(`Downloading plugin ${data.name} from ${data.source} ...`);
-    const fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.zip`;
-    const curlCmd = `curl -L -k -XGET -x ${httpProxy} ${data.source} --output ${fileName}`;
-    const stdoutCurl = execSync(curlCmd);
-    M.log.verbose(stdoutCurl.toString());
-    M.log.info('Download complete.');
+  let fileName = null;
+  let unzipCmd = null;
 
-    // Unzipping downloaded file
-    M.log.info(`Unzipping ${fileName}...`);
-    const unzipCmd = execSync(`unzip ${fileName} -d ${dirName}`);
-    M.log.verbose(unzipCmd.toString());
-    M.log.info('Unzip complete.');
+  // .zip files
+  if (data.source.endsWith('.zip') ) {
+    // Set name and unzip command
+    fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.zip`;
+    unzipCmd = `unzip ${fileName} -d ${dirName}`;
   }
-  // Tar files
+  // .tar.gz files
   else if (data.source.endsWith('.tar.gz')) {
-    // Downloading from website
-    M.log.info(`Downloading plugin ${data.name} from ${data.source} ...`);
-    const fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.tar.gz`;
-    const curlCmd = `curl -L -k -XGET -x ${httpProxy} ${data.source} --output ${fileName}`;
-    const stdoutCurl = execSync(curlCmd);
-    M.log.verbose(stdoutCurl.toString());
-    M.log.info('Download complete.');
-
-    // Extracting downloaded file
-    M.log.info(`Extracting ${fileName}...`);
-    const unzipCmd = execSync(`tar xvzf ${fileName} -C ${dirName}`);
-    M.log.verbose(unzipCmd.toString());
-    M.log.info('Extraction complete.');
+    // Set name and unzip command
+    fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.tar.gz`;
+    unzipCmd = `tar xvzf ${fileName} -C ${dirName}`;
   }
-  // Gz Files
+  // .gz files
   else if (data.source.endsWith('.gz')) {
-    // Downloading from website
-    M.log.info(`Downloading plugin ${data.name} from ${data.source} ...`);
-    const fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.gz`;
-    const curlCmd = `curl -L -k -XGET -x ${httpProxy} ${data.source} --output ${fileName}`;
-    const stdoutCurl = execSync(curlCmd);
-    M.log.verbose(stdoutCurl.toString());
-    M.log.info('Download complete.');
-
-    // Extracting downloaded file
-    M.log.info(`Extracting ${fileName}...`);
-    const unzipCmd = execSync(`gunzip -c ${fileName} > ${dirName}`);
-    M.log.verbose(unzipCmd.toString());
-    M.log.info('Extraction complete.');
+    // Set name and unzip command
+    fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.gz`;
+    unzipCmd = `gunzip -c ${fileName} > ${dirName}`;
   }
+  // Other files
+  else {
+    M.log.info('File is not an accepted download option.');
+    return;
+  }
+
+  // Downloading from website
+  M.log.info(`Downloading plugin ${data.name} from ${data.source} ...`);
+  const curlCmd = `curl -L -k -XGET -x ${httpProxy} ${data.source} --output ${fileName}`;
+  const stdoutCurl = execSync(curlCmd);
+  M.log.verbose(stdoutCurl.toString());
+  M.log.info('Download complete.');
+
+  // Unzipping downloaded file
+  M.log.info(`Extracting ${fileName}...`);
+  const execCmd = execSync(unzipCmd);
+  M.log.verbose(execCmd.toString());
+  M.log.info('Extraction complete.');
 }
 
 module.exports = pluginRouter;
