@@ -94,6 +94,11 @@
     document.getElementById("content").classList.add('sidebar-full');
   }
 
+  function toggleSidebar() {
+    document.getElementById("nav-sidebar").classList.toggle("sidebar-min");
+    document.getElementById("content").classList.toggle("sidebar-min");
+  };
+
   <% if (ui.banner.on) { %>
   document.getElementById("navbar").classList.add('navbar-banner');
   document.getElementById("content").classList.add('content-banner');
