@@ -24,10 +24,21 @@ module.exports = {
   createElementsTree
 };
 
+/**
+ * @description Takes an array of elements and sorts them so they appear in
+ * depth first order according to package hiearchy.
+ * @param {Array} elementArr - An array of unsorted elements
+ * @return {Array} sortedElementArr - The sorted array according to package
+ * hierarchy.
+ */
 function sortElementsArray(elementArr) {
-  const elementTree = createElementsTree(elementArr);
+  // Initalize sortedElementArr
   const sortedElementArr = [];
 
+  // Create elementTree with package hierarchy.
+  const elementTree = createElementsTree(elementArr);
+
+  // Append elements to sortedElementArr in depth first order.
   depthFirstTreeTraversal(elementTree, sortedElementArr);
   return sortedElementArr;
 }

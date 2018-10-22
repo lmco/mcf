@@ -149,3 +149,41 @@ const members = project.permissions.read;
   </div>
   <hr>
 </div>
+
+<%- contentFor('scripts') %>
+<script>
+  $(document).ready(function() {
+    $('.close-tree-sidebar').click(function() {
+      $('.tree-sidebar').removeClass('tree-sidebar-active');
+    });
+
+    $('.element-title').click(function() {
+      $('.tree-sidebar').addClass('tree-sidebar-active');
+      $('.element-item-name-value').html('Loading...');
+      $('.element-item-id-value').html('Loading...');
+      $('.element-item-parent-value').html('Loading...');
+      $('.element-item-created-value').html('Loading...');
+      $('.element-item-updated-value').html('Loading...');
+      $('.element-item-custom-value').html('Loading...');
+      $('.element-item-documentation-value').html('Loading...');
+      jQuery.get($(this).attr('id') , function(data) {
+        $('.tree-sidebar').addClass('tree-sidebar-active');
+        $('.element-item-name-value').html(data.name);
+        $('.element-item-id-value').html(data.id);
+        $('.element-item-parent-value').html((data.parent) ? data.parent.name : 'No Parent.');
+        $('.element-item-created-value').html(data.createdOn);
+        $('.element-item-updated-value').html(data.updatedOn);
+        $('.element-item-custom-value').html(data.custom || 'No Custom Data.');
+        $('.element-item-documentation-value').html(data.documentation || 'No ' +
+          'Documentation.');
+      });
+    });
+  });
+
+  function toggleClosed(itemClass) {
+    const elementList = document.getElementsByClassName(itemClass)
+    for (let i = 0; i < elementList.length; i++) {
+      elementList[i].classList.toggle("closed");
+    }
+  };
+</script>

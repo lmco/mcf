@@ -47,3 +47,11 @@ const navListArr = Object.keys(navList);
   </a>
 
 </div>
+
+<%- contentFor('scripts') %>
+<script>
+  function toggleSidebar() {
+    document.getElementById("nav-sidebar").classList.toggle("sidebar-min");
+    document.getElementById("content").classList.toggle("sidebar-min");
+  };
+</script>
