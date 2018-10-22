@@ -271,12 +271,11 @@ function authenticate(req, res, next) {
   // Verify if credentials are empty or null
   else {
     M.log.debug('Username or password not provided.');
-    req.flash('loginError', 'Username or password not provided.');
 
     // return proper error for API route or redirect for UI
     return (req.originalUrl.startsWith('/api'))
       ? res.status(401).send('Unauthorized')
-      : res.redirect('back');
+      : res.redirect('/login');
   }
 }
 
