@@ -51,7 +51,7 @@ module.exports = app;
 db.connect()
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
-.then(() => Webhook.syncEvents())
+.then(() => syncWebhookEvents())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);
@@ -203,5 +203,18 @@ function createDefaultAdmin() {
     })
     // Catch and reject error
     .catch(error => reject(error));
+  });
+}
+
+function syncWebhookEvents() {
+  return new Promise((resolve, reject) => {
+  Webhook.find({})
+    .then((webhooks) => {
+      webhooks.forEach((webhook) => {
+        webhook.addEventListener();
+      });
+      return resolve();
+    })
+    .catch((error) => reject(error));
   });
 }
