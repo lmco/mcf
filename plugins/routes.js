@@ -183,7 +183,7 @@ function copyPluginFromLocalDir(data) {
  * directory. If the plugin location is already in the local directory, nothing
  * occurs.
  *
- * @param {Object} data The plugin configuration data
+ * @param {Object} data - The plugin configuration data
  */
 function downloadPluginFromWebsite(data) {
   // Remove plugin if it already exists in plugins directory
