@@ -15,7 +15,7 @@
 // Node modules
 const request = require('request');
 
-// NMP modules
+// NPM modules
 const mongoose = require('mongoose');
 
 // MBEE modules
