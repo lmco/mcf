@@ -21,6 +21,7 @@ const mongoose = require('mongoose');
 // MBEE modules
 const EventEmitter = M.require('lib.events');
 const timestamp = M.require('models.plugin.timestamp');
+const validators = M.require('lib.validators');
 
 /* ---------------------------( Webhook Schema )----------------------------- */
 
@@ -42,7 +43,8 @@ const WebhookSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    match: RegExp(validators.webhook.id)
   },
   name: {
     type: String,

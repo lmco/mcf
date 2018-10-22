@@ -25,22 +25,23 @@ const Webhook = M.require('models.webhook');
  */
 class CustomEmitter extends EventEmitter {
 
-  constructor() {
-    console.log('Emitter instantiated');
-    // Initialize event emitter properties
-    super();
-    // Find all webhooks
-    Webhook.find({})
-    .then((webhooks) => {
-      // For every webhook
-      webhooks.forEach((webhook) => {
-        // Add the event emitter
-        webhook.addEventListener();
+  syncEvents() {
+    return new Promise((resolve, reject) => {
+      // Find all webhooks
+      Webhook.find({})
+      .then((webhooks) => {
+        // For every webhook
+        webhooks.forEach((webhook) => {
+          // Add the event emitter
+          webhook.addEventListener();
+        });
+        return resolve(this);
+      })
+      .catch((error) => {
+        // Log critical error
+        M.log.critical(error);
+        return reject(error);
       });
-    })
-    .catch((error) => {
-      // Log critical error
-      M.log.critical(error);
     });
   }
 

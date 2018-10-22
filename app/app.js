@@ -33,6 +33,7 @@ const flash = require('express-flash');
 
 // MBEE modules
 const db = M.require('lib.db');
+const events = M.require('lib.events');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
 const UserController = M.require('controllers.user-controller');
@@ -48,6 +49,7 @@ module.exports = app;
 db.connect()
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
+.then(() => events.syncEvents())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);
