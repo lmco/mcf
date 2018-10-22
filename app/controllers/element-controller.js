@@ -923,7 +923,7 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
     // Find the element
     findElement(reqUser, organizationID, projectID, elementID, true)
     .then((element) => {
-      // Error Check: ensure user has permissions to delete project
+      // Error Check: ensure user has permissions to delete element
       if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
