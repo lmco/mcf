@@ -15,35 +15,11 @@
 // Node.js modules
 const EventEmitter = require('events');
 
-// MBEE Modules
-const Webhook = M.require('models.webhook');
-
 /**
- * @description The CustomEmitter class. It extends Nodes build in event emitter
- * by pulling all webhooks in the from the database and adding the listeners to
- * the CustomEmitter object. This is done upon instantiation of the object.
+ * @description The CustomEmitter class. It extends Node.js built in event
+ * emitter.
  */
-class CustomEmitter extends EventEmitter {
-
-  constructor() {
-    // Initialize event emitter properties
-    super();
-    // Find all webhooks
-    Webhook.find({})
-    .then((webhooks) => {
-      // For every webhook
-      webhooks.forEach((webhook) => {
-        // Add the event emitter
-        webhook.addEventListener();
-      });
-    })
-    .catch((error) => {
-      // Log critical error
-      M.log.critical(error);
-    });
-  }
-
-}
+class CustomEmitter extends EventEmitter {}
 
 // Create instance of CustomEmitter
 const event = new CustomEmitter();

@@ -43,11 +43,14 @@ const User = M.require('models.user');
 const app = express();
 module.exports = app;
 
-// Connect to database, initialize application, and create default admin and
-// default organization if needed.
+/**
+ * Connect to database, initialize application, sync webhooks, and create
+ * default admin and default organization if needed.
+ */
 db.connect()
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
+.then(() => syncWebhookEvents())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);
@@ -199,5 +202,20 @@ function createDefaultAdmin() {
     })
     // Catch and reject error
     .catch(error => reject(error));
+  });
+}
+
+function syncWebhookEvents() {
+  return new Promise((resolve, reject) => {
+    const Webhook = M.require('models.webhook');
+    Webhook.find({ deletedOn: null })
+    .then(() => {
+      console.log('*******Searched for webhooks*******'); // eslint-disable-line no-console
+      return resolve();
+    })
+    // webhooks.forEach((webhook) => {
+    //   webhook.addEventListener();
+    // });
+    .catch((error) => reject(error));
   });
 }

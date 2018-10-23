@@ -15,11 +15,13 @@
 // Node modules
 const request = require('request');
 
-// NMP modules
+// NPM modules
 const mongoose = require('mongoose');
 
 // MBEE modules
+const EventEmitter = M.require('lib.events');
 const timestamp = M.require('models.plugin.timestamp');
+const validators = M.require('lib.validators');
 
 /* ---------------------------( Webhook Schema )----------------------------- */
 
@@ -41,7 +43,8 @@ const WebhookSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    match: RegExp(validators.webhook.id)
   },
   name: {
     type: String,
@@ -107,7 +110,7 @@ WebhookSchema.post('save', function(doc, next) {
 /* ----------------------------( Webhook Methods )-----------------------------*/
 
 /**
- * @description Adds an event listener to the global event emitter.
+ * @description Adds an event listener to the global event emitter
  *
  * @memberOf WebhookSchema
  */
@@ -115,7 +118,7 @@ WebhookSchema.methods.addEventListener = function() {
   // For each trigger
   this.triggers.forEach((trigger) => {
     // Add listener to event emitter
-    M.Event.on(trigger, (eventData) => {
+    EventEmitter.on(trigger, (eventData) => {
       // For every response in the Webhook responses list
       this.responses.forEach((response) => {
         // Send an HTTP request to given URL
@@ -129,7 +132,6 @@ WebhookSchema.methods.addEventListener = function() {
     });
   });
 };
-
 
 /* --------------------------( Webhook Properties )-------------------------- */
 
