@@ -68,9 +68,9 @@ module.exports.connect = function() {
       if (err) {
         // If error, reject it
         M.log.critical(err);
-        reject(err);
+        return reject(err);
       }
-      resolve();
+      return resolve();
     });
   });
 };

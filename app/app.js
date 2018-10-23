@@ -209,13 +209,12 @@ function syncWebhookEvents() {
   return new Promise((resolve, reject) => {
     const Webhook = M.require('models.webhook');
     Webhook.find({ deletedOn: null })
-    .then(() => {
-      console.log('*******Searched for webhooks*******'); // eslint-disable-line no-console
+    .then((webhooks) => {
+      webhooks.forEach((webhook) => {
+        webhook.addEventListener();
+      });
       return resolve();
     })
-    // webhooks.forEach((webhook) => {
-    //   webhook.addEventListener();
-    // });
     .catch((error) => reject(error));
   });
 }
