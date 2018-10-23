@@ -236,29 +236,36 @@ module.exports.parseUID = function(uid) {
 /**
  * @description Title-cases a string.
  *
- * @param {String} word - The word to be title-cased
+ * @param {String} s - The stringto be title-cased
+ *  @param {boolean} keepUpper- Boolean indicating wither or not keep uppercase characters as is
  * @return {String} the word with upper case
  */
-module.exports.toTitleCase = function(word) {
-  // Check if word NOT string or contains whitespace
-  if (typeof word !== 'string' || RegExp(/\s/).test(word)) {
+module.exports.toTitleCase = function(s, keepUpper=false) {
+  // Check if s NOT string or contains whitespace
+  if (typeof s !== 'string') {
     // Cannot be title-cased, return word
-    return word;
+    return s;
   }
 
-  // Define title-cased string
-  let titleCasedString;
+  let words = s.split(' ');
+  words = words.map(word => {
+    // Define title-cased string
+    let titleCasedString = '';
 
-  // Upper-Case the first letter
-  titleCasedString = word[0].toUpperCase();
+    // Upper-Case the first letter
+    titleCasedString += word[0].toUpperCase();
 
-  // For remaining characters in word
-  for (let i = 1; i < word.length; i++) {
-    // Lower-case ith character, append to titleCasedString
-    titleCasedString += word[i].toLowerCase();
-  }
+    // For remaining characters in word, make lowercase
+    for (let i = 1; i < word.length; i++) {
+      // Lower-case ith character, append to titleCasedString
+      titleCasedString += (keepUpper) ? word[i] : word[i].toLowerCase();
+    }
 
-  return titleCasedString;
+
+    return titleCasedString;
+  });
+
+  return words.join(' ');
 };
 
 /**

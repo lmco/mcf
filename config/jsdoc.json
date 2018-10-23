@@ -2,8 +2,9 @@
   "opts": {
       "template": "",
       "encoding": "utf8",
-      "destination": "./build/doc",
-      "recurse": true
+      "destination": "./build/public/doc",
+      "recurse": true,
+      "tutorials": "./doc"
   },
   "source": {
       "include": ["app", "README.md", "test"],
