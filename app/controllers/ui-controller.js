@@ -84,12 +84,13 @@ function flightManual(req, res) {
 
     // Turn the file names into section IDs and titles
     const sections = [];
-    files.filter(f => f.endsWith('.html')).forEach(section => {
+    files.filter(fname => fname.endsWith('.html')).forEach(section => {
       const sectionID = section.replace('.html', '');
       const sectionTitle = sectionID.replace(/-/g, ' ');
       sections.push({
-        id: sectionID,
-        title: utils.toTitleCase(sectionTitle, true)
+        id: sectionID.replace(/\./g, '-'),
+        title: utils.toTitleCase(sectionTitle, true),
+        content: fs.readFileSync(`${M.root}/build/fm/${section}`)
       });
     })
     // Render the flight manual
@@ -97,12 +98,6 @@ function flightManual(req, res) {
       sections: sections
     });
   });
-
-  //const page = sani.html(req.params.page);
-  // renter the page
-  //return utils.render(req, res, 'fm', {
-  //  content: fs.readFileSync(`${M.root}/build/doc/${page}`, 'utf8')
-  //});
 }
 
 /**
