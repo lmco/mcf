@@ -110,6 +110,7 @@ function organization(req, res) {
   .then(org => utils.render(req, res, 'organization', {
     name: 'organization',
     title: 'MBEE | Model-Based Engineering Environment',
+    org: org,
     sidebar: {
       heading: 'Organization',
       icon: 'fas fa-boxes',
@@ -128,7 +129,6 @@ function organization(req, res) {
         }
       }
     },
-    org: org
   }))
   // If error, redirect to organization list
   .catch(err => {
@@ -158,7 +158,8 @@ function organizationEdit(req, res) {
     utils.render(req, res, 'organization-edit', {
       name: 'organization-edit',
       title: 'MBEE | Model-Based Engineering Environment',
-      org: org
+      org: org,
+      validators: validators.org
     });
   })
   // If error, redirect to organization list
