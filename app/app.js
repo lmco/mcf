@@ -38,7 +38,6 @@ const middleware = M.require('lib.middleware');
 const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
-const Webhook = M.require('models.webhook');
 
 // Initialize express app and export the object
 const app = express();
@@ -208,6 +207,7 @@ function createDefaultAdmin() {
 
 function syncWebhookEvents() {
   return new Promise((resolve, reject) => {
+    const Webhook = M.require('models.webhook');
     Webhook.find({ deletedOn: null })
     .then(() => {
       console.log('*******Searched for webhooks*******'); // eslint-disable-line no-console
