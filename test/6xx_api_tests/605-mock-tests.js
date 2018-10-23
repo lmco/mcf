@@ -110,6 +110,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should DELETE an element', deleteElement);
   it('should POST a webhook', postWebhook);
   it('should GET a webhook', getWebhook);
+  it('should PATCH a webhook', patchWebhook);
   it('should DELETE a webhook', deleteWebhook);
   it('should DELETE a project', deleteProject);
   it('should DELETE a user', deleteUser);
@@ -906,6 +907,37 @@ function getWebhook(done) {
 
   // GETs a webhook
   apiController.getWebhook(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update a webhook.
+ */
+function patchWebhook(done) {
+  // Create request object
+  const body = { name: 'Updated Webhook Name' };
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    webhookid: testData.webhooks[0].id
+  };
+  const method = 'PATCH';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.name).to.equal('Updated Webhook Name');
+    done();
+  };
+
+  // PATCH a webhook
+  apiController.patchWebhook(req, res);
 }
 
 /**
