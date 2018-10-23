@@ -149,10 +149,12 @@ function organizationEdit(req, res) {
   }
   // Find organization
   OrgController.findOrg(req.user, req.params.orgid)
-  // Render organization page including nav-sidebar
+  // Render organization page
   .then(org => {
+    // Check if user is NOT admin
     if (!req.user.admin
       && !org.permissions.admin.map(u => u.username).includes(req.user.username)) {
+      // User is NOT admin, redirect to org page
       return res.redirect(`/${org.id}`);
     }
     utils.render(req, res, 'organization-edit', {
