@@ -208,15 +208,11 @@ function createDefaultAdmin() {
 
 function syncWebhookEvents() {
   return new Promise((resolve, reject) => {
-    console.log('Let\'s sync!'); // eslint-disable-line no-console
     Webhook.find({})
-    .then((webhooks) => {
-      webhooks.forEach((webhook) => {
-        console.log('Adding event listener'); // eslint-disable-line no-console
-        webhook.addEventListener();
-      });
-      return resolve();
-    })
+    .then(() => resolve())
+    // webhooks.forEach((webhook) => {
+    //   webhook.addEventListener();
+    // });
     .catch((error) => reject(error));
   });
 }
