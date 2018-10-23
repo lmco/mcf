@@ -122,6 +122,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creating an already existing webhook', rejectCreateExisting);
   it('should find a webhook', findWebhook);
   it('should reject finding a non-existent webhook', rejectFindNonExistent);
+  it('should update a webhook', updateWebhook);
   it('should reject deleting a webhook with invalid function params', rejectDeleteInvalidParam);
   it('should soft-delete a webhook', softDeleteWebhook);
   it('should hard-delete a webhook', hardDeleteWebhook);
@@ -207,6 +208,30 @@ function rejectFindNonExistent(done) {
   .catch((error) => {
     // Expected error thrown: 'Not Found'
     chai.expect(error.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Updates a webhooks name.
+ */
+function updateWebhook(done) {
+  // Create update object
+  const updateObject = {
+    name: 'Updated Webhook Name'
+  };
+
+  // Update webhook
+  WebhookController.updateWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, updateObject)
+  .then((updatedWebhook) => {
+    // Verify returned data
+    chai.expect(updatedWebhook.name).to.equal(updateObject.name);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
     done();
   });
 }
