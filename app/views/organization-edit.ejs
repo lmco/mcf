@@ -29,7 +29,25 @@ const members = org.permissions.read;
     </div>
     <button id="subitForm" type="button" class="btn btn-primary">Save</button>
   </form>
+</div>
 
+<div id="status-modal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 id="modal-title" class="modal-title" style="color: #222222;">Success!</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="modal-message" style="color:#333;">Your updates to <%= org.name%> were saved successfully.</p>
+      </div>
+      <div class="modal-footer">
+        <a id="modal-button" href="">OK</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <%- contentFor('scripts') %>
@@ -49,10 +67,29 @@ const members = org.permissions.read;
         data: {name: $("#name").val(), custom: JSON.parse($("#custom").val())}
       })
       .done(function (msg, status) {
-        $(location).attr('href',"<%= `/${org.id}/edit` %>")
+        $('#modal-title').html('Success!');
+        $('#modal-message').html('Your updates to <%= org.name%> were saved successfully.');
+        $('#status-modal').modal('show');
+        $('#modal-button').removeAttr('data-dismiss')
+        $('#modal-button').removeAttr('aria-label')
+        $('#modal-button').attr('href', '<%= `/${org.id}` %>');
+        $('#modal-button').attr('class', 'btn btn-success');
       })
       .fail(function(msg) {
-        console.log(msg);
+        console.log(msg)
+        $('#modal-button').attr('class', 'btn btn-warning');
+        $('#modal-button').attr('data-dismiss', 'modal');
+        $('#modal-button').attr('aria-label', 'Close');
+        $('#modal-button').removeAttr('href')
+        if (msg.status === 400){
+          $('#modal-title').html('Failed!');
+          $('#modal-message').html('Your updates to <%= org.name %> could not be saved. Please ensure you are using a valid name and the custom field contains valid JSON.');
+        }
+        else {
+          $('#modal-title').html('Failed!');
+          $('#modal-message').html('Your updates to <%= org.name %> could not be saved.');
+        }
+        $('#status-modal').modal('show');
       })
     });
   });
