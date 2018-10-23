@@ -110,7 +110,7 @@ WebhookSchema.post('save', function(doc, next) {
 /* ----------------------------( Webhook Methods )-----------------------------*/
 
 /**
- * @description Adds an event listener to the global event emitter
+ * @description Adds an event listener to the global event emitter.
  *
  * @memberOf WebhookSchema
  */
