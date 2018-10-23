@@ -15,16 +15,43 @@
   <hr class="mb-4">
 
   <h1 class="display-4"><%= user.name%></h1>
-
+  <% if (customData) { %>
+  
   <ul class="user-info">
-    <li class="user-info-item">
-      <a href="/<%=customData%>">
-        <div class="customdata-info-item">
+    <h1 class="display-4"><%= JSON.stringify(projects.length, null, 4) %></h1>
 
+    <h3 id="projects" class="mt-3">User's Information</h3>
+    <% Object.keys(customData).forEach(key => { %>
+
+    <li class="user-info-item">
+
+      <div class="customdata-info-item">
+
+        <div class="customdata-info-key">
+          <i class="fas fa-circle icon-close">
+          </i>
+          <span><%=members[i].name%></span>
         </div>
-      </a>
+
+        <div class="member-list-stats">
+          <div class="member-list-stats-email">
+            <i class="fas fa-envelope"
+               data-toggle="tooltip"
+               data-placement="top"
+               title="Email">
+            </i>
+            <span><%= customData[key]%></span>
+          </div>
+        </div>
+      </div>
 
     </li>
+    <% }) %>
   </ul>
+
+  <% } else { %>
+
+    <p> The user does not currently contain any custom data.</p>
+  <% } %>
 
 </div>

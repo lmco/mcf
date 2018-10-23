@@ -12,7 +12,9 @@
       "lname": "De Laurell",
       "admin": true,
       "custom": {
-        "location": "Denver"
+        "location": "Denver",
+        "leader": "Josh",
+        "company": "Space"
       }
     },
     {

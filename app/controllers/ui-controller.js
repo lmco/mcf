@@ -241,7 +241,6 @@ function whoami(req, res) {
   UserController.findUser(req.user, req.user.username)
   // Render the project page with the list of projects
   .then(foundUser => {
-    console.log(JSON.stringify(foundUser), null, 4);
     user = foundUser;
     // Create list of projects
     // projects = user.proj.read;
