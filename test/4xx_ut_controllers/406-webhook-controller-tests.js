@@ -121,6 +121,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a webhook', createWebhook);
   it('should reject creating an already existing webhook', rejectCreateExisting);
   it('should find a webhook', findWebhook);
+  it('should reject finding a non-existent webhook', rejectFindNonExistent);
+  it('should reject deleting a webhook with invalid function params', rejectDeleteInvalidParam);
   it('should soft-delete a webhook', softDeleteWebhook);
   it('should hard-delete a webhook', hardDeleteWebhook);
 });
@@ -190,6 +192,46 @@ function findWebhook(done) {
 }
 
 /**
+ * @description Rejects finding a non-existent webhook
+ * Expected error thrown: 'Not Found'
+ */
+function rejectFindNonExistent(done) {
+  // Find the webhook
+  WebhookController.findWebhook(adminUser, org.id, proj.id, testData.webhooks[1].id)
+  .then(() => {
+    // Expect findWebhook() to fail
+    // Webhook was found, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Rejects deleting a webhook with invalid function parameters
+ * Expected error thrown: 'Bad Request'
+ */
+function rejectDeleteInvalidParam(done) {
+  // Delete the webhook
+  WebhookController.removeWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, 'true')
+  .then(() => {
+    // Expect removeWebhook() to fail
+    // Webhook was deleted, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+/**
  * @description Soft deletes a webhook.
  */
 function softDeleteWebhook(done) {
@@ -230,7 +272,7 @@ function hardDeleteWebhook(done) {
     // Attempt to find the webhook
     return WebhookController.findWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, true);
   })
-  .then((webhook) => {
+  .then(() => {
     // Expect findWebhook() to fail
     // Webhook was found, force test to fail
     chai.assert(true === false);
