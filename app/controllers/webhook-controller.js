@@ -23,6 +23,7 @@
 // Note: The export is being done before the import to solve the issues of
 // circular references between controllers.
 module.exports = {
+  findWebhook,
   createWebhook,
   removeWebhook
 };
@@ -75,7 +76,48 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
+    // Sanitize query inputs
+    const orgID = sani.sanitize(organizationID);
+    const projID = sani.sanitize(projectID);
+    const webID = sani.sanitize(webhookID);
+    const webUID = utils.createUID(orgID, projID, webID);
 
+    // Search for a webhook that matches the given uid
+    const findQuery = { id: webUID, deleted: false };
+
+    // Error Check: Ensure user has permissions to find deleted webhooks
+    if (softDeleted && !reqUser.admin) {
+      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+    }
+    // Check softDeleted flag true
+    if (softDeleted) {
+      // softDeleted flag true and User Admin true, remove deleted: false
+      delete findQuery.deleted;
+    }
+
+    // Find webhooks
+    findWebhooksQuery(findQuery)
+    .then((webhooks) => {
+      // Error Check: ensure at least one webhook was found
+      if (webhooks.length === 0) {
+        // No webhooks found, reject error
+        return reject(new M.CustomError('Webhook not found.', 404, 'warn'));
+      }
+
+      // Error Check: ensure no more than one webhook was found
+      if (webhooks.length > 1) {
+        return reject(new M.CustomError('More than one webhook found.', 400, 'warn'));
+      }
+
+      // Error Check: ensure reqUser has either read permissions or is global admin
+      if (!webhooks[0].project.getPermissions(reqUser).read && !reqUser.admin) {
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      }
+
+      // All checks passed, resolve webhook
+      return resolve(webhooks[0]);
+    })
+    .catch((error) => reject(error));
   });
 }
 
@@ -141,7 +183,9 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
     }
 
     // Verify another webhook with same ID doesn't exist
-    findWebhooksQuery({ id: sani.sanitize(webhookData.id) })
+    findWebhooksQuery({
+      id: sani.sanitize(utils.createUID(organizationID, projectID, webhookData.id))
+    })
     .then((foundWebhook) => {
       // Error Check: ensure no existing webhook was found
       if (foundWebhook.length > 0) {
@@ -159,7 +203,7 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
 
       // Create webhook object
       const webhookObj = new Webhook({
-        id: sani.sanitize(webhookData.id),
+        id: sani.sanitize(utils.createUID(organizationID, projectID, webhookData.id)),
         name: sani.sanitize(webhookData.name),
         project: project,
         triggers: sani.sanitize(webhookData.triggers),
@@ -226,13 +270,14 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
 
       // Hard delete
       if (hardDelete) {
-        return Webhook.deleteOne({ id: sani.sanitize(webhookID) });
+        return Webhook.deleteOne({
+          id: sani.sanitize(utils.createUID(organizationID, projectID, webhookID))
+        });
       }
       // Soft delete
-      else {
-        webhook.deleted = true;
-        return webhook.save();
-      }
+
+      webhook.deleted = true;
+      return webhook.save();
     })
     .then(() => resolve(true))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
