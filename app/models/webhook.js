@@ -63,7 +63,8 @@ const WebhookSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_proj !== this.project) {
         // Immutable field, return error
-        return new M.CustomError('Assigned project cannot be changed.', 400, 'warn');
+        M.log.error('Assigned project cannot be changed.');
+        return this.project;
       }
       // No change, return the value
       return this.project;
