@@ -208,8 +208,11 @@ function createDefaultAdmin() {
 
 function syncWebhookEvents() {
   return new Promise((resolve, reject) => {
-    Webhook.find({})
-    .then(() => resolve())
+    Webhook.find({ deletedOn: null })
+    .then(() => {
+      console.log('*******Searched for webhooks*******'); // eslint-disable-line no-console
+      return resolve();
+    })
     // webhooks.forEach((webhook) => {
     //   webhook.addEventListener();
     // });
