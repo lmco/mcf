@@ -131,7 +131,7 @@ router.route('/:orgid')
   UIController.organization
 );
 
-/* This renders an organization for a user */
+/* This renders an organizations edit form for an admin user */
 router.route('/:orgid/edit')
 .get(
   AuthController.authenticate,
