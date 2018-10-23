@@ -1,4 +1,8 @@
-
+<%
+  const orgs = user.orgs;
+  const projects = user.proj;
+  const customData = user.custom;
+%>
 <div class="container">
 
   <nav aria-label="breadcrumb">
@@ -11,5 +15,16 @@
   <hr class="mb-4">
 
   <h1 class="display-4"><%= user.name%></h1>
+
+  <ul class="user-info">
+    <li class="user-info-item">
+      <a href="/<%=customData%>">
+        <div class="customdata-info-item">
+
+        </div>
+      </a>
+
+    </li>
+  </ul>
 
 </div>

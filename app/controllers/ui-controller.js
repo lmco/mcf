@@ -233,28 +233,45 @@ function whoami(req, res) {
     // redirect to the login screen
     res.redirect('/login');
   }
+
+  let user = null;
+  let projects = null;
+
   // get all organizations the user is a member of
   UserController.findUser(req.user, req.user.username)
   // Render the project page with the list of projects
-  .then(foundUser => utils.render(req, res, 'user', {
-    user: foundUser,
-    title: 'MBEE | Model-Based Engineering Environment',
-    name: foundUser.username,
-    sidebar: {
-      heading: 'User',
-      icon: 'fas fa-boxes',
-      list: {
-        Projects: {
-          icon: 'fas fa-box',
-          link: '#projects'
-        },
-        Settings: {
-          icon: 'fas fa-cog',
-          link: '#settings'
+  .then(foundUser => {
+    console.log(JSON.stringify(foundUser), null, 4);
+    user = foundUser;
+    // Create list of projects
+    // projects = user.proj.read;
+    // Loop through list and create reference page for each project
+    // userProjects.forEach(proj => {
+    //   // set ref to split of uid and join with forward slashes
+    //   proj.ref = utils.parseUID(proj.uid)
+    //     .join('/');
+    // });
+
+    utils.render(req, res, 'user', {
+      name: user.username,
+      title: 'MBEE | Model-Based Engineering Environment',
+      sidebar: {
+        heading: 'User',
+        icon: 'fas fa-boxes',
+        list: {
+          Projects: {
+            icon: 'fas fa-box',
+            link: '#projects'
+          },
+          Settings: {
+            icon: 'fas fa-cog',
+            link: '#settings'
+          }
         }
-      }
-    },
-  }))
+      },
+      user: user
+    });
+  })
   // If error, redirect to home
   .catch(error => {
     M.log.error(error);
