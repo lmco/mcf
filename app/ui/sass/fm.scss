@@ -1,0 +1,25 @@
+
+#fm {
+
+    h1.title {
+        color: #fff;
+        font-weight: 100;
+        font-size: 64px;
+        margin: 40px 15px;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 100;
+    }
+
+    .nav-link {
+        border-radius: 0px;
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: transparent;
+        border-bottom: 1px solid #007bff;
+    }
+
+
+}
