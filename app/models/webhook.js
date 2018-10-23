@@ -101,6 +101,10 @@ WebhookSchema.plugin(timestamp);
 
 /* --------------------------( Webhook Middleware )----------------------------*/
 
+/**
+ * @description Post-save actions for a webhook.
+ * @memberOf WebhookSchema
+ */
 WebhookSchema.post('save', function(doc, next) {
   doc.addEventListener();
   next();
