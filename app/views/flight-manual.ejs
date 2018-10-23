@@ -19,7 +19,7 @@
     <div class="col-12">
       <h1 class="title">Flight Manual</h1>
     </div>
-    <div class="col-3">
+    <div class="col-4">
       <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
         <% for (let i = 0; i < sections.length; i++ ) { %>
           <a class="nav-link <%= (i === 0) ? 'active': '' %>"
@@ -34,7 +34,6 @@
         <% } %>
       </div>
     </div>
-    <div class="col-1"></div>
     <div class="col-8">
       <div class="tab-content" id="v-pills-tabContent">
         <% for (let i = 0; i < sections.length; i++ ) { %>
@@ -53,18 +52,7 @@
 
 
 
-
-
 <%- contentFor('styles') %>
 <link type="text/css" rel="stylesheet" href="/css/fm.css">
 
 <%- contentFor('scripts') %>
-<script type="text/javascript">
-  $(function() {
-    $('#fm-link').addClass('active');
-    $('#mod-doc-link').removeClass('active');
-    $( "#flight-manual-menu" ).css('display', 'block');
-    $( "#modules-menu" ).css('display', 'none');
-  });
-  const flight = () => console.log('Go');
-</script>
