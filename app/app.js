@@ -38,6 +38,7 @@ const middleware = M.require('lib.middleware');
 const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
+const Webhook = M.require('models.webhook');
 
 // Initialize express app and export the object
 const app = express();
@@ -205,17 +206,21 @@ function createDefaultAdmin() {
   });
 }
 
+/**
+ * @description Attaches webhooks in database to the event listener.
+ */
 function syncWebhookEvents() {
   return new Promise((resolve, reject) => {
-    const Webhook = M.require('models.webhook');
+    // Find all webhooks that have not been deleted
     Webhook.find({ deletedOn: null })
-    .then(() => {
-      console.log('*******Searched for webhooks*******'); // eslint-disable-line no-console
+    .then((webhooks) => {
+      // For each webhook
+      webhooks.forEach((webhook) => {
+        // Add trigger to event listener
+        webhook.addEventListener();
+      });
       return resolve();
     })
-    // webhooks.forEach((webhook) => {
-    //   webhook.addEventListener();
-    // });
     .catch((error) => reject(error));
   });
 }

@@ -63,7 +63,8 @@ const WebhookSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_proj !== this.project) {
         // Immutable field, return error
-        return new M.CustomError('Assigned project cannot be changed.', 400, 'warn');
+        M.log.error('Assigned project cannot be changed.');
+        return this.project;
       }
       // No change, return the value
       return this.project;
@@ -101,6 +102,10 @@ WebhookSchema.plugin(timestamp);
 
 /* --------------------------( Webhook Middleware )----------------------------*/
 
+/**
+ * @description Post-save actions for a webhook.
+ * @memberOf WebhookSchema
+ */
 WebhookSchema.post('save', function(doc, next) {
   doc.addEventListener();
   next();
@@ -110,7 +115,7 @@ WebhookSchema.post('save', function(doc, next) {
 /* ----------------------------( Webhook Methods )-----------------------------*/
 
 /**
- * @description Adds an event listener to the global event emitter
+ * @description Adds an event listener to the global event emitter.
  *
  * @memberOf WebhookSchema
  */
