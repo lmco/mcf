@@ -327,6 +327,12 @@
       "filename": "logo.png",
       "location": "/build/public/img/"
 
+    },
+    {
+      "id": "artifact01",
+      "filename": "logo-alt.png",
+      "location": "/build/public/img/"
+
     }
   ]
 }

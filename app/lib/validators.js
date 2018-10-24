@@ -188,14 +188,18 @@ module.exports.url = {
  *   - MUST only include lowercase letters, uppercase letters, numbers,
  *     '-', or whitespace
  *   - MUST be of length 1 or more
- * uuid:
- *   - MUST follow the following format: xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
- *     where x is a number or a lowercase letter from a-f
+ * id:
+ *   - MUST start with lowercase letter or a number
+ *   - MUST ONLY include lowercase letters, numbers, or '-'
+ *   - Must be of length 1 or more
  *   Examples:
- *     - f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+ *     - e1 [valid]
+ *     - my-element [valid]
+ *     - f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
+ *     - myProject [invalid - cannot contain uppercase characters]
  *
  */
 module.exports.artifact = {
   filename: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
-  uuid: '([a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12})'
+  id: '([a-z0-9])([-_a-z0-9:]){0,}'
 };

@@ -33,10 +33,9 @@ const ArtifactSchema = new mongoose.Schema({
     type: String,
     required: true,
     index: true,
-    unique: true,
     match: RegExp(validators.artifact.id),
-    maxlength: [255, 'Element ID is too long'],
-    minlength: [2, 'Element ID is too short'],
+    maxlength: [255, 'Artifact ID is too long'],
+    minlength: [2, 'Artifact ID is too short'],
     set: function(_id) {
       // Check value undefined
       if (typeof this.id === 'undefined') {
@@ -46,47 +45,63 @@ const ArtifactSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_id !== this.id) {
         // Immutable field, return error
-        return new M.CustomError('UID cannot be changed.', 400, 'warn');
+        return new M.CustomError('ID cannot be changed.', 400, 'warn');
       }
       // No change, return the value
       return this.id;
     }
   },
-  hash: {
-    type: String,
-    required: true,
-    index: false
-  },
-  filename : {
+  history: [{
+    hash:{
+      type: String,
+      required: true
+    },
+    updatedOn: {
+      type: Date,
+      default: Date.now(),
+      required: true
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    }
+  }],
+  filename: {
     type: String,
     required: true,
   },
   contentType: {
     type: String,
-    require: true
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    required: true
   },
   project: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project'
-  }
+    ref: 'Project',
+    required: true
+
+  },
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
 // Use timestamp model plugin
 ArtifactSchema.plugin(timestamp);
 
-/* ---------------------------( User Middleware )---------------------------- */
+/* ---------------------------( Artifact Middleware )---------------------------- */
 
 
-/* -----------------------------( User Methods )----------------------------- */
+/* -----------------------------( Artifact Methods )----------------------------- */
+/**
+ * @description Returns artifact fields that can be changed
+ * @memberOf ArtifactSchema
+ */
+ArtifactSchema.methods.getValidUpdateFields = function() {
+  return ['filename', 'contentType', 'hash' ];
+};
 
 
-/* ---------------------------( User Properties )---------------------------- */
+/* ---------------------------( Artifact Properties )---------------------------- */
 
-/* -------------------------( User Schema Export )--------------------------- */
+/* -------------------------( Artifact Schema Export )--------------------------- */
 // Export mongoose model as 'Artifact'
 module.exports = mongoose.model('Artifact', ArtifactSchema);

@@ -115,24 +115,24 @@ describe(M.getModuleName(module.filename), () => {
   it('should upload an artifact', uploadArtifact);
   it('should upload second artifact with same file', uploadSecondArtifact);
   it('should write out an artifact file', updateArtifact);
-  //it('should delete an artifact', deleteArtifactFile);
-  //it('should delete second artifact', deleteSecondArtifactFile);
+  it('should delete an artifact', deleteArtifactFile);
+  it('should delete second artifact', deleteSecondArtifactFile);
 
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an artifact via model and save it to the database.
+ * @description Update an artifact with a few file. This result in a different hash, thus a entirely new artifact is
+ * created.
  */
 function uploadArtifact(done) {
-  let imgPath = path.join(M.root, testData.artifacts[0].location, testData.artifacts[0].filename);
-  artifactPNG = fs.readFileSync(imgPath);
+  const imgPath = path.join(M.root, testData.artifacts[0].location, testData.artifacts[0].filename);
+  const artifactPNG = fs.readFileSync(imgPath);
 
-  artifactObjData = {
+  const artifactObjData = {
     id: testData.artifacts[0].id,
     contentType: 'png',
     filename: testData.artifacts[0].filename,
-    location: imgPath
   }
   // Create artifact
   ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
@@ -155,14 +155,13 @@ function uploadArtifact(done) {
  * the previously created in uploadArtifact().
  */
 function uploadSecondArtifact(done) {
-  let imgPath = path.join(M.root, testData.artifacts[1].location, testData.artifacts[1].filename);
-  artifactPNG = fs.readFileSync(imgPath);
+  const imgPath = path.join(M.root, testData.artifacts[1].location, testData.artifacts[1].filename);
+  const artifactPNG = fs.readFileSync(imgPath);
 
-  artifactObjData = {
+  const artifactObjData = {
     id: testData.artifacts[1].id,
     contentType: 'png',
     filename: testData.artifacts[1].filename,
-    location: imgPath
   }
   // Create artifact
   ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
@@ -177,27 +176,25 @@ function uploadSecondArtifact(done) {
     chai.expect(error.message).to.equal(null);
     done();
   });
-
 }
 
 /**
  * @description Updates an existing artifact.
  */
-function writeArtifactFile(done) {
-  let imgPath = path.join(M.root, testData.artifacts[1].location, testData.artifacts[1].filename);
-  artifactPNG = fs.readFileSync(imgPath);
+function updateArtifact(done) {
+  const imgPath = path.join(M.root, testData.artifacts[2].location, testData.artifacts[2].filename);
+  const artifactPNG = fs.readFileSync(imgPath);
 
-  artifactObjData = {
-    id: testData.artifacts[1].id,
+  const artifactObjData = {
+    id: testData.artifacts[2].id,
     contentType: 'png',
-    filename: testData.artifacts[1].filename,
-    location: imgPath
+    filename: testData.artifacts[2].filename,
   }
   // Create artifact
-  ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
+  ArtifactController.updateArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
   .then((artifact) => {
     // Verify artifact created properly
-    chai.expect(artifact.filename).to.equal(testData.artifacts[1].filename);
+    chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
     done();
   })
   .catch((error) => {
@@ -214,9 +211,9 @@ function writeArtifactFile(done) {
 function deleteArtifactFile(done) {
   // Create artifact
   ArtifactController.deleteArtifact(adminUser, org, proj, testData.artifacts[0].id)
-  .then((artifact) => {
+  .then((artifactId) => {
     // Verify artifact deleted properly
-    console.log(artifact);
+    chai.expect(artifactId).to.equal(testData.artifacts[0].id);
     done();
   })
   .catch((error) => {
@@ -233,9 +230,9 @@ function deleteArtifactFile(done) {
 function deleteSecondArtifactFile(done) {
   // Create artifact
   ArtifactController.deleteArtifact(adminUser, org, proj, testData.artifacts[1].id)
-  .then((artifact) => {
+  .then((artifactId) => {
     // Verify artifact deleted properly
-    console.log(artifact);
+    chai.expect(artifactId).to.equal(testData.artifacts[1].id);
     done();
   })
   .catch((error) => {
