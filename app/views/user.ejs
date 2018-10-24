@@ -16,7 +16,7 @@
 
   <h1 class="display-4"><%= user.name%></h1>
   <% if (customData) { %>
-  
+
   <ul class="user-info">
     <h1 class="display-4"><%= JSON.stringify(projects.length, null, 4) %></h1>
 
@@ -25,16 +25,8 @@
 
     <li class="user-info-item">
 
-      <div class="customdata-info-item">
-
-        <div class="customdata-info-key">
-          <i class="fas fa-circle icon-close">
-          </i>
-          <span><%=members[i].name%></span>
-        </div>
-
-        <div class="member-list-stats">
-          <div class="member-list-stats-email">
+        <div class="customdata-list-stats">
+          <div class="customdata-list-stats-email">
             <i class="fas fa-envelope"
                data-toggle="tooltip"
                data-placement="top"
@@ -50,7 +42,6 @@
   </ul>
 
   <% } else { %>
-
     <p> The user does not currently contain any custom data.</p>
   <% } %>
 
