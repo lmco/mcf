@@ -129,7 +129,7 @@ function organization(req, res) {
           link: '#settings'
         }
       }
-    },
+    }
   }))
   // If error, redirect to organization list
   .catch(err => {
