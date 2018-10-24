@@ -112,7 +112,6 @@ router.param('orgid', (req, res, next, orgid) => {
   }
 });
 
-
 // Parameter validation for the 'projectid' param
 // eslint-disable-next-line consistent-return
 router.param('projectid', (req, res, next, project) => {
