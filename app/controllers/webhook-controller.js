@@ -271,7 +271,8 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
 
       // Remove webhook from event emitter
       webhook.triggers.forEach((trigger) => {
-        events.
+        console.log(trigger);
+        events.removeListener(trigger);
       });
 
       // Hard delete
