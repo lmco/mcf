@@ -148,7 +148,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
     // Find any existing projects that match the query
     findProjectsQuery(findQuery)
     .then((projects) => {
-      // Error Check- ensure no projects already exist
+      // Error Check: ensure no projects already exist
       if (projects.length > 0) {
         // Get the ids of the projects that already exist
         const existingIDs = projects.map(p => p.id);
@@ -299,8 +299,10 @@ function updateProjects(reqUser, query, updateInfo) {
       // Check if some of the projects in updateMany failed
       if (!containsMixed && retQuery.n !== foundProjects.length) {
         // The number updated does not match the number attempted, log it
-        M.log.error('Some of the following projects failed to update: '
-          + `[${foundProjects.map(o => o.id)}].`);
+        return reject(new M.CustomError(
+          'Some of the following projects failed to update: '
+          + `[${foundProjects.map(p => p.id)}].`, 500, 'error'
+        ));
       }
 
       // Find the updated projects to return them

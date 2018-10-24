@@ -28,11 +28,13 @@ const mongoose = require('mongoose');
 const { execSync } = require('child_process');
 
 // MBEE modules
-const User = M.require('models.user');
+const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const Element = M.require('models.element');
 const Artifact = M.require('models.artifact');
+const User = M.require('models.user');
+const Webhook = M.require('models.webhook');
 const UserController = M.require('controllers.user-controller');
 const db = M.require('lib.db');
 
@@ -77,6 +79,7 @@ function cleanDB(done) {
     execSync(`rm -rf ${M.root}/storage/*`);
     return Artifact.deleteMany({});
   })
+  .then(() => Webhook.deleteMany({}))  // Remove webhooks
   .then(() => done())
   .catch(error => {
     M.log.error(error);

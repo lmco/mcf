@@ -31,7 +31,6 @@ const utils = M.require('lib.utils');
 
 // Expose `ElementController`
 module.exports = {
-  notImplemented,
   swaggerJSON,
   login,
   test,
@@ -70,6 +69,8 @@ module.exports = {
   deleteUser,
   whoami,
   getElements,
+  postElements,
+  patchElements,
   deleteElements,
   getElement,
   postElement,
@@ -87,19 +88,6 @@ module.exports = {
  */
 function formatJSON(obj) {
   return JSON.stringify(obj, null, M.config.server.api.json.indent);
-}
-
-/**
- * @description This function is used for routes that are not yet implemented.
- * It returns a 501: Not Implemented response.
- *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- *
- * @return {Object} res - Response object with no implemented status
- */
-function notImplemented(req, res) {
-  return res.status(501).send('Not Implemented.');
 }
 
 /**
@@ -749,7 +737,7 @@ function postProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: check if projects list included in req.body
+  // Error Check: check if projects array included in req.body
   if (!req.body.hasOwnProperty('projects')) {
     const error = new M.CustomError('Projects array not in request body.', 400, 'warn');
     return res.status(error.status).send(error);
@@ -1575,13 +1563,124 @@ function getElements(req, res) {
 }
 
 /**
+ * POST /api/orgs/:orgid/projects/:projectid/elements
+ *
+ * @description Creates multiple projects at a time.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with created elements
+ */
+function postElements(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Error Check: check if elements array included in req.body
+  if (!req.body.hasOwnProperty('elements')) {
+    const error = new M.CustomError('Elements array not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Create the specified elements
+  // NOTE: createElements() sanitizes req.params.orgid, req.params.projectid and the elements
+  ElementController.createElements(req.user, req.params.orgid,
+    req.params.projectid, req.body.elements)
+  .then((elements) => {
+    // Return 200: OK and the new elements
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/elements
+ *
+ * @description Updates multiple projects at a time.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with updated elements
+ */
+function patchElements(req, res) {
+  // Ensure request parameters and body are properly formatted
+  try {
+    assert.ok(req.hasOwnProperty('user'), 'Request Failed');
+    // Check if invalid key passed in
+    Object.keys(req.body).forEach((key) => {
+      // If invalid key, reject
+      assert.ok(['elements', 'update'].includes(key), `Invalid parameter: ${key}`);
+    });
+    assert.ok(req.body.hasOwnProperty('update'), 'Update object was not provided in body.');
+  }
+  catch (message) {
+    // If req.user is not provided, set status code to 500
+    let status = 400;
+    if (message === 'Request Failed') status = 500;
+
+    // Create and return error
+    const error = new M.CustomError(message, status, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize the update query object
+  let updateQuery = {};
+
+  // No elements provided, update all elements in the project
+  if (!req.body.hasOwnProperty('elements')) {
+    // Query finds all elements that start with 'orgid:projectid:'
+    updateQuery = { uid: { $regex: `^${sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid
+    ))}:` } };
+  }
+  // Element objects provided, update all
+  else if (req.body.elements.every(e => typeof e === 'object')) {
+    // Query finds all element by their uid
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid, e.id
+    )));
+    updateQuery = { uid: { $in: uids } };
+  }
+  // Element IDs provided, update all
+  else if (req.body.elements.every(e => typeof e === 'string')) {
+    // Query finds all elements by their uid, generated from orgid and projectid
+    // in the request parameters
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+      req.params.orgid, req.params.projectid, e
+    )));
+    updateQuery = { uid: { $in: uids } };
+  }
+  // No valid element data was provided, reject
+  else {
+    const error = new M.CustomError('Elements array contains invalid types.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified projects
+  // NOTE: updateElements() sanitizes req.body.update
+  ElementController.updateElements(req.user, updateQuery, req.body.update)
+  .then((elements) => {
+    // Return 200: OK and the updated elements
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/*
  * DELETE /api/orgs/:orgid/projects/:projectid/elements
  *
  * @description Deletes multiple elements at the same time
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- *
  * @return {Object} res response object with elements
  */
 function deleteElements(req, res) {

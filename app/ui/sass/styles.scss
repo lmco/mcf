@@ -20,9 +20,9 @@
  */
 
 @import 'variables';
-@import '../font-awesome/fontawesome';
-@import '../font-awesome/solid';
-@import '../font-awesome/brands';
+@import '../../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome';
+@import '../../../node_modules/@fortawesome/fontawesome-free/scss/solid';
+@import '../../../node_modules/@fortawesome/fontawesome-free/scss/brands';
 
 /******************************************************************************
 /*                                  General                                   *
@@ -127,12 +127,12 @@ body {
 .nav-sidebar {
     background: darken($mbee-background, 5);
     color: inherit;
-    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    position: absolute; /* Fixed Sidebar (stay in place on scroll) */
     top: $navbar-height;
     left: 0;
     bottom: 0;
     z-index: 1000;
-    overflow-x: hidden;
+    overflow: hidden;
     &.nav-sidebar-banner {
         top: $banner-height + $navbar-height;
         bottom: $banner-height
@@ -235,10 +235,12 @@ body {
 /*                           Main Content Container                           *
 /******************************************************************************/
 .content {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100vw;
     margin-top: $navbar-height;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 10px;
     overflow-y: scroll;
     &.content-banner {
         margin-top: $banner-height + $navbar-height;
@@ -246,11 +248,11 @@ body {
     // Adjust the margins of the content with the sidebar
     // NOTE: Order matters, min will override full and so it must come last.
     &.sidebar-full {
-        margin-left: $nav-sidebar-full-width;
+        padding-left: $nav-sidebar-full-width + 10;
     }
 
     &.sidebar-min {
-        margin-left: $nav-sidebar-min-width;
+        padding-left: $nav-sidebar-min-width + 10;
     }
 }
 
@@ -329,6 +331,109 @@ body {
 /******************************************************************************/
 .mbee-project {
 
+}
+
+/******************************************************************************
+/*                            Project Tree Styling                            *
+/******************************************************************************/
+.element-tree-container {
+    background: darken($mbee-background, 10);
+
+    .element {
+        padding: 10px;
+        padding-left: 15px;
+        padding-right: 15px;
+        display: flex;
+        flex-direction: column;
+
+        &.type-package {
+
+        }
+
+        &.type-block {
+            padding-left: 15px+16px;
+        }
+        &.type-relationship {
+            padding-left: 15px+16px;
+        }
+
+        &.closed {
+            display: none;
+        }
+
+        .element-container {
+            :hover {
+                background: lighten($mbee-background,10);
+                cursor: pointer;
+            }
+            .dropdown-icon {
+                i {
+                    &.closed {
+                        display: none;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.tree-sidebar {
+    position: absolute;
+    top: 0;
+    right: -350px;
+    background: #ffffff;
+    height: 100vh;
+    width: 350px;
+    overflow-y: scroll;
+
+    &.tree-sidebar-active {
+        right: 0;
+        transition: right .2s;
+    }
+
+    background: lighten($mbee-background, 5);
+    color: inherit;
+
+    .close-tree-sidebar {
+        position: absolute;
+        left: 10px;
+        color: #ffc700;
+        cursor: pointer;
+    }
+
+    .element-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-top: 10px;
+
+        h2 {
+            padding-left: 10px;
+            margin: 0;
+        }
+    }
+
+    .element-content {
+        .element-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+
+            .element-key {
+                color: darken($mbee-color,20);
+                display: flex;
+                width: 40%;
+                justify-content: flex-start;
+            }
+            .element-value {
+                display: flex;
+                width: 60%;
+                justify-content: flex-start;
+            }
+        }
+    }
 }
 
 /******************************************************************************

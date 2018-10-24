@@ -19,6 +19,9 @@
  * helper functions - used to validate data within MBEE.
  */
 
+// MBEE modules
+const utils = M.require('lib.utils');
+
 // This ID is used as the common regex for other ID fields in this module
 const id = '([a-z0-9])([-_a-z0-9]){0,}';
 
@@ -202,4 +205,23 @@ module.exports.url = {
 module.exports.artifact = {
   filename: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
   id: '([a-z0-9])([-_a-z0-9:]){0,}'
+};
+
+/**
+ * @description Regular Expressions to validate webhook data
+ *
+ * id:
+ *   - Each segment MUST start with lowercase letter or a number
+ *   - Each segment MUST only include lowercase letters, numbers, or '-'
+ *   - each segment MUST be of length 1 or more
+ *   Examples:
+ *      - orgid:projid:webhookid [valid]
+ *      - orgid:projid:my-webhook [valid]
+ *      - orgid:projid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
+ *      - orgid:projid:-webhook [invalid - must start with a letter or a number]
+ *      - orgid:projid:myWebhook [invalid - cannot use uppercase characters]
+ *      - my-webhook [invalid - must contain org and proj segments]
+ */
+module.exports.webhook = {
+  id: `^${id}${utils.UID_DELIMITER}${id}${utils.UID_DELIMITER}${id}$`
 };

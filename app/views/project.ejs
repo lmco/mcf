@@ -18,28 +18,16 @@ const members = project.permissions.read;
   <h1 class="display-4"><%= project.name%></h1>
 
   <h3 id="elements" class="mt-3">Elements</h3>
-  <% if (elements.length > 0) { %>
 
-  <ul class="mbee-list">
-    <% for (let i = 0; i < elements.length; i++) { %>
-    <li class="mbee-list-item">
-      <a href="<%=org.id%>/<%=project.id%>/<%=elements[i].name%>">
-        <div class="element-list-item">
+  <div class="element-tree-container">
+  <% if (elements) { %>
 
-          <div class="element-list-title">
-            <%=elements[i].name%>
-          </div>
-
-        </div>
-      </a>
-
-    </li>
-    <% } %>
-  </ul>
+    <%- include('element-tree-render', {root: elements} ) %>
 
   <% } else { %>
-  <p> This Organization does not currently contain any elements</p>
+    <p> This project does not currently contain any elements</p>
   <% } %>
+</div>
 
 
   <h3 id="members" class="mt-5">Members</h3>
@@ -81,3 +69,121 @@ const members = project.permissions.read;
 
 
 </div>
+
+<div class="tree-sidebar">
+  <div class ="element-header">
+    <i class="fas fa-times close-tree-sidebar"></i>
+    <i class="fas fa-project-diagram"></i>
+    <h2> Element Details</h2>
+  </div>
+  <div class="element-content">
+    <hr>
+    <div class="element-item">
+      <div class="element-key">
+        <span class="element-item-name-key">Name:</span>
+      </div>
+      <div class="element-value">
+        <span class="element-item-name-value">Loading...</span>
+      </div>
+    </div>
+    <hr>
+
+    <div class="element-item">
+      <div class="element-key">
+        <span class="element-item-id-key">ID:</span>
+      </div>
+      <div class="element-value">
+        <span class="element-item-id-value">Loading...</span>
+      </div>
+    </div>
+    <hr>
+
+    <div class="element-item">
+      <div class="element-key">
+        <span class="element-item-parent-key">Parent:</span>
+      </div>
+      <div class="element-value">
+        <span class="element-item-parent-value">Loading...</span>
+      </div>
+    </div>
+    <hr>
+
+    <div class="element-item">
+      <div class="element-key">
+        <span class="element-item-created-key">Created On:</span>
+      </div>
+      <div class="element-value">
+        <span class="element-item-created-value">Loading...</span>
+      </div>
+    </div>
+    <hr>
+
+    <div class="element-item">
+      <div class="element-key">
+        <span class="element-item-updated-key">Last Updated:</span>
+      </div>
+      <div class="element-value">
+        <span class="element-item-updated-value">Loading...</span>
+      </div>
+    </div>
+    <hr>
+
+    <div class="element-item">
+      <div class="element-key">
+        <span class="element-item-custom-key">Custom:</span>
+      </div>
+      <div class="element-value">
+        <span class="element-item-custom-value">Loading...</span>
+      </div>
+    </div>
+    <hr>
+
+    <div class="element-item">
+      <div class="element-key">
+        <span class="element-item-documentation-key">Documentation:</span>
+      </div>
+      <div class="element-value">
+        <span class="element-item-documentation-value">Loading...</span>
+      </div>
+    </div>
+  </div>
+  <hr>
+</div>
+
+<%- contentFor('scripts') %>
+<script>
+  $(document).ready(function() {
+    $('.close-tree-sidebar').click(function() {
+      $('.tree-sidebar').removeClass('tree-sidebar-active');
+    });
+
+    $('.element-title').click(function() {
+      $('.tree-sidebar').addClass('tree-sidebar-active');
+      $('.element-item-name-value').html('Loading...');
+      $('.element-item-id-value').html('Loading...');
+      $('.element-item-parent-value').html('Loading...');
+      $('.element-item-created-value').html('Loading...');
+      $('.element-item-updated-value').html('Loading...');
+      $('.element-item-custom-value').html('Loading...');
+      $('.element-item-documentation-value').html('Loading...');
+      jQuery.get($(this).attr('id') , function(data) {
+        $('.tree-sidebar').addClass('tree-sidebar-active');
+        $('.element-item-name-value').html(data.name);
+        $('.element-item-id-value').html(data.id);
+        $('.element-item-parent-value').html((data.parent) ? data.parent.name : 'No Parent.');
+        $('.element-item-created-value').html(data.createdOn);
+        $('.element-item-updated-value').html(data.updatedOn);
+        $('.element-item-custom-value').html(data.custom || 'No Custom Data.');
+        $('.element-item-documentation-value').html(data.documentation || 'No ' +
+          'Documentation.');
+      });
+    });
+  });
+
+  function toggleClosed(itemClass) {
+    const elementList = document.getElementsByClassName(itemClass)
+    for (let i = 0; i < elementList.length; i++) {
+      elementList[i].classList.toggle("closed");
+    }
+  };
+</script>
