@@ -23,11 +23,11 @@
       <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
         <% for (let i = 0; i < sections.length; i++ ) { %>
           <a class="nav-link <%= (i === 0) ? 'active': '' %>"
-             id="v-pills-<%= sections[i].id %>-tab"
+             id="<%= sections[i].id %>-tab"
              data-toggle="pill"
-             href="#v-pills-<%= sections[i].id %>"
+             href="#<%= sections[i].id %>"
              role="tab"
-             aria-controls="v-pills-<%= sections[i].id %>"
+             aria-controls="<%= sections[i].id %>"
              aria-selected="<%= (i === 0) ? 'true': 'false' %>">
             <%= sections[i].title %>
           </a>
@@ -38,9 +38,9 @@
       <div class="tab-content" id="v-pills-tabContent">
         <% for (let i = 0; i < sections.length; i++ ) { %>
         <div class="tab-pane fade <%= (i === 0) ? 'show active': '' %>"
-             id="v-pills-<%= sections[i].id %>"
+             id="<%= sections[i].id %>"
              role="tabpanel"
-             aria-labelledby="v-pills-<%= sections[i].id %>-tab">
+             aria-labelledby="<%= sections[i].id %>-tab">
           <%- sections[i].content %>
         </div>
         <% } %>
