@@ -5,7 +5,8 @@
 #
 # @copyright Copyright (C) 2018, Lockheed Martin Corporation
 #
-# @license MIT
+# LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+# It is not approved for public release or redistribution.
 #
 # @description This Dockerfile defines the Docker build for MBEE.
 ##
