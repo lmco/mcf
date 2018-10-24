@@ -147,5 +147,13 @@ router.route('/:orgid/:projectid')
   UIController.project
 );
 
+/* This renders a project edit form for an admin user */
+router.route('/:orgid/:projectid/edit')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.projectEdit
+);
+
 
 module.exports = router;

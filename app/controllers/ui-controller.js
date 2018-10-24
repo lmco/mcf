@@ -31,6 +31,7 @@ module.exports = {
   organizationEdit,
   projectList,
   project,
+  projectEdit,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -138,7 +139,7 @@ function organization(req, res) {
 }
 
 /**
- * @description Renders an organization page.
+ * @description Renders an organization edit/form page.
  */
 function organizationEdit(req, res) {
   // Sanity check: confirm req.user exists
@@ -149,7 +150,6 @@ function organizationEdit(req, res) {
   }
   // Find organization
   OrgController.findOrg(req.user, req.params.orgid)
-  // Render organization page
   .then(org => {
     // Check if user is NOT admin
     if (!req.user.admin
@@ -157,6 +157,7 @@ function organizationEdit(req, res) {
       // User is NOT admin, redirect to org page
       return res.redirect(`/${org.id}`);
     }
+    // Render organization page
     utils.render(req, res, 'organization-edit', {
       name: 'organization-edit',
       title: 'MBEE | Model-Based Engineering Environment',
@@ -257,6 +258,40 @@ function project(req, res) {
     });
   })
   // If error, redirect to organization list
+  .catch(err => {
+    M.log.error(err);
+    return res.redirect('/projects');
+  });
+}
+
+/**
+ * @description Renders a project edit/form page.
+ */
+function projectEdit(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/:projectid/edit executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Find Project
+  ProjController.findProject(req.user, req.params.orgid, req.params.projectid)
+  .then(foundProject => {
+    // Check if user is NOT admin
+    if (!req.user.admin
+      && !foundProject.permissions.admin.map(u => u.username).includes(req.user.username)) {
+      // User is NOT admin, redirect to project page
+      return res.redirect(`/${foundProject.org.id}/${foundProject.id}`);
+    }
+    // Render project edit page
+    utils.render(req, res, 'project-edit', {
+      name: 'project-edit',
+      title: 'MBEE | Model-Based Engineering Environment',
+      project: foundProject,
+      validators: validators.project
+    });
+  })
+  // If error, redirect to project list
   .catch(err => {
     M.log.error(err);
     return res.redirect('/projects');

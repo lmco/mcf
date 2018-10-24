@@ -3,7 +3,7 @@ const org = project.org;
 const members = project.permissions.read;
 %>
 
-<div class="container">
+<div class="container mbee-project">
 
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -15,7 +15,12 @@ const members = project.permissions.read;
 
   <hr class="mb-4">
 
-  <h1 class="display-4"><%= project.name%></h1>
+  <div class="project-header">
+    <h1 class="display-4"><%= project.name%></h1>
+    <% if (user.admin || project.permissions.admin.map(u => u.username).includes(user.username)) { %>
+    <a href="/<%=org.id%>/<%=project.id%>/edit" class="btn btn-outline-warning" role="button"> edit </a>
+    <% } %>
+  </div>
 
   <h3 id="elements" class="mt-3">Elements</h3>
 
