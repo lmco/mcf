@@ -98,7 +98,7 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
     // Find webhooks
     findWebhooksQuery(findQuery)
     .then((webhooks) => {
-      // Error Check: ensure at least one webhook was found
+      // Error Check: ensure webhook was found
       if (webhooks.length === 0) {
         // No webhooks found, reject error
         return reject(new M.CustomError('Webhook not found.', 404, 'warn'));
@@ -182,10 +182,14 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
-    // Verify another webhook with same ID doesn't exist
-    findWebhooksQuery({
-      id: sani.sanitize(utils.createUID(organizationID, projectID, webhookData.id))
-    })
+    // Sanitize query parameters
+    const orgID = sani.sanitize(organizationID);
+    const projID = sani.sanitize(projectID);
+    const webID = sani.sanitize(webhookData.id);
+    const webhookUID = utils.createUID(orgID, projID, webID);
+
+    // Verify another webhook with same ID does NOT exist
+    findWebhooksQuery({ id: webhookUID })
     .then((foundWebhook) => {
       // Error Check: ensure no existing webhook was found
       if (foundWebhook.length > 0) {
@@ -203,7 +207,7 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
 
       // Create webhook object
       const webhookObj = new Webhook({
-        id: sani.sanitize(utils.createUID(organizationID, projectID, webhookData.id)),
+        id: webhookUID,
         name: sani.sanitize(webhookData.name),
         project: project,
         triggers: sani.sanitize(webhookData.triggers),
@@ -270,9 +274,7 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
 
       // Hard delete
       if (hardDelete) {
-        return Webhook.deleteOne({
-          id: sani.sanitize(utils.createUID(organizationID, projectID, webhookID))
-        });
+        return Webhook.deleteOne({ id: webhook.id });
       }
       // Soft delete
 
