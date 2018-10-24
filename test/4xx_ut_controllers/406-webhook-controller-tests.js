@@ -217,7 +217,7 @@ function rejectFindNonExistent(done) {
  */
 function rejectDeleteInvalidParam(done) {
   // Delete the webhook
-  WebhookController.removeWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, 'true')
+  WebhookController.removeWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, 'invalid')
   .then(() => {
     // Expect removeWebhook() to fail
     // Webhook was deleted, force test to fail
