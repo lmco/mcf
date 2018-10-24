@@ -19,12 +19,17 @@ const path = require('path'); // Find directory paths
 
 // MBEE modules
 const Artifact = M.require('models.artifact');
+const Org = M.require('models.organization');
+const Project = M.require('models.project');
 const db = M.require('lib.db');
 const mbeeCrypto = M.require('lib.crypto');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testData = require(path.join(M.root, 'test', 'data.json'));
 let artifactPNG = null;
+let org = null;
+let project = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -35,24 +40,74 @@ let artifactPNG = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests. Open the database connection.
+   * Before: runs before all tests
    */
-  before(() => {
+  before((done) => {
     db.connect();
+
+    // Create the organization model object
+    const newOrg = new Org({
+      id: testData.orgs[0].id,
+      name: testData.orgs[0].name
+    });
+
+    // Save the organization model object to the database
+    newOrg.save()
+    .then((retOrg) => {
+      // Update organization for test data
+      org = retOrg;
+
+      // Create the project model object
+      const newProject = new Project({
+        id: testData.projects[1].id,
+        name: testData.projects[1].name,
+        org: org._id,
+        uid: `${org.id}:${testData.projects[1].id}`
+      });
+
+      // Save the project model object to the database
+      return newProject.save();
+    })
+    .then((retProj) => {
+      // Update project for test data
+      project = retProj;
+
+      done();
+    })
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
   });
 
   /**
-   * After: runs after all tests. Close database connection.
+   * After: runs after all tests
    */
-  after(() => {
-    db.disconnect();
+  after((done) => {
+    // Remove the project created in before()
+    Project.findOneAndRemove({ uid: project.uid })
+    // Remove the org created in before()
+    .then(() => Org.findOneAndRemove({ id: org.id }))
+    .then(() => {
+      db.disconnect();
+      done();
+    })
+    .catch((error) => {
+      db.disconnect();
+
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
   });
 
   /* Execute the tests */
   it('should upload an artifact', uploadArtifact);
-  it('should write out an artifact file', writeArtifactFile);
+  it('should update an artifact file', updateArtifactFile);
   it('should delete an artifact', deleteArtifactFile);
-
 });
 
 /* --------------------( Tests )-------------------- */
@@ -62,14 +117,18 @@ describe(M.getModuleName(module.filename), () => {
 function uploadArtifact(done) {
   // Upload new artifact
   const artifact = new Artifact();
-  artifact.contentType= 'png';
-  artifact.id = testData.artifacts[0].id;
+  artifact.id = utils.createUID(org.id, project.id, testData.artifacts[0].id);
   artifact.filename = testData.artifacts[0].filename;
-  artifact.location = testData.artifacts[0].location;
-  let imgPath = path.join(M.root, artifact.location, artifact.filename)
+  artifact.contentType = path.extname(testData.artifacts[0].filename);
+  artifact.project = project;
+  artifact.organization = org;
 
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+  );
   artifactPNG = fs.readFileSync(imgPath);
-  artifact.hash = mbeeCrypto.md5Hash(artifactPNG);
+  artifact.hash = mbeeCrypto.sha256Hash(artifactPNG);
 
   // Save user object to the database
   artifact.save()
@@ -83,32 +142,19 @@ function uploadArtifact(done) {
 }
 
 /**
- * @description Finds an artifact via model and writes to a file.
+ * @description Finds an existing artifact and updates it.
  */
-function writeArtifactFile(done) {
-  console.log(artifactPNG);
+function updateArtifactFile(done) {
+  const artifactFillId = utils.createUID(org.id, project.id, testData.artifacts[0].id);
   // Find the artifact previously uploaded.
-  Artifact.findOne({ id: testData.artifacts[0].id, deletedOn: null })
+  Artifact.find({ id: artifactFillId, deleted: false })
+  .then((artifactToUpdate) => {
+    artifactToUpdate[0].filename = testData.artifacts[2].filename;
+    return artifactToUpdate[0].save();
+  })
   .then((artifact) => {
-    console.log(artifact);
-    const fileDest = `/tmp/${artifact.filename}`;
-    fs.writeFile(fileDest, artifactPNG, function(error){
-      if (error){
-        // Error occurred, log it
-        M.log.error(error);
-      }
-    });
-
-    // Verifies file was NOT created
-    if (fs.exists(fileDest, (exist) => {
-      // Check file NOT exist
-      if (!exist){
-        console.log(error);
-        // Missing file, error out
-        throw new M.CustomError('Artifact file not generated.');
-      }
-      done();
-    }));
+    chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
+    done();
   })
   .catch((error) => {
     M.log.error(error);
@@ -122,27 +168,15 @@ function writeArtifactFile(done) {
  * @description Finds an artifact via model and writes to a file.
  */
 function deleteArtifactFile(done) {
-  // Find the previously created user from the createUser test.
-  Artifact.findOne({ id: testData.artifacts[0].id})
-  // Delete the user
-  .then((artifact) => {
-    console.log(artifact);
-    console.log(`/tmp/${artifact.filename}`);
-    // Remove artifact from filesystem
-    fs.unlink(`/tmp/${artifact.filename}`, (error) => {
-      if (error) throw new M.CustomError(error.message,400,'Artifact file could not be removed');
-    })
-
-    // Remove artifact from database
-    artifact.remove();
-  })
+  const artifactFillId = utils.createUID(org.id, project.id, testData.artifacts[0].id);
+  // Find the artifact previously uploaded.
+  Artifact.find({ id: artifactFillId, deleted: false })
+  .then((artifactToUpdate) => artifactToUpdate[0].remove())
   .then(() => done())
-  .catch(error => {
+  .catch((error) => {
     M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
   });
-
-
 }

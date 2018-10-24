@@ -147,7 +147,7 @@ if (installComplete) {
 
 // Initialize artifact storage path
 Object.defineProperty(M, 'artifactPath', {
-  value: path.join(M.root,M.config.artifact.path),
+  value: path.join(M.root, M.config.artifact.path),
   writable: false,
   enumerable: true
 });

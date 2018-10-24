@@ -24,7 +24,6 @@
 const mongoose = require('mongoose');
 
 // MBEE modules
-const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const timestamp = M.require('models.plugin.timestamp');
 
@@ -52,7 +51,7 @@ const ArtifactSchema = new mongoose.Schema({
     }
   },
   history: [{
-    hash:{
+    hash: {
       type: String,
       required: true
     },
@@ -69,7 +68,7 @@ const ArtifactSchema = new mongoose.Schema({
   }],
   filename: {
     type: String,
-    required: true,
+    required: true
   },
   contentType: {
     type: String,
@@ -80,7 +79,7 @@ const ArtifactSchema = new mongoose.Schema({
     ref: 'Project',
     required: true
 
-  },
+  }
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
@@ -96,7 +95,7 @@ ArtifactSchema.plugin(timestamp);
  * @memberOf ArtifactSchema
  */
 ArtifactSchema.methods.getValidUpdateFields = function() {
-  return ['filename', 'contentType', 'hash' ];
+  return ['filename', 'contentType', 'hash'];
 };
 
 

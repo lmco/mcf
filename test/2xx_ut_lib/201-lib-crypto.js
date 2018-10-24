@@ -55,7 +55,7 @@ function checkCryptoFunctions(done) {
  * @description Performs a md5 hash on a string message.
  */
 function md5HashTest(done) {
-  const hash = mbeeCrypto.md5Hash("hello world");
+  const hash = mbeeCrypto.md5Hash('hello world');
   chai.expect(hash).to.equal('5eb63bbbe01eeed093cb22bb8f5acdc3');
   done();
 }

@@ -112,18 +112,18 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should upload an artifact', uploadArtifact);
-  it('should upload second artifact with same file', uploadSecondArtifact);
-  it('should write out an artifact file', updateArtifact);
-  it('should delete an artifact', deleteArtifactFile);
-  it('should delete second artifact', deleteSecondArtifactFile);
-
+  it('should upload artifact00', uploadArtifact);
+  it('should upload second artifact01 with same file', uploadSecondArtifact);
+  it('should update artifact01 with new file', updateArtifact);
+  it('should delete an artifact00', deleteArtifactFile);
+  it('should delete second artifact01', deleteSecondArtifactFile);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Update an artifact with a few file. This result in a different hash, thus a entirely new artifact is
- * created.
+ * @description Update an artifact with a new file.
+ * Note: This result in a different hash. Both files should be archieved
+ * and artifact history is updated.
  */
 function uploadArtifact(done) {
   const imgPath = path.join(M.root, testData.artifacts[0].location, testData.artifacts[0].filename);
@@ -132,8 +132,8 @@ function uploadArtifact(done) {
   const artifactObjData = {
     id: testData.artifacts[0].id,
     contentType: 'png',
-    filename: testData.artifacts[0].filename,
-  }
+    filename: testData.artifacts[0].filename
+  };
   // Create artifact
   ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
   .then((artifact) => {
@@ -161,8 +161,8 @@ function uploadSecondArtifact(done) {
   const artifactObjData = {
     id: testData.artifacts[1].id,
     contentType: 'png',
-    filename: testData.artifacts[1].filename,
-  }
+    filename: testData.artifacts[1].filename
+  };
   // Create artifact
   ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
   .then((artifact) => {
@@ -188,8 +188,8 @@ function updateArtifact(done) {
   const artifactObjData = {
     id: testData.artifacts[2].id,
     contentType: 'png',
-    filename: testData.artifacts[2].filename,
-  }
+    filename: testData.artifacts[2].filename
+  };
   // Create artifact
   ArtifactController.updateArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
   .then((artifact) => {

@@ -25,6 +25,7 @@
 // Node modules
 const chai = require('chai');
 const mongoose = require('mongoose');
+const { execSync } = require('child_process');
 
 // MBEE modules
 const User = M.require('models.user');
@@ -71,7 +72,11 @@ function cleanDB(done) {
   .then(() => Organization.deleteMany({ id: { $ne: M.config.server.defaultOrganizationId } }))
   .then(() => Project.deleteMany({}))  // Remove projects
   .then(() => Element.Element.deleteMany({}))  // Remove elements
-  .then(() => Artifact.deleteMany({}))  // Remove artifacts
+  .then(() => {
+    // Remove artifacts
+    execSync(`rm -rf ${M.root}/storage/*`);
+    return Artifact.deleteMany({});
+  })
   .then(() => done())
   .catch(error => {
     M.log.error(error);

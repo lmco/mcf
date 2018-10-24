@@ -44,8 +44,8 @@ const utils = M.require('lib.utils');
  * @description This function creates an Artifact.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {Project} proj - The project object of the artifact.
  * @param {Organization} org - The Org object of the artifact.
+ * @param {Project} proj - The project object of the artifact.
  * @param {Object} artifactMetaData - The JSON object containing the Artifact data
  * @param {Binary} artifactBlob - The binary data to store.
  *
@@ -68,7 +68,7 @@ function createArtifact(reqUser, org, proj, artifactMetaData, artifactBlob) {
     }
 
     // Create the full artifact id
-    artifactFullId = utils.createUID(org.id, proj.id, artifactMetaData.id);
+    const artifactFullId = utils.createUID(org.id, proj.id, artifactMetaData.id);
 
     // Find artifact in database
     findArtifact(reqUser, artifactFullId)
@@ -80,8 +80,8 @@ function createArtifact(reqUser, org, proj, artifactMetaData, artifactBlob) {
           + ` already exist: [${_artifact.id}].`, 403, 'warn'));
       }
       // Generate hash
-      let hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-      let fileDest = path.join(M.artifactPath, hashedName);
+      const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+      const fileDest = path.join(M.artifactPath, hashedName);
 
       // Check if hash folder already exist in filesystem
       fs.exists(fileDest, (exists) => {
@@ -90,9 +90,9 @@ function createArtifact(reqUser, org, proj, artifactMetaData, artifactBlob) {
           M.log.info('Adding new artifact...');
 
           // Add artifact to storage
-          addArtifactOS(hashedName, artifactMetaData.filename, artifactBlob);
+          addArtifactOS(hashedName, artifactBlob);
         }
-        else{
+        else {
           // Folder exist, no need to duplicate to file system
           M.log.info('Existing Artifact...');
         }
@@ -102,7 +102,7 @@ function createArtifact(reqUser, org, proj, artifactMetaData, artifactBlob) {
       const historyData = {
         hash: hashedName,
         user: reqUser
-      }
+      };
 
       // Create the new Artifact
       const artifact = new Artifact({
@@ -111,7 +111,7 @@ function createArtifact(reqUser, org, proj, artifactMetaData, artifactBlob) {
         contentType: path.extname(artifactMetaData.filename),
         history: historyData,
         project: proj,
-        organization:org
+        organization: org
 
       });
 
@@ -131,8 +131,8 @@ function createArtifact(reqUser, org, proj, artifactMetaData, artifactBlob) {
  * @description This function updates an existing Artifact.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {Project} proj - The project object of the artifact.
  * @param {Organization} org - The Org object of the artifact.
+ * @param {Project} proj - The project object of the artifact.
  * @param {Object} artifactToUpdate - JSON object containing updated Artifact data
  * @param {Binary} artifactBlob - The binary data to store.
  *
@@ -155,7 +155,7 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
     }
 
     // Create the full artifact id
-    artifactFullId = utils.createUID(org.id, proj.id, artifactToUpdate.id);
+    const artifactFullId = utils.createUID(org.id, proj.id, artifactToUpdate.id);
 
     // Find artifact in database
     findArtifact(reqUser, artifactFullId)
@@ -165,10 +165,10 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
         // Artifact not found, reject with error
         return reject(new M.CustomError('Artifact not found', 404, 'warn'));
       }
-      
+
       // Generate hash
-      let hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-      let fileDest = path.join(M.artifactPath, hashedName);
+      const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+      const fileDest = path.join(M.artifactPath, hashedName);
 
       // Check if hash folder already exist in filesystem
       fs.exists(fileDest, (exists) => {
@@ -177,17 +177,17 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
           M.log.info('Adding new artifact...');
 
           // Add artifact to storage
-          addArtifactOS(hashedName, artifactToUpdate.filename, artifactBlob);
+          addArtifactOS(hashedName, artifactBlob);
         }
-        else{
+        else {
           // Folder exist, no need to duplicate to file system
           M.log.info('Existing Artifact...');
         }
       });
 
-      // Remove 'id' list
+      // Remove 'id' from artifactToUpdate
       // Note: id is immutable and cannot be changed
-      delete artifactToUpdate['id'];
+      delete artifactToUpdate.id;
 
       // Define and get a list of artifact keys to update
       const artifactUpdateFields = Object.keys(artifactToUpdate);
@@ -204,16 +204,14 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
             `Artifact property [${artifactUpdateFields[i]}] cannot be changed.`, 403, 'warn'
           ));
         }
-        // Sanitize field and update field in user object
-        _artifact[artifactUpdateFields[i]] =
-          sani.sanitize(artifactToUpdate[artifactUpdateFields[i]]);
+        // Sanitize field and update field in artifact object
+        _artifact[artifactUpdateFields[i]] = sani.sanitize(artifactToUpdate[artifactUpdateFields[i]]);
       }
 
       // Get history length
-      const historyIndex = _artifact.history.length-1;
+      const historyIndex = _artifact.history.length - 1;
       // Check hash has changed
-      if (hashedName !== _artifact.history[historyIndex].hash)
-      {
+      if (hashedName !== _artifact.history[historyIndex].hash) {
         // Define new hash history data
         const historyData = {
           hash: hashedName,
@@ -239,8 +237,8 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
  * @description This function deletes an Artifact.
  *
  * @param {User} reqUser  The user object of the requesting user.
- * @param {Project} proj - The project object of the artifact.
  * @param {Organization} org - The Org object of the artifact.
+ * @param {Project} proj - The project object of the artifact.
  * @param {String} artifactId - The Artifact Id
  *
  * @return {Promise} resolve - new Artifact
@@ -262,13 +260,8 @@ function deleteArtifact(reqUser, org, proj, artifactId) {
       return reject(new M.CustomError(error.message, statusCode, 'warn'));
     }
 
-    // Define function-wide artifact
-    let artifactToDelete = null;
-    let hashedName = '';
-    let filename = '';
-
     // Create the full artifact id
-    artifactFullId = utils.createUID(org.id, proj.id, artifactId);
+    const artifactFullId = utils.createUID(org.id, proj.id, artifactId);
 
     // Find to be deleted artifact
     findArtifact(reqUser, artifactFullId)
@@ -280,18 +273,16 @@ function deleteArtifact(reqUser, org, proj, artifactId) {
       }
       // Define and get artifact history
       const artifactHistory = artifactToDelete.history;
-      const filename = artifactToDelete.filename;
 
-      // Loop through object history
+      // Loop through artifact history
       for (let i = 0; i < artifactHistory.length; i++) {
-        // Find Artifact in filesystem
         // Check no db record linked to this artifact
         Artifact.find({ 'history.hash': artifactHistory[i].hash })
         .then((remainingArtifacts) => {
-          // Check last record with this hash
+          // Check last artifact with this hash
           if (remainingArtifacts.length === 1) {
             // Last hash record, remove artifact to storage
-            removeArtifactOS(artifactHistory[i].hash, filename);
+            removeArtifactOS(artifactHistory[i].hash);
           }
         })
         .catch((error) => reject(error));
@@ -312,8 +303,8 @@ function deleteArtifact(reqUser, org, proj, artifactId) {
   });
 }
 
-/**
- * @description This function finds a artifact.
+/** //TODO: Create a function that returns artifact binary
+ * @description This function finds an artifact based on artifact full id.
  *
  * @param {User} reqUser - The requesting user
  * @param {String} artifactFullId - Concatenation of 'OrgId:ProjId:ArtifactId'
@@ -334,23 +325,21 @@ function findArtifact(reqUser, artifactFullId, softDeleted = false) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
-    // Check softDeleted flag true and User Admin true
-    if (softDeleted && reqUser.admin) {
-      // softDeleted flag true and User Admin true, remove deleted: false
-      delete searchParams.deleted;
-    }
     // Define the search params
     const searchParams = {
       id: artifactFullId,
       deleted: false
     };
 
+    // Check softDeleted flag true and User Admin true
+    if (softDeleted && reqUser.admin) {
+      // softDeleted flag true and User Admin true, remove deleted: false
+      delete searchParams.deleted;
+    }
+
     // Find Artifact
     Artifact.find(searchParams)
-    .then((artifact) => {
-      // Return resolve artifact
-      return resolve(artifact[0]);
-    })
+    .then((artifact) => resolve(artifact[0]))
     .catch((error) => reject(new M.CustomError(error.message), 500, 'warn'));
   });
 }
@@ -361,31 +350,33 @@ function findArtifact(reqUser, artifactFullId, softDeleted = false) {
  * @param {String} hashName - hash name of the file
  * @param {Binary} artifactBlob - A binary large object artifact
  */
-function addArtifactOS(hashName, filename, artifactBlob) {
-  // Create folder directory
+function addArtifactOS(hashName, artifactBlob) {
+  // Creates main artifact directory if not exist
+  createStorageDirectory();
+
+  // Create sub folder path and artifact path
   // Note: Folder name is the first 2 characters from the generated hash
-  const folderPath = path.join(M.artifactPath, hashName.substring(0,2));
+  const folderPath = path.join(M.artifactPath, hashName.substring(0, 2));
   const artifactPath = path.join(folderPath, hashName);
 
-  // Check file exist
+  // Check sub folder exist
   fs.exists(folderPath, (exists) => {
-    // Check directory NOT exist
+    // Check results
     if (!exists) {
       // Directory does NOT exist, create it
-      fs.mkdir(folderPath, (error) => {
-        if (error){
+      // Note: Use sync to ensure directory created before advancing
+      fs.mkdirSync(folderPath, (error) => {
+        if (error) {
           M.log.error(error);
-          throw new M.CustomError(error.message, statusCode, 'warn');
+          throw new M.CustomError(error.message, 500, 'warn');
         }
-        else{
-          // Write out artifact file, defaults to 666 permission
-          fs.writeFile(artifactPath, artifactBlob, (err) => {
-            if (err) {
-              // Error occurred, log it
-              M.log.error(error);
-              throw new M.CustomError(error.message, statusCode, 'warn');
-            }
-          });
+      });
+      // Write out artifact file, defaults to 666 permission
+      fs.writeFile(artifactPath, artifactBlob, (err) => {
+        if (err) {
+          // Error occurred, log it
+          M.log.error(err);
+          throw new M.CustomError(err.message, 500, 'warn');
         }
       });
     }
@@ -393,41 +384,61 @@ function addArtifactOS(hashName, filename, artifactBlob) {
 }
 
 /**
- * @description This function removes the artifact blob file and folder
+ * @description This function removes the artifact blob file and sub folder
  * from the file system.
  *
  * @param {String} hashName - folder's hash name
  */
 function removeArtifactOS(hashName) {
-  // Create folder directory
+  // Create sub folder path and artifact path
   // Note: Folder name is the first 2 characters from the generated hash
-  const folderPath = path.join(M.artifactPath, hashName.substring(0,2));
+  const folderPath = path.join(M.artifactPath, hashName.substring(0, 2));
   const artifactPath = path.join(folderPath, hashName);
 
   // Remove the artifact file
-  fs.unlink(artifactPath, (error) => {
+  // Note: Use sync to ensure file is removed before advancing
+  fs.unlinkSync(artifactPath, (error) => {
     // Check directory NOT exist
     if (error) {
-      throw new M.CustomError(error.message, 500, 'warn');
+      M.log.warn(error);
     }
   });
 
   // Check if directory is empty
   fs.readdir(folderPath, function(err, files) {
     if (err) {
-      // some sort of error
-    } else {
-      // Check if empty directory
-      if (!files.length) {
-        // directory appears to be empty
-        // Remove the directory
-        fs.rmdir(folderPath, (error) => {
-          // Check directory NOT exist
-          if (error) {
-            throw new M.CustomError(error.message, 500, 'warn');
-          }
-        });
-      }
+      M.log.warn(err);
+    }
+    // Check if empty directory
+    if (!files.length) {
+      // Directory empty, remove it
+      fs.rmdir(folderPath, (error) => {
+        // Check directory NOT exist
+        if (error) {
+          throw new M.CustomError(error.message, 500, 'warn');
+        }
+      });
+    }
+  });
+}
+
+/**
+ * @description This function creates the artifact storage directory if
+ * it doesn't exist.
+ */
+function createStorageDirectory() {
+  // Check file exist
+  fs.exists(M.artifactPath, (exists) => {
+    // Check directory NOT exist
+    if (!exists) {
+      // Directory does NOT exist, create it
+      fs.mkdir(M.artifactPath, (error) => {
+        // Check for errors
+        if (error) {
+          M.log.error(error);
+          throw new M.CustomError(error.message, 500, 'warn');
+        }
+      });
     }
   });
 }
