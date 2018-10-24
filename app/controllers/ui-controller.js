@@ -242,26 +242,14 @@ function whoami(req, res) {
   // Render the project page with the list of projects
   .then(foundUser => {
     user = foundUser;
-    // Create list of projects
-    // projects = user.proj.read;
-    // Loop through list and create reference page for each project
-    // userProjects.forEach(proj => {
-    //   // set ref to split of uid and join with forward slashes
-    //   proj.ref = utils.parseUID(proj.uid)
-    //     .join('/');
-    // });
 
     utils.render(req, res, 'user', {
       name: user.username,
       title: 'MBEE | Model-Based Engineering Environment',
       sidebar: {
         heading: 'User',
-        icon: 'fas fa-boxes',
+        icon: 'fas fa-astronaut',
         list: {
-          Projects: {
-            icon: 'fas fa-box',
-            link: '#projects'
-          },
           Settings: {
             icon: 'fas fa-cog',
             link: '#settings'
