@@ -26,10 +26,11 @@
 const chai = require('chai');
 
 // MBEE modules
-const User = M.require('models.user');
+const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
-const Element = M.require('models.element');
+const User = M.require('models.user');
+const Webhook = M.require('models.webhook');
 const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
@@ -65,6 +66,8 @@ function cleanDB(done) {
   .then(() => Project.deleteMany({}))
   // Remove elements
   .then(() => Element.Element.deleteMany({}))
+  // Remove webhooks
+  .then(() => Webhook.deleteMany({}))
   .then(() => done())
   .catch(error => {
     M.log.error(error);
