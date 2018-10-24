@@ -216,12 +216,9 @@ function authenticate(req, res, next) {
     })
     .catch(err => {
       M.log.error(err.stack);
-      if (err.description === 'Invalid username or password.') {
-        req.flash('loginError', err.description);
-      }
-      else {
-        req.flash('loginError', 'Internal Server Error');
-      }
+      req.user = null;
+      req.session.destroy();
+      req.flash('loginError', 'Session or Token Expired');
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Unauthorized')
