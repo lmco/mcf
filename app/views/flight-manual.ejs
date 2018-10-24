@@ -14,33 +14,34 @@
  */
 %>
 
-<div class="container">
+<div class="container-fluid">
   <div id="fm" class="row">
     <div class="col-12">
       <h1 class="title">Flight Manual</h1>
+      <h2 class="subtitle">Version <%= M.version %></h2>
     </div>
-    <div class="col-4">
+    <div class="col-3">
       <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
         <% for (let i = 0; i < sections.length; i++ ) { %>
           <a class="nav-link <%= (i === 0) ? 'active': '' %>"
-             id="<%= sections[i].id %>-tab"
+             id="v-pills-<%= sections[i].id %>-tab"
              data-toggle="pill"
-             href="#<%= sections[i].id %>"
+             href="#v-pills-<%= sections[i].id %>"
              role="tab"
-             aria-controls="<%= sections[i].id %>"
+             aria-controls="v-pills-<%= sections[i].id %>"
              aria-selected="<%= (i === 0) ? 'true': 'false' %>">
             <%= sections[i].title %>
           </a>
         <% } %>
       </div>
     </div>
-    <div class="col-8">
+    <div class="col-9">
       <div class="tab-content" id="v-pills-tabContent">
         <% for (let i = 0; i < sections.length; i++ ) { %>
         <div class="tab-pane fade <%= (i === 0) ? 'show active': '' %>"
-             id="<%= sections[i].id %>"
+             id="v-pills-<%= sections[i].id %>"
              role="tabpanel"
-             aria-labelledby="<%= sections[i].id %>-tab">
+             aria-labelledby="v-pills-<%= sections[i].id %>-tab">
           <%- sections[i].content %>
         </div>
         <% } %>
@@ -57,27 +58,13 @@
 
 <%- contentFor('scripts') %>
 <script>
-  /*$(function(){
-    var hash = window.location.hash;
-    hash && $('ul.nav a[href="' + hash + '"]').tab('show');
-
-    $('.nav-tabs a').click(function (e) {
-      $(this).tab('show');
-      var scrollmem = $('body').scrollTop();
-      window.location.hash = this.hash;
-      $('html,body').scrollTop(scrollmem);
-    });
-  });*/
-
-  // Javascript to enable link to tab
-  var url = document.location.toString();
+  // If # anchor is in URL, show that tab\
+  const url = document.location.toString();
   if (url.match('#')) {
-    $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+    const e = document.querySelector('#' + url.split('#')[1]);
+    const t = e.closest(".tab-pane");
+    $('.nav-pills a[href="#' + t.id + '"]')
+      .tab('show');
   }
-
-  // Change hash for page-reload
-  $('.nav-pills a').on('shown.bs.tab', function (e) {
-    window.location.hash = e.target.hash;
-  })
 </script>
 

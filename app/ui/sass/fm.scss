@@ -1,15 +1,20 @@
 
 #fm {
 
+    color: #d6d7d8;
+
     h1.title {
         color: #fff;
         font-weight: 100;
-        font-size: 64px;
-        margin: 40px 15px;
+        font-size: 56px;
+        margin: 40px 15px 0px 15px;
     }
 
-    h1, h2, h3, h4, h5, h6 {
+    h2.subtitle {
+        color: #d6d7d8;
         font-weight: 100;
+        font-size: 14px;
+        margin: 0px 15px 40px 15px;
     }
 
     .nav-link {
@@ -21,8 +26,27 @@
         border-bottom: 1px solid #007bff;
     }
 
-    p {
-        color: #c2c3c5;
+    .tab-content {
+
+        color: #d6d7d8;
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 300;
+            color: #fff;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 48px;
+            font-weight: 100;
+        }
+
+        h2 {
+            border-bottom: 1px solid #5c6166;
+            padding-bottom: 2px;
+            margin-bottom: 18px;
+        }
     }
+
 
 }
