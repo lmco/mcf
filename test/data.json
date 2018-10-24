@@ -233,14 +233,29 @@
     {
       "id": "webhook1",
       "name": "Webhook 1",
-      "triggers": ["First Trigger", "Second Trigger"],
+      "triggers": ["First Trigger", "Element Created"],
       "responses": [
         {
-          "url": "http://-this-is-sample-url-1.com",
+          "url": "http://this-is-sample-url-1.com",
           "method": "GET"
         },
         {
-          "url": "http://-this-is-sample-url-2.com",
+          "url": "http://this-is-sample-url-2.com",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "id": "webhook2",
+      "name": "Webhook 2",
+      "triggers": ["First Trigger", "Second Trigger", "Third Trigger"],
+      "responses": [
+        {
+          "url": "http://this-is-sample-url-1.com",
+          "method": "GET"
+        },
+        {
+          "url": "http://this-is-sample-url-2.com",
           "method": "POST"
         }
       ]
@@ -296,6 +311,24 @@
       "id": "elem6",
       "name": "%@^@$#@#",
       "type": "Block"
+    }
+  ],
+
+  "invalidWebhooks": [
+    {
+      "id": "InvalidWebhook1",
+      "name": "Invalid Webhook 1",
+      "triggers": ["First Trigger", "Second Trigger"],
+      "responses": [
+        {
+          "url": "http://this-is-sample-url-1.com",
+          "method": "GET"
+        },
+        {
+          "url": "http://this-is-sample-url-2.com",
+          "method": "POST"
+        }
+      ]
     }
   ],
 
