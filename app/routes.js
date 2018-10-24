@@ -91,7 +91,6 @@ router.route('/projects')
   UIController.projectList
 );
 
-
 /**
  * Logs the user out by unsetting the req.user and req.session.token objects.
  */
