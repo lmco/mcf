@@ -241,7 +241,6 @@ function whoami(req, res) {
   }
 
   let user = null;
-  let projects = null;
 
   // get all organizations the user is a member of
   UserController.findUser(req.user, req.user.username)
@@ -254,8 +253,15 @@ function whoami(req, res) {
       title: 'MBEE | Model-Based Engineering Environment',
       sidebar: {
         heading: 'User',
-        icon: 'fas fa-astronaut',
         list: {
+          Organizations: {
+            icon: 'fas fa-boxes',
+            link: '/organizations'
+          },
+          Projects: {
+            icon: 'fas fa-box',
+            link: '/projects'
+          },
           Settings: {
             icon: 'fas fa-cog',
             link: '#settings'

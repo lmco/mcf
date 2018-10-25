@@ -5,17 +5,16 @@
       "adminPassword": "test12345"
     },
     {
-      "username": "e372655",
-      "password": "Password12345",
-      "preferredName": "Leah",
-      "fname": "Leah",
-      "lname": "De Laurell",
-      "admin": true,
+      "username": "nonadminuser01",
+      "password": "Password123",
+      "preferredName": "nonadmin user",
+      "fname": "userFirstname",
+      "lname": "userLastname",
+      "admin": false,
       "custom": {
-        "location": "Denver",
-        "leader": "Josh",
-        "company": "Space"
+        "location": "Location01"
       }
+
     },
     {
       "username": "nonadminuser02",
