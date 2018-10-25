@@ -46,6 +46,7 @@
 <script>
   $(document).ready(function() {
     const nameRegex = /<%= validators.name %>/
+      
     $('#name').on('input', function() {
       if (nameRegex.test($(this).val())) {
         $(this).removeClass('is-invalid')
