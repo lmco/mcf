@@ -397,8 +397,8 @@
     },
     {
       "id": "artifact01",
-      "filename": "favicon.ico",
-      "location": "/build/public/img/"
+      "filename": "fa-brands-400.svg",
+      "location": "/build/public/img/webfonts"
 
     }
   ]

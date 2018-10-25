@@ -35,18 +35,17 @@ const timestamp = M.require('models.plugin.timestamp');
  *
  * @property {String} id - The elements unique id name-spaced by its project
  * and organization.
- * @property {String} uuid - The elements RFC 4122 id, automatically generated
- * or taken from another source if imported.
- * @property {String} name - THe elements non-unique name.
- * @property {Project} project - A reference to an element's project.
- * @property {Element} parent - The parent element which contains the element
- * NOTE: Only package elements have a parent, root element parents are null.
- * @property {String} documentation - The element documentation.
- * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
- * @property {Date} createdOn - The date which an element was created.
- * @property {Date} updatedOn - The date which an element was updated.
- * @property {Date} createdOn - The date the element was soft deleted or null
- * @property {Boolean} deleted - Indicates if a element has been soft deleted.
+ * @property {Object} history - An array of object that tracks artifact's
+ * history.
+ * @property {String} hash - [Within Histroy]Hash string of the stored artifact.
+ * @property {Date} updatedOn - [Within Histroy] Hash string of the stored artifact.
+ * @property {User} hash - [Within Histroy]Hash string of the stored artifact.
+
+ * @property {Project} project - A reference to an artifact's project.
+ * @property {Date} createdOn - The date which an artifact was created.
+ * @property {Date} updatedOn - The date which an artifact was updated.
+ * @property {Date} createdOn - The date the artifact was soft deleted or null
+ * @property {Boolean} deleted - Indicates if a artifact has been soft deleted.
  *
  */
 const ArtifactSchema = new mongoose.Schema({

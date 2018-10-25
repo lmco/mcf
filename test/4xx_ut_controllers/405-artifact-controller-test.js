@@ -115,8 +115,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should upload artifact00', uploadArtifact);
   it('should upload second artifact01 with same file', uploadSecondArtifact);
   it('should update artifact01 with new file', updateArtifact);
-  it('should delete an artifact00', deleteArtifactFile);
-  it('should delete second artifact01', deleteSecondArtifactFile);
+  //t('should delete an artifact00', deleteArtifactFile);
+  //it('should delete second artifact01', deleteSecondArtifactFile);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -135,7 +135,7 @@ function uploadArtifact(done) {
     filename: testData.artifacts[0].filename
   };
   // Create artifact
-  ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
+  ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData, artifactPNG)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[0].filename);
@@ -163,8 +163,9 @@ function uploadSecondArtifact(done) {
     contentType: 'png',
     filename: testData.artifacts[1].filename
   };
+
   // Create artifact
-  ArtifactController.createArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
+  ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData, artifactPNG)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[1].filename);
