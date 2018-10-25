@@ -335,6 +335,11 @@ body {
 /*                            Project Page Styling                            *
 /******************************************************************************/
 .mbee-project {
+    .project-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
 }
 
