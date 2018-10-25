@@ -93,7 +93,7 @@ function docker(args) {
       '--restart=always',
       '-e', `MBEE_ENV=${M.env}`
     ].concat(args.slice(1));
-    if (M.config.docker.mongo) {
+    if (M.config.docker.mongo.enabled) {
       // http and docker http enabled, open specified ports
       rargs = rargs.concat(['-p', `${M.config.docker.mongo.port}:27017`]);
     }
