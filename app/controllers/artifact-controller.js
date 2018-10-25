@@ -24,7 +24,7 @@
 // circular references between controllers.
 module.exports = {
   createArtifact,
-  deleteArtifact,
+  removeArtifact,
   updateArtifact,
   findArtifact
 
@@ -47,8 +47,8 @@ const ProjController = M.require('controllers.project-controller');
  * @description This function creates an Artifact.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {Organization} org - The Org object of the artifact.
- * @param {Project} proj - The project object of the artifact.
+ * @param {Organization} orgID - The organization ID for the org the project belongs to.
+ * @param {Project} projID - The project ID of the Project which is being searched for.
  * @param {Object} artifactMetaData - The JSON object containing the Artifact data
  * @param {Binary} artifactBlob - The binary data to store.
  *
@@ -99,7 +99,7 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
       if (_artifact.length > 0) {
         return reject(new M.CustomError('Artifact already exists.', 400, 'warn'));
       }
-
+      // TODO: Different ID same hash, code does not handle
       // Generate hash
       hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
@@ -123,12 +123,13 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
       return artifact.save();
     })
     .then((_artifact) => {
-     createdArtifact = _artifact;
-      return addArtifactOS(hashedName, artifactBlob, true);
+      createdArtifact = _artifact;
+      return (!fs.existsSync(path.join(M.artifactPath, hashedName.substring(0, 2),hashedName)))
+        ? addArtifactOS(hashedName, artifactBlob)
+        : resolve(_artifact);
     })
     .then(() => resolve(createdArtifact))
     .catch((error) => {
-      console.log(error);
       M.log.error(error);
       // Error occurred, reject it
       return reject(error);
@@ -140,15 +141,15 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
  * @description This function updates an existing Artifact.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {Organization} org - The Org object of the artifact.
- * @param {Project} proj - The project object of the artifact.
+ * @param {Organization} orgID - The organization ID for the org the project belongs to.
+ * @param {Project} projID - The project ID of the Project which is being searched for.
  * @param {Object} artifactToUpdate - JSON object containing updated Artifact data
  * @param {Binary} artifactBlob - The binary data to store.
  *
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
-function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
+function updateArtifact(reqUser, orgID, projID, artifactToUpdate, artifactBlob) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
@@ -165,18 +166,17 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
     // Define function-wide variables
     let hashedName = '';
     let isNewHash = false;
-
-    // Create the full artifact id
-    const artifactFullId = utils.createUID(org.id, proj.id, artifactToUpdate.id);
+    let updatedArtifact = null;
 
     // Find artifact in database
-    findArtifact(reqUser, artifactFullId)
+    findArtifact(reqUser, orgID, projID, artifactToUpdate.id)
     .then((_artifact) => {
-      // Error Check: artifact was NOT found
-      if (!_artifact) {
-        // Artifact not found, reject with error.
-        return reject(new M.CustomError('Artifact not found', 404, 'warn'));
+      // Error Check: ensure reqUser is a project admin or global admin
+      if (!_artifact.project.getPermissions(reqUser).admin && !reqUser.admin) {
+        // reqUser does NOT have admin permissions or NOT global admin, reject error
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
+
       // Generate hash
       hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
@@ -185,19 +185,18 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
 
       // Check latest hash history has changed
       if (hashedName !== _artifact.history[lastestHistoryIndex].hash) {
-        // Define new hash history data
+        // New hash, define new hash history data
         const historyData = {
           hash: hashedName,
           user: reqUser
         };
-        // Hash changed, add to history
+        // Add new hash to history
         _artifact.history.push(historyData);
 
         // Set new hash boolean to true
         isNewHash = true;
       }
 
-      // Check if hash has change from previous
       // Remove 'id' from artifactToUpdate
       // Note: id is immutable and cannot be changed
       delete artifactToUpdate.id;
@@ -228,12 +227,9 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
     })
     .then((_artifact) => {
       updatedArtifact = _artifact;
-      if (isNewHash) {
-        return addArtifactOS(hashedName, artifactBlob, isNewHash);
-      }
-      else{
-        // What to do austin??
-      }
+      return (isNewHash)
+        ? addArtifactOS(hashedName, artifactBlob)
+        : resolve(_artifact);
     })
     .then(() => resolve(updatedArtifact))
     .catch((error) => {
@@ -245,43 +241,55 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
 }
 
 /**
- * @description This function deletes an Artifact.
+ * @description This function removes an Artifact.
  *
  * @param {User} reqUser  The user object of the requesting user.
- * @param {Organization} org - The Org object of the artifact.
- * @param {Project} proj - The project object of the artifact.
- * @param {String} artifactId - The Artifact Id
+ * @param {Organization} orgID - The organization ID for the org the project belongs to.
+ * @param {Project} projID - The project ID of the Project which is being searched for.
+ * @param {String} artifactID - The Artifact ID
+ * @param {Object} hardDelete  Flag denoting whether to hard or soft delete.
  *
- * @return {Promise} resolve - new Artifact
+ * @return {Promise} resolve - deleted Artifact
  *                   reject - error
  *
+ * @example
+ * removeArtifact({User}, 'orgID', 'projectID', 'elementID', false)
+ * .then(function(element) {
+ *   // Do something with the newly deleted element
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
  */
-function deleteArtifact(reqUser, org, proj, artifactId) {
+function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(reqUser.admin, 'User does not have permissions.');
+      assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof artifactID === 'string', 'Artifact ID is not a string.');
+      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      let statusCode = 400;
-      // Return a 403 if request is permissions related
-      if (error.message.includes('permissions')) {
-        statusCode = 403;
-      }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
-    // Create the full artifact id
-    const artifactFullId = utils.createUID(org.id, proj.id, artifactId);
+    // Error Check: if hard deleting, ensure user is global admin
+    if (hardDelete && !reqUser.admin) {
+      return reject(new M.CustomError(
+        'User does not have permission to permanently delete a project.', 403, 'warn'
+      ));
+    }
 
     // Find to be deleted artifact
-    findArtifact(reqUser, artifactFullId)
+    findArtifact(reqUser, orgID, projID, artifactID, true)
     .then((artifactToDelete) => {
-      // Error Check: artifact is NOT found
-      if (!artifactToDelete) {
-        // No artifact exists, reject
-        return reject(new M.CustomError('Artifact not found.', 404, 'warn'));
+      // Error Check: ensure reqUser is a project admin or global admin
+      if (!artifactToDelete.project.getPermissions(reqUser).admin && !reqUser.admin) {
+        // reqUser does NOT have admin permissions or NOT global admin, reject error
+        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
+
       // Define and get artifact history
       const artifactHistory = artifactToDelete.history;
 
@@ -304,7 +312,7 @@ function deleteArtifact(reqUser, org, proj, artifactId) {
     .then((_deletedArtifact) => {
       // Return the shorten artifact ID
       const shortenArtifactId = _deletedArtifact.id.split(':')[2];
-      resolve(shortenArtifactId);
+      return resolve(shortenArtifactId);
     })
     .catch((error) => {
       M.log.error(error);
@@ -331,7 +339,7 @@ function findArtifact(reqUser, organizationID, projectID, artifactID, softDelete
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof artifactFullId === 'string', 'Artifact Full Id is not a string.');
+      assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
@@ -373,8 +381,8 @@ function findArtifact(reqUser, organizationID, projectID, artifactID, softDelete
       if (!artifact[0].project.getPermissions(reqUser).read && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
-      return resolve(artifact[0]));
-    }
+      return resolve(artifact[0]);
+    })
     .catch((error) => reject(error));
   });
 }
@@ -402,67 +410,56 @@ function findArtifactsQuery(artifactQuery) {
     Artifact.find(artifactQuery)
     .populate('project')
     .then((arrArtifact) => resolve(arrArtifact))
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
 /**
  * @description This function adds the artifact blob file to the file system.
  *
- * @param {String} hashName - hash name of the file
+ * @param {String} hashedName - hash name of the file
  * @param {Binary} artifactBlob - A binary large object artifact
  */
-function addArtifactOS(hashName, artifactBlob, isNewHash) {
+function addArtifactOS(hashedName, artifactBlob) {
   return new Promise((resolve, reject) => {
     // Check for new hash
-    if (isNewHash){
-      // New hash, create sub-folder and artifact file
-      // Creates main artifact directory if not exist
-      createStorageDirectory()
-      .then(() => {
-        // Set sub folder path and artifact path
-        // Note: Folder name is the first 2 characters from the generated hash
-        const folderPath = path.join(M.artifactPath, hashName.substring(0, 2));
-        const artifactPath = path.join(folderPath, hashName);
+    // New hash, create sub-folder and artifact file
+    // Creates main artifact directory if not exist
+    createStorageDirectory()
+    .then(() => {
+      // Set sub folder path and artifact path
+      // Note: Folder name is the first 2 characters from the generated hash
+      const folderPath = path.join(M.artifactPath, hashedName.substring(0, 2));
+      const artifactPath = path.join(folderPath, hashedName);
 
-        // Check sub folder exist
-        fs.exists(folderPath, (exists) => {
-          // Check results
-          if (!exists) {
-            // Directory does NOT exist, create it
-            // Note: Use sync to ensure directory created before advancing
-            fs.mkdirSync(folderPath, (makeDirectoryError) => {
-              if (makeDirectoryError) {
-                M.log.error(makeDirectoryError);
-                return reject(makeDirectoryError);
-              }
-            });
-            // Write out artifact file, defaults to 666 permission
-            fs.writeFile(artifactPath, artifactBlob, (writeArtifactError) => {
-              if (writeArtifactError) {
-                // Error occurred, log it
-                M.log.error(writeArtifactError);
-                return reject(writeArtifactError);
-              }
-            });
-          }
-          return resolve();
-        });
-      })
-      .catch((err) => reject(err));
-    }
-    else{
-      // File already exist, return resolve
-      return resolve();
-    }
-  });
+      // Check sub folder exist
+      fs.exists(folderPath, (exists) => {
+        // Check results
+        if (!exists) {
+          // Directory does NOT exist, create it
+          // Note: Use sync to ensure directory created before advancing
+          fs.mkdirSync(folderPath, (makeDirectoryError) => {
+            if (makeDirectoryError) {
+              M.log.error(makeDirectoryError);
+              return reject(makeDirectoryError);
+            }
+          });
+          // Write out artifact file, defaults to 666 permission
+          fs.writeFile(artifactPath, artifactBlob, (writeArtifactError) => {
+            if (writeArtifactError) {
+              // Error occurred, log it
+              M.log.error(writeArtifactError);
+              return reject(writeArtifactError);
+            }
+          });
+        }
+        return resolve();
+      });
+    })
+    .catch((err) => reject(err));
+
+
+    });
 }
 
 /**

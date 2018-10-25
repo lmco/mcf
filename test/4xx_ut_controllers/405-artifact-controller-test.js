@@ -115,8 +115,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should upload artifact00', uploadArtifact);
   it('should upload second artifact01 with same file', uploadSecondArtifact);
   it('should update artifact01 with new file', updateArtifact);
-  //t('should delete an artifact00', deleteArtifactFile);
-  //it('should delete second artifact01', deleteSecondArtifactFile);
+  it('should delete an artifact00', deleteArtifactFile);
+  it('should delete second artifact01', deleteSecondArtifactFile);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -192,7 +192,7 @@ function updateArtifact(done) {
     filename: testData.artifacts[2].filename
   };
   // Create artifact
-  ArtifactController.updateArtifact(adminUser, org, proj, artifactObjData, artifactPNG)
+  ArtifactController.updateArtifact(adminUser, org.id, proj.id, artifactObjData, artifactPNG)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
@@ -211,10 +211,10 @@ function updateArtifact(done) {
  */
 function deleteArtifactFile(done) {
   // Create artifact
-  ArtifactController.deleteArtifact(adminUser, org, proj, testData.artifacts[0].id)
-  .then((artifactId) => {
+  ArtifactController.removeArtifact(adminUser, org.id, proj.id, testData.artifacts[0].id)
+  .then((artifactID) => {
     // Verify artifact deleted properly
-    chai.expect(artifactId).to.equal(testData.artifacts[0].id);
+    chai.expect(artifactID).to.equal(testData.artifacts[0].id);
     done();
   })
   .catch((error) => {
@@ -230,10 +230,10 @@ function deleteArtifactFile(done) {
  */
 function deleteSecondArtifactFile(done) {
   // Create artifact
-  ArtifactController.deleteArtifact(adminUser, org, proj, testData.artifacts[1].id)
-  .then((artifactId) => {
+  ArtifactController.removeArtifact(adminUser, org.id, proj.id, testData.artifacts[1].id)
+  .then((artifactID) => {
     // Verify artifact deleted properly
-    chai.expect(artifactId).to.equal(testData.artifacts[1].id);
+    chai.expect(artifactID).to.equal(testData.artifacts[1].id);
     done();
   })
   .catch((error) => {
