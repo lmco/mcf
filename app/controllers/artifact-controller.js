@@ -25,7 +25,8 @@
 module.exports = {
   createArtifact,
   deleteArtifact,
-  updateArtifact
+  updateArtifact,
+  findArtifact
 
 };
 
@@ -162,7 +163,7 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
     .then((_artifact) => {
       // Error Check: artifact was NOT found
       if (!_artifact) {
-        // Artifact not found, reject with error
+        // Artifact not found, reject with error.
         return reject(new M.CustomError('Artifact not found', 404, 'warn'));
       }
 
