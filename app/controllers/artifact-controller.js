@@ -205,8 +205,7 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
           ));
         }
         // Sanitize field and update field in artifact object
-        _artifact[artifactUpdateFields[i]] =
-          sani.sanitize(artifactToUpdate[artifactUpdateFields[i]]);
+        _artifact[artifactUpdateFields[i]] = sani.sanitize(artifactToUpdate[artifactUpdateFields[i]]);
       }
 
       // Get history length
