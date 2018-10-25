@@ -86,7 +86,7 @@ module.exports.render = function(req, res, name, params) {
   const opts = params || {};
   opts.pluginNames = getPlugins();
   opts.ui = opts.ui || M.config.server.ui;
-  opts.user = opts.user || (req.user) ? req.user.getPublicData() : '';
+  opts.user = opts.user || ((req.user) ? req.user.getPublicData() : '');
   opts.title = opts.title || 'Model-Based Engineering Environment';
   return res.render(name, opts);
 };

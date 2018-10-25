@@ -43,6 +43,10 @@ function loadPlugins() {
     else if (data.source.startsWith('/') || data.source.startsWith('.')) {
       copyPluginFromLocalDir(data);
     }
+    // Website downloads
+    else if (data.source.endsWith('.zip') || data.source.endsWith('.gz')) {
+      downloadPluginFromWebsite(data);
+    }
     else {
       M.log.warn('Plugin type unknown');
     }
@@ -158,11 +162,6 @@ function clonePluginFromGitRepo(data) {
  * @param {Object} data The plugin configuration data
  */
 function copyPluginFromLocalDir(data) {
-  // Make sure source plugin is not in plugins directory
-  if (path.resolve(data.source).startsWith(path.resolve(__dirname))) {
-    return;
-  }
-
   // Remove plugin if it already exists in plugins directory
   const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
   const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(M.root, 'plugins', data.name)}`);
@@ -177,6 +176,69 @@ function copyPluginFromLocalDir(data) {
   const stdout = execSync(cmd);
   M.log.verbose(stdout.toString());
   M.log.info('Copy complete');
+}
+
+/**
+ * @description Copies the plugin from a website to the plugins
+ * directory. If the plugin location is already in the local directory, nothing
+ * occurs.
+ *
+ * @param {Object} data - The plugin configuration data
+ */
+function downloadPluginFromWebsite(data) {
+  // Remove plugin if it already exists in plugins directory
+  const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
+  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(M.root, 'plugins', data.name)}`);
+  M.log.verbose(stdoutRmCmd.toString());
+
+  // Proxy information
+  const httpProxy = M.config.server.proxy;
+
+  // Create directory for plugin
+  const dirName = path.join(M.root, 'plugins', data.name);
+  const stdoutMkdirCmd = execSync(`mkdir -p ${dirName}`);
+  M.log.verbose(stdoutMkdirCmd.toString());
+
+  // Setting parameters
+  let fileName = null;
+  let unzipCmd = null;
+
+  // .zip files
+  if (data.source.endsWith('.zip')) {
+    // Set name and unzip command
+    fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.zip`;
+    unzipCmd = `unzip ${fileName} -d ${dirName}`;
+  }
+  // .tar.gz files
+  else if (data.source.endsWith('.tar.gz')) {
+    // Set name and unzip command
+    fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.tar.gz`;
+    unzipCmd = `tar xvzf ${fileName} -C ${dirName}`;
+  }
+  // .gz files
+  else if (data.source.endsWith('.gz')) {
+    // Set name and unzip command
+    fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.gz`;
+    unzipCmd = `gunzip -c ${fileName} > ${dirName}`;
+  }
+  // Other files
+  else {
+    M.log.info('File is not an accepted download option.');
+    return;
+  }
+
+  // Downloading from website
+  M.log.info(`Downloading plugin ${data.name} from ${data.source} ...`);
+  const curlCmd = `curl -L -k -XGET -x ${httpProxy} ${data.source} --output ${fileName}`;
+  const stdoutCurl = execSync(curlCmd);
+  M.log.verbose(stdoutCurl.toString());
+  M.log.info('Download complete.');
+
+  // Extracting downloaded file
+  M.log.info(`Extracting ${fileName}...`);
+  const execCmd = execSync(unzipCmd);
+  M.log.verbose(execCmd.toString());
+  M.log.info('Extraction complete.');
 }
 
 module.exports = pluginRouter;
