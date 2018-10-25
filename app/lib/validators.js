@@ -52,7 +52,7 @@ const id = '([a-z0-9])([-_a-z0-9]){0,}';
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.org = {
-  id: `^(?!(css|js|img|login|logout|about|assets|static|public))${id}$`,
+  id: `^(?!(css|js|img|login|logout|about|assets|static|public|api|organizations|projects|users))${id}$`,
   name: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
 };
 
@@ -81,7 +81,7 @@ module.exports.org = {
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.project = {
-  id: `^${id}$`,
+  id: `^(?!(edit))${id}$`,
   name: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
 };
 
