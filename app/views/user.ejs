@@ -40,7 +40,7 @@
       <% if (customData) { %>
       <tr>
       <td>Custom Data</td>
-      <td><%= JSON.stringify(customData, null, 4).replace(/[\{\}\"]/g, " ") %></td>
+      <td><%- JSON.stringify(customData, null, 4).replace(/[\{\}\"]/g, " ").replace(/\,/g, "<br>") %></td>
       </tr>
       <% } %>
   </table>
