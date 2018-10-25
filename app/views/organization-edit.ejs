@@ -48,23 +48,19 @@
     const nameRegex = /<%= validators.name %>/
     $('#name').on('input', function() {
       if (nameRegex.test($(this).val())) {
-        $(this).addClass('is-valid')
         $(this).removeClass('is-invalid')
       }
       else {
         $(this).addClass('is-invalid')
-        $(this).removeClass('is-valid')
       }
     })
 
     $('#custom').on('input', function() {
       try {
         JSON.parse($("#custom").val())
-        $(this).addClass('is-valid')
         $(this).removeClass('is-invalid')
       }
       catch {
-        $(this).addClass('is-invalid')
         $(this).removeClass('is-valid')
       }
     })
