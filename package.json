@@ -18,6 +18,7 @@
     "express-session": "^1.15.6",
     "ldapjs": "^1.0.2",
     "mongoose": "^5.2.17",
+    "request": "^2.86.0",
     "swagger-jsdoc": "^1.9.7",
     "uuid": "^3.3.2",
     "winston": "^3.0.0",
@@ -38,7 +39,6 @@
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.17.0",
     "popper.js": "^1.12.9",
-    "request": "^2.86.0",
     "swagger-ui-express": "^2.0.15"
   },
   "scripts": {

@@ -27,10 +27,11 @@ const chai = require('chai');
 const mongoose = require('mongoose');
 
 // MBEE modules
-const User = M.require('models.user');
+const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
-const Element = M.require('models.element');
+const User = M.require('models.user');
+const Webhook = M.require('models.webhook');
 const UserController = M.require('controllers.user-controller');
 const db = M.require('lib.db');
 
@@ -70,6 +71,7 @@ function cleanDB(done) {
   .then(() => Organization.deleteMany({ id: { $ne: M.config.server.defaultOrganizationId } }))
   .then(() => Project.deleteMany({}))  // Remove projects
   .then(() => Element.Element.deleteMany({}))  // Remove elements
+  .then(() => Webhook.deleteMany({}))  // Remove webhooks
   .then(() => done())
   .catch(error => {
     M.log.error(error);
