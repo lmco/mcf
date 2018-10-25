@@ -14,12 +14,12 @@
 
 // Node modules
 const request = require('request');
+const fs = require('fs');
 
 // NPM modules
 const mongoose = require('mongoose');
 
 // MBEE modules
-const EventEmitter = M.require('lib.events');
 const timestamp = M.require('models.plugin.timestamp');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -84,6 +84,10 @@ const WebhookSchema = new mongoose.Schema({
       type: String,
       default: 'GET'
     },
+    headers: {
+      type: mongoose.Schema.Types.Mixed,
+      default: { 'Content-Type': 'application/json' }
+    },
     data: {
       type: String
     }
@@ -101,44 +105,37 @@ const WebhookSchema = new mongoose.Schema({
 WebhookSchema.plugin(timestamp);
 
 
-/* --------------------------( Webhook Middleware )----------------------------*/
-
-/**
- * @description Post-save actions for a webhook.
- * @memberOf WebhookSchema
- */
-WebhookSchema.post('save', function(doc, next) {
-  doc.addEventListener();
-  next();
-});
-
-
 /* ----------------------------( Webhook Methods )-----------------------------*/
 
 /**
- * @description Adds an event listener to the global event emitter.
- *
+ * @description Sends HTTP requests to all urls in this.responses
  * @memberOf WebhookSchema
  */
-WebhookSchema.methods.addEventListener = function() {
-  // For each trigger
-  this.triggers.forEach((trigger) => {
-    // Add listener to event emitter
-    EventEmitter.on(trigger, (eventData) => {
-      console.log('Triggered :)');
-      // For every response in the Webhook responses list
-      this.responses.forEach((response) => {
-        // Send an HTTP request to given URL
-        request({
-          url: response.url,
-          headers: { 'Content-Type': 'application/json' },
-          method: response.method,
-          body: JSON.stringify(response.data || eventData || undefined)
-        });
+WebhookSchema.methods.sendRequests = function(data) {
+  // If webhooks projects is the same as the incoming data's project
+  if (this.project === data.project) {
+    // For every response in the webhook responses list
+    this.responses.forEach((response) => {
+      // Send an HTTP request to given URL
+      request({
+        url: response.url,
+        headers: response.headers,
+        ca: readCaFile(),
+        method: response.method,
+        body: JSON.stringify(response.data || data || undefined)
       });
     });
-  });
+  }
 };
+
+/**
+ * @description Helper function for setting the certificate authorities for each request.
+ */
+function readCaFile() {
+  if (M.config.test.hasOwnProperty('ca')) {
+    return fs.readFileSync(`${M.root}/${M.config.test.ca}`);
+  }
+}
 
 /**
  * @description Returns a webhooks's public data.
@@ -153,6 +150,7 @@ WebhookSchema.methods.getPublicData = function() {
     custom: this.custom
   };
 };
+
 
 /* --------------------------( Webhook Properties )-------------------------- */
 

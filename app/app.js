@@ -38,7 +38,6 @@ const middleware = M.require('lib.middleware');
 const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
-const Webhook = M.require('models.webhook');
 
 // Initialize express app and export the object
 const app = express();
@@ -51,7 +50,6 @@ module.exports = app;
 db.connect()
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
-.then(() => syncWebhookEvents())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);
@@ -203,24 +201,5 @@ function createDefaultAdmin() {
     })
     // Catch and reject error
     .catch(error => reject(error));
-  });
-}
-
-/**
- * @description Attaches webhooks in database to the event listener.
- */
-function syncWebhookEvents() {
-  return new Promise((resolve, reject) => {
-    // Find all webhooks that have not been deleted
-    Webhook.find({ deletedOn: null })
-    .then((webhooks) => {
-      // For each webhook
-      webhooks.forEach((webhook) => {
-        // Add trigger to event listener
-        webhook.addEventListener();
-      });
-      return resolve();
-    })
-    .catch((error) => reject(error));
   });
 }

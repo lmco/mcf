@@ -34,7 +34,6 @@ const assert = require('assert');
 // MBEE modules
 const ProjectController = M.require('controllers.project-controller');
 const Webhook = M.require('models.webhook');
-const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
@@ -268,12 +267,6 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
       if (!webhook.project.getPermissions(reqUser).write && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
-
-      // Remove webhook from event emitter
-      webhook.triggers.forEach((trigger) => {
-        console.log(trigger);
-        events.removeListener(trigger);
-      });
 
       // Hard delete
       if (hardDelete) {

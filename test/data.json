@@ -233,15 +233,15 @@
     {
       "id": "webhook1",
       "name": "Webhook 1",
-      "triggers": ["First Trigger", "Element Created"],
+      "triggers": ["First Trigger", "Second Trigger"],
       "responses": [
         {
-          "url": "http://this-is-sample-url-1.com",
+          "url": "https://google.com",
           "method": "GET"
         },
         {
-          "url": "http://this-is-sample-url-2.com",
-          "method": "POST"
+          "url": "https://apple.com",
+          "method": "GET"
         }
       ]
     },
@@ -251,12 +251,8 @@
       "triggers": ["First Trigger", "Second Trigger", "Third Trigger"],
       "responses": [
         {
-          "url": "http://this-is-sample-url-1.com",
+          "url": "https://google.com",
           "method": "GET"
-        },
-        {
-          "url": "http://this-is-sample-url-2.com",
-          "method": "POST"
         }
       ]
     }
