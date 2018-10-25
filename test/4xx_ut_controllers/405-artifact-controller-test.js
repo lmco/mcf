@@ -89,7 +89,7 @@ describe(M.getModuleName(module.filename), () => {
     OrgController.removeOrg(adminUser, org.id, true)
     .then(() => {
       // Once db items are removed, remove reqUser
-      // close the db connection and finish
+      // Close the db connection and finish
       User.findOne({
         username: adminUser.username
       }, (error, foundUser) => {
