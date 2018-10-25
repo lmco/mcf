@@ -15,8 +15,7 @@
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
- * @description Middleware plugin that extends models.
- * Allows for artifacts to be stored. Artifacts are arbitrary data and
+ * @description Allows for artifacts to be stored. Artifacts are arbitrary data and
  * include: PDFs, images, zip files, other archives.
  */
 
@@ -27,6 +26,29 @@ const mongoose = require('mongoose');
 const validators = M.require('lib.validators');
 const timestamp = M.require('models.plugin.timestamp');
 
+/* ---------------------------( Artifact Schemas )---------------------------- */
+
+/**
+ * @namespace
+ *
+ * @description The base schema definition inherited by all other element types.
+ *
+ * @property {String} id - The elements unique id name-spaced by its project
+ * and organization.
+ * @property {String} uuid - The elements RFC 4122 id, automatically generated
+ * or taken from another source if imported.
+ * @property {String} name - THe elements non-unique name.
+ * @property {Project} project - A reference to an element's project.
+ * @property {Element} parent - The parent element which contains the element
+ * NOTE: Only package elements have a parent, root element parents are null.
+ * @property {String} documentation - The element documentation.
+ * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
+ * @property {Date} createdOn - The date which an element was created.
+ * @property {Date} updatedOn - The date which an element was updated.
+ * @property {Date} createdOn - The date the element was soft deleted or null
+ * @property {Boolean} deleted - Indicates if a element has been soft deleted.
+ *
+ */
 const ArtifactSchema = new mongoose.Schema({
   id: {
     type: String,

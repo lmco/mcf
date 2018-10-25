@@ -91,7 +91,9 @@ function createArtifact(reqUser, org, proj, artifactMetaData, artifactBlob) {
           M.log.info('Adding new artifact...');
 
           // Add artifact to storage
-          addArtifactOS(hashedName, artifactBlob);
+          addArtifactOS(hashedName, artifactBlob)
+          .then(() => resolve())
+          .catch((error) => reject(error));
         }
         else {
           // Folder exist, no need to duplicate to file system
@@ -178,7 +180,9 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
           M.log.info('Adding new artifact...');
 
           // Add artifact to storage
-          addArtifactOS(hashedName, artifactBlob);
+          addArtifactOS(hashedName, artifactBlob)
+          .then(() => resolve())
+          .catch((error) => reject(error));
         }
         else {
           // Folder exist, no need to duplicate to file system
@@ -354,35 +358,40 @@ function findArtifact(reqUser, artifactFullId, softDeleted = false) {
  * @param {Binary} artifactBlob - A binary large object artifact
  */
 function addArtifactOS(hashName, artifactBlob) {
-  // Creates main artifact directory if not exist
-  createStorageDirectory();
+  return new Promise((resolve, reject) => {
+    // Creates main artifact directory if not exist
+    createStorageDirectory()
+    .then(() => {
+      // Create sub folder path and artifact path
+      // Note: Folder name is the first 2 characters from the generated hash
+      const folderPath = path.join(M.artifactPath, hashName.substring(0, 2));
+      const artifactPath = path.join(folderPath, hashName);
 
-  // Create sub folder path and artifact path
-  // Note: Folder name is the first 2 characters from the generated hash
-  const folderPath = path.join(M.artifactPath, hashName.substring(0, 2));
-  const artifactPath = path.join(folderPath, hashName);
-
-  // Check sub folder exist
-  fs.exists(folderPath, (exists) => {
-    // Check results
-    if (!exists) {
-      // Directory does NOT exist, create it
-      // Note: Use sync to ensure directory created before advancing
-      fs.mkdirSync(folderPath, (error) => {
-        if (error) {
-          M.log.error(error);
-          throw new M.CustomError(error.message, 500, 'warn');
+      // Check sub folder exist
+      fs.exists(folderPath, (exists) => {
+        // Check results
+        if (!exists) {
+          // Directory does NOT exist, create it
+          // Note: Use sync to ensure directory created before advancing
+          fs.mkdirSync(folderPath, (error) => {
+            if (error) {
+              M.log.error(error);
+              throw new M.CustomError(error.message, 500, 'warn');
+            }
+          });
+          // Write out artifact file, defaults to 666 permission
+          fs.writeFile(artifactPath, artifactBlob, (err) => {
+            if (err) {
+              // Error occurred, log it
+              M.log.error(err);
+              return reject(err);
+            }
+          });
         }
+        return resolve();
       });
-      // Write out artifact file, defaults to 666 permission
-      fs.writeFile(artifactPath, artifactBlob, (err) => {
-        if (err) {
-          // Error occurred, log it
-          M.log.error(err);
-          throw new M.CustomError(err.message, 500, 'warn');
-        }
-      });
-    }
+    })
+    .catch((err) => reject(err));
   });
 }
 
@@ -430,18 +439,21 @@ function removeArtifactOS(hashName) {
  * it doesn't exist.
  */
 function createStorageDirectory() {
-  // Check file exist
-  fs.exists(M.artifactPath, (exists) => {
-    // Check directory NOT exist
-    if (!exists) {
-      // Directory does NOT exist, create it
-      fs.mkdir(M.artifactPath, (error) => {
-        // Check for errors
-        if (error) {
-          M.log.error(error);
-          throw new M.CustomError(error.message, 500, 'warn');
-        }
-      });
-    }
+  return new Promise((resolve, reject) => {
+    // Check file exist
+    fs.exists(M.artifactPath, (exists) => {
+      // Check directory NOT exist
+      if (!exists) {
+        // Directory does NOT exist, create it
+        fs.mkdir(M.artifactPath, (error) => {
+          // Check for errors
+          if (error) {
+            M.log.error(error);
+            return reject(new M.CustomError(error.message, 500, 'warn'));
+          }
+        });
+      }
+      return resolve();
+    });
   });
 }
