@@ -397,7 +397,7 @@
     },
     {
       "id": "artifact01",
-      "filename": "logo-alt.png",
+      "filename": "favicon.ico",
       "location": "/build/public/img/"
 
     }
