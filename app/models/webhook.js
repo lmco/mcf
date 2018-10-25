@@ -14,7 +14,6 @@
 
 // Node modules
 const request = require('request');
-const fs = require('fs');
 
 // NPM modules
 const mongoose = require('mongoose');
@@ -88,6 +87,9 @@ const WebhookSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.Mixed,
       default: { 'Content-Type': 'application/json' }
     },
+    ca: {
+      type: String
+    },
     data: {
       type: String
     }
@@ -120,22 +122,13 @@ WebhookSchema.methods.sendRequests = function(data) {
       request({
         url: response.url,
         headers: response.headers,
-        ca: readCaFile(),
+        ca: response.ca,
         method: response.method,
         body: JSON.stringify(response.data || data || undefined)
       });
     });
   }
 };
-
-/**
- * @description Helper function for setting the certificate authorities for each request.
- */
-function readCaFile() {
-  if (M.config.test.hasOwnProperty('ca')) {
-    return fs.readFileSync(`${M.root}/${M.config.test.ca}`);
-  }
-}
 
 /**
  * @description Returns a webhooks's public data.

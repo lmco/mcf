@@ -236,11 +236,11 @@
       "triggers": ["First Trigger", "Second Trigger"],
       "responses": [
         {
-          "url": "https://google.com",
+          "url": "http://google.com",
           "method": "GET"
         },
         {
-          "url": "https://apple.com",
+          "url": "http://apple.com",
           "method": "GET"
         }
       ]
@@ -251,7 +251,7 @@
       "triggers": ["First Trigger", "Second Trigger", "Third Trigger"],
       "responses": [
         {
-          "url": "https://google.com",
+          "url": "http://google.com",
           "method": "GET"
         }
       ]
