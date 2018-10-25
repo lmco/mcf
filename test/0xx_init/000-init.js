@@ -28,7 +28,6 @@ const mongoose = require('mongoose');
 const { execSync } = require('child_process');
 
 // MBEE modules
-const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const Element = M.require('models.element');
