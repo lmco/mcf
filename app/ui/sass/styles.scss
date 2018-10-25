@@ -660,3 +660,18 @@ body {
         }
     }
 }
+
+/******************************************************************************
+/*                        User Information Table                              *
+/******************************************************************************/
+.user-table {
+    table {
+        border-collapse: collapse;
+        height: 10px;
+        border-bottom-width: thin;
+        width: 100%;
+    }
+    td {
+        padding: 4px 1;
+    }
+}
