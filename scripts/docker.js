@@ -95,7 +95,7 @@ function docker(args) {
     ].concat(args.slice(1));
     if (M.config.docker.mongo) {
       // http and docker http enabled, open specified ports
-      rargs = rargs.concat(['-p', `27017:${M.config.db.port}`]);
+      rargs = rargs.concat(['-p', `${M.config.db.port}:27017`]);
     }
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
       // http and docker http enabled, open specified ports
