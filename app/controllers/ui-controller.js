@@ -49,9 +49,6 @@ const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const ElementController = M.require('controllers.element-controller');
-const User = M.require('models.user');
-const crypto = M.require('lib.crypto');
-const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const elementSort = M.require('lib.element-sort');
 const validators = M.require('lib.validators');
@@ -381,24 +378,11 @@ function swaggerDoc(req, res) {
  * or not the user is logged in.
  */
 function showAboutPage(req, res) {
-  const token = crypto.inspectToken(req.session.token);
-  User.findOne({
-    username: sani.sanitize(token.username)
-  })
-  .exec((err, user) => {
-    if (err) {
-      M.log.error(err);
-    }
-    else {
-      req.user = user;
-    }
-    // Disables because database document is being directly used
-    return utils.render(req, res, 'about', {
-      info: {
-        version: M.version4
-      },
-      title: 'About | Model-Based Engineering Environment'
-    });
+  return utils.render(req, res, 'about', {
+    info: {
+      version: M.version4
+    },
+    title: 'About | Model-Based Engineering Environment'
   });
 }
 
