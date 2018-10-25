@@ -316,7 +316,7 @@ function whoami(req, res) {
   // Render the project page with the list of projects
   .then(foundUser => {
     utils.render(req, res, 'user', {
-      name: user.username,
+      name: foundUser.username,
       title: 'MBEE | Model-Based Engineering Environment',
       sidebar: {
         heading: 'User',
