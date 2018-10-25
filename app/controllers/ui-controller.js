@@ -28,6 +28,7 @@ module.exports = {
   home,
   organizationList,
   organization,
+  organizationEdit,
   projectList,
   project,
   swaggerDoc,
@@ -109,6 +110,7 @@ function organization(req, res) {
   .then(org => utils.render(req, res, 'organization', {
     name: 'organization',
     title: 'MBEE | Model-Based Engineering Environment',
+    org: org,
     sidebar: {
       heading: 'Organization',
       icon: 'fas fa-boxes',
@@ -126,9 +128,42 @@ function organization(req, res) {
           link: '#settings'
         }
       }
-    },
-    org: org
+    }
   }))
+  // If error, redirect to organization list
+  .catch(err => {
+    M.log.error(err);
+    return res.redirect('/organizations');
+  });
+}
+
+/**
+ * @description Renders an organization page.
+ */
+function organizationEdit(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/:orgid/edit executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Find organization
+  OrgController.findOrg(req.user, req.params.orgid)
+  // Render organization page
+  .then(org => {
+    // Check if user is NOT admin
+    if (!req.user.admin
+      && !org.permissions.admin.map(u => u.username).includes(req.user.username)) {
+      // User is NOT admin, redirect to org page
+      return res.redirect(`/${org.id}`);
+    }
+    utils.render(req, res, 'organization-edit', {
+      name: 'organization-edit',
+      title: 'MBEE | Model-Based Engineering Environment',
+      org: org,
+      validators: validators.org
+    });
+  })
   // If error, redirect to organization list
   .catch(err => {
     M.log.error(err);

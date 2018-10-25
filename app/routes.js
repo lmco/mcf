@@ -123,12 +123,21 @@ router.param('projectid', (req, res, next, project) => {
   }
 });
 
+
 /* This renders an organization for a user */
 router.route('/:orgid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
   UIController.organization
+);
+
+/* This renders an organizations edit form for an admin user */
+router.route('/:orgid/edit')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.organizationEdit
 );
 
 /* This renders a project for a user */

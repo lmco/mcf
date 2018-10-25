@@ -34,6 +34,7 @@ const { execSync } = require('child_process');
 // NPM modules
 const gulp = require('gulp');
 const concat = require('gulp-concat');
+const minify = require('gulp-minify');
 const sass = require('gulp-sass');
 
 
@@ -85,6 +86,12 @@ function build(_args) {
 
     // Copy Jquery JS
     gulp.src('./node_modules/jquery/dist/jquery.min.js')
+    .pipe(gulp.dest('build/public/js'));
+
+    // Copy Jquery UI JS
+    gulp.src(['./node_modules/jquery-ui/ui/effect.js', './node_modules/jquery-ui/ui/effects/*.js'])
+    .pipe(concat('jquery-ui.js'))
+    .pipe(minify({ noSource: true }))
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Popper JS
