@@ -32,6 +32,7 @@ module.exports = {
   projectList,
   project,
   projectEdit,
+  whoami,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -279,7 +280,8 @@ function projectEdit(req, res) {
   .then(foundProject => {
     // Check if user is NOT admin
     if (!req.user.admin
-      && !foundProject.permissions.admin.map(u => u.username).includes(req.user.username)) {
+      && !foundProject.permissions.admin.map(u => u.username)
+      .includes(req.user.username)) {
       // User is NOT admin, redirect to project page
       return res.redirect(`/${foundProject.org.id}/${foundProject.id}`);
     }
@@ -295,6 +297,51 @@ function projectEdit(req, res) {
   .catch(err => {
     M.log.error(err);
     return res.redirect('/projects');
+  });
+}
+
+/**
+ * @description Renders the current user's page.
+ */
+function whoami(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/whoami executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+
+  // get all organizations the user is a member of
+  UserController.findUser(req.user, req.user.username)
+  // Render the project page with the list of projects
+  .then(foundUser => {
+    utils.render(req, res, 'user', {
+      name: user.username,
+      title: 'MBEE | Model-Based Engineering Environment',
+      sidebar: {
+        heading: 'User',
+        list: {
+          Organizations: {
+            icon: 'fas fa-boxes',
+            link: '/organizations'
+          },
+          Projects: {
+            icon: 'fas fa-box',
+            link: '/projects'
+          },
+          Settings: {
+            icon: 'fas fa-cog',
+            link: '#settings'
+          }
+        }
+      },
+      user: foundUser
+    });
+  })
+  // If error, redirect to home
+  .catch(error => {
+    M.log.error(error);
+    res.redirect('/');
   });
 }
 
