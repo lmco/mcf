@@ -31,7 +31,7 @@ module.exports = {
 
 // Node.js Modules
 const assert = require('assert');
-const fs = require('fs');  // Access the filesystem
+const fs = require('fs');        // Access the filesystem
 const path = require('path');    // Find directory paths
 
 // MBEE modules
@@ -205,7 +205,8 @@ function updateArtifact(reqUser, org, proj, artifactToUpdate, artifactBlob) {
           ));
         }
         // Sanitize field and update field in artifact object
-        _artifact[artifactUpdateFields[i]] = sani.sanitize(artifactToUpdate[artifactUpdateFields[i]]);
+        _artifact[artifactUpdateFields[i]] =
+          sani.sanitize(artifactToUpdate[artifactUpdateFields[i]]);
       }
 
       // Get history length
