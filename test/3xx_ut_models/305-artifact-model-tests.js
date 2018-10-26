@@ -9,7 +9,7 @@
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
- * @description Tests the artifact model plugin by performing various actions.
+ * @description Tests creating, updating and deleting artifacts through the model.
  */
 
 // Node modules
@@ -165,14 +165,17 @@ function updateArtifactFile(done) {
 }
 
 /**
- * @description Finds an artifact via model and writes to a file.
+ * @description Finds and deletes an artifact
  */
 function deleteArtifactFile(done) {
   const artifactFillId = utils.createUID(org.id, project.id, testData.artifacts[0].id);
   // Find the artifact previously uploaded.
-  Artifact.find({ id: artifactFillId, deleted: false })
-  .then((artifactToUpdate) => artifactToUpdate[0].remove())
-  .then(() => done())
+  Artifact.findOneAndRemove({ id: artifactFillId })
+  .then(() => Artifact.find({ id: artifactFillId }))
+  .then((deletedArtifact) => {
+    chai.expect(deletedArtifact.length).to.equal(0);
+    done();
+  })
   .catch((error) => {
     M.log.error(error);
     // Expect no error

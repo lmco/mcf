@@ -31,16 +31,17 @@ const timestamp = M.require('models.plugin.timestamp');
 /**
  * @namespace
  *
- * @description The base schema definition inherited by all other element types.
+ * @description Defines the Artifact Schema
  *
  * @property {String} id - The elements unique id name-spaced by its project
  * and organization.
  * @property {Object} history - An array of object that tracks artifact's
  * history.
- * @property {String} hash - [Within Histroy]Hash string of the stored artifact.
- * @property {Date} updatedOn - [Within Histroy] Hash string of the stored artifact.
- * @property {User} hash - [Within Histroy]Hash string of the stored artifact.
-
+ * @property {String} hash - [Within Histroy] Hash string of the stored artifact.
+ * @property {Date} updatedOn - [Within Histroy] Updated time for specific hash.
+ * @property {User} user - [Within Histroy] User that updated specific hash.
+ * @property {String} filename - The filename of the artifact.
+ * @property {String} contentType - The file extention. E.g: 'png', 'dat'
  * @property {Project} project - A reference to an artifact's project.
  * @property {Date} createdOn - The date which an artifact was created.
  * @property {Date} updatedOn - The date which an artifact was updated.
@@ -65,7 +66,7 @@ const ArtifactSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_id !== this.id) {
         // Immutable field, return error
-        return new M.CustomError('ID cannot be changed.', 400, 'warn');
+        M.log.warn(M.CustomError('ID cannot be changed.', 400, 'warn'));
       }
       // No change, return the value
       return this.id;
@@ -107,10 +108,6 @@ const ArtifactSchema = new mongoose.Schema({
 // Use timestamp model plugin
 ArtifactSchema.plugin(timestamp);
 
-/* ---------------------------( Artifact Middleware )---------------------------- */
-
-
-/* -----------------------------( Artifact Methods )----------------------------- */
 /**
  * @description Returns artifact fields that can be changed
  * @memberOf ArtifactSchema
@@ -118,9 +115,6 @@ ArtifactSchema.plugin(timestamp);
 ArtifactSchema.methods.getValidUpdateFields = function() {
   return ['filename', 'contentType', 'hash'];
 };
-
-
-/* ---------------------------( Artifact Properties )---------------------------- */
 
 /* -------------------------( Artifact Schema Export )--------------------------- */
 // Export mongoose model as 'Artifact'

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module controllers.element-controller
+ * @module controllers.artifact-controller
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -19,7 +19,7 @@
  * It also provides function for interacting with artifacts.
  */
 
-// Expose artifacts controller functions
+// Expose artifact controller functions
 // Note: The export is being done before the import to solve the issues of
 // circular references between controllers.
 module.exports = {
@@ -27,8 +27,6 @@ module.exports = {
   removeArtifact,
   updateArtifact,
   findArtifact
-
-
 };
 
 // Node.js Modules
