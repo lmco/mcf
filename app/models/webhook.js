@@ -126,7 +126,7 @@ const OutgoingWebhookSchema = new mongoose.Schema({
  */
 const IncomingWebhookSchema = new mongoose.Schema({
   token: String,
-  tokenLocation: String,
+  tokenLocation: String
 });
 
 
@@ -159,7 +159,7 @@ OutgoingWebhookSchema.methods.sendRequests = function(data) {
   }
 };
 
-OutgoingWebhookSchema.methods.verifyAuthority = function() { return false };
+OutgoingWebhookSchema.methods.verifyAuthority = function() { return false; };
 
 IncomingWebhookSchema.methods.verifyAuthority = function(value) {
   return (value === this.token);
@@ -207,4 +207,3 @@ const IncomingWebhook = Webhook.discriminator('Incoming', IncomingWebhookSchema)
 module.exports.Webhook = Webhook;
 module.exports.Outgoing = OutgoingWebhook;
 module.exports.Incoming = IncomingWebhook;
-

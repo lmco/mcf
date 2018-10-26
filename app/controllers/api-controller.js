@@ -2047,19 +2047,20 @@ function deleteWebhook(req, res) {
  * @return {Object} res response object
  */
 function postIncomingWebhook(req, res) {
-  // Decrypt webhookID and define uidParts
+  // Decrypt webhookID
   const webhookUID = Buffer.from(req.params.webhookid, 'base64').toString();
 
   // Find the webhook
-   WebhookController.findWebhooksQuery({ id: sani.sanitize(webhookUID), deleted: false })
+  WebhookController.findWebhooksQuery({ id: sani.sanitize(webhookUID), deleted: false })
   .then((foundWebhook) => {
     // If no webhooks are found, return a 404 Not Found
     if (foundWebhook.length === 0) {
       return res.status(404).send('Not Found');
     }
 
-    //
+    // If a token is specified in the webhook
     if (foundWebhook[0].token) {
+      // Verify the same token is provided in the request headers
       if (!foundWebhook[0].verifyAuthority(req.headers[foundWebhook[0].tokenLocation])) {
         return res.status(401).send('Unauthorized');
       }

@@ -113,9 +113,12 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create an outgoing webhook', createOutgoingWebhook);
+  it('should create an incoming webhook', createIncomingWebhook);
   it('should find a webhook', findWebhook);
+  it('should return webhook public data', getPublicData);
+  it('should validate an incoming webhook', validateWebhook);
   it('should update a webhook', updateWebhook);
-  it('should delete a webhook', deleteWebhook);
+  it('should delete all webhooks', deleteWebhooks);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -155,29 +158,31 @@ function createOutgoingWebhook(done) {
  */
 function createIncomingWebhook(done) {
   // Create webhook object
-  const webhook = new Webhook.Outgoing({
+  const webhook = new Webhook.Incoming({
     id: utils.createUID(org.id, project.id, testData.webhooks[2].id),
     name: testData.webhooks[2].name,
     project: project,
-    triggers: testData.webhooks[2].triggers
+    triggers: testData.webhooks[2].triggers,
+    token: testData.webhooks[2].token,
+    tokenLocation: testData.webhooks[2].tokenLocation
   });
 
   // Save webhook to database
   webhook.save()
-    .then((createdWebhook) => {
-      // Verify results
-      chai.expect(createdWebhook.id).to.equal(utils.createUID(
-        org.id, project.id, testData.webhooks[2].id
-      ));
-      chai.expect(createdWebhook.triggers.length).to.equal(testData.webhooks[2].triggers.length);
-      done();
-    })
-    .catch((error) => {
-      M.log.error(error);
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
-      done();
-    });
+  .then((createdWebhook) => {
+    // Verify results
+    chai.expect(createdWebhook.id).to.equal(utils.createUID(
+      org.id, project.id, testData.webhooks[2].id
+    ));
+    chai.expect(createdWebhook.triggers.length).to.equal(testData.webhooks[2].triggers.length);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
 }
 
 /**
@@ -192,6 +197,70 @@ function findWebhook(done) {
     chai.expect(webhook.id).to.equal(utils.createUID(org.id, project.id, testData.webhooks[0].id));
     chai.expect(webhook.triggers.length).to.equal(testData.webhooks[0].triggers.length);
     chai.expect(webhook.responses[0].method).to.equal(testData.webhooks[0].responses[0].method);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Tests getting public data fro incoming and outgoing webhooks.
+ */
+function getPublicData(done) {
+  // Find the outgoing webhook
+  Webhook.Webhook.findOne({ id: utils.createUID(org.id, project.id, testData.webhooks[0].id) })
+  .then((webhook) => {
+    // Get public data
+    const outgoingPub = (webhook.getPublicData());
+
+    // Verify results
+    chai.expect(outgoingPub.name).to.equal(testData.webhooks[0].name);
+    chai.expect(outgoingPub.deleted).to.equal(undefined);
+
+    // Find incoming webhook
+    return Webhook.Webhook.findOne({
+      id: utils.createUID(org.id, project.id, testData.webhooks[2].id)
+    });
+  })
+  .then((webhook) => {
+    // Get public data
+    const incomingPub = webhook.getPublicData();
+
+    // Verify results
+    chai.expect(incomingPub.name).to.equal(testData.webhooks[2].name);
+    chai.expect(incomingPub.token).to.equal(testData.webhooks[2].token);
+    chai.expect(incomingPub.deleted).to.equal(undefined);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Tests validating incoming webhooks
+ */
+function validateWebhook(done) {
+  // Create object with token
+  const tokenObject = {
+    'test-token': testData.webhooks[2].token
+  };
+
+  // Find the incoming webhooks
+  Webhook.Webhook.findOne({ id: utils.createUID(org.id, project.id, testData.webhooks[2].id) })
+  .then((webhook) => {
+    // Call verify function
+    const valid = webhook.verifyAuthority(tokenObject[webhook.tokenLocation]);
+
+    // Verify results
+    chai.expect(valid).to.equal(true);
     done();
   })
   .catch((error) => {
@@ -231,12 +300,13 @@ function updateWebhook(done) {
 /**
  * @description Tests deleting a webhook through the model.
  */
-function deleteWebhook(done) {
+function deleteWebhooks(done) {
   // Delete the webhook
-  Webhook.Webhook.findOneAndRemove({ id: utils.createUID(org.id, project.id, testData.webhooks[0].id) })
-  .then((webhook) => {
+  Webhook.Webhook.deleteMany({})
+  .then((results) => {
     // Verify results
-    chai.expect(webhook.id).to.equal(utils.createUID(org.id, project.id, testData.webhooks[0].id));
+    chai.expect(results.n).to.equal(2);
+    chai.expect(results.ok).to.equal(1);
     done();
   })
   .catch((error) => {

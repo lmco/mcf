@@ -262,7 +262,9 @@
       "id": "webhook3",
       "name": "Webhook 3",
       "triggers": ["First Trigger", "Second Trigger", "Third Trigger"],
-      "type": "Incoming"
+      "type": "Incoming",
+      "token": "12345",
+      "tokenLocation": "test-token"
     }
   ],
 
