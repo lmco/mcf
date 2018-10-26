@@ -512,7 +512,7 @@ function findProjectsQuery(query) {
 function createProject(reqUser, project) {
   return new Promise((resolve, reject) => {
     // Initialize optional fields with a default
-    let custom = null;
+    let custom = {};
     let visibility = 'private';
 
     // Error Check: ensure input parameters are valid

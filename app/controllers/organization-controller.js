@@ -512,7 +512,7 @@ function findOrgsQuery(orgQuery) {
 function createOrg(reqUser, newOrgData) {
   return new Promise((resolve, reject) => {
     // Initialize optional fields with a default
-    let custom = null;
+    let custom = {};
 
     // Error Check: ensure input parameters are valid
     try {
