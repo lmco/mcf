@@ -42,6 +42,12 @@ router.route('/doc/api')
 router.route('/doc/developers')
 .get(Middleware.logRoute, ((req, res) => res.redirect('/doc/index.html')));
 
+/**
+ * This renders the MBEE flight manual page.
+ */
+router.route('/doc/flight-manual')
+.get(Middleware.logRoute, UIController.flightManual);
+
 /* This renders the about page */
 router.route('/about')
 .get(

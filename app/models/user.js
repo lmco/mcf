@@ -293,7 +293,8 @@ UserSchema.methods.getPublicData = function() {
     lname: this.lname,
     email: this.email,
     createdOn: this.createdOn,
-    updatedOn: this.updatedOn
+    updatedOn: this.updatedOn,
+    admin: this.admin
   };
 };
 

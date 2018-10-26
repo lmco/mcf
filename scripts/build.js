@@ -36,6 +36,7 @@ const gulp = require('gulp');
 const concat = require('gulp-concat');
 const minify = require('gulp-minify');
 const sass = require('gulp-sass');
+const markdown = require('gulp-markdown');
 
 
 /**
@@ -50,6 +51,7 @@ const sass = require('gulp-sass');
  * --sass
  * --react
  * --jsdoc
+ * --fm
  * --all
  *
  * If NO arguments given, defaults to `--all`
@@ -132,6 +134,14 @@ function build(_args) {
 
     // Execute JSDoc build command
     execSync(cmd);
+  }
+
+  // Build Flight Manual
+  if (args.includes('--all') || args.includes('--fm')) {
+    M.log.info('  + Building flight manual ...');
+    gulp.src('./doc/**/*.md')
+    .pipe(markdown())
+    .pipe(gulp.dest('build/fm'));
   }
 
   M.log.info('Build Complete.');

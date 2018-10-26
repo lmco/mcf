@@ -26,6 +26,7 @@
 // circular references between controllers.
 module.exports = {
   home,
+  flightManual,
   organizationList,
   organization,
   organizationEdit,
@@ -41,6 +42,7 @@ module.exports = {
 };
 
 // Node modules
+const fs = require('fs'); // Used by flight manual. This may change. ~jk
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
@@ -66,6 +68,35 @@ function home(req, res) {
   // Render the MBEE home screen
   return utils.render(req, res, 'home', {
     title: 'MBEE | Model-Based Engineering Environment'
+  });
+}
+
+/**
+ * @description Renders the flight manual.
+ */
+function flightManual(req, res) {
+  // Read the flight manual sections from the doc directory
+  fs.readdir(`${M.root}/build/fm`, (err, files) => {
+    if (err) {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error.');
+    }
+
+    // Turn the file names into section IDs and titles
+    const sections = [];
+    files.filter(fname => fname.endsWith('.html')).forEach(section => {
+      const sectionID = section.replace('.html', '');
+      const sectionTitle = sectionID.replace(/-/g, ' ');
+      sections.push({
+        id: sectionID.replace(/\./g, '-'),
+        title: utils.toTitleCase(sectionTitle, true),
+        content: fs.readFileSync(`${M.root}/build/fm/${section}`)
+      });
+    });
+    // Render the flight manual
+    return utils.render(req, res, 'flight-manual', {
+      sections: sections
+    });
   });
 }
 

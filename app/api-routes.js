@@ -1888,7 +1888,7 @@ api.route('/users')
 
 /**
  * @swagger
- * /users/whoami:
+ * /api/users/whoami:
  *   get:
  *     tags:
  *       - users
@@ -1916,7 +1916,7 @@ api.route('/users/whoami')
 
 /**
  * @swagger
- * /users/:username:
+ * /api/users/:username:
  *   get:
  *     tags:
  *       - users
