@@ -42,8 +42,8 @@ class CustomEmitter extends EventEmitter {
     })
     .catch((error) => {
       // Failed to find webhooks, no webhooks will be triggered
-      M.log.critical('Failed to find webhooks');
-      M.log.critical(error);
+      M.log.error('Failed to find webhooks');
+      M.log.error(error);
     });
     // Run the normal EventEmitter.emit() function
     super.emit(event, args);
