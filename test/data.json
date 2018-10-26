@@ -314,6 +314,24 @@
     }
   ],
 
+  "invalidWebhooks": [
+    {
+      "id": "InvalidWebhook1",
+      "name": "Invalid Webhook 1",
+      "triggers": ["First Trigger", "Second Trigger"],
+      "responses": [
+        {
+          "url": "http://this-is-sample-url-1.com",
+          "method": "GET"
+        },
+        {
+          "url": "http://this-is-sample-url-2.com",
+          "method": "POST"
+        }
+      ]
+    }
+  ],
+
   "names": [
     {
       "lname": "InvalidLastName@#$"

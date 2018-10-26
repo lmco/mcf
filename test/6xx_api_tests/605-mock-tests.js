@@ -108,6 +108,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET an element', getElement);
   it('should PATCH an element', patchElement);
   it('should DELETE an element', deleteElement);
+  it('should POST a webhook', postWebhook);
+  it('should GET a webhook', getWebhook);
+  it('should DELETE a webhook', deleteWebhook);
   it('should DELETE a project', deleteProject);
   it('should DELETE a user', deleteUser);
   it('should DELETE an org', deleteOrg);
@@ -839,6 +842,101 @@ function deleteElement(done) {
 
   // DELETEs an element
   apiController.deleteElement(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to create a webhook.
+ */
+function postWebhook(done) {
+  // Create request object
+  const body = testData.webhooks[0];
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    webhookid: testData.webhooks[0].id
+  };
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.webhooks[0].id);
+    chai.expect(json.name).to.equal(testData.webhooks[0].name);
+    done();
+  };
+
+  // POSTs a webhook
+  apiController.postWebhook(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get a webhook.
+ */
+function getWebhook(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    webhookid: testData.webhooks[0].id
+  };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.id).to.equal(testData.webhooks[0].id);
+    chai.expect(json.name).to.equal(testData.webhooks[0].name);
+    done();
+  };
+
+  // GETs a webhook
+  apiController.getWebhook(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete a webhook.
+ */
+function deleteWebhook(done) {
+  // Create request object
+  const body = { hardDelete: true };
+  const params = {
+    orgid: testData.orgs[0].id,
+    projectid: testData.projects[0].id,
+    webhookid: testData.webhooks[0].id
+  };
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json).to.equal(true);
+    done();
+  };
+
+  // DELETEs a webhook
+  apiController.deleteWebhook(req, res);
 }
 
 /**

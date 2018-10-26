@@ -15,7 +15,7 @@
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests the project API controller functionality:
+ * @description This tests the element API controller functionality:
  * GET, POST, PATCH, and DELETE of an element.
  */
 
@@ -386,7 +386,7 @@ function rejectPatchInvalidFieldElements(done) {
 
 /**
  * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * deletes the previously created element.
+ * fails to delete a non-existing element.
  */
 function rejectDeleteNonexistingElement(done) {
   request({
@@ -432,7 +432,6 @@ function deleteElement(done) {
     // Verify response body
     const json = JSON.parse(body);
     chai.expect(json.id).to.equal(testData.elements[0].id);
-
     done();
   });
 }
