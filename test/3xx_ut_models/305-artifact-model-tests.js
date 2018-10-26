@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.301-user-model-tests
+ * @module  test.301-artifact-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -150,6 +150,7 @@ function updateArtifactFile(done) {
   Artifact.find({ id: artifactFillId, deleted: false })
   .then((artifactToUpdate) => {
     artifactToUpdate[0].filename = testData.artifacts[2].filename;
+    // Save the updated artifact
     return artifactToUpdate[0].save();
   })
   .then((artifact) => {
@@ -169,7 +170,7 @@ function updateArtifactFile(done) {
  */
 function deleteArtifactFile(done) {
   const artifactFillId = utils.createUID(org.id, project.id, testData.artifacts[0].id);
-  // Find the artifact previously uploaded.
+  // Attempt to find deleted artifact
   Artifact.findOneAndRemove({ id: artifactFillId })
   .then(() => Artifact.find({ id: artifactFillId }))
   .then((deletedArtifact) => {

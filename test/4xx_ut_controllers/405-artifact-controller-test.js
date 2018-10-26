@@ -126,6 +126,7 @@ describe(M.getModuleName(module.filename), () => {
  * and artifact history is updated.
  */
 function uploadArtifact(done) {
+  // Find and read image
   const imgPath = path.join(M.root, testData.artifacts[0].location, testData.artifacts[0].filename);
   const artifactPNG = fs.readFileSync(imgPath);
 
@@ -155,6 +156,7 @@ function uploadArtifact(done) {
  * the previously created in uploadArtifact().
  */
 function uploadSecondArtifact(done) {
+  // Find and read image
   const imgPath = path.join(M.root, testData.artifacts[1].location, testData.artifacts[1].filename);
   const artifactPNG = fs.readFileSync(imgPath);
 
@@ -183,6 +185,7 @@ function uploadSecondArtifact(done) {
  * @description Updates an existing artifact.
  */
 function updateArtifact(done) {
+  // Find and read image
   const imgPath = path.join(M.root, testData.artifacts[2].location, testData.artifacts[2].filename);
   const artifactPNG = fs.readFileSync(imgPath);
 
