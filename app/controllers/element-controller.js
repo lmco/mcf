@@ -524,10 +524,7 @@ function removeElements(reqUser, query, hardDelete = false) {
     // Return the deleted elements
     .then(() => resolve(foundElements))
     // Return reject with custom error
-    .catch((error) => {
-      M.log.error(error.stack);
-      return reject(M.CustomError.parseCustomError(error));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
