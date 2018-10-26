@@ -565,7 +565,7 @@ function createProject(reqUser, project) {
     .then((foundProject) => {
       // Error Check: ensure no project was found
       if (foundProject.length > 0) {
-        reject(new M.CustomError('A project with the same ID already exists.', 403, 'warn'));
+        return reject(new M.CustomError('A project with the same ID already exists.', 403, 'warn'));
       }
 
       // Create the new project
