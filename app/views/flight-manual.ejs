@@ -50,9 +50,6 @@
   </div>
 </div>
 
-
-
-
 <%- contentFor('styles') %>
 <link type="text/css" rel="stylesheet" href="/css/fm.css">
 
@@ -62,7 +59,7 @@
   const url = document.location.toString();
   if (url.match('#')) {
     const e = document.querySelector('#' + url.split('#')[1]);
-    const t = e.closest(".tab-pane");
+    const t = e.closest('.tab-pane');
     $('.nav-pills a[href="#' + t.id + '"]')
       .tab('show');
   }
