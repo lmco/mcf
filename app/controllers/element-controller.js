@@ -771,12 +771,12 @@ function createElement(reqUser, element) {
  * @param {String} elementID - The element ID.
  * @param {Object} elementUpdated - Update data object OR element to be updated
  *
- * @return {Promise} resolve - new block element
+ * @return {Promise} resolve - updated element
  *                   reject -  error
  *
  * @example
  * updateElement({User}, 'orgID', 'projectID', 'elementID', { name: 'Updated Element' })
- * .then(function(org) {
+ * .then(function(element) {
  *   // do something with the updated element.
  * })
  * .catch(function(error) {
@@ -791,7 +791,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
-      assert.ok(typeof elementUpdated === 'object', 'Element Data is not a object.');
+      assert.ok(typeof elementUpdated === 'object', 'Element data is not a object.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -828,7 +828,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
 
         // Error Check: check if updated field also exists in the original element.
         if (!element.toJSON().hasOwnProperty(updateField)) {
-          // Original project does NOT contain updatedField, reject error
+          // Original element does NOT contain updatedField, reject error
           return reject(new M.CustomError(`Element does not contain field ${updateField}.`, 400, 'warn'));
         }
 
