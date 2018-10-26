@@ -23,7 +23,7 @@ const timestamp = M.require('models.plugin.timestamp');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 
-/* ---------------------------( Webhook Schema )----------------------------- */
+/* ---------------------------( Webhook Schemas )---------------------------- */
 
 /**
  * @namespace
@@ -34,9 +34,6 @@ const validators = M.require('lib.validators');
  * @property {String} name - The webhooks name.
  * @property {Project} project - A reference to a webhook's project.
  * @property {Array} triggers - The events that trigger this webhook.
- * @property {Array} responseURL - An array containing URLs to contact when the
- * webhook is triggered.
- * @property {User} createdBy - The user who created this webhook.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
  */
 const WebhookSchema = new mongoose.Schema({
@@ -74,6 +71,25 @@ const WebhookSchema = new mongoose.Schema({
     type: String,
     required: true
   }],
+  custom: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  }
+});
+
+/**
+ * @namespace
+ *
+ * @description The OutgoingWebhook schema is a webhook discriminator which
+ * extends webhooks by adding an array of responses to send requests to when a
+ * a webhook is triggered.
+ *
+ * @property {Array} responses - An array of request info. Contains a url
+ * (String), method (String, defaults to GET), headers (JSON Object), ca
+ * (String), and optional data field that replaces data sent from the emitter.
+ *
+ */
+const OutgoingWebhookSchema = new mongoose.Schema({
   responses: [{
     url: {
       type: String,
@@ -93,11 +109,24 @@ const WebhookSchema = new mongoose.Schema({
     data: {
       type: String
     }
-  }],
-  custom: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
-  }
+  }]
+});
+
+/**
+ * @namespace
+ *
+ * @description The IncomingWebhook schema is a Webhook discriminator which
+ * extends webhooks by adding a token and token location used to authorize
+ * incoming requests.
+ *
+ * @property {String} token - The token to validate incoming requests against.
+ * @property {String} tokenLocation - The location of the incoming requests
+ * token to validate against.
+ *
+ */
+const IncomingWebhookSchema = new mongoose.Schema({
+  token: String,
+  tokenLocation: String,
 });
 
 
@@ -111,9 +140,9 @@ WebhookSchema.plugin(timestamp);
 
 /**
  * @description Sends HTTP requests to all urls in this.responses
- * @memberOf WebhookSchema
+ * @memberOf OutgoingWebhookSchema
  */
-WebhookSchema.methods.sendRequests = function(data) {
+OutgoingWebhookSchema.methods.sendRequests = function(data) {
   // If webhooks projects is the same as the incoming data's project
   if (this.project === data.project) {
     // For every response in the webhook responses list
@@ -130,11 +159,17 @@ WebhookSchema.methods.sendRequests = function(data) {
   }
 };
 
+OutgoingWebhookSchema.methods.verifyAuthority = function() { return false };
+
+IncomingWebhookSchema.methods.verifyAuthority = function(value) {
+  return (value === this.token);
+};
+
 /**
- * @description Returns a webhooks's public data.
- * @memberOf WebhookSchema
+ * @description Returns an outgoing webhooks's public data.
+ * @memberOf OutgoingWebhookSchema
  */
-WebhookSchema.methods.getPublicData = function() {
+OutgoingWebhookSchema.methods.getPublicData = function() {
   return {
     id: utils.parseUID(this.id)[2],
     name: this.name,
@@ -144,15 +179,32 @@ WebhookSchema.methods.getPublicData = function() {
   };
 };
 
+/**
+ * @description Returns an incoming webhooks's public data.
+ * @memberOf IncomingWebhookSchema
+ */
+IncomingWebhookSchema.methods.getPublicData = function() {
+  return {
+    id: utils.parseUID(this.id)[2],
+    name: this.name,
+    triggers: this.triggers,
+    token: this.token,
+    tokenLocation: this.tokenLocation,
+    custom: this.custom
+  };
+};
 
-/* --------------------------( Webhook Properties )-------------------------- */
 
-// Required for virtual getters
-WebhookSchema.set('toJSON', { virtuals: true });
-WebhookSchema.set('toObject', { virtuals: true });
+/* ----------------------------( Webhook Models )---------------------------- */
+
+const Webhook = mongoose.model('Webhook', WebhookSchema);
+const OutgoingWebhook = Webhook.discriminator('Outgoing', OutgoingWebhookSchema);
+const IncomingWebhook = Webhook.discriminator('Incoming', IncomingWebhookSchema);
 
 
 /* ------------------------( Webhook Schema Export )------------------------- */
 
-// Export mongoose model as "Webhook"
-module.exports = mongoose.model('Webhook', WebhookSchema);
+module.exports.Webhook = Webhook;
+module.exports.Outgoing = OutgoingWebhook;
+module.exports.Incoming = IncomingWebhook;
+

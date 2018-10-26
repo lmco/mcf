@@ -243,7 +243,8 @@
           "url": "http://apple.com",
           "method": "GET"
         }
-      ]
+      ],
+      "type": "Outgoing"
     },
     {
       "id": "webhook2",
@@ -254,7 +255,14 @@
           "url": "http://google.com",
           "method": "GET"
         }
-      ]
+      ],
+      "type": "Outgoing"
+    },
+    {
+      "id": "webhook3",
+      "name": "Webhook 3",
+      "triggers": ["First Trigger", "Second Trigger", "Third Trigger"],
+      "type": "Incoming"
     }
   ],
 
@@ -324,7 +332,8 @@
           "url": "http://this-is-sample-url-2.com",
           "method": "POST"
         }
-      ]
+      ],
+      "type": "Outgoing"
     }
   ],
 

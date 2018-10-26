@@ -24,6 +24,7 @@
 // circular references between controllers.
 module.exports = {
   findWebhook,
+  findWebhooksQuery,
   createWebhook,
   removeWebhook
 };
@@ -141,7 +142,7 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
 function findWebhooksQuery(query) {
   return new Promise((resolve, reject) => {
     // Find webhooks
-    Webhook.find(query)
+    Webhook.Webhook.find(query)
     .populate('project')
     .then((webhooks) => resolve(webhooks))
     .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
@@ -174,6 +175,9 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(webhookData.hasOwnProperty('id'), 'ID not provided in webhook object.');
+      assert.ok(webhookData.hasOwnProperty('type'), 'Webhook type not provided in webhook object.');
+      assert.ok(['Incoming', 'Outgoing'].includes(utils.toTitleCase(webhookData.type)),
+        'Webhook type must either be \'Incoming\' or \'Outgoing\'.');
       assert.ok(typeof webhookData.id === 'string', 'ID in webhook object is not a string.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
@@ -206,14 +210,26 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
       }
 
       // Create webhook object
-      const webhookObj = new Webhook({
-        id: webhookUID,
-        name: sani.sanitize(webhookData.name),
-        project: project,
-        triggers: sani.sanitize(webhookData.triggers),
-        responses: sani.mongo(webhookData.responses),
-        custom: sani.sanitize(webhookData.custom)
-      });
+      const webhookObj = (utils.toTitleCase(webhookData.type) === 'Outgoing')
+        // Outgoing Webhook
+        ? new Webhook.Outgoing({
+          id: webhookUID,
+          name: sani.sanitize(webhookData.name),
+          project: project,
+          triggers: sani.sanitize(webhookData.triggers),
+          responses: webhookData.responses, // Not sanitized due to URLs
+          custom: sani.sanitize(webhookData.custom)
+        })
+        // Incoming Webhook
+        : new Webhook.Incoming({
+          id: webhookUID,
+          name: sani.sanitize(webhookData.name),
+          project: project,
+          triggers: sani.sanitize(webhookData.triggers),
+          token: webhookData.token,
+          tokenLocation: webhookData.tokenLocation,
+          custom: sani.sanitize(webhookData.custom)
+        });
 
       // Save webhook to DB
       return webhookObj.save();
@@ -274,7 +290,7 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
 
       // Hard delete
       if (hardDelete) {
-        return Webhook.deleteOne({ id: webhook.id });
+        return Webhook.Webhook.deleteOne({ id: webhook.id });
       }
       // Soft delete
 

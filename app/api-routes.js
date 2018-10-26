@@ -2300,5 +2300,11 @@ api.route('/orgs/:orgid/projects/:projectid/webhooks/:webhookid')
   APIController.deleteWebhook
 );
 
+api.route('/webhooks/:webhookid')
+.post(
+  Middleware.logRoute,
+  APIController.postIncomingWebhook
+);
+
 // Export the API router
 module.exports = api;

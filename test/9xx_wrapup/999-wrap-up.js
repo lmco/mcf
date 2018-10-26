@@ -67,7 +67,7 @@ function cleanDB(done) {
   // Remove elements
   .then(() => Element.Element.deleteMany({}))
   // Remove webhooks
-  .then(() => Webhook.deleteMany({}))
+  .then(() => Webhook.Webhook.deleteMany({}))
   .then(() => done())
   .catch(error => {
     M.log.error(error);

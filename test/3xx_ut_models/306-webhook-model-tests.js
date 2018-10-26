@@ -112,7 +112,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a webhook', createWebhook);
+  it('should create an outgoing webhook', createOutgoingWebhook);
   it('should find a webhook', findWebhook);
   it('should update a webhook', updateWebhook);
   it('should delete a webhook', deleteWebhook);
@@ -120,11 +120,11 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Tests creating a webhook through the model.
+ * @description Tests creating an outgoing webhook through the model.
  */
-function createWebhook(done) {
+function createOutgoingWebhook(done) {
   // Create webhook object
-  const webhook = new Webhook({
+  const webhook = new Webhook.Outgoing({
     id: utils.createUID(org.id, project.id, testData.webhooks[0].id),
     name: testData.webhooks[0].name,
     project: project,
@@ -151,11 +151,41 @@ function createWebhook(done) {
 }
 
 /**
+ * @description Tests creating an incoming webhook through the model.
+ */
+function createIncomingWebhook(done) {
+  // Create webhook object
+  const webhook = new Webhook.Outgoing({
+    id: utils.createUID(org.id, project.id, testData.webhooks[2].id),
+    name: testData.webhooks[2].name,
+    project: project,
+    triggers: testData.webhooks[2].triggers
+  });
+
+  // Save webhook to database
+  webhook.save()
+    .then((createdWebhook) => {
+      // Verify results
+      chai.expect(createdWebhook.id).to.equal(utils.createUID(
+        org.id, project.id, testData.webhooks[2].id
+      ));
+      chai.expect(createdWebhook.triggers.length).to.equal(testData.webhooks[2].triggers.length);
+      done();
+    })
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
+      done();
+    });
+}
+
+/**
  * @description Tests finding a webhook through the model.
  */
 function findWebhook(done) {
   // Find the webhook
-  Webhook.findOne({ id: utils.createUID(org.id, project.id, testData.webhooks[0].id) })
+  Webhook.Webhook.findOne({ id: utils.createUID(org.id, project.id, testData.webhooks[0].id) })
   .then((webhook) => {
     // Verify results
     chai.expect(webhook.name).to.equal(testData.webhooks[0].name);
@@ -177,7 +207,7 @@ function findWebhook(done) {
  */
 function updateWebhook(done) {
   // Find the webhook
-  Webhook.findOne({ id: utils.createUID(org.id, project.id, testData.webhooks[0].id) })
+  Webhook.Webhook.findOne({ id: utils.createUID(org.id, project.id, testData.webhooks[0].id) })
   .then((webhook) => {
     // Change name of webhook
     webhook.name = 'Updated Name';
@@ -203,7 +233,7 @@ function updateWebhook(done) {
  */
 function deleteWebhook(done) {
   // Delete the webhook
-  Webhook.findOneAndRemove({ id: utils.createUID(org.id, project.id, testData.webhooks[0].id) })
+  Webhook.Webhook.findOneAndRemove({ id: utils.createUID(org.id, project.id, testData.webhooks[0].id) })
   .then((webhook) => {
     // Verify results
     chai.expect(webhook.id).to.equal(utils.createUID(org.id, project.id, testData.webhooks[0].id));
