@@ -34,6 +34,7 @@ const { execSync } = require('child_process');
 // NPM modules
 const gulp = require('gulp');
 const concat = require('gulp-concat');
+const minify = require('gulp-minify');
 const sass = require('gulp-sass');
 
 
@@ -78,17 +79,29 @@ function build(_args) {
     // Copy Bootstrap CSS
     gulp.src('./node_modules/bootstrap/dist/css/bootstrap.min.css')
     .pipe(gulp.dest('build/public/css'));
+    gulp.src('./node_modules/bootstrap/dist/css/bootstrap.min.css.map')
+    .pipe(gulp.dest('build/public/css'));
 
     // Copy Bootstrap JS
     gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
+    .pipe(gulp.dest('build/public/js'));
+    gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js.map')
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Jquery JS
     gulp.src('./node_modules/jquery/dist/jquery.min.js')
     .pipe(gulp.dest('build/public/js'));
 
+    // Copy Jquery UI JS
+    gulp.src(['./node_modules/jquery-ui/ui/effect.js', './node_modules/jquery-ui/ui/effects/*.js'])
+    .pipe(concat('jquery-ui.js'))
+    .pipe(minify({ noSource: true }))
+    .pipe(gulp.dest('build/public/js'));
+
     // Copy Popper JS
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
+    .pipe(gulp.dest('build/public/js'));
+    gulp.src('./node_modules/popper.js/dist//umd/popper.min.js.map')
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Font-Awesome dependencies
