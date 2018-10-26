@@ -70,7 +70,7 @@ function cleanDB(done) {
   .then(() => Organization.deleteMany({ id: { $ne: M.config.server.defaultOrganizationId } }))
   .then(() => Project.deleteMany({}))  // Remove projects
   .then(() => Element.Element.deleteMany({}))  // Remove elements
-  .then(() => Webhook.deleteMany({}))  // Remove webhooks
+  .then(() => Webhook.Webhook.deleteMany({}))  // Remove webhooks
   .then(() => done())
   .catch(error => {
     M.log.error(error);

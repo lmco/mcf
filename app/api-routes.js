@@ -2359,5 +2359,39 @@ api.route('/orgs/:orgid/projects/:projectid/webhooks/:webhookid')
   APIController.deleteWebhook
 );
 
+/**
+ * @swagger
+ * /api/webhooks/:webhookid:
+ *   post:
+ *     tags:
+ *       - webhooks
+ *     description: Triggers events for a given webhook
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: webhookid
+ *         description: The ID of the webhook, encoded in base64.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to trigger webhook events, return nothing.
+ *       401:
+ *         description: Unauthorized, Failed to triggers webhook events because
+ *                      the given token did not match the webhooks token.
+ *       404:
+ *         description: Not Found, Failed to trigger webhook events due to the
+ *                      webhook not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to trigger webhook events
+ *                      due to server side issue.
+ */
+api.route('/webhooks/:webhookid')
+.post(
+  Middleware.logRoute,
+  APIController.postIncomingWebhook
+);
+
 // Export the API router
 module.exports = api;

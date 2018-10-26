@@ -27,6 +27,7 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const WebhookController = M.require('controllers.webhook-controller');
+const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
@@ -80,7 +81,8 @@ module.exports = {
   getWebhook,
   postWebhook,
   patchWebhook,
-  deleteWebhook
+  deleteWebhook,
+  postIncomingWebhook
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -2062,6 +2064,50 @@ function deleteWebhook(req, res) {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and success
     return res.status(200).send(formatJSON(success));
+  })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * POST /api/webhooks/:webhookid
+ *
+ * @description Takes a base64 encoded webhookID and triggers a given event on
+ * Node.js event system.
+ * NOTE: No user object is expected in this request
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object
+ */
+function postIncomingWebhook(req, res) {
+  // Decrypt webhookID
+  const webhookUID = Buffer.from(req.params.webhookid, 'base64').toString();
+
+  // Find the webhook
+  WebhookController.findWebhooksQuery({ id: sani.sanitize(webhookUID), deleted: false })
+  .then((foundWebhook) => {
+    // If no webhooks are found, return a 404 Not Found
+    if (foundWebhook.length === 0) {
+      return res.status(404).send('Not Found');
+    }
+
+    // If a token is specified in the webhook
+    if (foundWebhook[0].token) {
+      // Verify the same token is provided in the request headers
+      if (!foundWebhook[0].verifyAuthority(req.headers[foundWebhook[0].tokenLocation])) {
+        return res.status(401).send('Unauthorized');
+      }
+    }
+
+    // For each webhook trigger
+    foundWebhook[0].triggers.forEach((trigger) => {
+      // Emit an event, and pass along request body
+      events.emit(trigger, req.body);
+    });
+
+    // Return a 200 status
+    return res.status(200).send();
   })
   .catch((error) => res.status(error.status).send(error));
 }

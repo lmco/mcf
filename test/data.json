@@ -243,7 +243,8 @@
           "url": "http://dev.mbee.us.lmco.com/api/about",
           "method": "GET"
         }
-      ]
+      ],
+      "type": "Outgoing"
     },
     {
       "id": "webhook2",
@@ -254,7 +255,16 @@
           "url": "http://dev.mbee.us.lmco.com/api/test",
           "method": "GET"
         }
-      ]
+      ],
+      "type": "Outgoing"
+    },
+    {
+      "id": "webhook3",
+      "name": "Webhook 3",
+      "triggers": ["First Trigger", "Second Trigger", "Third Trigger"],
+      "type": "Incoming",
+      "token": "12345",
+      "tokenLocation": "test-token"
     }
   ],
 
@@ -324,7 +334,8 @@
           "url": "http://this-is-sample-url-2.com",
           "method": "POST"
         }
-      ]
+      ],
+      "type": "Outgoing"
     }
   ],
 

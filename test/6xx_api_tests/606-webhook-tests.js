@@ -29,6 +29,7 @@ const path = require('path');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -118,22 +119,25 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should POST a webhook', postWebhook);
+  it('should POST an outgoing webhook', postOutgoingWebhook);
+  it('should POST an incoming webhook', postIncomingWebhook);
   it('should GET the previously created webhook', getWebhook);
+  it('should trigger an incoming webhook', triggerWebhook);
   it('should PATCH the previously created webhook', patchWebhook);
   it('should reject a POST with an invalid id field', rejectPostWebhook);
   it('should reject a GET of a non-existing webhook', rejectGetWebhook);
   it('should reject a PATCH of an immutable webhook field', rejectPatchWebhook);
   it('should reject a DELETE of a non-existing webhook', rejectDeleteNonExistingWebhook);
-  it('should DELETE the previously created webhook', deleteWebhook);
+  it('should DELETE the previously created outgoing webhook', deleteOutgoingWebhook);
+  it('should DELETE the previously created incoming webhook', deleteIncomingWebhook);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * creates a webhook.
+ * creates an outgoing webhook.
  */
-function postWebhook(done) {
+function postOutgoingWebhook(done) {
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
@@ -149,6 +153,30 @@ function postWebhook(done) {
     // Verify response body
     const json = JSON.parse(body);
     chai.expect(json.id).to.equal(testData.webhooks[0].id);
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * creates an incoming webhook.
+ */
+function postIncomingWebhook(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[2].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(testData.webhooks[2])
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.id).to.equal(testData.webhooks[2].id);
     done();
   });
 }
@@ -172,6 +200,35 @@ function getWebhook(done) {
     // Verify response body
     const json = JSON.parse(body);
     chai.expect(json.id).to.equal(testData.webhooks[0].id);
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/webhooks/:webhookid triggers an incoming
+ * webhooks events.
+ */
+function triggerWebhook(done) {
+  // Create base64 encoded webhook id
+  const webhookUID = utils.createUID(org.id, proj.id, testData.webhooks[2].id);
+  const encodedID = Buffer.from(webhookUID).toString('base64');
+
+  // Add token to headers
+  const headers = getHeaders();
+  headers[testData.webhooks[2].tokenLocation] = testData.webhooks[2].token;
+
+  // Send request
+  request({
+    url: `${M.config.test.url}/api/webhooks/${encodedID}`,
+    headers: headers,
+    ca: readCaFile(),
+    method: 'POST'
+  },
+  (err, response) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     done();
   });
 }
@@ -303,11 +360,37 @@ function rejectDeleteNonExistingWebhook(done) {
 
 /**
  * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * deletes the previously created webhook.
+ * deletes the previously created outgoing webhook.
  */
-function deleteWebhook(done) {
+function deleteOutgoingWebhook(done) {
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      hardDelete: true
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json).to.equal(true);
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * deletes the previously created incoming webhook.
+ */
+function deleteIncomingWebhook(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[2].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',

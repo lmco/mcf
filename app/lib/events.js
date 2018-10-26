@@ -32,7 +32,7 @@ class CustomEmitter extends EventEmitter {
    */
   emit(event, ...args) {
     // Find all webhooks that include the triggered event
-    Webhook.find({ triggers: event })
+    Webhook.Outgoing.find({ triggers: event })
     .then((webhooks) => {
       // For each found webhook
       webhooks.forEach((webhook) => {
