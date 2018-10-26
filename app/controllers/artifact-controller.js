@@ -305,10 +305,7 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
       // Remove artifact from database
       return artifactToDelete.remove();
     })
-    .then((_deletedArtifact) => {
-      // Return resolve
-      return resolve();
-    })
+    .then((_deletedArtifact) => resolve())
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -445,7 +442,6 @@ function addArtifactOS(hashedName, artifactBlob) {
               });
             }
           });
-
         }
         return resolve();
       });
@@ -477,7 +473,7 @@ function removeArtifactOS(hashName) {
     });
 
     // Check if directory is empty
-    fs.readdir(folderPath, function (err, files) {
+    fs.readdir(folderPath, function(err, files) {
       if (err) {
         M.log.warn(err);
       }
@@ -492,7 +488,7 @@ function removeArtifactOS(hashName) {
         });
       }
     });
-    return resolve()
+    return resolve();
   });
 }
 
