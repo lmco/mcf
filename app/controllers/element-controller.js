@@ -665,7 +665,7 @@ function createElement(reqUser, element) {
     // Initialize optional fields with a default
     let elemName = null;
     let parentID = null;
-    let custom = null;
+    let custom = {};
     let documentation = null;
     let uuid = '';
 
