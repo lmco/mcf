@@ -24,7 +24,6 @@
 
 // Node modules
 const chai = require('chai');
-const mongoose = require('mongoose');
 
 // MBEE modules
 const Element = M.require('models.element');
@@ -51,7 +50,7 @@ describe(M.getModuleName(module.filename), function() {
   /**
    * Runs after all tests. Close database connection.
    */
-  after(() => mongoose.connection.close());
+  after(() => db.disconnect());
 
   /**
    * Execute the tests
