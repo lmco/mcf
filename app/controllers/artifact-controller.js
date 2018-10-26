@@ -113,7 +113,7 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
         filename: artifactMetaData.filename,
         contentType: path.extname(artifactMetaData.filename),
         history: historyData,
-        project: foundProj,
+        project: foundProj
 
       });
 
@@ -122,7 +122,7 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
     })
     .then((_artifact) => {
       createdArtifact = _artifact;
-      return (!fs.existsSync(path.join(M.artifactPath, hashedName.substring(0, 2),hashedName)))
+      return (!fs.existsSync(path.join(M.artifactPath, hashedName.substring(0, 2), hashedName)))
         ? addArtifactOS(hashedName, artifactBlob)
         : resolve(_artifact);
     })
@@ -455,9 +455,7 @@ function addArtifactOS(hashedName, artifactBlob) {
       });
     })
     .catch((err) => reject(err));
-
-
-    });
+  });
 }
 
 /**
