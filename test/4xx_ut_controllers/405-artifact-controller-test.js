@@ -23,6 +23,7 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const User = M.require('models.user');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testData = require(path.join(M.root, 'test', 'data.json'));
@@ -115,6 +116,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should upload artifact00', uploadArtifact);
   it('should upload second artifact01 with same file', uploadSecondArtifact);
   it('should update artifact01 with new file', updateArtifact);
+  it('should find updated artifact01 new filename', findArtifact);
   it('should delete an artifact00', deleteArtifactFile);
   it('should delete second artifact01', deleteSecondArtifactFile);
 });
@@ -132,7 +134,6 @@ function uploadArtifact(done) {
 
   const artifactObjData = {
     id: testData.artifacts[0].id,
-    contentType: 'png',
     filename: testData.artifacts[0].filename
   };
   // Create artifact
@@ -162,7 +163,6 @@ function uploadSecondArtifact(done) {
 
   const artifactObjData = {
     id: testData.artifacts[1].id,
-    contentType: 'png',
     filename: testData.artifacts[1].filename
   };
 
@@ -189,16 +189,37 @@ function updateArtifact(done) {
   const imgPath = path.join(M.root, testData.artifacts[2].location, testData.artifacts[2].filename);
   const artifactPNG = fs.readFileSync(imgPath);
 
-  const artifactObjData = {
-    id: testData.artifacts[2].id,
-    contentType: 'png',
-    filename: testData.artifacts[2].filename
+  // Extract the artifact id
+  const artifactID = testData.artifacts[2].id;
+
+  // Create artfact to update object
+  const artObjData = {
+    filename: artifactID
   };
   // Create artifact
-  ArtifactController.updateArtifact(adminUser, org.id, proj.id, artifactObjData, artifactPNG)
+  ArtifactController.updateArtifact(adminUser, org.id, proj.id, artifactID, artObjData, artifactPNG)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Find an existing artifact.
+ */
+function findArtifact(done) {
+  // Find artifact
+  ArtifactController.findArtifact(adminUser, org.id, proj.id, testData.artifacts[2].id)
+  .then((artifact) => {
+    // Verify artifact found properly
+    chai.expect(artifact.id).to.equal(utils.createUID(org.id, proj.id, testData.artifacts[2].id));
     done();
   })
   .catch((error) => {
@@ -216,8 +237,6 @@ function deleteArtifactFile(done) {
   // Create artifact
   ArtifactController.removeArtifact(adminUser, org.id, proj.id, testData.artifacts[0].id)
   .then((artifactID) => {
-    // Verify artifact deleted properly
-    chai.expect(artifactID).to.equal(testData.artifacts[0].id);
     done();
   })
   .catch((error) => {
@@ -235,8 +254,6 @@ function deleteSecondArtifactFile(done) {
   // Create artifact
   ArtifactController.removeArtifact(adminUser, org.id, proj.id, testData.artifacts[1].id)
   .then((artifactID) => {
-    // Verify artifact deleted properly
-    chai.expect(artifactID).to.equal(testData.artifacts[1].id);
     done();
   })
   .catch((error) => {

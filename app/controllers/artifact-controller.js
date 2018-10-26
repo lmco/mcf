@@ -149,7 +149,7 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
-function updateArtifact(reqUser, orgID, projID, artifactToUpdate, artifactBlob) {
+function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, artifactBlob) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
@@ -168,8 +168,14 @@ function updateArtifact(reqUser, orgID, projID, artifactToUpdate, artifactBlob) 
     let isNewHash = false;
     let updatedArtifact = null;
 
+    // Check if artifactToUpdate is instance of Artifact model
+    if (artifactToUpdate instanceof Artifact) {
+      // Disabling linter because the reassign is needed to convert the object to JSON
+      // artifactToUpdate is instance of Artifact model, convert to JSON
+      artifactToUpdate = artifactToUpdate.toJSON(); // eslint-disable-line no-param-reassign
+    }
     // Find artifact in database
-    findArtifact(reqUser, orgID, projID, artifactToUpdate.id)
+    findArtifact(reqUser, orgID, projID, artifactID)
     .then((_artifact) => {
       // Error Check: ensure reqUser is a project admin or global admin
       if (!_artifact.project.getPermissions(reqUser).admin && !reqUser.admin) {
@@ -199,6 +205,7 @@ function updateArtifact(reqUser, orgID, projID, artifactToUpdate, artifactBlob) 
 
       // Remove 'id' from artifactToUpdate
       // Note: id is immutable and cannot be changed
+      // TODO: Talk with Austin
       delete artifactToUpdate.id;
 
       // Define and get a list of artifact keys to update
@@ -277,6 +284,8 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
       ));
     }
 
+    // Define function-wide found artifact
+    let foundArtifact = null;
     // Find to be deleted artifact
     findArtifact(reqUser, orgID, projID, artifactID, true)
     .then((artifactToDelete) => {
@@ -289,22 +298,28 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
       // Define and get artifact history
       const artifactHistory = artifactToDelete.history;
 
+      // Create array of promises
+      const arrPromises = [];
+
+      // Set the found artifact
+      foundArtifact = artifactToDelete;
+
       // Loop through artifact history
-      for (let i = 0; i < artifactHistory.length; i++) {
+      artifactHistory.forEach((eachArtifact) => {
         // Check no db record linked to this artifact
-        Artifact.find({ 'history.hash': artifactHistory[i].hash })
+        arrPromises.push(Artifact.find({ 'history.hash': eachArtifact.hash })
         .then((remainingArtifacts) => {
           // Check last artifact with this hash
           if (remainingArtifacts.length === 1) {
             // Last hash record, remove artifact to storage
-            return removeArtifactOS(artifactHistory[i].hash);
+            removeArtifactOS(eachArtifact.hash);
           }
         })
-        .catch((error) => reject(error));
-      }
-      // Remove artifact from database
-      return artifactToDelete.remove();
+        .catch((error) => reject(error)));
+      });
+      return Promise.all(arrPromises);
     })
+    .then(() => foundArtifact.remove())
     .then((_deletedArtifact) => resolve())
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -443,6 +458,7 @@ function addArtifactOS(hashedName, artifactBlob) {
             }
           });
         }
+        // Return resolve
         return resolve();
       });
     })
