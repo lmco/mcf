@@ -371,7 +371,7 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
     // If hard deleting, ensure user is a site-wide admin
     if (hardDelete && !reqUser.admin) {
       return reject(new M.CustomError('User does not have permission to permanently'
-        + ' delete a project.', 403, 'warn'));
+         + ' delete a project.', 403, 'warn'));
     }
 
     // Define foundProjects
@@ -384,8 +384,7 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
       foundProjects = arrProjects;
 
       // Error Check: ensure user has permission to delete each project
-      Object(arrProjects)
-      .forEach((project) => {
+      Object(arrProjects).forEach((project) => {
         if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
           // User does not have permissions and is not a site-wide admin, reject
           return reject(new M.CustomError('User does not have permission to '
