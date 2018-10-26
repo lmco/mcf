@@ -141,7 +141,7 @@ function build(_args) {
     M.log.info('  + Building flight manual ...');
     gulp.src('./doc/**/*.md')
     .pipe(markdown())
-    .pipe(gulp.dest('build/fm'))
+    .pipe(gulp.dest('build/fm'));
   }
 
   M.log.info('Build Complete.');

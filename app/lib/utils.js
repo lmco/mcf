@@ -240,7 +240,7 @@ module.exports.parseUID = function(uid) {
  *  @param {boolean} keepUpper- Boolean indicating wither or not keep uppercase characters as is
  * @return {String} the word with upper case
  */
-module.exports.toTitleCase = function(s, keepUpper=false) {
+module.exports.toTitleCase = function(s, keepUpper = false) {
   // Check if s NOT string or contains whitespace
   if (typeof s !== 'string') {
     // Cannot be title-cased, return word

@@ -100,10 +100,6 @@ api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
  */
 api.route('/login')
 .post(
-  (req, res, next) => {
-    console.log(req.body);
-    next()
-  },
   AuthController.authenticate,
   Middleware.logRoute,
   AuthController.doLogin,

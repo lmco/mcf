@@ -92,7 +92,7 @@ function flightManual(req, res) {
         title: utils.toTitleCase(sectionTitle, true),
         content: fs.readFileSync(`${M.root}/build/fm/${section}`)
       });
-    })
+    });
     // Render the flight manual
     return utils.render(req, res, 'flight-manual', {
       sections: sections
