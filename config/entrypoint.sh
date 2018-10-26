@@ -5,7 +5,7 @@ chown mongodb:mongodb /lm/mbee/data/db
 chmod +w /lm/mbee/data/db/log/mbee-db.log
 mongod --dbpath /lm/mbee/data/db \
        --bind_ip 0.0.0.0 \
-       --port 27024 \
+       --port 27017 \
        --fork \
        --logpath /lm/mbee/data/db/log/mbee-db.log
 
