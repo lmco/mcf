@@ -26,6 +26,7 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const WebhookController = M.require('controllers.webhook-controller');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
@@ -75,7 +76,11 @@ module.exports = {
   getElement,
   postElement,
   patchElement,
-  deleteElement
+  deleteElement,
+  getWebhook,
+  postWebhook,
+  patchWebhook,
+  deleteWebhook
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -1898,8 +1903,8 @@ function deleteElement(req, res) {
     hardDelete = req.body.hardDelete;
   }
 
-  // Remove the specified project
-  // NOTE: removeProject() sanitizes req.params.orgid, req.params.projectid, and
+  // Remove the specified element
+  // NOTE: removeElement() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.elementid
   ElementController.removeElement(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid, hardDelete)
@@ -1907,6 +1912,156 @@ function deleteElement(req, res) {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element
     return res.status(200).send(formatJSON(element));
+  })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/* -----------------------( Webhooks API Endpoints )------------------------- */
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ *
+ * @description Gets a webhook by its webhook.id, project.id, and org.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with found webhook
+ */
+function getWebhook(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
+  // Find the webhook from it's webhook.id, project.id, and org.id
+  // NOTE: findWebhook() sanitizes req.params.webhookid, req.params.projectid, req.params.orgid
+  WebhookController.findWebhook(req.user, req.params.orgid,
+    req.params.projectid, req.params.webhookid, softDeleted)
+  .then((webhook) => {
+    // Return a 200: OK and the webhook
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(webhook.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ *
+ * @description Takes an organization ID, project ID, and webhook ID in the URI
+ * along with the request body to create a webhook.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with created webhook
+ */
+function postWebhook(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If webhook ID was provided in the body, ensure it matches webhook ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.webhookid !== req.body.id)) {
+    const error = new M.CustomError('Webhook ID in the body does not match ID in the params.', 400);
+    return res.status(error.status).send(error);
+  }
+
+  // Set id in request body
+  req.body.id = req.params.webhookid;
+
+  // Create webhook with provided parameters
+  // NOTE: createWebhook() sanitizes req.body
+  WebhookController.createWebhook(req.user, req.params.orgid, req.params.projectid, req.body)
+  .then((webhook) => {
+    // Return 200: OK and created webhook
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(webhook.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ *
+ * @description Updates the webhook specified in the URI. Takes an org id,
+ * project id, and webhook id in the URI and updated properties of the webhook
+ * in the request body.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with updated webhook
+ */
+function patchWebhook(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified webhook
+  // NOTE: updateWebhook() sanitizes req.params.orgid, req.params.projectid,
+  // and req.params.webhookid
+  WebhookController.updateWebhook(req.user, req.params.orgid,
+    req.params.projectid, req.params.webhookid, req.body)
+  .then((webhook) => {
+    // Return 200: OK and the updated webhook
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(webhook.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ *
+ * @description Takes an orgid, projectid, webhookid in the URI along with delete
+ * options in the body and deletes the corresponding webhook.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with success boolean
+ */
+function deleteWebhook(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Remove the specified webhook
+  // NOTE: removeWebhook() sanitizes req.params.orgid, req.params.projectid, and
+  // req.params.webhookid
+  WebhookController.removeWebhook(req.user, req.params.orgid,
+    req.params.projectid, req.params.webhookid, hardDelete)
+  .then((success) => {
+    res.header('Content-Type', 'application/json');
+    // Return 200: OK and success
+    return res.status(200).send(formatJSON(success));
   })
   .catch((error) => res.status(error.status).send(error));
 }

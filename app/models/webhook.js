@@ -21,6 +21,7 @@ const mongoose = require('mongoose');
 // MBEE modules
 const EventEmitter = M.require('lib.events');
 const timestamp = M.require('models.plugin.timestamp');
+const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 
 /* ---------------------------( Webhook Schema )----------------------------- */
@@ -136,6 +137,28 @@ WebhookSchema.methods.addEventListener = function() {
       });
     });
   });
+};
+
+/**
+ * @description Returns a webhooks's public data.
+ * @memberOf WebhookSchema
+ */
+WebhookSchema.methods.getPublicData = function() {
+  return {
+    id: utils.parseUID(this.id)[2],
+    name: this.name,
+    triggers: this.triggers,
+    responses: this.responses,
+    custom: this.custom
+  };
+};
+
+/**
+ * @description Returns webhook fields that can be changed
+ * @memberof WebhookSchema
+ */
+WebhookSchema.methods.getValidUpdateFields = function() {
+  return ['name', 'custom'];
 };
 
 /* --------------------------( Webhook Properties )-------------------------- */
