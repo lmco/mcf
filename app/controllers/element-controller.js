@@ -39,6 +39,7 @@ const assert = require('assert');
 // MBEE Modules
 const ProjController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
+const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
@@ -755,7 +756,13 @@ function createElement(reqUser, element) {
       // Save the element
       return elemObject.save();
     })
-    .then((newElement) => resolve(newElement))
+    .then((newElement) => {
+      // Trigger webhooks
+      events.emit('Element Created', newElement);
+
+      // Return new element
+      return resolve(newElement);
+    })
 
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -873,7 +880,13 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       // Save updated element
       return element.save();
     })
-    .then((updatedElement) => resolve(updatedElement))
+    .then((updatedElement) => {
+      // Trigger Webhooks
+      events.emit('Element Updated', updatedElement);
+
+      // Return updated element
+      return resolve(updatedElement);
+    })
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -920,9 +933,15 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
         + ' element.', 403, 'warn'));
     }
 
+    // Define foundElement
+    let foundElement = null;
+
     // Find the element
     findElement(reqUser, organizationID, projectID, elementID, true)
     .then((element) => {
+      // Set foundElement
+      foundElement = element;
+
       // Error Check: ensure user has permissions to delete element
       if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
@@ -930,19 +949,23 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
 
       // Hard delete
       if (hardDelete) {
-        Element.Element.deleteOne({ uid: element.uid })
-        .then(() => resolve(element))
-        .catch((error) => reject(error));
+        return Element.Element.deleteOne({ uid: element.uid });
       }
       // Soft delete
-      else {
-        element.deleted = true;
-        element.save()
-        .then(() => resolve(element))
-        // Return reject with custom error
-        .catch((error) => reject(M.CustomError.parseCustomError(error)));
-      }
+      element.deleted = true;
+      return element.save();
     })
-    .catch((error) => reject(error));
+    .then(() => {
+      // Set deleted boolean on foundElement
+      foundElement.deleted = true;
+
+      // Trigger webhooks
+      events.emit('Element Deleted', foundElement);
+
+      // Return found element
+      return resolve(foundElement);
+    })
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

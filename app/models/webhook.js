@@ -19,7 +19,6 @@ const request = require('request');
 const mongoose = require('mongoose');
 
 // MBEE modules
-const EventEmitter = M.require('lib.events');
 const timestamp = M.require('models.plugin.timestamp');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -84,6 +83,13 @@ const WebhookSchema = new mongoose.Schema({
       type: String,
       default: 'GET'
     },
+    headers: {
+      type: mongoose.Schema.Types.Mixed,
+      default: { 'Content-Type': 'application/json' }
+    },
+    ca: {
+      type: String
+    },
     data: {
       type: String
     }
@@ -101,42 +107,27 @@ const WebhookSchema = new mongoose.Schema({
 WebhookSchema.plugin(timestamp);
 
 
-/* --------------------------( Webhook Middleware )----------------------------*/
-
-/**
- * @description Post-save actions for a webhook.
- * @memberOf WebhookSchema
- */
-WebhookSchema.post('save', function(doc, next) {
-  doc.addEventListener();
-  next();
-});
-
-
 /* ----------------------------( Webhook Methods )-----------------------------*/
 
 /**
- * @description Adds an event listener to the global event emitter.
- *
+ * @description Sends HTTP requests to all urls in this.responses
  * @memberOf WebhookSchema
  */
-WebhookSchema.methods.addEventListener = function() {
-  // For each trigger
-  this.triggers.forEach((trigger) => {
-    // Add listener to event emitter
-    EventEmitter.on(trigger, (eventData) => {
-      // For every response in the Webhook responses list
-      this.responses.forEach((response) => {
-        // Send an HTTP request to given URL
-        request({
-          url: response.url,
-          headers: { 'Content-Type': 'application/json' },
-          method: response.method,
-          body: JSON.stringify(response.data || eventData || undefined)
-        });
+WebhookSchema.methods.sendRequests = function(data) {
+  // If webhooks projects is the same as the incoming data's project
+  if (this.project === data.project) {
+    // For every response in the webhook responses list
+    this.responses.forEach((response) => {
+      // Send an HTTP request to given URL
+      request({
+        url: response.url,
+        headers: response.headers,
+        ca: response.ca,
+        method: response.method,
+        body: JSON.stringify(response.data || data || undefined)
       });
     });
-  });
+  }
 };
 
 /**
@@ -160,6 +151,7 @@ WebhookSchema.methods.getPublicData = function() {
 WebhookSchema.methods.getValidUpdateFields = function() {
   return ['name', 'custom'];
 };
+
 
 /* --------------------------( Webhook Properties )-------------------------- */
 

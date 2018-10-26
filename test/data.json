@@ -236,12 +236,12 @@
       "triggers": ["First Trigger", "Second Trigger"],
       "responses": [
         {
-          "url": "http://this-is-sample-url-1.com",
+          "url": "http://dev.mbee.us.lmco.com/api/test",
           "method": "GET"
         },
         {
-          "url": "http://this-is-sample-url-2.com",
-          "method": "POST"
+          "url": "http://dev.mbee.us.lmco.com/api/about",
+          "method": "GET"
         }
       ]
     },
@@ -251,12 +251,8 @@
       "triggers": ["First Trigger", "Second Trigger", "Third Trigger"],
       "responses": [
         {
-          "url": "http://this-is-sample-url-1.com",
+          "url": "http://dev.mbee.us.lmco.com/api/test",
           "method": "GET"
-        },
-        {
-          "url": "http://this-is-sample-url-2.com",
-          "method": "POST"
         }
       ]
     }
