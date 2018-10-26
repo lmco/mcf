@@ -123,8 +123,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST an incoming webhook', postIncomingWebhook);
   it('should GET the previously created webhook', getWebhook);
   it('should trigger an incoming webhook', triggerWebhook);
+  it('should PATCH the previously created webhook', patchWebhook);
   it('should reject a POST with an invalid id field', rejectPostWebhook);
   it('should reject a GET of a non-existing webhook', rejectGetWebhook);
+  it('should reject a PATCH of an immutable webhook field', rejectPatchWebhook);
   it('should reject a DELETE of a non-existing webhook', rejectDeleteNonExistingWebhook);
   it('should DELETE the previously created outgoing webhook', deleteOutgoingWebhook);
   it('should DELETE the previously created incoming webhook', deleteIncomingWebhook);
@@ -232,6 +234,32 @@ function triggerWebhook(done) {
 }
 
 /**
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * updates a webhook.
+ */
+function patchWebhook(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      name: 'Updated Webhook Name'
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.name).to.equal('Updated Webhook Name');
+    done();
+  });
+}
+
+/**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
  * fails to creates a webhook with an invalid id field.
  */
@@ -274,6 +302,32 @@ function rejectGetWebhook(done) {
     // Verify error message in response body
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * fails to update an immutable webhook field.
+ */
+function rejectPatchWebhook(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      id: 'newwebhookid'
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 403 Forbidden
+    chai.expect(response.statusCode).to.equal(403);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Forbidden');
     done();
   });
 }

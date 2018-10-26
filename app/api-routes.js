@@ -1662,7 +1662,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *       403:
  *         description: Forbidden, Failed to PATCH element due to updating an immutable field.
  *       404:
- *         description: Not Found, Failed to PATCH element due to element does not exist.
+ *         description: Not Found, Failed to PATCH element due to element not existing.
  *       500:
  *         description: Internal Server Error, Failed to PATCH element due to server side issue.
  *
@@ -2230,6 +2230,60 @@ api.route('/users/:username')
  *         description: Internal Server Error, Failed to POST webhook due to
  *                      server side issue.
  *
+ *   patch:
+ *     tags:
+ *       - webhooks
+ *     description: Updates an existing webhook.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the webhook.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: webhookid
+ *         description: The ID of the webhook to be updated.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing the updated webhook data.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: The updated name for the webhook.
+ *             custom:
+ *               type: JSON Object
+ *               description: The updated custom JSON data for the webhook.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH webhook, returns webhook data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH webhook due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH webhook due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH webhook due to updating an
+ *                      immutable field.
+ *       404:
+ *         description: Not Found, Failed to PATCH webhook due to webhook
+ *                      not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to PATCH webhook due to
+ *                      server side issue.
+ *
  *   delete:
  *     tags:
  *       -  webhooks
@@ -2293,6 +2347,11 @@ api.route('/orgs/:orgid/projects/:projectid/webhooks/:webhookid')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postWebhook
+)
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchWebhook
 )
 .delete(
   AuthController.authenticate,

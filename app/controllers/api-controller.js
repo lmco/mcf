@@ -80,6 +80,7 @@ module.exports = {
   deleteElement,
   getWebhook,
   postWebhook,
+  patchWebhook,
   deleteWebhook,
   postIncomingWebhook
 };
@@ -1988,6 +1989,39 @@ function postWebhook(req, res) {
   WebhookController.createWebhook(req.user, req.params.orgid, req.params.projectid, req.body)
   .then((webhook) => {
     // Return 200: OK and created webhook
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(webhook.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ *
+ * @description Updates the webhook specified in the URI. Takes an org id,
+ * project id, and webhook id in the URI and updated properties of the webhook
+ * in the request body.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with updated webhook
+ */
+function patchWebhook(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified webhook
+  // NOTE: updateWebhook() sanitizes req.params.orgid, req.params.projectid,
+  // and req.params.webhookid
+  WebhookController.updateWebhook(req.user, req.params.orgid,
+    req.params.projectid, req.params.webhookid, req.body)
+  .then((webhook) => {
+    // Return 200: OK and the updated webhook
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(webhook.getPublicData()));
   })

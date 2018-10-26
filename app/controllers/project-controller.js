@@ -512,7 +512,7 @@ function findProjectsQuery(query) {
 function createProject(reqUser, project) {
   return new Promise((resolve, reject) => {
     // Initialize optional fields with a default
-    let custom = null;
+    let custom = {};
     let visibility = 'private';
 
     // Error Check: ensure input parameters are valid
@@ -565,7 +565,7 @@ function createProject(reqUser, project) {
     .then((foundProject) => {
       // Error Check: ensure no project was found
       if (foundProject.length > 0) {
-        reject(new M.CustomError('A project with the same ID already exists.', 403, 'warn'));
+        return reject(new M.CustomError('A project with the same ID already exists.', 403, 'warn'));
       }
 
       // Create the new project

@@ -67,9 +67,9 @@ module.exports.connect = function() {
     mongoose.connect(connectURL, options, (err) => {
       if (err) {
         // If error, reject it
-        reject(err);
+        return reject(M.CustomError.parseCustomError(err));
       }
-      resolve();
+      return resolve();
     });
   });
 };

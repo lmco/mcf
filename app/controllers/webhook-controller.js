@@ -26,6 +26,7 @@ module.exports = {
   findWebhook,
   findWebhooksQuery,
   createWebhook,
+  updateWebhook,
   removeWebhook
 };
 
@@ -236,6 +237,121 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
     })
     // Return newly created webhook
     .then((newWebhook) => resolve(newWebhook))
+    // Return reject with custom error
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+/**
+ * @description This function updates a webhook.
+ *
+ * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The organization ID of the project.
+ * @param {String} projectID - The project ID.
+ * @param {String} webhookID - The webhook ID.
+ * @param {Object} webhookUpdated - Update data object OR webhook to be updated
+ *
+ * @return {Promise} resolve - updated webhook
+ *                   reject -  error
+ *
+ * @example
+ * updateWebhook({User}, 'orgID', 'projectID', 'webhookID', { name: 'Updated Webhook' })
+ * .then(function(webhook) {
+ *   // do something with the updated webhook.
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpdated) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof webhookID === 'string', 'Webhook ID is not a string.');
+      assert.ok(typeof webhookUpdated === 'object', 'Webhook data is not a object.');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+
+    // Check if webhookUpdated is instance of Webhook model
+    if (webhookUpdated instanceof Webhook.Webhook) {
+      // Disabling linter because the reassign is needed to convert the object to JSON
+      // webhookUpdated is instance of Webhook model, convert to JSON
+      webhookUpdated = webhookUpdated.toJSON(); // eslint-disable-line no-param-reassign
+    }
+
+    // Find the webhook
+    // Note: organizationID, projectID, and webhookID are sanitized in findWebhook()
+    findWebhook(reqUser, organizationID, projectID, webhookID)
+    .then((webhook) => {
+      // Error Check: ensure reqUser is a project admin or global admin
+      if (!webhook.project.getPermissions(reqUser).admin && !reqUser.admin) {
+        // reqUser does NOT have admin permissions or NOT global admin, reject error
+        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      }
+
+      // Get list of keys the user is trying to update
+      const webhookUpdateFields = Object.keys(webhookUpdated);
+      // Get list of parameters which can be updated from model
+      const validUpdateFields = webhook.getValidUpdateFields();
+
+      // Allocate update val and field before for loop
+      let updateField = '';
+      // Loop through webhookUpdateFields
+      for (let i = 0; i < webhookUpdateFields.length; i++) {
+        updateField = webhookUpdateFields[i];
+
+        // Error Check: check if updated field also exists in the original webhook.
+        if (!webhook.toJSON().hasOwnProperty(updateField)) {
+          // Original webhook does NOT contain updatedField, reject error
+          return reject(new M.CustomError(`Webhook does not contain field ${updateField}.`, 400, 'warn'));
+        }
+
+        // Check if updated field is equal to the original field
+        if (utils.deepEqual(webhook.toJSON()[updateField], webhookUpdated[updateField])) {
+          // Updated value matches existing value, continue to next loop iteration
+          continue;
+        }
+
+        // Error Check: Check if field can be updated
+        if (!validUpdateFields.includes(updateField)) {
+          // field cannot be updated, reject error
+          return reject(new M.CustomError(
+            `Webhook property [${updateField}] cannot be changed.`, 403, 'warn'
+          ));
+        }
+
+        // Check if updateField type is 'Mixed'
+        if (Webhook.Webhook.schema.obj[updateField].type.schemaName === 'Mixed') {
+          // Only objects should be passed into mixed data
+          if (typeof webhookUpdated[updateField] !== 'object') {
+            return reject(new M.CustomError(`${updateField} must be an object`, 400, 'warn'));
+          }
+
+          // Update each value in the object
+          // eslint-disable-next-line no-loop-func
+          Object.keys(webhookUpdated[updateField]).forEach((key) => {
+            webhook[updateField][key] = sani.sanitize(webhookUpdated[updateField][key]);
+          });
+
+          // Mark mixed fields as updated, required for mixed fields to update in mongoose
+          // http://mongoosejs.com/docs/schematypes.html#mixed
+          webhook.markModified(updateField);
+        }
+        else {
+          // Schema type is not mixed
+          // Sanitize field and update field in webhook object
+          webhook[updateField] = sani.sanitize(webhookUpdated[updateField]);
+        }
+      }
+
+      // Save updated webhook
+      return webhook.save();
+    })
+    .then((updatedWebhook) => resolve(updatedWebhook))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

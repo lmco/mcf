@@ -236,11 +236,11 @@
       "triggers": ["First Trigger", "Second Trigger"],
       "responses": [
         {
-          "url": "http://google.com",
+          "url": "http://dev.mbee.us.lmco.com/api/test",
           "method": "GET"
         },
         {
-          "url": "http://apple.com",
+          "url": "http://dev.mbee.us.lmco.com/api/about",
           "method": "GET"
         }
       ],
@@ -252,7 +252,7 @@
       "triggers": ["First Trigger", "Second Trigger", "Third Trigger"],
       "responses": [
         {
-          "url": "http://google.com",
+          "url": "http://dev.mbee.us.lmco.com/api/test",
           "method": "GET"
         }
       ],

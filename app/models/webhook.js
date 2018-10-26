@@ -194,6 +194,21 @@ IncomingWebhookSchema.methods.getPublicData = function() {
   };
 };
 
+/**
+ * @description Returns webhook fields that can be changed
+ * @memberof WebhookSchema
+ */
+WebhookSchema.methods.getValidUpdateFields = function() {
+  return ['name', 'custom'];
+};
+
+
+/* --------------------------( Webhook Properties )-------------------------- */
+
+// Required for virtual getters
+WebhookSchema.set('toJSON', { virtuals: true });
+WebhookSchema.set('toObject', { virtuals: true });
+
 
 /* ----------------------------( Webhook Models )---------------------------- */
 
