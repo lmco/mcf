@@ -225,7 +225,7 @@ function getElements(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(4);
+    chai.expect(json.length).to.equal(5);
     done();
   });
 }

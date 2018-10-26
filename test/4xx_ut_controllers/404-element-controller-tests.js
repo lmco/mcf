@@ -351,7 +351,7 @@ function findElements(done) {
   ElemController.findElements(adminUser, org.id, proj.id)
   .then((retElems) => {
     // Expect 4 elements to be found
-    chai.expect(retElems.length).to.equal(10);
+    chai.expect(retElems.length).to.equal(11);
     done();
   })
   .catch((error) => {
@@ -526,7 +526,7 @@ function softDeleteAllElements(done) {
   .then(() => ElemController.findElements(adminUser, org.id, proj.id, true))
   .then((retElems) => {
     // Find succeeded, verify elements were returned
-    chai.expect(retElems.length).to.equal(9);
+    chai.expect(retElems.length).to.equal(10);
     // Verify elements deleted field is set to true
     chai.expect(retElems[0].deleted).to.equal(true);
     done();

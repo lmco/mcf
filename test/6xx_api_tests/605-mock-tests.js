@@ -1157,7 +1157,7 @@ function getElements(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(10);
+    chai.expect(json.length).to.equal(11);
     done();
   };
 
