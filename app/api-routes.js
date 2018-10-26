@@ -100,6 +100,10 @@ api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
  */
 api.route('/login')
 .post(
+  (req, res, next) => {
+    console.log(req.body);
+    next()
+  },
   AuthController.authenticate,
   Middleware.logRoute,
   AuthController.doLogin,
@@ -1888,7 +1892,7 @@ api.route('/users')
 
 /**
  * @swagger
- * /users/whoami:
+ * /api/users/whoami:
  *   get:
  *     tags:
  *       - users
@@ -1916,7 +1920,7 @@ api.route('/users/whoami')
 
 /**
  * @swagger
- * /users/:username:
+ * /api/users/:username:
  *   get:
  *     tags:
  *       - users
