@@ -499,7 +499,7 @@ function rejectDeleteNonExistingOrg(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
-    body: JSON.stringify({ soft: false })
+    body: JSON.stringify({ hardDelete: false })
   },
   function(err, response, body) {
     // Expect no error
