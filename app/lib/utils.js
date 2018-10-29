@@ -51,7 +51,7 @@ module.exports.UID_DELIMITER = ':';
 module.exports.render = function(req, res, name, params) {
   const opts = params || {};
   // eslint-disable-next-line global-require
-  opts.pluginNames = require(path.join(M.root, 'plugins', 'routes.js')).loadedPlugins;
+  opts.pluginNames = require(path.join(M.root, 'plugins', 'routes.js')).loadedPlugins || [];
   opts.ui = opts.ui || M.config.server.ui;
   opts.user = opts.user || ((req.user) ? req.user.getPublicData() : '');
   opts.title = opts.title || 'Model-Based Engineering Environment';
