@@ -95,9 +95,7 @@ describe(M.getModuleName(module.filename), () => {
       const userTwo = testData.users[1].username;
       return testUtils.removeNonadminUser(userTwo);
     })
-    .then(() => {
-      return testUtils.removeAdminUser();
-    })
+    .then(() => testUtils.removeAdminUser())
     .then((delAdminUser) => {
       chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
       done();
@@ -484,7 +482,7 @@ function deleteProjects(done) {
     ],
     hardDelete: true
   };
-  const params = { orgid: org.id};
+  const params = { orgid: org.id };
   const method = 'DELETE';
   const req = getReq(params, body, method);
 
