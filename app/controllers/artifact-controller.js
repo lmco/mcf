@@ -57,19 +57,13 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(reqUser.admin, 'User does not have permissions.');
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artifactMetaData.id === 'string', 'Artifact ID is not a string.');
       assert.ok(typeof artifactBlob === 'object', 'Artifact is not a object.');
     }
     catch (error) {
-      let statusCode = 400;
-      // Return a 403 if request is permissions related
-      if (error.message.includes('permissions')) {
-        statusCode = 403;
-      }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Define function-wide variables
@@ -156,18 +150,6 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
  */
 function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, artifactBlob) {
   return new Promise((resolve, reject) => {
-    // Error Check: ensure input parameters are valid
-    try {
-      assert.ok(reqUser.admin, 'User does not have permissions.');
-    }
-    catch (error) {
-      let statusCode = 400;
-      // Return a 403 if request is permissions related
-      if (error.message.includes('permissions')) {
-        statusCode = 403;
-      }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
-    }
     // Define function-wide variables
     let hashedName = '';
     let isNewHash = false;
@@ -233,7 +215,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
         );
       }
 
-      // Save user object to the database
+      // Save artifact object to the database
       return _artifact.save();
     })
     .then((_artifact) => {
@@ -284,7 +266,7 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
     // Error Check: if hard deleting, ensure user is global admin
     if (hardDelete && !reqUser.admin) {
       return reject(new M.CustomError(
-        'User does not have permission to permanently delete a artifact.', 403, 'warn'
+        'User does not have permission to permanently delete an artifact.', 403, 'warn'
       ));
     }
 

@@ -77,7 +77,7 @@ function cleanDB(done) {
   .then(() => {
     // Remove artifacts
     execSync(`rm -rf ${M.root}/storage/*`);
-    return Artifact.collection.drop({});
+    return Artifact.collection.drop();
   })
   .then(() => done())
   .catch(error => {
