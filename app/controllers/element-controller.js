@@ -284,9 +284,9 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       packageArray.forEach((pack) => {
         // If the packages parent is also being created, set its _id
         if (pack.$parent) {
-          const packUID = utils.createUID(orgID, projID, pack.$parent);
-          if (packIDs.includes(packUID)) {
-            pack.parent = packageArray.filter(p => p.id === packUID)[0]._id;
+          const packID = utils.createUID(orgID, projID, pack.$parent);
+          if (packIDs.includes(packID)) {
+            pack.parent = packageArray.filter(p => p.id === packID)[0]._id;
             pack.$parent = null;
           }
         }
@@ -577,7 +577,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
     const elemID = sani.sanitize(elementID);
     const elemUID = utils.createUID(orgID, projID, elemID);
 
-    // Search for an element that matches the uid or uuid
+    // Search for an element that matches the id or uuid
     let searchParams = { $and: [{ $or: [{ id: elemUID },
       { uuid: elemID }] }, { deleted: false }] };
 
