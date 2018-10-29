@@ -105,7 +105,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
       // Return resulting elements
       return resolve(res);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -342,8 +342,8 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       // If it's not a CustomError, the create failed so delete all successfully
       // created elements and reject the error.
       return Element.Element.deleteMany({ uid: { $in: arrUID } })
-      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
-      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+      .then(() => reject(M.CustomError.parseCustomError(error)))
+      .catch((error2) => reject(M.CustomError.parseCustomError(error2)));
     });
   });
 }
@@ -605,7 +605,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
       // All checks passed, resolve element
       return resolve(elements[0]);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -632,14 +632,7 @@ function findElementsQuery(elementQuery) {
     Element.Element.find(elementQuery)
     .populate('parent project source target contains')
     .then((arrElements) => resolve(arrElements))
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
