@@ -174,23 +174,19 @@ OrganizationSchema.methods.getPermissions = function(user) {
 };
 
 /**
- * @description Returns the permissions a user has on the org
- *
- * @param {User} user  The user whose permissions are being returned
- * @memberof OrganizationSchema
- *
- * @returns {Boolean} A json object with keys being the permission levels
- * and values being booleans
  */
 OrganizationSchema.methods.validateObjectKeys = function(object) {
-  // Map org permissions lists user._ids to strings
-  Object.keys(object).forEach(key => {
-    if (!['id', 'name', 'custom'].includes(key)) {
-      return false;
-    }
-  });
-
-  return true;
+  let returnVal = true;
+  if (!(object instanceof mongoose.model('Organization', OrganizationSchema))) {
+    // Map org permissions lists user._ids to strings
+    Object.keys(object)
+    .forEach(key => {
+      if (!Object.keys(OrganizationSchema.obj).includes(key)) {
+        returnVal = false;
+      }
+    });
+  }
+  return returnVal;
 };
 
 

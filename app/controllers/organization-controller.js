@@ -132,7 +132,7 @@ function createOrgs(reqUser, arrOrgs) {
         assert.ok(org.hasOwnProperty('id'), `Org #${index} does not contain an id.`);
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
         // Error Check: ensure object only contains valid keys
-        assert.ok(Organization.schema.validateObjectKeys(org), `Org #${index} contains invalid keys.`);
+        assert.ok(Organization.schema.methods.validateObjectKeys(org), `Org #${index} contains invalid keys.`);
         index++;
       });
     }
@@ -215,7 +215,7 @@ function updateOrgs(reqUser, query, updateInfo) {
       assert.ok(typeof query === 'object', 'Update query is not an object.');
       assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
       // Error Check: ensure object only contains valid keys
-      assert.ok(Organization.schema.validateObjectKeys(updateInfo),
+      assert.ok(Organization.schema.methods.validateObjectKeys(updateInfo),
         'Updated information contains invalid keys.');
       // Loop through each desired update
       Object.keys(updateInfo).forEach((key) => {
@@ -528,7 +528,7 @@ function createOrg(reqUser, newOrgData) {
       assert.ok(typeof newOrgData.id === 'string', 'ID in request body is not a string.');
       assert.ok(typeof newOrgData.name === 'string', 'Name in request body is not a string.');
       // Error Check: ensure object only contains valid keys
-      assert.ok(Organization.schema.validateObjectKeys(newOrgData), 'Org contains invalid keys.');
+      assert.ok(Organization.schema.methods.validateObjectKeys(newOrgData), 'Org contains invalid keys.');
 
       // If custom data provided, validate type and sanitize
       if (utils.checkExists(['custom'], newOrgData)) {
@@ -606,7 +606,7 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof orgUpdated === 'object', 'Updated org is not an object');
       // Error Check: ensure object only contains valid keys
-      assert.ok(Organization.schema.validateObjectKeys(orgUpdated), 'Org contains invalid keys.');
+      assert.ok(Organization.schema.methods.validateObjectKeys(orgUpdated), 'Org contains invalid keys.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
