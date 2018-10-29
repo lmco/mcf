@@ -98,7 +98,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    testUtils.removeOrganization()
+    testUtils.removeOrganization(adminUser)
     .then(() => testUtils.removeNonadminUser())
     .then(() => testUtils.removeAdminUser())
     .then((delAdminUser) => {

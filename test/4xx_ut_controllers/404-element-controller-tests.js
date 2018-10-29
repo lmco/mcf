@@ -92,7 +92,7 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
-    testUtils.removeOrganization()
+    testUtils.removeOrganization(adminUser)
     .then(() => testUtils.removeAdminUser())
     .then((delAdminUser) => {
       chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
