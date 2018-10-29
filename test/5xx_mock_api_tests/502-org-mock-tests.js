@@ -26,7 +26,6 @@ const path = require('path');
 // MBEE modules
 const db = M.require('lib.db');
 const apiController = M.require('controllers.api-controller');
-const UserController = M.require('controllers.user-controller');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
