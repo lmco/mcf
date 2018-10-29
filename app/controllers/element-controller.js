@@ -177,7 +177,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
 
     // Loop through each element
     arrElements.forEach((element) => {
-      // Generate unique ID for every element, and set as 'id' field
+      // Generate unique UID for every element
       const uid = utils.createUID(orgID, projID, element.id);
       arrUID.push(uid);
       element.uid = uid;
