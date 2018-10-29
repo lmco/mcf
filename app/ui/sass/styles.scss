@@ -19,7 +19,14 @@
  * @description This defines the style and layout for MBEE.
  */
 
+// Import MBEE variables
 @import 'variables';
+
+// Import Bootstrap Sass
+@import '../../../node_modules/bootstrap/scss/bootstrap';
+@import '../../../node_modules/bootstrap/scss/_variables';
+
+// Import FontAwesome Sass
 @import '../../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome';
 @import '../../../node_modules/@fortawesome/fontawesome-free/scss/solid';
 @import '../../../node_modules/@fortawesome/fontawesome-free/scss/brands';

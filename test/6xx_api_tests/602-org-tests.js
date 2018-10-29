@@ -245,9 +245,15 @@ function patchMultipleOrgs(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json[0].custom.leader).to.equal(testData.orgs[2].custom.leader);
-    chai.expect(json[0].custom.department).to.equal('Space');
-    chai.expect(json[0].custom.location.country).to.equal('USA');
+    // Verify correct number of orgs returned
+    chai.expect(json.length).to.equal(2);
+
+    // Declare org0
+    const org0 = json.filter(o => o.id === testData.orgs[2].id)[0];
+    // Check org0 properties
+    chai.expect(org0.custom.leader).to.equal(testData.orgs[2].custom.leader);
+    chai.expect(org0.custom.department).to.equal('Space');
+    chai.expect(org0.custom.location.country).to.equal('USA');
     done();
   });
 }
