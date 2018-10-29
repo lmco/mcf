@@ -100,12 +100,12 @@ function docker(args) {
     }
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
       // http and docker http enabled, open specified ports
-      rargs = rargs.concat(['-p', `${M.config.server.http.port}:${M.config.docker.http.port}`]);
+      rargs = rargs.concat(['-p', `${M.config.docker.http.port}:${M.config.server.http.port}`]);
     }
     // Check if server https and docker https are enabled
     if (M.config.server.https.enabled && M.config.docker.https.enabled) {
       // https and docker https enabled, open specified ports
-      rargs = rargs.concat(['-p', `${M.config.server.https.port}:${M.config.docker.https.port}`]);
+      rargs = rargs.concat(['-p', `${M.config.docker.https.port}:${M.config.server.https.port}`]);
     }
     // Set docker image name
     rargs = rargs.concat(['--name', M.config.docker.container.name]);
