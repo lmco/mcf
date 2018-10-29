@@ -174,19 +174,30 @@ OrganizationSchema.methods.getPermissions = function(user) {
 };
 
 /**
+ * @description Validates an object to ensure that it only contains keys
+ * which exist in the organization mongoose model.
+ *
+ * @param {Object} object to check keys of.
+ * @return {boolean} The boolean indicating if the object contained only
+ * existing fields.
  */
-OrganizationSchema.methods.validateObjectKeys = function(object) {
-  let returnVal = true;
+OrganizationSchema.statics.validateObjectKeys = function(object) {
+  // Initialize returnBool to true
+  let returnBool = true;
+  // Check if the object is NOT an instance of the organization model
   if (!(object instanceof mongoose.model('Organization', OrganizationSchema))) {
-    // Map org permissions lists user._ids to strings
-    Object.keys(object)
-    .forEach(key => {
+    // Loop through each key of the object
+    Object.keys(object).forEach(key => {
+      // Check if the object key is a key in the organization model
       if (!Object.keys(OrganizationSchema.obj).includes(key)) {
-        returnVal = false;
+        // Key is not in organization model, return false
+        returnBool = false;
       }
     });
   }
-  return returnVal;
+  // All object keys found in organization model or object was an instance of
+  // organization model, return true
+  return returnBool;
 };
 
 

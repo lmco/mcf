@@ -67,7 +67,7 @@ describe(M.getModuleName(module.filename), () => {
 
       // Define project data
       const projData = testData.projects[0];
-      projData.orgid = org.id;
+      projData.org = { id: org.id };
 
       // Create project
       return ProjController.createProject(adminUser, projData);

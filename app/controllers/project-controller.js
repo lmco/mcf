@@ -134,6 +134,8 @@ function createProjects(reqUser, organizationID, arrProjects) {
       Object(arrProjects).forEach((project) => {
         assert.ok(project.hasOwnProperty('id'), `Project #${index} is missing an id.`);
         assert.ok(typeof project.id === 'string', `Project #${index}'s id is not a string.`);
+        // Error Check: ensure object only contains valid keys
+        assert.ok(Project.validateObjectKeys(project), `Project #${index} contains invalid keys.`);
         index++;
       });
     }
@@ -252,6 +254,8 @@ function updateProjects(reqUser, query, updateInfo) {
     try {
       assert.ok(typeof query === 'object', 'Update query is not an object.');
       assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
+      // Error Check: ensure updateInfo only contains valid keys
+      assert.ok(Project.validateObjectKeys(updateInfo), 'Updated object contains invalid keys.');
       // Loop through each desired update
       Object.keys(updateInfo).forEach((key) => {
         // Error Check: ensure user can update each field
@@ -545,10 +549,13 @@ function createProject(reqUser, project) {
     try {
       assert.ok(project.id !== undefined, 'project.id is undefined');
       assert.ok(project.name !== undefined, 'project.name is undefined');
-      assert.ok(project.orgid !== undefined, 'project.orgid is undefined');
+      assert.ok(project.org !== undefined, 'project.org is undefined');
+      assert.ok(project.org.id !== undefined, 'project.org is undefined');
       assert.strictEqual(typeof project.id, 'string');
       assert.strictEqual(typeof project.name, 'string');
-      assert.strictEqual(typeof project.orgid, 'string');
+      assert.strictEqual(typeof project.org.id, 'string');
+      // Error Check: ensure project only contains valid keys
+      assert.ok(Project.validateObjectKeys(project), 'Project contains invalid keys.');
 
       // If custom data provided, validate type and sanitize
       if (project.hasOwnProperty('custom')) {
@@ -570,7 +577,7 @@ function createProject(reqUser, project) {
     // Sanitize query inputs
     const projID = sani.sanitize(project.id);
     const projName = sani.sanitize(project.name);
-    const orgID = sani.sanitize(project.orgid);
+    const orgID = sani.sanitize(project.org.id);
 
     // Initialize function-wide variables
     let org = null;
@@ -660,6 +667,8 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       assert.strictEqual(typeof organizationID, 'string', 'organizationID is not a string');
       assert.strictEqual(typeof projectID, 'string', 'projectID is not a string');
       assert.strictEqual(typeof projectUpdated, 'object', 'projectUpdated is not an object');
+      // Error Check: ensure projectUpdated only contains valid keys
+      assert.ok(Project.validateObjectKeys(projectUpdated), 'Update object contains invalid keys.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
