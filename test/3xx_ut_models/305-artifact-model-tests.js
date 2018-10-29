@@ -172,7 +172,7 @@ function updateArtifactFile(done) {
 }
 
 /**
- * @description Finds and deletes an artifact
+ * @description Finds and deletes an artifact.
  */
 function deleteArtifactFile(done) {
   const artifactFillId = utils.createID(org.id, project.id, testData.artifacts[0].id);
