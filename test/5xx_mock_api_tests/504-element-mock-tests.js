@@ -92,20 +92,12 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
-    OrgController.removeOrg(adminUser, org.id, true)
-    .then(() => {
-      // Once db items are removed, remove reqUser
-      // close the db connection and finish
-      User.findOne({
-        username: adminUser.username
-      }, (error, foundUser) => {
-        chai.expect(error).to.equal(null);
-        foundUser.remove((error2) => {
-          chai.expect(error2).to.equal(null);
-          db.disconnect();
-          done();
-        });
-      });
+    testUtils.removeOrganization(adminUser)
+    .then(() => testUtils.removeAdminUser())
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
+      db.disconnect();
+      done();
     })
     .catch((error) => {
       db.disconnect();

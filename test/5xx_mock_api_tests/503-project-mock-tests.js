@@ -89,15 +89,12 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
-    .then(() => {
-      // Removing the non-admin user
-      const userTwo = testData.users[1].username;
-      return testUtils.removeNonadminUser(userTwo);
-    })
+    testUtils.removeOrganization(adminUser)
+    .then(() => testUtils.removeNonadminUser())
     .then(() => testUtils.removeAdminUser())
     .then((delAdminUser) => {
       chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
+      db.disconnect();
       done();
     })
     .catch((error) => {
