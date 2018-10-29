@@ -26,10 +26,14 @@
 // circular references between controllers.
 module.exports = {
   home,
+  flightManual,
   organizationList,
   organization,
+  organizationEdit,
   projectList,
   project,
+  projectEdit,
+  whoami,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -38,6 +42,7 @@ module.exports = {
 };
 
 // Node modules
+const fs = require('fs'); // Used by flight manual. This may change. ~jk
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
@@ -46,9 +51,6 @@ const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const ElementController = M.require('controllers.element-controller');
-const User = M.require('models.user');
-const crypto = M.require('lib.crypto');
-const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const elementSort = M.require('lib.element-sort');
 const validators = M.require('lib.validators');
@@ -66,6 +68,35 @@ function home(req, res) {
   // Render the MBEE home screen
   return utils.render(req, res, 'home', {
     title: 'MBEE | Model-Based Engineering Environment'
+  });
+}
+
+/**
+ * @description Renders the flight manual.
+ */
+function flightManual(req, res) {
+  // Read the flight manual sections from the doc directory
+  fs.readdir(`${M.root}/build/fm`, (err, files) => {
+    if (err) {
+      M.log.error(err);
+      return res.status(500).send('Internal Server Error.');
+    }
+
+    // Turn the file names into section IDs and titles
+    const sections = [];
+    files.filter(fname => fname.endsWith('.html')).forEach(section => {
+      const sectionID = section.replace('.html', '');
+      const sectionTitle = sectionID.replace(/-/g, ' ');
+      sections.push({
+        id: sectionID.replace(/\./g, '-'),
+        title: utils.toTitleCase(sectionTitle, true),
+        content: fs.readFileSync(`${M.root}/build/fm/${section}`)
+      });
+    });
+    // Render the flight manual
+    return utils.render(req, res, 'flight-manual', {
+      sections: sections
+    });
   });
 }
 
@@ -109,6 +140,7 @@ function organization(req, res) {
   .then(org => utils.render(req, res, 'organization', {
     name: 'organization',
     title: 'MBEE | Model-Based Engineering Environment',
+    org: org,
     sidebar: {
       heading: 'Organization',
       icon: 'fas fa-boxes',
@@ -126,9 +158,42 @@ function organization(req, res) {
           link: '#settings'
         }
       }
-    },
-    org: org
+    }
   }))
+  // If error, redirect to organization list
+  .catch(err => {
+    M.log.error(err);
+    return res.redirect('/organizations');
+  });
+}
+
+/**
+ * @description Renders an organization edit/form page.
+ */
+function organizationEdit(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/:orgid/edit executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Find organization
+  OrgController.findOrg(req.user, req.params.orgid)
+  .then(org => {
+    // Check if user is NOT admin
+    if (!req.user.admin
+      && !org.permissions.admin.map(u => u.username).includes(req.user.username)) {
+      // User is NOT admin, redirect to org page
+      return res.redirect(`/${org.id}`);
+    }
+    // Render organization page
+    utils.render(req, res, 'organization-edit', {
+      name: 'organization-edit',
+      title: 'MBEE | Model-Based Engineering Environment',
+      org: org,
+      validators: validators.org
+    });
+  })
   // If error, redirect to organization list
   .catch(err => {
     M.log.error(err);
@@ -155,7 +220,7 @@ function projectList(req, res) {
     // Loop through list and create reference page for each project
     projects.forEach(proj => {
       // set ref to split of uid and join with forward slashes
-      proj.ref = utils.parseUID(proj.uid).join('/');
+      proj.ref = utils.parseID(proj.uid).join('/');
     });
     utils.render(req, res, 'project-list', {
       title: 'MBEE | Model-Based Engineering Environment',
@@ -191,7 +256,7 @@ function project(req, res) {
   .then(foundElements => {
     elements = foundElements;
     elements.forEach(element => {
-      const uid = utils.parseUID(element.uid);
+      const uid = utils.parseID(element.uid);
       element.apiRef = `/api/orgs/${uid[0]}/projects/${uid[1]}/elements/${uid[2]}`;
     });
     const elementTree = elementSort.createElementsTree(elements);
@@ -225,6 +290,86 @@ function project(req, res) {
   .catch(err => {
     M.log.error(err);
     return res.redirect('/projects');
+  });
+}
+
+/**
+ * @description Renders a project edit/form page.
+ */
+function projectEdit(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/:projectid/edit executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Find Project
+  ProjController.findProject(req.user, req.params.orgid, req.params.projectid)
+  .then(foundProject => {
+    // Check if user is NOT admin
+    if (!req.user.admin
+      && !foundProject.permissions.admin.map(u => u.username)
+      .includes(req.user.username)) {
+      // User is NOT admin, redirect to project page
+      return res.redirect(`/${foundProject.org.id}/${foundProject.id}`);
+    }
+    // Render project edit page
+    utils.render(req, res, 'project-edit', {
+      name: 'project-edit',
+      title: 'MBEE | Model-Based Engineering Environment',
+      project: foundProject,
+      validators: validators.project
+    });
+  })
+  // If error, redirect to project list
+  .catch(err => {
+    M.log.error(err);
+    return res.redirect('/projects');
+  });
+}
+
+/**
+ * @description Renders the current user's page.
+ */
+function whoami(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/whoami executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+
+  // get all organizations the user is a member of
+  UserController.findUser(req.user, req.user.username)
+  // Render the project page with the list of projects
+  .then(foundUser => {
+    utils.render(req, res, 'user', {
+      name: foundUser.username,
+      title: 'MBEE | Model-Based Engineering Environment',
+      sidebar: {
+        heading: 'User',
+        list: {
+          Organizations: {
+            icon: 'fas fa-boxes',
+            link: '/organizations'
+          },
+          Projects: {
+            icon: 'fas fa-box',
+            link: '/projects'
+          },
+          Settings: {
+            icon: 'fas fa-cog',
+            link: '#settings'
+          }
+        }
+      },
+      user: foundUser
+    });
+  })
+  // If error, redirect to home
+  .catch(error => {
+    M.log.error(error);
+    res.redirect('/');
   });
 }
 
@@ -264,24 +409,11 @@ function swaggerDoc(req, res) {
  * or not the user is logged in.
  */
 function showAboutPage(req, res) {
-  const token = crypto.inspectToken(req.session.token);
-  User.findOne({
-    username: sani.sanitize(token.username)
-  })
-  .exec((err, user) => {
-    if (err) {
-      M.log.error(err);
-    }
-    else {
-      req.user = user;
-    }
-    // Disables because database document is being directly used
-    return utils.render(req, res, 'about', {
-      info: {
-        version: M.version4
-      },
-      title: 'About | Model-Based Engineering Environment'
-    });
+  return utils.render(req, res, 'about', {
+    info: {
+      version: M.version4
+    },
+    title: 'About | Model-Based Engineering Environment'
   });
 }
 

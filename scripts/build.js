@@ -34,7 +34,9 @@ const { execSync } = require('child_process');
 // NPM modules
 const gulp = require('gulp');
 const concat = require('gulp-concat');
+const minify = require('gulp-minify');
 const sass = require('gulp-sass');
+const markdown = require('gulp-markdown');
 
 
 /**
@@ -49,6 +51,7 @@ const sass = require('gulp-sass');
  * --sass
  * --react
  * --jsdoc
+ * --fm
  * --all
  *
  * If NO arguments given, defaults to `--all`
@@ -75,20 +78,26 @@ function build(_args) {
     gulp.src('./node_modules/swagger-ui-express/static/*.js')
     .pipe(gulp.dest('build/public/js'));
 
-    // Copy Bootstrap CSS
-    gulp.src('./node_modules/bootstrap/dist/css/bootstrap.min.css')
-    .pipe(gulp.dest('build/public/css'));
-
     // Copy Bootstrap JS
     gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
+    .pipe(gulp.dest('build/public/js'));
+    gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js.map')
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Jquery JS
     gulp.src('./node_modules/jquery/dist/jquery.min.js')
     .pipe(gulp.dest('build/public/js'));
 
+    // Copy Jquery UI JS
+    gulp.src(['./node_modules/jquery-ui/ui/effect.js', './node_modules/jquery-ui/ui/effects/*.js'])
+    .pipe(concat('jquery-ui.js'))
+    .pipe(minify({ noSource: true }))
+    .pipe(gulp.dest('build/public/js'));
+
     // Copy Popper JS
     gulp.src('./node_modules/popper.js/dist//umd/popper.min.js')
+    .pipe(gulp.dest('build/public/js'));
+    gulp.src('./node_modules/popper.js/dist//umd/popper.min.js.map')
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Font-Awesome dependencies
@@ -119,6 +128,14 @@ function build(_args) {
 
     // Execute JSDoc build command
     execSync(cmd);
+  }
+
+  // Build Flight Manual
+  if (args.includes('--all') || args.includes('--fm')) {
+    M.log.info('  + Building flight manual ...');
+    gulp.src('./doc/**/*.md')
+    .pipe(markdown())
+    .pipe(gulp.dest('build/fm'));
   }
 
   M.log.info('Build Complete.');

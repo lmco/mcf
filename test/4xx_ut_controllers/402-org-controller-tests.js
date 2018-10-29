@@ -455,7 +455,7 @@ function softDeleteProjectAndOrg(done) {
       id: testData.projects[0].id,
       name: testData.projects[0].name,
       org: retOrg._id,
-      uid: utils.createUID(testData.orgs[3].id, testData.projects[0].id)
+      uid: utils.createID(testData.orgs[3].id, testData.projects[0].id)
     });
 
     // Save the project to the database

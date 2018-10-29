@@ -26,6 +26,8 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const WebhookController = M.require('controllers.webhook-controller');
+const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
@@ -75,7 +77,12 @@ module.exports = {
   getElement,
   postElement,
   patchElement,
-  deleteElement
+  deleteElement,
+  getWebhook,
+  postWebhook,
+  patchWebhook,
+  deleteWebhook,
+  postIncomingWebhook
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -215,10 +222,7 @@ function getOrgs(req, res) {
   OrgController.findOrgs(req.user, softDeleted)
   .then((orgs) => {
     // Return only public organization data
-    const orgsPublicData = [];
-    for (let i = 0; i < orgs.length; i++) {
-      orgsPublicData.push(orgs[i].getPublicData());
-    }
+    const orgsPublicData = orgs.map(o => o.getPublicData());
 
     // Verify orgs public data array is not empty
     if (orgsPublicData.length === 0) {
@@ -1554,9 +1558,18 @@ function getElements(req, res) {
   // NOTE: findElements() sanitizes req.params.orgid and req.params.projectid
   ElementController.findElements(req.user, req.params.orgid, req.params.projectid, softDeleted)
   .then((elements) => {
-    // Return a 200: OK and elements
+    // Return only public element data
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // Verify elements public data array is not empty
+    if (elementsPublicData.length === 0) {
+      const error = new M.CustomError('No elements found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements));
+    return res.status(200).send(formatJSON(elementsPublicData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1592,7 +1605,7 @@ function postElements(req, res) {
   .then((elements) => {
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements));
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1635,26 +1648,26 @@ function patchElements(req, res) {
   // No elements provided, update all elements in the project
   if (!req.body.hasOwnProperty('elements')) {
     // Query finds all elements that start with 'orgid:projectid:'
-    updateQuery = { uid: { $regex: `^${sani.sanitize(utils.createUID(
+    updateQuery = { id: { $regex: `^${sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid
     ))}:` } };
   }
   // Element objects provided, update all
   else if (req.body.elements.every(e => typeof e === 'object')) {
-    // Query finds all element by their uid
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    // Query finds all element by their id
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e.id
     )));
-    updateQuery = { uid: { $in: uids } };
+    updateQuery = { id: { $in: uids } };
   }
   // Element IDs provided, update all
   else if (req.body.elements.every(e => typeof e === 'string')) {
-    // Query finds all elements by their uid, generated from orgid and projectid
+    // Query finds all elements by their id, generated from orgid and projectid
     // in the request parameters
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e
     )));
-    updateQuery = { uid: { $in: uids } };
+    updateQuery = { id: { $in: uids } };
   }
   // No valid element data was provided, reject
   else {
@@ -1668,7 +1681,7 @@ function patchElements(req, res) {
   .then((elements) => {
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements));
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1713,26 +1726,26 @@ function deleteElements(req, res) {
   // No elements provided, delete all elements in the project
   if (!req.body.hasOwnProperty('elements')) {
     // Query finds all elements that start with 'orgid:projectid:'
-    deleteQuery = { uid: { $regex: `^${sani.sanitize(utils.createUID(
+    deleteQuery = { id: { $regex: `^${sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid
     ))}:` } };
   }
   // Element objects provided, delete all
   else if (req.body.elements.every(e => typeof e === 'object')) {
-    // Query finds all element by their uid
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    // Query finds all element by their id
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e.id
     )));
-    deleteQuery = { uid: { $in: uids } };
+    deleteQuery = { id: { $in: uids } };
   }
   // Element IDs provided, delete all
   else if (req.body.elements.every(e => typeof e === 'string')) {
-    // Query finds all elements by their uid, generated from orgid and projectid
+    // Query finds all elements by their id, generated from orgid and projectid
     // in the request parameters
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e
     )));
-    deleteQuery = { uid: { $in: uids } };
+    deleteQuery = { id: { $in: uids } };
   }
   // No valid element data was provided, reject
   else {
@@ -1745,7 +1758,7 @@ function deleteElements(req, res) {
   .then((elements) => {
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements));
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1783,7 +1796,7 @@ function getElement(req, res) {
   .then((element) => {
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element));
+    return res.status(200).send(formatJSON(element.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1814,7 +1827,7 @@ function postElement(req, res) {
   }
 
   // Generate the project UID from url parameters
-  const projUID = utils.createUID(req.params.orgid, req.params.projectid);
+  const projUID = utils.createID(req.params.orgid, req.params.projectid);
 
   // If project UID was provided in the body, ensure it matches project UID from params
   if (req.body.hasOwnProperty('projectUID') && (projUID !== req.body.projectUID)) {
@@ -1833,7 +1846,7 @@ function postElement(req, res) {
   .then((element) => {
     // Return 200: OK and created element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element));
+    return res.status(200).send(formatJSON(element.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1866,7 +1879,7 @@ function patchElement(req, res) {
   .then((element) => {
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element));
+    return res.status(200).send(formatJSON(element.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1898,15 +1911,209 @@ function deleteElement(req, res) {
     hardDelete = req.body.hardDelete;
   }
 
-  // Remove the specified project
-  // NOTE: removeProject() sanitizes req.params.orgid, req.params.projectid, and
+  // Remove the specified element
+  // NOTE: removeElement() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.elementid
   ElementController.removeElement(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid, hardDelete)
   .then((element) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element
-    return res.status(200).send(formatJSON(element));
+    return res.status(200).send(formatJSON(element.getPublicData()));
+  })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/* -----------------------( Webhooks API Endpoints )------------------------- */
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ *
+ * @description Gets a webhook by its webhook.id, project.id, and org.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with found webhook
+ */
+function getWebhook(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
+  // Find the webhook from it's webhook.id, project.id, and org.id
+  // NOTE: findWebhook() sanitizes req.params.webhookid, req.params.projectid, req.params.orgid
+  WebhookController.findWebhook(req.user, req.params.orgid,
+    req.params.projectid, req.params.webhookid, softDeleted)
+  .then((webhook) => {
+    // Return a 200: OK and the webhook
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(webhook.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ *
+ * @description Takes an organization ID, project ID, and webhook ID in the URI
+ * along with the request body to create a webhook.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with created webhook
+ */
+function postWebhook(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If webhook ID was provided in the body, ensure it matches webhook ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.webhookid !== req.body.id)) {
+    const error = new M.CustomError('Webhook ID in the body does not match ID in the params.', 400);
+    return res.status(error.status).send(error);
+  }
+
+  // Set id in request body
+  req.body.id = req.params.webhookid;
+
+  // Create webhook with provided parameters
+  // NOTE: createWebhook() sanitizes req.body
+  WebhookController.createWebhook(req.user, req.params.orgid, req.params.projectid, req.body)
+  .then((webhook) => {
+    // Return 200: OK and created webhook
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(webhook.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ *
+ * @description Updates the webhook specified in the URI. Takes an org id,
+ * project id, and webhook id in the URI and updated properties of the webhook
+ * in the request body.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with updated webhook
+ */
+function patchWebhook(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified webhook
+  // NOTE: updateWebhook() sanitizes req.params.orgid, req.params.projectid,
+  // and req.params.webhookid
+  WebhookController.updateWebhook(req.user, req.params.orgid,
+    req.params.projectid, req.params.webhookid, req.body)
+  .then((webhook) => {
+    // Return 200: OK and the updated webhook
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(webhook.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ *
+ * @description Takes an orgid, projectid, webhookid in the URI along with delete
+ * options in the body and deletes the corresponding webhook.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with success boolean
+ */
+function deleteWebhook(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Remove the specified webhook
+  // NOTE: removeWebhook() sanitizes req.params.orgid, req.params.projectid, and
+  // req.params.webhookid
+  WebhookController.removeWebhook(req.user, req.params.orgid,
+    req.params.projectid, req.params.webhookid, hardDelete)
+  .then((success) => {
+    res.header('Content-Type', 'application/json');
+    // Return 200: OK and success
+    return res.status(200).send(formatJSON(success));
+  })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * POST /api/webhooks/:webhookid
+ *
+ * @description Takes a base64 encoded webhookID and triggers a given event on
+ * Node.js event system.
+ * NOTE: No user object is expected in this request
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object
+ */
+function postIncomingWebhook(req, res) {
+  // Decrypt webhookID
+  const webhookUID = Buffer.from(req.params.webhookid, 'base64').toString();
+
+  // Find the webhook
+  WebhookController.findWebhooksQuery({ id: sani.sanitize(webhookUID), deleted: false })
+  .then((foundWebhook) => {
+    // If no webhooks are found, return a 404 Not Found
+    if (foundWebhook.length === 0) {
+      return res.status(404).send('Not Found');
+    }
+
+    // If a token is specified in the webhook
+    if (foundWebhook[0].token) {
+      // Verify the same token is provided in the request headers
+      if (!foundWebhook[0].verifyAuthority(req.headers[foundWebhook[0].tokenLocation])) {
+        return res.status(401).send('Unauthorized');
+      }
+    }
+
+    // For each webhook trigger
+    foundWebhook[0].triggers.forEach((trigger) => {
+      // Emit an event, and pass along request body
+      events.emit(trigger, req.body);
+    });
+
+    // Return a 200 status
+    return res.status(200).send();
   })
   .catch((error) => res.status(error.status).send(error));
 }

@@ -1662,7 +1662,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *       403:
  *         description: Forbidden, Failed to PATCH element due to updating an immutable field.
  *       404:
- *         description: Not Found, Failed to PATCH element due to element does not exist.
+ *         description: Not Found, Failed to PATCH element due to element not existing.
  *       500:
  *         description: Internal Server Error, Failed to PATCH element due to server side issue.
  *
@@ -1888,7 +1888,7 @@ api.route('/users')
 
 /**
  * @swagger
- * /users/whoami:
+ * /api/users/whoami:
  *   get:
  *     tags:
  *       - users
@@ -1916,7 +1916,7 @@ api.route('/users/whoami')
 
 /**
  * @swagger
- * /users/:username:
+ * /api/users/:username:
  *   get:
  *     tags:
  *       - users
@@ -2101,6 +2101,296 @@ api.route('/users/:username')
   Middleware.logRoute,
   Middleware.disableUserAPI,
   APIController.deleteUser
+);
+
+/**
+ * @swagger
+ * /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid:
+ *   get:
+ *     tags:
+ *       - webhooks
+ *     description: Finds and returns a webhook.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the webhook.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: webhookid
+ *         description: The ID of the webhook to return.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing get webhook options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             softDeleted:
+ *               type: boolean
+ *               description: The boolean indicating if the soft deleted webhook
+ *                            is returned. The user must be a global admin or an
+ *                            admin on the project to find a soft deleted
+ *                            webhook.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET webhook, returns webhook data.
+ *       400:
+ *         description: Bad Request, Failed to GET webhook due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET webhook due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET webhook due to not having
+ *                      correct permissions.
+ *       404:
+ *         description: Not Found, Failed to GET webhook due to webhook not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET webhook due to
+ *                      server side issue.
+ *   post:
+ *     tags:
+ *       - webhooks
+ *     description: Creates a new webhook.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the webhook.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: webhookid
+ *         description: The ID of the webhook to be created.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing the new webhook data.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           required:
+ *             - name
+ *             - triggers
+ *             - responses
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: The ID of the webhook. If this is provided, it
+ *                            must match the webhook ID provided in the URI.
+ *             name:
+ *               type: string
+ *               description: The name for the webhook.
+ *             triggers:
+ *               type: object
+ *               description: An array of events on which the webhook will be
+ *                            triggered. The events should all be strings.
+ *             responses:
+ *               type: object
+ *               description: An array of objects, each containing a URL
+ *                            (required, string), method (string, defaults to
+ *                            GET), and optional data field. On trigger of an
+ *                            an event, the a request of type 'method' will be
+ *                            sent to the specified URL.
+ *             custom:
+ *               type: JSON Object
+ *               description: Custom JSON data that can be added to the webhook.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST webhook, returns webhook data.
+ *       400:
+ *         description: Bad Request, Failed to POST webhook due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to POST webhook due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST webhook due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to POST webhook due to project/org not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to POST webhook due to
+ *                      server side issue.
+ *
+ *   patch:
+ *     tags:
+ *       - webhooks
+ *     description: Updates an existing webhook.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the webhook.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: webhookid
+ *         description: The ID of the webhook to be updated.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing the updated webhook data.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: The updated name for the webhook.
+ *             custom:
+ *               type: JSON Object
+ *               description: The updated custom JSON data for the webhook.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH webhook, returns webhook data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH webhook due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH webhook due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH webhook due to updating an
+ *                      immutable field.
+ *       404:
+ *         description: Not Found, Failed to PATCH webhook due to webhook
+ *                      not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to PATCH webhook due to
+ *                      server side issue.
+ *
+ *   delete:
+ *     tags:
+ *       -  webhooks
+ *     description: Deletes a webhook.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the webhook.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: webhookid
+ *         description: The ID of the webhook to delete.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing delete options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the webhook should be
+ *                            hard deleted or not. The user must be a global
+ *                            admin to hard delete. Defaults to false.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to DELETE webhook, returns true.
+ *       400:
+ *         description: Bad Request, Failed to DELETE webhook due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to DELETE webhook due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to DELETE webhook due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to DELETE webhook due to webhook not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE webhook due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/webhooks/:webhookid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getWebhook
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.postWebhook
+)
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchWebhook
+)
+.delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.deleteWebhook
+);
+
+/**
+ * @swagger
+ * /api/webhooks/:webhookid:
+ *   post:
+ *     tags:
+ *       - webhooks
+ *     description: Triggers events for a given webhook
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: webhookid
+ *         description: The ID of the webhook, encoded in base64.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to trigger webhook events, return nothing.
+ *       401:
+ *         description: Unauthorized, Failed to triggers webhook events because
+ *                      the given token did not match the webhooks token.
+ *       404:
+ *         description: Not Found, Failed to trigger webhook events due to the
+ *                      webhook not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to trigger webhook events
+ *                      due to server side issue.
+ */
+api.route('/webhooks/:webhookid')
+.post(
+  Middleware.logRoute,
+  APIController.postIncomingWebhook
 );
 
 // Export the API router

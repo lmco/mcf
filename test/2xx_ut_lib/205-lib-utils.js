@@ -208,7 +208,7 @@ function userIsNotAdmin(done) {
  */
 function validUID(done) {
   try {
-    const uid = utils.createUID('org', 'project', 'element');
+    const uid = utils.createID('org', 'project', 'element');
     chai.expect(uid).to.equal('org:project:element');
     done();
   }
@@ -225,7 +225,7 @@ function validUID(done) {
  */
 function invalidUID(done) {
   try {
-    utils.createUID('org', 'project', 9);
+    utils.createID('org', 'project', 9);
     chai.expect(true).to.equal(false);
     done();
   }
@@ -240,7 +240,7 @@ function invalidUID(done) {
  */
 function parseValidUID(done) {
   try {
-    const uid = utils.parseUID('org:project:element');
+    const uid = utils.parseID('org:project:element');
     chai.expect(uid).to.include('org');
     chai.expect(uid).to.include('project');
     chai.expect(uid).to.include('element');
@@ -259,7 +259,7 @@ function parseValidUID(done) {
  */
 function parseInvalidUID(done) {
   try {
-    utils.parseUID('not a valid uid');
+    utils.parseID('not a valid uid');
     chai.assert(true === false);
     done();
   }
@@ -274,7 +274,7 @@ function parseInvalidUID(done) {
  */
 function parseValidUIDSecondElement(done) {
   try {
-    const project = utils.parseUID('org:project:element')[2];
+    const project = utils.parseID('org:project:element')[2];
     chai.expect(project).to.equal('element');
     done();
   }

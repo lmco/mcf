@@ -117,13 +117,14 @@ function verifyProjectName(done) {
  */
 function verifyElementID(done) {
   // Valid IDs
-  chai.expect(RegExp(validators.element.id).test('elem3')).to.equal(true);
-  chai.expect(RegExp(validators.element.id).test('3elem-id')).to.equal(true);
+  chai.expect(RegExp(validators.element.id).test('org:proj:elem3')).to.equal(true);
+  chai.expect(RegExp(validators.element.id).test('org:proj:3elem-id')).to.equal(true);
 
   // Invalid IDs
   chai.expect(RegExp(validators.element.id).test('Elem3')).to.equal(false);
   chai.expect(RegExp(validators.element.id).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.element.id).test('')).to.equal(false);
+  chai.expect(RegExp(validators.element.id).test('elem3')).to.equal(false);
   done();
 }
 

@@ -145,6 +145,9 @@ function createProjects(reqUser, organizationID, arrProjects) {
     const findQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(organizationID)}:` } },
       { id: { $in: sani.sanitize(arrProjects.map(p => p.id)) } }] };
 
+    // Initialize createdProjects
+    let createdProjects = null;
+
     // Find any existing projects that match the query
     findProjectsQuery(findQuery)
     .then((projects) => {
@@ -167,7 +170,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
 
       // Set the uid and org for each project
       Object(arrProjects).forEach((project) => {
-        project.uid = utils.createUID(org.id, project.id);
+        project.uid = utils.createID(org.id, project.id);
         project.org = org._id;
       });
 
@@ -183,7 +186,29 @@ function createProjects(reqUser, organizationID, arrProjects) {
       // Create the projects
       return Project.create(projObjects);
     })
-    .then((createdProjects) => resolve(createdProjects))
+    .then((savedProjects) => {
+      // set savedProjects to createdProjects
+      createdProjects = savedProjects;
+      // Initialize promise array
+      const promises = [];
+      // Loop through each project
+      arrProjects.forEach(project => {
+        // Create root element for each project
+        const rootElement = {
+          name: 'Model',
+          id: 'model',
+          type: 'Package',
+          parent: null,
+          projectUID: utils.createID(sani.sanitize(organizationID), project.id)
+        };
+        // Push the save of the element to the promise array
+        promises.push(ElementController.createElement(reqUser, rootElement));
+      });
+
+      // Once all promises complete, return
+      return Promise.all(promises);
+    })
+    .then(() => resolve(createdProjects))
     .catch((error) => {
       // If error is a CustomError, reject it
       if (error instanceof M.CustomError) {
@@ -346,7 +371,7 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
     // If hard deleting, ensure user is a site-wide admin
     if (hardDelete && !reqUser.admin) {
       return reject(new M.CustomError('User does not have permission to permanently'
-          + ' delete a project.', 403, 'warn'));
+         + ' delete a project.', 403, 'warn'));
     }
 
     // Define foundProjects
@@ -366,18 +391,19 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
             + `delete the project ${project.id}.`, 403, 'warn'));
         }
       });
-      // If hardDelete, remove projects otherwise update projects.
-      return (hardDelete)
-        ? Project.deleteMany(removeQuery)
-        : Project.updateMany(removeQuery, { deleted: true });
-    })
-    // Delete elements in associated projects
-    .then(() => {
+
       // Create delete query to remove elements
       const elementDeleteQuery = { project: { $in: foundProjects.map(p => p._id) } };
-
       // Delete all elements in the projects
       return ElementController.removeElements(reqUser, elementDeleteQuery, hardDelete);
+    })
+
+    .then(() => {
+      // If hardDelete, remove projects otherwise update projects.
+      if (hardDelete) {
+        return Project.deleteMany(removeQuery);
+      }
+      return Project.updateMany(removeQuery, { deleted: true });
     })
     // Return deleted projects
     .then(() => resolve(foundProjects))
@@ -421,7 +447,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
-    const projUID = utils.createUID(orgID, projID);
+    const projUID = utils.createID(orgID, projID);
 
     // Set search Params for projUID and deleted = false
     const searchParams = { uid: projUID, deleted: false };
@@ -512,7 +538,7 @@ function findProjectsQuery(query) {
 function createProject(reqUser, project) {
   return new Promise((resolve, reject) => {
     // Initialize optional fields with a default
-    let custom = null;
+    let custom = {};
     let visibility = 'private';
 
     // Error Check: ensure input parameters are valid
@@ -548,6 +574,7 @@ function createProject(reqUser, project) {
 
     // Initialize function-wide variables
     let org = null;
+    let createdProject = null;
     // Error Check: make sure the org exists
     OrgController.findOrg(reqUser, orgID)
     .then((_org) => {
@@ -565,7 +592,7 @@ function createProject(reqUser, project) {
     .then((foundProject) => {
       // Error Check: ensure no project was found
       if (foundProject.length > 0) {
-        reject(new M.CustomError('A project with the same ID already exists.', 403, 'warn'));
+        return reject(new M.CustomError('A project with the same ID already exists.', 403, 'warn'));
       }
 
       // Create the new project
@@ -578,7 +605,7 @@ function createProject(reqUser, project) {
           write: [reqUser._id],
           admin: [reqUser._id]
         },
-        uid: utils.createUID(orgID, projID),
+        uid: utils.createID(orgID, projID),
         custom: custom,
         visibility: visibility
       });
@@ -586,7 +613,21 @@ function createProject(reqUser, project) {
       // Save new project
       return newProject.save();
     })
-    .then((createdProject) => resolve(createdProject))
+    .then(savedProject => {
+      // Create root model element for new project
+      createdProject = savedProject;
+      const rootElement = {
+        name: 'Model',
+        id: 'model',
+        type: 'Package',
+        parent: null,
+        projectUID: utils.createID(orgID, projID)
+      };
+      // Save  root model element
+      return ElementController.createElement(reqUser, rootElement);
+    })
+    // Return the created project
+    .then(() => resolve(createdProject))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -750,7 +791,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
       }
 
       // Initialize element delete query
-      const elementDeleteQuery = { uid: { $regex: `^${foundProject.uid}` } };
+      const elementDeleteQuery = { id: { $regex: `^${foundProject.uid}` } };
 
       // Delete all elements on the project
       return ElementController.removeElements(reqUser, elementDeleteQuery, hardDelete);

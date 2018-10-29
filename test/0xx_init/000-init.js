@@ -24,7 +24,6 @@
 
 // Node modules
 const chai = require('chai');
-const mongoose = require('mongoose');
 const { execSync } = require('child_process');
 
 // MBEE modules
@@ -53,7 +52,7 @@ describe(M.getModuleName(module.filename), function() {
   /**
    * Runs after all tests. Close database connection.
    */
-  after(() => mongoose.connection.close());
+  after(() => db.disconnect());
 
   /**
    * Execute the tests
@@ -73,12 +72,12 @@ function cleanDB(done) {
   .then(() => Organization.deleteMany({ id: { $ne: M.config.server.defaultOrganizationId } }))
   .then(() => Project.deleteMany({}))  // Remove projects
   .then(() => Element.Element.deleteMany({}))  // Remove elements
+  .then(() => Webhook.Webhook.deleteMany({}))  // Remove webhooks
   .then(() => {
     // Remove artifacts
     execSync(`rm -rf ${M.root}/storage/*`);
     return Artifact.deleteMany({});
   })
-  .then(() => Webhook.deleteMany({}))  // Remove webhooks
   .then(() => done())
   .catch(error => {
     M.log.error(error);

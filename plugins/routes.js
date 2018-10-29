@@ -89,15 +89,17 @@ function loadPlugins() {
 
     // Install the dependencies
     const dependencies = pkg.dependencies;
-    // Loop through plugin dependencies
-    for (let i = 0; i < dependencies.length; i++) {
-      // Add dependency to node_modules without errasing existing node_modules
-      // directory
-      const commands = [
-        `yarn add --dev ${dependencies[i]} && yarn remove ${dependencies[i]}`
-      ];
-      const stdout = execSync(commands.join('; '));
-      M.log.verbose(stdout.toString());
+    if (dependencies) {
+      // Loop through plugin dependencies
+      for (let i = 0; i < dependencies.length; i++) {
+        // Add dependency to node_modules without errasing existing node_modules
+        // directory
+        const commands = [
+          `yarn add --dev ${dependencies[i]} && yarn remove ${dependencies[i]}`
+        ];
+        const stdout = execSync(commands.join('; '));
+        M.log.verbose(stdout.toString());
+      }
     }
 
 

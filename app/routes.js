@@ -42,6 +42,12 @@ router.route('/doc/api')
 router.route('/doc/developers')
 .get(Middleware.logRoute, ((req, res) => res.redirect('/doc/index.html')));
 
+/**
+ * This renders the MBEE flight manual page.
+ */
+router.route('/doc/flight-manual')
+.get(Middleware.logRoute, UIController.flightManual);
+
 /* This renders the about page */
 router.route('/about')
 .get(
@@ -74,6 +80,15 @@ router.route('/')
   Middleware.logRoute,
   UIController.home
 );
+
+/* This renders the user page for logged in users */
+router.route('/whoami')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.whoami
+);
+
 
 /* This renders the organization list page for logged in users */
 router.route('/organizations')
@@ -123,6 +138,7 @@ router.param('projectid', (req, res, next, project) => {
   }
 });
 
+
 /* This renders an organization for a user */
 router.route('/:orgid')
 .get(
@@ -131,12 +147,28 @@ router.route('/:orgid')
   UIController.organization
 );
 
+/* This renders an organizations edit form for an admin user */
+router.route('/:orgid/edit')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.organizationEdit
+);
+
 /* This renders a project for a user */
 router.route('/:orgid/:projectid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
   UIController.project
+);
+
+/* This renders a project edit form for an admin user */
+router.route('/:orgid/:projectid/edit')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.projectEdit
 );
 
 

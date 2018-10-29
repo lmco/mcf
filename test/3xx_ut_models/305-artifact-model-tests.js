@@ -116,7 +116,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function uploadArtifact(done) {
   // Create the full artifact ID
-  const artifactID = utils.createUID(org.id, project.id, testData.artifacts[0].id);
+  const artifactID = utils.createID(org.id, project.id, testData.artifacts[0].id);
 
   // Upload new artifact
   const artifact = new Artifact();
@@ -150,7 +150,7 @@ function uploadArtifact(done) {
  * @description Finds an existing artifact and updates it.
  */
 function updateArtifactFile(done) {
-  const artifactFillId = utils.createUID(org.id, project.id, testData.artifacts[0].id);
+  const artifactFillId = utils.createID(org.id, project.id, testData.artifacts[0].id);
   // Find the artifact previously uploaded.
   Artifact.find({ id: artifactFillId, deleted: false })
   .then((artifactToUpdate) => {
@@ -175,7 +175,7 @@ function updateArtifactFile(done) {
  * @description Finds and deletes an artifact
  */
 function deleteArtifactFile(done) {
-  const artifactFillId = utils.createUID(org.id, project.id, testData.artifacts[0].id);
+  const artifactFillId = utils.createID(org.id, project.id, testData.artifacts[0].id);
   // Attempt to find deleted artifact
   Artifact.findOneAndRemove({ id: artifactFillId })
   .then(() => Artifact.find({ id: artifactFillId }))

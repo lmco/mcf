@@ -32,6 +32,7 @@ const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
+const utils = M.require('lib.utils');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
@@ -172,6 +173,10 @@ function createProject(done) {
     chai.expect(proj.id).to.equal(testData.projects[0].id);
     chai.expect(proj.name).to.equal(testData.projects[0].name);
     chai.expect(proj.custom.builtFor).to.equal(projData.custom.builtFor);
+    return Element.Element.find({ id: utils.createID(org.id, project.id, 'model') });
+  })
+  .then(element => {
+    chai.expect(element[0].id).to.equal(utils.createID(org.id, project.id, 'model'));
     done();
   })
   .catch((error) => {
@@ -196,6 +201,14 @@ function createMultipleProjects(done) {
   .then((projects) => {
     // Verify the projects were created
     chai.expect(projects.length).to.equal(2);
+    // Create array of elementUID's
+    const elementUIDs = [utils.createID(org.id, testData.projects[4].id, 'model'),
+      utils.createID(org.id, testData.projects[5].id, 'model')];
+    // Query for elements
+    return Element.Element.find({ id: { $in: elementUIDs } });
+  })
+  .then(elements => {
+    chai.expect(elements.length).to.equal(2);
     done();
   })
   .catch((error) => {
@@ -741,8 +754,7 @@ function setPerm(done) {
 function softDeleteProject(done) {
   // Create an element via the Element model
   const elem = new Element.Block({
-    id: testData.elements[1].id,
-    uid: `${org.id}:${testData.projects[0].id}:${testData.elements[1].id}`,
+    id: utils.createID(org.id, project.id, testData.elements[1].id),
     project: project._id
   });
 
@@ -836,10 +848,14 @@ function deleteMultipleProjects(done) {
   .then((foundProjects) => {
     // Expect foundProjects array to be empty
     chai.expect(foundProjects.length).to.equal(0);
+    return Element.Element.find({ id: 'model' });
+  })
+  .then(elements => {
+    chai.expect(elements.length).to.equal(0);
     done();
   })
   .catch((error) => {
-    M.log.error(error);
+    M.log.error(error.stack);
     // Expect no error
     chai.expect(error).to.equal(null);
     done();

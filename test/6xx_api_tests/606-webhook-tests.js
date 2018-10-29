@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.604-element-tests
+ * @module  test.606-webhook-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,8 +15,8 @@
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests the element API controller functionality:
- * GET, POST, PATCH, and DELETE of an element.
+ * @description This tests the webhook API controller functionality:
+ * GET, POST, PATCH, and DELETE of a webhook.
  */
 
 // Node modules
@@ -29,6 +29,7 @@ const path = require('path');
 const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -118,33 +119,31 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should POST an element', postElement);
-  it('should POST multiple elements', postMultipleElements);
-  it('should GET the previously posted element', getElement);
-  it('should GET all elements for a project', getElements);
-  it('should PATCH an elements name', patchElement);
-  it('should PATCH an update to multiple elements', patchMultipleElements);
-  it('should reject a POST with an invalid name field', rejectPostElement);
-  it('should reject a GET to a non-existing element', rejectGetElement);
-  it('should reject a PATCH with an invalid name', rejectPatchElement);
-  it('should reject a PATCH invalid field to multiple elements', rejectPatchInvalidFieldElements);
-  it('should reject a DELETE with a non-existing element', rejectDeleteNonexistingElement);
-  it('should DELETE the previously created element', deleteElement);
-  it('should DELETE multiple elements', deleteMultipleElements);
+  it('should POST an outgoing webhook', postOutgoingWebhook);
+  it('should POST an incoming webhook', postIncomingWebhook);
+  it('should GET the previously created webhook', getWebhook);
+  it('should trigger an incoming webhook', triggerWebhook);
+  it('should PATCH the previously created webhook', patchWebhook);
+  it('should reject a POST with an invalid id field', rejectPostWebhook);
+  it('should reject a GET of a non-existing webhook', rejectGetWebhook);
+  it('should reject a PATCH of an immutable webhook field', rejectPatchWebhook);
+  it('should reject a DELETE of a non-existing webhook', rejectDeleteNonExistingWebhook);
+  it('should DELETE the previously created outgoing webhook', deleteOutgoingWebhook);
+  it('should DELETE the previously created incoming webhook', deleteIncomingWebhook);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * creates an element.
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * creates an outgoing webhook.
  */
-function postElement(done) {
+function postOutgoingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.elements[0])
+    body: JSON.stringify(testData.webhooks[0])
   },
   (err, response, body) => {
     // Expect no error
@@ -153,24 +152,22 @@ function postElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[0].id);
+    chai.expect(json.id).to.equal(testData.webhooks[0].id);
     done();
   });
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements
- * creates multiple elements
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * creates an incoming webhook.
  */
-function postMultipleElements(done) {
+function postIncomingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[2].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      elements: [testData.elements[1], testData.elements[2], testData.elements[3]]
-    })
+    body: JSON.stringify(testData.webhooks[2])
   },
   (err, response, body) => {
     // Expect no error
@@ -179,18 +176,18 @@ function postMultipleElements(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(3);
+    chai.expect(json.id).to.equal(testData.webhooks[2].id);
     done();
   });
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * finds and returns the previously created element.
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * finds and returns the previously created webhook.
  */
-function getElement(done) {
+function getWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -202,46 +199,52 @@ function getElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[0].id);
+    chai.expect(json.id).to.equal(testData.webhooks[0].id);
     done();
   });
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/elements finds
- * and returns all elements in the previously created project.
+ * @description Verifies POST /api/webhooks/:webhookid triggers an incoming
+ * webhooks events.
  */
-function getElements(done) {
+function triggerWebhook(done) {
+  // Create base64 encoded webhook id
+  const webhookUID = utils.createID(org.id, proj.id, testData.webhooks[2].id);
+  const encodedID = Buffer.from(webhookUID).toString('base64');
+
+  // Add token to headers
+  const headers = getHeaders();
+  headers[testData.webhooks[2].tokenLocation] = testData.webhooks[2].token;
+
+  // Send request
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements`,
-    headers: getHeaders(),
+    url: `${M.config.test.url}/api/webhooks/${encodedID}`,
+    headers: headers,
     ca: readCaFile(),
-    method: 'GET'
+    method: 'POST'
   },
-  (err, response, body) => {
+  (err, response) => {
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(5);
     done();
   });
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * updates name of previously created element.
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * updates a webhook.
  */
-function patchElement(done) {
+function patchWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
-      name: testData.elements[2].name
+      name: 'Updated Webhook Name'
     })
   },
   (err, response, body) => {
@@ -251,52 +254,22 @@ function patchElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal(testData.elements[2].name);
+    chai.expect(json.name).to.equal('Updated Webhook Name');
     done();
   });
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements
- * updates multiple elements at the same time.
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * fails to creates a webhook with an invalid id field.
  */
-function patchMultipleElements(done) {
+function rejectPostWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'PATCH',
-    body: JSON.stringify({
-      elements: [testData.elements[0], testData.elements[1]],
-      update: { custom: { department: 'Space' }, name: 'New Element Name' }
-    })
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json[0].name).to.equal('New Element Name');
-    chai.expect(json[1].name).to.equal('New Element Name');
-    chai.expect(json[0].custom.department).to.equal('Space');
-    chai.expect(json[1].custom.department).to.equal('Space');
-    done();
-  });
-}
-
-/**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * fails to creates an element with an empty/invalid name field.
- */
-function rejectPostElement(done) {
-  request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.invalidElements[2].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.invalidWebhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.invalidElements[2])
+    body: JSON.stringify(testData.invalidWebhooks[0])
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -311,12 +284,12 @@ function rejectPostElement(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * fails to find a non-existing element.
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * fails to find a non-existing webhook.
  */
-function rejectGetElement(done) {
+function rejectGetWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[6].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -334,63 +307,38 @@ function rejectGetElement(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * fails to update an element with an empty/invalid name field.
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * fails to update an immutable webhook field.
  */
-function rejectPatchElement(done) {
+function rejectPatchWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'PATCH',
-    body: JSON.stringify(testData.names[8])
-  },
-  (err, response, body) => {
-    // Expect no error (request succeeds)
-    chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Verify error message in response body
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-/**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/elements
- * fails to update a unique field.
- */
-function rejectPatchInvalidFieldElements(done) {
-  request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({
-      elements: [testData.elements[0], testData.elements[1]],
-      update: { id: 'newid' }
+      id: 'newwebhookid'
     })
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
+    // Expect response status: 403 Forbidden
+    chai.expect(response.statusCode).to.equal(403);
     // Verify error message in response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.message).to.equal('Forbidden');
     done();
   });
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * fails to delete a non-existing element.
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * fails to delete a non-existing webhook.
  */
-function rejectDeleteNonexistingElement(done) {
+function rejectDeleteNonExistingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[6].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -411,12 +359,12 @@ function rejectDeleteNonexistingElement(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
- * deletes the previously created element.
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * deletes the previously created outgoing webhook.
  */
-function deleteElement(done) {
+function deleteOutgoingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -431,23 +379,22 @@ function deleteElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[0].id);
+    chai.expect(json).to.equal(true);
     done();
   });
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/elements
- * deletes multiple elements.
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * deletes the previously created incoming webhook.
  */
-function deleteMultipleElements(done) {
+function deleteIncomingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[2].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      elements: [testData.elements[1], testData.elements[2], testData.elements[3]],
       hardDelete: true
     })
   },
@@ -458,7 +405,7 @@ function deleteMultipleElements(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(3);
+    chai.expect(json).to.equal(true);
     done();
   });
 }

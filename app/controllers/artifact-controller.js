@@ -74,7 +74,7 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
 
     // Define function-wide variables
     // Create the full artifact id
-    const artifactFullId = utils.createUID(orgID, projID, artifactMetaData.id);
+    const artifactFullId = utils.createID(orgID, projID, artifactMetaData.id);
     let createdArtifact = null;
     let hashedName = '';
 
@@ -138,9 +138,7 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
         : resolve(_artifact);
     })
     .then(() => resolve(createdArtifact))
-    .catch((error) => {
-      return reject(M.CustomError.parseCustomError(error));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -358,7 +356,7 @@ function findArtifact(reqUser, organizationID, projectID, artifactID, softDelete
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     const artID = sani.sanitize(artifactID);
-    const artifactFullID = utils.createUID(orgID, projID, artID);
+    const artifactFullID = utils.createID(orgID, projID, artID);
 
     // Define the search params
     const searchParams = {

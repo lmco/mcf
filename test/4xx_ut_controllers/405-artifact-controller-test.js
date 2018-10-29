@@ -220,7 +220,7 @@ function findArtifact(done) {
   ArtifactController.findArtifact(adminUser, org.id, proj.id, testData.artifacts[2].id)
   .then((artifact) => {
     // Verify artifact found properly
-    chai.expect(artifact.id).to.equal(utils.createUID(org.id, proj.id, testData.artifacts[2].id));
+    chai.expect(artifact.id).to.equal(utils.createID(org.id, proj.id, testData.artifacts[2].id));
     done();
   })
   .catch((error) => {
