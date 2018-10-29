@@ -27,13 +27,15 @@ const path = require('path');
 const db = M.require('lib.db');
 const apiController = M.require('controllers.api-controller');
 const UserController = M.require('controllers.user-controller');
+const OrgController = M.require('controllers.organization-controller');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testData = require(path.join(M.root, 'test', 'data.json'));
 const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
-let newUser = null;
+let nonAdminUser = null;
+let org = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -47,21 +49,32 @@ describe(M.getModuleName(module.filename), () => {
    * Before: Run before all tests. Creates the admin user.
    */
   before((done) => {
-    // Connect to the database
+    // Connect db
     db.connect();
 
     // Create test admin
     testUtils.createAdminUser()
-    .then((reqUser) => {
-      adminUser = reqUser;
+    .then((_adminUser) => {
+      // Set global admin user
+      adminUser = _adminUser;
 
+      // Create non-admin user
       return testUtils.createNonadminUser();
     })
-    .then((nonadminUser) => {
-      newUser = nonadminUser;
-      chai.expect(newUser.username).to.equal(testData.users[1].username);
-      chai.expect(newUser.fname).to.equal(testData.users[1].fname);
-      chai.expect(newUser.lname).to.equal(testData.users[1].lname);
+    .then((_nonadminUser) => {
+      nonAdminUser = _nonadminUser;
+      chai.expect(nonAdminUser.username).to.equal(testData.users[1].username);
+      chai.expect(nonAdminUser.fname).to.equal(testData.users[1].fname);
+      chai.expect(nonAdminUser.lname).to.equal(testData.users[1].lname);
+    })
+    .then(() => testUtils.createOrganization(adminUser))
+    .then((retOrg) => {
+      org = retOrg;
+      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
+      chai.expect(retOrg.name).to.equal(testData.orgs[0].name);
+      chai.expect(retOrg.permissions.read).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.write).to.include(adminUser._id.toString());
+      chai.expect(retOrg.permissions.admin).to.include(adminUser._id.toString());
       done();
     })
     .catch((error) => {
@@ -76,20 +89,21 @@ describe(M.getModuleName(module.filename), () => {
    * After: Delete admin user.
    */
   after((done) => {
-    // Removing non-admin user
-    UserController.removeUser(adminUser, newUser.username)
-    .then((delUser2) => {
-      chai.expect(delUser2.username).to.equal(testData.users[1].username);
-      // Find admin user
-      return testUtils.removeAdminUser();
+    // Removing the organization created
+    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
+    .then(() => {
+      // Removing the non-admin user
+      const userTwo = testData.users[1].username;
+      return testUtils.removeNonadminUser(userTwo);
     })
     .then(() => {
-      // Disconnect from the database
-      db.disconnect();
+      return testUtils.removeAdminUser();
+    })
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
       done();
     })
     .catch((error) => {
-      // Disconnect from the database
       db.disconnect();
 
       M.log.error(error);
@@ -100,28 +114,31 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should POST an org', postOrg);
-  it('should POST an org role', postOrgRole);
-  it('should GET an org role', getOrgRole);
-  it('should GET all org roles', getAllOrgRoles);
-  it('should DELETE an org role', deleteOrgRole);
-  it('should GET the posted org', getOrg);
-  it('should PATCH an org', patchOrg);
-  it('should GET all orgs user has access to', getOrgs);
-  it('should DELETE an org', deleteOrg);
-  it('should POST multiple orgs', postOrgs);
-  it('should PATCH multiple orgs', patchOrgs);
-  it('should DELETE orgs', deleteOrgs);
+  it('should POST a project', postProject);
+  it('should POST a project role', postProjectRole);
+  it('should GET a project role', getProjectRole);
+  it('should GET all project roles', getProjectRoles);
+  it('should DELETE a project role', deleteProjectRole);
+  it('should PATCH a project', patchProject);
+  it('should GET the previously patched project', getProject);
+  it('should DELETE a project', deleteProject);
+  it('should POST multiple projects', postProjects);
+  it('should PATCH multiple projects', patchProjects);
+  it('should GET multiple projects', getProjects);
+  it('should DELETE multiple projects', deleteProjects);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies mock POST request to create an organization.
+ * @description Verifies mock POST request to create a project.
  */
-function postOrg(done) {
+function postProject(done) {
   // Create request object
-  const body = testData.orgs[0];
-  const params = { orgid: testData.orgs[0].id };
+  const body = testData.projects[0];
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
   const method = 'POST';
   const req = getReq(params, body, method);
 
@@ -134,24 +151,26 @@ function postOrg(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.orgs[0].id);
-    chai.expect(json.name).to.equal(testData.orgs[0].name);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
+    chai.expect(json.name).to.equal(testData.projects[0].name);
     done();
   };
 
-  // POSTs an org
-  apiController.postOrg(req, res);
+  // POSTs a project
+  apiController.postProject(req, res);
 }
 
 /**
- * @description Verifies mock POST request to add a user to an organization.
+ * @description Verifies mock POST request to add a user to a project.
  */
-function postOrgRole(done) {
+function postProjectRole(done) {
   // Create request object
   const body = testData.roles[0];
   const params = {
-    orgid: testData.orgs[0].id,
-    username: testData.users[1].username };
+    orgid: org.id,
+    projectid: testData.projects[0].id,
+    username: testData.users[1].username
+  };
   const method = 'POST';
   const req = getReq(params, body, method);
 
@@ -164,23 +183,24 @@ function postOrgRole(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
     chai.expect(json.permissions.read.length).to.equal(2);
     done();
   };
 
-  // POSTs an org role
-  apiController.postOrgRole(req, res);
+  // POSTs a project role
+  apiController.postProjectRole(req, res);
 }
 
 /**
- * @description Verifies mock GET a users role within an organization.
+ * @description Verifies mock GET request to get a project role.
  */
-function getOrgRole(done) {
+function getProjectRole(done) {
   // Create request object
   const body = {};
   const params = {
-    orgid: testData.orgs[0].id,
+    orgid: org.id,
+    projectid: testData.projects[0].id,
     username: testData.users[1].username
   };
   const method = 'GET';
@@ -201,17 +221,20 @@ function getOrgRole(done) {
     done();
   };
 
-  // GETs an org member role
-  apiController.getOrgRole(req, res);
+  // GETs a project member role
+  apiController.getProjMemRole(req, res);
 }
 
 /**
- * @description Verifies mock GET request to get all organization roles.
+ * @description Verifies mock GET request to get all project roles.
  */
-function getAllOrgRoles(done) {
+function getProjectRoles(done) {
   // Create request object
   const body = {};
-  const params = { orgid: testData.orgs[0].id };
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
   const method = 'GET';
   const req = getReq(params, body, method);
 
@@ -228,19 +251,19 @@ function getAllOrgRoles(done) {
     done();
   };
 
-  // GETs all org member roles
-  apiController.getAllOrgMemRoles(req, res);
+  // GETs all project member roles
+  apiController.getAllProjMemRoles(req, res);
 }
 
 /**
- * @description Verifies mock DELETE request to remove a user from an
- * organization.
+ * @description Verifies mock DELETE request to remove a user from a project.
  */
-function deleteOrgRole(done) {
+function deleteProjectRole(done) {
   // Create request object
   const body = {};
   const params = {
-    orgid: testData.orgs[0].id,
+    orgid: org.id,
+    projectid: testData.projects[0].id,
     username: testData.users[1].username
   };
   const method = 'DELETE';
@@ -249,7 +272,7 @@ function deleteOrgRole(done) {
   // Set response as empty object
   const res = {};
 
-  // Verifies status code and headers
+  // // Verifies status code and headers
   resFunctions(res);
 
   // Verifies the response data
@@ -259,45 +282,20 @@ function deleteOrgRole(done) {
     done();
   };
 
-  // DELETEs an org role
-  apiController.deleteOrgRole(req, res);
+  // DELETEs a project role
+  apiController.deleteProjectRole(req, res);
 }
 
 /**
- * @description Verifies mock GET request to get an organization.
+ * @description Verifies mock PATCH request to update a project.
  */
-function getOrg(done) {
-  // Create request object
-  const body = {};
-  const params = { orgid: testData.orgs[0].id };
-  const method = 'GET';
-  const req = getReq(params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  resFunctions(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.orgs[0].id);
-    chai.expect(json.name).to.equal(testData.orgs[0].name);
-    done();
-  };
-
-  // GETs an org
-  apiController.getOrg(req, res);
-}
-
-/**
- * @description Verifies mock PATCH request to update an organization.
- */
-function patchOrg(done) {
+function patchProject(done) {
   // Create request object
   const body = testData.names[10];
-  const params = { orgid: testData.orgs[0].id };
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
   const method = 'PATCH';
   const req = getReq(params, body, method);
 
@@ -310,22 +308,25 @@ function patchOrg(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
     chai.expect(json.name).to.equal(testData.names[10].name);
     done();
   };
 
-  // PATCHs an org
-  apiController.patchOrg(req, res);
+  // PATCHs a project
+  apiController.patchProject(req, res);
 }
 
 /**
- * @description Verifies mock GET request to get all organizations.
+ * @description Verifies mock GET request to get a project.
  */
-function getOrgs(done) {
+function getProject(done) {
   // Create request object
   const body = {};
-  const params = {};
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
   const method = 'GET';
   const req = getReq(params, body, method);
 
@@ -338,21 +339,25 @@ function getOrgs(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
+    chai.expect(json.name).to.equal(testData.names[10].name);
     done();
   };
 
-  // GETs all orgs
-  apiController.getOrgs(req, res);
+  // GETs a project
+  apiController.getProject(req, res);
 }
 
 /**
- * @description Verifies mock DELETE request to delete an organization.
+ * @description Verifies mock DELETE request to delete a project.
  */
-function deleteOrg(done) {
+function deleteProject(done) {
   // Create request object
   const body = { hardDelete: true };
-  const params = { orgid: testData.orgs[0].id };
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
   const method = 'DELETE';
   const req = getReq(params, body, method);
 
@@ -365,26 +370,26 @@ function deleteOrg(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(json.id).to.equal(testData.projects[0].id);
     done();
   };
 
-  // DELETEs an org
-  apiController.deleteOrg(req, res);
+  // DELETEs a project
+  apiController.deleteProject(req, res);
 }
 
 /**
- * @description Verifies mock POST request to create multiple organizations.
+ * @description Verifies mock POST request to create multiple projects.
  */
-function postOrgs(done) {
+function postProjects(done) {
   // Create request object
   const body = {
-    orgs: [
-      testData.orgs[1],
-      testData.orgs[2]
+    projects: [
+      testData.projects[4],
+      testData.projects[5]
     ]
   };
-  const params = {};
+  const params = { orgid: org.id };
   const method = 'POST';
   const req = getReq(params, body, method);
 
@@ -401,23 +406,23 @@ function postOrgs(done) {
     done();
   };
 
-  // POSTs multiple orgs
-  apiController.postOrgs(req, res);
+  // POSTs multiple projects
+  apiController.postProjects(req, res);
 }
 
 /**
- * @description Verifies mock PATCH request to update multiple orgs.
+ * @description Verifies mock PATCH request to update multiple projects.
  */
-function patchOrgs(done) {
+function patchProjects(done) {
   // Create request object
   const body = {
-    orgs: [
-      testData.orgs[1],
-      testData.orgs[2]
+    projects: [
+      testData.projects[4],
+      testData.projects[5]
     ],
-    update: { custom: { department: 'Space', location: { country: 'USA' } } }
+    update: { custom: { department: 'Space' }, name: 'Useless Project' }
   };
-  const params = {};
+  const params = { orgid: org.id };
   const method = 'PATCH';
   const req = getReq(params, body, method);
 
@@ -430,30 +435,57 @@ function patchOrgs(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(2);
-    chai.expect(json[0].custom.leader).to.equal(testData.orgs[1].custom.leader);
+    chai.expect(json[0].name).to.equal('Useless Project');
+    chai.expect(json[1].name).to.equal('Useless Project');
     chai.expect(json[0].custom.department).to.equal('Space');
-    chai.expect(json[0].custom.location.country).to.equal('USA');
+    chai.expect(json[1].custom.department).to.equal('Space');
     done();
   };
 
-  // PATCHs multiple orgs
-  apiController.patchOrgs(req, res);
+  // PATCHs multiple projects
+  apiController.patchProjects(req, res);
 }
 
 /**
- * @description Verifies mock DELETE request to delete multiple organizations.
+ * @description Verifies mock GET request to get multiple projects.
  */
-function deleteOrgs(done) {
+function getProjects(done) {
+  // Create request object
+  const body = { };
+  const params = { orgid: org.id };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // POSTs multiple projects
+  apiController.getProjects(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete multiple projects.
+ */
+function deleteProjects(done) {
   // Create request object
   const body = {
-    orgs: [
-      testData.orgs[1],
-      testData.orgs[2]
+    projects: [
+      testData.projects[4],
+      testData.projects[5]
     ],
     hardDelete: true
   };
-  const params = {};
+  const params = { orgid: org.id};
   const method = 'DELETE';
   const req = getReq(params, body, method);
 
@@ -470,8 +502,8 @@ function deleteOrgs(done) {
     done();
   };
 
-  // DELETEs multiple orgs
-  apiController.deleteOrgs(req, res);
+  // DELETEs multiple projects
+  apiController.deleteProjects(req, res);
 }
 
 /* ----------( Helper Functions )----------*/
