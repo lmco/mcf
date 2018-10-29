@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.605-mock-tests
+ * @module  test.501-user-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -16,10 +16,10 @@
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE a user, organization, project, and elements.
+ * GET, POST, PATCH, and DELETE a user.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const path = require('path');
 

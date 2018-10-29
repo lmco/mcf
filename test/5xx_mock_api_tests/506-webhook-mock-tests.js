@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.406-webhook-controller-tests
+ * @module  test.506-webhook-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,7 +15,8 @@
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests the Webhook Controller functionality.
+ * @description This tests mock requests of the API controller functionality:
+ * GET, POST, PATCH, and DELETE webhooks.
  */
 
 // NPM modules

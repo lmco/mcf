@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.605-mock-tests
+ * @module  test.502-org-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -16,10 +16,10 @@
  * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE a user, organization, project, and elements.
+ * GET, POST, PATCH, and DELETE organizations.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const path = require('path');
 
@@ -77,12 +77,8 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing non-admin user
-    UserController.removeUser(adminUser, newUser.username)
-    .then((delUser2) => {
-      chai.expect(delUser2.username).to.equal(testData.users[1].username);
-      // Find admin user
-      return testUtils.removeAdminUser();
-    })
+    testUtils.removeNonadminUser()
+    .then(() => testUtils.removeAdminUser())
     .then(() => {
       // Disconnect from the database
       db.disconnect();

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.404-element-controller-tests
+ * @module  test.504-element-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -13,9 +13,10 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This tests the Element Controller functionality.
+ * @description This tests mock requests of the API controller functionality:
+ * GET, POST, PATCH, and DELETE elements.
  */
 
 // NPM modules
