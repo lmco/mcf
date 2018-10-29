@@ -189,7 +189,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
     .then((savedProjects) => {
       // set savedProjects to createdProjects
       createdProjects = savedProjects;
-      // Initalize promise array
+      // Initialize promise array
       const promises = [];
       // Loop through each project
       arrProjects.forEach(project => {
@@ -791,7 +791,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
       }
 
       // Initialize element delete query
-      const elementDeleteQuery = { uid: { $regex: `^${foundProject.uid}` } };
+      const elementDeleteQuery = { id: { $regex: `^${foundProject.uid}` } };
 
       // Delete all elements on the project
       return ElementController.removeElements(reqUser, elementDeleteQuery, hardDelete);

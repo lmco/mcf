@@ -151,7 +151,7 @@ function createPackage(done) {
   ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Element was created, verify its properties
-    chai.expect(retElem.id).to.equal(testData.elements[0].id);
+    chai.expect(retElem.id).to.equal(utils.createUID(org.id, proj.id, testData.elements[0].id));
     chai.expect(retElem.name).to.equal(testData.elements[0].name);
     done();
   })
@@ -172,7 +172,7 @@ function findElement(done) {
   .then((retElem) => {
     // Element was found, verify properties
     chai.expect(retElem.name).to.equal(testData.elements[0].name);
-    chai.expect(retElem.id).to.equal(testData.elements[0].id);
+    chai.expect(retElem.id).to.equal(utils.createUID(org.id, proj.id, testData.elements[0].id));
     done();
   })
   .catch((error) => {
@@ -196,7 +196,7 @@ function createChildElement(done) {
   ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Element was created, verify its properties
-    chai.expect(retElem.id).to.equal(testData.elements[1].id);
+    chai.expect(retElem.id).to.equal(utils.createUID(org.id, proj.id, testData.elements[1].id));
     chai.expect(retElem.parent).to.not.equal(null);
     // Find the parent element
     return ElemController.findElement(adminUser, org.id, proj.id, testData.elements[1].id);
@@ -252,7 +252,7 @@ function createBlockWithUUID(done) {
   ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Expect element create to succeed, verify element properties
-    chai.expect(retElem.id).to.equal(testData.elements[2].id);
+    chai.expect(retElem.id).to.equal(utils.createUID(org.id, proj.id, testData.elements[2].id));
     chai.expect(retElem.parent).to.not.equal(null);
     chai.expect(retElem.uuid).to.equal(testData.elements[2].uuid);
     done();
@@ -277,7 +277,7 @@ function createRelationship(done) {
   ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Expect createElement() to succeed and verify element properties
-    chai.expect(retElem.id).to.equal(testData.elements[3].id);
+    chai.expect(retElem.id).to.equal(utils.createUID(org.id, proj.id, testData.elements[3].id));
     chai.expect(retElem.target).to.not.equal(null);
     chai.expect(retElem.source).to.not.equal(null);
     done();
@@ -403,7 +403,7 @@ function updateElement(done) {
   .then((retElem) => {
     // Expect findElement() to succeed
     // Verify the found element's properties
-    chai.expect(retElem.id).to.equal(testData.elements[0].id);
+    chai.expect(retElem.id).to.equal(utils.createUID(org.id, proj.id, testData.elements[0].id));
     chai.expect(retElem.name).to.equal(testData.elements[4].name);
     done();
   })
@@ -420,9 +420,9 @@ function updateElement(done) {
  */
 function updateMultipleElements(done) {
   // Create query to update elements
-  const uids = [utils.createUID(org.id, proj.id, testData.elements[0].id),
+  const ids = [utils.createUID(org.id, proj.id, testData.elements[0].id),
     utils.createUID(org.id, proj.id, testData.elements[1].id)];
-  const updateQuery = { uid: { $in: uids } };
+  const updateQuery = { id: { $in: ids } };
 
   // Create list of update parameters
   const updateObj = {
@@ -480,7 +480,7 @@ function softDeleteElement(done) {
   })
   .then((retElem) => {
     // Find succeeded, verify element properties
-    chai.expect(retElem.id).to.equal(testData.elements[0].id);
+    chai.expect(retElem.id).to.equal(utils.createUID(org.id, proj.id, testData.elements[0].id));
     done();
   })
   .catch((error) => {

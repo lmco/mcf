@@ -89,14 +89,16 @@ module.exports.project = {
  * @description Regular Expressions to validate element data
  *
  * id:
- *   - MUST start with lowercase letter or a number
- *   - MUST ONLY include lowercase letters, numbers, or '-'
- *   - Must be of length 1 or more
+ *   - Each segment MUST start with lowercase letter or a number
+ *   - Each segment MUST only include lowercase letters, numbers, or '-'
+ *   - each segment MUST be of length 1 or more
  *   Examples:
- *     - e1 [valid]
- *     - my-element [valid]
- *     - f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
- *     - myProject [invalid - cannot contain uppercase characters]
+ *      - orgid:projid:elementid [valid]
+ *      - orgid:projid:my-element [valid]
+ *      - orgid:projid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
+ *      - orgid:projid:-element [invalid - must start with a letter or a number]
+ *      - orgid:projid:myElement [invalid - cannot use uppercase characters]
+ *      - my-element [invalid - must contain org and proj segments]
  * name:
  *   - MUST start with a lowercase letter, uppercase letter, or number
  *   - MUST only include lowercase letters, uppercase letters, numbers,
@@ -110,7 +112,7 @@ module.exports.project = {
  *
  */
 module.exports.element = {
-  id: `^${id}$`,
+  id: `^${id}${utils.UID_DELIMITER}${id}${utils.UID_DELIMITER}${id}$`,
   name: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
   uuid: '([a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12})'
 };
