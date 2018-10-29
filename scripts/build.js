@@ -78,12 +78,6 @@ function build(_args) {
     gulp.src('./node_modules/swagger-ui-express/static/*.js')
     .pipe(gulp.dest('build/public/js'));
 
-    // Copy Bootstrap CSS
-    gulp.src('./node_modules/bootstrap/dist/css/bootstrap.min.css')
-    .pipe(gulp.dest('build/public/css'));
-    gulp.src('./node_modules/bootstrap/dist/css/bootstrap.min.css.map')
-    .pipe(gulp.dest('build/public/css'));
-
     // Copy Bootstrap JS
     gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
     .pipe(gulp.dest('build/public/js'));
