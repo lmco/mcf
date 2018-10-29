@@ -31,7 +31,6 @@ const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
 const Webhook = M.require('models.webhook');
-const UserController = M.require('controllers.user-controller');
 const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
@@ -65,16 +64,17 @@ describe(M.getModuleName(module.filename), function() {
  * collections.
  */
 function cleanDB(done) {
-  User.deleteMany({}) // Remove users
-  // Remove all orgs except for the 'default' org.
-  .then(() => Organization.deleteMany({ id: { $ne: M.config.server.defaultOrganizationId } }))
-  .then(() => Project.deleteMany({}))  // Remove projects
-  .then(() => Element.Element.deleteMany({}))  // Remove elements
-  .then(() => Webhook.Webhook.deleteMany({}))  // Remove webhooks
+  // Set retry number in case another async db operation is happening
+  this.retries(3);
+
+  User.collection.drop() // Remove users
+  .then(() => Organization.collection.drop()) // Remove organizations
+  .then(() => Project.collection.drop()) // Remove projects
+  .then(() => Element.Element.collection.drop())  // Remove elements
+  .then(() => Webhook.Webhook.collection.drop())  // Remove webhooks
   .then(() => done())
   .catch(error => {
     M.log.error(error);
-
     // Expect no error
     chai.expect(error).to.equal(null);
     done();
@@ -87,43 +87,24 @@ function cleanDB(done) {
  */
 function createDefaultOrg(done) {
   Organization.findOne({ id: M.config.server.defaultOrganizationId })
-  .exec((err, org) => {
-    chai.expect(err).to.equal(null);
-    if (org === null) {
-      const defOrg = new Organization({
-        id: M.config.server.defaultOrganizationId,
-        name: M.config.server.defaultOrganizationName
-      });
-      defOrg.save((saveErr) => {
-        chai.expect(saveErr).to.equal(null);
-        done();
-      });
-    }
-    else {
-      // Prune current users to ensure no deleted
-      // users are still part of the org
-      UserController.findUsers({ admin: true })
-      .then((users) => {
-        const newList = [];
+  .then((org) => {
+    // Verify return statement
+    chai.expect(org).to.equal(null);
 
-        // Add all existing users to the read and write list
-        Object.keys(users).forEach((user) => {
-          newList.push(users[user]._id);
-        });
-        org.permissions.read = newList;
-        org.permissions.write = newList;
+    // Create default org object
+    const defOrg = new Organization({
+      id: M.config.server.defaultOrganizationId,
+      name: M.config.server.defaultOrganizationName
+    });
 
-        // Save the updated org
-        return org.save();
-      })
-      .then(() => done())
-      .catch((err2) => {
-        M.log.error(err2);
-
-        // Expect no error
-        chai.expect(err2).to.equal(null);
-        done();
-      });
-    }
+    // Save the default org
+    return defOrg.save();
+  })
+  .then(() => done())
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
   });
 }
