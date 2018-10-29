@@ -102,7 +102,7 @@ function initApp() {
     // Load the plugin routes
     if (M.config.server.plugins.enabled) {
       const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
-      const PluginRouter = require(PluginRoutesPath); // eslint-disable-line global-require
+      const PluginRouter = require(PluginRoutesPath).router; // eslint-disable-line global-require
       app.use('/plugins', PluginRouter);
     }
 

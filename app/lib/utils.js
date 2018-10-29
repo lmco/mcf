@@ -21,7 +21,6 @@
 // Node modules
 const assert = require('assert');
 const path = require('path');
-const fs = require('fs');
 
 /**
  * @description Provides time unit conversions.
@@ -41,39 +40,6 @@ module.exports.timeConversions = {
 module.exports.UID_DELIMITER = ':';
 
 /**
- * @description Gets and returns an array of the names of all plugins
- * contained in the MBEE plugins directory. If no plugins are installed,
- * an empty array is returned.
- *
- * @return {Array} Array of MBEE plugins
- */
-function getPlugins() {
-  const arrPlugins = [];
-  const pluginPath = path.join(__dirname, '..', '..', 'plugins');
-
-  // If plugins are not enabled, return the empty array
-  if (!M.config.server.plugins.enabled) {
-    return arrPlugins;
-  }
-
-  // Loop over plugins defined in config
-  for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
-    // Check that the plugin exists and has a package.json file
-    const plugin = M.config.server.plugins.plugins[i];
-    const pkgPath = path.join(pluginPath, plugin.name, 'package.json');
-
-    // If no package.json skip this plugin
-    if (!fs.existsSync(pkgPath)) {
-      continue;
-    }
-
-    // If plugin exists, append it to the array
-    arrPlugins.push({ name: plugin.name, title: plugin.title });
-  }
-  return arrPlugins;
-}
-
-/**
  * @description Defines a render utility wrapper for the Express res.render
  * function to define and pass in default options.
  *
@@ -84,7 +50,8 @@ function getPlugins() {
  */
 module.exports.render = function(req, res, name, params) {
   const opts = params || {};
-  opts.pluginNames = getPlugins();
+  // eslint-disable-next-line global-require
+  opts.pluginNames = require(path.join(M.root, 'plugins', 'routes.js')).loadedPlugins;
   opts.ui = opts.ui || M.config.server.ui;
   opts.user = opts.user || ((req.user) ? req.user.getPublicData() : '');
   opts.title = opts.title || 'Model-Based Engineering Environment';
