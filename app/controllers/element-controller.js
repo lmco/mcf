@@ -81,7 +81,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     // Sanitize query input
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
-    const projectUID = utils.createUID(orgID, projID);
+    const projectUID = utils.createID(orgID, projID);
 
     const searchParams = { id: { $regex: `^${projectUID}` }, deleted: false };
 
@@ -178,7 +178,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
     // Loop through each element
     arrElements.forEach((element) => {
       // Generate unique UID for every element
-      const uid = utils.createUID(orgID, projID, element.id);
+      const uid = utils.createID(orgID, projID, element.id);
       arrUID.push(uid);
       element.uid = uid;
 
@@ -284,7 +284,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       packageArray.forEach((pack) => {
         // If the packages parent is also being created, set its _id
         if (pack.$parent) {
-          const packID = utils.createUID(orgID, projID, pack.$parent);
+          const packID = utils.createID(orgID, projID, pack.$parent);
           if (packIDs.includes(packID)) {
             pack.parent = packageArray.filter(p => p.id === packID)[0]._id;
             pack.$parent = null;
@@ -298,7 +298,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       relationshipArray.forEach((rel) => {
         // If the relationships target is also being created, set its _id
         if (rel.$target) {
-          const targetID = utils.createUID(orgID, projID, rel.$target);
+          const targetID = utils.createID(orgID, projID, rel.$target);
           if (relIDs.includes(targetID)) {
             rel.target = relationshipArray.filter(r => r.id === targetID)[0]._id;
           }
@@ -306,7 +306,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
 
         // If the relationships source is also being created, set its _id
         if (rel.$source) {
-          const sourceID = utils.createUID(orgID, projID, rel.$target);
+          const sourceID = utils.createID(orgID, projID, rel.$target);
           if (relIDs.includes(sourceID)) {
             rel.source = relationshipArray.filter(r => r.id === sourceID)[0]._id;
           }
@@ -575,7 +575,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     const elemID = sani.sanitize(elementID);
-    const elemUID = utils.createUID(orgID, projID, elemID);
+    const elemUID = utils.createID(orgID, projID, elemID);
 
     // Search for an element that matches the id or uuid
     let searchParams = { $and: [{ $or: [{ id: elemUID },
@@ -708,8 +708,8 @@ function createElement(reqUser, element) {
 
     // Sanitize query inputs
     const elemID = sani.sanitize(element.id);
-    const splitProjectUID = utils.parseUID(sani.sanitize(element.projectUID));
-    const elemUID = utils.createUID(splitProjectUID[0], splitProjectUID[1], elemID);
+    const splitProjectUID = utils.parseID(sani.sanitize(element.projectUID));
+    const elemUID = utils.createID(splitProjectUID[0], splitProjectUID[1], elemID);
     const elementType = utils.toTitleCase(sani.sanitize(element.type));
 
     // Initialize foundProject

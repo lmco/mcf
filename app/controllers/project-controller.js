@@ -170,7 +170,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
 
       // Set the uid and org for each project
       Object(arrProjects).forEach((project) => {
-        project.uid = utils.createUID(org.id, project.id);
+        project.uid = utils.createID(org.id, project.id);
         project.org = org._id;
       });
 
@@ -199,7 +199,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
           id: 'model',
           type: 'Package',
           parent: null,
-          projectUID: utils.createUID(sani.sanitize(organizationID), project.id)
+          projectUID: utils.createID(sani.sanitize(organizationID), project.id)
         };
         // Push the save of the element to the promise array
         promises.push(ElementController.createElement(reqUser, rootElement));
@@ -447,7 +447,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
-    const projUID = utils.createUID(orgID, projID);
+    const projUID = utils.createID(orgID, projID);
 
     // Set search Params for projUID and deleted = false
     const searchParams = { uid: projUID, deleted: false };
@@ -605,7 +605,7 @@ function createProject(reqUser, project) {
           write: [reqUser._id],
           admin: [reqUser._id]
         },
-        uid: utils.createUID(orgID, projID),
+        uid: utils.createID(orgID, projID),
         custom: custom,
         visibility: visibility
       });
@@ -621,7 +621,7 @@ function createProject(reqUser, project) {
         id: 'model',
         type: 'Package',
         parent: null,
-        projectUID: utils.createUID(orgID, projID)
+        projectUID: utils.createID(orgID, projID)
       };
       // Save  root model element
       return ElementController.createElement(reqUser, rootElement);

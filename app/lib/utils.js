@@ -38,7 +38,7 @@ module.exports.timeConversions = {
  * The string used as the UID delimiter.
  * @type {string}
  */
-module.exports.UID_DELIMITER = ':';
+module.exports.ID_DELIMITER = ':';
 
 /**
  * @description Gets and returns an array of the names of all plugins
@@ -214,9 +214,9 @@ module.exports.assertAdmin = function(user) {
  * @param {String} args - An arbitrary number of strings to be appended.
  * @return {String} args with uid delimiter
  */
-module.exports.createUID = function(...args) {
+module.exports.createID = function(...args) {
   this.assertType(args, 'string');
-  return args.join(this.UID_DELIMITER);
+  return args.join(this.ID_DELIMITER);
 };
 
 /**
@@ -226,17 +226,17 @@ module.exports.createUID = function(...args) {
  * @param {String} uid - The uid.
  * @return {String} uid with delimiter
  */
-module.exports.parseUID = function(uid) {
-  if (!uid.includes(this.UID_DELIMITER)) {
+module.exports.parseID = function(uid) {
+  if (!uid.includes(this.ID_DELIMITER)) {
     throw new M.CustomError('Invalid UID.', 400);
   }
-  return uid.split(this.UID_DELIMITER);
+  return uid.split(this.ID_DELIMITER);
 };
 
 /**
  * @description Title-cases a string.
  *
- * @param {String} s - The stringto be title-cased
+ * @param {String} s - The string to be title-cased
  *  @param {boolean} keepUpper- Boolean indicating wither or not keep uppercase characters as is
  * @return {String} the word with upper case
  */

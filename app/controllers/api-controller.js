@@ -1648,14 +1648,14 @@ function patchElements(req, res) {
   // No elements provided, update all elements in the project
   if (!req.body.hasOwnProperty('elements')) {
     // Query finds all elements that start with 'orgid:projectid:'
-    updateQuery = { id: { $regex: `^${sani.sanitize(utils.createUID(
+    updateQuery = { id: { $regex: `^${sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid
     ))}:` } };
   }
   // Element objects provided, update all
   else if (req.body.elements.every(e => typeof e === 'object')) {
     // Query finds all element by their id
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e.id
     )));
     updateQuery = { id: { $in: uids } };
@@ -1664,7 +1664,7 @@ function patchElements(req, res) {
   else if (req.body.elements.every(e => typeof e === 'string')) {
     // Query finds all elements by their id, generated from orgid and projectid
     // in the request parameters
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e
     )));
     updateQuery = { id: { $in: uids } };
@@ -1726,14 +1726,14 @@ function deleteElements(req, res) {
   // No elements provided, delete all elements in the project
   if (!req.body.hasOwnProperty('elements')) {
     // Query finds all elements that start with 'orgid:projectid:'
-    deleteQuery = { id: { $regex: `^${sani.sanitize(utils.createUID(
+    deleteQuery = { id: { $regex: `^${sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid
     ))}:` } };
   }
   // Element objects provided, delete all
   else if (req.body.elements.every(e => typeof e === 'object')) {
     // Query finds all element by their id
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e.id
     )));
     deleteQuery = { id: { $in: uids } };
@@ -1742,7 +1742,7 @@ function deleteElements(req, res) {
   else if (req.body.elements.every(e => typeof e === 'string')) {
     // Query finds all elements by their id, generated from orgid and projectid
     // in the request parameters
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e
     )));
     deleteQuery = { id: { $in: uids } };
@@ -1827,7 +1827,7 @@ function postElement(req, res) {
   }
 
   // Generate the project UID from url parameters
-  const projUID = utils.createUID(req.params.orgid, req.params.projectid);
+  const projUID = utils.createID(req.params.orgid, req.params.projectid);
 
   // If project UID was provided in the body, ensure it matches project UID from params
   if (req.body.hasOwnProperty('projectUID') && (projUID !== req.body.projectUID)) {

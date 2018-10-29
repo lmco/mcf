@@ -112,7 +112,7 @@ module.exports.project = {
  *
  */
 module.exports.element = {
-  id: `^${id}${utils.UID_DELIMITER}${id}${utils.UID_DELIMITER}${id}$`,
+  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
   name: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
   uuid: '([a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12})'
 };
@@ -201,5 +201,5 @@ module.exports.url = {
  *      - my-webhook [invalid - must contain org and proj segments]
  */
 module.exports.webhook = {
-  id: `^${id}${utils.UID_DELIMITER}${id}${utils.UID_DELIMITER}${id}$`
+  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };

@@ -173,10 +173,10 @@ function createProject(done) {
     chai.expect(proj.id).to.equal(testData.projects[0].id);
     chai.expect(proj.name).to.equal(testData.projects[0].name);
     chai.expect(proj.custom.builtFor).to.equal(projData.custom.builtFor);
-    return Element.Element.find({ id: utils.createUID(org.id, project.id, 'model') });
+    return Element.Element.find({ id: utils.createID(org.id, project.id, 'model') });
   })
   .then(element => {
-    chai.expect(element[0].id).to.equal(utils.createUID(org.id, project.id, 'model'));
+    chai.expect(element[0].id).to.equal(utils.createID(org.id, project.id, 'model'));
     done();
   })
   .catch((error) => {
@@ -202,8 +202,8 @@ function createMultipleProjects(done) {
     // Verify the projects were created
     chai.expect(projects.length).to.equal(2);
     // Create array of elementUID's
-    const elementUIDs = [utils.createUID(org.id, testData.projects[4].id, 'model'),
-      utils.createUID(org.id, testData.projects[5].id, 'model')];
+    const elementUIDs = [utils.createID(org.id, testData.projects[4].id, 'model'),
+      utils.createID(org.id, testData.projects[5].id, 'model')];
     // Query for elements
     return Element.Element.find({ id: { $in: elementUIDs } });
   })
@@ -754,7 +754,7 @@ function setPerm(done) {
 function softDeleteProject(done) {
   // Create an element via the Element model
   const elem = new Element.Block({
-    id: utils.createUID(org.id, project.id, testData.elements[1].id),
+    id: utils.createID(org.id, project.id, testData.elements[1].id),
     project: project._id
   });
 

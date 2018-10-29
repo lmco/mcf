@@ -244,8 +244,8 @@ ElementSchema.pre('validate', function() {
     }
 
     // Create the parent id for searching
-    const idParts = utils.parseUID(this.id);
-    const parentID = utils.createUID(idParts[0], idParts[1], this.$parent);
+    const idParts = utils.parseID(this.id);
+    const parentID = utils.createID(idParts[0], idParts[1], this.$parent);
 
     // Find the parent to update it
     Element.findOne({ id: parentID }) // eslint-disable-line no-use-before-define
@@ -293,9 +293,9 @@ RelationshipSchema.pre('validate', function() {
     }
 
     // Create the target and source IDs for searching
-    const idParts = utils.parseUID(this.id);
-    const targetID = utils.createUID(idParts[0], idParts[1], this.$target);
-    const sourceID = utils.createUID(idParts[0], idParts[1], this.$source);
+    const idParts = utils.parseID(this.id);
+    const targetID = utils.createID(idParts[0], idParts[1], this.$target);
+    const sourceID = utils.createID(idParts[0], idParts[1], this.$source);
 
     // Find the target element
     Element.findOne({ id: targetID }) // eslint-disable-line no-use-before-define
@@ -345,7 +345,7 @@ ElementSchema.statics.getValidTypes = function() {
  */
 ElementSchema.methods.getPublicData = function() {
   return {
-    id: utils.parseUID(this.id)[2],
+    id: utils.parseID(this.id)[2],
     uuid: this.uuid,
     name: this.name,
     project: this.project,
