@@ -222,10 +222,7 @@ function getOrgs(req, res) {
   OrgController.findOrgs(req.user, softDeleted)
   .then((orgs) => {
     // Return only public organization data
-    const orgsPublicData = [];
-    for (let i = 0; i < orgs.length; i++) {
-      orgsPublicData.push(orgs[i].getPublicData());
-    }
+    const orgsPublicData = orgs.map(o => o.getPublicData());
 
     // Verify orgs public data array is not empty
     if (orgsPublicData.length === 0) {
@@ -1561,9 +1558,18 @@ function getElements(req, res) {
   // NOTE: findElements() sanitizes req.params.orgid and req.params.projectid
   ElementController.findElements(req.user, req.params.orgid, req.params.projectid, softDeleted)
   .then((elements) => {
-    // Return a 200: OK and elements
+    // Return only public element data
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // Verify elements public data array is not empty
+    if (elementsPublicData.length === 0) {
+      const error = new M.CustomError('No elements found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements));
+    return res.status(200).send(formatJSON(elementsPublicData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1599,7 +1605,7 @@ function postElements(req, res) {
   .then((elements) => {
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements));
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1642,26 +1648,26 @@ function patchElements(req, res) {
   // No elements provided, update all elements in the project
   if (!req.body.hasOwnProperty('elements')) {
     // Query finds all elements that start with 'orgid:projectid:'
-    updateQuery = { uid: { $regex: `^${sani.sanitize(utils.createUID(
+    updateQuery = { id: { $regex: `^${sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid
     ))}:` } };
   }
   // Element objects provided, update all
   else if (req.body.elements.every(e => typeof e === 'object')) {
-    // Query finds all element by their uid
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    // Query finds all element by their id
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e.id
     )));
-    updateQuery = { uid: { $in: uids } };
+    updateQuery = { id: { $in: uids } };
   }
   // Element IDs provided, update all
   else if (req.body.elements.every(e => typeof e === 'string')) {
-    // Query finds all elements by their uid, generated from orgid and projectid
+    // Query finds all elements by their id, generated from orgid and projectid
     // in the request parameters
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e
     )));
-    updateQuery = { uid: { $in: uids } };
+    updateQuery = { id: { $in: uids } };
   }
   // No valid element data was provided, reject
   else {
@@ -1675,7 +1681,7 @@ function patchElements(req, res) {
   .then((elements) => {
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements));
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1720,26 +1726,26 @@ function deleteElements(req, res) {
   // No elements provided, delete all elements in the project
   if (!req.body.hasOwnProperty('elements')) {
     // Query finds all elements that start with 'orgid:projectid:'
-    deleteQuery = { uid: { $regex: `^${sani.sanitize(utils.createUID(
+    deleteQuery = { id: { $regex: `^${sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid
     ))}:` } };
   }
   // Element objects provided, delete all
   else if (req.body.elements.every(e => typeof e === 'object')) {
-    // Query finds all element by their uid
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    // Query finds all element by their id
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e.id
     )));
-    deleteQuery = { uid: { $in: uids } };
+    deleteQuery = { id: { $in: uids } };
   }
   // Element IDs provided, delete all
   else if (req.body.elements.every(e => typeof e === 'string')) {
-    // Query finds all elements by their uid, generated from orgid and projectid
+    // Query finds all elements by their id, generated from orgid and projectid
     // in the request parameters
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createUID(
+    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e
     )));
-    deleteQuery = { uid: { $in: uids } };
+    deleteQuery = { id: { $in: uids } };
   }
   // No valid element data was provided, reject
   else {
@@ -1752,7 +1758,7 @@ function deleteElements(req, res) {
   .then((elements) => {
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements));
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1790,7 +1796,7 @@ function getElement(req, res) {
   .then((element) => {
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element));
+    return res.status(200).send(formatJSON(element.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1821,7 +1827,7 @@ function postElement(req, res) {
   }
 
   // Generate the project UID from url parameters
-  const projUID = utils.createUID(req.params.orgid, req.params.projectid);
+  const projUID = utils.createID(req.params.orgid, req.params.projectid);
 
   // If project UID was provided in the body, ensure it matches project UID from params
   if (req.body.hasOwnProperty('projectUID') && (projUID !== req.body.projectUID)) {
@@ -1840,7 +1846,7 @@ function postElement(req, res) {
   .then((element) => {
     // Return 200: OK and created element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element));
+    return res.status(200).send(formatJSON(element.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1873,7 +1879,7 @@ function patchElement(req, res) {
   .then((element) => {
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element));
+    return res.status(200).send(formatJSON(element.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1913,7 +1919,7 @@ function deleteElement(req, res) {
   .then((element) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element
-    return res.status(200).send(formatJSON(element));
+    return res.status(200).send(formatJSON(element.getPublicData()));
   })
   .catch((error) => res.status(error.status).send(error));
 }

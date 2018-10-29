@@ -210,7 +210,7 @@ function getWebhook(done) {
  */
 function triggerWebhook(done) {
   // Create base64 encoded webhook id
-  const webhookUID = utils.createUID(org.id, proj.id, testData.webhooks[2].id);
+  const webhookUID = utils.createID(org.id, proj.id, testData.webhooks[2].id);
   const encodedID = Buffer.from(webhookUID).toString('base64');
 
   // Add token to headers
