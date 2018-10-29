@@ -110,6 +110,7 @@ describe(M.getModuleName(module.filename), () => {
     })
     .then((delAdminUser) => {
       chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
+      db.disconnect();
       done();
     })
     .catch((error) => {
