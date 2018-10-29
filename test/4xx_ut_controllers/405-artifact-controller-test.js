@@ -136,6 +136,7 @@ function uploadArtifact(done) {
     id: testData.artifacts[0].id,
     filename: testData.artifacts[0].filename
   };
+
   // Create artifact
   ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData, artifactPNG)
   .then((artifact) => {
@@ -194,7 +195,7 @@ function updateArtifact(done) {
 
   // Create artfact to update object
   const artObjData = {
-    filename: artifactID
+    filename: testData.artifacts[2].filename
   };
   // Create artifact
   ArtifactController.updateArtifact(adminUser, org.id, proj.id, artifactID, artObjData, artifactPNG)

@@ -124,16 +124,23 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
       return artifact.save();
     })
     .then((_artifact) => {
+      // Save created artifact
       createdArtifact = _artifact;
+
+      // Create the main artifact path
+      const artifactPath = path.join(M.root, M.config.artifact.path);
+
       // Check if artifact file exist,
       //     NOT Exist - Returns calling addArtifactOS()
       //     Exist - Returns resolve Artifact
-      return (!fs.existsSync(path.join(M.artifactPath, hashedName.substring(0, 2), hashedName)))
+      return (!fs.existsSync(path.join(artifactPath, hashedName.substring(0, 2), hashedName)))
         ? addArtifactOS(hashedName, artifactBlob)
         : resolve(_artifact);
     })
     .then(() => resolve(createdArtifact))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => {
+      return reject(M.CustomError.parseCustomError(error));
+    });
   });
 }
 
@@ -205,7 +212,6 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
 
       // Remove 'id' from artifactToUpdate
       // Note: id is immutable and cannot be changed
-      // TODO: Talk with Austin
       delete artifactToUpdate.id;
 
       // Define and get a list of artifact keys to update
@@ -320,7 +326,7 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
       return Promise.all(arrPromises);
     })
     .then(() => foundArtifact.remove())
-    .then((_deletedArtifact) => resolve())
+    .then(() => resolve())
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -428,10 +434,12 @@ function addArtifactOS(hashedName, artifactBlob) {
     // Creates main artifact directory if not exist
     createStorageDirectory()
     .then(() => {
+      // Create the main artifact path
+      const artifactPath = path.join(M.root, M.config.artifact.path);
       // Set sub folder path and artifact path
       // Note: Folder name is the first 2 characters from the generated hash
-      const folderPath = path.join(M.artifactPath, hashedName.substring(0, 2));
-      const artifactPath = path.join(folderPath, hashedName);
+      const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
+      const filePath = path.join(folderPath, hashedName);
 
       // Check sub folder exist
       fs.exists(folderPath, (foldExists) => {
@@ -446,10 +454,10 @@ function addArtifactOS(hashedName, artifactBlob) {
             }
           });
           // Check if file already exist
-          fs.exists(artifactPath, (fileExist) => {
+          fs.exists(filePath, (fileExist) => {
             if (!fileExist) {
               // Write out artifact file, defaults to 666 permission
-              fs.writeFileSync(artifactPath, artifactBlob, (writeArtifactError) => {
+              fs.writeFileSync(filePath, artifactBlob, (writeArtifactError) => {
                 if (writeArtifactError) {
                   // Error occurred, log it
                   return reject(new M.CustomError(writeArtifactError.message, 500, 'warn'));
@@ -474,14 +482,16 @@ function addArtifactOS(hashedName, artifactBlob) {
  */
 function removeArtifactOS(hashName) {
   return new Promise((resolve, reject) => {
+    // Create the main artifact path
+    const artifactPath = path.join(M.root, M.config.artifact.path);
     // Create sub folder path and artifact path
     // Note: Folder name is the first 2 characters from the generated hash
-    const folderPath = path.join(M.artifactPath, hashName.substring(0, 2));
-    const artifactPath = path.join(folderPath, hashName);
+    const folderPath = path.join(artifactPath, hashName.substring(0, 2));
+    const filePath = path.join(folderPath, hashName);
 
     // Remove the artifact file
     // Note: Use sync to ensure file is removed before advancing
-    fs.unlinkSync(artifactPath, (error) => {
+    fs.unlinkSync(filePath, (error) => {
       // Check directory NOT exist
       if (error) {
         return reject(new M.CustomError(error.message, 500, 'warn'));
@@ -514,12 +524,15 @@ function removeArtifactOS(hashName) {
  */
 function createStorageDirectory() {
   return new Promise((resolve, reject) => {
+    // Create the main artifact path
+    const artifactPath = path.join(M.root, M.config.artifact.path);
+
     // Check file exist
-    fs.exists(M.artifactPath, (exists) => {
+    fs.exists(artifactPath, (exists) => {
       // Check directory NOT exist
       if (!exists) {
         // Directory does NOT exist, create it
-        fs.mkdir(M.artifactPath, (error) => {
+        fs.mkdir(artifactPath, (error) => {
           // Check for errors
           if (error) {
             M.log.error(error);

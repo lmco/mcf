@@ -187,24 +187,32 @@ module.exports.url = {
  * @description Regular Expressions to validate artifact data
  *
  * filename:
- *   - MUST start with a lowercase letter, uppercase letter, or number
- *   - MUST only include lowercase letters, uppercase letters, numbers,
+ *   - MUST start with a letter or number
+ *   - MUST ONLY include lowercase letters, uppercase letters, numbers,
  *     '-', or whitespace
  *   - MUST be of length 1 or more
- * id:
- *   - MUST start with lowercase letter or a number
- *   - MUST ONLY include lowercase letters, numbers, or '-'
- *   - Must be of length 1 or more
  *   Examples:
- *     - e1 [valid]
- *     - my-element [valid]
- *     - f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
- *     - myProject [invalid - cannot contain uppercase characters]
+ *     - "Org 1" [valid]
+ *     - "An organization name - with dashes" [valid]
+ *     - "No invalid chars (e.g. ', $, &, etc)" [invalid - no special characters]
+ *     - " " [invalid - cannot start with a space]
  *
+ * id:
+ *   - Each segment MUST start with lowercase letter or a number
+ *   - Each segment MUST only include lowercase letters, numbers, or '-'
+ *   - each segment MUST be of length 1 or more
+ *   Examples:
+ *      - orgid:projid:artifactid [valid]
+ *      - orgid:projid:my-artifact [valid]
+ *      - orgid:projid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
+ *      - orgid:projid:-artifact [invalid - must start with a letter or a number]
+ *      - orgid:projid:myArtifact [invalid - cannot use uppercase characters]
+ *      - my-artifact [invalid - must contain org and proj segments]
  */
+
 module.exports.artifact = {
-  filename: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
-  id: '([a-z0-9])([-_a-z0-9:]){0,}'
+  filename: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$',
+  id: `^${id}${utils.UID_DELIMITER}${id}${utils.UID_DELIMITER}${id}$`
 };
 
 /**

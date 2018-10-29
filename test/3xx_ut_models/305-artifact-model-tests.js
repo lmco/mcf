@@ -115,9 +115,12 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates an artifact via model and save it to the database.
  */
 function uploadArtifact(done) {
+  // Create the full artifact ID
+  const artifactID = utils.createUID(org.id, project.id, testData.artifacts[0].id);
+
   // Upload new artifact
   const artifact = new Artifact();
-  artifact.id = utils.createUID(org.id, project.id, testData.artifacts[0].id);
+  artifact.id = artifactID;
   artifact.filename = testData.artifacts[0].filename;
   artifact.contentType = path.extname(testData.artifacts[0].filename);
   artifact.project = project;
@@ -127,6 +130,8 @@ function uploadArtifact(done) {
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
+
+  // Get the test file
   artifactPNG = fs.readFileSync(imgPath);
   artifact.hash = mbeeCrypto.sha256Hash(artifactPNG);
 
@@ -149,6 +154,7 @@ function updateArtifactFile(done) {
   // Find the artifact previously uploaded.
   Artifact.find({ id: artifactFillId, deleted: false })
   .then((artifactToUpdate) => {
+    // Update the filename
     artifactToUpdate[0].filename = testData.artifacts[2].filename;
     // Save the updated artifact
     return artifactToUpdate[0].save();

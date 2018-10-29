@@ -386,19 +386,19 @@
     {
       "id": "artifact00",
       "filename": "logo.png",
-      "location": "/build/public/img/"
+      "location": "/test/test_data/"
 
     },
     {
       "id": "artifact01",
       "filename": "logo.png",
-      "location": "/build/public/img/"
+      "location": "/test/test_data/"
 
     },
     {
       "id": "artifact01",
-      "filename": "fa-brands-400.svg",
-      "location": "/build/public/img/webfonts"
+      "filename": "mbee-logo-alt.png",
+      "location": "/test/test_data/"
 
     }
   ]
