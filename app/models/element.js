@@ -63,8 +63,6 @@ const options = { discriminatorKey: 'type' };
  * @description The base schema definition inherited by all other element types.
  *
  * @property {String} id - The elements non-unique element ID.
- * @property {String} uid - The elements unique id name-spaced by its project
- * and organization.
  * @property {String} uuid - The elements RFC 4122 id, automatically generated
  * or taken from another source if imported.
  * @property {String} name - THe elements non-unique name.
@@ -83,6 +81,7 @@ const ElementSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
+    unique: true,
     match: RegExp(validators.element.id),
     maxlength: [64, 'Element ID is too long'],
     minlength: [2, 'Element ID is too short'],
@@ -99,29 +98,6 @@ const ElementSchema = new mongoose.Schema({
       }
       // No change, return the value
       return this.id;
-    }
-  },
-  uid: {
-    type: String,
-    required: true,
-    index: true,
-    unique: true,
-    match: RegExp(validators.element.uid),
-    maxlength: [255, 'Element UID is too long'],
-    minlength: [2, 'Element UID is too short'],
-    set: function(_uid) {
-      // Check value undefined
-      if (typeof this.uid === 'undefined') {
-        // Return value to set it
-        return _uid;
-      }
-      // Check value NOT equal to db value
-      if (_uid !== this.uid) {
-        // Immutable field, return error
-        return new M.CustomError('UID cannot be changed.', 400, 'warn');
-      }
-      // No change, return the value
-      return this.uid;
     }
   },
   uuid: {
@@ -267,12 +243,12 @@ ElementSchema.pre('validate', function() {
       return resolve();
     }
 
-    // Create the parent UID for searching
-    const uidParts = utils.parseUID(this.uid);
-    const parentUID = utils.createUID(uidParts[0], uidParts[1], this.$parent);
+    // Create the parent id for searching
+    const idParts = utils.parseID(this.id);
+    const parentID = utils.createID(idParts[0], idParts[1], this.$parent);
 
     // Find the parent to update it
-    Element.findOne({ uid: parentUID }) // eslint-disable-line no-use-before-define
+    Element.findOne({ id: parentID }) // eslint-disable-line no-use-before-define
     .then((parent) => {
       // Error Check: ensure parent element type is package
       if (parent.type !== 'Package') {
@@ -316,19 +292,19 @@ RelationshipSchema.pre('validate', function() {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
-    // Create the target and source UIDs for searching
-    const uidParts = utils.parseUID(this.uid);
-    const targetUID = utils.createUID(uidParts[0], uidParts[1], this.$target);
-    const sourceUID = utils.createUID(uidParts[0], uidParts[1], this.$source);
+    // Create the target and source IDs for searching
+    const idParts = utils.parseID(this.id);
+    const targetID = utils.createID(idParts[0], idParts[1], this.$target);
+    const sourceID = utils.createID(idParts[0], idParts[1], this.$source);
 
     // Find the target element
-    Element.findOne({ uid: targetUID }) // eslint-disable-line no-use-before-define
+    Element.findOne({ id: targetID }) // eslint-disable-line no-use-before-define
     .then((target) => {
       // Set relationship target reference
       this.target = this.target || target;
 
       // Find the source element
-      return Element.findOne({ uid: sourceUID }); // eslint-disable-line no-use-before-define
+      return Element.findOne({ id: sourceID }); // eslint-disable-line no-use-before-define
     })
     .then((source) => {
       // Set relationship source reference
@@ -361,6 +337,22 @@ ElementSchema.methods.getValidTypes = function() {
 
 ElementSchema.statics.getValidTypes = function() {
   return ElementSchema.methods.getValidTypes();
+};
+
+/**
+ * @description Returns the element public data
+ * @memberOf ElementSchema
+ */
+ElementSchema.methods.getPublicData = function() {
+  return {
+    id: utils.parseID(this.id)[2],
+    uuid: this.uuid,
+    name: this.name,
+    project: this.project,
+    parent: this.parent,
+    documentation: this.documentation,
+    custom: this.custom
+  };
 };
 
 /* ---------------------------( Element Indexes )---------------------------- */

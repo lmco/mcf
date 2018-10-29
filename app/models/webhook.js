@@ -171,7 +171,7 @@ IncomingWebhookSchema.methods.verifyAuthority = function(value) {
  */
 OutgoingWebhookSchema.methods.getPublicData = function() {
   return {
-    id: utils.parseUID(this.id)[2],
+    id: utils.parseID(this.id)[2],
     name: this.name,
     triggers: this.triggers,
     responses: this.responses,
@@ -185,7 +185,7 @@ OutgoingWebhookSchema.methods.getPublicData = function() {
  */
 IncomingWebhookSchema.methods.getPublicData = function() {
   return {
-    id: utils.parseUID(this.id)[2],
+    id: utils.parseID(this.id)[2],
     name: this.name,
     triggers: this.triggers,
     token: this.token,

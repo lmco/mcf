@@ -82,7 +82,7 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     const webID = sani.sanitize(webhookID);
-    const webUID = utils.createUID(orgID, projID, webID);
+    const webUID = utils.createID(orgID, projID, webID);
 
     // Search for a webhook that matches the given uid
     const findQuery = { id: webUID, deleted: false };
@@ -191,7 +191,7 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     const webID = sani.sanitize(webhookData.id);
-    const webhookUID = utils.createUID(orgID, projID, webID);
+    const webhookUID = utils.createID(orgID, projID, webID);
 
     // Verify another webhook with same ID does NOT exist
     findWebhooksQuery({ id: webhookUID })

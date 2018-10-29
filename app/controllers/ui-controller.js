@@ -220,7 +220,7 @@ function projectList(req, res) {
     // Loop through list and create reference page for each project
     projects.forEach(proj => {
       // set ref to split of uid and join with forward slashes
-      proj.ref = utils.parseUID(proj.uid).join('/');
+      proj.ref = utils.parseID(proj.uid).join('/');
     });
     utils.render(req, res, 'project-list', {
       title: 'MBEE | Model-Based Engineering Environment',
@@ -256,7 +256,7 @@ function project(req, res) {
   .then(foundElements => {
     elements = foundElements;
     elements.forEach(element => {
-      const uid = utils.parseUID(element.uid);
+      const uid = utils.parseID(element.uid);
       element.apiRef = `/api/orgs/${uid[0]}/projects/${uid[1]}/elements/${uid[2]}`;
     });
     const elementTree = elementSort.createElementsTree(elements);

@@ -30,7 +30,8 @@ const path = require('path');
 const Element = M.require('models.element');
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
-const db = M.require('lib/db');
+const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -127,10 +128,12 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates a root package element for test data project
  */
 function createRootPackage(done) {
+  // Create unique ID
+  const uniqueID = utils.createID(org.id, project.id, testData.elements[0].id);
+
   // Create the root package element object
   const newPackage = new Element.Package({
-    id: testData.elements[0].id,
-    uid: `${org.id}:${project.id}:${testData.elements[0].id}`,
+    id: uniqueID,
     name: testData.elements[0].name,
     project: project._id,
     parent: null
@@ -139,13 +142,10 @@ function createRootPackage(done) {
   // Save the root package element to the database
   newPackage.save()
   // Find the root package element
-  .then(() => Element.Package.findOne({
-    uid: `${org.id}:${project.id}:${testData.elements[0].id}` }))
+  .then(() => Element.Package.findOne({ id: uniqueID }))
   .then((retPackage) => {
     // Check the root package element saved correctly
-    chai.expect(retPackage.uid).to.equal(
-      `${org.id}:${project.id}:${testData.elements[0].id}`
-    );
+    chai.expect(retPackage.id).to.equal(uniqueID);
     chai.expect(retPackage.type).to.equal(testData.elements[0].type);
     done();
   })
@@ -165,15 +165,14 @@ function createBlock(done) {
   let pkg;
   // Find root package element created in createRootPackage test
   Element.Package.findOne({
-    uid: `${org.id}:${project.id}:${testData.elements[0].id}` })
+    id: utils.createID(org.id, project.id, testData.elements[0].id) })
   .then((_pkg) => {
     // Set function-global variable
     pkg = _pkg;
 
     // Create new block element object
     const newBlock = new Element.Block({
-      id: testData.elements[1].id,
-      uid: `${org.id}:${project.id}:${testData.elements[1].id}`,
+      id: utils.createID(org.id, project.id, testData.elements[1].id),
       name: testData.elements[1].name,
       project: project._id,
       parent: pkg._id
@@ -184,10 +183,9 @@ function createBlock(done) {
   })
   .then((createdBlock) => {
     // Check block element object saved correctly
-    chai.expect(createdBlock.uid).to.equal(
-      `${org.id}:${project.id}:${testData.elements[1].id}`
+    chai.expect(createdBlock.id).to.equal(
+      utils.createID(org.id, project.id, testData.elements[1].id)
     );
-
     chai.expect(createdBlock.name).to.equal(testData.elements[1].name);
     chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
     // Check block element has root package as its parent
@@ -215,7 +213,7 @@ function createRelationship(done) {
 
   // Start by grabbing the root package
   Element.Package.findOne({
-    uid: `${org.id}:${project.id}:${testData.elements[0].id}` })
+    id: utils.createID(org.id, project.id, testData.elements[0].id) })
   .then((_pkg) => {
     // Set function-global variable
     pkg = _pkg;
@@ -227,8 +225,7 @@ function createRelationship(done) {
 
     // Create the new relationship connecting the existing block
     const newRelationship = new Element.Relationship({
-      id: testData.elements[3].id,
-      uid: `${org.id}:${project.id}:${testData.elements[3].id}`,
+      id: utils.createID(org.id, project.id, testData.elements[3].id),
       name: testData.elements[3].name,
       project: project._id,
       parent: pkg._id,
@@ -241,10 +238,9 @@ function createRelationship(done) {
   })
   .then((createdRelationship) => {
     // Make sure it created what we expect and finish
-    chai.expect(createdRelationship.uid).to.equal(
-      `${org.id}:${project.id}:${testData.elements[3].id}`
+    chai.expect(createdRelationship.id).to.equal(
+      utils.createID(org.id, project.id, testData.elements[3].id)
     );
-
     chai.expect(createdRelationship.name).to.equal(testData.elements[3].name);
     chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
     chai.expect(createdRelationship.parent.toString()).to.equal(pkg._id.toString());
@@ -271,7 +267,7 @@ function createRelationship(done) {
  */
 function findBlock(done) {
   // Find the block
-  Element.Element.findOne({ id: testData.elements[1].id })
+  Element.Element.findOne({ id: utils.createID(org.id, project.id, testData.elements[1].id) })
   .then((element) => {
     // Verify found element is correct
     chai.expect(element.name).to.equal(testData.elements[1].name);
@@ -290,9 +286,13 @@ function findBlock(done) {
  */
 function updateBlock(done) {
   // Update the block
-  Element.Element.findOneAndUpdate({ id: testData.elements[1].id }, { name: 'No more looping' })
+  Element.Element.findOneAndUpdate(
+    { id: utils.createID(org.id, project.id, testData.elements[1].id) },
+    { name: 'No more looping' }
+  )
   // Find the updated element
-  .then(() => Element.Element.findOne({ id: testData.elements[1].id }))
+  .then(() => Element.Element.findOne({
+    id: utils.createID(org.id, project.id, testData.elements[1].id) }))
   .then((element) => {
     // Verify the found element was update successfully
     chai.expect(element.name).to.equal('No more looping');
@@ -312,8 +312,7 @@ function updateBlock(done) {
 function verifyBlankElemName(done) {
   // Create the block element object
   const newElement = new Element.Block({
-    id: testData.elements[5].id,
-    uid: `${org.id}:${project.id}:${testData.elements[5].id}`,
+    id: utils.createID(org.id, project.id, testData.elements[5].id),
     name: testData.elements[5].name,
     project: project._id,
     parent: null
@@ -323,8 +322,8 @@ function verifyBlankElemName(done) {
   newElement.save()
   .then((retElement) => {
     // Check the block element saved correctly
-    chai.expect(retElement.uid).to.equal(
-      `${org.id}:${project.id}:${testData.elements[5].id}`
+    chai.expect(retElement.id).to.equal(
+      utils.createID(org.id, project.id, testData.elements[5].id)
     );
     chai.expect(retElement.name).to.equal(testData.elements[5].name);
     done();
@@ -343,19 +342,19 @@ function verifyBlankElemName(done) {
 function deleteElements(done) {
   // Find and delete the element of type 'relationship'
   Element.Relationship.findOneAndRemove({
-    uid: `${org.id}:${project.id}:${testData.elements[3].id}` })
+    id: utils.createID(org.id, project.id, testData.elements[3].id) })
 
   // Find and delete the element of type 'Block'
   .then(() => Element.Block.findOneAndRemove({
-    uid: `${org.id}:${project.id}:${testData.elements[1].id}` }))
+    id: utils.createID(org.id, project.id, testData.elements[1].id) }))
 
   // Find and delete the element of type 'Package'
   .then(() => Element.Package.findOneAndRemove({
-    uid: `${org.id}:${project.id}:${testData.elements[0].id}` }))
+    id: utils.createID(org.id, project.id, testData.elements[0].id) }))
 
   // Find and delete the other elements
   .then(() => Element.Block.findOneAndRemove({
-    uid: `${org.id}:${project.id}:${testData.elements[5].id}` }))
+    id: utils.createID(org.id, project.id, testData.elements[5].id) }))
 
   // Attempt to find any elements
   .then(() => Element.Element.find())
