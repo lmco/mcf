@@ -126,10 +126,13 @@ function createOrgs(reqUser, arrOrgs) {
       assert.ok(reqUser.admin, 'User does not have permissions.');
       assert.ok(typeof arrOrgs === 'object', 'Orgs array is not an object');
       let index = 1;
-      // Ensure each org in arrOrgs has an ID that is a string
+      // Loop through orgs in through
       Object(arrOrgs).forEach((org) => {
+        // Ensure each org in arrOrgs has an ID that is a string
         assert.ok(org.hasOwnProperty('id'), `Org #${index} does not contain an id.`);
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
+        // Error Check: ensure object only contains valid keys
+        assert.ok(Organization.schema.validateObjectKeys(org), `Org #${index} contains invalid keys.`);
         index++;
       });
     }
@@ -211,6 +214,9 @@ function updateOrgs(reqUser, query, updateInfo) {
     try {
       assert.ok(typeof query === 'object', 'Update query is not an object.');
       assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
+      // Error Check: ensure object only contains valid keys
+      assert.ok(Organization.schema.validateObjectKeys(updateInfo),
+        'Updated information contains invalid keys.');
       // Loop through each desired update
       Object.keys(updateInfo).forEach((key) => {
         // Error Check: ensure user can update each field
@@ -521,6 +527,8 @@ function createOrg(reqUser, newOrgData) {
       assert.ok(newOrgData.hasOwnProperty('name'), 'Name not provided in request body.');
       assert.ok(typeof newOrgData.id === 'string', 'ID in request body is not a string.');
       assert.ok(typeof newOrgData.name === 'string', 'Name in request body is not a string.');
+      // Error Check: ensure object only contains valid keys
+      assert.ok(Organization.schema.validateObjectKeys(newOrgData), 'Org contains invalid keys.');
 
       // If custom data provided, validate type and sanitize
       if (utils.checkExists(['custom'], newOrgData)) {
@@ -597,6 +605,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof orgUpdated === 'object', 'Updated org is not an object');
+      // Error Check: ensure object only contains valid keys
+      assert.ok(Organization.schema.validateObjectKeys(orgUpdated), 'Org contains invalid keys.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
