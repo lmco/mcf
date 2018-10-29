@@ -57,17 +57,14 @@ describe(M.getModuleName(module.filename), () => {
  * items from all MongoDB collections.
  */
 function cleanDB(done) {
-  // Remove users
-  User.deleteMany({})
+  // Set retry number in case another async operation is happening
+  this.retries(3);
 
-  // Remove all orgs except for the 'default' org.
-  .then(() => Organization.deleteMany({ id: { $ne: M.config.server.defaultOrganizationId } }))
-  // Remove projects
-  .then(() => Project.deleteMany({}))
-  // Remove elements
-  .then(() => Element.Element.deleteMany({}))
-  // Remove webhooks
-  .then(() => Webhook.Webhook.deleteMany({}))
+  User.collection.drop() // Remove users
+  .then(() => Organization.collection.drop()) // Remove organizations
+  .then(() => Project.collection.drop()) // Remove projects
+  .then(() => Element.Element.collection.drop()) // Remove elements
+  .then(() => Webhook.Webhook.collection.drop()) // Remove webhooks
   .then(() => done())
   .catch(error => {
     M.log.error(error);

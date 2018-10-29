@@ -347,13 +347,16 @@ function updateMultipleOrgs(done) {
   // Update orgs
   OrgController.updateOrgs(adminUser, updateQuery, updateObj)
   .then((orgs) => {
+    // Define org0 and org1
+    const org0 = orgs.filter(o => o.id === testData.orgs[1].id)[0];
+    const org1 = orgs.filter(o => o.id === testData.orgs[4].id)[0];
     // Verify returned data
-    chai.expect(orgs[0].custom.leader).to.equal(testData.orgs[1].custom.leader);
-    chai.expect(orgs[0].custom.location.country).to.equal(updateObj.custom.location.country);
-    chai.expect(orgs[0].custom.department).to.equal(updateObj.custom.department);
-    chai.expect(orgs[1].custom.leader).to.equal(testData.orgs[4].custom.leader);
-    chai.expect(orgs[1].custom.location.state).to.equal(testData.orgs[4].custom.location.state);
-    chai.expect(orgs[1].custom.location.country).to.equal(updateObj.custom.location.country);
+    chai.expect(org0.custom.leader).to.equal(testData.orgs[1].custom.leader);
+    chai.expect(org0.custom.location.country).to.equal(updateObj.custom.location.country);
+    chai.expect(org0.custom.department).to.equal(updateObj.custom.department);
+    chai.expect(org1.custom.leader).to.equal(testData.orgs[4].custom.leader);
+    chai.expect(org1.custom.location.state).to.equal(testData.orgs[4].custom.location.state);
+    chai.expect(org1.custom.location.country).to.equal(updateObj.custom.location.country);
     done();
   })
   .catch((error) => {
@@ -455,7 +458,7 @@ function softDeleteProjectAndOrg(done) {
       id: testData.projects[0].id,
       name: testData.projects[0].name,
       org: retOrg._id,
-      uid: utils.createUID(testData.orgs[3].id, testData.projects[0].id)
+      uid: utils.createID(testData.orgs[3].id, testData.projects[0].id)
     });
 
     // Save the project to the database

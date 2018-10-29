@@ -113,7 +113,7 @@ function createProject(done) {
     id: testData.projects[0].id,
     name: testData.projects[0].name,
     org: org._id,
-    uid: utils.createUID(org.id, testData.projects[0].id)
+    uid: utils.createID(org.id, testData.projects[0].id)
   });
   // Save project model object to database
   newProject.save()

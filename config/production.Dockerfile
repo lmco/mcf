@@ -60,9 +60,5 @@ COPY ./build build
 COPY ./app  app
 COPY ./README.md README.md
 
-# Expose ports
-EXPOSE 6233
-EXPOSE 6234
-
 # Run server
 CMD ["node", "mbee.js", "start"]
