@@ -137,7 +137,7 @@ function createWebhook(done) {
   WebhookController.createWebhook(adminUser, org.id, proj.id, testData.webhooks[0])
   .then((newWebhook) => {
     // Verify returned data
-    chai.expect(newWebhook.id).to.equal(utils.createUID(org.id, proj.id, testData.webhooks[0].id));
+    chai.expect(newWebhook.id).to.equal(utils.createID(org.id, proj.id, testData.webhooks[0].id));
     chai.expect(newWebhook.name).to.equal(testData.webhooks[0].name);
     chai.expect(newWebhook.triggers[0]).to.equal(testData.webhooks[0].triggers[0]);
     done();
@@ -179,7 +179,7 @@ function findWebhook(done) {
   WebhookController.findWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id)
   .then((webhook) => {
     // Verify returned data
-    chai.expect(webhook.id).to.equal(utils.createUID(org.id, proj.id, testData.webhooks[0].id));
+    chai.expect(webhook.id).to.equal(utils.createID(org.id, proj.id, testData.webhooks[0].id));
     chai.expect(webhook.name).to.equal(testData.webhooks[0].name);
     chai.expect(webhook.triggers[0]).to.equal(testData.webhooks[0].triggers[0]);
     done();

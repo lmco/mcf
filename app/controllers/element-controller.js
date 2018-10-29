@@ -81,9 +81,9 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     // Sanitize query input
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
-    const projectUID = utils.createUID(orgID, projID);
+    const projectUID = utils.createID(orgID, projID);
 
-    const searchParams = { uid: { $regex: `^${projectUID}` }, deleted: false };
+    const searchParams = { id: { $regex: `^${projectUID}` }, deleted: false };
 
     // Error Check: Ensure user has permissions to find deleted elements
     if (softDeleted && !reqUser.admin) {
@@ -177,8 +177,8 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
 
     // Loop through each element
     arrElements.forEach((element) => {
-      // Generate UIDs for every element
-      const uid = utils.createUID(orgID, projID, element.id);
+      // Generate unique UID for every element
+      const uid = utils.createID(orgID, projID, element.id);
       arrUID.push(uid);
       element.uid = uid;
 
@@ -194,7 +194,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
     });
 
     // Generate find query
-    const findQuery = { $or: [{ uid: { $in: arrUID } }, { uuid: { $in: arrUUID } }] };
+    const findQuery = { $or: [{ id: { $in: arrUID } }, { uuid: { $in: arrUUID } }] };
 
     // Find any existing elements that match the query
     findElementsQuery(findQuery)
@@ -235,10 +235,9 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       arrElements.forEach((element) => {
         // Create element data object
         const elemData = {
-          id: element.id,
+          id: element.uid,
           name: element.name,
           project: proj._id,
-          uid: element.uid,
           uuid: element.uuid,
           documentation: element.documentation,
           custom: element.custom
@@ -284,9 +283,12 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       // For each package
       packageArray.forEach((pack) => {
         // If the packages parent is also being created, set its _id
-        if (packIDs.includes(pack.$parent)) {
-          pack.parent = packageArray.filter(p => p.id === pack.$parent)[0]._id;
-          pack.$parent = null;
+        if (pack.$parent) {
+          const packID = utils.createID(orgID, projID, pack.$parent);
+          if (packIDs.includes(packID)) {
+            pack.parent = packageArray.filter(p => p.id === packID)[0]._id;
+            pack.$parent = null;
+          }
         }
       });
 
@@ -295,13 +297,19 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       // For each relationship
       relationshipArray.forEach((rel) => {
         // If the relationships target is also being created, set its _id
-        if (relIDs.includes(rel.$target)) {
-          rel.target = relationshipArray.filter(r => r.id === rel.$target)[0]._id;
+        if (rel.$target) {
+          const targetID = utils.createID(orgID, projID, rel.$target);
+          if (relIDs.includes(targetID)) {
+            rel.target = relationshipArray.filter(r => r.id === targetID)[0]._id;
+          }
         }
 
         // If the relationships source is also being created, set its _id
-        if (relIDs.includes(rel.$source)) {
-          rel.source = relationshipArray.filter(r => r.id === rel.$source)[0]._id;
+        if (rel.$source) {
+          const sourceID = utils.createID(orgID, projID, rel.$target);
+          if (relIDs.includes(sourceID)) {
+            rel.source = relationshipArray.filter(r => r.id === sourceID)[0]._id;
+          }
         }
       });
 
@@ -341,7 +349,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
 
       // If it's not a CustomError, the create failed so delete all successfully
       // created elements and reject the error.
-      return Element.Element.deleteMany({ uid: { $in: arrUID } })
+      return Element.Element.deleteMany({ id: { $in: arrUID } })
       .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
       .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
     });
@@ -567,10 +575,10 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     const elemID = sani.sanitize(elementID);
-    const elemUID = utils.createUID(orgID, projID, elemID);
+    const elemUID = utils.createID(orgID, projID, elemID);
 
-    // Search for an element that matches the uid or uuid
-    let searchParams = { $and: [{ $or: [{ uid: elemUID },
+    // Search for an element that matches the id or uuid
+    let searchParams = { $and: [{ $or: [{ id: elemUID },
       { uuid: elemID }] }, { deleted: false }] };
 
     // Error Check: Ensure user has permissions to find deleted elements
@@ -580,7 +588,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
     // Check softDeleted flag true
     if (softDeleted) {
       // softDeleted flag true and User Admin true, remove deleted: false
-      searchParams = { $or: [{ uid: elemUID }, { uuid: elemID }] };
+      searchParams = { $or: [{ id: elemUID }, { uuid: elemID }] };
     }
 
     // Find elements
@@ -700,8 +708,8 @@ function createElement(reqUser, element) {
 
     // Sanitize query inputs
     const elemID = sani.sanitize(element.id);
-    const splitProjectUID = utils.parseUID(sani.sanitize(element.projectUID));
-    const elemUID = utils.createUID(splitProjectUID[0], splitProjectUID[1], elemID);
+    const splitProjectUID = utils.parseID(sani.sanitize(element.projectUID));
+    const elemUID = utils.createID(splitProjectUID[0], splitProjectUID[1], elemID);
     const elementType = utils.toTitleCase(sani.sanitize(element.type));
 
     // Initialize foundProject
@@ -720,7 +728,7 @@ function createElement(reqUser, element) {
 
       // Error check - check if the element already exists
       // Must nest promises since the catch uses proj, returned from findProject.
-      return findElementsQuery({ $or: [{ uid: elemUID }, { uuid: uuid }] });
+      return findElementsQuery({ $or: [{ id: elemUID }, { uuid: uuid }] });
     })
     .then((elements) => {
       // Error Check: ensure no elements were found
@@ -735,10 +743,9 @@ function createElement(reqUser, element) {
 
       // Create the new element object
       const elemObject = new Element[elementType]({
-        id: elemID,
+        id: elemUID,
         name: elemName,
         project: foundProj,
-        uid: elemUID,
         custom: custom,
         documentation: documentation,
         uuid: uuid
@@ -949,7 +956,7 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
 
       // Hard delete
       if (hardDelete) {
-        return Element.Element.deleteOne({ uid: element.uid });
+        return Element.Element.deleteOne({ id: element.id });
       }
       // Soft delete
       element.deleted = true;
