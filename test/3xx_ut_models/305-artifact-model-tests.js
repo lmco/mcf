@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.301-artifact-model-tests
+ * @module  test.305-artifact-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
