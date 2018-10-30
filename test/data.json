@@ -420,6 +420,27 @@
     {
       "role": "write"
     }
+  ],
+
+  "artifacts": [
+    {
+      "id": "artifact00",
+      "filename": "logo.png",
+      "location": "/test/test_data/"
+
+    },
+    {
+      "id": "artifact01",
+      "filename": "logo.png",
+      "location": "/test/test_data/"
+
+    },
+    {
+      "id": "artifact01",
+      "filename": "mbee-logo-alt.png",
+      "location": "/test/test_data/"
+
+    }
   ]
 }
 
