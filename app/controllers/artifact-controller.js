@@ -436,11 +436,11 @@ function addArtifactOS(hashedName, artifactBlob) {
           // Check if file already exist
           fs.exists(filePath, (fileExist) => {
             if (!fileExist) {
-              try{
+              try {
                 // Write out artifact file, defaults to 666 permission.
                 fs.writeFileSync(filePath, artifactBlob)
               }
-              catch{
+              catch (error){
                 // Error occurred, log it
                 return reject(new M.CustomError('Could not create Artifact BLOB.', 500, 'warn'));
 
