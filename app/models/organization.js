@@ -68,7 +68,7 @@ const OrganizationSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_id !== this.id) {
         // Immutable field, return error
-        return new M.CustomError('ID cannot be changed.', 400, 'warn');
+        M.log.warn(new M.CustomError('ID cannot be changed.', 400, 'warn'));
       }
       // No change, return the value
       return this.id;

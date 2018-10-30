@@ -94,7 +94,7 @@ const ElementSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_id !== this.id) {
         // Immutable field, return error
-        return new M.CustomError('ID cannot be changed.', 400, 'warn');
+        M.log.warn(M.CustomError('ID cannot be changed.', 400, 'warn'));
       }
       // No change, return the value
       return this.id;
@@ -129,7 +129,7 @@ const ElementSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_proj !== this.project) {
         // Immutable field, return error
-        return new M.CustomError('Assigned project cannot be changed.', 400, 'warn');
+        M.log.warn(M.CustomError('Assigned project cannot be changed.', 400, 'warn'));
       }
       // No change, return the value
       return this.project;
