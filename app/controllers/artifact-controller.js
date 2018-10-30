@@ -438,12 +438,11 @@ function addArtifactOS(hashedName, artifactBlob) {
             if (!fileExist) {
               try {
                 // Write out artifact file, defaults to 666 permission.
-                fs.writeFileSync(filePath, artifactBlob)
+                fs.writeFileSync(filePath, artifactBlob);
               }
-              catch (error){
+              catch (error) {
                 // Error occurred, log it
                 return reject(new M.CustomError('Could not create Artifact BLOB.', 500, 'warn'));
-
               }
             }
           });
