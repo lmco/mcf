@@ -437,7 +437,7 @@ function addArtifactOS(hashedName, artifactBlob) {
           fs.exists(filePath, (fileExist) => {
             if (!fileExist) {
               try{
-                // Write out artifact file, defaults to 666 permission
+                // Write out artifact file, defaults to 666 permission.
                 fs.writeFileSync(filePath, artifactBlob)
               }
               catch{
