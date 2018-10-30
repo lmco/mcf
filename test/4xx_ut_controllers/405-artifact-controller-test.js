@@ -140,13 +140,11 @@ function uploadArtifact(done) {
   // Create artifact
   ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData, artifactPNG)
   .then((artifact) => {
-    console.log("uploadArtifact() .then");
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[0].filename);
     done();
   })
   .catch((error) => {
-    console.log("uploadArtifact() catch");
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);

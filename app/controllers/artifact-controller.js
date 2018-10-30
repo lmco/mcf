@@ -436,13 +436,15 @@ function addArtifactOS(hashedName, artifactBlob) {
           // Check if file already exist
           fs.exists(filePath, (fileExist) => {
             if (!fileExist) {
-              // Write out artifact file, defaults to 666 permission
-              fs.writeFileSync(filePath, artifactBlob, (writeArtifactError) => {
-                if (writeArtifactError) {
-                  // Error occurred, log it
-                  return reject(new M.CustomError(writeArtifactError.message, 500, 'warn'));
-                }
-              });
+              try{
+                // Write out artifact file, defaults to 666 permission
+                fs.writeFileSync(filePath, artifactBlob)
+              }
+              catch{
+                // Error occurred, log it
+                return reject(new M.CustomError('Could not create Artifact BLOB.', 500, 'warn'));
+
+              }
             }
           });
         }
