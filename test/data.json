@@ -108,7 +108,7 @@
     {
       "id": "thisisaverylongidnamepleaseacceptmeorbreak",
       "name": "Long Id",
-      "orgid": "testorg00"
+      "org": {"id": "testorg00"}
     },
     {
       "id": "project4",
