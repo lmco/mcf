@@ -66,9 +66,14 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
+    // Sanitize query inputs
+    const organizationID = sani.sanitize(orgID);
+    const projectID = sani.sanitize(projID);
+    const artID = sani.sanitize(artifactMetaData.id);
+
     // Define function-wide variables
     // Create the full artifact id
-    const artifactFullId = utils.createID(orgID, projID, artifactMetaData.id);
+    const artifactFullId = utils.createID(organizationID, projectID, artID);
     let createdArtifact = null;
     let hashedName = '';
 
@@ -142,6 +147,7 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
  * @param {User} reqUser - The user object of the requesting user.
  * @param {String} orgID - The organization ID for the org the project belongs to.
  * @param {String} projID - The project ID of the Project which is being searched for.
+ * @param {String} artifactID - The Artifact ID
  * @param {Object} artifactToUpdate - JSON object containing updated Artifact data
  * @param {Binary} artifactBlob - The binary data to store.
  *
@@ -150,6 +156,23 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
  */
 function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, artifactBlob) {
   return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
+      assert.ok(typeof artifactToUpdate === 'object', 'Artifact to update is not an object.');
+      assert.ok(typeof artifactBlob === 'object', 'Artifact Blob is not an object.');
+    }
+    catch (error) {
+      return reject(new M.CustomError(error.message, 400, 'warn'));
+    }
+
+    // Sanitize query inputs
+    const organizationID = sani.sanitize(orgID);
+    const projectID = sani.sanitize(projID);
+    const artID = sani.sanitize(artifactID);
+
     // Define function-wide variables
     let hashedName = '';
     let isNewHash = false;
@@ -162,7 +185,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
       artifactToUpdate = artifactToUpdate.toJSON(); // eslint-disable-line no-param-reassign
     }
     // Find artifact in database
-    findArtifact(reqUser, orgID, projID, artifactID)
+    findArtifact(reqUser, organizationID, projectID, artID)
     .then((_artifact) => {
       // Error Check: ensure reqUser is a project admin or global admin
       if (!_artifact.project.getPermissions(reqUser).admin && !reqUser.admin) {
@@ -315,18 +338,20 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
  * @description This function finds an artifact based on artifact full id.
  *
  * @param {User} reqUser - The requesting user
- * @param {String} artifactID - The artifact ID
+ * @param {String} orgID - The organization ID for the org the project belongs to.
+ * @param {String} projID - The project ID of the Project which is being searched for.
+ * @param {String} artifactID - The Artifact ID
  * @param {Boolean} softDeleted - A boolean value indicating whether to soft delete.
  *
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  * */
-function findArtifact(reqUser, organizationID, projectID, artifactID, softDeleted = false) {
+function findArtifact(reqUser, orgID, projID, artifactID, softDeleted = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
@@ -335,10 +360,10 @@ function findArtifact(reqUser, organizationID, projectID, artifactID, softDelete
     }
 
     // Sanitize query inputs
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
+    const organizationID = sani.sanitize(orgID);
+    const projectID = sani.sanitize(projID);
     const artID = sani.sanitize(artifactID);
-    const artifactFullID = utils.createID(orgID, projID, artID);
+    const artifactFullID = utils.createID(organizationID, projectID, artID);
 
     // Define the search params
     const searchParams = {
@@ -429,8 +454,7 @@ function addArtifactOS(hashedName, artifactBlob) {
           // Note: Use sync to ensure directory created before advancing
           fs.mkdirSync(folderPath, (makeDirectoryError) => {
             if (makeDirectoryError) {
-              M.log.error(makeDirectoryError);
-              return reject(makeDirectoryError);
+              return reject(M.CustomError.parseCustomError(makeDirectoryError));
             }
           });
           // Check if file already exist
