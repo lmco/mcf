@@ -81,7 +81,7 @@ const UserSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_username !== this.username) {
         // Immutable field, return error
-        M.log.warn(M.CustomError('Username cannot be changed.', 400, 'warn'));
+        M.log.warn('Username cannot be changed.');
       }
       // No change, return the value
       return this.username;
