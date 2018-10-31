@@ -27,6 +27,7 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const WebhookController = M.require('controllers.webhook-controller');
+const ArtifactController = M.require('controllers.artifact-controller');
 const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -82,7 +83,11 @@ module.exports = {
   postWebhook,
   patchWebhook,
   deleteWebhook,
-  postIncomingWebhook
+  postIncomingWebhook,
+  getArtifact
+  //postArtifact,
+  //patchArtifact,
+  //deleteArtifact,
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -2109,5 +2114,43 @@ function postIncomingWebhook(req, res) {
     // Return a 200 status
     return res.status(200).send();
   })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifact/:artifactid
+ *
+ * @description Gets an artifact by its artifact.id, project.id, and org.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with searched element
+ */
+function getArtifact(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
+  // Find the artifact from it's artifact.id, project.id, and org.id
+  // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
+  ArtifactController.findArtifact(req.user, req.params.orgid,
+  req.params.projectid, req.params.artifactid, softDeleted)
+  .then((element) => {
+    // Return a 200: OK and the element
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(element.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
