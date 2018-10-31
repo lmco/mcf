@@ -23,10 +23,8 @@ const chai = require('chai');
 const path = require('path');
 
 // MBEE modules
-const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const ElemController = M.require('controllers.element-controller');
-const User = M.require('models.user');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
@@ -92,20 +90,12 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
-    OrgController.removeOrg(adminUser, org.id, true)
-    .then(() => {
-      // Once db items are removed, remove reqUser
-      // close the db connection and finish
-      User.findOne({
-        username: adminUser.username
-      }, (error, foundUser) => {
-        chai.expect(error).to.equal(null);
-        foundUser.remove((error2) => {
-          chai.expect(error2).to.equal(null);
-          db.disconnect();
-          done();
-        });
-      });
+    testUtils.removeOrganization(adminUser)
+    .then(() => testUtils.removeAdminUser())
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
+      db.disconnect();
+      done();
     })
     .catch((error) => {
       db.disconnect();
