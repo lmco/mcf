@@ -97,8 +97,8 @@ describe(M.getModuleName(module.filename), () => {
     testUtils.removeOrganization(adminUser)
     // Delete admin user
     .then(() => testUtils.removeAdminUser())
-    .then((user) => {
-      chai.expect(user).to.equal(testData.users[0].adminUsername);
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
       db.disconnect();
       done();
     })
