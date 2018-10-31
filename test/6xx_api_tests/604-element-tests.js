@@ -164,9 +164,7 @@ function postMultipleElements(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      elements: [testData.elements[1], testData.elements[2], testData.elements[3]]
-    })
+    body: JSON.stringify([testData.elements[1], testData.elements[2], testData.elements[3]])
   },
   (err, response, body) => {
     // Expect no error

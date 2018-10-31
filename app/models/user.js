@@ -81,7 +81,7 @@ const UserSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_username !== this.username) {
         // Immutable field, return error
-        return new M.CustomError('Username cannot be changed.', 400, 'warn');
+        M.log.warn('Username cannot be changed.');
       }
       // No change, return the value
       return this.username;
@@ -119,21 +119,7 @@ const UserSchema = new mongoose.Schema({
   },
   provider: {
     type: String,
-    default: 'local',
-    set: function(_provider) {
-      // Check value undefined
-      if (typeof this.provider === 'undefined') {
-        // Return value to set it
-        return _provider;
-      }
-      // Check value NOT equal to db value
-      if (_provider !== this.provider) {
-        // Immutable field, return error
-        return new M.CustomError('Provider cannot be changed.', 400, 'warn');
-      }
-      // No change, return the value
-      return this.provider;
-    }
+    default: 'local'
   },
   deleted: {
     type: Boolean,

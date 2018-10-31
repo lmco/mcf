@@ -35,6 +35,7 @@ const mbeeCrypto = M.require('lib.crypto');
 describe(M.getModuleName(module.filename), () => {
   it('should have encrypt and decrypt functions', checkCryptoFunctions);
   it('should encrypt and decrypt a message', encryptTest);
+  it('should md5 hash a message', md5HashTest);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -47,6 +48,15 @@ function checkCryptoFunctions(done) {
   chai.expect(mbeeCrypto.hasOwnProperty('decrypt')).to.equal(true);
   chai.expect(typeof mbeeCrypto.encrypt).to.equal('function');
   chai.expect(typeof mbeeCrypto.decrypt).to.equal('function');
+  done();
+}
+
+/**
+ * @description Performs a md5 hash on a string message.
+ */
+function md5HashTest(done) {
+  const hash = mbeeCrypto.md5Hash('hello world');
+  chai.expect(hash).to.equal('5eb63bbbe01eeed093cb22bb8f5acdc3');
   done();
 }
 

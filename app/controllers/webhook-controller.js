@@ -119,7 +119,7 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
       // All checks passed, resolve webhook
       return resolve(webhooks[0]);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -146,7 +146,7 @@ function findWebhooksQuery(query) {
     Webhook.Webhook.find(query)
     .populate('project')
     .then((webhooks) => resolve(webhooks))
-    .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 

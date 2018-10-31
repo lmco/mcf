@@ -214,11 +214,11 @@ function rejectPostMultipleInvalidProjects(done) {
   (err, response, body) => {
     // Expect no error
     chai.expect(err).to.equal(null);
-    // Expect response status: 500 Internal Server Error
-    chai.expect(response.statusCode).to.equal(500);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Internal Server Error');
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

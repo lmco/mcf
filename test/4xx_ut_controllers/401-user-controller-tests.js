@@ -139,7 +139,7 @@ function createNewUser(done) {
 
 /**
  * @description Rejects creation of multiple users when one is invalid.
- * Expected error thrown: 'Internal Server Error'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectCreateMultipleUsersInvalid(done) {
   // Create array of user data
@@ -157,8 +157,8 @@ function rejectCreateMultipleUsersInvalid(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Internal Server Error'
-    chai.expect(error.message).to.equal('Internal Server Error');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
