@@ -142,7 +142,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         assert.ok(element.hasOwnProperty('id'), `Element #${index} is missing an id.`);
         assert.ok(typeof element.id === 'string', `Element #${index}'s id is not a string.`);
         assert.ok(element.hasOwnProperty('type'), `Element #${index} is missing a type.`);
-        assert.ok(Element.Element.getValidTypes().includes(element.type),
+        assert.ok(Element.Element.getValidTypes().includes(utils.toTitleCase(element.type)),
           `Element #${index} has an invalid type of ${element.type}.`);
         // If element is a relationship, ensure source/target exist
         if (utils.toTitleCase(element.type) === 'Relationship') {
@@ -306,7 +306,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
 
         // If the relationships source is also being created, set its _id
         if (rel.$source) {
-          const sourceID = utils.createID(orgID, projID, rel.$target);
+          const sourceID = utils.createID(orgID, projID, rel.$source);
           if (relIDs.includes(sourceID)) {
             rel.source = relationshipArray.filter(r => r.id === sourceID)[0]._id;
           }

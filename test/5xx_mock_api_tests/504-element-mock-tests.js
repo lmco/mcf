@@ -262,20 +262,18 @@ function deleteElement(done) {
  */
 function postElements(done) {
   // Create request object
-  const body = {
-    elements: [
-      testData.elements[0],
-      testData.elements[1],
-      testData.elements[2],
-      testData.elements[3],
-      testData.elements[7],
-      testData.elements[6],
-      testData.elements[8],
-      testData.elements[9],
-      testData.elements[11],
-      testData.elements[10]
-    ]
-  };
+  const body = [
+    testData.elements[0],
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[7],
+    testData.elements[6],
+    testData.elements[8],
+    testData.elements[9],
+    testData.elements[11],
+    testData.elements[10]
+  ];
   const params = { orgid: org.id, projectid: proj.id };
   const method = 'POST';
   const req = getReq(params, body, method);
