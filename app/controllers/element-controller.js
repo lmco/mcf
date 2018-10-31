@@ -348,7 +348,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       if (error instanceof M.CustomError && !created) {
         return reject(error);
       }
-
+      console.log(error);
       // If it's not a CustomError, the create failed so delete all successfully
       // created elements and reject the error.
       return Element.Element.deleteMany({ id: { $in: arrUID } })
