@@ -105,7 +105,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
       // Return resulting elements
       return resolve(res);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -142,7 +142,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         assert.ok(element.hasOwnProperty('id'), `Element #${index} is missing an id.`);
         assert.ok(typeof element.id === 'string', `Element #${index}'s id is not a string.`);
         assert.ok(element.hasOwnProperty('type'), `Element #${index} is missing a type.`);
-        assert.ok(Element.Element.getValidTypes().includes(element.type),
+        assert.ok(Element.Element.getValidTypes().includes(utils.toTitleCase(element.type)),
           `Element #${index} has an invalid type of ${element.type}.`);
         // If element is a relationship, ensure source/target exist
         if (utils.toTitleCase(element.type) === 'Relationship') {
@@ -306,7 +306,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
 
         // If the relationships source is also being created, set its _id
         if (rel.$source) {
-          const sourceID = utils.createID(orgID, projID, rel.$target);
+          const sourceID = utils.createID(orgID, projID, rel.$source);
           if (relIDs.includes(sourceID)) {
             rel.source = relationshipArray.filter(r => r.id === sourceID)[0]._id;
           }
@@ -350,8 +350,8 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       // If it's not a CustomError, the create failed so delete all successfully
       // created elements and reject the error.
       return Element.Element.deleteMany({ id: { $in: arrUID } })
-      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
-      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+      .then(() => reject(M.CustomError.parseCustomError(error)))
+      .catch((error2) => reject(M.CustomError.parseCustomError(error2)));
     });
   });
 }
@@ -613,7 +613,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
       // All checks passed, resolve element
       return resolve(elements[0]);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -640,14 +640,7 @@ function findElementsQuery(elementQuery) {
     Element.Element.find(elementQuery)
     .populate('parent project source target contains')
     .then((arrElements) => resolve(arrElements))
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 

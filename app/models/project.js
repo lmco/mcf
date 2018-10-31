@@ -71,7 +71,7 @@ const ProjectSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_id !== this.id) {
         // Immutable field, return error
-        return new M.CustomError('ID cannot be changed.', 400, 'warn');
+        M.log.warn('ID cannot be changed.');
       }
       // No change, return the value
       return this.id;
@@ -90,7 +90,7 @@ const ProjectSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_org !== this.org) {
         // Immutable field, return error
-        return new M.CustomError('Assigned org cannot be changed.', 400, 'warn');
+        M.log.warn('Assigned org cannot be changed.');
       }
       // No change, return the value
       return this.org;
@@ -109,7 +109,7 @@ const ProjectSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_uid !== this.uid) {
         // Immutable field, return error
-        return new M.CustomError('UID cannot be changed.', 400, 'warn');
+        M.log.warn('UID cannot be changed.');
       }
       // No change, return the value
       return this.uid;

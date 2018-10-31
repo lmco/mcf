@@ -19,7 +19,7 @@
  * Allows time stamping: createdOn, UpdatedOn, DeletedOn and deleted.
  */
 
-module.exports = function createdOnPlugin(schema, options) {
+module.exports = function timestampPlugin(schema, options) {
   schema.add({
     createdOn: {
       type: Date,

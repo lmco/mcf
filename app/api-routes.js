@@ -1371,12 +1371,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         required: true
  *         schema:
  *           type: object
- *           required:
- *             - elements
- *           properties:
- *             elements:
- *               type: object
- *               description: An array of element objects to create.
+ *           description: An array of element objects to create.
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST element, return element data.

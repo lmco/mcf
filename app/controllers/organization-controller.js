@@ -98,7 +98,7 @@ function findOrgs(reqUser, softDeleted = false) {
     // Find Organizations user has read access
     findOrgsQuery(searchParams)
     .then((orgs) => resolve(orgs))
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -177,8 +177,8 @@ function createOrgs(reqUser, arrOrgs) {
       // If it's not a CustomError, the create failed so delete all successfully
       // created orgs and reject the error.
       return Organization.deleteMany(findQuery)
-      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
-      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+      .then(() => reject(M.CustomError.parseCustomError(error)))
+      .catch((error2) => reject(M.CustomError.parseCustomError(error2)));
     });
   });
 }
@@ -384,7 +384,7 @@ function removeOrgs(reqUser, query, hardDelete = false) {
         return reject(error);
       }
       // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
+      return reject(M.CustomError.parseCustomError(error));
     });
   });
 }
@@ -460,7 +460,7 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
       // All checks passed, resolve org
       return resolve(orgs[0]);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -487,7 +487,7 @@ function findOrgsQuery(orgQuery) {
     Organization.find(orgQuery)
     .populate('projects permissions.read permissions.write permissions.admin')
     .then((orgs) => resolve(orgs))
-    .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -772,7 +772,7 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
         .catch((error) => reject(error));
       }
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -814,7 +814,7 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
       // Return users permissions
       return resolve(permissionList[searchedUsername]);
     })
-    .catch(error => reject(error));
+    .catch(error => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -999,6 +999,6 @@ function findAllPermissions(reqUser, organizationID) {
       }
       return resolve(roleList);
     })
-    .catch(error => reject(error));
+    .catch(error => reject(M.CustomError.parseCustomError(error)));
   });
 }
