@@ -374,9 +374,7 @@ ElementSchema.statics.validateObjectKeys = function(object) {
       Object.keys(RelationshipSchema.obj),
       Object.keys(PackageSchema.obj)
     );
-    validKeys = validKeys.filter((elem, pos) => {
-      return validKeys.indexOf(elem) === pos;
-    });
+    validKeys = validKeys.filter((elem, pos) => validKeys.indexOf(elem) === pos);
     validKeys.push('projectUID');
     validKeys.push('type');
     // Loop through each key of the object

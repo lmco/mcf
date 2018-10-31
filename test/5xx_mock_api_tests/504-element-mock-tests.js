@@ -307,8 +307,7 @@ function patchElements(done) {
       testData.elements[0],
       testData.elements[1],
       testData.elements[2],
-      testData.elements[3],
-      testData.elements[7]
+      testData.elements[3]
     ],
     update: { name: 'Updated Elements' }
   };
