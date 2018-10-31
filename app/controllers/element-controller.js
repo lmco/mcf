@@ -219,7 +219,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         }
 
         // Reject error
-        return reject(M.CustomError(message, 403, 'warn'));
+        return reject(new M.CustomError(message, 403, 'warn'));
       }
 
       // Find the project
