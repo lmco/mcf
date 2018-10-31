@@ -24,10 +24,8 @@ const chai = require('chai');
 const path = require('path');
 
 // MBEE modules
-const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const apiController = M.require('controllers.api-controller');
-const User = M.require('models.user');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
@@ -92,20 +90,12 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
-    OrgController.removeOrg(adminUser, org.id, true)
-    .then(() => {
-      // Once db items are removed, remove reqUser
-      // close the db connection and finish
-      User.findOne({
-        username: adminUser.username
-      }, (error, foundUser) => {
-        chai.expect(error).to.equal(null);
-        foundUser.remove((error2) => {
-          chai.expect(error2).to.equal(null);
-          db.disconnect();
-          done();
-        });
-      });
+    testUtils.removeOrganization(adminUser)
+    .then(() => testUtils.removeAdminUser())
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
+      db.disconnect();
+      done();
     })
     .catch((error) => {
       db.disconnect();
@@ -262,20 +252,18 @@ function deleteElement(done) {
  */
 function postElements(done) {
   // Create request object
-  const body = {
-    elements: [
-      testData.elements[0],
-      testData.elements[1],
-      testData.elements[2],
-      testData.elements[3],
-      testData.elements[7],
-      testData.elements[6],
-      testData.elements[8],
-      testData.elements[9],
-      testData.elements[11],
-      testData.elements[10]
-    ]
-  };
+  const body = [
+    testData.elements[0],
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[7],
+    testData.elements[6],
+    testData.elements[8],
+    testData.elements[9],
+    testData.elements[11],
+    testData.elements[10]
+  ];
   const params = { orgid: org.id, projectid: proj.id };
   const method = 'POST';
   const req = getReq(params, body, method);

@@ -87,7 +87,7 @@ function findUsers(reqUser, softDeleted = false) {
     // Find users
     findUsersQuery(searchParams)
     .then((users) => resolve(users))
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -207,8 +207,8 @@ function createUsers(reqUser, arrNewUsers) {
       // If it's not a CustomError, the create failed so delete all successfully
       // created users and reject the error.
       return User.deleteMany(findQuery)
-      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
-      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+      .then(() => reject(M.CustomError.parseCustomError(error)))
+      .catch((error2) => reject(M.CustomError.parseCustomError(error2)));
     });
   });
 }
@@ -432,14 +432,7 @@ function removeUsers(reqUser, query, hardDelete = false) {
       }
       return resolve(foundUsers);
     })
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -502,7 +495,7 @@ function findUser(reqUser, searchedUsername, softDeleted = false) {
       // All checks passed, resolve user
       return resolve(arrUsers[0]);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -528,7 +521,7 @@ function findUsersQuery(usersQuery) {
     // Find users
     User.find(usersQuery)
     .then((users) => resolve(users))
-    .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 

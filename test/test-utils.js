@@ -29,6 +29,7 @@ const path = require('path');
 // MBEE modules
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
+const OrgController = M.require('controllers.organization-controller');
 const testData = require(path.join(M.root, 'test', 'data.json'));
 /**
  * @description Helper function to create test non-admin user in
@@ -217,17 +218,11 @@ module.exports.createOrganization = function(adminUser) {
  * @description Helper function to remove organization in
  * MBEE tests.
  */
-module.exports.removeOrganization = function() {
+module.exports.removeOrganization = function(adminUser) {
   return new Promise((resolve, reject) => {
-    let organization = null;
     // Find organization to ensure it exists
-    Organization.find({ id: testData.orgs[0].id, deleted: false })
-    .then((org) => {
-      organization = org;
-      // Hard delete
-      return Organization.deleteOne({ id: org.id });
-    })
-    .then(() => resolve(organization))
+    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
+    .then((org) => resolve(org))
     .catch((error) => reject(error));
   });
 };
