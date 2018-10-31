@@ -180,6 +180,10 @@ function createProjects(reqUser, organizationID, arrProjects) {
         projObject.permissions.read.push(reqUser._id);
         projObject.permissions.write.push(reqUser._id);
         projObject.permissions.admin.push(reqUser._id);
+
+        // Update the created by and last modified field
+        projObject.createdBy = reqUser;
+        projObject.lastModifiedBy = reqUser;
         return projObject;
       });
 
@@ -308,6 +312,9 @@ function updateProjects(reqUser, query, updateInfo) {
               proj[key] = sani.sanitize(updateInfo[key]);
             }
           });
+
+          // Update last modified field
+          proj.lastModifiedBy = reqUser;
 
           // Add proj.save() to promise array
           promises.push(proj.save());
@@ -607,7 +614,10 @@ function createProject(reqUser, project) {
         },
         uid: utils.createID(orgID, projID),
         custom: custom,
-        visibility: visibility
+        visibility: visibility,
+        createdBy: reqUser,
+        lastModifiedBy: reqUser
+
       });
 
       // Save new project
@@ -728,6 +738,9 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
           project[updateField] = sani.sanitize(projectUpdated[updateField]);
         }
       }
+
+      // Update last modified field
+      project.lastModifiedBy = reqUser;
 
       // Save updated project
       return project.save();

@@ -240,7 +240,9 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           project: proj._id,
           uuid: element.uuid,
           documentation: element.documentation,
-          custom: element.custom
+          custom: element.custom,
+          createdBy: reqUser,
+          lastModifiedBy: reqUser
         };
 
         // Add element to correct type array
@@ -440,6 +442,9 @@ function updateElements(reqUser, query, updateInfo) {
               element[key] = sani.sanitize(updateInfo[key]);
             }
           });
+
+          // Update last modified field
+          element.lastModifiedBy = reqUser;
 
           // Add element.save() to promise array
           promises.push(element.save());
@@ -748,7 +753,9 @@ function createElement(reqUser, element) {
         project: foundProj,
         custom: custom,
         documentation: documentation,
-        uuid: uuid
+        uuid: uuid,
+        createdBy: reqUser,
+        lastModifiedBy: reqUser
       });
 
       // Set the hidden parent field, used by middleware
@@ -883,6 +890,9 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
           element[updateField] = sani.sanitize(elementUpdated[updateField]);
         }
       }
+
+      // Update last modified field
+      element.lastModifiedBy = reqUser;
 
       // Save updated element
       return element.save();

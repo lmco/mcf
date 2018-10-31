@@ -24,7 +24,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
-const timestamp = M.require('models.plugin.timestamp');
+const extensions = M.require('models.plugin.extensions');
 
 /* ---------------------------( Artifact Schemas )---------------------------- */
 
@@ -105,8 +105,8 @@ const ArtifactSchema = new mongoose.Schema({
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
-// Use timestamp model plugin
-ArtifactSchema.plugin(timestamp);
+// Use extensions model plugin;
+ArtifactSchema.plugin(extensions);
 
 /**
  * @description Returns artifact fields that can be changed

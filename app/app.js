@@ -48,8 +48,8 @@ module.exports = app;
  * default admin and default organization if needed.
  */
 db.connect()
-.then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
+.then(() => createDefaultOrganization())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);

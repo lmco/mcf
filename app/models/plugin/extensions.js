@@ -16,11 +16,22 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Middleware plugin that extends models.
- * Allows time stamping: createdOn, UpdatedOn, DeletedOn and deleted.
+ * Allows field extensions: createBy, createdOn, UpdatedOn, DeletedOn and deleted.
  */
 
-module.exports = function timestampPlugin(schema, options) {
+// NPM modules
+const mongoose = require('mongoose');
+
+module.exports = function extensionPlugin(schema, options) {
   schema.add({
+    createdBy: {
+      type: mongoose.Schema.Types.Mixed,
+      ref: 'User'
+    },
+    lastModifiedBy: {
+      type: mongoose.Schema.Types.Mixed,
+      ref: 'User'
+    },
     createdOn: {
       type: Date,
       default: Date.now()

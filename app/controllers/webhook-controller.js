@@ -232,6 +232,10 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
           custom: sani.sanitize(webhookData.custom)
         });
 
+      // Update the created by and last modified field
+      webhookObj.createdBy = reqUser;
+      webhookObj.lastModifiedBy = reqUser;
+
       // Save webhook to DB
       return webhookObj.save();
     })
@@ -347,6 +351,9 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
           webhook[updateField] = sani.sanitize(webhookUpdated[updateField]);
         }
       }
+
+      // Update last modified field
+      webhook.lastModifiedBy = reqUser;
 
       // Save updated webhook
       return webhook.save();

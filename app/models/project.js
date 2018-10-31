@@ -23,7 +23,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
-const timestamp = M.require('models.plugin.timestamp');
+const extensions = M.require('models.plugin.extensions');
 
 
 /* ----------------------------( Project Model )----------------------------- */
@@ -145,8 +145,8 @@ const ProjectSchema = new mongoose.Schema({
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
-// Use timestamp model plugin
-ProjectSchema.plugin(timestamp);
+// Use extensions model plugin;
+ProjectSchema.plugin(extensions);
 
 /* ---------------------------( Project Methods )---------------------------- */
 

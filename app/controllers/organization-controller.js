@@ -162,6 +162,8 @@ function createOrgs(reqUser, arrOrgs) {
         orgObject.permissions.read.push(reqUser._id);
         orgObject.permissions.write.push(reqUser._id);
         orgObject.permissions.admin.push(reqUser._id);
+        orgObject.createdBy = reqUser;
+        orgObject.lastModifiedBy = reqUser;
         return orgObject;
       });
       // Save the organizations
@@ -274,6 +276,9 @@ function updateOrgs(reqUser, query, updateInfo) {
               org[key] = sani.sanitize(updateInfo[key]);
             }
           });
+
+          // Update last modified field
+          org.lastmodifiedBy = reqUser;
 
           // Add org.save() to promise array
           promises.push(org.save());
@@ -561,6 +566,8 @@ function createOrg(reqUser, newOrgData) {
           write: [reqUser._id],
           read: [reqUser._id]
         },
+        createdBy: reqUser,
+        lastModifiedBy: reqUser,
         custom: custom
       });
       // Save new org
@@ -676,6 +683,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
           org[updateField] = sani.sanitize(orgUpdated[updateField]);
         }
       }
+      // Update last modified field
+      org.lastModifiedBy = reqUser;
 
       // Save updated org
       return org.save();

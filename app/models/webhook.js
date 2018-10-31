@@ -19,7 +19,7 @@ const request = require('request');
 const mongoose = require('mongoose');
 
 // MBEE modules
-const timestamp = M.require('models.plugin.timestamp');
+const extensions = M.require('models.plugin.extensions');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 
@@ -131,8 +131,8 @@ const IncomingWebhookSchema = new mongoose.Schema({
 
 /* ----------------------------( Model Plugin )------------------------------ */
 
-// Use timestamp model plugin
-WebhookSchema.plugin(timestamp);
+// Use extensions model plugin;
+WebhookSchema.plugin(extensions);
 
 
 /* ----------------------------( Webhook Methods )-----------------------------*/

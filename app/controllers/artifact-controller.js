@@ -115,7 +115,10 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
         filename: artifactMetaData.filename,
         contentType: path.extname(artifactMetaData.filename),
         history: historyData,
-        project: foundProj
+        project: foundProj,
+        lastModifiedBy: reqUser,
+        createdBy: reqUser
+
 
       });
 
@@ -237,6 +240,9 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
           artifactToUpdate[artifactUpdateFields[i]]
         );
       }
+
+      // Update last modified field
+      _artifact.lastModifiedBy = reqUser;
 
       // Save artifact object to the database
       return _artifact.save();
