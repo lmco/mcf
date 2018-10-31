@@ -188,7 +188,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       }
 
       // If element doesn't have parent, add it
-      if (element.hasOwnProperty('parent')) {
+      if (!element.hasOwnProperty('parent')) {
         element.parent = null;
       }
     });

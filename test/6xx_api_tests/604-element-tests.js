@@ -26,7 +26,6 @@ const request = require('request');
 const path = require('path');
 
 // MBEE modules
-const OrgController = M.require('controllers.organization-controller');
 const ProjController = M.require('controllers.project-controller');
 const db = M.require('lib.db');
 
@@ -95,14 +94,11 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Delete organization
-    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
-    .then((retOrg) => {
-      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
-      // Delete admin user
-      return testUtils.removeAdminUser();
-    })
-    .then((user) => {
-      chai.expect(user).to.equal(testData.users[0].adminUsername);
+    testUtils.removeOrganization(adminUser)
+    // Delete admin user
+    .then(() => testUtils.removeAdminUser())
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
       db.disconnect();
       done();
     })

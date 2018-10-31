@@ -27,7 +27,6 @@ const chai = require('chai');
 // MBEE modules
 const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
-const User = M.require('models.user');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
@@ -72,21 +71,11 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Find the admin user
-    User.findOne({
-      username: testData.users[0].adminUsername
-    }, (error, user) => {
-      // Expect no error
-      chai.expect(error).to.equal(null);
-
-      // Delete admin user
-      user.remove((error2) => {
-        // Expect no error
-        chai.expect(error2).to.equal(null);
-
-        // Disconnect from the database
-        db.disconnect();
-        done();
-      });
+    testUtils.removeAdminUser()
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
+      db.disconnect();
+      done();
     })
     .catch((error) => {
       // Disconnect from the database
