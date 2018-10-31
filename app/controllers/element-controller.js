@@ -241,8 +241,8 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           uuid: element.uuid,
           documentation: element.documentation,
           custom: element.custom,
-          createdBy: reqUser,
-          lastModifiedBy: reqUser
+          createdBy: reqUser._id,
+          lastModifiedBy: reqUser._id
         };
 
         // Add element to correct type array
@@ -348,7 +348,6 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       if (error instanceof M.CustomError && !created) {
         return reject(error);
       }
-      console.log(error);
       // If it's not a CustomError, the create failed so delete all successfully
       // created elements and reject the error.
       return Element.Element.deleteMany({ id: { $in: arrUID } })

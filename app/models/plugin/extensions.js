@@ -25,11 +25,11 @@ const mongoose = require('mongoose');
 module.exports = function extensionPlugin(schema, options) {
   schema.add({
     createdBy: {
-      type: mongoose.Schema.Types.Mixed,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
     lastModifiedBy: {
-      type: mongoose.Schema.Types.Mixed,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
     createdOn: {
