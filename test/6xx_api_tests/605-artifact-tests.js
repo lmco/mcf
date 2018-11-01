@@ -113,22 +113,291 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
+
   /* Execute the tests */
-  it('should POST an outgoing webhook', postOutgoingWebhook);
-  it('should POST an incoming webhook', postIncomingWebhook);
-  it('should GET the previously created webhook', getWebhook);
-  it('should trigger an incoming webhook', triggerWebhook);
-  it('should PATCH the previously created webhook', patchWebhook);
-  it('should reject a POST with an invalid id field', rejectPostWebhook);
-  it('should reject a GET of a non-existing webhook', rejectGetWebhook);
-  it('should reject a PATCH of an immutable webhook field', rejectPatchWebhook);
-  it('should reject a DELETE of a non-existing webhook', rejectDeleteNonExistingWebhook);
-  it('should DELETE the previously created outgoing webhook', deleteOutgoingWebhook);
-  it('should DELETE the previously created incoming webhook', deleteIncomingWebhook);
+  it('should POST an artifact', postArtifact);
+  it('should GET the previously created Artifact', getArtifact);
+  it('should PATCH the previously created Artifact', patchArtifact);
+  /*
+  it('should reject a POST with an invalid id field', rejectPostArtifact);
+  it('should reject a GET of a non-existing Artifact', rejectGetArtifact);
+  it('should reject a PATCH of an immutable Artifact field', rejectPatchArtifact);
+  it('should reject a DELETE of a non-existing Artifact', rejectDeleteNonExistingArtifact);
+  it('should DELETE the previously created outgoing Artifact', deleteOutgoingArtifact);
+  it('should DELETE the previously created incoming Artifact', deleteIncomingArtifact);*/
 });
 
 /* --------------------( Tests )-------------------- */
 
+/**
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ * creates an artifact.
+ */
+function postArtifact(done) {
+  // Upload new artifact
+  const artifact = {
+    id: testData.artifacts[0].id,
+    filename: testData.artifacts[0].filename,
+    contentType: path.extname(testData.artifacts[0].filename),
+    project: proj,
+    organization: org,
+  }
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+  );
+
+  const body = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  }
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/artifacts/${testData.artifacts[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(body)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.id).to.equal(testData.artifacts[0].id);
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * finds and returns the previously created Artifact.
+ */
+function getArtifact(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.id).to.equal(testData.artifacts[0].id);
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/Artifacts/:Artifactid triggers an incoming
+ * Artifacts events.
+ */
+function triggerArtifact(done) {
+  // Create base64 encoded Artifact id
+  const ArtifactUID = utils.createID(org.id, proj.id, testData.artifacts[2].id);
+  const encodedID = Buffer.from(ArtifactUID).toString('base64');
+
+  // Add token to headers
+  const headers = getHeaders();
+  headers[testData.artifacts[2].tokenLocation] = testData.artifacts[2].token;
+
+  // Send request
+  request({
+    url: `${M.config.test.url}/api/Artifacts/${encodedID}`,
+    headers: headers,
+    ca: readCaFile(),
+    method: 'POST'
+  },
+  (err, response) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * updates a Artifact.
+ */
+function patchArtifact(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      name: 'Updated Artifact Name'
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json.name).to.equal('Updated Artifact Name');
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * fails to creates a Artifact with an invalid id field.
+ */
+function rejectPostArtifact(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.invalidartifacts[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(testData.invalidartifacts[0])
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Bad Request');
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * fails to find a non-existing Artifact.
+ */
+function rejectGetArtifact(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[1].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 404 Not Found
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * fails to update an immutable Artifact field.
+ */
+function rejectPatchArtifact(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify({
+      id: 'newArtifactid'
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 403 Forbidden
+    chai.expect(response.statusCode).to.equal(403);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * fails to delete a non-existing Artifact.
+ */
+function rejectDeleteNonExistingArtifact(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[1].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      hardDelete: true
+    })
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 404 Not Found
+    chai.expect(response.statusCode).to.equal(404);
+    // Verify error message in response body
+    const json = JSON.parse(body);
+    chai.expect(json.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * deletes the previously created outgoing Artifact.
+ */
+function deleteOutgoingArtifact(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      hardDelete: true
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json).to.equal(true);
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * deletes the previously created incoming Artifact.
+ */
+function deleteIncomingArtifact(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[2].id}`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify({
+      hardDelete: true
+    })
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const json = JSON.parse(body);
+    chai.expect(json).to.equal(true);
+    done();
+  });
+}
 
 /* ----------( Helper Functions )----------*/
 /**

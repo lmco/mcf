@@ -47,20 +47,19 @@ const ProjController = M.require('controllers.project-controller');
  * @param {User} reqUser - The user object of the requesting user.
  * @param {String} orgID - The organization ID for the org the project belongs to.
  * @param {String} projID - The project ID of the Project which is being searched for.
- * @param {Object} artifactMetaData - The JSON object containing the Artifact data
- * @param {Binary} artifactBlob - The binary data to store.
+ * @param {Object} artData - The JSON object containing the Artifact data
  *
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
-function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) {
+function createArtifact(reqUser, orgID, projID, artData) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof artifactMetaData.id === 'string', 'Artifact ID is not a string.');
-      assert.ok(typeof artifactBlob === 'object', 'Artifact is not a object.');
+      assert.ok(typeof artData.metaData.id === 'string', 'Artifact ID is not a string.');
+      assert.ok(typeof artData.metaData === 'object', 'Artifact is not a object.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -69,7 +68,7 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
     // Sanitize query inputs
     const organizationID = sani.sanitize(orgID);
     const projectID = sani.sanitize(projID);
-    const artID = sani.sanitize(artifactMetaData.id);
+    const artID = sani.sanitize(artData.metaData.id);
 
     // Define function-wide variables
     // Create the full artifact id
@@ -95,10 +94,14 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
       return findArtifactsQuery({ id: artifactFullId });
     })
     .then((_artifact) => {
+      console.log('first');
       // Error Check: ensure no artifact were found
       if (_artifact.length > 0) {
-        return reject(new M.CustomError('Artifact already exists.', 400, 'warn'));
+        return reject(new M.CustomError('Artifact already exists.', 403, 'warn'));
       }
+
+      // Convert JSON object to buffer
+      const artifactBlob = Buffer.from(JSON.stringify(artData.artifactBlob));
 
       // Generate hash
       hashedName = mbeeCrypto.sha256Hash(artifactBlob);
@@ -112,8 +115,8 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
       // Create the new Artifact
       const artifact = new Artifact({
         id: artifactFullId,
-        filename: artifactMetaData.filename,
-        contentType: path.extname(artifactMetaData.filename),
+        filename: artData.metaData.filename,
+        contentType: path.extname(artData.metaData.filename),
         history: historyData,
         project: foundProj
 
@@ -133,11 +136,14 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
       //     NOT Exist - Returns calling addArtifactOS()
       //     Exist - Returns resolve Artifact
       return (!fs.existsSync(path.join(artifactPath, hashedName.substring(0, 2), hashedName)))
-        ? addArtifactOS(hashedName, artifactBlob)
+        ? addArtifactOS(hashedName, artData.artifactBlob)
         : resolve(_artifact);
     })
     .then(() => resolve(createdArtifact))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => {
+      console.log(error);
+      reject(M.CustomError.parseCustomError(error))
+    });
   });
 }
 
@@ -149,12 +155,11 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
  * @param {String} projID - The project ID of the Project which is being searched for.
  * @param {String} artifactID - The Artifact ID
  * @param {Object} artifactToUpdate - JSON object containing updated Artifact data
- * @param {Binary} artifactBlob - The binary data to store.
  *
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
-function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, artifactBlob) {
+function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
@@ -162,7 +167,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
       assert.ok(typeof artifactToUpdate === 'object', 'Artifact to update is not an object.');
-      assert.ok(typeof artifactBlob === 'object', 'Artifact Blob is not an object.');
+      assert.ok(typeof artifactToUpdate.artifactBlob === 'object', 'Artifact Blob is not an object.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -194,7 +199,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
       }
 
       // Generate hash
-      hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+      hashedName = mbeeCrypto.sha256Hash(artifactToUpdate.artifactBlob);
 
       // Get history length
       const lastestHistoryIndex = _artifact.history.length - 1;
@@ -213,10 +218,6 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
         isNewHash = true;
       }
 
-      // Remove 'id' from artifactToUpdate
-      // Note: id is immutable and cannot be changed
-      delete artifactToUpdate.id;
-
       // Define and get a list of artifact keys to update
       const artifactUpdateFields = Object.keys(artifactToUpdate);
 
@@ -226,7 +227,9 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
       // Loop through all updateable fields
       for (let i = 0; i < artifactUpdateFields.length; i++) {
         // Error Check: Check if field can be updated
-        if (!validUpdateFields.includes(artifactUpdateFields[i])) {
+        if (!validUpdateFields.includes(artifactUpdateFields[i])
+          && artifactUpdateFields[i] !== 'artifactBlob') {
+
           // field cannot be updated, reject error
           return reject(new M.CustomError(
             `Artifact property [${artifactUpdateFields[i]}] cannot be changed.`, 403, 'warn'
@@ -244,7 +247,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
     .then((_artifact) => {
       updatedArtifact = _artifact;
       return (isNewHash)
-        ? addArtifactOS(hashedName, artifactBlob)
+        ? addArtifactOS(hashedName, artifactToUpdate.artifactBlob)
         : resolve(_artifact);
     })
     .then(() => resolve(updatedArtifact))
@@ -390,7 +393,7 @@ function findArtifact(reqUser, orgID, projID, artifactID, softDeleted = false) {
       if (artifact.length > 1) {
         return reject(new M.CustomError('More than one artifact found.', 400, 'warn'));
       }
-
+      console.log(artifact[0]);
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!artifact[0].project.getPermissions(reqUser).read && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));

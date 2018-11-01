@@ -24,6 +24,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
+const utils = M.require('lib.utils');
 const timestamp = M.require('models.plugin.timestamp');
 
 /* ---------------------------( Artifact Schemas )---------------------------- */
@@ -107,6 +108,20 @@ const ArtifactSchema = new mongoose.Schema({
 /* ---------------------------( Model Plugin )---------------------------- */
 // Use timestamp model plugin
 ArtifactSchema.plugin(timestamp);
+
+/* ----------------------------( Webhook Methods )-----------------------------*/
+/**
+ * @description Returns an incoming artifact's public data.
+ * @memberOf ArtifactSchema
+ */
+ArtifactSchema.methods.getPublicData = function() {
+  return {
+    id: utils.parseID(this.id)[2],
+    filename: this.filename,
+    history: this.history,
+    contentType: this.contentType
+  };
+};
 
 /**
  * @description Returns artifact fields that can be changed

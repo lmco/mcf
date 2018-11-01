@@ -2388,5 +2388,261 @@ api.route('/webhooks/:webhookid')
   APIController.postIncomingWebhook
 );
 
+/**
+ * @swagger
+ * /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Finds and returns a artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to return.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing get artifact options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             softDeleted:
+ *               type: boolean
+ *               description: The boolean indicating if the soft deleted artifact
+ *                            is returned. The user must be a global admin or an
+ *                            admin on the project to find a soft deleted
+ *                            artifact.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      correct permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ *   post:
+ *     tags:
+ *       - artifacts
+ *     description: Creates a new artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to be created.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing the new artifact data.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           required:
+ *             - name
+ *             - triggers
+ *             - responses
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: The ID of the artifact. If this is provided, it
+ *                            must match the artifact ID provided in the URI.
+ *             name:
+ *               type: string
+ *               description: The name for the artifact.
+ *             triggers:
+ *               type: object
+ *               description: An array of events on which the artifact will be
+ *                            triggered. The events should all be strings.
+ *             responses:
+ *               type: object
+ *               description: An array of objects, each containing a URL
+ *                            (required, string), method (string, defaults to
+ *                            GET), and optional data field. On trigger of an
+ *                            an event, the a request of type 'method' will be
+ *                            sent to the specified URL.
+ *             custom:
+ *               type: JSON Object
+ *               description: Custom JSON data that can be added to the artifact.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST artifact, returns artifact data.
+ *       400:
+ *         description: Bad Request, Failed to POST artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to POST artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to POST artifact due to project/org not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to POST artifact due to
+ *                      server side issue.
+ *
+ *   patch:
+ *     tags:
+ *       - artifacts
+ *     description: Updates an existing artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to be updated.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing the updated artifact data.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: The updated name for the artifact.
+ *             custom:
+ *               type: JSON Object
+ *               description: The updated custom JSON data for the artifact.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH artifact, returns artifact data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH artifact due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH artifact due to updating an
+ *                      immutable field.
+ *       404:
+ *         description: Not Found, Failed to PATCH artifact due to artifact
+ *                      not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to PATCH artifact due to
+ *                      server side issue.
+ *
+ *   delete:
+ *     tags:
+ *       -  artifacts
+ *     description: Deletes a artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to delete.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing delete options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             hardDelete:
+ *               type: boolean
+ *               description: The boolean indicating if the artifact should be
+ *                            hard deleted or not. The user must be a global
+ *                            admin to hard delete. Defaults to false.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to DELETE artifact, returns true.
+ *       400:
+ *         description: Bad Request, Failed to DELETE artifact due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to DELETE artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to DELETE artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to DELETE artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE artifact due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getArtifact
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.postArtifact
+)
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchArtifact
+)
+.delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.deleteArtifact
+);
+
 // Export the API router
 module.exports = api;
