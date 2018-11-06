@@ -543,10 +543,9 @@ function createStorageDirectory() {
       // Check directory NOT exist
       if (!exists) {
         // Directory does NOT exist, create it
-        fs.mkdir(artifactPath, (error) => {
+        fs.mkdirSync(artifactPath, (error) => {
           // Check for errors
           if (error) {
-            M.log.error(error);
             return reject(new M.CustomError(error.message, 500, 'warn'));
           }
         });
