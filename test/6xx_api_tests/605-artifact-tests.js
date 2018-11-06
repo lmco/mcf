@@ -28,7 +28,6 @@ const path = require('path');
 // MBEE modules
 const ProjController = M.require('controllers.project-controller');
 const db = M.require('lib.db');
-const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -118,14 +117,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST an artifact', postArtifact);
   it('should GET the previously created Artifact', getArtifact);
   it('should PATCH the previously created Artifact', patchArtifact);
-  it('should reject a POST with an existing id field', rejectPostArtifact);
-
+  it('should reject a POST with an existing id field', rejectExistingPostArtifact);
   it('should reject a GET of a non-existing Artifact', rejectGetArtifact);
-  /*
   it('should reject a PATCH of an immutable Artifact field', rejectPatchArtifact);
   it('should reject a DELETE of a non-existing Artifact', rejectDeleteNonExistingArtifact);
-  it('should DELETE the previously created outgoing Artifact', deleteOutgoingArtifact);
-  it('should DELETE the previously created incoming Artifact', deleteIncomingArtifact);*/
+  it('should DELETE the previously created Artifact', deleteArtifact);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -140,22 +136,22 @@ function postArtifact(done) {
     id: testData.artifacts[0].id,
     filename: testData.artifacts[0].filename,
     contentType: path.extname(testData.artifacts[0].filename)
-  }
+  };
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
 
-  const body = {
+  const bodyRequest = {
     metaData: artifact,
     artifactBlob: fs.readFileSync(imgPath)
-  }
+  };
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(body)
+    body: JSON.stringify(bodyRequest)
   },
   (err, response, body) => {
     // Expect no error
@@ -201,22 +197,22 @@ function patchArtifact(done) {
   const artifact = {
     filename: testData.artifacts[2].filename,
     contentType: path.extname(testData.artifacts[2].filename)
-  }
+  };
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[2].filename
   );
 
-  const body = {
+  const bodyRequest = {
     metaData: artifact,
     artifactBlob: fs.readFileSync(imgPath)
-  }
+  };
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(body)
+    body: JSON.stringify(bodyRequest)
   },
   (err, response, body) => {
     // Expect no error
@@ -234,28 +230,28 @@ function patchArtifact(done) {
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
  * Fails to creates an Artifact with an existing ID.
  */
-function rejectPostArtifact(done) {
+function rejectExistingPostArtifact(done) {
   // Define new artifact
   const artifact = {
     id: testData.artifacts[0].id,
     filename: testData.artifacts[0].filename,
     contentType: path.extname(testData.artifacts[0].filename)
-  }
+  };
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
 
-  const body = {
+  const bodyRequest = {
     metaData: artifact,
     artifactBlob: fs.readFileSync(imgPath)
-  }
+  };
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(body)
+    body: JSON.stringify(bodyRequest)
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -294,17 +290,30 @@ function rejectGetArtifact(done) {
 
 /**
  * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
- * fails to update an immutable Artifact field.
+ * fails to update an immutable Artifact id field.
  */
 function rejectPatchArtifact(done) {
+  // Define artifact fields to update
+  const artifact = {
+    id: testData.artifacts[2].id,
+    filename: testData.artifacts[2].filename,
+    contentType: path.extname(testData.artifacts[2].filename)
+  };
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[2].filename
+  );
+
+  const bodyRequest = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  };
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({
-      id: 'newArtifactid'
-    })
+    body: JSON.stringify(bodyRequest)
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -346,9 +355,9 @@ function rejectDeleteNonExistingArtifact(done) {
 
 /**
  * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
- * deletes the previously created outgoing Artifact.
+ * deletes the previously created Artifact.
  */
-function deleteOutgoingArtifact(done) {
+function deleteArtifact(done) {
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
@@ -363,35 +372,6 @@ function deleteOutgoingArtifact(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json).to.equal(true);
-    done();
-  });
-}
-
-/**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
- * deletes the previously created incoming Artifact.
- */
-function deleteIncomingArtifact(done) {
-  request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[2].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json).to.equal(true);
     done();
   });
 }

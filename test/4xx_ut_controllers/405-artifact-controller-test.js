@@ -142,7 +142,7 @@ function uploadArtifact(done) {
   const artifactObjData = {
     metaData: artifactMetaData,
     artifactBlob: artifactPNG
-  }
+  };
 
   // Create artifact
   ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData)
@@ -152,7 +152,6 @@ function uploadArtifact(done) {
     done();
   })
   .catch((error) => {
-    console.log('second');
     M.log.error(error.description);
     // Expect no error
     chai.expect(error.message).to.equal(null);
@@ -180,7 +179,7 @@ function uploadSecondArtifact(done) {
   const artifactObjData = {
     metaData: artifactMetaData,
     artifactBlob: artifactPNG
-  }
+  };
 
   // Create artifact
   ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData)
@@ -212,7 +211,7 @@ function updateArtifact(done) {
   const artMetaData = {
     filename: testData.artifacts[2].filename,
     contentType: path.extname(testData.artifacts[2].filename)
-  }
+  };
 
   // Create artfact to update object
   const artObjData = {

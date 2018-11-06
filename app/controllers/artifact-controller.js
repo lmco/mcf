@@ -163,7 +163,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
       assert.ok(typeof artToUpdate === 'object', 'Artifact to update is not an object.');
-      assert.ok(typeof artToUpdate.metaData === 'object', 'Artifact Blob is not an object.')
+      assert.ok(typeof artToUpdate.metaData === 'object', 'Artifact Blob is not an object.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -194,27 +194,30 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
         return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
-      // Convert JSON object to buffer
-      const artifactBlob = Buffer.from(JSON.stringify(artToUpdate.artifactBlob));
+      // Check if Artifact blob is part of the update
+      if (artToUpdate.artifactBlob) {
+        // Convert JSON object to buffer
+        const artifactBlob = Buffer.from(JSON.stringify(artToUpdate.artifactBlob));
 
-      // Generate hash
-      hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+        // Generate hash
+        hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
-      // Get history length
-      const lastestHistoryIndex = _artifact.history.length - 1;
+        // Get history length
+        const lastestHistoryIndex = _artifact.history.length - 1;
 
-      // Check latest hash history has changed
-      if (hashedName !== _artifact.history[lastestHistoryIndex].hash) {
-        // New hash, define new hash history data
-        const historyData = {
-          hash: hashedName,
-          user: reqUser
-        };
-        // Add new hash to history
-        _artifact.history.push(historyData);
+        // Check latest hash history has changed
+        if (hashedName !== _artifact.history[lastestHistoryIndex].hash) {
+          // New hash, define new hash history data
+          const historyData = {
+            hash: hashedName,
+            user: reqUser
+          };
+          // Add new hash to history
+          _artifact.history.push(historyData);
 
-        // Set new hash boolean to true
-        isNewHash = true;
+          // Set new hash boolean to true
+          isNewHash = true;
+        }
       }
 
       // Define and get a list of artifact keys to update
@@ -228,7 +231,6 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(artifactUpdateFields[i])
           && artifactUpdateFields[i] !== 'artifactBlob') {
-
           // field cannot be updated, reject error
           return reject(new M.CustomError(
             `Artifact property [${artifactUpdateFields[i]}] cannot be changed.`, 403, 'warn'
@@ -252,8 +254,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
     })
     .then(() => resolve(updatedArtifact))
     .catch((error) => {
-      console.log(error);
-      reject(M.CustomError.parseCustomError(error))
+      reject(M.CustomError.parseCustomError(error));
     });
   });
 }
