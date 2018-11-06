@@ -2394,7 +2394,7 @@ api.route('/webhooks/:webhookid')
  *   get:
  *     tags:
  *       - artifacts
- *     description: Finds and returns a artifact.
+ *     description: Finds and returns an artifact.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2572,7 +2572,7 @@ api.route('/webhooks/:webhookid')
  *   delete:
  *     tags:
  *       -  artifacts
- *     description: Deletes a artifact.
+ *     description: Deletes an artifact.
  *     produces:
  *       - application/json
  *     parameters:

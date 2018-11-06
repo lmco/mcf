@@ -47,7 +47,7 @@ const timestamp = M.require('models.plugin.timestamp');
  * @property {Date} createdOn - The date which an artifact was created.
  * @property {Date} updatedOn - The date which an artifact was updated.
  * @property {Date} createdOn - The date the artifact was soft deleted or null
- * @property {Boolean} deleted - Indicates if a artifact has been soft deleted.
+ * @property {Boolean} deleted - Indicates if an artifact has been soft deleted.
  *
  */
 const ArtifactSchema = new mongoose.Schema({

@@ -190,7 +190,7 @@ function getArtifact(done) {
 
 /**
  * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
- * updates a Artifact.
+ * updates an Artifact.
  */
 function patchArtifact(done) {
   // Define artifact fields to update

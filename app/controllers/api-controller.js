@@ -2121,7 +2121,7 @@ function postIncomingWebhook(req, res) {
 /**
  * GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  *
- * @description Gets a artifact by its artifact.id, project.id, and org.id.
+ * @description Gets an artifact by its artifact.id, project.id, and org.id.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2160,7 +2160,7 @@ function getArtifact(req, res) {
  * POST /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  *
  * @description Takes an organization ID, project ID, and artifact ID in the URI
- * along with the request body to create a artifact.
+ * along with the request body to create an artifact.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
