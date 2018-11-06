@@ -25,6 +25,7 @@ const ldap = require('ldapjs');
 
 // MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
+const User = M.require('models.user');
 const UserController = M.require('controllers.user-controller');
 const sani = M.require('lib.sanitization');
 
@@ -305,16 +306,17 @@ function ldapSync(ldapUserObj) {
       }
       // Error message 'Not Found', create user in database
       // Initialize userData with LDAP information
-      const initData = {
+      const initData = new User({
         username: ldapUserObj[ldapConfig.attributes.username],
         fname: ldapUserObj[ldapConfig.attributes.firstName],
         preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
         lname: ldapUserObj[ldapConfig.attributes.lastName],
         email: ldapUserObj[ldapConfig.attributes.eMail],
         provider: 'ldap'
-      };
+      });
 
-      UserController.createUser({ admin: true }, initData)
+      // Save ldap user
+      return initData.save()
       // Save successful, resolve user model object
       .then(userSaveNew => resolve(userSaveNew))
       // Save failed, reject error

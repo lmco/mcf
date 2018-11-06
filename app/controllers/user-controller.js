@@ -152,13 +152,18 @@ function createUsers(reqUser, arrNewUsers) {
       // Create user objects
       const userObjects = arrNewUsers.map(u => new User(sani.sanitize(u)));
 
-      // Error Check: ensure password is provided if local strategy
+      // Loop through all the new users
       userObjects.forEach((user) => {
+        // Error Check: ensure password is provided if local strategy
         if (user.password === undefined && user.provider === 'local') {
           return reject(new M.CustomError(
             `Password is required for local user [${user.username}`, 403, 'warn'
           ));
         }
+
+        // Update the created by and last modified field
+        user.createdBy = reqUser;
+        user.lastModifiedBy = reqUser;
       });
 
       // Set created flag to true
@@ -290,6 +295,9 @@ function updateUsers(reqUser, query, updateInfo) {
             }
           });
 
+          // Update last modified field
+          user.lastModifiedBy = reqUser;
+
           // Add user.save() to promise array
           promises.push(user.save());
         });
@@ -415,7 +423,7 @@ function removeUsers(reqUser, query, hardDelete = false) {
     // If hardDelete, delete users, otherwise update them
     .then(() => ((hardDelete)
       ? User.deleteMany(query)
-      : User.updateMany(query, { deleted: true })))
+      : User.updateMany(query, { deleted: true, deletedBy: reqUser })))
     .then((responseQuery) => {
       // Handle case where not all users are successfully deleted/updated
       if (responseQuery.n !== foundUsers.length) {
@@ -569,6 +577,10 @@ function createUser(reqUser, newUserData) {
       // Create the new user
       const user = new User(sani.sanitize(newUserData));
 
+      // Update the created by and last modified field
+      user.createdBy = reqUser;
+      user.lastModifiedBy = reqUser;
+
       // Error Check: ensure password is provided if local strategy
       if (user.password === undefined && user.provider === 'local') {
         return reject(new M.CustomError('Password is required for local users', 403, 'warn'));
@@ -675,6 +687,8 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
           user[userUpdateFields[i]] = sani.sanitize(newUserData[userUpdateFields[i]]);
         }
       }
+      // Update last modified field
+      user.lastModifiedBy = reqUser;
 
       // Save updated user
       return user.save();

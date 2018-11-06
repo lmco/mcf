@@ -232,6 +232,10 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
           custom: sani.sanitize(webhookData.custom)
         });
 
+      // Update the created by and last modified field
+      webhookObj.createdBy = reqUser;
+      webhookObj.lastModifiedBy = reqUser;
+
       // Save webhook to DB
       return webhookObj.save();
     })
@@ -348,6 +352,9 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
         }
       }
 
+      // Update last modified field
+      webhook.lastModifiedBy = reqUser;
+
       // Save updated webhook
       return webhook.save();
     })
@@ -409,8 +416,10 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
         return Webhook.Webhook.deleteOne({ id: webhook.id });
       }
       // Soft delete
-
       webhook.deleted = true;
+
+      // Update deleted by field
+      webhook.deletedBy = reqUser;
       return webhook.save();
     })
     .then(() => resolve(true))

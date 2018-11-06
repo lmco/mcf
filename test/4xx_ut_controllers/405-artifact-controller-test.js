@@ -125,7 +125,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Update an artifact with a new file.
  * Note: This result in a different hash. Both files should be archieved
- * and artifact history is updated.
+ * and artifact history is updated
  */
 function uploadArtifact(done) {
   // Find and read image

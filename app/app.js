@@ -48,8 +48,8 @@ module.exports = app;
  * default admin and default organization if needed.
  */
 db.connect()
-.then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
+.then(() => createDefaultOrganization())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);
@@ -102,7 +102,7 @@ function initApp() {
     // Load the plugin routes
     if (M.config.server.plugins.enabled) {
       const PluginRoutesPath = path.join(__dirname, '..', 'plugins', 'routes.js');
-      const PluginRouter = require(PluginRoutesPath); // eslint-disable-line global-require
+      const PluginRouter = require(PluginRoutesPath).router; // eslint-disable-line global-require
       app.use('/plugins', PluginRouter);
     }
 
@@ -182,15 +182,15 @@ function createDefaultAdmin() {
       // set userCreated to true
       userCreated = true;
       // No global admin exists, create local user as global admin
-      const adminUserData = {
+      const adminUserData = new User({
         // Set username and password of global admin user from configuration.
         username: M.config.server.defaultAdminUsername,
         password: M.config.server.defaultAdminPassword,
         provider: 'local',
         admin: true
-      };
+      });
       // Save new global admin user
-      return UserController.createUser({ admin: true }, adminUserData);
+      return adminUserData.save();
     })
     // Resolve on success of saved admin
     .then(() => {

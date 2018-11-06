@@ -180,6 +180,10 @@ function createProjects(reqUser, organizationID, arrProjects) {
         projObject.permissions.read.push(reqUser._id);
         projObject.permissions.write.push(reqUser._id);
         projObject.permissions.admin.push(reqUser._id);
+
+        // Update the created by and last modified field
+        projObject.createdBy = reqUser;
+        projObject.lastModifiedBy = reqUser;
         return projObject;
       });
 
@@ -309,6 +313,9 @@ function updateProjects(reqUser, query, updateInfo) {
             }
           });
 
+          // Update last modified field
+          proj.lastModifiedBy = reqUser;
+
           // Add proj.save() to promise array
           promises.push(proj.save());
         });
@@ -403,7 +410,7 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
       if (hardDelete) {
         return Project.deleteMany(removeQuery);
       }
-      return Project.updateMany(removeQuery, { deleted: true });
+      return Project.updateMany(removeQuery, { deleted: true, deletedBy: reqUser });
     })
     // Return deleted projects
     .then(() => resolve(foundProjects))
@@ -607,7 +614,10 @@ function createProject(reqUser, project) {
         },
         uid: utils.createID(orgID, projID),
         custom: custom,
-        visibility: visibility
+        visibility: visibility,
+        createdBy: reqUser,
+        lastModifiedBy: reqUser
+
       });
 
       // Save new project
@@ -729,6 +739,9 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
         }
       }
 
+      // Update last modified field
+      project.lastModifiedBy = reqUser;
+
       // Save updated project
       return project.save();
     })
@@ -799,7 +812,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
     // If hard delete, delete project, otherwise update project
     .then(() => ((hardDelete)
       ? Project.deleteOne({ id: foundProject.id })
-      : Project.updateOne({ id: foundProject.id }, { deleted: true })))
+      : Project.updateOne({ id: foundProject.id }, { deleted: true, deletedBy: reqUser })))
     .then(() => resolve(foundProject))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

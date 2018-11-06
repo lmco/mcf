@@ -23,7 +23,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
-const timestamp = M.require('models.plugin.timestamp');
+const extensions = M.require('models.plugin.extensions');
 
 /* -------------------------( Organization Schema )-------------------------- */
 
@@ -108,8 +108,8 @@ OrganizationSchema.virtual('projects', {
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
-// Use timestamp model plugin
-OrganizationSchema.plugin(timestamp);
+// Use extensions model plugin;
+OrganizationSchema.plugin(extensions);
 
 /* -------------------------( Organization Methods )------------------------- */
 
