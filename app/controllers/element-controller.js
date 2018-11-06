@@ -240,7 +240,9 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           project: proj._id,
           uuid: element.uuid,
           documentation: element.documentation,
-          custom: element.custom
+          custom: element.custom,
+          createdBy: reqUser._id,
+          lastModifiedBy: reqUser._id
         };
 
         // Add element to correct type array
@@ -346,7 +348,6 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       if (error instanceof M.CustomError && !created) {
         return reject(error);
       }
-
       // If it's not a CustomError, the create failed so delete all successfully
       // created elements and reject the error.
       return Element.Element.deleteMany({ id: { $in: arrUID } })
@@ -441,6 +442,9 @@ function updateElements(reqUser, query, updateInfo) {
             }
           });
 
+          // Update last modified field
+          element.lastModifiedBy = reqUser;
+
           // Add element.save() to promise array
           promises.push(element.save());
         });
@@ -528,7 +532,7 @@ function removeElements(reqUser, query, hardDelete = false) {
       // If hard delete, delete elements, otherwise update elements
       return (hardDelete)
         ? Element.Element.deleteMany(query)
-        : Element.Element.updateMany(query, { deleted: true });
+        : Element.Element.updateMany(query, { deleted: true, deletedBy: reqUser });
     })
     // Return the deleted elements
     .then(() => resolve(foundElements))
@@ -741,7 +745,9 @@ function createElement(reqUser, element) {
         project: foundProj,
         custom: custom,
         documentation: documentation,
-        uuid: uuid
+        uuid: uuid,
+        createdBy: reqUser,
+        lastModifiedBy: reqUser
       });
 
       // Set the hidden parent field, used by middleware
@@ -877,6 +883,9 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         }
       }
 
+      // Update last modified field
+      element.lastModifiedBy = reqUser;
+
       // Save updated element
       return element.save();
     })
@@ -953,6 +962,10 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
       }
       // Soft delete
       element.deleted = true;
+
+      // Update deleted by field
+      element.deletedBy = reqUser;
+
       return element.save();
     })
     .then(() => {

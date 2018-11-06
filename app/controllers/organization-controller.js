@@ -162,6 +162,8 @@ function createOrgs(reqUser, arrOrgs) {
         orgObject.permissions.read.push(reqUser._id);
         orgObject.permissions.write.push(reqUser._id);
         orgObject.permissions.admin.push(reqUser._id);
+        orgObject.createdBy = reqUser;
+        orgObject.lastModifiedBy = reqUser;
         return orgObject;
       });
       // Save the organizations
@@ -275,6 +277,9 @@ function updateOrgs(reqUser, query, updateInfo) {
             }
           });
 
+          // Update last modified field
+          org.lastmodifiedBy = reqUser;
+
           // Add org.save() to promise array
           promises.push(org.save());
         });
@@ -367,7 +372,7 @@ function removeOrgs(reqUser, query, hardDelete = false) {
       // If hard delete, delete orgs, otherwise update orgs
       return (hardDelete)
         ? Organization.deleteMany(query)
-        : Organization.updateMany(query, { deleted: true });
+        : Organization.updateMany(query, { deleted: true, deletedBy: reqUser });
     })
     .then(() => {
       // Create delete query to remove projects
@@ -561,6 +566,8 @@ function createOrg(reqUser, newOrgData) {
           write: [reqUser._id],
           read: [reqUser._id]
         },
+        createdBy: reqUser,
+        lastModifiedBy: reqUser,
         custom: custom
       });
       // Save new org
@@ -676,6 +683,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
           org[updateField] = sani.sanitize(orgUpdated[updateField]);
         }
       }
+      // Update last modified field
+      org.lastModifiedBy = reqUser;
 
       // Save updated org
       return org.save();
@@ -760,7 +769,7 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
       }
       // Soft delete
       else {
-        Organization.updateOne({ id: org.id }, { deleted: true })
+        Organization.updateOne({ id: org.id }, { deleted: true, deletedBy: reqUser })
         // Soft-delete all projects in the org
         .then(() => ProjController.removeProjects(reqUser, projectQuery, hardDelete))
         .then(() => {

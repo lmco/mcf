@@ -115,7 +115,10 @@ function createArtifact(reqUser, orgID, projID, artifactMetaData, artifactBlob) 
         filename: artifactMetaData.filename,
         contentType: path.extname(artifactMetaData.filename),
         history: historyData,
-        project: foundProj
+        project: foundProj,
+        lastModifiedBy: reqUser,
+        createdBy: reqUser
+
 
       });
 
@@ -237,6 +240,9 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate, ar
           artifactToUpdate[artifactUpdateFields[i]]
         );
       }
+
+      // Update last modified field
+      _artifact.lastModifiedBy = reqUser;
 
       // Save artifact object to the database
       return _artifact.save();
@@ -537,10 +543,9 @@ function createStorageDirectory() {
       // Check directory NOT exist
       if (!exists) {
         // Directory does NOT exist, create it
-        fs.mkdir(artifactPath, (error) => {
+        fs.mkdirSync(artifactPath, (error) => {
           // Check for errors
           if (error) {
-            M.log.error(error);
             return reject(new M.CustomError(error.message, 500, 'warn'));
           }
         });

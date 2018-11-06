@@ -49,7 +49,7 @@ const uuidv4 = require('uuid/v4');
 // MBEE modules
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
-const timestamp = M.require('models.plugin.timestamp');
+const extensions = M.require('models.plugin.extensions');
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };
@@ -202,8 +202,8 @@ const PackageSchema = new mongoose.Schema({
 }, options);
 
 /* ---------------------------( Model Plugin )---------------------------- */
-// Use timestamp model plugin
-ElementSchema.plugin(timestamp);
+// Use extensions model plugin;
+ElementSchema.plugin(extensions);
 
 /* --------------------------( Element Middleware )-------------------------- */
 

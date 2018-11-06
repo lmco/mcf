@@ -27,7 +27,7 @@ const mongoose = require('mongoose');
 
 // MBEE Modules
 const validators = M.require('lib.validators');
-const timestamp = M.require('models.plugin.timestamp');
+const extensions = M.require('models.plugin.extensions');
 
 
 /* ----------------------------( Element Model )----------------------------- */
@@ -179,8 +179,8 @@ UserSchema.virtual('name')
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
-// Use timestamp model plugin
-UserSchema.plugin(timestamp);
+// Use extensions model plugin;
+UserSchema.plugin(extensions);
 
 /* ---------------------------( User Middleware )---------------------------- */
 /**

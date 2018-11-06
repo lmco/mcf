@@ -101,7 +101,10 @@ function createDefaultOrg(done) {
     // Create default org object
     const defOrg = new Organization({
       id: M.config.server.defaultOrganizationId,
-      name: M.config.server.defaultOrganizationName
+      name: M.config.server.defaultOrganizationName,
+      createdBy: null,
+      lastModifiedBy: null
+
     });
 
     // Save the default org
