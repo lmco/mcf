@@ -16,7 +16,7 @@
  * @author  Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This tests the artifact API controller functionality:
- * GET, POST, PATCH, and DELETE of a artifact.
+ * GET, POST, PATCH, and DELETE of an artifact.
  */
 
 // Node modules
