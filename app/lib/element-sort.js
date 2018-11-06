@@ -79,10 +79,10 @@ function createElementsTree(elementList) {
     if (elementList[i].type.toLowerCase() === 'package') {
       // element is a package, check if elementTree does NOT have a
       // key allocated
-      if (!elementTree[elementList[i].uid]) {
+      if (!elementTree[elementList[i].id]) {
         // elementTree does NOT have a key allocated. create a key and
         // insert element reference into element field
-        elementTree[elementList[i].uid] = {
+        elementTree[elementList[i].id] = {
           element: elementList[i],
           children: []
         };
@@ -90,13 +90,13 @@ function createElementsTree(elementList) {
       // elementTree has a key allocated, insert the element reference into
       // element field
       else {
-        elementTree[elementList[i].uid].element = elementList[i];
+        elementTree[elementList[i].id].element = elementList[i];
       }
     }
     // element is NOT a package. allocate a key in elementTree and insert
     // element object reference into the element field
     else {
-      elementTree[elementList[i].uid] = {
+      elementTree[elementList[i].id] = {
         element: elementList[i]
       };
     }
@@ -105,24 +105,24 @@ function createElementsTree(elementList) {
     if (elementList[i].parent) {
       // element has a parent element, check if parent element has NOT been
       // inserted into the elementTree
-      if (!elementTree[elementList[i].parent.uid]) {
+      if (!elementTree[elementList[i].parent.id]) {
         // The parent element has NOT been inserted into elementTree. Create a
         // key for parent and insert element reference into parents children
         // array
-        elementTree[elementList[i].parent.uid] = {
+        elementTree[elementList[i].parent.id] = {
           element: {},
-          children: [elementTree[elementList[i].uid]]
+          children: [elementTree[elementList[i].id]]
         };
       }
       // The parent element has a key allocated in elementTree, add element
       // reference to parents children array
       else {
-        elementTree[elementList[i].parent.uid].children.push(elementTree[elementList[i].uid]);
+        elementTree[elementList[i].parent.id].children.push(elementTree[elementList[i].id]);
       }
     }
     // Element has no parent, set as root
     else {
-      root = elementList[i].uid;
+      root = elementList[i].id;
     }
   }
   // return the root element
