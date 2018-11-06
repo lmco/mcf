@@ -264,7 +264,7 @@ function rejectPostArtifact(done) {
     chai.expect(response.statusCode).to.equal(409);
     // Verify error message in response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.description).to.equal('Artifact already exists.');
     done();
   });
 }

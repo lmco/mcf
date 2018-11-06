@@ -208,9 +208,15 @@ function updateArtifact(done) {
   // Extract the artifact id
   const artifactID = testData.artifacts[2].id;
 
+  // Define artifact fields to update
+  const artMetaData = {
+    filename: testData.artifacts[2].filename,
+    contentType: path.extname(testData.artifacts[2].filename)
+  }
+
   // Create artfact to update object
   const artObjData = {
-    filename: testData.artifacts[2].filename,
+    metaData: artMetaData,
     artifactBlob: artifactPNG
   };
   // Create artifact

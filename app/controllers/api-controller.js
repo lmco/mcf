@@ -2153,10 +2153,7 @@ function getArtifact(req, res) {
     return res.status(200).send(formatJSON(artifact.getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    //console.log(error);
-    return res.status(error.status).send(error)
-  });
+  .catch((error) => return res.status(error.status).send(error));
 }
 
 /**
@@ -2196,7 +2193,7 @@ function postArtifact(req, res) {
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
