@@ -119,7 +119,10 @@ ArtifactSchema.methods.getPublicData = function() {
     id: utils.parseID(this.id)[2],
     filename: this.filename,
     history: this.history,
-    contentType: this.contentType
+    contentType: this.contentType,
+    createdBy: this.createdBy,
+    lastModified: this.lastModified
+
   };
 };
 

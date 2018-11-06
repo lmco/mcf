@@ -118,9 +118,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST an artifact', postArtifact);
   it('should GET the previously created Artifact', getArtifact);
   it('should PATCH the previously created Artifact', patchArtifact);
-  /*
-  it('should reject a POST with an invalid id field', rejectPostArtifact);
+  it('should reject a POST with an existing id field', rejectPostArtifact);
+
   it('should reject a GET of a non-existing Artifact', rejectGetArtifact);
+  /*
   it('should reject a PATCH of an immutable Artifact field', rejectPatchArtifact);
   it('should reject a DELETE of a non-existing Artifact', rejectDeleteNonExistingArtifact);
   it('should DELETE the previously created outgoing Artifact', deleteOutgoingArtifact);
@@ -134,13 +135,11 @@ describe(M.getModuleName(module.filename), () => {
  * creates an artifact.
  */
 function postArtifact(done) {
-  // Upload new artifact
+  // Define new artifact
   const artifact = {
     id: testData.artifacts[0].id,
     filename: testData.artifacts[0].filename,
-    contentType: path.extname(testData.artifacts[0].filename),
-    project: proj,
-    organization: org,
+    contentType: path.extname(testData.artifacts[0].filename)
   }
   // Get png test file
   const imgPath = path.join(
@@ -194,47 +193,30 @@ function getArtifact(done) {
 }
 
 /**
- * @description Verifies POST /api/Artifacts/:Artifactid triggers an incoming
- * Artifacts events.
- */
-function triggerArtifact(done) {
-  // Create base64 encoded Artifact id
-  const ArtifactUID = utils.createID(org.id, proj.id, testData.artifacts[2].id);
-  const encodedID = Buffer.from(ArtifactUID).toString('base64');
-
-  // Add token to headers
-  const headers = getHeaders();
-  headers[testData.artifacts[2].tokenLocation] = testData.artifacts[2].token;
-
-  // Send request
-  request({
-    url: `${M.config.test.url}/api/Artifacts/${encodedID}`,
-    headers: headers,
-    ca: readCaFile(),
-    method: 'POST'
-  },
-  (err, response) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    done();
-  });
-}
-
-/**
  * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
  * updates a Artifact.
  */
 function patchArtifact(done) {
+  // Define artifact fields to update
+  const artifact = {
+    filename: testData.artifacts[2].filename,
+    contentType: path.extname(testData.artifacts[2].filename)
+  }
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[2].filename
+  );
+
+  const body = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  }
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({
-      name: 'Updated Artifact Name'
-    })
+    body: JSON.stringify(body)
   },
   (err, response, body) => {
     // Expect no error
@@ -243,28 +225,43 @@ function patchArtifact(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('Updated Artifact Name');
+    chai.expect(json.filename).to.equal(testData.artifacts[2].filename);
     done();
   });
 }
 
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
- * fails to creates a Artifact with an invalid id field.
+ * Fails to creates an Artifact with an existing ID.
  */
 function rejectPostArtifact(done) {
+  // Define new artifact
+  const artifact = {
+    id: testData.artifacts[0].id,
+    filename: testData.artifacts[0].filename,
+    contentType: path.extname(testData.artifacts[0].filename)
+  }
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+  );
+
+  const body = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  }
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.invalidartifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.invalidartifacts[0])
+    body: JSON.stringify(body)
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
     // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
+    chai.expect(response.statusCode).to.equal(409);
     // Verify error message in response body
     const json = JSON.parse(body);
     chai.expect(json.message).to.equal('Bad Request');

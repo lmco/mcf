@@ -94,10 +94,9 @@ function createArtifact(reqUser, orgID, projID, artData) {
       return findArtifactsQuery({ id: artifactFullId });
     })
     .then((_artifact) => {
-      console.log('first');
       // Error Check: ensure no artifact were found
       if (_artifact.length > 0) {
-        return reject(new M.CustomError('Artifact already exists.', 403, 'warn'));
+        return reject(new M.CustomError('Artifact already exists.', 409, 'warn'));
       }
 
       // Convert JSON object to buffer
@@ -140,10 +139,7 @@ function createArtifact(reqUser, orgID, projID, artData) {
         : resolve(_artifact);
     })
     .then(() => resolve(createdArtifact))
-    .catch((error) => {
-      console.log(error);
-      reject(M.CustomError.parseCustomError(error))
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -154,20 +150,20 @@ function createArtifact(reqUser, orgID, projID, artData) {
  * @param {String} orgID - The organization ID for the org the project belongs to.
  * @param {String} projID - The project ID of the Project which is being searched for.
  * @param {String} artifactID - The Artifact ID
- * @param {Object} artifactToUpdate - JSON object containing updated Artifact data
+ * @param {Object} artToUpdate - JSON object containing updated Artifact data
  *
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
-function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate) {
+function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
-      assert.ok(typeof artifactToUpdate === 'object', 'Artifact to update is not an object.');
-      assert.ok(typeof artifactToUpdate.artifactBlob === 'object', 'Artifact Blob is not an object.');
+      assert.ok(typeof artToUpdate === 'object', 'Artifact to update is not an object.');
+      assert.ok(typeof artToUpdate.metaData === 'object', 'Artifact Blob is not an object.')
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -184,10 +180,10 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate) {
     let updatedArtifact = null;
 
     // Check if artifactToUpdate is instance of Artifact model
-    if (artifactToUpdate instanceof Artifact) {
+    if (artToUpdate instanceof Artifact) {
       // Disabling linter because the reassign is needed to convert the object to JSON
       // artifactToUpdate is instance of Artifact model, convert to JSON
-      artifactToUpdate = artifactToUpdate.toJSON(); // eslint-disable-line no-param-reassign
+      artToUpdate = artToUpdate.toJSON(); // eslint-disable-line no-param-reassign
     }
     // Find artifact in database
     findArtifact(reqUser, organizationID, projectID, artID)
@@ -198,8 +194,11 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate) {
         return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
+      // Convert JSON object to buffer
+      const artifactBlob = Buffer.from(JSON.stringify(artToUpdate.artifactBlob));
+
       // Generate hash
-      hashedName = mbeeCrypto.sha256Hash(artifactToUpdate.artifactBlob);
+      hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
       // Get history length
       const lastestHistoryIndex = _artifact.history.length - 1;
@@ -219,7 +218,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate) {
       }
 
       // Define and get a list of artifact keys to update
-      const artifactUpdateFields = Object.keys(artifactToUpdate);
+      const artifactUpdateFields = Object.keys(artToUpdate.metaData);
 
       // Get list of parameters which can be updated from model
       const validUpdateFields = _artifact.getValidUpdateFields();
@@ -235,9 +234,10 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate) {
             `Artifact property [${artifactUpdateFields[i]}] cannot be changed.`, 403, 'warn'
           ));
         }
+
         // Sanitize field and update field in artifact object
         _artifact[artifactUpdateFields[i]] = sani.sanitize(
-          artifactToUpdate[artifactUpdateFields[i]]
+          artToUpdate.metaData[artifactUpdateFields[i]]
         );
       }
 
@@ -247,11 +247,14 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artifactToUpdate) {
     .then((_artifact) => {
       updatedArtifact = _artifact;
       return (isNewHash)
-        ? addArtifactOS(hashedName, artifactToUpdate.artifactBlob)
+        ? addArtifactOS(hashedName, artToUpdate.artifactBlob)
         : resolve(_artifact);
     })
     .then(() => resolve(updatedArtifact))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => {
+      console.log(error);
+      reject(M.CustomError.parseCustomError(error))
+    });
   });
 }
 
@@ -393,7 +396,6 @@ function findArtifact(reqUser, orgID, projID, artifactID, softDeleted = false) {
       if (artifact.length > 1) {
         return reject(new M.CustomError('More than one artifact found.', 400, 'warn'));
       }
-      console.log(artifact[0]);
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!artifact[0].project.getPermissions(reqUser).read && !reqUser.admin) {
         return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));

@@ -2154,7 +2154,7 @@ function getArtifact(req, res) {
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
-    console.log(error);
+    //console.log(error);
     return res.status(error.status).send(error)
   });
 }
