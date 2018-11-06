@@ -423,7 +423,7 @@ function removeUsers(reqUser, query, hardDelete = false) {
     // If hardDelete, delete users, otherwise update them
     .then(() => ((hardDelete)
       ? User.deleteMany(query)
-      : User.updateMany(query, { deleted: true })))
+      : User.updateMany(query, { deleted: true, deletedBy: reqUser })))
     .then((responseQuery) => {
       // Handle case where not all users are successfully deleted/updated
       if (responseQuery.n !== foundUsers.length) {

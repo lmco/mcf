@@ -416,8 +416,10 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
         return Webhook.Webhook.deleteOne({ id: webhook.id });
       }
       // Soft delete
-
       webhook.deleted = true;
+
+      // Update deleted by field
+      webhook.deletedBy = reqUser;
       return webhook.save();
     })
     .then(() => resolve(true))

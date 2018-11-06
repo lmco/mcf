@@ -532,7 +532,7 @@ function removeElements(reqUser, query, hardDelete = false) {
       // If hard delete, delete elements, otherwise update elements
       return (hardDelete)
         ? Element.Element.deleteMany(query)
-        : Element.Element.updateMany(query, { deleted: true });
+        : Element.Element.updateMany(query, { deleted: true, deletedBy: reqUser });
     })
     // Return the deleted elements
     .then(() => resolve(foundElements))
@@ -962,6 +962,10 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
       }
       // Soft delete
       element.deleted = true;
+
+      // Update deleted by field
+      element.deletedBy = reqUser;
+
       return element.save();
     })
     .then(() => {

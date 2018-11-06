@@ -410,7 +410,7 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
       if (hardDelete) {
         return Project.deleteMany(removeQuery);
       }
-      return Project.updateMany(removeQuery, { deleted: true });
+      return Project.updateMany(removeQuery, { deleted: true, deletedBy: reqUser });
     })
     // Return deleted projects
     .then(() => resolve(foundProjects))
@@ -812,7 +812,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
     // If hard delete, delete project, otherwise update project
     .then(() => ((hardDelete)
       ? Project.deleteOne({ id: foundProject.id })
-      : Project.updateOne({ id: foundProject.id }, { deleted: true })))
+      : Project.updateOne({ id: foundProject.id }, { deleted: true, deletedBy: reqUser })))
     .then(() => resolve(foundProject))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

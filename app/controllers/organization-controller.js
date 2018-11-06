@@ -372,7 +372,7 @@ function removeOrgs(reqUser, query, hardDelete = false) {
       // If hard delete, delete orgs, otherwise update orgs
       return (hardDelete)
         ? Organization.deleteMany(query)
-        : Organization.updateMany(query, { deleted: true });
+        : Organization.updateMany(query, { deleted: true, deletedBy: reqUser });
     })
     .then(() => {
       // Create delete query to remove projects
@@ -769,7 +769,7 @@ function removeOrg(reqUser, organizationID, hardDelete = false) {
       }
       // Soft delete
       else {
-        Organization.updateOne({ id: org.id }, { deleted: true })
+        Organization.updateOne({ id: org.id }, { deleted: true, deletedBy: reqUser })
         // Soft-delete all projects in the org
         .then(() => ProjController.removeProjects(reqUser, projectQuery, hardDelete))
         .then(() => {

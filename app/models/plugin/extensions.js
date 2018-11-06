@@ -24,6 +24,10 @@ const mongoose = require('mongoose');
 
 module.exports = function extensionPlugin(schema, options) {
   schema.add({
+    deletedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
