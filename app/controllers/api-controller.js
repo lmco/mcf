@@ -27,6 +27,7 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const WebhookController = M.require('controllers.webhook-controller');
+const ArtifactController = M.require('controllers.artifact-controller');
 const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -82,7 +83,11 @@ module.exports = {
   postWebhook,
   patchWebhook,
   deleteWebhook,
-  postIncomingWebhook
+  postIncomingWebhook,
+  getArtifact,
+  postArtifact,
+  patchArtifact,
+  deleteArtifact
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -2108,6 +2113,158 @@ function postIncomingWebhook(req, res) {
 
     // Return a 200 status
     return res.status(200).send();
+  })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/* -----------------------( Artifacts API Endpoints )------------------------- */
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Gets an artifact by its artifact.id, project.id, and org.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with found artifact
+ */
+function getArtifact(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
+  // Find the artifact from it's artifact.id, project.id, and org.id
+  // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
+  ArtifactController.findArtifact(req.user, req.params.orgid,
+    req.params.projectid, req.params.artifactid, softDeleted)
+  .then((artifact) => {
+    // Return a 200: OK and the artifact
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(artifact.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * POST /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Takes an organization ID, project ID, and artifact ID in the URI
+ * along with the request body to create an artifact.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with created artifact
+ */
+function postArtifact(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If artifact ID was provided in the body, ensure it matches artifact ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.artifactid !== req.body.id)) {
+    const error = new M.CustomError('Artifact ID in the body does not match ID in the params.', 400);
+    return res.status(error.status).send(error);
+  }
+
+  // Set id in request body
+  req.body.id = req.params.artifactid;
+
+  // Create artifact with provided parameters
+  // NOTE: createArtifact() sanitizes req.body
+  ArtifactController.createArtifact(req.user, req.params.orgid, req.params.projectid, req.body)
+  .then((artifact) => {
+    // Return 200: OK and created artifact
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(artifact.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => {
+    res.status(error.status).send(error);
+  });
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Updates the artifact specified in the URI. Takes an org id,
+ * project id, and artifact id in the URI and updated properties of the artifact
+ * in the request body.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with updated artifact
+ */
+function patchArtifact(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified artifact
+  // NOTE: updateArtifact() sanitizes req.params.orgid, req.params.projectid,
+  // and req.params.artifactid
+  ArtifactController.updateArtifact(req.user, req.params.orgid,
+    req.params.projectid, req.params.artifactid, req.body)
+  .then((artifact) => {
+    // Return 200: OK and the updated artifact
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(artifact.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * DELETE /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Takes an orgid, projectid, artifactid in the URI along with delete
+ * options in the body and deletes the corresponding artifact.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with success boolean
+ */
+function deleteArtifact(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Remove the specified artifact
+  // NOTE: removeArtifact() sanitizes req.params.orgid, req.params.projectid, and
+  // req.params.artifactid
+  ArtifactController.removeArtifact(req.user, req.params.orgid,
+    req.params.projectid, req.params.artifactid, hardDelete)
+  .then((success) => {
+    res.header('Content-Type', 'application/json');
+    // Return 200: OK and success
+    return res.status(200).send(formatJSON(success));
   })
   .catch((error) => res.status(error.status).send(error));
 }
