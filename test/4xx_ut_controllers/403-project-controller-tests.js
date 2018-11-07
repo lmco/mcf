@@ -37,8 +37,8 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
-const testData = require(path.join(M.root, 'test', 'data.json'));
-const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
 let nonAdminUser = null;
 let adminUser = null;
 let org = null;

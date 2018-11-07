@@ -29,8 +29,8 @@ const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-const testData = require(path.join(M.root, 'test', 'data.json'));
-const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -264,6 +264,7 @@ function postElements(done) {
     testData.elements[11],
     testData.elements[10]
   ];
+  console.log(JSON.stringify(body, null, 2));
   const params = { orgid: org.id, projectid: proj.id };
   const method = 'POST';
   const req = getReq(params, body, method);
@@ -312,7 +313,7 @@ function patchElements(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(5);
+    chai.expect(json.length).to.equal(4);
     chai.expect(json[2].name).to.equal('Updated Elements');
     done();
   };
