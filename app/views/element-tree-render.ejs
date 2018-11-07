@@ -1,6 +1,6 @@
 <%
-// Set uid, name, and type
-const uid = root.element.uid;
+// Set id, name, and type
+const id = root.element.id;
 const name = root.element.name;
 const type = root.element.type.toLowerCase();
 const apiRef = root.element.apiRef;
@@ -17,12 +17,12 @@ else {
   icon = 'fas fa-box'
 }
 
-const parentRef = (root.element.parent) ? `${root.element.parent.uid}-child` : ''
-const childRef = (root.hasOwnProperty('children')) ? `${root.element.uid}-child` : ''
+const parentRef = (root.element.parent) ? `${root.element.parent.id}-child` : ''
+const childRef = (root.hasOwnProperty('children')) ? `${root.element.id}-child` : ''
 const closed = (root.element.parent) ? 'closed' : ''
  %>
 
-<div class="element type-<%= type %> <%= uid %> <%= parentRef %> <%= closed %>">
+<div class="element type-<%= type %> <%= id %> <%= parentRef %> <%= closed %>">
   <div class="element-container">
 
     <% if (type === 'package') { %>
@@ -40,9 +40,8 @@ const closed = (root.element.parent) ? 'closed' : ''
     <%
     if (root.hasOwnProperty('children') && root.children.length > 0) {
       for (let i = 0; i < root.children.length; i++) {
-        let child = root.children[i];
-    %>
-    <%- include('element-tree-render', {root: child}) %>
+        let child = root.children[i]; %>
+        <%- include('element-tree-render', {root: child}) %>
     <%
       }
     }

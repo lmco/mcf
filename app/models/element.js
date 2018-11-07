@@ -350,6 +350,8 @@ ElementSchema.methods.getPublicData = function() {
     name: this.name,
     project: this.project,
     parent: this.parent,
+    createdOn: this.createdOn,
+    updatedOn: this.updatedOn,
     documentation: this.documentation,
     custom: this.custom
   };

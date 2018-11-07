@@ -192,7 +192,22 @@ const members = project.permissions.read;
       <button id="cancelForm" type="button" class="btn btn-secondary">Cancel</button>
     </form>
   </div>
+</div>
 
+<div id="save-warning" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" style="color: #222222;" >Save Failed</h4>
+      </div>
+      <div class="modal-body">
+        <p style="color:#333;">Your changes have failed to save.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <%- contentFor('scripts') %>
@@ -217,6 +232,17 @@ const members = project.permissions.read;
       $(`#${selectedElementData.url}`.split('\/').join('\\/')).trigger('click')
     });
 
+    const formatDate = (dateString) => {
+      const date = new Date(dateString)
+      const month = ('0'+date.getMonth()+1).slice(-2)
+      const day   = ('0'+date.getDate()).slice(-2)
+      const year  = ('0'+date.getFullYear()).slice(-2)
+      const hour  = ('0'+date.getHours()).slice(-2)
+      const min   = ('0'+date.getMinutes()).slice(-2)
+      const sec   = ('0'+date.getSeconds()).slice(-2)
+
+      return `${month}/${day}/${year}  ${hour}:${min}:${sec}`
+    }
 
     $('.element-title').click(function() {
       $('#tree-sidebar-view').addClass('tree-sidebar-active');
@@ -233,8 +259,8 @@ const members = project.permissions.read;
         $('#edit-name').val(data.name).trigger('change');
         $('.element-item-id-value').html(data.id || 'No ID Provided');
         $('.element-item-parent-value').html((data.parent) ? data.parent.name : 'No Parent.');
-        $('.element-item-created-value').html(data.createdOn || 'No Date Provided');
-        $('.element-item-updated-value').html(data.updatedOn || 'No Date Provided');
+        $('.element-item-created-value').html((data.createdOn) ? formatDate(data.createdOn): 'No Date Provided');
+        $('.element-item-updated-value').html((data.updatedOn) ? formatDate(data.updatedOn): 'Element has not been updated');
         $('.element-item-custom-value').html(JSON.stringify(data.custom, null, 2) || 'No Custom Data.');
         $('#edit-custom').val(JSON.stringify(data.custom, null, 2) || '').trigger('change');
         $('.element-item-documentation-value').html(data.documentation || 'No ' +
@@ -304,8 +330,7 @@ const members = project.permissions.read;
         $('#tree-sidebar-edit').removeClass('tree-sidebar-active');
       })
       .fail(function(msg) {
-        $('#save-warning')
-        .modal('show');
+        $('#save-warning').modal('show');
       });
     });
   });
