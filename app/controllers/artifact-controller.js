@@ -337,12 +337,12 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
             removeArtifactOS(eachArtifact.hash);
           }
         })
-        .catch((error) => reject(error)));
+        .catch((error) => reject(M.CustomError.parseCustomError(error))));
       });
       return Promise.all(arrPromises);
     })
     .then(() => foundArtifact.remove())
-    .then(() => resolve())
+    .then(() => resolve(true))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
