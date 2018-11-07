@@ -152,7 +152,7 @@ function uploadArtifact(done) {
     done();
   })
   .catch((error) => {
-    M.log.error(error.description);
+    M.log.error(error.message);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();

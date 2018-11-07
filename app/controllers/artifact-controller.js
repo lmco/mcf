@@ -96,7 +96,7 @@ function createArtifact(reqUser, orgID, projID, artData) {
     .then((_artifact) => {
       // Error Check: ensure no artifact were found
       if (_artifact.length > 0) {
-        return reject(new M.CustomError('Artifact already exists.', 409, 'warn'));
+        return reject(new M.CustomError('Artifact already exists.', 400, 'warn'));
       }
 
       // Convert JSON object to buffer

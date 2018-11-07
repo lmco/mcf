@@ -21,9 +21,11 @@
 
 // Node modules
 const fs = require('fs');
-const chai = require('chai');
 const request = require('request');
 const path = require('path');
+
+// NPM Modules
+const chai = require('chai');
 
 // MBEE modules
 const ProjController = M.require('controllers.project-controller');
@@ -257,7 +259,7 @@ function rejectExistingPostArtifact(done) {
     // Expect no error (request succeeds)
     chai.expect(err).to.equal(null);
     // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(409);
+    chai.expect(response.statusCode).to.equal(400);
     // Verify error message in response body
     const json = JSON.parse(body);
     chai.expect(json.description).to.equal('Artifact already exists.');
