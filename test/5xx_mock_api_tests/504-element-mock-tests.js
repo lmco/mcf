@@ -264,7 +264,6 @@ function postElements(done) {
     testData.elements[11],
     testData.elements[10]
   ];
-  console.log(JSON.stringify(body, null, 2));
   const params = { orgid: org.id, projectid: proj.id };
   const method = 'POST';
   const req = getReq(params, body, method);

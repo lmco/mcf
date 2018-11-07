@@ -1803,10 +1803,7 @@ function patchElements(req, res) {
     return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error.stack)
-    res.status(error.status).send(error)
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /*

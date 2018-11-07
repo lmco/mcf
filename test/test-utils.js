@@ -233,6 +233,7 @@ module.exports.removeOrganization = function(adminUser) {
  */
 module.exports.importTestData = function() {
   // Import a copy of the data.json
+  // eslint-disable-next-line global-require
   const testDataFresh = require(path.join(M.root, 'test', 'data.json'));
   // After import, clear require cache so a new copy is imported
   // if this function is called again
