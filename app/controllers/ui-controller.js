@@ -256,7 +256,7 @@ function project(req, res) {
   .then(foundElements => {
     elements = foundElements;
     elements.forEach(element => {
-      const uid = utils.parseID(element.uid);
+      const uid = utils.parseID(element.id);
       element.apiRef = `/api/orgs/${uid[0]}/projects/${uid[1]}/elements/${uid[2]}`;
     });
     const elementTree = elementSort.createElementsTree(elements);

@@ -26,10 +26,8 @@ const chai = require('chai');
 const path = require('path');
 
 // MBEE modules
-const UserController = M.require('controllers.user-controller');
 const OrgController = M.require('controllers.organization-controller');
 const Project = M.require('models.project');
-const User = M.require('models.user');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
@@ -84,15 +82,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing non-admin user
-    UserController.removeUser(adminUser, newUser.username)
-    .then((delUser2) => {
-      chai.expect(delUser2.username).to.equal(testData.users[1].username);
-      // Find admin user
-      return User.findOne({ username: adminUser.username });
-    })
-    // Remove admin user
-    .then((foundUser) => foundUser.remove())
-    .then(() => {
+    testUtils.removeNonadminUser()
+    .then(() => testUtils.removeAdminUser())
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
       // Disconnect from the database
       db.disconnect();
       done();

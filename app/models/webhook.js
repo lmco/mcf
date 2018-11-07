@@ -19,7 +19,7 @@ const request = require('request');
 const mongoose = require('mongoose');
 
 // MBEE modules
-const timestamp = M.require('models.plugin.timestamp');
+const extensions = M.require('models.plugin.extensions');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 
@@ -60,8 +60,7 @@ const WebhookSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_proj !== this.project) {
         // Immutable field, return error
-        M.log.error('Assigned project cannot be changed.');
-        return this.project;
+        M.log.warn('Assigned project cannot be changed.');
       }
       // No change, return the value
       return this.project;
@@ -132,8 +131,8 @@ const IncomingWebhookSchema = new mongoose.Schema({
 
 /* ----------------------------( Model Plugin )------------------------------ */
 
-// Use timestamp model plugin
-WebhookSchema.plugin(timestamp);
+// Use extensions model plugin;
+WebhookSchema.plugin(extensions);
 
 
 /* ----------------------------( Webhook Methods )-----------------------------*/

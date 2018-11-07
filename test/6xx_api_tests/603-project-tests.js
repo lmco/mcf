@@ -26,8 +26,6 @@ const request = require('request');
 const path = require('path');
 
 // MBEE modules
-const OrgController = M.require('controllers.organization-controller');
-const User = M.require('models.user');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
@@ -88,18 +86,10 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the Organization
-    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
-    .then((retOrg) => {
-      // Verify deleted org
-      chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
-
-      // Find the admin user
-      return User.findOne({ username: adminUser.username });
-    })
-    // Remove admin user
-    .then((foundUser) => foundUser.remove())
-    .then(() => {
-      // Disconnect from database
+    testUtils.removeOrganization(adminUser)
+    .then(() => testUtils.removeAdminUser())
+    .then((delAdminUser) => {
+      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
       db.disconnect();
       done();
     })
@@ -224,11 +214,11 @@ function rejectPostMultipleInvalidProjects(done) {
   (err, response, body) => {
     // Expect no error
     chai.expect(err).to.equal(null);
-    // Expect response status: 500 Internal Server Error
-    chai.expect(response.statusCode).to.equal(500);
+    // Expect response status: 400 Bad Request
+    chai.expect(response.statusCode).to.equal(400);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Internal Server Error');
+    chai.expect(json.message).to.equal('Bad Request');
     done();
   });
 }

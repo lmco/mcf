@@ -119,7 +119,7 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
       // All checks passed, resolve webhook
       return resolve(webhooks[0]);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -146,7 +146,7 @@ function findWebhooksQuery(query) {
     Webhook.Webhook.find(query)
     .populate('project')
     .then((webhooks) => resolve(webhooks))
-    .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -231,6 +231,10 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
           tokenLocation: webhookData.tokenLocation,
           custom: sani.sanitize(webhookData.custom)
         });
+
+      // Update the created by and last modified field
+      webhookObj.createdBy = reqUser;
+      webhookObj.lastModifiedBy = reqUser;
 
       // Save webhook to DB
       return webhookObj.save();
@@ -348,6 +352,9 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
         }
       }
 
+      // Update last modified field
+      webhook.lastModifiedBy = reqUser;
+
       // Save updated webhook
       return webhook.save();
     })
@@ -409,8 +416,10 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
         return Webhook.Webhook.deleteOne({ id: webhook.id });
       }
       // Soft delete
-
       webhook.deleted = true;
+
+      // Update deleted by field
+      webhook.deletedBy = reqUser;
       return webhook.save();
     })
     .then(() => resolve(true))

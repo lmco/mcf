@@ -49,7 +49,7 @@ const uuidv4 = require('uuid/v4');
 // MBEE modules
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
-const timestamp = M.require('models.plugin.timestamp');
+const extensions = M.require('models.plugin.extensions');
 
 // Mongoose options - for discriminators
 const options = { discriminatorKey: 'type' };
@@ -94,7 +94,7 @@ const ElementSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_id !== this.id) {
         // Immutable field, return error
-        return new M.CustomError('ID cannot be changed.', 400, 'warn');
+        M.log.warn('ID cannot be changed.');
       }
       // No change, return the value
       return this.id;
@@ -129,7 +129,7 @@ const ElementSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_proj !== this.project) {
         // Immutable field, return error
-        return new M.CustomError('Assigned project cannot be changed.', 400, 'warn');
+        M.log.warn('Assigned project cannot be changed.');
       }
       // No change, return the value
       return this.project;
@@ -202,8 +202,8 @@ const PackageSchema = new mongoose.Schema({
 }, options);
 
 /* ---------------------------( Model Plugin )---------------------------- */
-// Use timestamp model plugin
-ElementSchema.plugin(timestamp);
+// Use extensions model plugin;
+ElementSchema.plugin(extensions);
 
 /* --------------------------( Element Middleware )-------------------------- */
 

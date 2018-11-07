@@ -32,6 +32,8 @@ loadPlugins();
  * use them as part of the plugins routes.
  */
 function loadPlugins() {
+  const loadedPlugins = [];
+
   // Clone or copy plugins from their source into the plugins directory
   for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
     const data = M.config.server.plugins.plugins[i];
@@ -92,7 +94,7 @@ function loadPlugins() {
     if (dependencies) {
       // Loop through plugin dependencies
       for (let i = 0; i < dependencies.length; i++) {
-        // Add dependency to node_modules without errasing existing node_modules
+        // Add dependency to node_modules without erasing existing node_modules
         // directory
         const commands = [
           `yarn add --dev ${dependencies[i]} && yarn remove ${dependencies[i]}`
@@ -115,7 +117,16 @@ function loadPlugins() {
       return;
     }
     M.log.info(`Plugin ${namespace} installed.`);
+
+    // Add plugin name/title to array of loaded plugins
+    loadedPlugins.push({
+      name: namespace,
+      title: M.config.server.plugins.plugins.filter(p => p.name === namespace)[0].title
+    });
   });
+
+  // Export list of loaded plugins
+  module.exports.loadedPlugins = loadedPlugins;
 }
 
 /**
@@ -243,4 +254,4 @@ function downloadPluginFromWebsite(data) {
   M.log.info('Extraction complete.');
 }
 
-module.exports = pluginRouter;
+module.exports.router = pluginRouter;

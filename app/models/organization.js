@@ -23,7 +23,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
-const timestamp = M.require('models.plugin.timestamp');
+const extensions = M.require('models.plugin.extensions');
 
 /* -------------------------( Organization Schema )-------------------------- */
 
@@ -68,7 +68,7 @@ const OrganizationSchema = new mongoose.Schema({
       // Check value NOT equal to db value
       if (_id !== this.id) {
         // Immutable field, return error
-        return new M.CustomError('ID cannot be changed.', 400, 'warn');
+        M.log.warn('ID cannot be changed.');
       }
       // No change, return the value
       return this.id;
@@ -108,8 +108,8 @@ OrganizationSchema.virtual('projects', {
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
-// Use timestamp model plugin
-OrganizationSchema.plugin(timestamp);
+// Use extensions model plugin;
+OrganizationSchema.plugin(extensions);
 
 /* -------------------------( Organization Methods )------------------------- */
 

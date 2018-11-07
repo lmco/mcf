@@ -105,7 +105,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
       // Return resulting elements
       return resolve(res);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -142,7 +142,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         assert.ok(element.hasOwnProperty('id'), `Element #${index} is missing an id.`);
         assert.ok(typeof element.id === 'string', `Element #${index}'s id is not a string.`);
         assert.ok(element.hasOwnProperty('type'), `Element #${index} is missing a type.`);
-        assert.ok(Element.Element.getValidTypes().includes(element.type),
+        assert.ok(Element.Element.getValidTypes().includes(utils.toTitleCase(element.type)),
           `Element #${index} has an invalid type of ${element.type}.`);
         // If element is a relationship, ensure source/target exist
         if (utils.toTitleCase(element.type) === 'Relationship') {
@@ -191,7 +191,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       }
 
       // If element doesn't have parent, add it
-      if (element.hasOwnProperty('parent')) {
+      if (!element.hasOwnProperty('parent')) {
         element.parent = null;
       }
     });
@@ -222,7 +222,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         }
 
         // Reject error
-        return reject(M.CustomError(message, 403, 'warn'));
+        return reject(new M.CustomError(message, 403, 'warn'));
       }
 
       // Find the project
@@ -243,7 +243,9 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           project: proj._id,
           uuid: element.uuid,
           documentation: element.documentation,
-          custom: element.custom
+          custom: element.custom,
+          createdBy: reqUser._id,
+          lastModifiedBy: reqUser._id
         };
 
         // Add element to correct type array
@@ -309,7 +311,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
 
         // If the relationships source is also being created, set its _id
         if (rel.$source) {
-          const sourceID = utils.createID(orgID, projID, rel.$target);
+          const sourceID = utils.createID(orgID, projID, rel.$source);
           if (relIDs.includes(sourceID)) {
             rel.source = relationshipArray.filter(r => r.id === sourceID)[0]._id;
           }
@@ -349,12 +351,11 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       if (error instanceof M.CustomError && !created) {
         return reject(error);
       }
-
       // If it's not a CustomError, the create failed so delete all successfully
       // created elements and reject the error.
       return Element.Element.deleteMany({ id: { $in: arrUID } })
-      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
-      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+      .then(() => reject(M.CustomError.parseCustomError(error)))
+      .catch((error2) => reject(M.CustomError.parseCustomError(error2)));
     });
   });
 }
@@ -446,6 +447,9 @@ function updateElements(reqUser, query, updateInfo) {
             }
           });
 
+          // Update last modified field
+          element.lastModifiedBy = reqUser;
+
           // Add element.save() to promise array
           promises.push(element.save());
         });
@@ -533,7 +537,7 @@ function removeElements(reqUser, query, hardDelete = false) {
       // If hard delete, delete elements, otherwise update elements
       return (hardDelete)
         ? Element.Element.deleteMany(query)
-        : Element.Element.updateMany(query, { deleted: true });
+        : Element.Element.updateMany(query, { deleted: true, deletedBy: reqUser });
     })
     // Return the deleted elements
     .then(() => resolve(foundElements))
@@ -618,7 +622,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
       // All checks passed, resolve element
       return resolve(elements[0]);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -645,14 +649,7 @@ function findElementsQuery(elementQuery) {
     Element.Element.find(elementQuery)
     .populate('parent project source target contains')
     .then((arrElements) => resolve(arrElements))
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -755,7 +752,9 @@ function createElement(reqUser, element) {
         project: foundProj,
         custom: custom,
         documentation: documentation,
-        uuid: uuid
+        uuid: uuid,
+        createdBy: reqUser,
+        lastModifiedBy: reqUser
       });
 
       // Set the hidden parent field, used by middleware
@@ -893,6 +892,9 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         }
       }
 
+      // Update last modified field
+      element.lastModifiedBy = reqUser;
+
       // Save updated element
       return element.save();
     })
@@ -969,6 +971,10 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
       }
       // Soft delete
       element.deleted = true;
+
+      // Update deleted by field
+      element.deletedBy = reqUser;
+
       return element.save();
     })
     .then(() => {

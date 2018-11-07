@@ -1717,16 +1717,10 @@ function postElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: check if elements array included in req.body
-  if (!req.body.hasOwnProperty('elements')) {
-    const error = new M.CustomError('Elements array not in request body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
   // Create the specified elements
   // NOTE: createElements() sanitizes req.params.orgid, req.params.projectid and the elements
   ElementController.createElements(req.user, req.params.orgid,
-    req.params.projectid, req.body.elements)
+    req.params.projectid, req.body)
   .then((elements) => {
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');

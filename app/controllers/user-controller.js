@@ -87,7 +87,7 @@ function findUsers(reqUser, softDeleted = false) {
     // Find users
     findUsersQuery(searchParams)
     .then((users) => resolve(users))
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -152,13 +152,18 @@ function createUsers(reqUser, arrNewUsers) {
       // Create user objects
       const userObjects = arrNewUsers.map(u => new User(sani.sanitize(u)));
 
-      // Error Check: ensure password is provided if local strategy
+      // Loop through all the new users
       userObjects.forEach((user) => {
+        // Error Check: ensure password is provided if local strategy
         if (user.password === undefined && user.provider === 'local') {
           return reject(new M.CustomError(
             `Password is required for local user [${user.username}`, 403, 'warn'
           ));
         }
+
+        // Update the created by and last modified field
+        user.createdBy = reqUser;
+        user.lastModifiedBy = reqUser;
       });
 
       // Set created flag to true
@@ -202,8 +207,8 @@ function createUsers(reqUser, arrNewUsers) {
       // If it's not a CustomError, the create failed so delete all successfully
       // created users and reject the error.
       return User.deleteMany(findQuery)
-      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
-      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+      .then(() => reject(M.CustomError.parseCustomError(error)))
+      .catch((error2) => reject(M.CustomError.parseCustomError(error2)));
     });
   });
 }
@@ -289,6 +294,9 @@ function updateUsers(reqUser, query, updateInfo) {
               user[key] = sani.sanitize(updateInfo[key]);
             }
           });
+
+          // Update last modified field
+          user.lastModifiedBy = reqUser;
 
           // Add user.save() to promise array
           promises.push(user.save());
@@ -415,7 +423,7 @@ function removeUsers(reqUser, query, hardDelete = false) {
     // If hardDelete, delete users, otherwise update them
     .then(() => ((hardDelete)
       ? User.deleteMany(query)
-      : User.updateMany(query, { deleted: true })))
+      : User.updateMany(query, { deleted: true, deletedBy: reqUser })))
     .then((responseQuery) => {
       // Handle case where not all users are successfully deleted/updated
       if (responseQuery.n !== foundUsers.length) {
@@ -424,14 +432,7 @@ function removeUsers(reqUser, query, hardDelete = false) {
       }
       return resolve(foundUsers);
     })
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(new M.CustomError(error.message, 500, 'warn'));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -494,7 +495,7 @@ function findUser(reqUser, searchedUsername, softDeleted = false) {
       // All checks passed, resolve user
       return resolve(arrUsers[0]);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -520,7 +521,7 @@ function findUsersQuery(usersQuery) {
     // Find users
     User.find(usersQuery)
     .then((users) => resolve(users))
-    .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -575,6 +576,10 @@ function createUser(reqUser, newUserData) {
 
       // Create the new user
       const user = new User(sani.sanitize(newUserData));
+
+      // Update the created by and last modified field
+      user.createdBy = reqUser;
+      user.lastModifiedBy = reqUser;
 
       // Error Check: ensure password is provided if local strategy
       if (user.password === undefined && user.provider === 'local') {
@@ -682,6 +687,8 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
           user[userUpdateFields[i]] = sani.sanitize(newUserData[userUpdateFields[i]]);
         }
       }
+      // Update last modified field
+      user.lastModifiedBy = reqUser;
 
       // Save updated user
       return user.save();

@@ -103,7 +103,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     .then(() => findProjectsQuery(searchParams))
     .then((projects) => resolve(projects
     .filter(project => project.getPermissions(reqUser).read || reqUser.admin)))
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -182,6 +182,10 @@ function createProjects(reqUser, organizationID, arrProjects) {
         projObject.permissions.read.push(reqUser._id);
         projObject.permissions.write.push(reqUser._id);
         projObject.permissions.admin.push(reqUser._id);
+
+        // Update the created by and last modified field
+        projObject.createdBy = reqUser;
+        projObject.lastModifiedBy = reqUser;
         return projObject;
       });
 
@@ -220,8 +224,8 @@ function createProjects(reqUser, organizationID, arrProjects) {
       // If it's not a CustomError, the create failed so delete all successfully
       // created projects and reject the error.
       return Project.deleteMany(findQuery)
-      .then(() => reject(new M.CustomError(error.message, 500, 'warn')))
-      .catch((error2) => reject(new M.CustomError(error2.message, 500, 'warn')));
+      .then(() => reject(M.CustomError.parseCustomError(error)))
+      .catch((error2) => reject(M.CustomError.parseCustomError(error2)));
     });
   });
 }
@@ -312,6 +316,9 @@ function updateProjects(reqUser, query, updateInfo) {
               proj[key] = sani.sanitize(updateInfo[key]);
             }
           });
+
+          // Update last modified field
+          proj.lastModifiedBy = reqUser;
 
           // Add proj.save() to promise array
           promises.push(proj.save());
@@ -407,11 +414,11 @@ function removeProjects(reqUser, removeQuery, hardDelete = false) {
       if (hardDelete) {
         return Project.deleteMany(removeQuery);
       }
-      return Project.updateMany(removeQuery, { deleted: true });
+      return Project.updateMany(removeQuery, { deleted: true, deletedBy: reqUser });
     })
     // Return deleted projects
     .then(() => resolve(foundProjects))
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -489,7 +496,7 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
       // All checks passed, resolve project
       return resolve(projects[0]);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -517,7 +524,7 @@ function findProjectsQuery(query) {
     Project.find(query)
     .populate('org permissions.read permissions.write permissions.admin')
     .then((projects) => resolve(projects))
-    .catch(() => reject(new M.CustomError('Find failed.', 500, 'warn')));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -614,7 +621,10 @@ function createProject(reqUser, project) {
         },
         uid: utils.createID(orgID, projID),
         custom: custom,
-        visibility: visibility
+        visibility: visibility,
+        createdBy: reqUser,
+        lastModifiedBy: reqUser
+
       });
 
       // Save new project
@@ -738,6 +748,9 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
         }
       }
 
+      // Update last modified field
+      project.lastModifiedBy = reqUser;
+
       // Save updated project
       return project.save();
     })
@@ -808,7 +821,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
     // If hard delete, delete project, otherwise update project
     .then(() => ((hardDelete)
       ? Project.deleteOne({ id: foundProject.id })
-      : Project.updateOne({ id: foundProject.id }, { deleted: true })))
+      : Project.updateOne({ id: foundProject.id }, { deleted: true, deletedBy: reqUser })))
     .then(() => resolve(foundProject))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -870,7 +883,7 @@ function findAllPermissions(reqUser, organizationID, projectID) {
       }
       return resolve(roleList);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -917,7 +930,7 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
       // Return users permissions
       return resolve(permissionList[searchedUsername]);
     })
-    .catch((findPermissionsErr) => reject(findPermissionsErr));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
