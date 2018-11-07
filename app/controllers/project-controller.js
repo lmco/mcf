@@ -557,7 +557,7 @@ function createProject(reqUser, project) {
       assert.ok(project.id !== undefined, 'project.id is undefined');
       assert.ok(project.name !== undefined, 'project.name is undefined');
       assert.ok(project.org !== undefined, 'project.org is undefined');
-      assert.ok(project.org.id !== undefined, 'project.org is undefined');
+      assert.ok(project.org.id !== undefined, 'project.org.id is undefined');
       assert.strictEqual(typeof project.id, 'string');
       assert.strictEqual(typeof project.name, 'string');
       assert.strictEqual(typeof project.org.id, 'string');

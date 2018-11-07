@@ -232,12 +232,11 @@ module.exports.removeOrganization = function(adminUser) {
  * @description Helper function to import a copy of test data
  */
 module.exports.importTestData = function() {
+  // Clear require cache so a new copy is imported
+  delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
   // Import a copy of the data.json
   // eslint-disable-next-line global-require
   const testDataFresh = require(path.join(M.root, 'test', 'data.json'));
-  // After import, clear require cache so a new copy is imported
-  // if this function is called again
-  delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
   // Return a newly assigned copy of the fresh data
   return Object.assign({}, testDataFresh);
 };
