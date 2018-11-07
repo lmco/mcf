@@ -132,20 +132,27 @@ function uploadArtifact(done) {
   const imgPath = path.join(M.root, testData.artifacts[0].location, testData.artifacts[0].filename);
   const artifactPNG = fs.readFileSync(imgPath);
 
-  const artifactObjData = {
+  // Define and initialize the meta data
+  const artifactMetaData = {
     id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename
+    filename: testData.artifacts[0].filename,
+    artifactBlob: artifactPNG
+  };
+
+  const artifactObjData = {
+    metaData: artifactMetaData,
+    artifactBlob: artifactPNG
   };
 
   // Create artifact
-  ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData, artifactPNG)
+  ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[0].filename);
     done();
   })
   .catch((error) => {
-    M.log.error(error);
+    M.log.error(error.message);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();
@@ -162,13 +169,20 @@ function uploadSecondArtifact(done) {
   const imgPath = path.join(M.root, testData.artifacts[1].location, testData.artifacts[1].filename);
   const artifactPNG = fs.readFileSync(imgPath);
 
-  const artifactObjData = {
+  // Define and initialize the meta data
+  const artifactMetaData = {
     id: testData.artifacts[1].id,
-    filename: testData.artifacts[1].filename
+    filename: testData.artifacts[1].filename,
+    artifactBlob: artifactPNG
+  };
+
+  const artifactObjData = {
+    metaData: artifactMetaData,
+    artifactBlob: artifactPNG
   };
 
   // Create artifact
-  ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData, artifactPNG)
+  ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[1].filename);
@@ -193,12 +207,19 @@ function updateArtifact(done) {
   // Extract the artifact id
   const artifactID = testData.artifacts[2].id;
 
+  // Define artifact fields to update
+  const artMetaData = {
+    filename: testData.artifacts[2].filename,
+    contentType: path.extname(testData.artifacts[2].filename)
+  };
+
   // Create artfact to update object
   const artObjData = {
-    filename: testData.artifacts[2].filename
+    metaData: artMetaData,
+    artifactBlob: artifactPNG
   };
   // Create artifact
-  ArtifactController.updateArtifact(adminUser, org.id, proj.id, artifactID, artObjData, artifactPNG)
+  ArtifactController.updateArtifact(adminUser, org.id, proj.id, artifactID, artObjData)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
