@@ -2388,5 +2388,239 @@ api.route('/webhooks/:webhookid')
   APIController.postIncomingWebhook
 );
 
+/**
+ * @swagger
+ * /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Finds and returns an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to return.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      correct permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ *
+ *   post:
+ *     tags:
+ *       - artifacts
+ *     description: Creates a new artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to be created.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: metaData
+ *         description: The artifact meta data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - id
+ *             - filename
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: The ID of the artifact. If this is provided, it
+ *                            must match the artifact ID provided in the URI.
+ *             filename:
+ *               type: string
+ *               description: The name for the artifact file.
+ *       - name: artifactBlob
+ *         description: The artifact blob data.
+ *         in: body
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST artifact, returns artifact data.
+ *       400:
+ *         description: Bad Request, Failed to POST artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to POST artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to POST artifact due to project/org not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to POST artifact due to
+ *                      server side issue.
+ *
+ *   patch:
+ *     tags:
+ *       - artifacts
+ *     description: Updates an existing artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to be updated.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: metaData
+ *         description: The artifact meta data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required: false
+ *             - filename
+ *             - contentType
+ *           properties:
+ *             filename:
+ *               type: string
+ *               description: The name for the artifact file.
+ *             contentType:
+ *               type: string
+ *               description: The content type of the artifact.
+ *                            Normally an extension such as "png", "dat", etc.
+ *       - name: artifactBlob
+ *         description: The artifact blob data.
+ *         in: body
+ *
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH artifact, returns artifact data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH artifact due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH artifact due to updating an
+ *                      immutable field.
+ *       404:
+ *         description: Not Found, Failed to PATCH artifact due to artifact
+ *                      not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to PATCH artifact due to
+ *                      server side issue.
+ *
+ *   delete:
+ *     tags:
+ *       -  artifacts
+ *     description: Deletes an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to delete.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: hardDelete
+ *         type: boolean
+ *         description: The boolean indicating if the artifact should be
+ *                      hard deleted or not. The user must be a global
+ *                      admin to hard delete. Defaults to false.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to DELETE artifact, returns true.
+ *       400:
+ *         description: Bad Request, Failed to DELETE artifact due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to DELETE artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to DELETE artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to DELETE artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE artifact due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getArtifact
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.postArtifact
+)
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchArtifact
+)
+.delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.deleteArtifact
+);
+
 // Export the API router
 module.exports = api;
