@@ -2413,19 +2413,6 @@ api.route('/webhooks/:webhookid')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing get artifact options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             softDeleted:
- *               type: boolean
- *               description: The boolean indicating if the soft deleted artifact
- *                            is returned. The user must be a global admin or an
- *                            admin on the project to find a soft deleted
- *                            artifact.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET artifact, returns artifact data.
@@ -2443,6 +2430,7 @@ api.route('/webhooks/:webhookid')
  *       500:
  *         description: Internal Server Error, Failed to GET artifact due to
  *                      server side issue.
+ *
  *   post:
  *     tags:
  *       - artifacts
@@ -2465,38 +2453,27 @@ api.route('/webhooks/:webhookid')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing the new artifact data.
+ *       - name: metaData
+ *         description: The artifact meta data.
  *         in: body
- *         required: false
+ *         required: true
  *         schema:
  *           type: object
  *           required:
- *             - name
- *             - triggers
- *             - responses
+ *             - id
+ *             - filename
  *           properties:
  *             id:
  *               type: string
  *               description: The ID of the artifact. If this is provided, it
  *                            must match the artifact ID provided in the URI.
- *             name:
+ *             filename:
  *               type: string
- *               description: The name for the artifact.
- *             triggers:
- *               type: object
- *               description: An array of events on which the artifact will be
- *                            triggered. The events should all be strings.
- *             responses:
- *               type: object
- *               description: An array of objects, each containing a URL
- *                            (required, string), method (string, defaults to
- *                            GET), and optional data field. On trigger of an
- *                            an event, the a request of type 'method' will be
- *                            sent to the specified URL.
- *             custom:
- *               type: JSON Object
- *               description: Custom JSON data that can be added to the artifact.
+ *               description: The name for the artifact file.
+ *       - name: artifactBlob
+ *         description: The artifact blob data.
+ *         in: body
+ *         required: true
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST artifact, returns artifact data.
@@ -2537,19 +2514,27 @@ api.route('/webhooks/:webhookid')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing the updated artifact data.
+ *       - name: metaData
+ *         description: The artifact meta data.
  *         in: body
- *         required: false
+ *         required: true
  *         schema:
  *           type: object
+ *           required: false
+ *             - filename
+ *             - contentType
  *           properties:
- *             name:
+ *             filename:
  *               type: string
- *               description: The updated name for the artifact.
- *             custom:
- *               type: JSON Object
- *               description: The updated custom JSON data for the artifact.
+ *               description: The name for the artifact file.
+ *             contentType:
+ *               type: string
+ *               description: The content type of the artifact.
+ *                            Normally an extension such as "png", "dat", etc.
+ *       - name: artifactBlob
+ *         description: The artifact blob data.
+ *         in: body
+ *
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH artifact, returns artifact data.
@@ -2591,18 +2576,11 @@ api.route('/webhooks/:webhookid')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing delete options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the artifact should be
- *                            hard deleted or not. The user must be a global
- *                            admin to hard delete. Defaults to false.
+ *       - name: hardDelete
+ *         type: boolean
+ *         description: The boolean indicating if the artifact should be
+ *                      hard deleted or not. The user must be a global
+ *                      admin to hard delete. Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE artifact, returns true.
