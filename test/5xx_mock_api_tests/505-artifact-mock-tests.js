@@ -13,7 +13,7 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author  Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
  * GET, POST, PATCH, and DELETE artifacts.
