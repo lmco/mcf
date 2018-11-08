@@ -2295,7 +2295,14 @@ function getArtifact(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
-
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
   // Define the optional softDelete flag
   let softDeleted = false;
 
@@ -2408,6 +2415,15 @@ function deleteArtifact(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Initialize hardDelete variable
   let hardDelete = false;
