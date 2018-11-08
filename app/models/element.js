@@ -350,7 +350,8 @@ ElementSchema.methods.getPublicData = function() {
     uuid: this.uuid,
     name: this.name,
     project: this.project.id,
-    parent: (this.parent) ? this.parent.id : null, // parent is null for root
+    org: utils.parseID(this.id)[0],
+    parent: (this.parent) ? utils.parseID(this.parent.id)[2] : null,
     documentation: this.documentation,
     custom: this.custom,
     type: this.type.toLowerCase()
@@ -358,7 +359,7 @@ ElementSchema.methods.getPublicData = function() {
 
   // only packages have a contains field
   if (data.type === 'package') {
-    data.contains = this.contains.map(e => e.id);
+    data.contains = this.contains.map(e => utils.parseID(e.id)[2]);
   }
 
   return data;
