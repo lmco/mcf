@@ -21,6 +21,7 @@
 
 // MBEE modules
 const utils = M.require('lib.utils');
+const AuthModule = M.require(`auth.${M.config.auth.strategy}`);
 
 // This ID is used as the common regex for other ID fields in this module
 const id = '([a-z0-9])([-_a-z0-9]){0,}';
@@ -138,10 +139,18 @@ module.exports.element = {
 module.exports.user = {
   username: '^([a-z])([a-z0-9_]){0,}$',
   password: function(p) {
+    // Check if config strategy module defines custom password rules
+    /*if (typeof AuthModule.validatePassword() === 'function'){
+      console.log('USE CUSTOM RULES');
+    }
+    else{
+      console.log('USE DEFAULT RULES');
+    }
+
     // Error check - Make sure password is a string
     if (typeof (p) !== typeof ('')) {
       return false;
-    }
+    }*/
 
     try {
       // At least 8 characters

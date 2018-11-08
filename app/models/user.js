@@ -71,7 +71,8 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    match: RegExp(validators.user.username),
+    //match: RegExp(validators.user),
+    match: console.log(validators),
     set: function(_username) {
       // Check value undefined
       if (typeof this.username === 'undefined') {
@@ -89,7 +90,8 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: false
+    required: false,
+    match: validators.user.password(this.password)
   },
   email: {
     type: String,
