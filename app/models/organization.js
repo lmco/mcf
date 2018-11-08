@@ -175,7 +175,7 @@ OrganizationSchema.methods.getPermissions = function(user) {
 
 /**
  * @description Validates an object to ensure that it only contains keys
- * which exist in the organization mongoose model.
+ * which exist in the organization model.
  *
  * @param {Object} object to check keys of.
  * @return {boolean} The boolean indicating if the object contained only

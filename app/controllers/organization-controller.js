@@ -218,7 +218,7 @@ function updateOrgs(reqUser, query, updateInfo) {
       assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
       // Error Check: ensure object only contains valid keys
       assert.ok(Organization.validateObjectKeys(updateInfo),
-        'Updated information contains invalid keys.');
+        'Update object contains invalid keys.');
       // Loop through each desired update
       Object.keys(updateInfo).forEach((key) => {
         // Error Check: ensure user can update each field

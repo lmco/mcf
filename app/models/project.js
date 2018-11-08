@@ -237,7 +237,7 @@ ProjectSchema.statics.getVisibilityLevels = function() {
 
 /**
  * @description Validates an object to ensure that it only contains keys
- * which exist in the project mongoose model.
+ * which exist in the project model.
  *
  * @param {Object} object to check keys of.
  * @return {boolean} The boolean indicating if the object contained only
