@@ -350,7 +350,7 @@ ElementSchema.methods.getPublicData = function() {
     uuid: this.uuid,
     name: this.name,
     project: this.project.id,
-    org: utils.parseID(this.id)[2],
+    org: utils.parseID(this.id)[0],
     documentation: this.documentation,
     custom: this.custom,
     type: this.type.toLowerCase()

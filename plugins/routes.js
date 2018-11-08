@@ -105,7 +105,7 @@ function loadPlugins() {
         // directory
         // TODO (jk) - We need to handle version management of dependencies
         const commands = [
-          `yarn add --dev ${dep} --modules-folder ${M.root}/node_modules && yarn remove ${dep}`
+          `yarn add --dev ${dep} --modules-folder "${M.root}/node_modules" && yarn remove ${dep}`
         ];
         M.log.verbose(`Installing dependency ${dep} ...`);
         const stdout = execSync(commands.join('; '));
