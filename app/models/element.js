@@ -376,6 +376,42 @@ ElementSchema.methods.getPublicData = function() {
   return data;
 };
 
+/**
+ * @description Validates an object to ensure that it only contains keys
+ * which exist in the element model.
+ *
+ * @param {Object} object to check keys of.
+ * @return {boolean} The boolean indicating if the object contained only
+ * existing fields.
+ */
+ElementSchema.statics.validateObjectKeys = function(object) {
+  // Initialize returnBool to true
+  let returnBool = true;
+  // Check if the object is NOT an instance of the element model
+  if (!(object instanceof mongoose.model('Element', ElementSchema))) {
+    let validKeys = Object.keys(ElementSchema.obj)
+    .concat(
+      Object.keys(BlockSchema.obj),
+      Object.keys(RelationshipSchema.obj),
+      Object.keys(PackageSchema.obj)
+    );
+    validKeys = validKeys.filter((elem, pos) => validKeys.indexOf(elem) === pos);
+    validKeys.push('projectUID');
+    validKeys.push('type');
+    // Loop through each key of the object
+    Object.keys(object).forEach(key => {
+      // Check if the object key is a key in the element model
+      if (!validKeys.includes(key)) {
+        // Key is not in element model, return false
+        returnBool = false;
+      }
+    });
+  }
+  // All object keys found in element model or object was an instance of
+  // element model, return true
+  return returnBool;
+};
+
 /* ---------------------------( Element Indexes )---------------------------- */
 
 /**

@@ -29,8 +29,8 @@ const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-const testData = require(path.join(M.root, 'test', 'data.json'));
-const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -65,7 +65,7 @@ describe(M.getModuleName(module.filename), () => {
 
       // Define project data
       const projData = testData.projects[0];
-      projData.orgid = org.id;
+      projData.org = { id: org.id };
 
       // Create project
       return ProjController.createProject(adminUser, projData);

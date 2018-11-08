@@ -60,6 +60,8 @@ function createArtifact(reqUser, orgID, projID, artData) {
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artData.metaData.id === 'string', 'Artifact ID is not a string.');
       assert.ok(typeof artData.metaData === 'object', 'Artifact is not a object.');
+      assert.ok(Artifact.validateObjectKeys(artData.metaData),
+        'Artifact metadata contains invalid keys.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -167,6 +169,8 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
       assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
       assert.ok(typeof artToUpdate === 'object', 'Artifact to update is not an object.');
       assert.ok(typeof artToUpdate.metaData === 'object', 'Artifact Blob is not an object.');
+      assert.ok(Artifact.validateObjectKeys(artToUpdate.metaData),
+        'Updated Artifact metadata contains invalid keys.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
