@@ -120,9 +120,9 @@ OrganizationSchema.plugin(extensions);
 OrganizationSchema.methods.getPublicData = function() {
   // Map read, write, and admin references to only contain user public data
   const permissions = {
-    read: this.permissions.read.map(u => u.getPublicData()),
-    write: this.permissions.write.map(u => u.getPublicData()),
-    admin: this.permissions.admin.map(u => u.getPublicData())
+    read: this.permissions.read.map(u => u.username),
+    write: this.permissions.write.map(u => u.username),
+    admin: this.permissions.admin.map(u => u.username)
   };
 
   // Return the organization public fields

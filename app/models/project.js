@@ -157,16 +157,17 @@ ProjectSchema.plugin(extensions);
 ProjectSchema.methods.getPublicData = function() {
   // Map read, write, and admin references to only contain user public data
   const permissions = {
-    read: this.permissions.read.map(u => u.getPublicData()),
-    write: this.permissions.write.map(u => u.getPublicData()),
-    admin: this.permissions.admin.map(u => u.getPublicData())
+    read: this.permissions.read.map(u => u.username),
+    write: this.permissions.write.map(u => u.username),
+    admin: this.permissions.admin.map(u => u.username)
   };
 
   // Return the projects public fields
   return {
     id: this.id,
-    org: this.org,
-    uid: this.uid,
+    // NOTE (jk): Not sure why the toString is needed, but a buffer gets
+    // returned when posting a project via the API
+    org: this.org.id,
     name: this.name,
     permissions: permissions,
     custom: this.custom,

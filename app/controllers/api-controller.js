@@ -272,7 +272,7 @@ function postOrgs(req, res) {
   .then((orgs) => {
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs));
+    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -331,7 +331,7 @@ function patchOrgs(req, res) {
   .then((orgs) => {
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs));
+    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -391,7 +391,7 @@ function deleteOrgs(req, res) {
   .then((orgs) => {
     // Return 200: OK and the deleted orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs));
+    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -469,7 +469,7 @@ function postOrg(req, res) {
   .then((org) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org));
+    return res.status(200).send(formatJSON(org.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -507,7 +507,7 @@ function patchOrg(req, res) {
   .then((org) => {
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org));
+    return res.status(200).send(formatJSON(org.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -545,7 +545,7 @@ function deleteOrg(req, res) {
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org));
+    return res.status(200).send(formatJSON(org.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -758,7 +758,7 @@ function postProjects(req, res) {
   .then((projects) => {
     // Return 200: OK and the new projects
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects));
+    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -832,7 +832,7 @@ function patchProjects(req, res) {
   .then((projects) => {
     // Return 200: OK and the updated projects
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects));
+    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -894,7 +894,8 @@ function deleteProjects(req, res) {
   .then((projects) => {
     // Return 200: OK and the deleted projects
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects));
+    return res.status(200)
+    .send(formatJSON(projects.map(p => p.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -981,7 +982,7 @@ function postProject(req, res) {
   .then((project) => {
     // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(project.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1011,7 +1012,7 @@ function patchProject(req, res) {
   .then((project) => {
     // Return 200: OK and the updated project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(project.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1049,7 +1050,7 @@ function deleteProject(req, res) {
   .then((project) => {
     // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(project.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1602,9 +1603,14 @@ function postElements(req, res) {
   ElementController.createElements(req.user, req.params.orgid,
     req.params.projectid, req.body)
   .then((elements) => {
+    const data = [];
+    for (let i = 0; i < elements.length; i++) {
+      data.push(elements[i].getPublicData());
+    }
+
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(formatJSON(data));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));

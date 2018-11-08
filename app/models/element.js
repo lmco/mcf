@@ -143,7 +143,7 @@ const ElementSchema = new mongoose.Schema({
   },
   documentation: {
     type: String,
-    default: ""
+    default: ''
   },
   custom: {
     type: mongoose.Schema.Types.Mixed,
@@ -350,12 +350,23 @@ ElementSchema.methods.getPublicData = function() {
     uuid: this.uuid,
     name: this.name,
     project: this.project.id,
-    org: utils.parseID(this.id)[0],
-    parent: (this.parent) ? utils.parseID(this.parent.id)[2] : null,
+    org: utils.parseID(this.id)[2],
     documentation: this.documentation,
     custom: this.custom,
     type: this.type.toLowerCase()
   };
+
+  if (this.parent && this.parent.id) {
+    try {
+      data.parent = utils.parseID(this.parent.id.toString())[2];
+    }
+    catch (error) {
+      data.parent = this.parent;
+    }
+  }
+  else {
+    data.parent = null;
+  }
 
   // only packages have a contains field
   if (data.type === 'package') {
