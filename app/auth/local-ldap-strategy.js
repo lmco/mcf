@@ -114,3 +114,24 @@ module.exports.handleTokenAuth = function(req, res, _token) {
 module.exports.doLogin = function(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
 };
+
+/**
+ * @description Validates a users password with set rules.
+ *
+ * @param {String} password - Password to verify
+ * @returns {Boolean} - If password is correctly validated
+ */
+module.exports.validatePassword = function(password) {
+  console.log('local ldap password validator')
+  // No defined password validator, use default
+  try {
+    // At least 8 characters
+    const lengthValidator = (p.length >= 8);
+    // Validate the password
+    return lengthValidator;
+  }
+  catch (error) {
+    // Explicitly NOT logging error to avoid password logging
+    return false;
+  }
+}

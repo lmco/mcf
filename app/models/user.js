@@ -28,6 +28,7 @@ const mongoose = require('mongoose');
 // MBEE Modules
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
+const AuthModule = M.require(`auth.${M.config.auth.strategy}`);
 
 
 /* ----------------------------( Element Model )----------------------------- */
@@ -89,7 +90,9 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: false
+    required: false,
+    // Pass AuthModule to determine password validation rules
+    match: validators.user.password(this.password, AuthModule)
   },
   email: {
     type: String,
