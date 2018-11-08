@@ -142,7 +142,8 @@ const ElementSchema = new mongoose.Schema({
     ref: 'Package'
   },
   documentation: {
-    type: String
+    type: String,
+    default: ""
   },
   custom: {
     type: mongoose.Schema.Types.Mixed,
@@ -344,15 +345,23 @@ ElementSchema.statics.getValidTypes = function() {
  * @memberOf ElementSchema
  */
 ElementSchema.methods.getPublicData = function() {
-  return {
+  const data = {
     id: utils.parseID(this.id)[2],
     uuid: this.uuid,
     name: this.name,
-    project: this.project,
-    parent: this.parent,
+    project: this.project.id,
+    parent: (this.parent) ? this.parent.id : null, // parent is null for root
     documentation: this.documentation,
-    custom: this.custom
+    custom: this.custom,
+    type: this.type.toLowerCase()
   };
+
+  // only packages have a contains field
+  if (data.type === 'package') {
+    data.contains = this.contains.map(e => e.id);
+  }
+
+  return data;
 };
 
 /* ---------------------------( Element Indexes )---------------------------- */
