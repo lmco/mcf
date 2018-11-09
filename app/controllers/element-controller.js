@@ -347,8 +347,10 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       createdElements = createdElements.concat(createdRelationships || []);
 
       // Return all of the created elements
-      return resolve(createdElements);
+      const createdID = createdElements.map(e => e._id);
+      return findElementsQuery({ _id: { $in: createdID } });
     })
+    .then((elements) => resolve(elements))
     .catch((error) => {
       // If error is a CustomError, reject it
       if (error instanceof M.CustomError && !created) {
@@ -546,7 +548,6 @@ function removeElements(reqUser, query, hardDelete = false) {
             // Add child to foundElements
             if (!foundElementsIDs.includes(child._id.toString())) {
               foundElements.push(child);
-              foundElementsIDs.push(child._id.toString());
             }
 
             // Add child to child query
