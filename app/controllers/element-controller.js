@@ -95,7 +95,6 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
       delete searchParams.deleted;
     }
 
-
     // Find elements
     findElementsQuery(searchParams)
     .then((elements) => {
