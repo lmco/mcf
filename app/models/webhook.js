@@ -202,6 +202,41 @@ WebhookSchema.methods.getValidUpdateFields = function() {
 };
 
 
+/**
+ * @description Validates an object to ensure that it only contains keys
+ * which exist in the webhook model.
+ *
+ * @param {Object} object to check keys of.
+ * @return {boolean} The boolean indicating if the object contained only
+ * existing fields.
+ */
+WebhookSchema.statics.validateObjectKeys = function(object) {
+  // Initialize returnBool to true
+  let returnBool = true;
+  // Check if the object is NOT an instance of the webhook model
+  if (!(object instanceof mongoose.model('Webhook', WebhookSchema))) {
+    let validKeys = Object.keys(WebhookSchema.obj)
+    .concat(
+      Object.keys(OutgoingWebhookSchema.obj),
+      Object.keys(IncomingWebhookSchema.obj)
+    );
+    validKeys = validKeys.filter((elem, pos) => validKeys.indexOf(elem) === pos);
+    validKeys.push('type');
+    // Loop through each key of the object
+    Object.keys(object).forEach(key => {
+      // Check if the object key is a key in the webhook model
+      if (!validKeys.includes(key)) {
+        // Key is not in webhook model, return false
+        returnBool = false;
+      }
+    });
+  }
+  // All object keys found in webhook model or object was an instance of
+  // webhook model, return true
+  return returnBool;
+};
+
+
 /* --------------------------( Webhook Properties )-------------------------- */
 
 // Required for virtual getters

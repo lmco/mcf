@@ -83,7 +83,8 @@ const formatter = printf((msg) => {
     if (lines[i].includes('node_modules')
          || lines[i].includes('DerivedLogger')
          || lines[i].includes('at doWrite')
-         || lines[i].includes('at writeOrBuffer ')) {
+         || lines[i].includes('at writeOrBuffer ')
+         || lines[i].includes('CustomError')) {
       continue;
     }
     reduced.push(lines[i]);

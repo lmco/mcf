@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.506-webhook-mock-tests
+ * @module  test.505-artifact-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -13,13 +13,14 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author  Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE webhooks.
+ * GET, POST, PATCH, and DELETE artifacts.
  */
 
 // NPM modules
+const fs = require('fs');
 const chai = require('chai');
 const path = require('path');
 
@@ -29,8 +30,8 @@ const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData();
+const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -108,25 +109,41 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should POST a webhook', postWebhook);
-  it('should GET a webhook', getWebhook);
-  it('should PATCH a webhook', patchWebhook);
-  it('should DELETE a webhook', deleteWebhook);
+  it('should POST an artifact', postArtifact);
+  it('should GET an artifact', getArtifact);
+  it('should PATCH an artifact', patchArtifact);
+  it('should DELETE an artifact', deleteArtifact);
 });
 
 /**
- * @description Verifies mock POST request to create a webhook.
+ * @description Verifies mock POST request to create an artifact.
  */
-function postWebhook(done) {
-  // Create request object
-  const body = testData.webhooks[0];
+function postArtifact(done) {
+  // Define new artifact
+  const artifact = {
+    id: testData.artifacts[0].id,
+    filename: testData.artifacts[0].filename,
+    contentType: path.extname(testData.artifacts[0].filename)
+  };
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+  );
+
+  // Create request body
+  const bodyRequest = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  };
+
+  // Define params
   const params = {
     orgid: org.id,
     projectid: proj.id,
-    webhookid: testData.webhooks[0].id
+    artifactid: testData.artifacts[0].id
   };
   const method = 'POST';
-  const req = getReq(params, body, method);
+  const req = getReq(params, bodyRequest, method);
 
   // Set response as empty object
   const res = {};
@@ -137,25 +154,25 @@ function postWebhook(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.webhooks[0].id);
-    chai.expect(json.name).to.equal(testData.webhooks[0].name);
+    chai.expect(json.id).to.equal(testData.artifacts[0].id);
+    chai.expect(json.name).to.equal(testData.artifacts[0].name);
     done();
   };
 
-  // POSTs a webhook
-  apiController.postWebhook(req, res);
+  // POSTs an artifact
+  apiController.postArtifact(req, res);
 }
 
 /**
- * @description Verifies mock GET request to get a webhook.
+ * @description Verifies mock GET request to get an artifact.
  */
-function getWebhook(done) {
+function getArtifact(done) {
   // Create request object
   const body = {};
   const params = {
     orgid: org.id,
     projectid: proj.id,
-    webhookid: testData.webhooks[0].id
+    artifactid: testData.artifacts[0].id
   };
   const method = 'GET';
   const req = getReq(params, body, method);
@@ -169,28 +186,42 @@ function getWebhook(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.webhooks[0].id);
-    chai.expect(json.name).to.equal(testData.webhooks[0].name);
+    chai.expect(json.id).to.equal(testData.artifacts[0].id);
+    chai.expect(json.name).to.equal(testData.artifacts[0].name);
     done();
   };
 
-  // GETs a webhook
-  apiController.getWebhook(req, res);
+  // GETs an artifact
+  apiController.getArtifact(req, res);
 }
 
 /**
- * @description Verifies mock PATCH request to update a webhook.
+ * @description Verifies mock PATCH request to update an artifact.
  */
-function patchWebhook(done) {
+function patchArtifact(done) {
   // Create request object
-  const body = { name: 'Updated Webhook Name' };
+  const artifact = {
+    filename: testData.artifacts[2].filename,
+    contentType: path.extname(testData.artifacts[2].filename)
+  };
+
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[2].filename
+  );
+
+  // Form body
+  const bodyRequest = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  };
   const params = {
     orgid: org.id,
     projectid: proj.id,
-    webhookid: testData.webhooks[0].id
+    artifactid: testData.artifacts[0].id
   };
   const method = 'PATCH';
-  const req = getReq(params, body, method);
+  const req = getReq(params, bodyRequest, method);
 
   // Set response as empty object
   const res = {};
@@ -201,24 +232,24 @@ function patchWebhook(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.name).to.equal('Updated Webhook Name');
+    chai.expect(json.filename).to.equal(testData.artifacts[2].filename);
     done();
   };
 
-  // PATCH a webhook
-  apiController.patchWebhook(req, res);
+  // PATCH an artifact
+  apiController.patchArtifact(req, res);
 }
 
 /**
- * @description Verifies mock DELETE request to delete a webhook.
+ * @description Verifies mock DELETE request to delete an artifact.
  */
-function deleteWebhook(done) {
+function deleteArtifact(done) {
   // Create request object
   const body = { hardDelete: true };
   const params = {
     orgid: org.id,
     projectid: proj.id,
-    webhookid: testData.webhooks[0].id
+    artifactid: testData.artifacts[0].id
   };
   const method = 'DELETE';
   const req = getReq(params, body, method);
@@ -236,8 +267,8 @@ function deleteWebhook(done) {
     done();
   };
 
-  // DELETEs a webhook
-  apiController.deleteWebhook(req, res);
+  // DELETES an artifact
+  apiController.deleteArtifact(req, res);
 }
 
 /* ----------( Helper Functions )----------*/

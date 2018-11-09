@@ -22,6 +22,8 @@ const express = require('express');
 const pluginRouter = express.Router();
 
 const protectedFileNames = ['routes.js'];
+const mbeeDependencies = require(`${M.root}/package.json`).dependencies;
+const mbeeDepList = Object.keys(mbeeDependencies);
 
 // Load the plugins
 loadPlugins();
@@ -92,16 +94,24 @@ function loadPlugins() {
     // Install the dependencies
     const dependencies = pkg.dependencies;
     if (dependencies) {
+      M.log.verbose('Installing plugin dependencies ...');
       // Loop through plugin dependencies
-      for (let i = 0; i < dependencies.length; i++) {
+      Object.keys(dependencies).forEach(dep => {
+        // Skip conflicting dependencies
+        if (mbeeDepList.includes(dep)) {
+          return;
+        }
         // Add dependency to node_modules without erasing existing node_modules
         // directory
+        // TODO (jk) - We need to handle version management of dependencies
         const commands = [
-          `yarn add --dev ${dependencies[i]} && yarn remove ${dependencies[i]}`
+          `yarn add --dev ${dep} --modules-folder "${M.root}/node_modules" && yarn remove ${dep}`
         ];
+        M.log.verbose(`Installing dependency ${dep} ...`);
         const stdout = execSync(commands.join('; '));
-        M.log.verbose(stdout.toString());
-      }
+        M.log.debug(stdout.toString());
+        M.log.verbose(`${dep} installed.`);
+      });
     }
 
 

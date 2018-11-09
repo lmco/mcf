@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.606-webhook-tests
+ * @module  test.605-artifact-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -13,27 +13,28 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author  Phillip Lee <phillip.lee@lmco.com>
  *
- * @description This tests the webhook API controller functionality:
- * GET, POST, PATCH, and DELETE of a webhook.
+ * @description This tests the artifact API controller functionality:
+ * GET, POST, PATCH, and DELETE of an artifact.
  */
 
 // Node modules
 const fs = require('fs');
-const chai = require('chai');
 const request = require('request');
 const path = require('path');
+
+// NPM Modules
+const chai = require('chai');
 
 // MBEE modules
 const ProjController = M.require('controllers.project-controller');
 const db = M.require('lib.db');
-const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
-const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData();
+const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let org = null;
 let proj = null;
 let adminUser = null;
@@ -73,6 +74,7 @@ describe(M.getModuleName(module.filename), () => {
       // Define project data
       const projData = testData.projects[0];
       projData.org = { id: org.id };
+
       // Create project
       return ProjController.createProject(adminUser, projData);
     })
@@ -113,32 +115,46 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
+
   /* Execute the tests */
-  it('should POST an outgoing webhook', postOutgoingWebhook);
-  it('should POST an incoming webhook', postIncomingWebhook);
-  it('should GET the previously created webhook', getWebhook);
-  it('should trigger an incoming webhook', triggerWebhook);
-  it('should PATCH the previously created webhook', patchWebhook);
-  it('should reject a POST with an invalid id field', rejectPostWebhook);
-  it('should reject a GET of a non-existing webhook', rejectGetWebhook);
-  it('should reject a PATCH of an immutable webhook field', rejectPatchWebhook);
-  it('should reject a DELETE of a non-existing webhook', rejectDeleteNonExistingWebhook);
-  it('should DELETE the previously created outgoing webhook', deleteOutgoingWebhook);
-  it('should DELETE the previously created incoming webhook', deleteIncomingWebhook);
+  it('should POST an artifact', postArtifact);
+  it('should GET the previously created Artifact', getArtifact);
+  it('should PATCH the previously created Artifact', patchArtifact);
+  it('should reject a POST with an existing id field', rejectExistingPostArtifact);
+  it('should reject a GET of a non-existing Artifact', rejectGetArtifact);
+  it('should reject a PATCH of an immutable Artifact field', rejectPatchArtifact);
+  it('should reject a DELETE of a non-existing Artifact', rejectDeleteNonExistingArtifact);
+  it('should DELETE the previously created Artifact', deleteArtifact);
 });
 
 /* --------------------( Tests )-------------------- */
+
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * creates an outgoing webhook.
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ * creates an artifact.
  */
-function postOutgoingWebhook(done) {
+function postArtifact(done) {
+  // Define new artifact
+  const artifact = {
+    id: testData.artifacts[0].id,
+    filename: testData.artifacts[0].filename,
+    contentType: path.extname(testData.artifacts[0].filename)
+  };
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+  );
+
+  const bodyRequest = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  };
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.webhooks[0])
+    body: JSON.stringify(bodyRequest)
   },
   (err, response, body) => {
     // Expect no error
@@ -147,42 +163,18 @@ function postOutgoingWebhook(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.webhooks[0].id);
+    chai.expect(json.id).to.equal(testData.artifacts[0].id);
     done();
   });
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * creates an incoming webhook.
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * finds and returns the previously created Artifact.
  */
-function postIncomingWebhook(done) {
+function getArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[2].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(testData.webhooks[2])
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.webhooks[2].id);
-    done();
-  });
-}
-
-/**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * finds and returns the previously created webhook.
- */
-function getWebhook(done) {
-  request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -194,53 +186,36 @@ function getWebhook(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.webhooks[0].id);
+    chai.expect(json.id).to.equal(testData.artifacts[0].id);
     done();
   });
 }
 
 /**
- * @description Verifies POST /api/webhooks/:webhookid triggers an incoming
- * webhooks events.
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * updates an Artifact.
  */
-function triggerWebhook(done) {
-  // Create base64 encoded webhook id
-  const webhookUID = utils.createID(org.id, proj.id, testData.webhooks[2].id);
-  const encodedID = Buffer.from(webhookUID).toString('base64');
+function patchArtifact(done) {
+  // Define artifact fields to update
+  const artifact = {
+    filename: testData.artifacts[2].filename,
+    contentType: path.extname(testData.artifacts[2].filename)
+  };
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[2].filename
+  );
 
-  // Add token to headers
-  const headers = getHeaders();
-  headers[testData.webhooks[2].tokenLocation] = testData.webhooks[2].token;
-
-  // Send request
+  const bodyRequest = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  };
   request({
-    url: `${M.config.test.url}/api/webhooks/${encodedID}`,
-    headers: headers,
-    ca: readCaFile(),
-    method: 'POST'
-  },
-  (err, response) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    done();
-  });
-}
-
-/**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * updates a webhook.
- */
-function patchWebhook(done) {
-  request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({
-      name: 'Updated Webhook Name'
-    })
+    body: JSON.stringify(bodyRequest)
   },
   (err, response, body) => {
     // Expect no error
@@ -249,22 +224,37 @@ function patchWebhook(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.name).to.equal('Updated Webhook Name');
+    chai.expect(json.filename).to.equal(testData.artifacts[2].filename);
     done();
   });
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * fails to creates a webhook with an invalid id field.
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * Fails to creates an Artifact with an existing ID.
  */
-function rejectPostWebhook(done) {
+function rejectExistingPostArtifact(done) {
+  // Define new artifact
+  const artifact = {
+    id: testData.artifacts[0].id,
+    filename: testData.artifacts[0].filename,
+    contentType: path.extname(testData.artifacts[0].filename)
+  };
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+  );
+
+  const bodyRequest = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  };
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.invalidWebhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.invalidWebhooks[0])
+    body: JSON.stringify(bodyRequest)
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -273,18 +263,18 @@ function rejectPostWebhook(done) {
     chai.expect(response.statusCode).to.equal(400);
     // Verify error message in response body
     const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
+    chai.expect(json.description).to.equal('Artifact already exists.');
     done();
   });
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * fails to find a non-existing webhook.
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * fails to find a non-existing Artifact.
  */
-function rejectGetWebhook(done) {
+function rejectGetArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -302,18 +292,31 @@ function rejectGetWebhook(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * fails to update an immutable webhook field.
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * fails to update an immutable Artifact id field.
  */
-function rejectPatchWebhook(done) {
+function rejectPatchArtifact(done) {
+  // Define artifact fields to update
+  const artifact = {
+    id: testData.artifacts[2].id,
+    filename: testData.artifacts[2].filename,
+    contentType: path.extname(testData.artifacts[2].filename)
+  };
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[2].filename
+  );
+
+  const bodyRequest = {
+    metaData: artifact,
+    artifactBlob: fs.readFileSync(imgPath)
+  };
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({
-      id: 'newwebhookid'
-    })
+    body: JSON.stringify(bodyRequest)
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -328,12 +331,12 @@ function rejectPatchWebhook(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * fails to delete a non-existing webhook.
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * fails to delete a non-existing Artifact.
  */
-function rejectDeleteNonExistingWebhook(done) {
+function rejectDeleteNonExistingArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -354,12 +357,12 @@ function rejectDeleteNonExistingWebhook(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * deletes the previously created outgoing webhook.
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * deletes the previously created Artifact.
  */
-function deleteOutgoingWebhook(done) {
+function deleteArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -372,35 +375,6 @@ function deleteOutgoingWebhook(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json).to.equal(true);
-    done();
-  });
-}
-
-/**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * deletes the previously created incoming webhook.
- */
-function deleteIncomingWebhook(done) {
-  request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[2].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json).to.equal(true);
     done();
   });
 }

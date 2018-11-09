@@ -24,6 +24,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
+const utils = M.require('lib.utils');
 const extensions = M.require('models.plugin.extensions');
 
 /* ---------------------------( Artifact Schemas )---------------------------- */
@@ -46,7 +47,7 @@ const extensions = M.require('models.plugin.extensions');
  * @property {Date} createdOn - The date which an artifact was created.
  * @property {Date} updatedOn - The date which an artifact was updated.
  * @property {Date} createdOn - The date the artifact was soft deleted or null
- * @property {Boolean} deleted - Indicates if a artifact has been soft deleted.
+ * @property {Boolean} deleted - Indicates if an artifact has been soft deleted.
  *
  */
 const ArtifactSchema = new mongoose.Schema({
@@ -108,12 +109,59 @@ const ArtifactSchema = new mongoose.Schema({
 // Use extensions model plugin;
 ArtifactSchema.plugin(extensions);
 
+/* ----------------------------( Webhook Methods )-----------------------------*/
+/**
+ * @description Returns an incoming artifact's public data.
+ * @memberOf ArtifactSchema
+ */
+ArtifactSchema.methods.getPublicData = function() {
+  return {
+    id: utils.parseID(this.id)[2],
+    filename: this.filename,
+    history: this.history,
+    contentType: this.contentType,
+    createdBy: this.createdBy,
+    lastModified: this.lastModified
+
+  };
+};
+
 /**
  * @description Returns artifact fields that can be changed
  * @memberOf ArtifactSchema
  */
 ArtifactSchema.methods.getValidUpdateFields = function() {
   return ['filename', 'contentType', 'hash'];
+};
+
+/**
+ * @description Validates an object to ensure that it only contains keys
+ * which exist in the artifact model.
+ *
+ * @param {Object} object to check keys of.
+ * @return {boolean} The boolean indicating if the object contained only
+ * existing fields.
+ */
+ArtifactSchema.statics.validateObjectKeys = function(object) {
+  // Initialize returnBool to true
+  let returnBool = true;
+
+  const validKeys = Object.keys(ArtifactSchema.obj);
+  validKeys.push('artifactBlob');
+  // Check if the object is NOT an instance of the artifact model
+  if (!(object instanceof mongoose.model('Artifact', ArtifactSchema))) {
+    // Loop through each key of the object
+    Object.keys(object).forEach(key => {
+      // Check if the object key is a key in the artifact model
+      if (!validKeys.includes(key)) {
+        // Key is not in artifact model, return false
+        returnBool = false;
+      }
+    });
+  }
+  // All object keys found in artifact model or object was an instance of
+  // artifact model, return true
+  return returnBool;
 };
 
 /* -------------------------( Artifact Schema Export )--------------------------- */

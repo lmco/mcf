@@ -27,6 +27,7 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const WebhookController = M.require('controllers.webhook-controller');
+const ArtifactController = M.require('controllers.artifact-controller');
 const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -82,7 +83,11 @@ module.exports = {
   postWebhook,
   patchWebhook,
   deleteWebhook,
-  postIncomingWebhook
+  postIncomingWebhook,
+  getArtifact,
+  postArtifact,
+  patchArtifact,
+  deleteArtifact
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -212,6 +217,15 @@ function getOrgs(req, res) {
   // Define the optional softDelete flag
   let softDeleted = false;
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Check if softDeleted was provided in the request body
   if (req.body.hasOwnProperty('softDeleted')) {
     softDeleted = req.body.softDeleted;
@@ -267,7 +281,7 @@ function postOrgs(req, res) {
   .then((orgs) => {
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs));
+    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -326,7 +340,7 @@ function patchOrgs(req, res) {
   .then((orgs) => {
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs));
+    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -348,6 +362,15 @@ function deleteOrgs(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['orgs', 'hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Initialize hardDelete variable
   let hardDelete = false;
@@ -386,7 +409,7 @@ function deleteOrgs(req, res) {
   .then((orgs) => {
     // Return 200: OK and the deleted orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs));
+    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -408,6 +431,15 @@ function getOrg(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Define the optional softDelete flag
   let softDeleted = false;
@@ -464,7 +496,7 @@ function postOrg(req, res) {
   .then((org) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org));
+    return res.status(200).send(formatJSON(org.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -502,7 +534,7 @@ function patchOrg(req, res) {
   .then((org) => {
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org));
+    return res.status(200).send(formatJSON(org.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -526,6 +558,15 @@ function deleteOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -540,7 +581,7 @@ function deleteOrg(req, res) {
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org));
+    return res.status(200).send(formatJSON(org.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -598,6 +639,23 @@ function postOrgRole(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check that role was passed into the request body
+  try {
+    assert.ok(req.body.hasOwnProperty('role'), 'A role was not specified in the request body.');
+  }
+  catch (error) {
+    res.status(400).send(new M.CustomError(error.message, 400, 'warn'));
+  }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['role'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Set permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid and req.params.username
@@ -692,6 +750,15 @@ function getProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Define the optional softDelete flag
   let softDeleted = false;
 
@@ -753,7 +820,7 @@ function postProjects(req, res) {
   .then((projects) => {
     // Return 200: OK and the new projects
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects));
+    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -827,7 +894,7 @@ function patchProjects(req, res) {
   .then((projects) => {
     // Return 200: OK and the updated projects
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects));
+    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -849,6 +916,15 @@ function deleteProjects(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['projects', 'hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Initialize hardDelete variable
   let hardDelete = false;
@@ -889,7 +965,8 @@ function deleteProjects(req, res) {
   .then((projects) => {
     // Return 200: OK and the deleted projects
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects));
+    return res.status(200)
+    .send(formatJSON(projects.map(p => p.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -911,6 +988,15 @@ function getProject(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Define the optional softDelete flag
   let softDeleted = false;
@@ -968,7 +1054,8 @@ function postProject(req, res) {
 
   // Set the orgid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
-  req.body.orgid = req.params.orgid;
+  req.body.org = { id: req.params.orgid };
+  delete req.body.orgid;
 
   // Create project with provided parameters
   // NOTE: createProject() sanitizes req.params.projectid, req.params.org.id and req.body.name
@@ -976,7 +1063,7 @@ function postProject(req, res) {
   .then((project) => {
     // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(project.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1006,7 +1093,7 @@ function patchProject(req, res) {
   .then((project) => {
     // Return 200: OK and the updated project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(project.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1030,6 +1117,15 @@ function deleteProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -1044,7 +1140,7 @@ function deleteProject(req, res) {
   .then((project) => {
     // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(project.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1133,6 +1229,23 @@ function postProjectRole(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check that role was passed into the request body
+  try {
+    assert.ok(req.body.hasOwnProperty('role'), 'A role was not specified in the request body.');
+  }
+  catch (error) {
+    res.status(400).send(new M.CustomError(error.message, 400, 'warn'));
+  }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['role'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Set permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
@@ -1331,6 +1444,15 @@ function deleteUsers(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['users', 'hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Initialize hardDelete variable
   let hardDelete = false;
@@ -1546,6 +1668,15 @@ function getElements(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Define the optional softDelete flag
   let softDeleted = false;
 
@@ -1597,9 +1728,14 @@ function postElements(req, res) {
   ElementController.createElements(req.user, req.params.orgid,
     req.params.projectid, req.body)
   .then((elements) => {
+    const data = [];
+    for (let i = 0; i < elements.length; i++) {
+      data.push(elements[i].getPublicData());
+    }
+
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(formatJSON(data));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1775,6 +1911,15 @@ function getElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Define the optional softDelete flag
   let softDeleted = false;
 
@@ -1897,6 +2042,15 @@ function deleteElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -1935,6 +2089,15 @@ function getWebhook(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Define the optional softDelete flag
   let softDeleted = false;
@@ -2047,6 +2210,15 @@ function deleteWebhook(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -2108,6 +2280,174 @@ function postIncomingWebhook(req, res) {
 
     // Return a 200 status
     return res.status(200).send();
+  })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/* -----------------------( Artifacts API Endpoints )------------------------- */
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Gets an artifact by its artifact.id, project.id, and org.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with found artifact
+ */
+function getArtifact(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
+  // Find the artifact from it's artifact.id, project.id, and org.id
+  // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
+  ArtifactController.findArtifact(req.user, req.params.orgid,
+    req.params.projectid, req.params.artifactid, softDeleted)
+  .then((artifact) => {
+    // Return a 200: OK and the artifact
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(artifact.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * POST /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Takes an organization ID, project ID, and artifact ID in the URI
+ * along with the request body to create an artifact.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with created artifact
+ */
+function postArtifact(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If artifact ID was provided in the body, ensure it matches artifact ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.artifactid !== req.body.id)) {
+    const error = new M.CustomError('Artifact ID in the body does not match ID in the params.', 400);
+    return res.status(error.status).send(error);
+  }
+
+  // Set id in request body
+  req.body.id = req.params.artifactid;
+
+  // Create artifact with provided parameters
+  // NOTE: createArtifact() sanitizes req.body
+  ArtifactController.createArtifact(req.user, req.params.orgid, req.params.projectid, req.body)
+  .then((artifact) => {
+    // Return 200: OK and created artifact
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(artifact.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => {
+    res.status(error.status).send(error);
+  });
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Updates the artifact specified in the URI. Takes an org id,
+ * project id, and artifact id in the URI and updated properties of the artifact
+ * in the request body.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with updated artifact
+ */
+function patchArtifact(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the specified artifact
+  // NOTE: updateArtifact() sanitizes req.params.orgid, req.params.projectid,
+  // and req.params.artifactid
+  ArtifactController.updateArtifact(req.user, req.params.orgid,
+    req.params.projectid, req.params.artifactid, req.body)
+  .then((artifact) => {
+    // Return 200: OK and the updated artifact
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(artifact.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * DELETE /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Takes an orgid, projectid, artifactid in the URI along with delete
+ * options in the body and deletes the corresponding artifact.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with success boolean
+ */
+function deleteArtifact(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
+  // Initialize hardDelete variable
+  let hardDelete = false;
+
+  // If hardDelete flag was provided, set the variable hardDelete
+  if (req.body.hasOwnProperty('hardDelete')) {
+    hardDelete = req.body.hardDelete;
+  }
+
+  // Remove the specified artifact
+  // NOTE: removeArtifact() sanitizes req.params.orgid, req.params.projectid, and
+  // req.params.artifactid
+  ArtifactController.removeArtifact(req.user, req.params.orgid,
+    req.params.projectid, req.params.artifactid, hardDelete)
+  .then((success) => {
+    res.header('Content-Type', 'application/json');
+    // Return 200: OK and success
+    return res.status(200).send(formatJSON(success));
   })
   .catch((error) => res.status(error.status).send(error));
 }
