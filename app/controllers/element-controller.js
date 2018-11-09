@@ -291,6 +291,9 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
             pack.parent = packageArray.filter(p => p.id === packID)[0]._id;
             pack.$parent = null;
           }
+
+          // Add package to parents contains array
+          packageArray.filter(p => p.id === packID)[0].contains.push(pack._id);
         }
       });
 
