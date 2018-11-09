@@ -153,6 +153,9 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           assert.ok(typeof element.source === 'string',
             `Element #${index}'s source is not a string.`);
         }
+        // Error Check: Ensure object contains valid keys
+        assert.ok(Element.Element.validateObjectKeys(element),
+          `Element #${index} contains invalid keys.`);
         index++;
       });
     }
@@ -389,6 +392,8 @@ function updateElements(reqUser, query, updateInfo) {
     try {
       assert.ok(typeof query === 'object', 'Update query is not an object.');
       assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
+      // Error Check: Ensure object contains valid keys
+      assert.ok(Element.Element.validateObjectKeys(updateInfo), 'Update contains invalid keys.');
       // Loop through each desired update
       Object.keys(updateInfo).forEach((key) => {
         // Error Check: ensure user can update each field
@@ -707,6 +712,8 @@ function createElement(reqUser, element) {
       assert.ok(element.hasOwnProperty('projectUID'), 'Project UID not provided in request body.');
       assert.ok(typeof element.id === 'string', 'ID in request body is not a string.');
       assert.ok(typeof element.type === 'string', 'Element type in request body is not a string.');
+      // Error Check: Ensure object contains valid keys
+      assert.ok(Element.Element.validateObjectKeys(element), 'Element contains invalid keys.');
 
       if (typeof element.name === 'string') {
         elemName = sani.sanitize(element.name);
@@ -830,6 +837,8 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
       assert.ok(typeof elementUpdated === 'object', 'Element data is not a object.');
+      // Error Check: Ensure object contains valid keys
+      assert.ok(Element.Element.validateObjectKeys(elementUpdated), 'Element contains invalid keys.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));

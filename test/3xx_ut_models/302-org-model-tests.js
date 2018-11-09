@@ -31,8 +31,8 @@ const db = M.require('lib.db');
 let userAdmin = null;
 
 /* --------------------( Test Data )-------------------- */
-const testData = require(path.join(M.root, 'test', 'data.json'));
-const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
 
 /* --------------------( Main )-------------------- */
 /**
