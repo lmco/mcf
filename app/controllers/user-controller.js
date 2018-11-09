@@ -43,6 +43,7 @@ const ProjController = M.require('controllers.project-controller');
 const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 // eslint consistent-return rule is disabled for this file. The rule may not fit
 // controller-related functions as returns are inconsistent.
@@ -656,43 +657,44 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
 
       // Loop through userUpdateFields
       for (let i = 0; i < userUpdateFields.length; i++) {
+        const field = userUpdateFields[i];
+
         // Error Check: Check if field can be updated
-        if (!validUpdateFields.includes(userUpdateFields[i])) {
+        if (!validUpdateFields.includes(field)) {
           // field cannot be updated, reject error
           return reject(new M.CustomError(
-            `User property [${userUpdateFields[i]}] cannot be changed.`, 403, 'warn'
+            `User property [${field}] cannot be changed.`, 403, 'warn'
           ));
         }
 
-        // Check if updateField type is 'Mixed'
-        if (User.schema.obj[userUpdateFields[i]].type.schemaName === 'Mixed') {
-          // Only objects should be passed into mixed data
-          if (typeof newUserData[userUpdateFields[i]] !== 'object') {
+        // If field has a validator, validate the updated value
+        if (validators.user.hasOwnProperty(field)) {
+          // If the field is invalid, throw an error
+          if (!RegExp(validators.user[field]).test(newUserData[field])) {
             return reject(new M.CustomError(
-              `${userUpdateFields[i]} must be an object`, 400, 'warn'
+              `Invalid ${field} [${newUserData[field]}].`, 403, 'warn'
             ));
           }
-
-          // Add and replace parameters of the type 'Mixed'
-          utils.updateAndCombineObjects(user[userUpdateFields[i]],
-            newUserData[userUpdateFields[i]]);
-
-          // Mark mixed fields as updated, required for mixed fields to update in mongoose
-          // http://mongoosejs.com/docs/schematypes.html#mixed
-          user.markModified(userUpdateFields[i]);
         }
-        else {
-          // Schema type is not mixed
-          // Sanitize field and update field in user object
-          user[userUpdateFields[i]] = sani.sanitize(newUserData[userUpdateFields[i]]);
+
+        // If the field is of type 'Mixed'
+        if (User.schema.obj[field].type.schemaName === 'Mixed') {
+          // Update the user objects mixed field
+          utils.updateAndCombineObjects(user[field], sani.sanitize(newUserData[field]));
+          newUserData[field] = user[field];
         }
       }
-      // Update last modified field
-      user.lastModifiedBy = reqUser;
 
-      // Save updated user
-      return user.save();
+      // Define query
+      const query = { username: user.username };
+
+      // Set lastModifiedBy field
+      newUserData.lastModifiedBy = reqUser._id;
+
+      // Update the user
+      return User.updateOne(query, newUserData);
     })
+    .then(() => findUser(reqUser, usernameToUpdate))
     .then((updatedUser) => resolve(updatedUser))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));

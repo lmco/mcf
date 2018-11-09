@@ -182,6 +182,8 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
       assert.ok(typeof webhookData.id === 'string', 'ID in webhook object is not a string.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(Webhook.Webhook.validateObjectKeys(webhookData),
+        'Webhook object contains invalid keys.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -275,6 +277,8 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof webhookID === 'string', 'Webhook ID is not a string.');
       assert.ok(typeof webhookUpdated === 'object', 'Webhook data is not a object.');
+      assert.ok(Webhook.Webhook.validateObjectKeys(webhookUpdated),
+        'Update object contains invalid keys.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));

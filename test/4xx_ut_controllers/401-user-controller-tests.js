@@ -31,8 +31,8 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
-const testData = require(path.join(M.root, 'test', 'data.json'));
-const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
 let adminUser = null;
 let nonAdminUser = null;
 
@@ -341,7 +341,7 @@ function updateMultipleUsers(done) {
 
 /**
  * @description Verify that update fails when given invalid input.
- * Expected error thrown: 'Bad Request'
+ * Expected error thrown: 'Forbidden'
  */
 function rejectInvalidLastNameUpdate(done) {
   // Create user data
@@ -356,8 +356,8 @@ function rejectInvalidLastNameUpdate(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
     done();
   });
 }

@@ -32,8 +32,8 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
-const testData = require(path.join(M.root, 'test', 'data.json'));
-const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
@@ -505,7 +505,7 @@ function rejectDeleteNonExistingOrg(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
-    body: JSON.stringify({ soft: false })
+    body: JSON.stringify({ hardDelete: false })
   },
   function(err, response, body) {
     // Expect no error

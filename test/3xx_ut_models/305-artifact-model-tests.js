@@ -26,7 +26,8 @@ const mbeeCrypto = M.require('lib.crypto');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
-const testData = require(path.join(M.root, 'test', 'data.json'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
 let artifactPNG = null;
 let org = null;
 let project = null;
