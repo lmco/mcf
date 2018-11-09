@@ -37,8 +37,8 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
-const testData = require(path.join(M.root, 'test', 'data.json'));
-const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
 let nonAdminUser = null;
 let adminUser = null;
 let org = null;
@@ -154,7 +154,7 @@ function createProject(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.projects[0]);
   projData.custom = { buildFor: 'build' };
-  projData.orgid = org.id;
+  projData.org = { id: org.id };
 
   // Create the project via project controller
   ProjController.createProject(adminUser, projData)
@@ -343,7 +343,7 @@ function updateMultipleProjects(done) {
 function createProject02(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.projects[2]);
-  projData.orgid = org.id;
+  projData.org = { id: org.id };
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -368,7 +368,7 @@ function createProject02(done) {
 function rejectCreatePeriodName(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[0]);
-  projData.orgid = org.id;
+  projData.org = { id: org.id };
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -392,7 +392,7 @@ function rejectCreatePeriodName(done) {
 function rejectDuplicateProjectId(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.projects[2]);
-  projData.orgid = org.id;
+  projData.org = { id: org.id };
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -416,7 +416,7 @@ function rejectDuplicateProjectId(done) {
 function rejectInvalidProjectId(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[1]);
-  projData.orgid = org.id;
+  projData.org = { id: org.id };
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -440,7 +440,7 @@ function rejectInvalidProjectId(done) {
 function rejectInvalidProjectName(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[2]);
-  projData.orgid = org.id;
+  projData.org = { id: org.id };
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -464,7 +464,7 @@ function rejectInvalidProjectName(done) {
 function rejectInvalidOrgId(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[3]);
-  projData.orgid = '';
+  projData.org = { id: '' };
 
   // Create project
   ProjController.createProject(adminUser, projData)
@@ -490,7 +490,7 @@ function rejectInvalidOrgId(done) {
 function rejectNonAdminCreateProject(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[0]);
-  projData.orgid = org.id;
+  projData.org = { id: org.id };
 
   // Create project
   ProjController.createProject(nonAdminUser, projData)
@@ -550,7 +550,7 @@ function findProjects(done) {
   .then(() => {
     // Define and clone the project data
     const projData = Object.assign({}, testData.projects[1]);
-    projData.orgid = org.id;
+    projData.org = { id: org.id };
     return ProjController.createProject(adminUser2, projData);
   })
   .then(() => ProjController.findProjects(adminUser, org.id))

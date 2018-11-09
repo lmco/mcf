@@ -157,16 +157,17 @@ ProjectSchema.plugin(extensions);
 ProjectSchema.methods.getPublicData = function() {
   // Map read, write, and admin references to only contain user public data
   const permissions = {
-    read: this.permissions.read.map(u => u.getPublicData()),
-    write: this.permissions.write.map(u => u.getPublicData()),
-    admin: this.permissions.admin.map(u => u.getPublicData())
+    read: this.permissions.read.map(u => u.username),
+    write: this.permissions.write.map(u => u.username),
+    admin: this.permissions.admin.map(u => u.username)
   };
 
   // Return the projects public fields
   return {
     id: this.id,
-    org: this.org,
-    uid: this.uid,
+    // NOTE (jk): Not sure why the toString is needed, but a buffer gets
+    // returned when posting a project via the API
+    org: this.org.id,
     name: this.name,
     permissions: permissions,
     custom: this.custom,
@@ -233,6 +234,33 @@ ProjectSchema.methods.getPermissions = function(user) {
 
 ProjectSchema.statics.getVisibilityLevels = function() {
   return ProjectSchema.methods.getVisibilityLevels();
+};
+
+/**
+ * @description Validates an object to ensure that it only contains keys
+ * which exist in the project model.
+ *
+ * @param {Object} object to check keys of.
+ * @return {boolean} The boolean indicating if the object contained only
+ * existing fields.
+ */
+ProjectSchema.statics.validateObjectKeys = function(object) {
+  // Initialize returnBool to true
+  let returnBool = true;
+  // Check if the object is NOT an instance of the project model
+  if (!(object instanceof mongoose.model('Project', ProjectSchema))) {
+    // Loop through each key of the object
+    Object.keys(object).forEach(key => {
+      // Check if the object key is a key in the project model
+      if (!Object.keys(ProjectSchema.obj).includes(key)) {
+        // Key is not in project model, return false
+        returnBool = false;
+      }
+    });
+  }
+  // All object keys found in project model or object was an instance of
+  // project model, return true
+  return returnBool;
 };
 
 

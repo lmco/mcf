@@ -120,9 +120,9 @@ OrganizationSchema.plugin(extensions);
 OrganizationSchema.methods.getPublicData = function() {
   // Map read, write, and admin references to only contain user public data
   const permissions = {
-    read: this.permissions.read.map(u => u.getPublicData()),
-    write: this.permissions.write.map(u => u.getPublicData()),
-    admin: this.permissions.admin.map(u => u.getPublicData())
+    read: this.permissions.read.map(u => u.username),
+    write: this.permissions.write.map(u => u.username),
+    admin: this.permissions.admin.map(u => u.username)
   };
 
   // Return the organization public fields
@@ -171,6 +171,33 @@ OrganizationSchema.methods.getPermissions = function(user) {
     write: write.includes(user._id.toString()),
     admin: admin.includes(user._id.toString())
   };
+};
+
+/**
+ * @description Validates an object to ensure that it only contains keys
+ * which exist in the organization model.
+ *
+ * @param {Object} object to check keys of.
+ * @return {boolean} The boolean indicating if the object contained only
+ * existing fields.
+ */
+OrganizationSchema.statics.validateObjectKeys = function(object) {
+  // Initialize returnBool to true
+  let returnBool = true;
+  // Check if the object is NOT an instance of the organization model
+  if (!(object instanceof mongoose.model('Organization', OrganizationSchema))) {
+    // Loop through each key of the object
+    Object.keys(object).forEach(key => {
+      // Check if the object key is a key in the organization model
+      if (!Object.keys(OrganizationSchema.obj).includes(key)) {
+        // Key is not in organization model, return false
+        returnBool = false;
+      }
+    });
+  }
+  // All object keys found in organization model or object was an instance of
+  // organization model, return true
+  return returnBool;
 };
 
 

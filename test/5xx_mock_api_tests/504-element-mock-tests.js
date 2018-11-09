@@ -29,8 +29,8 @@ const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-const testData = require(path.join(M.root, 'test', 'data.json'));
-const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -65,7 +65,7 @@ describe(M.getModuleName(module.filename), () => {
 
       // Define project data
       const projData = testData.projects[0];
-      projData.orgid = org.id;
+      projData.org = { id: org.id };
 
       // Create project
       return ProjController.createProject(adminUser, projData);
@@ -295,8 +295,7 @@ function patchElements(done) {
       testData.elements[0],
       testData.elements[1],
       testData.elements[2],
-      testData.elements[3],
-      testData.elements[7]
+      testData.elements[3]
     ],
     update: { name: 'Updated Elements' }
   };
@@ -313,7 +312,7 @@ function patchElements(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(5);
+    chai.expect(json.length).to.equal(4);
     chai.expect(json[2].name).to.equal('Updated Elements');
     done();
   };
