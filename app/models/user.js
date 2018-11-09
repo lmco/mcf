@@ -28,6 +28,7 @@ const mongoose = require('mongoose');
 // MBEE Modules
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
+const AuthModule = M.require(`auth.${M.config.auth.strategy}`);
 
 
 /* ----------------------------( Element Model )----------------------------- */
@@ -71,8 +72,7 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    //match: RegExp(validators.user),
-    match: console.log(validators),
+    match: RegExp(validators.user.username),
     set: function(_username) {
       // Check value undefined
       if (typeof this.username === 'undefined') {
@@ -90,8 +90,7 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: false,
-    match: validators.user.password(this.password)
+    required: false
   },
   email: {
     type: String,
@@ -210,6 +209,16 @@ UserSchema.pre('findOne', function(next) {
  * @memberOf UserSchema
  */
 UserSchema.pre('save', function(next) {
+  // Pass AuthModule to determine password validation rules
+  status = validators.user.password(this.password, AuthModule);
+
+  console.log('PASSWORD: ', this.password)
+  // Check validation status false
+  if (!status) {
+    // Failed validation, throw error
+    throw new M.CustomError('Password validation failed.', 404, 'warn')
+  }
+
   // Hash plaintext password
   if (this.password) {
     crypto.pbkdf2(this.password, this._id.toString(), 100000, 64, 'sha256', (err, derivedKey) => {
