@@ -83,7 +83,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     const projID = sani.sanitize(projectID);
     const projectUID = utils.createID(orgID, projID);
 
-    const searchParams = { id: { $regex: `^${projectUID}` }, deleted: false };
+    const searchParams = { id: { $regex: `^${projectUID}:` }, deleted: false };
 
     // Error Check: Ensure user has permissions to find deleted elements
     if (softDeleted && !reqUser.admin) {
