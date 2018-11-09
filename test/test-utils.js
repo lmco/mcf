@@ -31,6 +31,7 @@ const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const OrgController = M.require('controllers.organization-controller');
 const testData = require(path.join(M.root, 'test', 'data.json'));
+delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
 /**
  * @description Helper function to create test non-admin user in
  * MBEE tests.
@@ -225,4 +226,17 @@ module.exports.removeOrganization = function(adminUser) {
     .then((org) => resolve(org))
     .catch((error) => reject(error));
   });
+};
+
+/**
+ * @description Helper function to import a copy of test data
+ */
+module.exports.importTestData = function() {
+  // Clear require cache so a new copy is imported
+  delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
+  // Import a copy of the data.json
+  // eslint-disable-next-line global-require
+  const testDataFresh = require(path.join(M.root, 'test', 'data.json'));
+  // Return a newly assigned copy of the fresh data
+  return Object.assign({}, testDataFresh);
 };

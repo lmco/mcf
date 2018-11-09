@@ -134,6 +134,36 @@ ArtifactSchema.methods.getValidUpdateFields = function() {
   return ['filename', 'contentType', 'hash'];
 };
 
+/**
+ * @description Validates an object to ensure that it only contains keys
+ * which exist in the artifact model.
+ *
+ * @param {Object} object to check keys of.
+ * @return {boolean} The boolean indicating if the object contained only
+ * existing fields.
+ */
+ArtifactSchema.statics.validateObjectKeys = function(object) {
+  // Initialize returnBool to true
+  let returnBool = true;
+
+  const validKeys = Object.keys(ArtifactSchema.obj);
+  validKeys.push('artifactBlob');
+  // Check if the object is NOT an instance of the artifact model
+  if (!(object instanceof mongoose.model('Artifact', ArtifactSchema))) {
+    // Loop through each key of the object
+    Object.keys(object).forEach(key => {
+      // Check if the object key is a key in the artifact model
+      if (!validKeys.includes(key)) {
+        // Key is not in artifact model, return false
+        returnBool = false;
+      }
+    });
+  }
+  // All object keys found in artifact model or object was an instance of
+  // artifact model, return true
+  return returnBool;
+};
+
 /* -------------------------( Artifact Schema Export )--------------------------- */
 // Export mongoose model as 'Artifact'
 module.exports = mongoose.model('Artifact', ArtifactSchema);

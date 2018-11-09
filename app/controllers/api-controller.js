@@ -217,6 +217,15 @@ function getOrgs(req, res) {
   // Define the optional softDelete flag
   let softDeleted = false;
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Check if softDeleted was provided in the request body
   if (req.body.hasOwnProperty('softDeleted')) {
     softDeleted = req.body.softDeleted;
@@ -354,6 +363,15 @@ function deleteOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['orgs', 'hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -413,6 +431,15 @@ function getOrg(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Define the optional softDelete flag
   let softDeleted = false;
@@ -531,6 +558,15 @@ function deleteOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -603,6 +639,23 @@ function postOrgRole(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check that role was passed into the request body
+  try {
+    assert.ok(req.body.hasOwnProperty('role'), 'A role was not specified in the request body.');
+  }
+  catch (error) {
+    res.status(400).send(new M.CustomError(error.message, 400, 'warn'));
+  }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['role'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Set permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid and req.params.username
@@ -696,6 +749,15 @@ function getProjects(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Define the optional softDelete flag
   let softDeleted = false;
@@ -855,6 +917,15 @@ function deleteProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['projects', 'hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -918,6 +989,15 @@ function getProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Define the optional softDelete flag
   let softDeleted = false;
 
@@ -974,7 +1054,8 @@ function postProject(req, res) {
 
   // Set the orgid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
-  req.body.orgid = req.params.orgid;
+  req.body.org = { id: req.params.orgid };
+  delete req.body.orgid;
 
   // Create project with provided parameters
   // NOTE: createProject() sanitizes req.params.projectid, req.params.org.id and req.body.name
@@ -1035,6 +1116,15 @@ function deleteProject(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Initialize hardDelete variable
   let hardDelete = false;
@@ -1139,6 +1229,23 @@ function postProjectRole(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check that role was passed into the request body
+  try {
+    assert.ok(req.body.hasOwnProperty('role'), 'A role was not specified in the request body.');
+  }
+  catch (error) {
+    res.status(400).send(new M.CustomError(error.message, 400, 'warn'));
+  }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['role'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Set permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
@@ -1337,6 +1444,15 @@ function deleteUsers(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['users', 'hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Initialize hardDelete variable
   let hardDelete = false;
@@ -1551,6 +1667,15 @@ function getElements(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Define the optional softDelete flag
   let softDeleted = false;
@@ -1786,6 +1911,15 @@ function getElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Define the optional softDelete flag
   let softDeleted = false;
 
@@ -1908,6 +2042,15 @@ function deleteElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -1946,6 +2089,15 @@ function getWebhook(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Define the optional softDelete flag
   let softDeleted = false;
@@ -2058,6 +2210,15 @@ function deleteWebhook(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
   // Initialize hardDelete variable
   let hardDelete = false;
 
@@ -2140,7 +2301,14 @@ function getArtifact(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
-
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
   // Define the optional softDelete flag
   let softDeleted = false;
 
@@ -2253,6 +2421,15 @@ function deleteArtifact(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['hardDelete'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
 
   // Initialize hardDelete variable
   let hardDelete = false;
