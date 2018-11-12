@@ -83,7 +83,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     const projID = sani.sanitize(projectID);
     const projectUID = utils.createID(orgID, projID);
 
-    const searchParams = { id: { $regex: `^${projectUID}` }, deleted: false };
+    const searchParams = { id: { $regex: `^${projectUID}:` }, deleted: false };
 
     // Error Check: Ensure user has permissions to find deleted elements
     if (softDeleted && !reqUser.admin) {
@@ -293,6 +293,9 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
             pack.parent = packageArray.filter(p => p.id === packID)[0]._id;
             pack.$parent = null;
           }
+
+          // Add package to parents contains array
+          packageArray.filter(p => p.id === packID)[0].contains.push(pack._id);
         }
       });
 
@@ -343,8 +346,10 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       createdElements = createdElements.concat(createdRelationships || []);
 
       // Return all of the created elements
-      return resolve(createdElements);
+      const createdID = createdElements.map(e => e._id);
+      return findElementsQuery({ _id: { $in: createdID } });
     })
+    .then((elements) => resolve(elements))
     .catch((error) => {
       // If error is a CustomError, reject it
       if (error instanceof M.CustomError && !created) {
@@ -516,13 +521,16 @@ function removeElements(reqUser, query, hardDelete = false) {
       ));
     }
 
-    // Define found elements array
+    // Define found elements array and child query
     let foundElements = [];
+    const childQuery = { id: { $in: [] } };
+
     // Find the elements to delete
     findElementsQuery(query)
     .then((elements) => {
       // Set foundElements
       foundElements = elements;
+      const foundElementsIDs = foundElements.map(e => e._id.toString());
 
       // Loop through each found element
       Object(elements).forEach((element) => {
@@ -531,6 +539,20 @@ function removeElements(reqUser, query, hardDelete = false) {
           return reject(new M.CustomError('User does not have permissions to '
               + `delete elements in the project [${element.project.name}].`, 403, 'warn'));
         }
+
+        // If the element is a package, remove the children as well
+        if (element.type === 'Package') {
+          // For each child element
+          element.contains.forEach((child) => {
+            // Add child to foundElements
+            if (!foundElementsIDs.includes(child._id.toString())) {
+              foundElements.push(child);
+            }
+
+            // Add child to child query
+            childQuery.id.$in.push(child.id);
+          });
+        }
       });
 
       // If hard delete, delete elements, otherwise update elements
@@ -538,6 +560,10 @@ function removeElements(reqUser, query, hardDelete = false) {
         ? Element.Element.deleteMany(query)
         : Element.Element.updateMany(query, { deleted: true, deletedBy: reqUser });
     })
+    // Delete any child elements
+    .then(() => ((hardDelete)
+      ? Element.Element.deleteMany(childQuery)
+      : Element.Element.updateMany(childQuery, { deleted: true, deletedBy: reqUser })))
     // Return the deleted elements
     .then(() => resolve(foundElements))
     // Return reject with custom error
@@ -966,15 +992,31 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
 
       // Hard delete
       if (hardDelete) {
-        return Element.Element.deleteOne({ id: element.id });
+        return Element.Element.deleteMany({ $or: [{ _id: element._id }, { parent: element._id }] });
       }
+      // Create promises array
+      const promises = [];
       // Soft delete
       element.deleted = true;
 
       // Update deleted by field
       element.deletedBy = reqUser;
 
-      return element.save();
+      // Add element.save() to promises array
+      promises.push(element.save());
+
+      // If the deleted element is a package
+      if (element.type === 'Package') {
+        // Soft-delete each of it's children
+        element.contains.forEach((child) => {
+          child.deleted = true;
+          child.deletedBy = reqUser;
+          promises.push(child.save());
+        });
+      }
+
+      // Return once all promises are complete
+      return Promise.all(promises);
     })
     .then(() => {
       // Set deleted boolean on foundElement
@@ -982,6 +1024,14 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
 
       // Trigger webhooks
       events.emit('Element Deleted', foundElement);
+
+      // If the deleted element is a package
+      if (foundElement.type === 'Package') {
+        // Trigger webhook for each child also deleted
+        foundElement.contains.forEach((child) => {
+          events.emit('Element Deleted', child);
+        });
+      }
 
       // Return found element
       return resolve(foundElement);
