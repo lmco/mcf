@@ -24,8 +24,7 @@
 module.exports = {
   handleBasicAuth,
   handleTokenAuth,
-  doLogin,
-  validatePassword
+  doLogin
 };
 
 // Node modules
@@ -333,40 +332,4 @@ function ldapSync(ldapUserObj) {
       .catch(saveErr => reject(saveErr));
     });
   });
-}
-
-/**
- * @description Validates a users password with set rules.
- *
- * @param {String} password - Password to verify
- * @returns {Boolean} - If password is correctly validated
- */
-function validatePassword(password) {
-  // Error check - Make sure password is a string
-  if (typeof (password) !== typeof ('')) {
-    return false;
-  }
-
-  try {
-    // At least 8 characters
-    const lengthValidator = (password.length >= 8);
-    // At least 1 digit
-    const digitsValidator = (password.match(/[0-9]/g).length >= 1);
-    // At least 1 lowercase letter
-    const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
-    // At least 1 uppercase letter
-    const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
-    // At least 1 special character
-    const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
-    // Validate the password
-    return (lengthValidator
-      && digitsValidator
-      && lowercaseValidator
-      && uppercaseValidator
-      && specialCharValidator);
-  }
-  catch (error) {
-    // Explicitly NOT logging error to avoid password logging
-    return false;
-  }
 }

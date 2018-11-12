@@ -208,9 +208,9 @@ UserSchema.pre('findOne', function(next) {
  * @memberOf UserSchema
  */
 UserSchema.pre('save', function(next) {
-  // const AuthModule = M.require(`auth.${M.config.auth.strategy}`).validatePassword;
+  const AuthModule = M.require(`auth.${M.config.auth.strategy}`).validatePassword;
   // Pass AuthModule to determine password validation rules
-  const status = true;// validators.user.password(this.password, AuthModule);
+  const status = validators.user.password(this.password, AuthModule);
 
   // Check validation status false
   if (!status) {
