@@ -144,15 +144,19 @@ function ldapConnect() {
       return reject(new M.CustomError('An error occured.', 500));
     }
 
+    M.log.verbose('Reading LDAP server CAs ...')
+
     // Loop  number of certificates in config file
     for (let i = 0; i < ldapCA.length; i++) {
       // Extract certificate filename from config file
-      const certName = ldapCA.ca[i];
+      const certName = ldapCA[i];
       // Extract certificate file content
       const file = fs.readFileSync(path.join(M.root, certName));
       // Push file content to arrCaCert
       arrCaCerts.push(file);
     }
+    M.log.verbose('LDAP server CAs loaded.')
+
     // Create ldapClient object with url, credentials, and certificates
     const ldapClient = ldap.createClient({
       url: `${ldapConfig.url}:${ldapConfig.port}`,
