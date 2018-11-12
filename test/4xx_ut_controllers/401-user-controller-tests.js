@@ -96,7 +96,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creating a user with no username', rejectInvalidCreate);
   it('should reject creating an already existing user', rejectDuplicateUser);
   it('should update the users first name', updateFirstName);
-  it('should update multiple users', updateMultipleUsers);
+  // TODO: depends on MBX-595
+  // it('should update multiple users', updateMultipleUsers);
   it('should reject updating the last name with an invalid name', rejectInvalidLastNameUpdate);
   it('should reject updating the users username', rejectUsernameUpdate);
   it('should reject update from a non-admin user', rejectUserUpdateByNonAdmin);
@@ -303,6 +304,7 @@ function updateFirstName(done) {
 /**
  * @description Updates multiple users at the same time.
  */
+/* TODO: after MBX-595
 function updateMultipleUsers(done) {
   // Create query to update users
   const updateQuery = { username: { $in: [
@@ -338,6 +340,7 @@ function updateMultipleUsers(done) {
     done();
   });
 }
+*/
 
 /**
  * @description Verify that update fails when given invalid input.
