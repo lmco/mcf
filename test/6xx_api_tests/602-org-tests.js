@@ -185,6 +185,7 @@ function postOrgs(done) {
 function getOrg(done) {
   request({
     url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
+    ca: readCaFile(),
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -338,6 +339,7 @@ function rejectPatchUniqueFieldOrgs(done) {
 function getMemberRoles(done) {
   request({
     url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.users[0].adminUsername}`,
+    ca: readCaFile(),
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -361,6 +363,7 @@ function getMemberRoles(done) {
 function getOrgs(done) {
   request({
     url: `${test.url}/api/orgs`,
+    ca: readCaFile(),
     headers: getHeaders()
   },
   (err, response, body) => {
