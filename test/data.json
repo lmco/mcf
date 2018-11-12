@@ -2,7 +2,7 @@
   "users": [
     {
       "adminUsername": "test_admin",
-      "adminPassword": "test12345@"
+      "adminPassword": "Test12345@"
     },
     {
       "username": "nonadminuser01",

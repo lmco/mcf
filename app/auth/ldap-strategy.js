@@ -18,6 +18,16 @@
  * @description This file implements authentication using LDAP Active Directory.
  */
 
+// Expose auth strategy functions
+// Note: The export is being done before the import to solve the issues of
+// circular references.
+module.exports = {
+  handleBasicAuth,
+  handleTokenAuth,
+  doLogin,
+  validatePassword
+};
+
 // Node modules
 const fs = require('fs');
 const path = require('path');
@@ -53,7 +63,7 @@ const ldapConfig = M.config.auth.ldap;
  *     console.log(err);
  *   })
  */
-module.exports.handleBasicAuth = function(req, res, username, password) {
+function handleBasicAuth(req, res, username, password) {
   // Return a promise
   return new Promise((resolve, reject) => {
     // Define LDAP client handler
@@ -97,7 +107,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-module.exports.handleTokenAuth = function(req, res, token) {
+function handleTokenAuth(req, res, token) {
   return new Promise((resolve, reject) => {
     LocalStrategy.handleTokenAuth(req, res, token)
     .then(user => resolve(user))
@@ -113,7 +123,7 @@ module.exports.handleTokenAuth = function(req, res, token) {
  * @param {Object} res - Response express object
  * @param {callback} next - Callback to continue express authentication
  */
-module.exports.doLogin = function(req, res, next) {
+function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
 };
 
@@ -333,21 +343,21 @@ function ldapSync(ldapUserObj) {
  */
 function validatePassword(password) {
   // Error check - Make sure password is a string
-  if (typeof (p) !== typeof ('')) {
+  if (typeof (password) !== typeof ('')) {
     return false;
   }
 
   try {
     // At least 8 characters
-    const lengthValidator = (p.length >= 8);
+    const lengthValidator = (password.length >= 8);
     // At least 1 digit
-    const digitsValidator = (p.match(/[0-9]/g).length >= 1);
+    const digitsValidator = (password.match(/[0-9]/g).length >= 1);
     // At least 1 lowercase letter
-    const lowercaseValidator = (p.match(/[a-z]/g).length >= 1);
+    const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
     // At least 1 uppercase letter
-    const uppercaseValidator = (p.match(/[A-Z]/g).length >= 1);
+    const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
     // At least 1 special character
-    const specialCharValidator = (p.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
+    const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
     // Validate the password
     return (lengthValidator
       && digitsValidator

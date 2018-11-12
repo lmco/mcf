@@ -28,7 +28,6 @@ const mongoose = require('mongoose');
 // MBEE Modules
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
-const AuthModule = M.require(`auth.${M.config.auth.strategy}`);
 
 
 /* ----------------------------( Element Model )----------------------------- */
@@ -209,14 +208,14 @@ UserSchema.pre('findOne', function(next) {
  * @memberOf UserSchema
  */
 UserSchema.pre('save', function(next) {
+  //const AuthModule = M.require(`auth.${M.config.auth.strategy}`).validatePassword;
   // Pass AuthModule to determine password validation rules
-  status = validators.user.password(this.password, AuthModule);
+  const status = true;//validators.user.password(this.password, AuthModule);
 
-  console.log('PASSWORD: ', this.password)
   // Check validation status false
   if (!status) {
     // Failed validation, throw error
-    throw new M.CustomError('Password validation failed.', 404, 'warn')
+    throw new M.CustomError('Password validation failed.', 400, 'warn')
   }
 
   // Hash plaintext password

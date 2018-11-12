@@ -306,7 +306,7 @@ function updateUsers(reqUser, query, updateInfo) {
         // Once all promises complete, return
         return Promise.all(promises);
       }
-
+      console.log('HERE');
       // No mixed field update, update all together
       return User.updateMany(query, updateInfo);
     })
@@ -323,7 +323,10 @@ function updateUsers(reqUser, query, updateInfo) {
       return findUsersQuery(query);
     })
     // Return the updated users
-    .then((updatedUsers) => resolve(updatedUsers))
+    .then((updatedUsers) => {
+      console.log(updatedUsers);
+      return resolve(updatedUsers);
+    })
     .catch((error) => M.CustomError.parseCustomError(error));
   });
 }

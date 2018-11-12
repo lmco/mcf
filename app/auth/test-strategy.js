@@ -15,6 +15,15 @@
  * regardless of the provided username and password.
  */
 
+// Expose auth strategy functions
+// Note: The export is being done before the import to solve the issues of
+// circular references.
+module.exports = {
+  handleBasicAuth,
+  handleTokenAuth,
+  doLogin
+};
+
 // MBEE modules
 const User = M.require('models.user');
 const mbeeCrypto = M.require('lib.crypto');
@@ -43,7 +52,7 @@ const utils = M.require('lib.utils');
  *     console.log(err);
  *   })
  */
-module.exports.handleBasicAuth = function(req, res, username, password) {
+function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
     User.findOne({
       admin: true,
@@ -82,7 +91,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-module.exports.handleTokenAuth = function(req, res, token) {
+function handleTokenAuth(req, res, token) {
   return new Promise((resolve, reject) => {
     // Define and initialize token
     let decryptedToken = null;
@@ -134,7 +143,7 @@ module.exports.handleTokenAuth = function(req, res, token) {
  * @param {Object} res - response express object
  * @param {callback} next - Callback to express authentication
  */
-module.exports.doLogin = function(req, res, next) {
+function doLogin(req, res, next) {
   // Compute token expiration time
   const timeDelta = M.config.auth.token.expires
     * utils.timeConversions[M.config.auth.token.units];
