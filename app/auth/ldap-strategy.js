@@ -86,7 +86,7 @@ function handleBasicAuth(req, res, username, password) {
     .then(syncedUser => resolve(syncedUser))
     .catch(ldapConnectErr => reject(ldapConnectErr));
   });
-};
+}
 
 /**
  * @description Authenticates user with passed in token.
@@ -113,7 +113,7 @@ function handleTokenAuth(req, res, token) {
     .then(user => resolve(user))
     .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
   });
-};
+}
 
 /**
  * @description  This function generates the session token for user login.
@@ -125,7 +125,7 @@ function handleTokenAuth(req, res, token) {
  */
 function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
-};
+}
 
 /* ------------------------( LDAP Helper Functions )--------------------------*/
 /**

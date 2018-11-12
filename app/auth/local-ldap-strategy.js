@@ -80,7 +80,7 @@ function handleBasicAuth(req, res, username, password) {
       }
     });
   });
-};
+}
 
 /**
  * @description This function implements handleTokenAuth called in the auth.js library file.
@@ -109,7 +109,7 @@ function handleTokenAuth(req, res, _token) {
     .then(user => resolve(user))
     .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
   });
-};
+}
 
 /**
  * @description This function implements doLogin called in the auth.js library file.
@@ -123,7 +123,7 @@ function handleTokenAuth(req, res, _token) {
  */
 function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
-};
+}
 
 /**
  * @description Validates a users password with set rules.
@@ -133,7 +133,6 @@ function doLogin(req, res, next) {
  */
 function validatePassword(password) {
   try {
-
     // At least 8 characters
     const lengthValidator = (password.length >= 8);
     // At least 1 digit
@@ -151,7 +150,6 @@ function validatePassword(password) {
       && lowercaseValidator
       && uppercaseValidator
       && specialCharValidator);
-
   }
   catch (error) {
     // Explicitly NOT logging error to avoid password logging

@@ -70,7 +70,7 @@ function handleBasicAuth(req, res, username, password) {
       return resolve(user);
     });
   });
-};
+}
 
 /**
  * @description This function implements handleTokenAuth() in lib/auth.js.
@@ -132,7 +132,7 @@ function handleTokenAuth(req, res, token) {
       return reject(new M.CustomError('Token is expired or session is invalid.', 401));
     }
   });
-};
+}
 
 /**
  * @description This function implements doLogin() in lib/auth.js.
@@ -160,4 +160,4 @@ function doLogin(req, res, next) {
   M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
   // Callback
   next();
-};
+}

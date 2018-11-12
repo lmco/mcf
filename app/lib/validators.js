@@ -138,7 +138,6 @@ module.exports.element = {
 module.exports.user = {
   username: '^([a-z])([a-z0-9_]){0,}$',
   password: function(password, AuthModule) {
-
     // Error check - Make sure password is a string
     if (typeof (password) !== typeof ('')) {
       return false;
@@ -174,7 +173,6 @@ module.exports.user = {
       // Strategy has defined password validator, call it
       return AuthModule.validatePassword(password);
     }
-
   },
   email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
   fname: '^(([a-zA-Z])([-a-zA-Z ])*)?$',

@@ -162,8 +162,7 @@ function updateUser(done) {
 
   // Find and updated the user created in the previous createUser test.
   User.updateOne(query, newUserData)
-  .then(() => {
-    return User.findOne(query);})
+  .then(() => User.findOne(query))
   .then((updatedUser) => {
     chai.expect(updatedUser.username).to.equal(testData.users[1].username);
     chai.expect(updatedUser.fname).to.equal(`${testData.users[1].fname}edit`);
@@ -199,10 +198,7 @@ function softDeleteUser(done) {
   // Find the user previously created and updated in createUser and updateUser
   // tests.
   User.updateOne(query, newUserData)
-  .then((user) => {
-    // Find the previously soft deleted user
-    return User.findOne(query);
-  })
+  .then((user) => User.findOne(query))
   .then((deletedUser) => {
     // Verify the soft delete was successful
     chai.expect(deletedUser.deletedOn).to.not.equal(null);
