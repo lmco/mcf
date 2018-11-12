@@ -144,7 +144,7 @@ function ldapConnect() {
       return reject(new M.CustomError('An error occured.', 500));
     }
 
-    M.log.verbose('Reading LDAP server CAs ...')
+    M.log.verbose('Reading LDAP server CAs ...');
 
     // Loop  number of certificates in config file
     for (let i = 0; i < ldapCA.length; i++) {
@@ -155,7 +155,7 @@ function ldapConnect() {
       // Push file content to arrCaCert
       arrCaCerts.push(file);
     }
-    M.log.verbose('LDAP server CAs loaded.')
+    M.log.verbose('LDAP server CAs loaded.');
 
     // Create ldapClient object with url, credentials, and certificates
     const ldapClient = ldap.createClient({
