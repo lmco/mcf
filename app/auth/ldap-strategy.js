@@ -131,10 +131,23 @@ function ldapConnect() {
   return new Promise((resolve, reject) => {
     // Initialize arrCaCerts to hold LDAP server certificates
     const arrCaCerts = [];
+
+    // Handle strings by forcing them to arrays
+    let ldapCA = ldapConfig.ca;
+    if (!Array.isArray(ldapCA) && typeof ldapCA === 'string') {
+      ldapCA = [ldapCA];
+    }
+
+    // Now if it's not an array, fail
+    if (!Array.isArray(ldapCA)) {
+      M.log.error('Failed to load LDAP CA certificates from config');
+      return reject(new M.CustomError('An error occured.', 500));
+    }
+
     // Loop  number of certificates in config file
-    for (let i = 0; i < ldapConfig.ca.length; i++) {
+    for (let i = 0; i < ldapCA.length; i++) {
       // Extract certificate filename from config file
-      const certName = ldapConfig.ca[i];
+      const certName = ldapCA.ca[i];
       // Extract certificate file content
       const file = fs.readFileSync(path.join(M.root, certName));
       // Push file content to arrCaCert
