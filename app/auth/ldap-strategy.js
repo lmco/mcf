@@ -28,6 +28,7 @@ const LocalStrategy = M.require('auth.local-strategy');
 const User = M.require('models.user');
 const UserController = M.require('controllers.user-controller');
 const sani = M.require('lib.sanitization');
+const utils = M.require('lib.utils');
 
 // Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
@@ -132,14 +133,14 @@ function ldapConnect() {
     // Initialize arrCaCerts to hold LDAP server certificates
     const arrCaCerts = [];
 
-    // Handle strings by forcing them to arrays
     let ldapCA = ldapConfig.ca;
-    if (!Array.isArray(ldapCA) && typeof ldapCA === 'string') {
+    // If the CA contents is a string, make it an array
+    if (typeof ldapCA === 'string') {
       ldapCA = [ldapCA];
     }
 
-    // Now if it's not an array, fail
-    if (!Array.isArray(ldapCA)) {
+    // Now if it's not an array and each item in the array is not a string, fail
+    if (!Array.isArray(ldapCA) && !utils.checkType(ldapCA, 'string')) {
       M.log.error('Failed to load LDAP CA certificates from config');
       return reject(new M.CustomError('An error occured.', 500));
     }
