@@ -139,9 +139,15 @@ function ldapConnect() {
       ldapCA = [ldapCA];
     }
 
-    // Now if it's not an array and each item in the array is not a string, fail
-    if (!Array.isArray(ldapCA) && !utils.checkType(ldapCA, 'string')) {
-      M.log.error('Failed to load LDAP CA certificates from config');
+    // Now if it's not an array, fail
+    if (!Array.isArray(ldapCA)) {
+      M.log.error('Failed to load LDAP CA certificates (invalid type)');
+      return reject(new M.CustomError('An error occured.', 500));
+    }
+
+    // If any items in the array are not strings, fail
+    if (!utils.checkType(ldapCA, 'string')) {
+      M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
       return reject(new M.CustomError('An error occured.', 500));
     }
 
