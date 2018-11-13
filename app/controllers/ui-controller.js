@@ -283,7 +283,8 @@ function project(req, res) {
         }
       },
       project: proj,
-      elements: elementTree
+      elements: elementTree,
+      validators: validators.element
     });
   })
   // If error, redirect to organization list

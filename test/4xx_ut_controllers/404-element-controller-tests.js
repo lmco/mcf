@@ -516,7 +516,7 @@ function softDeleteAllElements(done) {
   .then(() => ElemController.findElements(adminUser, org.id, proj.id, true))
   .then((retElems) => {
     // Find succeeded, verify elements were returned
-    chai.expect(retElems.length).to.equal(10);
+    chai.expect(retElems.length).to.equal(7);
     // Verify elements deleted field is set to true
     chai.expect(retElems[0].deleted).to.equal(true);
     done();

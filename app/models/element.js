@@ -351,6 +351,8 @@ ElementSchema.methods.getPublicData = function() {
     name: this.name,
     project: this.project.id,
     org: utils.parseID(this.id)[0],
+    createdOn: this.createdOn,
+    updatedOn: this.updatedOn,
     documentation: this.documentation,
     custom: this.custom,
     type: this.type.toLowerCase()

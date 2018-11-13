@@ -410,7 +410,7 @@ function rejectDeleteNonexistingElement(done) {
  */
 function deleteElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -425,7 +425,7 @@ function deleteElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.elements[0].id);
+    chai.expect(json.id).to.equal(testData.elements[1].id);
     done();
   });
 }
@@ -441,7 +441,7 @@ function deleteMultipleElements(done) {
     ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      elements: [testData.elements[1], testData.elements[2], testData.elements[3]],
+      elements: [testData.elements[0], testData.elements[2], testData.elements[3]],
       hardDelete: true
     })
   },

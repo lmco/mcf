@@ -395,10 +395,10 @@ body {
 .tree-sidebar {
     position: absolute;
     top: 0;
-    right: -350px;
+    right: -400px;
     background: #ffffff;
     height: 100vh;
-    width: 350px;
+    width: 400px;
     overflow-y: scroll;
 
     &.tree-sidebar-active {
@@ -426,6 +426,10 @@ body {
             padding-left: 10px;
             margin: 0;
         }
+    }
+
+    .tree-sidebar-form {
+        padding: 15px
     }
 
     .element-content {
