@@ -126,7 +126,6 @@
       "type": "Package",
       "id": "nlp",
       "name": "Natural Language Processing",
-      "projectUID": "testorg00:project00",
       "custom": {
         "language": "english"
       }
@@ -138,8 +137,7 @@
       "parent": "nlp",
       "custom": {
         "language": "english"
-      },
-      "projectUID": "testorg00:project00"
+      }
     },
     {
       "type": "Block",
@@ -149,8 +147,7 @@
       "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9",
       "custom": {
         "language": "english"
-      },
-      "projectUID": "testorg00:project00"
+      }
     },
     {
       "type": "Relationship",
@@ -161,8 +158,7 @@
       "target": "text-parser",
       "custom": {
         "language": "english"
-      },
-      "projectUID": "testorg00:project00"
+      }
     },
     {
       "name": "In time loop"
