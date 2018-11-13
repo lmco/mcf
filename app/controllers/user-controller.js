@@ -281,26 +281,34 @@ function updateUsers(reqUser, query, updateInfo) {
         const promises = [];
         // Loop through each user
         Object(users).forEach((user) => {
+          // Make a copy of the update object
+          const tmpUpdateObj = Object.assign({}, updateInfo);
+
           // Loop through each update
-          Object.keys(updateInfo).forEach((key) => {
+          Object.keys(tmpUpdateObj).forEach((key) => {
+            // If field has a validator, validate the updated value
+            if (validators.user.hasOwnProperty(key)) {
+              // If the field is invalid, throw an error
+              if (!RegExp(validators.user[key]).test(tmpUpdateObj[key])) {
+                return reject(new M.CustomError(
+                  `Invalid ${key} [${tmpUpdateObj[key]}].`, 403, 'warn'
+                ));
+              }
+            }
+
             // If a 'Mixed' field
             if (User.schema.obj[key].type.schemaName === 'Mixed') {
               // Merge changes into original 'Mixed' field
-              utils.updateAndCombineObjects(user[key], sani.sanitize(updateInfo[key]));
-              // Mark that the 'Mixed' field has been modified
-              user.markModified(key);
-            }
-            else {
-              // Update the value in the user
-              user[key] = sani.sanitize(updateInfo[key]);
+              utils.updateAndCombineObjects(user[key], sani.sanitize(tmpUpdateObj[key]));
+              tmpUpdateObj[key] = user[key];
             }
           });
 
           // Update last modified field
-          user.lastModifiedBy = reqUser;
+          tmpUpdateObj.lastModifiedBy = reqUser._id;
 
-          // Add user.save() to promise array
-          promises.push(user.save());
+          // Add user.update() to promise array
+          promises.push(User.updateOne({ _id: user._id }, tmpUpdateObj));
         });
 
         // Once all promises complete, return
