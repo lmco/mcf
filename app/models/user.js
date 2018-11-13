@@ -208,7 +208,6 @@ UserSchema.pre('findOne', function(next) {
  * @memberOf UserSchema
  */
 UserSchema.pre('save', function(next) {
-  // TODO: depends on MBX-595
   const AuthModule = M.require(`auth.${M.config.auth.strategy}`).validatePassword;
   // Pass AuthModule to determine password validation rules
   const status = validators.user.password(this.password, AuthModule);
