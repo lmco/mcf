@@ -38,6 +38,7 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
   process.exit(0);
 }
 
+
 /**
  * @description This function is the main authenticate function used to handle
  * supported type of authentication: basic, token, and form.
@@ -282,3 +283,4 @@ module.exports.authenticate = authenticate;
 module.exports.doLogin = AuthModule.doLogin;
 module.exports.handleBasicAuth = AuthModule.handleBasicAuth;
 module.exports.handleTokenAuth = AuthModule.handleTokenAuth;
+module.exports.validatePassword = AuthModule.validatePassword || undefined;
