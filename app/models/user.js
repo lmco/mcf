@@ -208,12 +208,11 @@ UserSchema.pre('findOne', function(next) {
  * @memberOf UserSchema
  */
 UserSchema.pre('save', function(next) {
-  const AuthModule = M.require(`auth.${M.config.auth.strategy}`).validatePassword;
-  // Pass AuthModule to determine password validation rules
-  const status = validators.user.password(this.password, AuthModule);
+  // Require auth module
+  const AuthController = M.require('lib.auth');
 
-  // Check validation status false
-  if (!status) {
+  // Check validation status NOT sucessful
+  if (!AuthController.validatePassword(this.password)) {
     // Failed validation, throw error
     throw new M.CustomError('Password validation failed.', 400, 'warn');
   }
