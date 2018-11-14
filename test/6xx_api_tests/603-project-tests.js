@@ -133,8 +133,9 @@ describe(M.getModuleName(module.filename), () => {
 function rejectGetProjects(done) {
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/`,
-    headers: getHeaders(),
-    ca: readCaFile()
+    ca: readCaFile(),
+    headers: getHeaders()
+
   },
   (err, response, body) => {
     // Expect no error
