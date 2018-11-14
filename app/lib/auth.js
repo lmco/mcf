@@ -288,31 +288,30 @@ function validatePassword(password) {
   if (!AuthModule.hasOwnProperty('validatePassword')) {
     return AuthModule.validatePassword(password);
   }
-  else{
-    // validate password not defined, use default password rules
-    try {
-      // At least 8 characters
-      const lengthValidator = (password.length >= 8);
-      // At least 1 digit
-      const digitsValidator = (password.match(/[0-9]/g).length >= 1);
-      // At least 1 lowercase letter
-      const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
-      // At least 1 uppercase letter
-      const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
-      // At least 1 special character
-      const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
 
-      // Return concatenated result
-      return (lengthValidator
+  // validate password not defined, use default password rules
+  try {
+    // At least 8 characters
+    const lengthValidator = (password.length >= 8);
+    // At least 1 digit
+    const digitsValidator = (password.match(/[0-9]/g).length >= 1);
+    // At least 1 lowercase letter
+    const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
+    // At least 1 uppercase letter
+    const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
+    // At least 1 special character
+    const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
+
+    // Return concatenated result
+    return (lengthValidator
         && digitsValidator
         && lowercaseValidator
         && uppercaseValidator
         && specialCharValidator);
-    }
-    catch (error) {
-      // Explicitly NOT logging error to avoid password logging
-      return false;
-    }
+  }
+  catch (error) {
+    // Explicitly NOT logging error to avoid password logging
+    return false;
   }
 }
 
