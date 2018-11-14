@@ -135,7 +135,6 @@ function rejectGetProjects(done) {
     url: `${test.url}/api/orgs/${org.id}/projects/`,
     ca: readCaFile(),
     headers: getHeaders()
-
   },
   (err, response, body) => {
     // Expect no error
