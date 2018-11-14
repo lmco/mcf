@@ -133,6 +133,7 @@ describe(M.getModuleName(module.filename), () => {
 function rejectGetProjects(done) {
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/`,
+    ca: readCaFile(),
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -256,6 +257,7 @@ function postMultipleProjects(done) {
 function getProject(done) {
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[0].id}`,
+    ca: readCaFile(),
     headers: getHeaders()
   },
   (err, response, body) => {
@@ -333,6 +335,7 @@ function patchMultipleProjects(done) {
 function getAllProjects(done) {
   request({
     url: `${test.url}/api/orgs/${org.id}/projects`,
+    ca: readCaFile(),
     headers: getHeaders()
   },
   (err, response, body) => {
