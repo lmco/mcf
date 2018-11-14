@@ -285,7 +285,7 @@ function authenticate(req, res, next) {
  */
 function validatePassword(password) {
   // Check if custom validate password rules exist in auth strategy
-  if (!AuthModule.hasOwnProperty('validatePassword')) {
+  if (AuthModule.hasOwnProperty('validatePassword')) {
     return AuthModule.validatePassword(password);
   }
 
