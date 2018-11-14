@@ -60,8 +60,9 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: true,
     index: true,
+    unique: true,
     match: RegExp(validators.project.id),
-    maxlength: [36, 'Too many characters in username'],
+    maxlength: [255, 'Too many characters in username'],
     set: function(_id) {
       // Check value undefined
       if (typeof this.id === 'undefined') {
@@ -94,25 +95,6 @@ const ProjectSchema = new mongoose.Schema({
       }
       // No change, return the value
       return this.org;
-    }
-  },
-  uid: {
-    type: String,
-    unique: true,
-    required: true,
-    set: function(_uid) {
-      // Check value undefined
-      if (typeof this.uid === 'undefined') {
-        // Return value to set it
-        return _uid;
-      }
-      // Check value NOT equal to db value
-      if (_uid !== this.uid) {
-        // Immutable field, return error
-        M.log.warn('UID cannot be changed.');
-      }
-      // No change, return the value
-      return this.uid;
     }
   },
   name: {

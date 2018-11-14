@@ -63,6 +63,7 @@ module.exports.org = {
  *   - MUST start with lowercase letter or a number
  *   - MUST only include lowercase letters, numbers, or '-'
  *   - Must be of length 1 or more
+ *   - The following reserved words are not valid: "edit"
  *   Examples:
  *      - project1 [valid]
  *      - my-project [valid]
@@ -81,9 +82,10 @@ module.exports.org = {
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.project = {
-  id: `^(?!(edit))${id}$`,
+  id: `^${id}${utils.ID_DELIMITER}(?!(edit))${id}$`,
   name: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
 };
+
 
 /**
  * @description Regular Expressions to validate element data

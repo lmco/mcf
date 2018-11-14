@@ -809,14 +809,14 @@ function postProjects(req, res) {
   }
 
   // Error Check: check if projects array included in req.body
-  if (!req.body.hasOwnProperty('projects')) {
-    const error = new M.CustomError('Projects array not in request body.', 400, 'warn');
+  if (!Array.isArray(req.body)) {
+    const error = new M.CustomError('Request body is not an array.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
   // Create the specified projects
   // NOTE: createProjects() sanitizes req.params.orgid and the projects
-  ProjectController.createProjects(req.user, req.params.orgid, req.body.projects)
+  ProjectController.createProjects(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the new projects
     res.header('Content-Type', 'application/json');
@@ -847,8 +847,8 @@ function patchProjects(req, res) {
   let updateQuery = {};
 
   // Error Check: ensure update was provided in body
-  if (!req.body.hasOwnProperty('update')) {
-    const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
+  if (!Array.isArray(req.body)) {
+    const error = new M.CustomError('Request body is not an array.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
@@ -866,31 +866,9 @@ function patchProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // No projects provided, update all projects in the org
-  if (!req.body.hasOwnProperty('projects')) {
-    // Query finds all projects that start with 'orgid:'
-    updateQuery = { uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } };
-  }
-  // Project objects provided, update all
-  else if (req.body.projects.every(p => typeof p === 'object')) {
-    // Query finds all projects by their id and whose uid start with 'orgid:'
-    updateQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
-      { id: { $in: sani.sanitize(req.body.projects.map(p => p.id)) } }] };
-  }
-  // Project IDs provided, update all
-  else if (req.body.projects.every(p => typeof p === 'string')) {
-    // Query finds all projects by their id and whose uid start with 'orgid:'
-    updateQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
-      { id: { $in: sani.sanitize(req.body.projects) } }] };
-  }
-  // No valid project data was provided, reject
-  else {
-    const error = new M.CustomError('Projects array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
   // Update the specified projects
   // NOTE: updateProjects() sanitizes req.body.update
-  ProjectController.updateProjects(req.user, updateQuery, req.body.update)
+  ProjectController.updateProjects(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the updated projects
     res.header('Content-Type', 'application/json');

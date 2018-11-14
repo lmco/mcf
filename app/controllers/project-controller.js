@@ -86,7 +86,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
-    const searchParams = { uid: { $regex: `^${orgID}:` }, deleted: false };
+    const searchParams = { id: { $regex: `^${orgID}:` }, deleted: false };
 
     // Error Check: Ensure user has permissions to find deleted projects
     if (softDeleted && !reqUser.admin) {
@@ -144,8 +144,12 @@ function createProjects(reqUser, organizationID, arrProjects) {
     }
 
     // Create the find query
-    const findQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(organizationID)}:` } },
-      { id: { $in: sani.sanitize(arrProjects.map(p => p.id)) } }] };
+    const projectIDs = arrProjects.map(p => utils.createID(organizationID, p.id));
+    const findQuery = {
+      id: {
+        $in: sani.sanitize(projectIDs)
+      }
+    };
 
     // Initialize createdProjects
     let createdProjects = null;
@@ -170,15 +174,13 @@ function createProjects(reqUser, organizationID, arrProjects) {
         return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
-      // Set the uid and org for each project
-      Object(arrProjects).forEach((project) => {
-        project.uid = utils.createID(org.id, project.id);
-        project.org = org._id;
-      });
-
       // Convert each project into a project object
       const projObjects = arrProjects.map(p => {
-        const projObject = new Project(sani.sanitize(p));
+        const projData = p;
+        projData.id = utils.createID(organizationID, projData.id);
+
+        const projObject = new Project(sani.sanitize(projData));
+        projObject.org = org._id;
         projObject.permissions.read.push(reqUser._id);
         projObject.permissions.write.push(reqUser._id);
         projObject.permissions.admin.push(reqUser._id);
@@ -205,7 +207,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
           id: 'model',
           type: 'Package',
           parent: null,
-          projectUID: utils.createID(sani.sanitize(organizationID), project.id)
+          projectUID: project.id
         };
         // Push the save of the element to the promise array
         promises.push(ElementController.createElement(reqUser, rootElement));
@@ -248,7 +250,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
  *   M.log.error(error);
  * });
  */
-function updateProjects(reqUser, query, updateInfo) {
+function updateProjects(reqUser, organizationID, arrUpdate) {
   return new Promise((resolve, reject) => {
     // Define flag for updating 'Mixed' fields and foundProjects array
     let containsMixed = false;
@@ -256,12 +258,12 @@ function updateProjects(reqUser, query, updateInfo) {
 
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof query === 'object', 'Update query is not an object.');
-      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
+      assert.ok(Array.isArray(arrUpdate));
       // Error Check: ensure updateInfo only contains valid keys
-      assert.ok(Project.validateObjectKeys(updateInfo), 'Updated object contains invalid keys.');
+      // TODO (jk) - talk to Austin about this one
+      //assert.ok(Project.validateObjectKeys(updateInfo), 'Updated object contains invalid keys.');
       // Loop through each desired update
-      Object.keys(updateInfo).forEach((key) => {
+      Object.keys(arrUpdate).forEach((key) => {
         // Error Check: ensure user can update each field
         assert.ok(Project.schema.methods.getValidUpdateFields().includes(key),
           `Project property [${key}] cannot be changed.`);
@@ -279,6 +281,20 @@ function updateProjects(reqUser, query, updateInfo) {
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
+
+    // Get IDs of projects and build lookup query
+    const projectIDs = arrUpdate.map(p => utils.createID(organizationID, p.id));
+    const query = {
+      id: {
+        $in: sani.sanitize(projectIDs)
+      }
+    };
+
+    // Map update array to object for easier lookup later
+    const updateInfo = {};
+    arrUpdate.forEach(p => {
+      updateInfo[sani.sanitize(utils.createID(organizationID, p.id))] = p;
+    });
 
     // Find the projects to update
     findProjectsQuery(query)
@@ -457,11 +473,10 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
 
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
-    const projUID = utils.createID(orgID, projID);
+    const projID = utils.createID(orgID, sani.sanitize(projectID));
 
     // Set search Params for projUID and deleted = false
-    const searchParams = { uid: projUID, deleted: false };
+    const searchParams = { id: projID, deleted: false };
 
     // Error Check: Ensure user has permissions to find deleted projects
     if (softDeleted && !reqUser.admin) {
@@ -582,9 +597,9 @@ function createProject(reqUser, project) {
     }
 
     // Sanitize query inputs
-    const projID = sani.sanitize(project.id);
     const projName = sani.sanitize(project.name);
     const orgID = sani.sanitize(project.org.id);
+    const projID = utils.createID(orgID, sani.sanitize(project.id));
 
     // Initialize function-wide variables
     let org = null;
@@ -619,18 +634,20 @@ function createProject(reqUser, project) {
           write: [reqUser._id],
           admin: [reqUser._id]
         },
-        uid: utils.createID(orgID, projID),
         custom: custom,
         visibility: visibility,
         createdBy: reqUser,
         lastModifiedBy: reqUser
-
       });
+
+      M.log.debug('New project created. Saving ...');
 
       // Save new project
       return newProject.save();
     })
     .then(savedProject => {
+      M.log.debug('New project saved.');
+      M.log.debug('Creating root element ...');
       // Create root model element for new project
       createdProject = savedProject;
       const rootElement = {
@@ -638,7 +655,7 @@ function createProject(reqUser, project) {
         id: 'model',
         type: 'Package',
         parent: null,
-        projectUID: utils.createID(orgID, projID)
+        projectUID: projID
       };
       // Save  root model element
       return ElementController.createElement(reqUser, rootElement);
@@ -813,7 +830,7 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
       }
 
       // Initialize element delete query
-      const elementDeleteQuery = { id: { $regex: `^${foundProject.uid}` } };
+      const elementDeleteQuery = { project: project._id };
 
       // Delete all elements on the project
       return ElementController.removeElements(reqUser, elementDeleteQuery, hardDelete);
