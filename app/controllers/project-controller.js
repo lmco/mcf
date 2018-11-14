@@ -377,7 +377,7 @@ function updateProjects(reqUser, query, arrUpdateInfo) {
  *   M.log.error(error);
  * });
  */
-function removeProjects(reqUser, removeQuery, hardDelete = false) {
+function removeProjects(reqUser, organizationID, projectID, hardDelete = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
