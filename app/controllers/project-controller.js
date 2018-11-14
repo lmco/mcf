@@ -250,7 +250,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
  *   M.log.error(error);
  * });
  */
-function updateProjects(reqUser, organizationID, arrUpdate) {
+function updateProjects(reqUser, query, arrUpdateInfo) {
   return new Promise((resolve, reject) => {
     // Define flag for updating 'Mixed' fields and foundProjects array
     let containsMixed = false;
@@ -258,12 +258,12 @@ function updateProjects(reqUser, organizationID, arrUpdate) {
 
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(Array.isArray(arrUpdate));
+      assert.ok(typeof query === 'object', 'Update query is not an object.');
+      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
       // Error Check: ensure updateInfo only contains valid keys
-      // TODO (jk) - talk to Austin about this one
-      //assert.ok(Project.validateObjectKeys(updateInfo), 'Updated object contains invalid keys.');
+      assert.ok(Project.validateObjectKeys(updateInfo), 'Updated object contains invalid keys.');
       // Loop through each desired update
-      Object.keys(arrUpdate).forEach((key) => {
+      Object.keys(updateInfo).forEach((key) => {
         // Error Check: ensure user can update each field
         assert.ok(Project.schema.methods.getValidUpdateFields().includes(key),
           `Project property [${key}] cannot be changed.`);
@@ -282,22 +282,15 @@ function updateProjects(reqUser, organizationID, arrUpdate) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
-    // Get IDs of projects and build lookup query
-    const projectIDs = arrUpdate.map(p => utils.createID(organizationID, p.id));
-    const query = {
+    const projectIDs = arrProjects.map(p => utils.createID(organizationID, p.id));
+    const findQuery = {
       id: {
         $in: sani.sanitize(projectIDs)
       }
     };
 
-    // Map update array to object for easier lookup later
-    const updateInfo = {};
-    arrUpdate.forEach(p => {
-      updateInfo[sani.sanitize(utils.createID(organizationID, p.id))] = p;
-    });
-
     // Find the projects to update
-    findProjectsQuery(query)
+    findProjectsQuery(findQuery)
     .then((projects) => {
       // Set foundProjects array
       foundProjects = projects;
