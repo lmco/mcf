@@ -895,51 +895,8 @@ function deleteProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['projects', 'hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
-  // Initialize the delete query object
-  let deleteQuery = {};
-
-  // No projects provided, delete all projects in the org
-  if (!req.body.hasOwnProperty('projects')) {
-    // Query finds all projects that start with 'orgid:'
-    deleteQuery = { uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } };
-  }
-  // Project objects provided, delete all
-  else if (req.body.projects.every(p => typeof p === 'object')) {
-    // Query finds all projects by their id and whose uid start with 'orgid:'
-    deleteQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
-      { id: { $in: sani.sanitize(req.body.projects.map(p => p.id)) } }] };
-  }
-  // Project IDs provided, delete all
-  else if (req.body.projects.every(p => typeof p === 'string')) {
-    // Query finds all projects by their id and whose uid start with 'orgid:'
-    deleteQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
-      { id: { $in: sani.sanitize(req.body.projects) } }] };
-  }
-  // No valid project data was provided, reject
-  else {
-    const error = new M.CustomError('Projects array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
   // Remove the specified projects
-  ProjectController.removeProjects(req.user, deleteQuery, hardDelete)
+  ProjectController.removeProjects(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the deleted projects
     res.header('Content-Type', 'application/json');
