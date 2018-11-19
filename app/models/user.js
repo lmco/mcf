@@ -208,6 +208,15 @@ UserSchema.pre('findOne', function(next) {
  * @memberOf UserSchema
  */
 UserSchema.pre('save', function(next) {
+  // Require auth module
+  const AuthController = M.require('lib.auth');
+
+  // Check validation status NOT successful
+  if (!AuthController.validatePassword(this.password)) {
+    // Failed validation, throw error
+    throw new M.CustomError('Password validation failed.', 400, 'warn');
+  }
+
   // Hash plaintext password
   if (this.password) {
     crypto.pbkdf2(this.password, this._id.toString(), 1000, 64, 'sha256', (err, derivedKey) => {
