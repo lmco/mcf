@@ -18,6 +18,15 @@
  * @description This file implements authentication using LDAP Active Directory.
  */
 
+// Expose auth strategy functions
+// Note: The export is being done before the import to solve the issues of
+// circular references.
+module.exports = {
+  handleBasicAuth,
+  handleTokenAuth,
+  doLogin
+};
+
 // Node modules
 const fs = require('fs');
 const path = require('path');
@@ -54,7 +63,7 @@ const ldapConfig = M.config.auth.ldap;
  *     console.log(err);
  *   })
  */
-module.exports.handleBasicAuth = function(req, res, username, password) {
+function handleBasicAuth(req, res, username, password) {
   // Return a promise
   return new Promise((resolve, reject) => {
     // Define LDAP client handler
@@ -77,7 +86,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
     .then(syncedUser => resolve(syncedUser))
     .catch(ldapConnectErr => reject(ldapConnectErr));
   });
-};
+}
 
 /**
  * @description Authenticates user with passed in token.
@@ -98,13 +107,13 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-module.exports.handleTokenAuth = function(req, res, token) {
+function handleTokenAuth(req, res, token) {
   return new Promise((resolve, reject) => {
     LocalStrategy.handleTokenAuth(req, res, token)
     .then(user => resolve(user))
     .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
   });
-};
+}
 
 /**
  * @description  This function generates the session token for user login.
@@ -114,9 +123,9 @@ module.exports.handleTokenAuth = function(req, res, token) {
  * @param {Object} res - Response express object
  * @param {callback} next - Callback to continue express authentication
  */
-module.exports.doLogin = function(req, res, next) {
+function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
-};
+}
 
 /* ------------------------( LDAP Helper Functions )--------------------------*/
 /**

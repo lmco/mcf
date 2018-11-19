@@ -18,6 +18,16 @@
  * @description Implements authentication strategy for local and ldap.
  */
 
+// Expose auth strategy functions
+// Note: The export is being done before the import to solve the issues of
+// circular references.
+module.exports = {
+  handleBasicAuth,
+  handleTokenAuth,
+  doLogin,
+  validatePassword
+};
+
 // MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
 const LDAPStrategy = M.require('auth.ldap-strategy');
@@ -35,7 +45,7 @@ const User = M.require('models.user');
  * @return {Promise} resolve - authenticated user object
  *                   reject - an error
  */
-module.exports.handleBasicAuth = function(req, res, username, password) {
+function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
     // Search locally for the user
     User.find({
@@ -70,7 +80,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
       }
     });
   });
-};
+}
 
 /**
  * @description This function implements handleTokenAuth called in the auth.js library file.
@@ -93,13 +103,13 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-module.exports.handleTokenAuth = function(req, res, _token) {
+function handleTokenAuth(req, res, _token) {
   return new Promise((resolve, reject) => {
     LocalStrategy.handleTokenAuth(req, res, _token)
     .then(user => resolve(user))
     .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
   });
-};
+}
 
 /**
  * @description This function implements doLogin called in the auth.js library file.
@@ -109,8 +119,40 @@ module.exports.handleTokenAuth = function(req, res, _token) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow.
+ * @param {callback} next - Callback to express authentication flow
  */
-module.exports.doLogin = function(req, res, next) {
+function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
-};
+}
+
+/**
+ * @description Validates a users password with set rules.
+ *
+ * @param {String} password - Password to verify
+ * @returns {Boolean} - If password is correctly validated
+ */
+function validatePassword(password) {
+  try {
+    // At least 8 characters
+    const lengthValidator = (password.length >= 8);
+    // At least 1 digit
+    const digitsValidator = (password.match(/[0-9]/g).length >= 1);
+    // At least 1 lowercase letter
+    const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
+    // At least 1 uppercase letter
+    const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
+    // At least 1 special character
+    const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
+
+    // Return concatenated result
+    return (lengthValidator
+      && digitsValidator
+      && lowercaseValidator
+      && uppercaseValidator
+      && specialCharValidator);
+  }
+  catch (error) {
+    // Explicitly NOT logging error to avoid password logging
+    return false;
+  }
+}
