@@ -23,6 +23,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
+const utils = M.require('lib.utils');
 const extensions = M.require('models.plugin.extensions');
 
 
@@ -146,7 +147,7 @@ ProjectSchema.methods.getPublicData = function() {
 
   // Return the projects public fields
   return {
-    id: this.id,
+    id: utils.parseID(this.id).pop(),
     // NOTE (jk): Not sure why the toString is needed, but a buffer gets
     // returned when posting a project via the API
     org: this.org.id,
@@ -214,8 +215,14 @@ ProjectSchema.methods.getPermissions = function(user) {
   return permissions;
 };
 
+// TODO - Should method use statics instead of statics using methods?
 ProjectSchema.statics.getVisibilityLevels = function() {
   return ProjectSchema.methods.getVisibilityLevels();
+};
+
+// TODO - Should method use statics instead of statics using methods?
+ProjectSchema.statics.getValidUpdateFields = function() {
+  return ProjectSchema.methods.getValidUpdateFields();
 };
 
 /**

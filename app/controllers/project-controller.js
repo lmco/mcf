@@ -250,33 +250,22 @@ function createProjects(reqUser, organizationID, arrProjects) {
  *   M.log.error(error);
  * });
  */
-function updateProjects(reqUser, query, arrUpdateInfo) {
+function updateProjects(reqUser, organizationID, arrProjects) {
   return new Promise((resolve, reject) => {
-    // Define flag for updating 'Mixed' fields and foundProjects array
-    let containsMixed = false;
-    let foundProjects = [];
+    // Array of promises
+    const promisesArray = [];
 
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof query === 'object', 'Update query is not an object.');
-      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
-      // Error Check: ensure updateInfo only contains valid keys
-      assert.ok(Project.validateObjectKeys(updateInfo), 'Updated object contains invalid keys.');
-      // Loop through each desired update
-      Object.keys(updateInfo).forEach((key) => {
-        // Error Check: ensure user can update each field
-        assert.ok(Project.schema.methods.getValidUpdateFields().includes(key),
-          `Project property [${key}] cannot be changed.`);
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(Array.isArray(arrProjects), 'Projects array is not an array.');
 
-        // Error Check: ensure parameter is not unique
-        assert.ok(!Project.schema.obj[key].unique,
-          `Cannot use batch update on the unique field [${key}].`);
-
-        // If the field is a mixed field, set the flag
-        if (Project.schema.obj[key].type.schemaName === 'Mixed') {
-          containsMixed = true;
-        }
-      });
+      // Make sure every project object has an ID
+      for (let i = 0; i < arrProjects.length; i++) {
+        const p = arrProjects[i];
+        assert.ok(p.hasOwnProperty('id'), `Project ${i + 1} does not have an ID.`);
+        assert.ok(typeof p.id === 'string', `Project ${i + 1} ID is not a string.`);
+      }
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -289,13 +278,19 @@ function updateProjects(reqUser, query, arrUpdateInfo) {
       }
     };
 
+    // Array of fields user can update
+    const updatableFields = Project.getValidUpdateFields();
+
     // Find the projects to update
     findProjectsQuery(findQuery)
     .then((projects) => {
-      // Set foundProjects array
-      foundProjects = projects;
+      // Make sure all projects were found
+      // TODO - Consider giving user more meaningful error
+      if (projects.length !== arrProjects.length) {
+        return reject(new M.CustomError('One or more projects not found.', 404, 'warn'));
+      }
 
-      // Loop through each found project
+      // Loop through each found project and check permissions
       Object(projects).forEach((proj) => {
         // Error Check: ensure user has permission to update proj
         if (!proj.getPermissions(reqUser).admin && !reqUser.admin) {
@@ -303,59 +298,86 @@ function updateProjects(reqUser, query, arrUpdateInfo) {
         }
       });
 
-      // If updating a mixed field, update each project individually
-      if (containsMixed) {
-        M.log.info('Updating projects.... this could take a while.');
-        // Create array of promises
-        const promises = [];
-        // Loop through each project
-        Object(projects).forEach((proj) => {
-          // Loop through each update
-          Object.keys(updateInfo).forEach((key) => {
-            // If a 'Mixed' field
-            if (Project.schema.obj[key].type.schemaName === 'Mixed') {
-              // Merge changes into original 'Mixed' field
-              utils.updateAndCombineObjects(proj[key], sani.sanitize(updateInfo[key]));
+      // Map found project to object with ID keys
+      // This is to allow us to loop over user provided array and then have
+      // constant time lookup of DB project objects
+      const objProjects = {};
+      projects.forEach(p => {
+        objProjects[p.id] = p;
+      });
 
-              // Mark that the 'Mixed' field has been modified
-              proj.markModified(key);
+      // For each project update
+      for (let i = 0; i < arrProjects.length; i++) {
+        const update = arrProjects[i];
+        const updateId = utils.createID(organizationID, update.id);
+        const updateKeys = Object.keys(arrProjects[i]);
+
+        // For each field in project update
+        for (let j = 0; j < updateKeys.length; j++) {
+          const key = updateKeys[j];
+
+          // Skip ID, we don't update it
+          if (key === 'id') {
+            continue;
+          }
+
+          // If key is not updatable, throw an error
+          if (!updatableFields.includes(key)) {
+            const msg = `Field ${key} is not allowed to be updated.`;
+            const err = new M.CustomError(msg, 403, 'warn');
+            return reject(err);
+          }
+
+          // Update that field on the project
+          // If field is Mixed data type, combine new data with original obj
+          if (Project.schema.obj[key].type.schemaName === 'Mixed') {
+            // If mixed data is not an object, fail with explicit error message
+            if (typeof update[key] !== 'object') {
+              const msg = `Field ${key} must be an object`;
+              const err = new M.CustomError(msg, 403, 'warn');
+              return reject(err);
             }
-            else {
-              // Update the value in the proj
-              proj[key] = sani.sanitize(updateInfo[key]);
-            }
-          });
 
-          // Update last modified field
-          proj.lastModifiedBy = reqUser;
+            // Update the Mixed field in place
+            const originalObjField = objProjects[updateId][key];
+            const changesObj = sani.sanitize(update[key]);
+            utils.updateAndCombineObjects(originalObjField, changesObj);
 
-          // Add proj.save() to promise array
-          promises.push(proj.save());
-        });
+            // Mongoose requires Mixed field updates to use markModified()
+            // to change rather than replace the field
+            objProjects[updateId].markModified(key);
+          }
+          // Else, field is not mixed data. Sanitize it and update.
+          else {
+            objProjects[updateId][key] = sani.sanitize(update[key]);
+          }
 
-        // Once all promises complete, return
-        return Promise.all(promises);
+          // Update the last-modified by info
+          // TODO - lastModifiedBy should be a username rather than a ref
+          objProjects[updateId].lastModifiedBy = reqUser;
+        }
+
+        // Validate the changes, fail if invalid
+        const validationError = objProjects[updateId].validateSync();
+        if (validationError) {
+          const err = M.CustomError.parseCustomError(validationError);
+          return reject(err);
+        }
       }
 
-      // No mixed field update, update all together
-      return Project.updateMany(query, updateInfo);
+      // Loop over projects again and save changes
+      for (let i = 0; i < arrProjects.length; i++) {
+        const id = utils.createID(organizationID, arrProjects[i].id);
+        promisesArray.push(objProjects[id].save());
+      }
+      return Promise.all(promisesArray);
     })
-    .then((retQuery) => {
-      // Check if some of the projects in updateMany failed
-      if (!containsMixed && retQuery.n !== foundProjects.length) {
-        // The number updated does not match the number attempted, log it
-        return reject(new M.CustomError(
-          'Some of the following projects failed to update: '
-          + `[${foundProjects.map(p => p.id)}].`, 500, 'error'
-        ));
-      }
-
-      // Find the updated projects to return them
-      return findProjectsQuery(query);
+    .then(() => {
+      return findProjectsQuery(findQuery);
     })
     // Return the updated projects
     .then((updatedProjects) => resolve(updatedProjects))
-    .catch((error) => M.CustomError.parseCustomError(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -386,10 +408,11 @@ function removeProjects(reqUser, organizationID, arrProjects) {
       utils.assertType(arrProjects, 'object');
 
       // Make sure every project object has an ID
-      arrProjects.forEach(p => {
-        assert.ok(p.hasOwnProperty('id'), 'Project does not have an ID.');
-        assert.ok(typeof p.id === 'string', 'Project ID is not a string.')
-      });
+      for (let i = 0; i < arrProjects.length; i++) {
+        const p = arrProjects[i];
+        assert.ok(p.hasOwnProperty('id'), `Project ${i + 1} does not have an ID.`);
+        assert.ok(typeof p.id === 'string', `Project ${i + 1} ID is not a string.`);
+      }
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
