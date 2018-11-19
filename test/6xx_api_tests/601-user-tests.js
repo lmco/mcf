@@ -551,7 +551,7 @@ function rejectDeleteNoUsers(done) {
 /**
  * @description Helper function for setting the request header.
  */
-function getHeaders() {
+function  getHeaders() {
   const formattedCreds = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {

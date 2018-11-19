@@ -172,7 +172,12 @@ function createOrgs(reqUser, arrOrgs) {
       // Save the organizations
       return Organization.create(orgObjects);
     })
-    .then((createdOrgs) => resolve(createdOrgs))
+    .then((createdOrgs) => {
+      // Create the find query
+      const findQuery = {id: {$in: sani.sanitize(createdOrgs.map(o => o.id))}};
+      return findOrgsQuery(findQuery);
+    })
+    .then((foundOrgs) => resolve(foundOrgs))
     .catch((error) => {
       // If error is a CustomError, reject it
       if (error instanceof M.CustomError) {
