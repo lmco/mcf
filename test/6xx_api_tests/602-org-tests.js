@@ -189,6 +189,7 @@ function getOrg(done) {
     headers: getHeaders()
   },
   (err, response, body) => {
+    console.log(body);
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK

@@ -495,7 +495,7 @@ function postOrg(req, res) {
   OrgController.createOrg(req.user, req.body)
   // Find the org created
   // NOTE: returns correct populated permissions
-  .then((org) => OrgController.findOrg(req.user, org.id))
+  .then((org) => OrgController.findOrg(req.user, org.id, false))
   .then((retOrg) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
@@ -1065,7 +1065,7 @@ function postProject(req, res) {
   ProjectController.createProject(req.user, req.body)
   // Find the org created
   // NOTE: returns correct populated permissions
-  .then((project) => ProjectController.findProject(req.user, req.params.orgid, project.id))
+  .then((project) => ProjectController.findProject(req.user, req.params.orgid, project.id, false))
   .then((retProject) => {
     // Return 200: OK and created project
     res.header('Content-Type', 'application/json');

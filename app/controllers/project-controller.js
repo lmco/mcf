@@ -216,8 +216,8 @@ function createProjects(reqUser, organizationID, arrProjects) {
     })
     .then(() => {
       // Create the find query
-      const findQuery = {id: {$in: sani.sanitize(createdProjects.map(o => o.id))}};
-      return findProjectsQuery(findQuery);
+      const refindQuery = { id: { $in: sani.sanitize(createdProjects.map(o => o.id)) } };
+      return findProjectsQuery(refindQuery);
     })
     .then((foundProjects) => resolve(foundProjects))
     .catch((error) => {
