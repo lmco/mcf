@@ -20,6 +20,16 @@
  * authentication. This should be the default authentication strategy for MBEE.
  */
 
+// Expose auth strategy functions
+// Note: The export is being done before the import to solve the issues of
+// circular references.
+module.exports = {
+  handleBasicAuth,
+  handleTokenAuth,
+  doLogin,
+  validatePassword
+};
+
 // MBEE modules
 const User = M.require('models.user');
 const mbeeCrypto = M.require('lib.crypto');
@@ -48,7 +58,7 @@ const utils = M.require('lib.utils');
  *     console.log(err);
  *   })
  */
-module.exports.handleBasicAuth = function(req, res, username, password) {
+function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
     User.findOne({
       username: username,
@@ -76,7 +86,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
       .catch(verifyErr => reject(verifyErr));
     });
   });
-};
+}
 
 /**
  * @description This function implements handleTokenAuth() in lib/auth.js.
@@ -97,7 +107,7 @@ module.exports.handleBasicAuth = function(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-module.exports.handleTokenAuth = function(req, res, token) {
+function handleTokenAuth(req, res, token) {
   return new Promise((resolve, reject) => {
     // Define and initialize token
     let decryptedToken = null;
@@ -138,7 +148,7 @@ module.exports.handleTokenAuth = function(req, res, token) {
       return reject(new M.CustomError('Token is expired or session is invalid.', 401));
     }
   });
-};
+}
 
 /**
  * @description This function implements doLogin() in lib/auth.js.
@@ -149,7 +159,7 @@ module.exports.handleTokenAuth = function(req, res, token) {
  * @param {Object} res - response express object
  * @param {callback} next - Callback to express authentication
  */
-module.exports.doLogin = function(req, res, next) {
+function doLogin(req, res, next) {
   // Compute token expiration time
   const timeDelta = M.config.auth.token.expires
                   * utils.timeConversions[M.config.auth.token.units];
@@ -166,4 +176,36 @@ module.exports.doLogin = function(req, res, next) {
   M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
   // Callback
   next();
-};
+}
+
+/**
+ * @description Validates a users password with set rules.
+ *
+ * @param {String} password - Password to verify
+ * @returns {Boolean} - If password is correctly validated
+ */
+function validatePassword(password) {
+  // No defined password validator, use default
+  try {
+    // At least 8 characters
+    const lengthValidator = (password.length >= 8);
+    // At least 1 digit
+    const digitsValidator = (password.match(/[0-9]/g).length >= 1);
+    // At least 1 lowercase letter
+    const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
+    // At least 1 uppercase letter
+    const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
+    // At least 1 special character
+    const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
+    // Validate the password
+    return (lengthValidator
+      && digitsValidator
+      && lowercaseValidator
+      && uppercaseValidator
+      && specialCharValidator);
+  }
+  catch (error) {
+    // Explicitly NOT logging error to avoid password logging
+    return false;
+  }
+}
