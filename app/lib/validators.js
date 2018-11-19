@@ -142,6 +142,7 @@ module.exports.user = {
     if (typeof (password) !== typeof ('')) {
       return false;
     }
+
     // Check if config strategy module defines custom password rules
     if (typeof AuthModule.validatePassword === 'undefined') {
       // No defined password validator, use default
