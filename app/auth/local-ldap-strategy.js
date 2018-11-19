@@ -119,7 +119,7 @@ function handleTokenAuth(req, res, _token) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow.
+ * @param {callback} next - Callback to express authentication flow
  */
 function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
