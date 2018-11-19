@@ -28,6 +28,7 @@ const LocalStrategy = M.require('auth.local-strategy');
 const User = M.require('models.user');
 const UserController = M.require('controllers.user-controller');
 const sani = M.require('lib.sanitization');
+const utils = M.require('lib.utils');
 
 // Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
@@ -131,15 +132,38 @@ function ldapConnect() {
   return new Promise((resolve, reject) => {
     // Initialize arrCaCerts to hold LDAP server certificates
     const arrCaCerts = [];
+
+    let ldapCA = ldapConfig.ca;
+    // If the CA contents is a string, make it an array
+    if (typeof ldapCA === 'string') {
+      ldapCA = [ldapCA];
+    }
+
+    // Now if it's not an array, fail
+    if (!Array.isArray(ldapCA)) {
+      M.log.error('Failed to load LDAP CA certificates (invalid type)');
+      return reject(new M.CustomError('An error occured.', 500));
+    }
+
+    // If any items in the array are not strings, fail
+    if (!utils.checkType(ldapCA, 'string')) {
+      M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
+      return reject(new M.CustomError('An error occured.', 500));
+    }
+
+    M.log.verbose('Reading LDAP server CAs ...');
+
     // Loop  number of certificates in config file
-    for (let i = 0; i < ldapConfig.ca.length; i++) {
+    for (let i = 0; i < ldapCA.length; i++) {
       // Extract certificate filename from config file
-      const certName = ldapConfig.ca[i];
+      const certName = ldapCA[i];
       // Extract certificate file content
       const file = fs.readFileSync(path.join(M.root, certName));
       // Push file content to arrCaCert
       arrCaCerts.push(file);
     }
+    M.log.verbose('LDAP server CAs loaded.');
+
     // Create ldapClient object with url, credentials, and certificates
     const ldapClient = ldap.createClient({
       url: `${ldapConfig.url}:${ldapConfig.port}`,
