@@ -1063,10 +1063,13 @@ function postProject(req, res) {
   // Create project with provided parameters
   // NOTE: createProject() sanitizes req.params.projectid, req.params.org.id and req.body.name
   ProjectController.createProject(req.user, req.body)
-  .then((project) => {
+  // Find the org created
+  // NOTE: returns correct populated permissions
+  .then((project) => ProjectController.findProject(req.user, req.params.orgid, project.id))
+  .then((retProject) => {
     // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project.getPublicData()));
+    return res.status(200).send(formatJSON(retProject.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
