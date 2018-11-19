@@ -493,10 +493,13 @@ function postOrg(req, res) {
   // Create the organization with provided parameters
   // NOTE: createOrg() sanitizes req.params.org.id and req.body.name
   OrgController.createOrg(req.user, req.body)
-  .then((org) => {
+  // Find the org created
+  // NOTE: returns correct populated permissions
+  .then((org) => OrgController.findOrg(req.user, org.id))
+  .then((retOrg) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(retOrg.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
