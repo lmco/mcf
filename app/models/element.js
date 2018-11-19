@@ -112,6 +112,7 @@ const ElementSchema = new mongoose.Schema({
   name: {
     type: String,
     required: false,
+    match: RegExp(validators.element.name),
     maxlength: [64, 'Element name is too long'],
     minlength: [0, 'Element name is too short']
   },

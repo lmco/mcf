@@ -113,6 +113,7 @@ module.exports.project = {
  */
 module.exports.element = {
   id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  name: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
   uuid: '([a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12})'
 };
 
@@ -136,41 +137,33 @@ module.exports.element = {
  */
 module.exports.user = {
   username: '^([a-z])([a-z0-9_]){0,}$',
-  password: function(password, AuthModule) {
+  password: function(p) {
     // Error check - Make sure password is a string
-    if (typeof (password) !== typeof ('')) {
+    if (typeof (p) !== typeof ('')) {
       return false;
     }
-    // Check if config strategy module defines custom password rules
-    if (typeof AuthModule.validatePassword === 'undefined') {
-      // No defined password validator, use default
-      try {
-        // At least 8 characters
-        const lengthValidator = (password.length >= 8);
-        // At least 1 digit
-        const digitsValidator = (password.match(/[0-9]/g).length >= 1);
-        // At least 1 lowercase letter
-        const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
-        // At least 1 uppercase letter
-        const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
-        // At least 1 special character
-        const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
 
-        // Validate the password
-        return (lengthValidator
-          && digitsValidator
-          && lowercaseValidator
-          && uppercaseValidator
-          && specialCharValidator);
-      }
-      catch (error) {
-        // Explicitly NOT logging error to avoid password logging
-        return false;
-      }
+    try {
+      // At least 8 characters
+      const lengthValidator = (p.length >= 8);
+      // At least 1 digit
+      const digitsValidator = (p.match(/[0-9]/g).length >= 1);
+      // At least 1 lowercase letter
+      const lowercaseValidator = (p.match(/[a-z]/g).length >= 1);
+      // At least 1 uppercase letter
+      const uppercaseValidator = (p.match(/[A-Z]/g).length >= 1);
+      // At least 1 special character
+      const specialCharValidator = (p.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
+      // Validate the password
+      return (lengthValidator
+                && digitsValidator
+                && lowercaseValidator
+                && uppercaseValidator
+                && specialCharValidator);
     }
-    else {
-      // Strategy has defined password validator, call it
-      return AuthModule.validatePassword(password);
+    catch (error) {
+      // Explicitly NOT logging error to avoid password logging
+      return false;
     }
   },
   email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',

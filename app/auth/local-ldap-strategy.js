@@ -132,27 +132,11 @@ function doLogin(req, res, next) {
  * @returns {Boolean} - If password is correctly validated
  */
 function validatePassword(password) {
-  try {
-    // At least 8 characters
-    const lengthValidator = (password.length >= 8);
-    // At least 1 digit
-    const digitsValidator = (password.match(/[0-9]/g).length >= 1);
-    // At least 1 lowercase letter
-    const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
-    // At least 1 uppercase letter
-    const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
-    // At least 1 special character
-    const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
+  // Password is undefined, user is LDAP user
+  if (password === undefined) {
+    return true;
+  }
 
-    // Return concatenated result
-    return (lengthValidator
-      && digitsValidator
-      && lowercaseValidator
-      && uppercaseValidator
-      && specialCharValidator);
-  }
-  catch (error) {
-    // Explicitly NOT logging error to avoid password logging
-    return false;
-  }
+  // Local user, validate password
+  return LocalStrategy.validatePassword(password);
 }
