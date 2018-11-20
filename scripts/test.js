@@ -37,9 +37,9 @@ if (module.parent == null) {
  */
 function test(_args) {
   printHeader();
-  console.log('Running tests on mongo instance...'); // eslint-disable-line no-console
-  console.log(`Mongo IP: ${M.config.db.url}:${M.config.db.port}`);  // eslint-disable-line no-console
-  console.log(`Mongo DB: ${M.config.db.name}`);  // eslint-disable-line no-console
+  M.log.verbose('Running tests on mongo instance...');
+  M.log.verbose(`Mongo IP: ${M.config.db.url}:${M.config.db.port}`);
+  M.log.verbose(`Mongo DB: ${M.config.db.name}`);
 
   // Check if environment is production and NOT --force
   if (M.env.toLowerCase() === 'production' && !_args.includes('--force')) {
