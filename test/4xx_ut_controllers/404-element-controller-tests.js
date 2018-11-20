@@ -495,11 +495,12 @@ function softDeleteElement(done) {
  * Expected error thrown: 'Not Found'
  */
 function hardDeleteElement(done) {
+  const projID = utils.parseID(proj.id).pop();
   // Hard delete the element
-  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[0].id, true)
+  ElemController.removeElement(adminUser, org.id, projID, testData.elements[0].id, true)
   // Then search for the element (including soft-deleted elements)
   .then(() => ElemController
-  .findElement(adminUser, org.id, proj.id,
+  .findElement(adminUser, org.id, projID,
     testData.elements[0].id, true))
   .then(() => {
     // Expect no element found
@@ -527,8 +528,9 @@ function softDeleteAllElements(done) {
   // Find all existing elements in project, including soft-deleted elements
   .then(() => ElemController.findElements(adminUser, org.id, projID, true))
   .then((retElems) => {
-    process.exit()
     // Find succeeded, verify elements were returned
+    // 7 elements are expected rather than 10 because deleting the package
+    // in the previous test, also deleted its 3 children
     chai.expect(retElems.length).to.equal(7);
     // Verify elements deleted field is set to true
     chai.expect(retElems[0].deleted).to.equal(true);

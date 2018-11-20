@@ -409,7 +409,7 @@ function removeProjects(reqUser, organizationID, arrProjects = []) {
       for (let i = 0; i < arrProjects.length; i++) {
         const p = arrProjects[i];
         assert.ok(typeof p === 'object', 'At least one project is not an object.');
-        assert.ok(p.hasOwnProperty('id'), `Project ${i + 1} does not have an ID.`);
+        assert.ok(Object.hasOwnProperty.call('id', p), `Project ${i + 1} does not have an ID.`);
         assert.ok(typeof p.id === 'string', `Project ${i + 1} ID is not a string.`);
       }
     }

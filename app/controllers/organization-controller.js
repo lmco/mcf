@@ -753,6 +753,7 @@ function removeOrg(reqUser, organizationID) {
     // Delete the organization
     .then((foundProjects) => {
       projects = foundProjects;
+      console.log(projects);
       return Organization.deleteOne({ id: org.id });
     })
     // Delete all projects in the org
