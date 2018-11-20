@@ -493,8 +493,6 @@ function postOrg(req, res) {
   // Create the organization with provided parameters
   // NOTE: createOrg() sanitizes req.params.org.id and req.body.name
   OrgController.createOrg(req.user, req.body)
-  // Find the org created
-  // NOTE: returns correct populated permissions
   .then((org) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
