@@ -114,7 +114,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should find all orgs a user has access to', findAllExistingOrgs);
   it('should soft delete an existing org', softDeleteExistingOrg);
   it('should delete an existing org', deleteExistingOrg);
-  it('should soft-delete an existing org and its project', softDeleteProjectAndOrg).timeout(8000);
+  it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
   it('should reject find of soft-deleted org', rejectFindSoftDelOrg);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
   it('should reject update of default org', rejectUpdateDefaultOrg);
