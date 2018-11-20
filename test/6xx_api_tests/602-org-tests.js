@@ -48,10 +48,10 @@ describe(M.getModuleName(module.filename), () => {
    * Before: Create admin user.
    */
   before((done) => {
-    db.connect();
-
+    // Open the database connection
+    db.connect()
     // Create test admin
-    testUtils.createAdminUser()
+    .then(() => testUtils.createAdminUser())
     .then(() => {
       done();
     })

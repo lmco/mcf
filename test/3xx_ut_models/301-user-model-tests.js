@@ -38,8 +38,13 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests. Open the database connection.
    */
-  before(() => {
-    db.connect();
+  before((done) => {
+    db.connect()
+    .then(() => done())
+    .catch((error) => {
+      chai.expect(error.message).to.equal(null);
+      done();
+    });
   });
 
   /**

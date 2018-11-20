@@ -48,11 +48,10 @@ describe(M.getModuleName(module.filename), () => {
    * non-admin user and elevate to admin user.
    */
   before((done) => {
-  // Connect to the database
-    db.connect();
-
+    // Open the database connection
+    db.connect()
     // Create test admin
-    testUtils.createAdminUser()
+    .then(() => testUtils.createAdminUser())
     .then(() => {
       done();
     })

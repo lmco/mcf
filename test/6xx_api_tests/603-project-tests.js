@@ -49,11 +49,10 @@ describe(M.getModuleName(module.filename), () => {
    * Create admin user. Create an organization.
    */
   before((done) => {
-    // Connect db
-    db.connect();
-
+    // Open the database connection
+    db.connect()
     // Create test admin
-    testUtils.createAdminUser()
+    .then(() => testUtils.createAdminUser())
     .then((user) => {
       // Set to global admin
       adminUser = user;

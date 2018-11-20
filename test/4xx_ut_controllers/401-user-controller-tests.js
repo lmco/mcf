@@ -49,10 +49,9 @@ describe(M.getModuleName(module.filename), () => {
    */
   before((done) => {
     // Connect to the database
-    db.connect();
-
+    db.connect()
     // Create test admin
-    testUtils.createAdminUser()
+    .then(() => testUtils.createAdminUser())
     .then((user) => {
       // Set global admin user
       adminUser = user;
