@@ -649,7 +649,8 @@ function createProject(reqUser, project) {
       return ElementController.createElement(reqUser, rootElement);
     })
     // Return the created project
-    .then(() => resolve(createdProject))
+    .then(() => findProjectsQuery({ id: createdProject.id }))
+    .then((foundProject) => resolve(foundProject[0]))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

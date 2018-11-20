@@ -495,11 +495,10 @@ function postOrg(req, res) {
   OrgController.createOrg(req.user, req.body)
   // Find the org created
   // NOTE: returns correct populated permissions
-  .then((org) => OrgController.findOrg(req.user, org.id, false))
-  .then((retOrg) => {
+  .then((org) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(retOrg.getPublicData()));
+    return res.status(200).send(formatJSON(org.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1063,13 +1062,10 @@ function postProject(req, res) {
   // Create project with provided parameters
   // NOTE: createProject() sanitizes req.params.projectid, req.params.org.id and req.body.name
   ProjectController.createProject(req.user, req.body)
-  // Find the org created
-  // NOTE: returns correct populated permissions
-  .then((project) => ProjectController.findProject(req.user, req.params.orgid, project.id, false))
-  .then((retProject) => {
+  .then((project) => {
     // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(retProject.getPublicData()));
+    return res.status(200).send(formatJSON(project.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));

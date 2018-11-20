@@ -142,7 +142,7 @@ function createOrgs(reqUser, arrOrgs) {
       if (error.message.includes('permissions')) {
         statusCode = 403;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Create the find query
@@ -587,7 +587,10 @@ function createOrg(reqUser, newOrgData) {
       // Save new org
       return newOrg.save();
     })
-    .then((createdOrg) => resolve(createdOrg))
+    // Find the created org
+    .then((createdOrg) => findOrgsQuery({ id: createdOrg.id }))
+    // Return found org
+    .then((foundOrg) => resolve(foundOrg[0]))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
