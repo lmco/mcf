@@ -79,14 +79,9 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Delete the org
     Org.findOneAndRemove({ id: org.id })
-    .then(() => {
-      // Delete should succeed, close DB connection
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
-      db.disconnect();
-
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);

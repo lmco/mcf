@@ -78,5 +78,12 @@ module.exports.connect = function() {
  * @description Closes connection to database.
  */
 module.exports.disconnect = function() {
-  mongoose.connection.close();
+  return new Promise((resolve, reject) => {
+    mongoose.connection.close()
+    .then(() => resolve())
+    .catch((error) => {
+      M.log.critical(error);
+      return reject(error);
+    });
+  });
 };

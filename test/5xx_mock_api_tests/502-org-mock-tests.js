@@ -78,18 +78,12 @@ describe(M.getModuleName(module.filename), () => {
     // Removing non-admin user
     testUtils.removeNonadminUser()
     .then(() => testUtils.removeAdminUser())
-    .then(() => {
-      // Disconnect from the database
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
-      // Disconnect from the database
-      db.disconnect();
-
       M.log.error(error);
       // Expect no error
-      chai.expect(error.message).to.equal(null);
+      chai.expect(error).to.equal(null);
       done();
     });
   });

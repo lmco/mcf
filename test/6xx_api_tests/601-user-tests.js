@@ -70,14 +70,9 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Delete test admin
     testUtils.removeAdminUser()
-    .then(() => {
-      // Disconnect db
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
-      db.disconnect();
-
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);

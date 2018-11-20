@@ -70,11 +70,8 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove admin user
     testUtils.removeAdminUser()
-    .then(() => {
-      // Disconnect for database
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
       M.log.error(error);
       // Expect no error

@@ -91,13 +91,9 @@ describe(M.getModuleName(module.filename), () => {
     Project.findOneAndRemove({ uid: project.uid })
     // Remove the org created in before()
     .then(() => Org.findOneAndRemove({ id: org.id }))
-    .then(() => {
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
-      db.disconnect();
-
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);

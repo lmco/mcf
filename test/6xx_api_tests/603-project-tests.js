@@ -88,15 +88,9 @@ describe(M.getModuleName(module.filename), () => {
     // Remove the Organization
     testUtils.removeOrganization(adminUser)
     .then(() => testUtils.removeAdminUser())
-    .then((delAdminUser) => {
-      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
-      // Disconnect from database
-      db.disconnect();
-
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);

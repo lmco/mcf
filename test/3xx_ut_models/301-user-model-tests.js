@@ -45,8 +45,13 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: runs after all tests. Close database connection.
    */
-  after(() => {
-    db.disconnect();
+  after((done) => {
+    db.disconnect()
+    .then(() => done())
+    .catch((error) => {
+      chai.expect(error.message).to.equal(null);
+      done();
+    });
   });
 
   /* Execute the tests */
