@@ -96,7 +96,7 @@ function docker(args) {
     // Check if mongo is in docker conatiner
     if (M.config.docker.mongo.enabled) {
       // http and docker http enabled, open specified ports
-      rargs = rargs.concat(['-p', `${M.config.docker.mongo.port}:27017`]);
+      rargs = rargs.concat(['-p', `${M.config.docker.mongo.port}:${M.config.db.port}`]);
     }
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
       // http and docker http enabled, open specified ports
