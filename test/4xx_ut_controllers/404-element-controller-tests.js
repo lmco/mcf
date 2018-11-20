@@ -527,6 +527,7 @@ function softDeleteAllElements(done) {
   // Find all existing elements in project, including soft-deleted elements
   .then(() => ElemController.findElements(adminUser, org.id, projID, true))
   .then((retElems) => {
+    process.exit()
     // Find succeeded, verify elements were returned
     chai.expect(retElems.length).to.equal(7);
     // Verify elements deleted field is set to true
