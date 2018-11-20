@@ -124,10 +124,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createWebhook(done) {
   // Create the webhook
-  WebhookController.createWebhook(adminUser, org.id, proj.id, testData.webhooks[0])
+  const projID = utils.parseID(proj.id).pop();
+  WebhookController.createWebhook(adminUser, org.id, projID, testData.webhooks[0])
   .then((newWebhook) => {
     // Verify returned data
-    chai.expect(newWebhook.id).to.equal(utils.createID(org.id, proj.id, testData.webhooks[0].id));
+    chai.expect(newWebhook.id).to.equal(utils.createID(org.id, projID, testData.webhooks[0].id));
     chai.expect(newWebhook.name).to.equal(testData.webhooks[0].name);
     chai.expect(newWebhook.triggers[0]).to.equal(testData.webhooks[0].triggers[0]);
     done();
@@ -147,7 +148,8 @@ function createWebhook(done) {
  */
 function rejectCreateExisting(done) {
   // Create the webhook
-  WebhookController.createWebhook(adminUser, org.id, proj.id, testData.webhooks[0])
+  const projID = utils.parseID(proj.id).pop();
+  WebhookController.createWebhook(adminUser, org.id, projID, testData.webhooks[0])
   .then(() => {
     // Expected createWebhook() to fail
     // Webhook was created, force test to fail
@@ -166,10 +168,11 @@ function rejectCreateExisting(done) {
  */
 function findWebhook(done) {
   // Find the webhook
-  WebhookController.findWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id)
+  const projID = utils.parseID(proj.id).pop();
+  WebhookController.findWebhook(adminUser, org.id, projID, testData.webhooks[0].id)
   .then((webhook) => {
     // Verify returned data
-    chai.expect(webhook.id).to.equal(utils.createID(org.id, proj.id, testData.webhooks[0].id));
+    chai.expect(webhook.id).to.equal(utils.createID(org.id, projID, testData.webhooks[0].id));
     chai.expect(webhook.name).to.equal(testData.webhooks[0].name);
     chai.expect(webhook.triggers[0]).to.equal(testData.webhooks[0].triggers[0]);
     done();
@@ -188,7 +191,8 @@ function findWebhook(done) {
  */
 function rejectFindNonExistent(done) {
   // Find the webhook
-  WebhookController.findWebhook(adminUser, org.id, proj.id, testData.webhooks[1].id)
+  const projID = utils.parseID(proj.id).pop();
+  WebhookController.findWebhook(adminUser, org.id, projID, testData.webhooks[1].id)
   .then(() => {
     // Expect findWebhook() to fail
     // Webhook was found, force test to fail
@@ -212,7 +216,8 @@ function updateWebhook(done) {
   };
 
   // Update webhook
-  WebhookController.updateWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, updateObject)
+  const projID = utils.parseID(proj.id).pop();
+  WebhookController.updateWebhook(adminUser, org.id, projID, testData.webhooks[0].id, updateObject)
   .then((updatedWebhook) => {
     // Verify returned data
     chai.expect(updatedWebhook.name).to.equal(updateObject.name);
@@ -232,7 +237,8 @@ function updateWebhook(done) {
  */
 function rejectDeleteInvalidParam(done) {
   // Delete the webhook
-  WebhookController.removeWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, 'invalid')
+  const projID = utils.parseID(proj.id).pop();
+  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id, 'invalid')
   .then(() => {
     // Expect removeWebhook() to fail
     // Webhook was deleted, force test to fail
@@ -251,13 +257,14 @@ function rejectDeleteInvalidParam(done) {
  */
 function softDeleteWebhook(done) {
   // Soft delete webhook
-  WebhookController.removeWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id)
+  const projID = utils.parseID(proj.id).pop();
+  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id)
   .then((success) => {
     // Verify successful delete
     chai.expect(success).to.equal(true);
 
     // Find the soft deleted webhook
-    return WebhookController.findWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, true);
+    return WebhookController.findWebhook(adminUser, org.id, projID, testData.webhooks[0].id, true);
   })
   .then((foundWebhook) => {
     // Verify webhook has been soft deleted
@@ -279,13 +286,14 @@ function softDeleteWebhook(done) {
  */
 function hardDeleteWebhook(done) {
   // Hard delete webhook
-  WebhookController.removeWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, true)
+  const projID = utils.parseID(proj.id).pop();
+  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id, true)
   .then((success) => {
     // Verify success
     chai.expect(success).to.equal(true);
 
     // Attempt to find the webhook
-    return WebhookController.findWebhook(adminUser, org.id, proj.id, testData.webhooks[0].id, true);
+    return WebhookController.findWebhook(adminUser, org.id, projID, testData.webhooks[0].id, true);
   })
   .then(() => {
     // Expect findWebhook() to fail

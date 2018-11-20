@@ -752,12 +752,17 @@ function removeOrg(reqUser, organizationID) {
     })
     // Delete the organization
     .then((foundProjects) => {
-      projects = foundProjects;
-      console.log(projects);
-      return Organization.deleteOne({ id: org.id });
+      if (foundProjects.length > 0) {
+        console.log(foundProjects[0].id);
+        console.log(foundProjects[0].hasOwnProperty('id'));
+      }
+      projects = foundProjects
+
+      // Delete all projects in the org
+      return ProjController.removeProjects(reqUser, organizationID, projects);
     })
-    // Delete all projects in the org
-    .then(() => ProjController.removeProjects(reqUser, organizationID, projects))
+    // Delete the org
+    .then(() => Organization.deleteOne({ id: org.id }))
     // Resolve the deleted org
     .then(() => resolve(org))
     // Catch errors and reject with custom error

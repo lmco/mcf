@@ -145,7 +145,8 @@ function uploadArtifact(done) {
   };
 
   // Create artifact
-  ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData)
+  const projID = utils.parseID(proj.id).pop();
+  ArtifactController.createArtifact(adminUser, org.id, projID, artifactObjData)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[0].filename);
@@ -182,7 +183,8 @@ function uploadSecondArtifact(done) {
   };
 
   // Create artifact
-  ArtifactController.createArtifact(adminUser, org.id, proj.id, artifactObjData)
+  const projID = utils.parseID(proj.id).pop();
+  ArtifactController.createArtifact(adminUser, org.id, projID, artifactObjData)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[1].filename);
@@ -219,7 +221,8 @@ function updateArtifact(done) {
     artifactBlob: artifactPNG
   };
   // Create artifact
-  ArtifactController.updateArtifact(adminUser, org.id, proj.id, artifactID, artObjData)
+  const projID = utils.parseID(proj.id).pop();
+  ArtifactController.updateArtifact(adminUser, org.id, projID, artifactID, artObjData)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
@@ -238,10 +241,11 @@ function updateArtifact(done) {
  */
 function findArtifact(done) {
   // Find artifact
-  ArtifactController.findArtifact(adminUser, org.id, proj.id, testData.artifacts[2].id)
+  const projID = utils.parseID(proj.id).pop();
+  ArtifactController.findArtifact(adminUser, org.id, projID, testData.artifacts[2].id)
   .then((artifact) => {
     // Verify artifact found properly
-    chai.expect(artifact.id).to.equal(utils.createID(org.id, proj.id, testData.artifacts[2].id));
+    chai.expect(artifact.id).to.equal(utils.createID(org.id, projID, testData.artifacts[2].id));
     done();
   })
   .catch((error) => {
@@ -257,7 +261,8 @@ function findArtifact(done) {
  */
 function deleteArtifactFile(done) {
   // Create artifact
-  ArtifactController.removeArtifact(adminUser, org.id, proj.id, testData.artifacts[0].id)
+  const projID = utils.parseID(proj.id).pop();
+  ArtifactController.removeArtifact(adminUser, org.id, projID, testData.artifacts[0].id)
   .then((artifactID) => {
     done();
   })
@@ -274,7 +279,8 @@ function deleteArtifactFile(done) {
  */
 function deleteSecondArtifactFile(done) {
   // Create artifact
-  ArtifactController.removeArtifact(adminUser, org.id, proj.id, testData.artifacts[1].id)
+  const projID = utils.parseID(proj.id).pop();
+  ArtifactController.removeArtifact(adminUser, org.id, projID, testData.artifacts[1].id)
   .then((artifactID) => {
     done();
   })

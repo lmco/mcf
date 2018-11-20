@@ -398,7 +398,12 @@ function updateProjects(reqUser, organizationID, arrProjects) {
  *   M.log.error(error);
  * });
  */
-function removeProjects(reqUser, organizationID, arrProjects = []) {
+function removeProjects(_reqUser, _organizationID, _arrProjects = []) {
+
+  const reqUser = JSON.parse(JSON.stringify(_reqUser));
+  const organizationID = _organizationID;
+  const arrProjects = JSON.parse(JSON.stringify(_arrProjects));
+
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
@@ -409,12 +414,13 @@ function removeProjects(reqUser, organizationID, arrProjects = []) {
       for (let i = 0; i < arrProjects.length; i++) {
         const p = arrProjects[i];
         assert.ok(typeof p === 'object', 'At least one project is not an object.');
-        assert.ok(Object.hasOwnProperty.call('id', p), `Project ${i + 1} does not have an ID.`);
+        assert.ok(Object.hasOwnProperty.call(p, 'id'), `Project ${i + 1} does not have an ID.`);
         assert.ok(typeof p.id === 'string', `Project ${i + 1} ID is not a string.`);
       }
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      console.log(error.message)
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Ensure user is a global admin
