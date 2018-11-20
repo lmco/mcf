@@ -177,8 +177,8 @@ function updateProject(done) {
  */
 function deleteProject(done) {
   // Find and remove the project previously created in createProject test.
-  Project.findOneAndRemove({ id: testData.projects[0].id })
-  .then(() => Project.find({ id: testData.projects[0].id }))
+  Project.findOneAndRemove({ id: utils.createID(org.id, testData.projects[0].id) })
+  .then(() => Project.find({ id: utils.createID(org.id, testData.projects[0].id) }))
   .then((projects) => {
     // Expect to find no projects
     chai.expect(projects.length).to.equal(0);

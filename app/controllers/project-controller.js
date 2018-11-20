@@ -174,9 +174,10 @@ function createProjects(reqUser, organizationID, arrProjects) {
         return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
       }
 
+
       // Convert each project into a project object
       const projObjects = arrProjects.map(p => {
-        const projData = p;
+        const projData = JSON.parse(JSON.stringify(p)); // Need to use a copy
         projData.id = utils.createID(organizationID, projData.id);
 
         const projObject = new Project(sani.sanitize(projData));
@@ -200,7 +201,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
       // Initialize promise array
       const promises = [];
       // Loop through each project
-      arrProjects.forEach(project => {
+      createdProjects.forEach(project => {
         // Create root element for each project
         const rootElement = {
           name: 'Model',
@@ -403,13 +404,11 @@ function removeProjects(reqUser, organizationID, arrProjects = []) {
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(Array.isArray(arrProjects), 'Projects is not an array.');
-      arrProjects.forEach(p => {
-        assert.ok(typeof p === 'object', 'At least one project is not an object.');
-      });
 
       // Make sure every project object has an ID
       for (let i = 0; i < arrProjects.length; i++) {
         const p = arrProjects[i];
+        assert.ok(typeof p === 'object', 'At least one project is not an object.');
         assert.ok(p.hasOwnProperty('id'), `Project ${i + 1} does not have an ID.`);
         assert.ok(typeof p.id === 'string', `Project ${i + 1} ID is not a string.`);
       }

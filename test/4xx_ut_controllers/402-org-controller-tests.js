@@ -112,10 +112,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should update an orgs name using model object', updateOrgObject);
   it('should update multiple orgs at the same time', updateMultipleOrgs);
   it('should find all orgs a user has access to', findAllExistingOrgs);
-  //it('should soft delete an existing org', softDeleteExistingOrg);
   it('should delete an existing org', deleteExistingOrg);
-  //it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
-  //it('should reject find of soft-deleted org', rejectFindSoftDelOrg);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
   it('should reject update of default org', rejectUpdateDefaultOrg);
   it('should reject delete of default org', rejectDefaultOrgDelete);
@@ -389,15 +386,13 @@ function deleteExistingOrg(done) {
   OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
   // Find deleted org
   .then(() => OrgController.findOrg(adminUser, testData.orgs[0].id))
+  // Expected findOrg() to fail
   .then((orgs) => {
-    console.log('Resolved ??????????????????????????????')
-    // Expected findOrg() to fail
-    // Should not execute, force test to fail
-    chai.assert(true === false);
+    chai.assert(true === false); // Should not execute .then, force test to fail
     done();
   })
+  // Expected error thrown: 'Not Found'
   .catch((error) => {
-    // Expected error thrown: 'Not Found'
     chai.expect(error.message).to.equal('Not Found');
     done();
   });
