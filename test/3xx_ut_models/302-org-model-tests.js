@@ -47,10 +47,9 @@ describe(M.getModuleName(module.filename), () => {
    * user.
    */
   before((done) => {
-    db.connect();
-
+    db.connect()
     // Create admin user
-    testUtils.createAdminUser()
+    .then(() => testUtils.createAdminUser())
     .then((user) => {
       userAdmin = user;
       done();
@@ -70,11 +69,8 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove admin user
     testUtils.removeAdminUser()
-    .then(() => {
-      // Disconnect for database
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
       M.log.error(error);
       // Expect no error

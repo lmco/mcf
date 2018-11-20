@@ -49,10 +49,9 @@ describe(M.getModuleName(module.filename), () => {
    */
   before((done) => {
     // Open the database connection
-    db.connect();
-
+    db.connect()
     // Create test admin
-    testUtils.createAdminUser()
+    .then(() => testUtils.createAdminUser())
     .then((_adminUser) => {
       // Set global admin user
       adminUser = _adminUser;
@@ -93,17 +92,12 @@ describe(M.getModuleName(module.filename), () => {
     // Note: Projects under organization will also be removed
     testUtils.removeOrganization(adminUser)
     .then(() => testUtils.removeAdminUser())
-    .then((delAdminUser) => {
-      chai.expect(delAdminUser).to.equal(testData.users[0].adminUsername);
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
-      db.disconnect();
-
       M.log.error(error);
       // Expect no error
-      chai.expect(error.message).to.equal(null);
+      chai.expect(error).to.equal(null);
       done();
     });
   });
