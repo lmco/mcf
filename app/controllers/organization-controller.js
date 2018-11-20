@@ -175,8 +175,8 @@ function createOrgs(reqUser, arrOrgs) {
     })
     .then((createdOrgs) => {
       // Create the find query
-      const refindQuery = { id: { $in: sani.sanitize(createdOrgs.map(o => o.id)) } };
-      return findOrgsQuery(refindQuery);
+      const findcreatedOrgsQuery = { id: { $in: sani.sanitize(createdOrgs.map(o => o.id)) } };
+      return findOrgsQuery(findcreatedOrgsQuery);
     })
     .then((foundOrgs) => resolve(foundOrgs))
     .catch((error) => {
