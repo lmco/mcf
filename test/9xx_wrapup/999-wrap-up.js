@@ -24,15 +24,11 @@
 
 // Node modules
 const chai = require('chai');
-const { execSync } = require('child_process');
+
+// NPM modules
+const mongoose = require('mongoose');
 
 // MBEE modules
-const Element = M.require('models.element');
-const Organization = M.require('models.organization');
-const Project = M.require('models.project');
-const User = M.require('models.user');
-const Webhook = M.require('models.webhook');
-const Artifact = M.require('models.artifact');
 const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
@@ -44,10 +40,24 @@ const db = M.require('lib.db');
  */
 describe(M.getModuleName(module.filename), () => {
   /* Runs before all tests . Opens the database connection. */
-  before(() => db.connect());
+  before((done) => {
+    db.connect()
+    .then(() => done())
+    .catch((error) => {
+      chai.expect(error.message).to.equal(null);
+      done();
+    });
+  });
 
   /* Runs after all tests. Close database connection. */
-  after(() => db.disconnect());
+  after((done) => {
+    db.disconnect()
+    .then(() => done())
+    .catch((error) => {
+      chai.expect(error.message).to.equal(null);
+      done();
+    });
+  });
 
   /* Execute the tests */
   it('clean database', cleanDB);
@@ -59,19 +69,7 @@ describe(M.getModuleName(module.filename), () => {
  * items from all MongoDB collections.
  */
 function cleanDB(done) {
-  // Set retry number in case another async operation is happening
-  this.retries(3);
-
-  User.collection.drop() // Remove users
-  .then(() => Organization.collection.drop()) // Remove organizations
-  .then(() => Project.collection.drop()) // Remove projects
-  .then(() => Element.Element.collection.drop()) // Remove elements
-  .then(() => Webhook.Webhook.collection.drop()) // Remove webhooks
-  .then(() => {
-    // Remove artifacts
-    execSync(`rm -rf ${M.root}/storage/*`);
-    return Artifact.collection.drop();
-  })
+  mongoose.connection.db.dropDatabase()
   .then(() => done())
   .catch(error => {
     M.log.error(error);

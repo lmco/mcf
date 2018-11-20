@@ -44,16 +44,17 @@ describe(M.getModuleName(module.filename), () => {
    * Before: runs before all tests
    */
   before((done) => {
-    db.connect();
+    db.connect()
+    .then(() => {
+      // Create the organization model object
+      const newOrg = new Org({
+        id: testData.orgs[0].id,
+        name: testData.orgs[0].name
+      });
 
-    // Create the organization model object
-    const newOrg = new Org({
-      id: testData.orgs[0].id,
-      name: testData.orgs[0].name
-    });
-
-    // Save the organization model object to the database
-    newOrg.save()
+      // Save the organization model object to the database
+      return newOrg.save();
+    })
     .then((retOrg) => {
       // Update organization for test data
       org = retOrg;
@@ -91,13 +92,9 @@ describe(M.getModuleName(module.filename), () => {
     Project.findOneAndRemove({ uid: project.uid })
     // Remove the org created in before()
     .then(() => Org.findOneAndRemove({ id: org.id }))
-    .then(() => {
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
-      db.disconnect();
-
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);

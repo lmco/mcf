@@ -48,11 +48,10 @@ describe(M.getModuleName(module.filename), () => {
    * non-admin user and elevate to admin user.
    */
   before((done) => {
-  // Connect to the database
-    db.connect();
-
+    // Open the database connection
+    db.connect()
     // Create test admin
-    testUtils.createAdminUser()
+    .then(() => testUtils.createAdminUser())
     .then(() => {
       done();
     })
@@ -70,14 +69,9 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Delete test admin
     testUtils.removeAdminUser()
-    .then(() => {
-      // Disconnect db
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
-      db.disconnect();
-
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
