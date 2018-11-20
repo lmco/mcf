@@ -587,7 +587,7 @@ function createOrg(reqUser, newOrgData) {
       // Save new org
       return newOrg.save();
     })
-    // Find the created org
+    // Find created org
     .then((createdOrg) => findOrgsQuery({ id: createdOrg.id }))
     // Return found org
     .then((foundOrg) => resolve(foundOrg[0]))
