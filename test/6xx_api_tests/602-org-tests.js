@@ -87,24 +87,24 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should POST an organization', postOrg);
   it('should reject a POST with multiple invalid orgs', postInvalidOrgs);
-  //it('should POST multiple orgs', postOrgs);
-  //it('should GET posted organization', getOrg);
-  // it('should PATCH an update to posted organization', patchOrg);
-  // it('should PATCH an update to multiple orgs', patchMultipleOrgs);
-  // it('should GET a user\'s roles in an organization', getMemberRoles);
-  // it('should GET existing organizations', getOrgs);
-  // it('should reject a PATCH with invalid name', rejectPatchInvalidName);
-  // it('should reject a PATCH to the org ID', rejectPatchIdMismatch);
-  // it('should reject a PATCH of unique field to multiple orgs', rejectPatchUniqueFieldOrgs);
-  // it('should reject a POST with ID mismatch', rejectPostIdMismatch);
-  // it('should reject a POST with invalid org id', rejectPostInvalidId);
-  // it('should reject a POST with missing org name', rejectPostMissingName);
-  // it('should reject a POST with an empty name', rejectPostEmptyName);
-  // it('should reject a POST of an existing org', rejectPostExistingOrg);
-  // it('should reject a DELETE of a non-existing org', rejectDeleteNonExistingOrg);
-  // it('should reject a DELETE of orgs with invalid param', rejectDeleteOrgs);
-  // it('should DELETE organization', deleteOrg);
-  // it('should DELETE multiple organizations', deleteOrgs);
+  it('should POST multiple orgs', postOrgs);
+  it('should GET posted organization', getOrg);
+  it('should PATCH an update to posted organization', patchOrg);
+  it('should PATCH an update to multiple orgs', patchMultipleOrgs);
+  it('should GET a user\'s roles in an organization', getMemberRoles);
+  it('should GET existing organizations', getOrgs);
+  it('should reject a PATCH with invalid name', rejectPatchInvalidName);
+  it('should reject a PATCH to the org ID', rejectPatchIdMismatch);
+  it('should reject a PATCH of unique field to multiple orgs', rejectPatchUniqueFieldOrgs);
+  it('should reject a POST with ID mismatch', rejectPostIdMismatch);
+  it('should reject a POST with invalid org id', rejectPostInvalidId);
+  it('should reject a POST with missing org name', rejectPostMissingName);
+  it('should reject a POST with an empty name', rejectPostEmptyName);
+  it('should reject a POST of an existing org', rejectPostExistingOrg);
+  it('should reject a DELETE of a non-existing org', rejectDeleteNonExistingOrg);
+  it('should reject a DELETE of orgs with invalid param', rejectDeleteOrgs);
+  it('should DELETE organization', deleteOrg);
+  it('should DELETE multiple organizations', deleteOrgs);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -189,7 +189,6 @@ function getOrg(done) {
     headers: getHeaders()
   },
   (err, response, body) => {
-    console.log(body);
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
