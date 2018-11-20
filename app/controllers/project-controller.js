@@ -214,7 +214,12 @@ function createProjects(reqUser, organizationID, arrProjects) {
       // Once all promises complete, return
       return Promise.all(promises);
     })
-    .then(() => resolve(createdProjects))
+    .then(() => {
+      // Create the find query
+      const refindQuery = { id: { $in: sani.sanitize(createdProjects.map(o => o.id)) } };
+      return findProjectsQuery(refindQuery);
+    })
+    .then((foundProjects) => resolve(foundProjects))
     .catch((error) => {
       // If error is a CustomError, reject it
       if (error instanceof M.CustomError) {
@@ -644,7 +649,8 @@ function createProject(reqUser, project) {
       return ElementController.createElement(reqUser, rootElement);
     })
     // Return the created project
-    .then(() => resolve(createdProject))
+    .then(() => findProjectsQuery({ id: createdProject.id }))
+    .then((foundProject) => resolve(foundProject[0]))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

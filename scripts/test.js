@@ -37,6 +37,9 @@ if (module.parent == null) {
  */
 function test(_args) {
   printHeader();
+  M.log.verbose('Running tests on mongo instance...');
+  M.log.verbose(`Mongo IP: ${M.config.db.url}:${M.config.db.port}`);
+  M.log.verbose(`Mongo DB: ${M.config.db.name}`);
 
   // Check if environment is production and NOT --force
   if (M.env.toLowerCase() === 'production' && !_args.includes('--force')) {
