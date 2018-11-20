@@ -50,7 +50,6 @@ module.exports.ID_DELIMITER = ':';
  */
 module.exports.render = function(req, res, name, params) {
   const opts = params || {};
-
   opts.pluginNames = (M.config.server.plugins.enabled)
     ? require(path.join(M.root, 'plugins', 'routes.js')).loadedPlugins : []; // eslint-disable-line global-require
   opts.ui = opts.ui || M.config.server.ui;
