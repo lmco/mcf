@@ -156,9 +156,9 @@ function createOrgs(reqUser, arrOrgs) {
         // Get the ID's of the conflicting orgs
         const foundIDs = foundOrgs.map(o => o.id);
         return reject(new M.CustomError('Org(s) with the following ID(s) already'
-          + ` exists: [${foundIDs.toString()}.`, 403, 'warn'));
+          + ` exists: [${foundIDs.toString()}].`, 403, 'warn'));
       }
-
+      console.log("I am here");
       // Convert each object in arrOrgs into an Org object and set permissions
       const orgObjects = arrOrgs.map(o => {
         const orgObject = new Organization(sani.sanitize(o));
@@ -169,21 +169,26 @@ function createOrgs(reqUser, arrOrgs) {
         orgObject.lastModifiedBy = reqUser;
         return orgObject;
       });
+      console.log('after the mapping');
       // Save the organizations
       return Organization.create(orgObjects);
     })
     .then((createdOrgs) => {
-      // Create the find query
-      const refindQuery = { id: { $in: sani.sanitize(createdOrgs.map(o => o.id)) } };
-      return findOrgsQuery(refindQuery);
+      console.log('in the next then');
+      // // Create the find query
+      // const refindQuery = { id: { $in: sani.sanitize(createdOrgs.map(o => o.id)) } };
+      // return findOrgsQuery(refindQuery);
     })
     .then((foundOrgs) => resolve(foundOrgs))
     .catch((error) => {
+      console.log(error.constructor.name);
+      console.log(error);
+      //console.log(error instanceOf M.CustomError);
       // If error is a CustomError, reject it
       if (error instanceof M.CustomError) {
         return reject(error);
       }
-
+      console.log('after if statement');
       // If it's not a CustomError, the create failed so delete all successfully
       // created orgs and reject the error.
       return Organization.deleteMany(findQuery)
