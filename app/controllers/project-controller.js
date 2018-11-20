@@ -819,20 +819,19 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
  *   M.log.error(error);
  * });
  */
-function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
+function removeProject(reqUser, organizationID, projectID) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Error Check: if hard deleting, ensure user is global admin
-    if (hardDelete && !reqUser.admin) {
+    if (!reqUser.admin) {
       return reject(new M.CustomError(
         'User does not have permission to permanently delete a project.', 403, 'warn'
       ));
@@ -847,21 +846,14 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
       // Set foundProject
       foundProject = project;
 
-      // Error Check: ensure user has permissions to delete project
-      if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
-      }
-
       // Initialize element delete query
       const elementDeleteQuery = { project: project._id };
 
       // Delete all elements on the project
-      return ElementController.removeElements(reqUser, elementDeleteQuery, hardDelete);
+      return ElementController.removeElements(reqUser, elementDeleteQuery, true);
     })
     // If hard delete, delete project, otherwise update project
-    .then(() => ((hardDelete)
-      ? Project.deleteOne({ id: foundProject.id })
-      : Project.updateOne({ id: foundProject.id }, { deleted: true, deletedBy: reqUser })))
+    .then(() => Project.deleteOne({ id: foundProject.id }))
     .then(() => resolve(foundProject))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

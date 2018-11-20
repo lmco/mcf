@@ -140,7 +140,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject updating due to non-Admin user', rejectNonAdminProjectUpdate);
   it('should find the permissions on the project', findPerm);
   it('should set the permissions on the project', setPerm);
-  it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
   it('should delete second project', deleteProject02);
   it('should remove multiple projects', deleteMultipleProjects);
@@ -732,12 +731,10 @@ function findPerm(done) {
  */
 function setPerm(done) {
   // Admin sets permissions for non-admin
-  ProjController.setPermissions(adminUser, org.id, project.id.toString(),
-    nonAdminUser.username, 'write')
-  .then(() => {
-    console.log('Did set ...')
-    return ProjController.findProject(adminUser, org.id, project.id.toString())
-  })
+  const projID = utils.parseID(project.id)[1];
+  const writeUser = nonAdminUser.username;
+  ProjController.setPermissions(adminUser, org.id, projID, writeUser, 'write')
+  .then(() => ProjController.findProject(adminUser, org.id, projID))
   .then((retProj) => {
     // Verify permissions for non-admin
     chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAdminUser._id.toString());
@@ -749,36 +746,6 @@ function setPerm(done) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies project NOT found after soft-deletion.
- * Expected error thrown: 'Not Found'
- */
-function softDeleteProject(done) {
-  // Create an element via the Element model
-  const elem = new Element.Block({
-    id: utils.createID(org.id, project.id, testData.elements[1].id),
-    project: project._id
-  });
-
-  // Save the element
-  elem.save()
-  // Soft-delete the project
-  .then(() => ProjController.removeProject(adminUser, org.id, project.id, false))
-  // Find project
-  .then(() => ProjController.findProject(adminUser, org.id, project.id))
-  .then(() => {
-    // Expected findProject() to fail
-    // Should not execute, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Not Found'
-    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
@@ -844,12 +811,16 @@ function deleteProject02(done) {
  */
 function deleteMultipleProjects(done) {
   // Define query to find projects
-  const query = { uid: { $in: [`${org.id}:${testData.projects[1].id}`,
-    `${org.id}:${testData.projects[4].id}`,
-    `${org.id}:${testData.projects[5].id}`] } };
+  const arrProjects = [
+    { id: testData.projects[0].id },
+    { id: testData.projects[1].id },
+    { id: testData.projects[4].id },
+    { id: testData.projects[5].id }
+  ];
+
 
   // Remove projects
-  ProjController.removeProjects(adminUser, query, true)
+  ProjController.removeProjects(adminUser, org.id, arrProjects)
   .then(() => ProjController.findProjects(adminUser, org.id, true))
   .then((foundProjects) => {
     // Expect foundProjects array to be empty
