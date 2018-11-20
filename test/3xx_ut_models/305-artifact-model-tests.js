@@ -60,7 +60,7 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create the project model object
       const newProject = new Project({
-        id: testData.projects[1].id,
+        id: utils.createID(org.id, testData.projects[1].id),
         name: testData.projects[1].name,
         org: org._id,
         uid: `${org.id}:${testData.projects[1].id}`
@@ -88,7 +88,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the project created in before()
-    Project.findOneAndRemove({ uid: project.uid })
+    Project.findOneAndRemove({ id: project.id })
     // Remove the org created in before()
     .then(() => Org.findOneAndRemove({ id: org.id }))
     .then(() => {
@@ -117,7 +117,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function uploadArtifact(done) {
   // Create the full artifact ID
-  const artifactID = utils.createID(org.id, project.id, testData.artifacts[0].id);
+  const artifactID = utils.createID(project.id, testData.artifacts[0].id);
 
   // Upload new artifact
   const artifact = new Artifact();
@@ -151,7 +151,7 @@ function uploadArtifact(done) {
  * @description Finds an existing artifact and updates it.
  */
 function updateArtifactFile(done) {
-  const artifactFillId = utils.createID(org.id, project.id, testData.artifacts[0].id);
+  const artifactFillId = utils.createID(project.id, testData.artifacts[0].id);
   // Find the artifact previously uploaded.
   Artifact.find({ id: artifactFillId, deleted: false })
   .then((artifactToUpdate) => {
@@ -176,7 +176,7 @@ function updateArtifactFile(done) {
  * @description Finds and deletes an artifact.
  */
 function deleteArtifactFile(done) {
-  const artifactFillId = utils.createID(org.id, project.id, testData.artifacts[0].id);
+  const artifactFillId = utils.createID(project.id, testData.artifacts[0].id);
   // Attempt to find deleted artifact
   Artifact.findOneAndRemove({ id: artifactFillId })
   .then(() => Artifact.find({ id: artifactFillId }))

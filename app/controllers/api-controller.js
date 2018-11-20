@@ -843,9 +843,6 @@ function patchProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Initialize the update query object
-  let updateQuery = {};
-
   // Error Check: ensure update was provided in body
   if (!Array.isArray(req.body)) {
     const error = new M.CustomError('Request body is not an array.', 400, 'warn');

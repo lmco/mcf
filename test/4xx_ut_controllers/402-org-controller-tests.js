@@ -112,10 +112,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should update an orgs name using model object', updateOrgObject);
   it('should update multiple orgs at the same time', updateMultipleOrgs);
   it('should find all orgs a user has access to', findAllExistingOrgs);
-  it('should soft delete an existing org', softDeleteExistingOrg);
+  //it('should soft delete an existing org', softDeleteExistingOrg);
   it('should delete an existing org', deleteExistingOrg);
-  it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
-  it('should reject find of soft-deleted org', rejectFindSoftDelOrg);
+  //it('should soft-delete an existing org and its project', softDeleteProjectAndOrg);
+  //it('should reject find of soft-deleted org', rejectFindSoftDelOrg);
   it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
   it('should reject update of default org', rejectUpdateDefaultOrg);
   it('should reject delete of default org', rejectDefaultOrgDelete);
@@ -379,43 +379,6 @@ function findAllExistingOrgs(done) {
   });
 }
 
-/**
- * @description Soft-delete an existing org.
- */
-function softDeleteExistingOrg(done) {
-  // Soft delete an org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[0].id, false)
-  .then((retOrg) => {
-    // Expect the deleted flag on the returned org to be set to true
-    chai.expect(retOrg.deleted).to.equal(true);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verify soft-deleted org cannot be found.
- * Expected error thrown: 'Not Found'
- */
-function rejectFindSoftDelOrg(done) {
-  OrgController.findOrg(adminUser, testData.orgs[0].id)
-  .then(() => {
-    // Expected findOrg() to fail
-    // No org should be found, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Not Found'
-    chai.expect(error.message).to.equal('Not Found');
-    done();
-  });
-}
 
 /**
  * @description Deletes an existing org.
@@ -426,7 +389,8 @@ function deleteExistingOrg(done) {
   OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
   // Find deleted org
   .then(() => OrgController.findOrg(adminUser, testData.orgs[0].id))
-  .then(() => {
+  .then((orgs) => {
+    console.log('Resolved ??????????????????????????????')
     // Expected findOrg() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
@@ -435,48 +399,6 @@ function deleteExistingOrg(done) {
   .catch((error) => {
     // Expected error thrown: 'Not Found'
     chai.expect(error.message).to.equal('Not Found');
-    done();
-  });
-}
-
-/**
- * @description Verify projects and elements soft deleted when org soft deleted.
- */
-function softDeleteProjectAndOrg(done) {
-  // Create an org via controller
-  OrgController.createOrg(adminUser, testData.orgs[3])
-  .then((retOrg) => {
-    // Create the project via the model
-    const proj = new Project({
-      id: testData.projects[0].id,
-      name: testData.projects[0].name,
-      org: retOrg._id,
-      uid: utils.createID(testData.orgs[3].id, testData.projects[0].id)
-    });
-
-    // Save the project to the database
-    return proj.save();
-  })
-  // Soft delete org via controller
-  .then(() => OrgController.removeOrg(adminUser, testData.orgs[3].id, false))
-  // Find org via controller
-  .then(() => OrgController.findOrg(adminUser, testData.orgs[3].id, true))
-  .then((retOrg) => {
-    // Expect organization deleted field to be true
-    chai.expect(retOrg.deleted).to.equal(true);
-
-    // Find project
-    return Project.findOne({ id: testData.projects[0].id });
-  })
-  .then((foundProj) => {
-    // Expect found project's deleted parameter to be true
-    chai.expect(foundProj.deleted).to.equal(true);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
     done();
   });
 }
@@ -732,13 +654,13 @@ function rejectInvalidPermission(done) {
  */
 function removeMultipleOrgs(done) {
   // Create query to remove orgs
-  const deleteQuery = { id: { $in: [
-    testData.orgs[1].id,
-    testData.orgs[4].id
-  ] } };
+  const arrRmOrgs = [
+    { id: testData.orgs[1].id },
+    { id: testData.orgs[4].id }
+  ];
 
   // Delete the organizations
-  OrgController.removeOrgs(adminUser, deleteQuery, true)
+  OrgController.removeOrgs(adminUser, arrRmOrgs, true)
   .then((orgs) => {
     // Check that correct number of orgs were deleted
     chai.expect(orgs.length).to.equal(2);

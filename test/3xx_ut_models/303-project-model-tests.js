@@ -111,10 +111,9 @@ describe(M.getModuleName(module.filename), () => {
 function createProject(done) {
   // Create a project model object
   const newProject = new Project({
-    id: testData.projects[0].id,
+    id: utils.createID(org.id, testData.projects[0].id),
     name: testData.projects[0].name,
-    org: org._id,
-    uid: utils.createID(org.id, testData.projects[0].id)
+    org: org._id
   });
   // Save project model object to database
   newProject.save()
@@ -132,7 +131,7 @@ function createProject(done) {
  */
 function findProject(done) {
   // Find the project
-  Project.findOne({ id: testData.projects[0].id })
+  Project.findOne({ id: utils.createID(org.id, testData.projects[0].id) })
   .then((proj) => {
     // Ensure project data is correct
     chai.expect(proj.name).to.equal(testData.projects[0].name);
@@ -152,10 +151,14 @@ function findProject(done) {
 function updateProject(done) {
   // Find and update project previously created in createProject test
   Project.findOneAndUpdate({
-    id: testData.projects[0].id },
+    id: utils.createID(org.id, testData.projects[0].id) },
   { name: testData.projects[1].name })
   // Find previously updated project
-  .then(() => Project.findOne({ id: testData.projects[0].id }))
+  .then(() => {
+    return Project.findOne({
+      id: utils.createID(org.id, testData.projects[0].id)
+    });
+  })
   .then((proj) => {
     // Ensure project name was successfully updated
     chai.expect(proj.name).to.equal(testData.projects[1].name);
@@ -196,21 +199,20 @@ function deleteProject(done) {
 function verifyProjectFieldMaxChar(done) {
   // Create a new model project
   const newProject = new Project({
-    id: testData.projects[3].id,
+    id: utils.createID(org.id, testData.projects[3].id),
     name: testData.projects[3].name,
-    org: org._id,
-    uid: `${org.id}:${testData.projects[3].id}`
+    org: org._id
   });
 
   // Save project model object to database
   newProject.save()
   .then(() => {
-    chai.assert(true === false);
+    chai.assert(true === false, 'Fail, project should not have been created.');
     done();
   })
   .catch((error) => {
     // Expected error thrown: 'Project validation failed: id: Too many characters in username'
-    chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username');
+    chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username')
     done();
   });
 }

@@ -45,6 +45,7 @@ const assert = require('assert');
 const ProjController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
+const Project = M.require('models.project');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
@@ -334,25 +335,27 @@ function updateOrgs(reqUser, query, updateInfo) {
  *   M.log.error(error);
  * });
  */
-function removeOrgs(reqUser, query, hardDelete = false) {
+function removeOrgs(reqUser, arrOrgs) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof query === 'object', 'Remove query is not an object.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
+      assert.ok(Array.isArray(arrOrgs), 'Remove orgs is not an array');
+      arrOrgs.forEach(org => {
+        assert.ok(typeof org === 'object', 'Orgs array is not of objects');
+      });
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
     }
 
     // Error Check: ensure reqUser is a global admin if hard deleting
-    if (!reqUser.admin && hardDelete) {
-      return reject(new M.CustomError('User does not have permissions to '
-        + 'hard delete.', 403, 'warn'));
+    if (!reqUser.admin) {
+      return reject(new M.CustomError('User does not have permissions to delete.', 403, 'warn'));
     }
 
     // Define found orgs array
     let foundOrgs = [];
+    let query = { id: { $in: arrOrgs.map(o => o.id) } };
 
     // Find the orgs the user wishes to delete
     findOrgsQuery(query)
@@ -362,12 +365,6 @@ function removeOrgs(reqUser, query, hardDelete = false) {
 
       // Loop through each found org
       Object(orgs).forEach((org) => {
-        // Error Check: ensure user is a global admin or org admin
-        if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
-          return reject(new M.CustomError('User does not have permissions to '
-            + `delete the organization [${org.name}].`, 403, 'warn'));
-        }
-
         // Error Check: ensure reqUser is not deleting the default org
         if (org.id === M.config.server.defaultOrganizationId) {
           // orgID is default, reject error.
@@ -375,22 +372,21 @@ function removeOrgs(reqUser, query, hardDelete = false) {
         }
       });
 
-      // If hard delete, delete orgs, otherwise update orgs
-      return (hardDelete)
-        ? Organization.deleteMany(query)
-        : Organization.updateMany(query, { deleted: true, deletedBy: reqUser });
-    })
-    .then(() => {
-      // Create delete query to remove projects
-      const projectDeleteQuery = { org: { $in: foundOrgs.map(o => o._id) } };
 
       // Delete all projects in the orgs
-      return ProjController.removeProjects(reqUser, projectDeleteQuery, hardDelete);
+      return Project.deleteMany({
+        org: {
+          $in: orgs.map(o => o._id)
+        }
+      });
     })
+    // Delete the orgs
+    .then(() => Organization.deleteMany(query))
     // Return the deleted orgs
     .then(() => resolve(foundOrgs))
     .catch((error) => {
       // If error is a CustomError, reject it
+      // TODO (jk) - Is this necessary?
       if (error instanceof M.CustomError) {
         return reject(error);
       }
@@ -724,73 +720,46 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
  *   M.log.error(error);
  * });
  */
-function removeOrg(reqUser, organizationID, hardDelete = false) {
+function removeOrg(reqUser, organizationID) {
+  // Define org variable to be used for resolve
+  let org = null;
+  // Var to store list of projects to delete
+  let projects = null;
+
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
-    try {
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
-    }
-    catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+    if (typeof organizationID !== 'string') {
+      return reject(new M.CustomError('Organization ID is not a string.', 400, 'warn'));
     }
 
     // Error Check: ensure reqUser is not deleting the default org
     if (organizationID === M.config.server.defaultOrganizationId) {
-      // orgID is default, reject error.
       return reject(new M.CustomError('The default organization cannot be deleted.', 403, 'warn'));
     }
 
     // Error Check: ensure reqUser is a global admin if hard deleting
-    if (!reqUser.admin && hardDelete) {
-      return reject(new M.CustomError('User does not have permissions to '
-        + 'hard delete.', 403, 'warn'));
+    if (!reqUser.admin) {
+      return reject(new M.CustomError('User does not have permissions to delete.', 403, 'warn'));
     }
-
-    // Define org variable
-    let org = null;
 
     // Find the organization
     findOrg(reqUser, organizationID, true)
     .then((foundOrg) => {
       // Set org variable
       org = foundOrg;
-
-      // Error Check: ensure user is a global admin or org admin
-      if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permissions to '
-          + `delete the organization [${org.name}].`, 403, 'warn'));
-      }
-
-      // Find existing projects for provided organization
-      return ProjController.findProjects(reqUser, organizationID, true);
+      // Find all the projects
+      return ProjController.findProjects(reqUser, organizationID);
     })
-    .then((projects) => {
-      // Initialize delete query
-      const projectQuery = { uid: projects.map(p => p.uid) };
-
-      // Hard delete
-      if (hardDelete) {
-        Organization.deleteOne({ id: org.id })
-        // Delete all projects in the org
-        .then(() => ProjController.removeProjects(reqUser, projectQuery, hardDelete))
-        .then(() => resolve(org))
-        .catch((error) => reject(error));
-      }
-      // Soft delete
-      else {
-        Organization.updateOne({ id: org.id }, { deleted: true, deletedBy: reqUser })
-        // Soft-delete all projects in the org
-        .then(() => ProjController.removeProjects(reqUser, projectQuery, hardDelete))
-        .then(() => {
-          // Set the returned org deleted field to true since updateOne()
-          // returns a query not the updated org.
-          org.deleted = true;
-          return resolve(org);
-        })
-        .catch((error) => reject(error));
-      }
+    // Delete the organization
+    .then((foundProjects) => {
+      projects = foundProjects;
+      return Organization.deleteOne({ id: org.id });
     })
+    // Delete all projects in the org
+    .then(() => ProjController.removeProjects(reqUser, organizationID, projects))
+    // Resolve the deleted org
+    .then(() => resolve(org))
+    // Catch errors and reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

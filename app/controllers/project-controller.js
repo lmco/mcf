@@ -372,9 +372,7 @@ function updateProjects(reqUser, organizationID, arrProjects) {
       }
       return Promise.all(promisesArray);
     })
-    .then(() => {
-      return findProjectsQuery(findQuery);
-    })
+    .then(() => findProjectsQuery(findQuery))
     // Return the updated projects
     .then((updatedProjects) => resolve(updatedProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -399,13 +397,15 @@ function updateProjects(reqUser, organizationID, arrProjects) {
  *   M.log.error(error);
  * });
  */
-function removeProjects(reqUser, organizationID, arrProjects) {
+function removeProjects(reqUser, organizationID, arrProjects = []) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(Array.isArray(arrProjects), 'Projects is not an array.');
-      utils.assertType(arrProjects, 'object');
+      arrProjects.forEach(p => {
+        assert.ok(typeof p === 'object', 'At least one project is not an object.');
+      });
 
       // Make sure every project object has an ID
       for (let i = 0; i < arrProjects.length; i++) {
@@ -437,30 +437,29 @@ function removeProjects(reqUser, organizationID, arrProjects) {
 
     // Find the projects to check permissions
     findProjectsQuery(removeQuery)
-      .then((foundProjects) => {
+    .then((foundProjects) => {
+      // Error Check: ensure user has permission to delete each project
+      Object(foundProjects).forEach((project) => {
+        // If user does not have permissions
+        if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
+          // User does not have permissions and is not a site-wide admin, reject
+          const msg = `User does not have permission to delete the project ${project.id}.`;
+          return reject(new M.CustomError(msg, 403, 'warn'));
+        }
+      });
+      // The list of projects about to be deleted
+      deletedProjects = foundProjects;
 
-        // Error Check: ensure user has permission to delete each project
-        Object(foundProjects).forEach((project) => {
-          // If user does not have permissions
-          if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-            // User does not have permissions and is not a site-wide admin, reject
-            const msg = `User does not have permission to delete the project ${project.id}.`;
-            return reject(new M.CustomError(msg, 403, 'warn'));
-          }
-        });
-        // The list of projects about to be deleted
-        deletedProjects = foundProjects;
-
-        // Create delete query to remove elements
-        const elementDeleteQuery = { project: { $in: foundProjects.map(p => p._id) } };
-        // Delete all elements in the projects
-        return ElementController.removeElements(reqUser, elementDeleteQuery, true);
-      })
-      // Remove projects
-      .then(() => Project.deleteMany(removeQuery))
-      // Return deleted projects
-      .then(() => resolve(deletedProjects))
-      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+      // Create delete query to remove elements
+      const elementDeleteQuery = { project: { $in: foundProjects.map(p => p._id) } };
+      // Delete all elements in the projects
+      return ElementController.removeElements(reqUser, elementDeleteQuery, true);
+    })
+    // Remove projects
+    .then(() => Project.deleteMany(removeQuery))
+    // Return deleted projects
+    .then(() => resolve(deletedProjects))
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 

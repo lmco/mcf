@@ -744,8 +744,6 @@ function createElement(reqUser, element) {
     // Initialize foundProject
     let foundProj = null;
 
-    M.log.debug('Checking if project exists ...')
-
     // Error Check: make sure the project exists
     ProjController.findProject(reqUser, splitProjectUID[0], splitProjectUID[1])
     .then((proj) => {
