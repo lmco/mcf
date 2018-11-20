@@ -23,6 +23,7 @@ const chai = require('chai');
 
 // MBEE modules
 const validators = M.require('lib.validators');
+const AuthModule = M.require(`auth.${M.config.auth.strategy}`);
 
 /* --------------------( Main )-------------------- */
 /**
@@ -184,14 +185,14 @@ function verifyUserUsername(done) {
  */
 function verifyUserPassword(done) {
   // Valid passwords
-  chai.expect(validators.user.password('Ilovespace123!')).to.equal(true);
-  chai.expect(validators.user.password('sp3c1alChar5^&*')).to.equal(true);
+  chai.expect(validators.user.password('Ilovespace123!', AuthModule)).to.equal(true);
+  chai.expect(validators.user.password('sp3c1alChar5^&*', AuthModule)).to.equal(true);
 
   // Invalid passwords
-  chai.expect(validators.user.password('nouppercase3')).to.equal(false);
-  chai.expect(validators.user.password('noNumber')).to.equal(false);
-  chai.expect(validators.user.password('2shorT')).to.equal(false);
-  chai.expect(validators.user.password('NOLOWERCASE567')).to.equal(false);
+  chai.expect(validators.user.password('nouppercase3', AuthModule)).to.equal(false);
+  chai.expect(validators.user.password('noNumber', AuthModule)).to.equal(false);
+  chai.expect(validators.user.password('2shorT', AuthModule)).to.equal(false);
+  chai.expect(validators.user.password('NOLOWERCASE567', AuthModule)).to.equal(false);
   done();
 }
 

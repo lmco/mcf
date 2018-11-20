@@ -151,13 +151,18 @@ function verifyInvalidPassword(done) {
  * in the createUser test.
  */
 function updateUser(done) {
+  // Define query
+  const query = { username: testData.users[1].username };
+
+  // Define new userdata
+  const newUserData = {
+    fname: `${testData.users[1].fname}edit`,
+    lname: testData.users[1].lname
+  };
+
   // Find and updated the user created in the previous createUser test.
-  User.findOne({ username: testData.users[1].username })
-  .then((foundUser) => {
-    foundUser.fname = `${testData.users[1].fname}edit`;
-    foundUser.lname = testData.users[1].lname;
-    return foundUser.save();
-  })
+  User.updateOne(query, newUserData)
+  .then(() => User.findOne(query))
   .then((updatedUser) => {
     chai.expect(updatedUser.username).to.equal(testData.users[1].username);
     chai.expect(updatedUser.fname).to.equal(`${testData.users[1].fname}edit`);
@@ -182,21 +187,22 @@ function softDeleteUser(done) {
   // behavior with the deleted and deletedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
 
+  // Define query
+  const query = { username: testData.users[1].username };
+
+  // Define new userdata
+  const newUserData = {
+    deleted: true,
+    deletedOn: Date.now()
+  };
   // Find the user previously created and updated in createUser and updateUser
   // tests.
-  User.findOne({ username: testData.users[1].username })
-  .then((user) => {
-    // Set the User deleted field
-    user.deleted = true;
-    // Save the updated User object
-    return user.save();
-  })
-  // Find the previously soft deleted user
-  .then((user) => User.findOne({ username: user.username }))
-  .then((user) => {
+  User.updateOne(query, newUserData)
+  .then((user) => User.findOne(query))
+  .then((deletedUser) => {
     // Verify the soft delete was successful
-    chai.expect(user.deletedOn).to.not.equal(null);
-    chai.expect(user.deleted).to.equal(true);
+    chai.expect(deletedUser.deletedOn).to.not.equal(null);
+    chai.expect(deletedUser.deleted).to.equal(true);
     done();
   })
   .catch((error) => {

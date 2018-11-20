@@ -2,11 +2,11 @@
   "users": [
     {
       "adminUsername": "test_admin",
-      "adminPassword": "test12345"
+      "adminPassword": "Test12345@"
     },
     {
       "username": "nonadminuser01",
-      "password": "Password123",
+      "password": "Password123@",
       "preferredName": "nonadmin user",
       "fname": "userFirstname",
       "lname": "userLastname",
@@ -17,7 +17,7 @@
     },
     {
       "username": "nonadminuser02",
-      "password": "Password123",
+      "password": "Password123@",
       "preferredName": "nonadmin user",
       "fname": "userFirstname",
       "lname": "userLastname",
@@ -28,7 +28,7 @@
     },
     {
       "username": "nonadminuser03",
-      "password": "Password123",
+      "password": "Password123@",
       "preferredName": "nonadmin user",
       "fname": "userFirstname",
       "lname": "userLastname",
@@ -39,7 +39,7 @@
     },
     {
       "username": "nonadminuser04",
-      "password": "Password123",
+      "password": "Password123@",
       "preferredName": "nonadmin user",
       "fname": "userFirstname",
       "lname": "userLastname",
