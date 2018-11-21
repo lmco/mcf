@@ -75,7 +75,7 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
@@ -89,7 +89,7 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
 
     // Error Check: Ensure user has permissions to find deleted webhooks
     if (softDeleted && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
     // Check softDeleted flag true
     if (softDeleted) {
@@ -103,17 +103,17 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
       // Error Check: ensure webhook was found
       if (webhooks.length === 0) {
         // No webhooks found, reject error
-        return reject(new M.CustomError('Webhook not found.', 404, 'warn'));
+        throw new M.CustomError('Webhook not found.', 404, 'warn');
       }
 
       // Error Check: ensure no more than one webhook was found
       if (webhooks.length > 1) {
-        return reject(new M.CustomError('More than one webhook found.', 400, 'warn'));
+        throw new M.CustomError('More than one webhook found.', 400, 'warn');
       }
 
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!webhooks[0].project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
       // All checks passed, resolve webhook
@@ -186,7 +186,7 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
         'Webhook object contains invalid keys.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query parameters
@@ -200,7 +200,7 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
     .then((foundWebhook) => {
       // Error Check: ensure no existing webhook was found
       if (foundWebhook.length > 0) {
-        return reject(new M.CustomError('A webhook with the same ID already exists.', 403, 'warn'));
+        throw new M.CustomError('A webhook with the same ID already exists.', 403, 'warn');
       }
 
       // Find the project
@@ -209,7 +209,7 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
     .then((project) => {
       // Error check: make sure user has write permissions on project
       if (!project.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
       // Create webhook object
@@ -281,7 +281,7 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
         'Update object contains invalid keys.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Check if webhookUpdated is instance of Webhook model
@@ -298,7 +298,7 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
       // Error Check: ensure reqUser is a project admin or global admin
       if (!webhook.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
       // Get list of keys the user is trying to update
@@ -315,7 +315,7 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
         // Error Check: check if updated field also exists in the original webhook.
         if (!webhook.toJSON().hasOwnProperty(updateField)) {
           // Original webhook does NOT contain updatedField, reject error
-          return reject(new M.CustomError(`Webhook does not contain field ${updateField}.`, 400, 'warn'));
+          throw new M.CustomError(`Webhook does not contain field ${updateField}.`, 400, 'warn');
         }
 
         // Check if updated field is equal to the original field
@@ -327,16 +327,16 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
           // field cannot be updated, reject error
-          return reject(new M.CustomError(
+          throw new M.CustomError(
             `Webhook property [${updateField}] cannot be changed.`, 403, 'warn'
-          ));
+          );
         }
 
         // Check if updateField type is 'Mixed'
         if (Webhook.Webhook.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof webhookUpdated[updateField] !== 'object') {
-            return reject(new M.CustomError(`${updateField} must be an object`, 400, 'warn'));
+            throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
           }
 
           // Update each value in the object
@@ -398,13 +398,13 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
       assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Error Check: if hard deleting, ensure user is global admin
     if (hardDelete && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permission to hard delete a'
-        + ' webhook.', 403, 'warn'));
+      throw new M.CustomError('User does not have permission to hard delete a'
+        + ' webhook.', 403, 'warn');
     }
 
     // Find the webhook
@@ -412,7 +412,7 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete
     .then((webhook) => {
       // Error Check: ensure user has permissions to delete webhook
       if (!webhook.project.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
       // Hard delete

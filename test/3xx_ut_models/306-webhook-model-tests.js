@@ -68,10 +68,9 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create the project model object
       const newProject = new Project({
-        id: testData.projects[1].id,
+        id: utils.createID(org.id, testData.projects[1].id),
         name: testData.projects[1].name,
-        org: org._id,
-        uid: `${org.id}:${testData.projects[1].id}`
+        org: org._id
       });
 
         // Save the project model object to the database
@@ -80,7 +79,6 @@ describe(M.getModuleName(module.filename), () => {
     .then((retProj) => {
       // Update project for test data
       project = retProj;
-
       done();
     })
     .catch((error) => {
@@ -96,7 +94,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the project created in before()
-    Project.findOneAndRemove({ uid: project.uid })
+    Project.findOneAndRemove({ id: project.id })
     // Remove the org created in before()
     .then(() => Org.findOneAndRemove({ id: org.id }))
     .then(() => db.disconnect())
@@ -126,7 +124,7 @@ describe(M.getModuleName(module.filename), () => {
 function createOutgoingWebhook(done) {
   // Create webhook object
   const webhook = new Webhook.Outgoing({
-    id: utils.createID(org.id, project.id, testData.webhooks[0].id),
+    id: utils.createID(project.id, testData.webhooks[0].id),
     name: testData.webhooks[0].name,
     project: project,
     triggers: testData.webhooks[0].triggers,
@@ -137,9 +135,7 @@ function createOutgoingWebhook(done) {
   webhook.save()
   .then((createdWebhook) => {
     // Verify results
-    chai.expect(createdWebhook.id).to.equal(utils.createID(
-      org.id, project.id, testData.webhooks[0].id
-    ));
+    chai.expect(createdWebhook.id).to.equal(utils.createID(project.id, testData.webhooks[0].id));
     chai.expect(createdWebhook.triggers.length).to.equal(testData.webhooks[0].triggers.length);
     done();
   })
@@ -157,7 +153,7 @@ function createOutgoingWebhook(done) {
 function createIncomingWebhook(done) {
   // Create webhook object
   const webhook = new Webhook.Incoming({
-    id: utils.createID(org.id, project.id, testData.webhooks[2].id),
+    id: utils.createID(project.id, testData.webhooks[2].id),
     name: testData.webhooks[2].name,
     project: project,
     triggers: testData.webhooks[2].triggers,
@@ -169,9 +165,7 @@ function createIncomingWebhook(done) {
   webhook.save()
   .then((createdWebhook) => {
     // Verify results
-    chai.expect(createdWebhook.id).to.equal(utils.createID(
-      org.id, project.id, testData.webhooks[2].id
-    ));
+    chai.expect(createdWebhook.id).to.equal(utils.createID(project.id, testData.webhooks[2].id));
     chai.expect(createdWebhook.triggers.length).to.equal(testData.webhooks[2].triggers.length);
     done();
   })
@@ -188,11 +182,11 @@ function createIncomingWebhook(done) {
  */
 function findWebhook(done) {
   // Find the webhook
-  Webhook.Webhook.findOne({ id: utils.createID(org.id, project.id, testData.webhooks[0].id) })
+  Webhook.Webhook.findOne({ id: utils.createID(project.id, testData.webhooks[0].id) })
   .then((webhook) => {
     // Verify results
     chai.expect(webhook.name).to.equal(testData.webhooks[0].name);
-    chai.expect(webhook.id).to.equal(utils.createID(org.id, project.id, testData.webhooks[0].id));
+    chai.expect(webhook.id).to.equal(utils.createID(project.id, testData.webhooks[0].id));
     chai.expect(webhook.triggers.length).to.equal(testData.webhooks[0].triggers.length);
     chai.expect(webhook.responses[0].method).to.equal(testData.webhooks[0].responses[0].method);
     done();
@@ -210,7 +204,7 @@ function findWebhook(done) {
  */
 function getPublicData(done) {
   // Find the outgoing webhook
-  Webhook.Webhook.findOne({ id: utils.createID(org.id, project.id, testData.webhooks[0].id) })
+  Webhook.Webhook.findOne({ id: utils.createID(project.id, testData.webhooks[0].id) })
   .then((webhook) => {
     // Get public data
     const outgoingPub = (webhook.getPublicData());
@@ -221,7 +215,7 @@ function getPublicData(done) {
 
     // Find incoming webhook
     return Webhook.Webhook.findOne({
-      id: utils.createID(org.id, project.id, testData.webhooks[2].id)
+      id: utils.createID(project.id, testData.webhooks[2].id)
     });
   })
   .then((webhook) => {
@@ -252,7 +246,7 @@ function validateWebhook(done) {
   };
 
   // Find the incoming webhooks
-  Webhook.Webhook.findOne({ id: utils.createID(org.id, project.id, testData.webhooks[2].id) })
+  Webhook.Webhook.findOne({ id: utils.createID(project.id, testData.webhooks[2].id) })
   .then((webhook) => {
     // Call verify function
     const valid = webhook.verifyAuthority(tokenObject[webhook.tokenLocation]);
@@ -274,7 +268,7 @@ function validateWebhook(done) {
  */
 function updateWebhook(done) {
   // Find the webhook
-  Webhook.Webhook.findOne({ id: utils.createID(org.id, project.id, testData.webhooks[0].id) })
+  Webhook.Webhook.findOne({ id: utils.createID(project.id, testData.webhooks[0].id) })
   .then((webhook) => {
     // Change name of webhook
     webhook.name = 'Updated Name';

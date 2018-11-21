@@ -23,6 +23,7 @@ const mongoose = require('mongoose');
 
 // MBEE modules
 const validators = M.require('lib.validators');
+const utils = M.require('lib.utils');
 const extensions = M.require('models.plugin.extensions');
 
 
@@ -60,8 +61,9 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: true,
     index: true,
+    unique: true,
     match: RegExp(validators.project.id),
-    maxlength: [36, 'Too many characters in username'],
+    maxlength: [255, 'Too many characters in username'],
     set: function(_id) {
       // Check value undefined
       if (typeof this.id === 'undefined') {
@@ -94,25 +96,6 @@ const ProjectSchema = new mongoose.Schema({
       }
       // No change, return the value
       return this.org;
-    }
-  },
-  uid: {
-    type: String,
-    unique: true,
-    required: true,
-    set: function(_uid) {
-      // Check value undefined
-      if (typeof this.uid === 'undefined') {
-        // Return value to set it
-        return _uid;
-      }
-      // Check value NOT equal to db value
-      if (_uid !== this.uid) {
-        // Immutable field, return error
-        M.log.warn('UID cannot be changed.');
-      }
-      // No change, return the value
-      return this.uid;
     }
   },
   name: {
@@ -164,7 +147,7 @@ ProjectSchema.methods.getPublicData = function() {
 
   // Return the projects public fields
   return {
-    id: this.id,
+    id: utils.parseID(this.id).pop(),
     // NOTE (jk): Not sure why the toString is needed, but a buffer gets
     // returned when posting a project via the API
     org: this.org.id,
@@ -232,8 +215,14 @@ ProjectSchema.methods.getPermissions = function(user) {
   return permissions;
 };
 
+// TODO - Should method use statics instead of statics using methods?
 ProjectSchema.statics.getVisibilityLevels = function() {
   return ProjectSchema.methods.getVisibilityLevels();
+};
+
+// TODO - Should method use statics instead of statics using methods?
+ProjectSchema.statics.getValidUpdateFields = function() {
+  return ProjectSchema.methods.getValidUpdateFields();
 };
 
 /**

@@ -70,10 +70,9 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create the project model object
       const newProject = new Project({
-        id: testData.projects[1].id,
+        id: utils.createID(org.id, testData.projects[1].id),
         name: testData.projects[1].name,
-        org: org._id,
-        uid: `${org.id}:${testData.projects[1].id}`
+        org: org._id
       });
 
       // Save the project model object to the database
@@ -98,7 +97,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the project created in before()
-    Project.findOneAndRemove({ uid: project.uid })
+    Project.findOneAndRemove({ id: project.id })
     // Remove the org created in before()
     .then(() => Org.findOneAndRemove({ id: org.id }))
     .then(() => db.disconnect())
@@ -127,7 +126,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function createRootPackage(done) {
   // Create unique ID
-  const uniqueID = utils.createID(org.id, project.id, testData.elements[0].id);
+  const uniqueID = utils.createID(project.id, testData.elements[0].id);
 
   // Create the root package element object
   const newPackage = new Element.Package({
@@ -163,14 +162,14 @@ function createBlock(done) {
   let pkg;
   // Find root package element created in createRootPackage test
   Element.Package.findOne({
-    id: utils.createID(org.id, project.id, testData.elements[0].id) })
+    id: utils.createID(project.id, testData.elements[0].id) })
   .then((_pkg) => {
     // Set function-global variable
     pkg = _pkg;
 
     // Create new block element object
     const newBlock = new Element.Block({
-      id: utils.createID(org.id, project.id, testData.elements[1].id),
+      id: utils.createID(project.id, testData.elements[1].id),
       name: testData.elements[1].name,
       project: project._id,
       parent: pkg._id
@@ -182,7 +181,7 @@ function createBlock(done) {
   .then((createdBlock) => {
     // Check block element object saved correctly
     chai.expect(createdBlock.id).to.equal(
-      utils.createID(org.id, project.id, testData.elements[1].id)
+      utils.createID(project.id, testData.elements[1].id)
     );
     chai.expect(createdBlock.name).to.equal(testData.elements[1].name);
     chai.expect(createdBlock.project.toString()).to.equal(project._id.toString());
@@ -211,7 +210,7 @@ function createRelationship(done) {
 
   // Start by grabbing the root package
   Element.Package.findOne({
-    id: utils.createID(org.id, project.id, testData.elements[0].id) })
+    id: utils.createID(project.id, testData.elements[0].id) })
   .then((_pkg) => {
     // Set function-global variable
     pkg = _pkg;
@@ -223,7 +222,7 @@ function createRelationship(done) {
 
     // Create the new relationship connecting the existing block
     const newRelationship = new Element.Relationship({
-      id: utils.createID(org.id, project.id, testData.elements[3].id),
+      id: utils.createID(project.id, testData.elements[3].id),
       name: testData.elements[3].name,
       project: project._id,
       parent: pkg._id,
@@ -237,7 +236,7 @@ function createRelationship(done) {
   .then((createdRelationship) => {
     // Make sure it created what we expect and finish
     chai.expect(createdRelationship.id).to.equal(
-      utils.createID(org.id, project.id, testData.elements[3].id)
+      utils.createID(project.id, testData.elements[3].id)
     );
     chai.expect(createdRelationship.name).to.equal(testData.elements[3].name);
     chai.expect(createdRelationship.project.toString()).to.equal(project._id.toString());
@@ -265,7 +264,7 @@ function createRelationship(done) {
  */
 function findBlock(done) {
   // Find the block
-  Element.Element.findOne({ id: utils.createID(org.id, project.id, testData.elements[1].id) })
+  Element.Element.findOne({ id: utils.createID(project.id, testData.elements[1].id) })
   .then((element) => {
     // Verify found element is correct
     chai.expect(element.name).to.equal(testData.elements[1].name);
@@ -285,12 +284,12 @@ function findBlock(done) {
 function updateBlock(done) {
   // Update the block
   Element.Element.findOneAndUpdate(
-    { id: utils.createID(org.id, project.id, testData.elements[1].id) },
+    { id: utils.createID(project.id, testData.elements[1].id) },
     { name: 'No more looping' }
   )
   // Find the updated element
   .then(() => Element.Element.findOne({
-    id: utils.createID(org.id, project.id, testData.elements[1].id) }))
+    id: utils.createID(project.id, testData.elements[1].id) }))
   .then((element) => {
     // Verify the found element was update successfully
     chai.expect(element.name).to.equal('No more looping');
@@ -310,7 +309,7 @@ function updateBlock(done) {
 function verifyBlankElemName(done) {
   // Create the block element object
   const newElement = new Element.Block({
-    id: utils.createID(org.id, project.id, testData.elements[5].id),
+    id: utils.createID(project.id, testData.elements[5].id),
     name: testData.elements[5].name,
     project: project._id,
     parent: null
@@ -321,7 +320,7 @@ function verifyBlankElemName(done) {
   .then((retElement) => {
     // Check the block element saved correctly
     chai.expect(retElement.id).to.equal(
-      utils.createID(org.id, project.id, testData.elements[5].id)
+      utils.createID(project.id, testData.elements[5].id)
     );
     chai.expect(retElement.name).to.equal(testData.elements[5].name);
     done();
@@ -340,19 +339,19 @@ function verifyBlankElemName(done) {
 function deleteElements(done) {
   // Find and delete the element of type 'relationship'
   Element.Relationship.findOneAndRemove({
-    id: utils.createID(org.id, project.id, testData.elements[3].id) })
+    id: utils.createID(project.id, testData.elements[3].id) })
 
   // Find and delete the element of type 'Block'
   .then(() => Element.Block.findOneAndRemove({
-    id: utils.createID(org.id, project.id, testData.elements[1].id) }))
+    id: utils.createID(project.id, testData.elements[1].id) }))
 
   // Find and delete the element of type 'Package'
   .then(() => Element.Package.findOneAndRemove({
-    id: utils.createID(org.id, project.id, testData.elements[0].id) }))
+    id: utils.createID(project.id, testData.elements[0].id) }))
 
   // Find and delete the other elements
   .then(() => Element.Block.findOneAndRemove({
-    id: utils.createID(org.id, project.id, testData.elements[5].id) }))
+    id: utils.createID(project.id, testData.elements[5].id) }))
 
   // Attempt to find any elements
   .then(() => Element.Element.find())

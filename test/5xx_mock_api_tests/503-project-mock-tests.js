@@ -370,12 +370,10 @@ function deleteProject(done) {
  */
 function postProjects(done) {
   // Create request object
-  const body = {
-    projects: [
-      testData.projects[4],
-      testData.projects[5]
-    ]
-  };
+  const body = [
+    testData.projects[4],
+    testData.projects[5]
+  ];
   const params = { orgid: org.id };
   const method = 'POST';
   const req = getReq(params, body, method);
@@ -402,13 +400,18 @@ function postProjects(done) {
  */
 function patchProjects(done) {
   // Create request object
-  const body = {
-    projects: [
-      testData.projects[4],
-      testData.projects[5]
-    ],
-    update: { custom: { department: 'Space' }, name: 'Useless Project' }
-  };
+  const body = [
+    testData.projects[4],
+    testData.projects[5]
+  ];
+
+  // Add updates to each project
+  body.forEach((project) => {
+    project.custom = project.custom || {};
+    project.custom.department = 'Space';
+    project.name = 'Updated Project';
+  });
+
   const params = { orgid: org.id };
   const method = 'PATCH';
   const req = getReq(params, body, method);
@@ -422,8 +425,8 @@ function patchProjects(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json[0].name).to.equal('Useless Project');
-    chai.expect(json[1].name).to.equal('Useless Project');
+    chai.expect(json[0].name).to.equal('Updated Project');
+    chai.expect(json[1].name).to.equal('Updated Project');
     chai.expect(json[0].custom.department).to.equal('Space');
     chai.expect(json[1].custom.department).to.equal('Space');
     done();
@@ -465,13 +468,11 @@ function getProjects(done) {
  */
 function deleteProjects(done) {
   // Create request object
-  const body = {
-    projects: [
-      testData.projects[4],
-      testData.projects[5]
-    ],
-    hardDelete: true
-  };
+  const body = [
+    testData.projects[4],
+    testData.projects[5]
+  ];
+
   const params = { orgid: org.id };
   const method = 'DELETE';
   const req = getReq(params, body, method);

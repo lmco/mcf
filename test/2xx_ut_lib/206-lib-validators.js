@@ -87,8 +87,8 @@ function verifyOrgName(done) {
  */
 function verifyProjectID(done) {
   // Valid IDs
-  chai.expect(RegExp(validators.project.id).test('proj3')).to.equal(true);
-  chai.expect(RegExp(validators.project.id).test('3proj-id')).to.equal(true);
+  chai.expect(RegExp(validators.project.id).test('someorgid:proj3')).to.equal(true);
+  chai.expect(RegExp(validators.project.id).test('anotherorgid:3proj-id')).to.equal(true);
 
   // Invalid IDs
   chai.expect(RegExp(validators.project.id).test('Proj3')).to.equal(false);
