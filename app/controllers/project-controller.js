@@ -577,12 +577,13 @@ function findProjectsQuery(query) {
  * before use.
  *
  * @param {User} reqUser - The object containing the requesting user.
+ * @param {String} organizationID - The ID of the organization containing the project.
  * @param {Object} project - The object of the project being created.
  *
  * @returns {Promise} created project object
  *
  * @example
- * createProject({User}, { id: 'projectID', name: 'New Project', org: { id: 'orgID' } })
+ * createProject({User}, 'orgid', { id: 'projectID', name: 'New Project' })
  * .then(function(project) {
  *   // Do something with the newly created project
  * })
@@ -590,7 +591,7 @@ function findProjectsQuery(query) {
  *   M.log.error(error);
  * });
  */
-function createProject(reqUser, project) {
+function createProject(reqUser, organizationID, project) {
   return new Promise((resolve, reject) => {
     // Initialize optional fields with a default
     let custom = {};
@@ -600,11 +601,9 @@ function createProject(reqUser, project) {
     try {
       assert.ok(project.id !== undefined, 'project.id is undefined');
       assert.ok(project.name !== undefined, 'project.name is undefined');
-      assert.ok(project.org !== undefined, 'project.org is undefined');
-      assert.ok(project.org.id !== undefined, 'project.org.id is undefined');
+      assert.ok(typeof organizationID === 'string', 'The organization ID is not a string.');
       assert.strictEqual(typeof project.id, 'string');
       assert.strictEqual(typeof project.name, 'string');
-      assert.strictEqual(typeof project.org.id, 'string');
       // Error Check: ensure project only contains valid keys
       assert.ok(Project.validateObjectKeys(project), 'Project contains invalid keys.');
 
@@ -627,7 +626,7 @@ function createProject(reqUser, project) {
 
     // Sanitize query inputs
     const projName = sani.sanitize(project.name);
-    const orgID = sani.sanitize(project.org.id);
+    const orgID = sani.sanitize(organizationID);
     const projID = utils.createID(orgID, sani.sanitize(project.id));
 
     // Initialize function-wide variables
@@ -717,9 +716,9 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.strictEqual(typeof organizationID, 'string', 'organizationID is not a string');
-      assert.strictEqual(typeof projectID, 'string', 'projectID is not a string');
-      assert.strictEqual(typeof projectUpdated, 'object', 'projectUpdated is not an object');
+      assert.strictEqual(typeof organizationID, 'string', 'OrganizationID is not a string.');
+      assert.strictEqual(typeof projectID, 'string', 'ProjectID is not a string.');
+      assert.strictEqual(typeof projectUpdated, 'object', 'ProjectUpdated is not an object.');
       // Error Check: ensure projectUpdated only contains valid keys
       assert.ok(Project.validateObjectKeys(projectUpdated), 'Update object contains invalid keys.');
     }
