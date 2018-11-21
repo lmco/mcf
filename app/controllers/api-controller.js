@@ -839,7 +839,7 @@ function patchProjects(req, res) {
   }
 
   // Update the specified projects
-  // NOTE: updateProjects() sanitizes req.body.update
+  // NOTE: updateProjects() sanitizes req.params.orgid
   ProjectController.updateProjects(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the updated projects

@@ -749,7 +749,6 @@ function removeOrg(reqUser, organizationID) {
       // Find all the projects
       return ProjController.findProjects(reqUser, organizationID);
     })
-    // Delete the organization
     .then((foundProjects) => {
       projects = foundProjects.map(p => ({ id: utils.parseID(p.id).pop() }));
 

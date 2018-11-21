@@ -277,10 +277,10 @@ function updateProjects(reqUser, organizationID, arrProjects) {
       throw new M.CustomError(error.message, 400, 'warn');
     }
 
-    const projectIDs = arrProjects.map(p => utils.createID(organizationID, p.id));
+    const projectIDs = arrProjects.map(p => sani.sanitize(utils.createID(organizationID, p.id)));
     const findQuery = {
       id: {
-        $in: sani.sanitize(projectIDs)
+        $in: projectIDs
       }
     };
 
@@ -669,14 +669,10 @@ function createProject(reqUser, project) {
         lastModifiedBy: reqUser
       });
 
-      M.log.debug('New project created. Saving ...');
-
       // Save new project
       return newProject.save();
     })
     .then(savedProject => {
-      M.log.debug('New project saved.');
-      M.log.debug('Creating root element ...');
       // Create root model element for new project
       createdProject = savedProject;
       const rootElement = {
