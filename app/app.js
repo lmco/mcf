@@ -64,6 +64,7 @@ function initApp() {
     // Configure the static/public directory
     const staticDir = path.join(__dirname, '..', 'build', 'public');
     app.use(express.static(staticDir));
+    app.use('/favicon.ico', express.static('build/public/img/favicon.ico'));
 
     // Allows receiving JSON in the request body
     app.use(bodyParser.json());

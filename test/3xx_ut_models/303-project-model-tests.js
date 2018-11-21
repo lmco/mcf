@@ -50,16 +50,17 @@ describe(M.getModuleName(module.filename), () => {
    * organization to be used in tests.
    */
   before((done) => {
-    db.connect();
+    db.connect()
+    .then(() => {
+      // Create a parent organization before creating any projects
+      org = new Org({
+        id: testData.orgs[0].id,
+        name: testData.orgs[0].name
+      });
 
-    // Create a parent organization before creating any projects
-    org = new Org({
-      id: testData.orgs[0].id,
-      name: testData.orgs[0].name
-    });
-
-    // Save the org via the org model
-    org.save()
+      // Save the org via the org model
+      return org.save();
+    })
     .then((retOrg) => {
       // Set file-global org
       org = retOrg;
@@ -79,14 +80,9 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Delete the org
     Org.findOneAndRemove({ id: org.id })
-    .then(() => {
-      // Delete should succeed, close DB connection
-      db.disconnect();
-      done();
-    })
+    .then(() => db.disconnect())
+    .then(() => done())
     .catch((error) => {
-      db.disconnect();
-
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);

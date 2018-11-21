@@ -157,7 +157,7 @@ function createOrgs(reqUser, arrOrgs) {
         // Get the ID's of the conflicting orgs
         const foundIDs = foundOrgs.map(o => o.id);
         throw new M.CustomError('Org(s) with the following ID(s) already'
-          + ` exists: [${foundIDs.toString()}.`, 403, 'warn');
+          + ` exists: [${foundIDs.toString()}].`, 403, 'warn');
       }
 
       // Convert each object in arrOrgs into an Org object and set permissions
@@ -170,10 +170,16 @@ function createOrgs(reqUser, arrOrgs) {
         orgObject.lastModifiedBy = reqUser;
         return orgObject;
       });
+
       // Save the organizations
       return Organization.create(orgObjects);
     })
-    .then((createdOrgs) => resolve(createdOrgs))
+    .then((createdOrgs) => {
+      // Create the find query
+      const findcreatedOrgsQuery = { id: { $in: sani.sanitize(createdOrgs.map(o => o.id)) } };
+      return findOrgsQuery(findcreatedOrgsQuery);
+    })
+    .then((foundOrgs) => resolve(foundOrgs))
     .catch((error) => {
       // If error is a CustomError, reject it
       if (error instanceof M.CustomError) {
@@ -568,7 +574,10 @@ function createOrg(reqUser, newOrgData) {
       // Save new org
       return newOrg.save();
     })
-    .then((createdOrg) => resolve(createdOrg))
+    // Find created org
+    .then((createdOrg) => findOrgsQuery({ id: createdOrg.id }))
+    // Return found org
+    .then((foundOrg) => resolve(foundOrg[0]))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
