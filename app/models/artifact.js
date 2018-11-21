@@ -38,16 +38,16 @@ const extensions = M.require('models.plugin.extensions');
  * and organization.
  * @property {Object} history - An array of object that tracks artifact's
  * history.
- * @property {String} hash - [Within Histroy] Hash string of the stored artifact.
- * @property {Date} updatedOn - [Within Histroy] Updated time for specific hash.
- * @property {User} user - [Within Histroy] User that updated specific hash.
+ * @property {String} hash - [Within History] Hash string of the stored artifact.
+ * @property {Date} updatedOn - [Within History] Updated time for specific hash.
+ * @property {User} user - [Within History] User that updated specific hash.
  * @property {String} filename - The filename of the artifact.
- * @property {String} contentType - The file extention. E.g: 'png', 'dat'
+ * @property {String} contentType - The file extension. E.g: 'png', 'dat'
  * @property {Project} project - A reference to an artifact's project.
  * @property {Date} createdOn - The date which an artifact was created.
  * @property {Date} updatedOn - The date which an artifact was updated.
- * @property {Date} createdOn - The date the artifact was soft deleted or null
- * @property {Boolean} deleted - Indicates if an artifact has been soft deleted.
+ * @property {Date} archivedOn - The date the artifact was archived or null
+ * @property {Boolean} archived - Indicates if an artifact has been archived.
  *
  */
 const ArtifactSchema = new mongoose.Schema({

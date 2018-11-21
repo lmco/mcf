@@ -436,9 +436,8 @@ function rejectDeleteNonExisting(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
-    // Set soft delete parameter in request body
     body: JSON.stringify({
-      soft: false
+      hard: false
     })
   },
   (err, response, body) => {

@@ -73,8 +73,8 @@ const options = { discriminatorKey: 'type' };
  * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
  * @property {Date} createdOn - The date which an element was created.
  * @property {Date} updatedOn - The date which an element was updated.
- * @property {Date} createdOn - The date the element was soft deleted or null
- * @property {Boolean} deleted - Indicates if a element has been soft deleted.
+ * @property {Date} archivedOn - The date the element was archived or null
+ * @property {Boolean} archived - Indicates if an element has been archived.
  *
  */
 const ElementSchema = new mongoose.Schema({

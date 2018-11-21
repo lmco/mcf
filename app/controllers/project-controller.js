@@ -59,7 +59,8 @@ const utils = M.require('lib.utils');
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {Boolean} softDeleted - The optional flag to denote searching for deleted projects
+ * @param {Boolean} archived - The optional flag to denote also searching for
+ *                             archived projects
  *
  * @return {Array} array of found project objects
  *
@@ -72,12 +73,12 @@ const utils = M.require('lib.utils');
  *   M.log.error(error);
  * });
  */
-function findProjects(reqUser, organizationID, softDeleted = false) {
+function findProjects(reqUser, organizationID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -86,19 +87,19 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
-    const searchParams = { id: { $regex: `^${orgID}:` }, deleted: false };
+    const searchParams = { id: { $regex: `^${orgID}:` }, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted projects
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived projects
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // softDeleted flag true, remove deleted: false
-    if (softDeleted) {
-      delete searchParams.deleted;
+    // archived flag true, remove archived: false
+    if (archived) {
+      delete searchParams.archived;
     }
 
     // Error Check - ensure the organization exists
-    OrgController.findOrg(reqUser, organizationID, softDeleted)
+    OrgController.findOrg(reqUser, organizationID, archived)
     // Find projects
     .then(() => findProjectsQuery(searchParams))
     .then((projects) => resolve(projects
@@ -475,7 +476,7 @@ function removeProjects(_reqUser, _organizationID, _arrProjects = []) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being searched for.
- * @param {Boolean} softDeleted - The flag to control whether or not to find softDeleted projects.
+ * @param {Boolean} archived - The flag to control whether or not to find archived projects.
  *
  * @return {Project} The found project
  *
@@ -488,13 +489,13 @@ function removeProjects(_reqUser, _organizationID, _arrProjects = []) {
  *   M.log.error(error);
  * });
  */
-function findProject(reqUser, organizationID, projectID, softDeleted = false) {
+function findProject(reqUser, organizationID, projectID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -504,16 +505,16 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
     const orgID = sani.sanitize(organizationID);
     const projID = utils.createID(orgID, sani.sanitize(projectID));
 
-    // Set search Params for projUID and deleted = false
-    const searchParams = { id: projID, deleted: false };
+    // Set search Params for projUID and archived: false
+    const searchParams = { id: projID, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted projects
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived projects
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // softDeleted flag true, remove deleted: false
-    if (softDeleted) {
-      delete searchParams.deleted;
+    // archived flag true, remove archived: false
+    if (archived) {
+      delete searchParams.archived;
     }
 
     // Find projects
@@ -866,7 +867,7 @@ function removeProject(reqUser, organizationID, projectID) {
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {String} projectID - The project ID of the Project which is being deleted.
+ * @param {String} projectID - The project ID.
  *
  * @return {Promise} Returns a promise that resolves an object where the keys
  * are usernames and the values are permissions objects. The returned object
@@ -929,7 +930,7 @@ function findAllPermissions(reqUser, organizationID, projectID) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} searchedUsername - The string containing the username to be searched for.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {String} projectID - The project ID of the Project which is being deleted.
+ * @param {String} projectID - The project id.
  *
  * @return {Promise} Returns a promise that resolves an Object containing the
  * searched user's permissions on the project. This is returned in the form:
@@ -974,7 +975,7 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {String} projectID - The project ID of the Project which is being deleted.
+ * @param {String} projectID - The project id.
  * @param {String} setUsername - The username of the user who's permissions are being set.
  * @param {String} role - The permission level or type being set for the use
  *

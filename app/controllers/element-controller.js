@@ -53,7 +53,8 @@ const utils = M.require('lib.utils');
  * @param {User} reqUser - The user object of the requesting user.
  * @param {String} organizationID - The organization ID.
  * @param {String} projectID - The project ID.
- * @param {Boolean} softDeleted - A boolean value indicating whether to soft delete.
+ * @param {Boolean} archived - A boolean value indicating whether to also search
+ *                             for archived elements or not.
  *
  * @return {Promise} resolve - element
  *                   reject - error
@@ -66,13 +67,13 @@ const utils = M.require('lib.utils');
  *   M.log.error(error);
  * });
  */
-function findElements(reqUser, organizationID, projectID, softDeleted = false) {
+function findElements(reqUser, organizationID, projectID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -83,16 +84,16 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     const projID = sani.sanitize(projectID);
     const projectUID = utils.createID(orgID, projID);
 
-    const searchParams = { id: { $regex: `^${projectUID}:` }, deleted: false };
+    const searchParams = { id: { $regex: `^${projectUID}:` }, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted elements
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived elements
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // Check softDeleted flag true
-    if (softDeleted) {
-      // softDeleted flag true and User Admin true, remove deleted: false
-      delete searchParams.deleted;
+    // Check archived flag true
+    if (archived) {
+      // archived flag true and User Admin true, remove archived: false
+      delete searchParams.archived;
     }
 
     // Find elements
@@ -537,7 +538,7 @@ function removeElements(reqUser, query, hardDelete = false) {
         // Error Check: ensure user is global admin or project writer
         if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
           throw new M.CustomError('User does not have permissions to '
-              + `delete elements in the project [${element.project.name}].`, 403, 'warn');
+              + `delete/archive elements in the project [${element.project.name}].`, 403, 'warn');
         }
 
         // If the element is a package, remove the children as well
@@ -558,13 +559,13 @@ function removeElements(reqUser, query, hardDelete = false) {
       // If hard delete, delete elements, otherwise update elements
       return (hardDelete)
         ? Element.Element.deleteMany(query)
-        : Element.Element.updateMany(query, { deleted: true, deletedBy: reqUser });
+        : Element.Element.updateMany(query, { archived: true, archivedBy: reqUser });
     })
     // Delete any child elements
     .then(() => ((hardDelete)
       ? Element.Element.deleteMany(childQuery)
-      : Element.Element.updateMany(childQuery, { deleted: true, deletedBy: reqUser })))
-    // Return the deleted elements
+      : Element.Element.updateMany(childQuery, { archived: true, archivedBy: reqUser })))
+    // Return the deleted/archived elements
     .then(() => resolve(foundElements))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -578,7 +579,8 @@ function removeElements(reqUser, query, hardDelete = false) {
  * @param {String} organizationID - The organization ID.
  * @param {String} projectID - The project ID.
  * @param {String} elementID - The element ID.
- * @param {Boolean} softDeleted - A boolean value indicating whether to soft delete.
+ * @param {Boolean} archived - A boolean value indicating whether to also search
+ *                             for archived elements or not.
  *
  * @return {Promise} resolve - element
  *                   reject - error
@@ -592,14 +594,14 @@ function removeElements(reqUser, query, hardDelete = false) {
  *   M.log.error(error);
  * });
  */
-function findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
+function findElement(reqUser, organizationID, projectID, elementID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -613,15 +615,15 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
 
     // Search for an element that matches the id or uuid
     let searchParams = { $and: [{ $or: [{ id: elemUID },
-      { uuid: elemID }] }, { deleted: false }] };
+      { uuid: elemID }] }, { archived: false }] };
 
-    // Error Check: Ensure user has permissions to find deleted elements
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived elements
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // Check softDeleted flag true
-    if (softDeleted) {
-      // softDeleted flag true and User Admin true, remove deleted: false
+    // Check archived flag true
+    if (archived) {
+      // archived flag true and User Admin true, remove archived: false
       searchParams = { $or: [{ id: elemUID }, { uuid: elemID }] };
     }
 
@@ -936,8 +938,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
 }
 
 /**
-==== BASE ====
- * @description This function deletes an element.
+ * @description This function deletes/archives an element.
  *
  * @param {User} reqUser  The user object of the requesting user.
  * @param {String} organizationID  The organization ID.
@@ -990,27 +991,27 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
         return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
       }
 
-      // Hard delete
+      // Delete element
       if (hardDelete) {
         return Element.Element.deleteMany({ $or: [{ _id: element._id }, { parent: element._id }] });
       }
       // Create promises array
       const promises = [];
-      // Soft delete
-      element.deleted = true;
+      // Archive element
+      element.archived = true;
 
-      // Update deleted by field
-      element.deletedBy = reqUser;
+      // Update archivedBy field
+      element.archivedBy = reqUser;
 
       // Add element.save() to promises array
       promises.push(element.save());
 
-      // If the deleted element is a package
+      // If the archived element is a package
       if (element.type === 'Package') {
-        // Soft-delete each of it's children
+        // Archive each of it's children
         element.contains.forEach((child) => {
-          child.deleted = true;
-          child.deletedBy = reqUser;
+          child.archived = true;
+          child.archivedBy = reqUser;
           promises.push(child.save());
         });
       }
@@ -1019,17 +1020,17 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
       return Promise.all(promises);
     })
     .then(() => {
-      // Set deleted boolean on foundElement
-      foundElement.deleted = true;
+      // Set archived boolean on foundElement
+      foundElement.archived = true;
 
       // Trigger webhooks
-      events.emit('Element Deleted', foundElement);
+      events.emit('Element Archived', foundElement);
 
-      // If the deleted element is a package
+      // If the archived element is a package
       if (foundElement.type === 'Package') {
-        // Trigger webhook for each child also deleted
+        // Trigger webhook for each child also archived
         foundElement.contains.forEach((child) => {
-          events.emit('Element Deleted', child);
+          events.emit('Element Archived', child);
         });
       }
 

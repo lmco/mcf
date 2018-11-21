@@ -104,7 +104,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should update multiple orgs at the same time', updateMultipleOrgs);
   it('should find all orgs a user has access to', findAllExistingOrgs);
   it('should delete an existing org', deleteExistingOrg);
-  it('should hard-delete an existing org and its project', hardDeleteProjectAndOrg);
+  it('should delete an existing org and its project', deleteProjectAndOrg);
   it('should reject update of default org', rejectUpdateDefaultOrg);
   it('should reject delete of default org', rejectDefaultOrgDelete);
   it('should add a user to an org', setUserOrgRole);
@@ -393,7 +393,7 @@ function deleteExistingOrg(done) {
  * @description Verify projects deleted when org deleted.
  * Expected error thrown: 'Not Found'
  */
-function hardDeleteProjectAndOrg(done) {
+function deleteProjectAndOrg(done) {
   // Delete an org via controller
   OrgController.removeOrg(adminUser, testData.orgs[3].id, true)
   // Find deleted org

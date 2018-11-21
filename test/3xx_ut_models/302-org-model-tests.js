@@ -84,8 +84,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should find an organization', findOrg);
   it('should update an organization', updateOrg);
   it('should get all permissions of an organization', findOrgPermissions);
-  it('should soft delete an organization', softDeleteOrg);
-  it('should hard delete an organization', deleteOrg);
+  it('should archive an organization', archiveOrg);
+  it('should delete an organization', deleteOrg);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -178,28 +178,28 @@ function findOrgPermissions(done) {
 }
 
 /**
- * @description Soft-deletes the organization previously created in createOrg().
+ * @description Archives the organization previously created in createOrg().
  */
-function softDeleteOrg(done) {
+function archiveOrg(done) {
   // LM: Changed from findOneAndUpdate to a find and then update
   // findOneAndUpdate does not call setters, and was causing strange
-  // behavior with the deleted and deletedOn fields.
+  // behavior with the archived and archivedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
 
   // Find the previously created organization from createOrg.
   Org.findOne({ id: testData.orgs[0].id })
   .then((org) => {
-    // Set the deleted field of the organization to true
-    org.deleted = true;
+    // Set the archived field of the organization to true
+    org.archived = true;
     // Save the updated organization object to the database
     return org.save();
   })
   // Find the previously updated organization
   .then((org) => Org.findOne({ id: org.id }))
   .then((org) => {
-    // Verify the organization has been soft deleted.
-    chai.expect(org.deletedOn).to.not.equal(null);
-    chai.expect(org.deleted).to.equal(true);
+    // Verify the organization has been archived.
+    chai.expect(org.archivedOn).to.not.equal(null);
+    chai.expect(org.archived).to.equal(true);
     done();
   })
   .catch((error) => {
@@ -211,7 +211,7 @@ function softDeleteOrg(done) {
 }
 
 /**
- * @description hard deletes the previously created organization from createOrg.
+ * @description Deletes the previously created organization from createOrg.
  */
 function deleteOrg(done) {
   // find and remove the organization

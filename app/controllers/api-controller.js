@@ -214,26 +214,26 @@ function getOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
   }
 
   // Get all organizations the requesting user has access to
   // NOTE: findOrgs() sanitizes req.user.
-  OrgController.findOrgs(req.user, softDeleted)
+  OrgController.findOrgs(req.user, archived)
   .then((orgs) => {
     // Return only public organization data
     const orgsPublicData = orgs.map(o => o.getPublicData());
@@ -410,23 +410,23 @@ function getOrg(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
   }
 
   // Find the org from it's id
   // NOTE: findOrg() sanitizes req.params.orgid
-  OrgController.findOrg(req.user, req.params.orgid, softDeleted)
+  OrgController.findOrg(req.user, req.params.orgid, archived)
   .then((org) => {
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
@@ -728,23 +728,23 @@ function getProjects(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
   }
 
   // Get all projects the requesting user has access to
   // NOTE: findProjects() sanitizes req.user and org.id.
-  ProjectController.findProjects(req.user, req.params.orgid, softDeleted)
+  ProjectController.findProjects(req.user, req.params.orgid, archived)
   .then((projects) => {
     // Return only public project data
     const projectPublicData = [];
@@ -899,23 +899,23 @@ function getProject(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
   }
 
   // Find the project from it's project.id and org.id
   // NOTE: findProject() sanitizes req.params.projectid and req.params.orgid
-  ProjectController.findProject(req.user, req.params.orgid, req.params.projectid, softDeleted)
+  ProjectController.findProject(req.user, req.params.orgid, req.params.projectid, archived)
   .then((project) => {
     // Return a 200: OK and the project's public data
     res.header('Content-Type', 'application/json');
@@ -1578,23 +1578,23 @@ function getElements(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
   }
 
   // Find all elements from it's org.id and project.id
   // NOTE: findElements() sanitizes req.params.orgid and req.params.projectid
-  ElementController.findElements(req.user, req.params.orgid, req.params.projectid, softDeleted)
+  ElementController.findElements(req.user, req.params.orgid, req.params.projectid, archived)
   .then((elements) => {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
@@ -1821,24 +1821,24 @@ function getElement(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
   }
 
   // Find the element from it's element.id, project.id, and org.id
   // NOTE: findElement() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
   ElementController.findElement(req.user, req.params.orgid,
-    req.params.projectid, req.params.elementid, softDeleted)
+    req.params.projectid, req.params.elementid, archived)
   .then((element) => {
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');
@@ -2000,24 +2000,24 @@ function getWebhook(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
   }
 
   // Find the webhook from it's webhook.id, project.id, and org.id
   // NOTE: findWebhook() sanitizes req.params.webhookid, req.params.projectid, req.params.orgid
   WebhookController.findWebhook(req.user, req.params.orgid,
-    req.params.projectid, req.params.webhookid, softDeleted)
+    req.params.projectid, req.params.webhookid, archived)
   .then((webhook) => {
     // Return a 200: OK and the webhook
     res.header('Content-Type', 'application/json');
@@ -2164,7 +2164,7 @@ function postIncomingWebhook(req, res) {
   const webhookUID = Buffer.from(req.params.webhookid, 'base64').toString();
 
   // Find the webhook
-  WebhookController.findWebhooksQuery({ id: sani.sanitize(webhookUID), deleted: false })
+  WebhookController.findWebhooksQuery({ id: sani.sanitize(webhookUID), archived: false })
   .then((foundWebhook) => {
     // If no webhooks are found, return a 404 Not Found
     if (foundWebhook.length === 0) {
@@ -2211,23 +2211,23 @@ function getArtifact(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
   }
 
   // Find the artifact from it's artifact.id, project.id, and org.id
   // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
   ArtifactController.findArtifact(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid, softDeleted)
+    req.params.projectid, req.params.artifactid, archived)
   .then((artifact) => {
     // Return a 200: OK and the artifact
     res.header('Content-Type', 'application/json');

@@ -57,7 +57,8 @@ const utils = M.require('lib.utils');
  * @description This function finds all organizations a user belongs to.
  *
  * @param {User} reqUser - The user whose organizations to find
- * @param {Boolean} softDeleted - The optional flag to denote searching for deleted orgs
+ * @param {Boolean} archived - The optional flag to denote also searching for
+ *                             archived orgs.
  *
  * @return {Promise} resolve - Array of found organization objects
  *                    reject - error
@@ -72,11 +73,11 @@ const utils = M.require('lib.utils');
  * });
  *
  */
-function findOrgs(reqUser, softDeleted = false) {
+function findOrgs(reqUser, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -84,16 +85,16 @@ function findOrgs(reqUser, softDeleted = false) {
 
     const userID = sani.sanitize(reqUser._id);
 
-    // Set search Params for orgid and deleted = false
-    const searchParams = { 'permissions.read': userID, deleted: false };
+    // Set search Params for orgid and archived: false
+    const searchParams = { 'permissions.read': userID, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted orgs
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived orgs
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // softDeleted flag true, remove deleted: false
-    if (softDeleted) {
-      delete searchParams.deleted;
+    // archived flag true, remove archived: false
+    if (archived) {
+      delete searchParams.archived;
     }
 
     // Find Organizations user has read access
@@ -324,7 +325,7 @@ function updateOrgs(reqUser, query, updateInfo) {
 }
 
 /**
- * @description This functions deletes multiple orgs at a time.
+ * @description This function deletes multiple orgs at a time.
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {Array} arrOrgs - An array of organizations to delete.
@@ -355,7 +356,7 @@ function removeOrgs(reqUser, arrOrgs) {
 
     // Error Check: ensure reqUser is a global admin if hard deleting
     if (!reqUser.admin) {
-      throw new M.CustomError('User does not have permissions to delete.', 403, 'warn');
+      throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
 
     // Define found orgs array
@@ -399,8 +400,8 @@ function removeOrgs(reqUser, arrOrgs) {
  *
  * @param {User} reqUser - The requesting user object.
  * @param {String} organizationID - The string of the org ID.
- * @param {Boolean} softDeleted - An optional flag that allows users to
- *  search for soft deleted projects as well.
+ * @param {Boolean} archived - An optional flag that allows users to
+ *  search for archived projects as well.
  *
  * @return {Promise} resolve - searched organization object
  *                    reject - error
@@ -414,12 +415,12 @@ function removeOrgs(reqUser, arrOrgs) {
  *   M.log.error(error);
  * });
  */
-function findOrg(reqUser, organizationID, softDeleted = false) {
+function findOrg(reqUser, organizationID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -428,16 +429,16 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
-    // Set search Params for orgid and deleted = false
-    const searchParams = { id: orgID, deleted: false };
+    // Set search Params for orgid and archived: false
+    const searchParams = { id: orgID, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted orgs
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived orgs
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // softDeleted flag true, remove deleted: false
-    if (softDeleted) {
-      delete searchParams.deleted;
+    // archived flag true, remove archived: false
+    if (archived) {
+      delete searchParams.archived;
     }
 
     // Find orgs
@@ -702,8 +703,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
 }
 
 /**
- * @description This function takes a user object, organization ID, and an
- * optional flag for soft or hard delete and deletes an organization.
+ * @description This function takes a user object and organization ID and
+ * deletes an organization.
  *
  * @param {User} reqUser - The object containing the  requesting user.
  * @param {String} organizationID - The ID of the org being deleted.
@@ -810,7 +811,7 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
  * @description This function sets permissions for a user on an org
  *
  * @param {User} reqUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the org being deleted.
+ * @param {String} organizationID - The ID of the org.
  * @param {String} searchedUsername - The username of the user whose roles are to be changed.
  * @param {String} role - The new role for the user.
  *
@@ -928,7 +929,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
  * @description This function returns all user permissions of an org.
  *
  * @param {User} reqUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the org being deleted.
+ * @param {String} organizationID - The ID of the org.
  *
  * @returns {Promise} An object containing users permissions
  * {

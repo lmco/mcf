@@ -48,9 +48,8 @@ const extensions = M.require('models.plugin.extensions');
  * write access
  * @property {User} permissions.admin - An array of references to Users who have
  * admin access
- * @property {Date} deletedOn - The date a project was soft deleted or null if
- * not soft deleted
- * @property {Boolean} deleted - Indicates if a project has been soft deleted.
+ * @property {Date} archivedOn - The date the project was archived or null
+ * @property {Boolean} archived - Indicates if a project has been archived.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
  * @property {String} visibility - The visibility level of a project defining
  * its permissions behaviour.

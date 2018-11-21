@@ -476,11 +476,11 @@ api.route('/orgs/:orgid')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if soft deleted projects are returned. The user
- *                            must be a global admin or an admin on the organization to find soft
- *                            deleted projects.
+ *               description: The boolean indicating if archived projects are returned. The user
+ *                            must be a global admin or an admin on the organization to find
+ *                            archived projects.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects returns org data.
@@ -634,11 +634,11 @@ api.route('/orgs/:orgid/projects')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if a soft deleted project is returned. The user
- *                            must be a global admin or an admin on the organization to find a soft
- *                            deleted project.
+ *               description: The boolean indicating if a archived project is returned. The user
+ *                            must be a global admin or an admin on the organization to find an
+ *                            archived project.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET project returns project data.
@@ -1304,11 +1304,11 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if a soft deleted element is returned. The user
- *                            must be a global admin or an admin on the project to find a soft
- *                            deleted elements.
+ *               description: The boolean indicating if a archived element is returned. The user
+ *                            must be a global admin or an admin on the project to find archived
+ *                            elements.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements returns elements data
@@ -1507,11 +1507,11 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if the soft deleted element is returned. The
+ *               description: The boolean indicating if the archived element is returned. The
  *                            user must be a global admin or an admin on the project to
- *                            find a soft deleted element.
+ *                            find a archived element.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET element returns element data.
@@ -2106,11 +2106,11 @@ api.route('/users/:username')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if the soft deleted webhook
+ *               description: The boolean indicating if the archived webhook
  *                            is returned. The user must be a global admin or an
- *                            admin on the project to find a soft deleted
+ *                            admin on the project to find an archived
  *                            webhook.
  *     responses:
  *       200:

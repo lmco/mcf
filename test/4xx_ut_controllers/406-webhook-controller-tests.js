@@ -108,8 +108,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject finding a non-existent webhook', rejectFindNonExistent);
   it('should update a webhook', updateWebhook);
   it('should reject deleting a webhook with invalid function params', rejectDeleteInvalidParam);
-  it('should soft-delete a webhook', softDeleteWebhook);
-  it('should hard-delete a webhook', hardDeleteWebhook);
+  it('should archive a webhook', archiveWebhook);
+  it('should delete a webhook', deleteWebhook);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -247,23 +247,23 @@ function rejectDeleteInvalidParam(done) {
 }
 
 /**
- * @description Soft deletes a webhook.
+ * @description Archives a webhook.
  */
-function softDeleteWebhook(done) {
-  // Soft delete webhook
+function archiveWebhook(done) {
+  // Archive webhook
   const projID = utils.parseID(proj.id).pop();
   WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id)
   .then((success) => {
-    // Verify successful delete
+    // Verify successful archive
     chai.expect(success).to.equal(true);
 
-    // Find the soft deleted webhook
+    // Find the archived webhook
     return WebhookController.findWebhook(adminUser, org.id, projID, testData.webhooks[0].id, true);
   })
   .then((foundWebhook) => {
-    // Verify webhook has been soft deleted
-    chai.expect(foundWebhook.deleted).to.equal(true);
-    chai.expect(foundWebhook.deletedOn).not.to.equal(null);
+    // Verify webhook has been archived
+    chai.expect(foundWebhook.archived).to.equal(true);
+    chai.expect(foundWebhook.archivedOn).not.to.equal(null);
     done();
   })
   .catch((error) => {
@@ -275,11 +275,11 @@ function softDeleteWebhook(done) {
 }
 
 /**
- * @description Hard deletes a webhook.
+ * @description Deletes a webhook.
  * Expected error thrown: 'Not Found'
  */
-function hardDeleteWebhook(done) {
-  // Hard delete webhook
+function deleteWebhook(done) {
+  // Delete webhook
   const projID = utils.parseID(proj.id).pop();
   WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id, true)
   .then((success) => {

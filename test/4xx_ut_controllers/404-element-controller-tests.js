@@ -115,11 +115,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should find an element by its uuid', findElementByUUID);
   it('should update an element', updateElement);
   it('should update multiple elements', updateMultipleElements);
-  it('should soft delete an element', softDeleteElement);
-  it('should hard delete an element', hardDeleteElement);
-  it('should soft delete all elements', softDeleteAllElements);
-  it('should fail finding all non-soft-deleted elements', verifyFindNonSoftDelElem);
-  it('should hard delete all elements', hardDeleteAllElements);
+  it('should archive an element', archiveElement);
+  it('should delete an element', deleteElement);
+  it('should archive all elements', archiveAllElements);
+  it('should find all non-archived elements', verifyFindNonArchivedElem);
+  it('should delete all elements', deleteAllElements);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -443,16 +443,16 @@ function updateMultipleElements(done) {
 }
 
 /**
- * @description Verifies an element can be soft-deleted.
+ * @description Verifies an element can be archived.
  * Expected error thrown: 'Not Found'
  */
-function softDeleteElement(done) {
-  // Soft delete the element
+function archiveElement(done) {
+  // Archive the element
   const projID = utils.parseID(proj.id).pop();
   ElemController.removeElement(adminUser, org.id, projID, testData.elements[0].id, false)
   .then((retElem) => {
-    // Verify that the element's deleted field is now true
-    chai.expect(retElem.deleted).to.equal(true);
+    // Verify that the element's archived field is now true
+    chai.expect(retElem.archived).to.equal(true);
     // Try to find the element and expect it to fail
     return ElemController.findElement(adminUser, org.id, projID, testData.elements[0].id);
   })
@@ -467,7 +467,7 @@ function softDeleteElement(done) {
     chai.expect(error.message).to.equal('Not Found');
 
     // Find element again
-    // NOTE: The 'true' parameter tells the function to include soft-deleted
+    // NOTE: The 'true' parameter tells the function to include archived
     // elements in the results
     return ElemController.findElement(adminUser, org.id, projID, testData.elements[0].id, true);
   })
@@ -485,14 +485,14 @@ function softDeleteElement(done) {
 }
 
 /**
- * @description Verifies an element can be hard-deleted.
+ * @description Verifies an element can be deleted.
  * Expected error thrown: 'Not Found'
  */
-function hardDeleteElement(done) {
+function deleteElement(done) {
   const projID = utils.parseID(proj.id).pop();
-  // Hard delete the element
+  // Delete the element
   ElemController.removeElement(adminUser, org.id, projID, testData.elements[0].id, true)
-  // Then search for the element (including soft-deleted elements)
+  // Then search for the element (including archived elements)
   .then(() => ElemController
   .findElement(adminUser, org.id, projID,
     testData.elements[0].id, true))
@@ -510,24 +510,28 @@ function hardDeleteElement(done) {
 }
 
 /**
- * @description Verifies soft-delete of multiple elements by deleting
- * all elements in a project.
+ * @description Verifies archiving of multiple elements.
  */
-function softDeleteAllElements(done) {
+function archiveAllElements(done) {
   // The project ID (not the long-form UID)
   const projID = utils.parseID(proj.id).pop();
 
-  // Delete all elements in project
+  // Archive all elements in project
   ElemController.removeElements(adminUser, { project: proj._id }, false)
-  // Find all existing elements in project, including soft-deleted elements
+  // Find all existing elements in project, including archived elements
   .then(() => ElemController.findElements(adminUser, org.id, projID, true))
   .then((retElems) => {
     // Find succeeded, verify elements were returned
     // 7 elements are expected rather than 10 because deleting the package
     // in the previous test, also deleted its 3 children
     chai.expect(retElems.length).to.equal(7);
-    // Verify elements deleted field is set to true
-    chai.expect(retElems[0].deleted).to.equal(true);
+
+    // Verify elements archived field is set to true and archivedOn is not null
+    retElems.forEach((element) => {
+      chai.expect(element.archived).to.equal(true);
+      // TODO: archivedOn is not being properly set (MBX-656)
+      // chai.expect(element.archivedOn).to.not.equal(null);
+    });
     done();
   })
   .catch((error) => {
@@ -539,12 +543,12 @@ function softDeleteAllElements(done) {
 }
 
 /**
- * @description Verifies that findElements() does not return soft-deleted
+ * @description Verifies that findElements() does not return archived
  * elements by default.
  */
-function verifyFindNonSoftDelElem(done) {
+function verifyFindNonArchivedElem(done) {
   const projID = utils.parseID(proj.id).pop();
-  // Find elements which have NOT been soft-deleted
+  // Find elements which have NOT been archived
   ElemController.findElements(adminUser, org.id, projID)
   .then((elements) => {
     // Expect elements array to be empty
@@ -560,10 +564,9 @@ function verifyFindNonSoftDelElem(done) {
 }
 
 /**
- * @description Verifies hard-delete of multiple elements by deleting
- * all elements in a project.
+ * @description Verifies delete of multiple elements.
  */
-function hardDeleteAllElements(done) {
+function deleteAllElements(done) {
   const projID = utils.parseID(proj.id).pop();
   // Delete all elements in project
   ElemController.removeElements(adminUser, { project: proj._id }, true)

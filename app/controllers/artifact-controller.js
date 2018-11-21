@@ -276,7 +276,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
  * @param {String} orgID - The organization ID for the org the project belongs to.
  * @param {String} projID - The project ID of the Project which is being searched for.
  * @param {String} artifactID - The Artifact ID
- * @param {Object} hardDelete  Flag denoting whether to hard or soft delete.
+ * @param {Object} hardDelete  Flag denoting whether to delete or archive
  *
  * @return {Promise} resolve
  *                   reject - error
@@ -358,19 +358,20 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
  * @param {String} orgID - The organization ID for the org the project belongs to.
  * @param {String} projID - The project ID of the Project which is being searched for.
  * @param {String} artifactID - The Artifact ID
- * @param {Boolean} softDeleted - A boolean value indicating whether to soft delete.
+ * @param {Boolean} archived - A boolean value indicating whether to also search
+ *                             for archived artifacts.
  *
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  * */
-function findArtifact(reqUser, orgID, projID, artifactID, softDeleted = false) {
+function findArtifact(reqUser, orgID, projID, artifactID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -385,13 +386,13 @@ function findArtifact(reqUser, orgID, projID, artifactID, softDeleted = false) {
     // Define the search params
     const searchParams = {
       id: artifactFullID,
-      deleted: false
+      archived: false
     };
 
-    // Check softDeleted flag true and User Admin true
-    if (softDeleted && reqUser.admin) {
-      // softDeleted flag true and User Admin true, remove deleted: false
-      delete searchParams.deleted;
+    // Check archived flag true and User Admin true
+    if (archived && reqUser.admin) {
+      // archived flag true and User Admin true, remove archived: false
+      delete searchParams.archived;
     }
 
     // Find Artifact

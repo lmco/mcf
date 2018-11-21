@@ -16,15 +16,16 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Middleware plugin that extends models.
- * Allows field extensions: createBy, createdOn, UpdatedOn, DeletedOn and deleted.
+ * Allows field extensions: archivedBy, createBy, lastModifiedBy, createdOn,
+ * archivedOn, updatedOn, and archived.
  */
 
 // NPM modules
 const mongoose = require('mongoose');
 
-module.exports = function extensionPlugin(schema, options) {
+module.exports = function extensionPlugin(schema) {
   schema.add({
-    deletedBy: {
+    archivedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
@@ -40,19 +41,19 @@ module.exports = function extensionPlugin(schema, options) {
       type: Date,
       default: Date.now()
     },
-    deletedOn: {
+    archivedOn: {
       type: Date,
       default: null
     },
     updatedOn: {
       type: Date
     },
-    deleted: {
+    archived: {
       type: Boolean,
       default: false,
       set: function(v) {
         if (v) {
-          this.deletedOn = Date.now();
+          this.archivedOn = Date.now();
         }
         return v;
       }
@@ -61,12 +62,12 @@ module.exports = function extensionPlugin(schema, options) {
 
   schema.pre('save', function(next) {
     // updateOn is protected
-    if (this.isModified('updateOn')) {
-      next(new M.CustomError('updateOn is protected and cannot be changed.', 400, 'warn'));
+    if (this.isModified('updatedOn')) {
+      next(new M.CustomError('updatedOn is protected and cannot be changed.', 400, 'warn'));
     }
     // createdOn cannot be changed
     if (this.isModified('createdOn')) {
-      next(new M.CustomError('createOn cannot be changed.', 400, 'warn'));
+      next(new M.CustomError('createdOn cannot be changed.', 400, 'warn'));
     }
     // Update time
     this.updatedOn = Date.now();

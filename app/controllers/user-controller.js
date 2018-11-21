@@ -53,7 +53,8 @@ const validators = M.require('lib.validators');
  * @description This function finds all users.
  *
  * @param {User} reqUser - The requesting user
- * @param {Boolean} softDeleted - The optional flag to denote searching for deleted users
+ * @param {Boolean} archived - The optional flag to denote also searching for
+ *                             archived users
  *
  * @returns {Promise} Array of found user objects
  *
@@ -67,22 +68,22 @@ const validators = M.require('lib.validators');
  * });
  *
  */
-function findUsers(reqUser, softDeleted = false) {
+function findUsers(reqUser, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'error');
     }
 
-    const searchParams = { deleted: false };
+    const searchParams = { archived: false };
 
-    // Check softDeleted flag true and User Admin true
-    if (softDeleted && reqUser.admin) {
-      // softDeleted flag true and User Admin true, remove deleted: false
-      delete searchParams.deleted;
+    // Check archived flag true and User Admin true
+    if (archived && reqUser.admin) {
+      // archived flag true and User Admin true, remove archived: false
+      delete searchParams.archived;
     }
 
     // Find users
@@ -337,7 +338,7 @@ function updateUsers(reqUser, query, updateInfo) {
 }
 
 /**
- * @description This function deletes multiple users
+ * @description This function deletes/archived multiple users
  *
  * @param {User} reqUser - The requesting user.
  * @param {Object} query - The query used to update/delete users.
@@ -429,14 +430,14 @@ function removeUsers(reqUser, query, hardDelete = false) {
       // Save all projects and return once all are saved
       return Promise.all(promises);
     })
-    // If hardDelete, delete users, otherwise update them
+    // If hardDelete, delete users, otherwise archive them
     .then(() => ((hardDelete)
       ? User.deleteMany(query)
-      : User.updateMany(query, { deleted: true, deletedBy: reqUser })))
+      : User.updateMany(query, { archived: true, archivedBy: reqUser })))
     .then((responseQuery) => {
-      // Handle case where not all users are successfully deleted/updated
+      // Handle case where not all users are successfully deleted/archived
       if (responseQuery.n !== foundUsers.length) {
-        M.log.error('Some of the following users failed to delete: '
+        M.log.error('Some of the following users failed to delete/archive: '
         + `[${foundUsers.map(u => u.username)}].`);
       }
       return resolve(foundUsers);
@@ -450,7 +451,8 @@ function removeUsers(reqUser, query, hardDelete = false) {
  *
  * @param {User} reqUser - The requesting user
  * @param {String} searchedUsername - The username of the searched user.
- * @param {Boolean} softDeleted - The optional flag to denote searching for deleted users
+ * @param {Boolean} archived - The optional flag to denote also searching for
+ *                             archived users.
  *
  * @returns {Promise} The found user
  *
@@ -464,12 +466,12 @@ function removeUsers(reqUser, query, hardDelete = false) {
  * });
  *
  * */
-function findUser(reqUser, searchedUsername, softDeleted = false) {
+function findUser(reqUser, searchedUsername, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof searchedUsername === 'string', 'Username is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -478,12 +480,12 @@ function findUser(reqUser, searchedUsername, softDeleted = false) {
     // Sanitize query inputs
     const username = sani.sanitize(searchedUsername);
 
-    const searchParams = { username: username, deleted: false };
+    const searchParams = { username: username, archived: false };
 
-    // Check softDeleted flag true and User Admin true
-    if (softDeleted && reqUser.admin) {
-      // softDeleted flag true and User Admin true, remove deleted: false
-      delete searchParams.deleted;
+    // Check archived flag true and User Admin true
+    if (archived && reqUser.admin) {
+      // archived flag true and User Admin true, remove archived: false
+      delete searchParams.archived;
     }
 
     // Find users
@@ -758,7 +760,7 @@ function removeUser(reqUser, usernameToDelete) {
 
       // Find orgs which the user has read access on
       return OrgController.findOrgsQuery(
-        { 'permissions.read': user._id, deleted: false }
+        { 'permissions.read': user._id, archived: false }
       );
     })
     /* eslint-disable no-loop-func */
@@ -785,7 +787,7 @@ function removeUser(reqUser, usernameToDelete) {
     })
     // Find projects the user has read permissions on
     .then(() => ProjController.findProjectsQuery(
-      { 'permissions.read': userToDelete._id, deleted: false }
+      { 'permissions.read': userToDelete._id, archived: false }
     ))
     .then((projects) => {
       // Create an array of promises
