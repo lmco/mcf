@@ -2372,5 +2372,5 @@ function deleteArtifact(req, res) {
  * @return {Object} res response error message
  */
 function invalidRoute(req, res) {
-  return res.status(404).send('Invalid Route');
+  return res.status(404).send('Invalid Route or Method.');
 }
