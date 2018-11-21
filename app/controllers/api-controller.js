@@ -87,7 +87,8 @@ module.exports = {
   getArtifact,
   postArtifact,
   patchArtifact,
-  deleteArtifact
+  deleteArtifact,
+  invalidRoute
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -2357,4 +2358,19 @@ function deleteArtifact(req, res) {
     return res.status(200).send(formatJSON(success));
   })
   .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * ALL /api/*
+ *
+ * @description Returns an error message if a user tries to access an invalid
+ * api route.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response error message
+ */
+function invalidRoute(req, res) {
+  return res.status(404).send('Invalid Route');
 }

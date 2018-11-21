@@ -2598,5 +2598,8 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
   APIController.deleteArtifact
 );
 
+// Catches any invalid api route not defined above.
+api.use('*', APIController.invalidRoute);
+
 // Export the API router
 module.exports = api;
