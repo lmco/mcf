@@ -234,9 +234,7 @@ function postMultipleProjects(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify({
-      projects: [testData.projects[4], testData.projects[5]]
-    })
+    body: JSON.stringify([testData.projects[4], testData.projects[5]])
   },
   (err, response, body) => {
     // Expect no error
@@ -303,15 +301,21 @@ function patchProject(done) {
  * projects at the same time.
  */
 function patchMultipleProjects(done) {
+  const body = [testData.projects[4], testData.projects[5]];
+
+  // Update each project object
+  body.forEach((project) => {
+    project.custom = project.custom || {};
+    project.custom.department = 'Space';
+    project.name = 'Updated Project';
+  });
+
   request({
     url: `${test.url}/api/orgs/${org.id}/projects`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({
-      projects: [testData.projects[4], testData.projects[5]],
-      update: { custom: { department: 'Space' }, name: 'Useless Project' }
-    })
+    body: JSON.stringify(body)
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -320,8 +324,8 @@ function patchMultipleProjects(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json[0].name).to.equal('Useless Project');
-    chai.expect(json[1].name).to.equal('Useless Project');
+    chai.expect(json[0].name).to.equal('Updated Project');
+    chai.expect(json[1].name).to.equal('Updated Project');
     chai.expect(json[0].custom.department).to.equal('Space');
     chai.expect(json[1].custom.department).to.equal('Space');
     done();
@@ -507,10 +511,7 @@ function deleteMultipleProjects(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
-    body: JSON.stringify({
-      projects: [testData.projects[4], testData.projects[5]],
-      hardDelete: true
-    })
+    body: JSON.stringify([testData.projects[4], testData.projects[5]])
   },
   (err, response) => {
     // Expect no error

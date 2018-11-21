@@ -1161,7 +1161,7 @@ function postProjectRole(req, res) {
   .then((project) => {
     // Return 200: Ok and updated project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(project.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));

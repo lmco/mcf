@@ -37,6 +37,7 @@ const testData = testUtils.importTestData();
 let org = null;
 let proj = null;
 let adminUser = null;
+let projID = null;
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
@@ -78,7 +79,8 @@ describe(M.getModuleName(module.filename), () => {
     })
     .then((retProj) => {
       proj = retProj;
-      chai.expect(retProj.id).to.equal(testData.projects[0].id);
+      projID = utils.parseID(retProj.id).pop();
+      chai.expect(projID).to.equal(testData.projects[0].id);
       chai.expect(retProj.name).to.equal(testData.projects[0].name);
       done();
     })
@@ -134,7 +136,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postOutgoingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -158,7 +160,7 @@ function postOutgoingWebhook(done) {
  */
 function postIncomingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[2].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[2].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -182,7 +184,7 @@ function postIncomingWebhook(done) {
  */
 function getWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -205,7 +207,7 @@ function getWebhook(done) {
  */
 function triggerWebhook(done) {
   // Create base64 encoded webhook id
-  const webhookUID = utils.createID(org.id, proj.id, testData.webhooks[2].id);
+  const webhookUID = utils.createID(org.id, projID, testData.webhooks[2].id);
   const encodedID = Buffer.from(webhookUID).toString('base64');
 
   // Add token to headers
@@ -234,7 +236,7 @@ function triggerWebhook(done) {
  */
 function patchWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -260,7 +262,7 @@ function patchWebhook(done) {
  */
 function rejectPostWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.invalidWebhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.invalidWebhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -284,7 +286,7 @@ function rejectPostWebhook(done) {
  */
 function rejectGetWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -307,7 +309,7 @@ function rejectGetWebhook(done) {
  */
 function rejectPatchWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -333,7 +335,7 @@ function rejectPatchWebhook(done) {
  */
 function rejectDeleteNonExistingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -359,7 +361,7 @@ function rejectDeleteNonExistingWebhook(done) {
  */
 function deleteOutgoingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -385,7 +387,7 @@ function deleteOutgoingWebhook(done) {
  */
 function deleteIncomingWebhook(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/webhooks/${testData.webhooks[2].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[2].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',

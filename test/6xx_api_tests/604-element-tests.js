@@ -28,6 +28,7 @@ const path = require('path');
 // MBEE modules
 const ProjController = M.require('controllers.project-controller');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -36,6 +37,7 @@ const testData = testUtils.importTestData();
 let org = null;
 let proj = null;
 let adminUser = null;
+let projID = null;
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
@@ -77,7 +79,8 @@ describe(M.getModuleName(module.filename), () => {
     })
     .then((retProj) => {
       proj = retProj;
-      chai.expect(retProj.id).to.equal(testData.projects[0].id);
+      projID = utils.parseID(retProj.id).pop();
+      chai.expect(projID).to.equal(testData.projects[0].id);
       chai.expect(retProj.name).to.equal(testData.projects[0].name);
       done();
     })
@@ -136,7 +139,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -160,7 +163,7 @@ function postElement(done) {
  */
 function postMultipleElements(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -184,7 +187,7 @@ function postMultipleElements(done) {
  */
 function getElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -207,7 +210,7 @@ function getElement(done) {
  */
 function getElements(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -230,7 +233,7 @@ function getElements(done) {
  */
 function patchElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -256,7 +259,7 @@ function patchElement(done) {
  */
 function patchMultipleElements(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -286,7 +289,7 @@ function patchMultipleElements(done) {
  */
 function rejectPostElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.invalidElements[2].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.invalidElements[2].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -310,7 +313,7 @@ function rejectPostElement(done) {
  */
 function rejectGetElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[6].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.ids[6].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -333,7 +336,7 @@ function rejectGetElement(done) {
  */
 function rejectPatchElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -357,7 +360,7 @@ function rejectPatchElement(done) {
  */
 function rejectPatchInvalidFieldElements(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.elements[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -384,7 +387,7 @@ function rejectPatchInvalidFieldElements(done) {
  */
 function rejectDeleteNonexistingElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.ids[6].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.ids[6].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -410,7 +413,7 @@ function rejectDeleteNonexistingElement(done) {
  */
 function deleteElement(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements/${testData.elements[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.elements[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -436,7 +439,7 @@ function deleteElement(done) {
  */
 function deleteMultipleElements(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/elements`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',

@@ -27,6 +27,7 @@ const path = require('path');
 const ProjController = M.require('controllers.project-controller');
 const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
@@ -34,6 +35,7 @@ const testData = testUtils.importTestData();
 let adminUser = null;
 let org = null;
 let proj = null;
+let projID = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -73,6 +75,7 @@ describe(M.getModuleName(module.filename), () => {
     .then((retProj) => {
       // Set global project
       proj = retProj;
+      projID = utils.parseID(proj.id).pop();
       done();
     })
     .catch((error) => {
@@ -127,7 +130,7 @@ function postElement(done) {
   const body = testData.elements[0];
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     elementid: testData.elements[0].id
   };
   const method = 'POST';
@@ -160,7 +163,7 @@ function getElement(done) {
   const body = {};
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     elementid: testData.elements[0].id
   };
   const method = 'GET';
@@ -192,7 +195,7 @@ function patchElement(done) {
   const body = testData.names[10];
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     elementid: testData.elements[0].id
   };
   const method = 'PATCH';
@@ -224,7 +227,7 @@ function deleteElement(done) {
   const body = { hardDelete: true };
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     elementid: testData.elements[0].id
   };
   const method = 'DELETE';
@@ -264,7 +267,7 @@ function postElements(done) {
     testData.elements[11],
     testData.elements[10]
   ];
-  const params = { orgid: org.id, projectid: proj.id };
+  const params = { orgid: org.id, projectid: projID };
   const method = 'POST';
   const req = getReq(params, body, method);
 
@@ -299,7 +302,7 @@ function patchElements(done) {
     ],
     update: { name: 'Updated Elements' }
   };
-  const params = { orgid: org.id, projectid: proj.id };
+  const params = { orgid: org.id, projectid: projID };
   const method = 'PATCH';
   const req = getReq(params, body, method);
 
@@ -327,7 +330,7 @@ function patchElements(done) {
 function getElements(done) {
   // Create request object
   const body = {};
-  const params = { orgid: org.id, projectid: proj.id };
+  const params = { orgid: org.id, projectid: projID };
   const method = 'GET';
   const req = getReq(params, body, method);
 
@@ -368,7 +371,7 @@ function deleteElements(done) {
     ],
     hardDelete: true
   };
-  const params = { orgid: org.id, projectid: proj.id };
+  const params = { orgid: org.id, projectid: projID };
   const method = 'DELETE';
   const req = getReq(params, body, method);
 

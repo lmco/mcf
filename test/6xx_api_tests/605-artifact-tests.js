@@ -30,6 +30,7 @@ const chai = require('chai');
 // MBEE modules
 const ProjController = M.require('controllers.project-controller');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -38,6 +39,7 @@ const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let org = null;
 let proj = null;
 let adminUser = null;
+let projID = null;
 const test = M.config.test;
 
 /* --------------------( Main )-------------------- */
@@ -80,7 +82,8 @@ describe(M.getModuleName(module.filename), () => {
     })
     .then((retProj) => {
       proj = retProj;
-      chai.expect(retProj.id).to.equal(testData.projects[0].id);
+      projID = utils.parseID(retProj.id).pop();
+      chai.expect(projID).to.equal(testData.projects[0].id);
       chai.expect(retProj.name).to.equal(testData.projects[0].name);
       done();
     })
@@ -150,7 +153,7 @@ function postArtifact(done) {
     artifactBlob: fs.readFileSync(imgPath)
   };
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -174,7 +177,7 @@ function postArtifact(done) {
  */
 function getArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -211,7 +214,7 @@ function patchArtifact(done) {
     artifactBlob: fs.readFileSync(imgPath)
   };
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -250,7 +253,7 @@ function rejectExistingPostArtifact(done) {
     artifactBlob: fs.readFileSync(imgPath)
   };
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -274,7 +277,7 @@ function rejectExistingPostArtifact(done) {
  */
 function rejectGetArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -312,7 +315,7 @@ function rejectPatchArtifact(done) {
     artifactBlob: fs.readFileSync(imgPath)
   };
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -336,7 +339,7 @@ function rejectPatchArtifact(done) {
  */
 function rejectDeleteNonExistingArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
@@ -362,7 +365,7 @@ function rejectDeleteNonExistingArtifact(done) {
  */
 function deleteArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${proj.id}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
