@@ -86,7 +86,7 @@ function createArtifact(reqUser, orgID, projID, artData) {
     .then((proj) => {
       // Error check: make sure user has write permission on project
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
       // Set foundProject to the found project
@@ -98,7 +98,7 @@ function createArtifact(reqUser, orgID, projID, artData) {
     .then((_artifact) => {
       // Error Check: ensure no artifact were found
       if (_artifact.length > 0) {
-        return reject(new M.CustomError('Artifact already exists.', 400, 'warn'));
+        throw new M.CustomError('Artifact already exists.', 400, 'warn');
       }
 
       // Convert JSON object to buffer
@@ -173,7 +173,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
         'Updated Artifact metadata contains invalid keys.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
@@ -198,7 +198,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
       // Error Check: ensure reqUser is a project admin or global admin
       if (!_artifact.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
       // Check if Artifact blob is part of the update
@@ -239,9 +239,9 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
         if (!validUpdateFields.includes(artifactUpdateFields[i])
           && artifactUpdateFields[i] !== 'artifactBlob') {
           // field cannot be updated, reject error
-          return reject(new M.CustomError(
+          throw new M.CustomError(
             `Artifact property [${artifactUpdateFields[i]}] cannot be changed.`, 403, 'warn'
-          ));
+          );
         }
 
         // Sanitize field and update field in artifact object
@@ -282,7 +282,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
  *                   reject - error
  *
  * @example
- * removeArtifact({User}, 'orgID', 'projectID', 'artifaactID', false)
+ * removeArtifact({User}, 'orgID', 'projectID', 'artifactID', false)
  * .then(function(artifact) {
  *   // Do something with the newly deleted artifact
  * })
@@ -300,14 +300,14 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
       assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Error Check: if hard deleting, ensure user is global admin
     if (hardDelete && !reqUser.admin) {
-      return reject(new M.CustomError(
+      throw new M.CustomError(
         'User does not have permission to permanently delete an artifact.', 403, 'warn'
-      ));
+      );
     }
 
     // Define function-wide found artifact
@@ -318,7 +318,7 @@ function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) 
       // Error Check: ensure reqUser is a project admin or global admin
       if (!artifactToDelete.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
       // Define and get artifact history
@@ -373,7 +373,7 @@ function findArtifact(reqUser, orgID, projID, artifactID, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
@@ -400,16 +400,16 @@ function findArtifact(reqUser, orgID, projID, artifactID, softDeleted = false) {
       // Error Check: ensure at least one artifact was found
       if (artifact.length === 0) {
         // No artifact found, reject error
-        return reject(new M.CustomError('Artifact not found.', 404, 'warn'));
+        throw new M.CustomError('Artifact not found.', 404, 'warn');
       }
 
       // Error Check: ensure no more than one artifact was found
       if (artifact.length > 1) {
-        return reject(new M.CustomError('More than one artifact found.', 400, 'warn'));
+        throw new M.CustomError('More than one artifact found.', 400, 'warn');
       }
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!artifact[0].project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
       return resolve(artifact[0]);
     })
@@ -470,7 +470,7 @@ function addArtifactOS(hashedName, artifactBlob) {
           // Note: Use sync to ensure directory created before advancing
           fs.mkdirSync(folderPath, (makeDirectoryError) => {
             if (makeDirectoryError) {
-              return reject(M.CustomError.parseCustomError(makeDirectoryError));
+              throw M.CustomError.parseCustomError(makeDirectoryError);
             }
           });
           // Check if file already exist
@@ -482,7 +482,7 @@ function addArtifactOS(hashedName, artifactBlob) {
               }
               catch (error) {
                 // Error occurred, log it
-                return reject(new M.CustomError('Could not create Artifact BLOB.', 500, 'warn'));
+                throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
               }
             }
           });
@@ -491,7 +491,7 @@ function addArtifactOS(hashedName, artifactBlob) {
         return resolve();
       });
     })
-    .catch((err) => reject(err));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -515,7 +515,7 @@ function removeArtifactOS(hashName) {
     fs.unlinkSync(filePath, (error) => {
       // Check directory NOT exist
       if (error) {
-        return reject(new M.CustomError(error.message, 500, 'warn'));
+        throw new M.CustomError(error.message, 500, 'warn');
       }
     });
 
@@ -530,7 +530,7 @@ function removeArtifactOS(hashName) {
         fs.rmdir(folderPath, (error) => {
           // Check directory NOT exist
           if (error) {
-            return reject(new M.CustomError(error.message, 500, 'warn'));
+            throw new M.CustomError(error.message, 500, 'warn');
           }
         });
       }
@@ -556,7 +556,7 @@ function createStorageDirectory() {
         fs.mkdirSync(artifactPath, (error) => {
           // Check for errors
           if (error) {
-            return reject(new M.CustomError(error.message, 500, 'warn'));
+            throw new M.CustomError(error.message, 500, 'warn');
           }
         });
       }

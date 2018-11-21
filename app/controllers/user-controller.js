@@ -74,7 +74,7 @@ function findUsers(reqUser, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error'));
+      throw new M.CustomError(error.message, 400, 'error');
     }
 
     const searchParams = { deleted: false };
@@ -130,7 +130,7 @@ function createUsers(reqUser, arrNewUsers) {
       if (error.message.includes('permissions')) {
         statusCode = 403;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define function-wide variables
@@ -146,8 +146,8 @@ function createUsers(reqUser, arrNewUsers) {
       // Error Check: ensure no users with matching usernames already exist
       if (users.length > 0) {
         // One or more users exists, reject
-        return reject(new M.CustomError('User(s) with matching username(s) '
-          + ` already exist: [${users.map(u => u.username).toString()}].`, 403, 'warn'));
+        throw new M.CustomError('User(s) with matching username(s) '
+          + ` already exist: [${users.map(u => u.username).toString()}].`, 403, 'warn');
       }
 
       // Create user objects
@@ -157,9 +157,9 @@ function createUsers(reqUser, arrNewUsers) {
       userObjects.forEach((user) => {
         // Error Check: ensure password is provided if local strategy
         if (user.password === undefined && user.provider === 'local') {
-          return reject(new M.CustomError(
+          throw new M.CustomError(
             `Password is required for local user [${user.username}`, 403, 'warn'
-          ));
+          );
         }
 
         // Update the created by and last modified field
@@ -265,7 +265,7 @@ function updateUsers(reqUser, query, updateInfo) {
       if (error.message.includes('permissions')) {
         statusCode = 403;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Find the users to update
@@ -290,9 +290,9 @@ function updateUsers(reqUser, query, updateInfo) {
             if (validators.user.hasOwnProperty(key)) {
               // If the field is invalid, throw an error
               if (!RegExp(validators.user[key]).test(tmpUpdateObj[key])) {
-                return reject(new M.CustomError(
+                throw new M.CustomError(
                   `Invalid ${key} [${tmpUpdateObj[key]}].`, 403, 'warn'
-                ));
+                );
               }
             }
 
@@ -322,10 +322,10 @@ function updateUsers(reqUser, query, updateInfo) {
       // Check if some of the users in updateMany failed
       if (!containsMixed && retQuery.n !== foundUsers.length) {
         // The number updated does not match the number attempted, log it
-        return reject(new M.CustomError(
+        throw new M.CustomError(
           'Some of the following users failed to update: '
           + `[${foundUsers.map(u => u.id)}].`, 500, 'error'
-        ));
+        );
       }
       // Find the updated users to return them
       return findUsersQuery(query);
@@ -368,7 +368,7 @@ function removeUsers(reqUser, query, hardDelete = false) {
       if (error.message.includes('permissions')) {
         statusCode = 403;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define foundUsers array and findQuery
@@ -472,7 +472,7 @@ function findUser(reqUser, searchedUsername, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
@@ -492,13 +492,13 @@ function findUser(reqUser, searchedUsername, softDeleted = false) {
       // Error Check: ensure at least one user was found
       if (arrUsers.length === 0) {
         // No users found, reject error
-        return reject(new M.CustomError('User not found.', 404, 'warn'));
+        throw new M.CustomError('User not found.', 404, 'warn');
       }
 
       // Error Check: ensure no more than one user was found
       if (arrUsers.length > 1) {
         // Users length greater than one, reject error
-        return reject(new M.CustomError('More than one user found.', 400, 'warn'));
+        throw new M.CustomError('More than one user found.', 400, 'warn');
       }
 
       // All checks passed, resolve user
@@ -567,7 +567,7 @@ function createUser(reqUser, newUserData) {
       if (error.message.includes('permissions')) {
         statusCode = 403;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Initialize function-wide variables
@@ -578,9 +578,9 @@ function createUser(reqUser, newUserData) {
     .then((users) => {
       // Error Check: ensure no user was found
       if (users.length >= 1) {
-        return reject(new M.CustomError(
+        throw new M.CustomError(
           'A user with a matching username already exists.', 403, 'warn'
-        ));
+        );
       }
 
       // Create the new user
@@ -592,7 +592,7 @@ function createUser(reqUser, newUserData) {
 
       // Error Check: ensure password is provided if local strategy
       if (user.password === undefined && user.provider === 'local') {
-        return reject(new M.CustomError('Password is required for local users', 403, 'warn'));
+        throw new M.CustomError('Password is required for local users', 403, 'warn');
       }
 
       // Save new user
@@ -651,7 +651,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       if (error.message.includes('permissions')) {
         statusCode = 403;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Find user
@@ -670,18 +670,18 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(field)) {
           // field cannot be updated, reject error
-          return reject(new M.CustomError(
+          throw new M.CustomError(
             `User property [${field}] cannot be changed.`, 403, 'warn'
-          ));
+          );
         }
 
         // If field has a validator, validate the updated value
         if (validators.user.hasOwnProperty(field)) {
           // If the field is invalid, throw an error
           if (!RegExp(validators.user[field]).test(newUserData[field])) {
-            return reject(new M.CustomError(
+            throw new M.CustomError(
               `Invalid ${field} [${newUserData[field]}].`, 403, 'warn'
-            ));
+            );
           }
         }
 
@@ -739,12 +739,12 @@ function removeUser(reqUser, usernameToDelete) {
       if (error.message.includes('permissions')) {
         statusCode = 403;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Error Check: request user cannot deleted self
     if (reqUser.username === usernameToDelete) {
-      return reject(new M.CustomError('User cannot delete themselves.', 403, 'warn'));
+      throw new M.CustomError('User cannot delete themselves.', 403, 'warn');
     }
 
     // Define function-wide user

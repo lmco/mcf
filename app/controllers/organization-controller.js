@@ -79,7 +79,7 @@ function findOrgs(reqUser, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     const userID = sani.sanitize(reqUser._id);
@@ -89,7 +89,7 @@ function findOrgs(reqUser, softDeleted = false) {
 
     // Error Check: Ensure user has permissions to find deleted orgs
     if (softDeleted && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
     // softDeleted flag true, remove deleted: false
     if (softDeleted) {
@@ -143,7 +143,7 @@ function createOrgs(reqUser, arrOrgs) {
       if (error.message.includes('permissions')) {
         statusCode = 403;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Create the find query
@@ -156,8 +156,8 @@ function createOrgs(reqUser, arrOrgs) {
       if (foundOrgs.length > 0) {
         // Get the ID's of the conflicting orgs
         const foundIDs = foundOrgs.map(o => o.id);
-        return reject(new M.CustomError('Org(s) with the following ID(s) already'
-          + ` exists: [${foundIDs.toString()}.`, 403, 'warn'));
+        throw new M.CustomError('Org(s) with the following ID(s) already'
+          + ` exists: [${foundIDs.toString()}.`, 403, 'warn');
       }
 
       // Convert each object in arrOrgs into an Org object and set permissions
@@ -237,7 +237,7 @@ function updateOrgs(reqUser, query, updateInfo) {
       });
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Find the organizations to update
@@ -250,14 +250,14 @@ function updateOrgs(reqUser, query, updateInfo) {
       Object(orgs).forEach((org) => {
         // Error Check: ensure user has permission to update org
         if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
-          return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+          throw new M.CustomError('User does not have permissions.', 403, 'warn');
         }
 
         // Error Check: ensure user isn't trying to update the default org
         if (org.id === M.config.server.defaultOrganizationId) {
-          return reject(new M.CustomError(
+          throw new M.CustomError(
             'The default organization cannot be updated.', 403, 'warn'
-          ));
+          );
         }
       });
 
@@ -302,10 +302,10 @@ function updateOrgs(reqUser, query, updateInfo) {
       // Check if some of the orgs in updateMany failed
       if (!containsMixed && orgs.n !== foundOrgs.length) {
         // The number updated does not match the number attempted, log it
-        return reject(new M.CustomError(
+        throw new M.CustomError(
           'Some of the following organizations failed to update: '
         + `[${foundOrgs.map(o => o.id)}].`, 500, 'error'
-        ));
+        );
       }
 
       // Find the updated orgs to return them
@@ -321,8 +321,7 @@ function updateOrgs(reqUser, query, updateInfo) {
  * @description This functions deletes multiple orgs at a time.
  *
  * @param {User} reqUser - The object containing the requesting user.
- * @param {Object} query - The query used to find/delete orgs
- * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
+ * @param {Array} arrOrgs - An array of organizations to delete.
  *
  * @return {Promise} Deleted organization object
  *
@@ -345,17 +344,17 @@ function removeOrgs(reqUser, arrOrgs) {
       });
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Error Check: ensure reqUser is a global admin if hard deleting
     if (!reqUser.admin) {
-      return reject(new M.CustomError('User does not have permissions to delete.', 403, 'warn'));
+      throw new M.CustomError('User does not have permissions to delete.', 403, 'warn');
     }
 
     // Define found orgs array
     let foundOrgs = [];
-    let query = { id: { $in: arrOrgs.map(o => o.id) } };
+    const query = { id: { $in: arrOrgs.map(o => o.id) } };
 
     // Find the orgs the user wishes to delete
     findOrgsQuery(query)
@@ -368,7 +367,7 @@ function removeOrgs(reqUser, arrOrgs) {
         // Error Check: ensure reqUser is not deleting the default org
         if (org.id === M.config.server.defaultOrganizationId) {
           // orgID is default, reject error.
-          return reject(new M.CustomError('The default organization cannot be deleted.', 403, 'warn'));
+          throw new M.CustomError('The default organization cannot be deleted.', 403, 'warn');
         }
       });
 
@@ -384,15 +383,7 @@ function removeOrgs(reqUser, arrOrgs) {
     .then(() => Organization.deleteMany(query))
     // Return the deleted orgs
     .then(() => resolve(foundOrgs))
-    .catch((error) => {
-      // If error is a CustomError, reject it
-      // TODO (jk) - Is this necessary?
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, create one and reject
-      return reject(M.CustomError.parseCustomError(error));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -425,7 +416,7 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
@@ -436,7 +427,7 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
 
     // Error Check: Ensure user has permissions to find deleted orgs
     if (softDeleted && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
     // softDeleted flag true, remove deleted: false
     if (softDeleted) {
@@ -449,19 +440,19 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
       // Error Check: ensure at least one org was found
       if (orgs.length === 0) {
         // No orgs found, reject error
-        return reject(new M.CustomError('Org not found.', 404, 'warn'));
+        throw new M.CustomError('Org not found.', 404, 'warn');
       }
 
       // Error Check: ensure no more than one org was found
       if (orgs.length > 1) {
         // Orgs length greater than one, reject error
-        return reject(new M.CustomError('More than one org found.', 400, 'warn'));
+        throw new M.CustomError('More than one org found.', 400, 'warn');
       }
 
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!orgs[0].getPermissions(reqUser).read && !reqUser.admin) {
         // User does NOT have read access and is NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
       // All checks passed, resolve org
@@ -544,7 +535,7 @@ function createOrg(reqUser, newOrgData) {
       if (error.message.includes('permissions')) {
         statusCode = 403;
       }
-      return reject(new M.CustomError(error.message, statusCode, 'warn'));
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Sanitize query inputs
@@ -556,9 +547,9 @@ function createOrg(reqUser, newOrgData) {
     .then((foundOrg) => {
       // Error Check: ensure no org was found
       if (foundOrg.length > 0) {
-        return reject(new M.CustomError(
+        throw new M.CustomError(
           'An organization with the same ID already exists.', 403, 'warn'
-        ));
+        );
       }
 
       // Create the new org
@@ -612,7 +603,7 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
       assert.ok(Organization.validateObjectKeys(orgUpdated), 'Org contains invalid keys.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Check if orgUpdated is instance of Organization model
@@ -625,7 +616,7 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
     // Error Check: ensure the org being updated is not the default org
     if (organizationID === M.config.server.defaultOrganizationId) {
       // orgID is default, reject error
-      return reject(new M.CustomError('Cannot update the default org.', 403, 'warn'));
+      throw new M.CustomError('Cannot update the default org.', 403, 'warn');
     }
 
     // Find organization
@@ -635,7 +626,7 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
       // Error Check: ensure reqUser is an org admin or global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
       // Get list of keys the user is trying to update
@@ -650,9 +641,9 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
         // Check if original org does NOT contain updatedField
         if (!org.toJSON().hasOwnProperty(updateField)) {
           // Original org does NOT contain updatedField, reject error
-          return reject(new M.CustomError(
+          throw new M.CustomError(
             `Organization does not contain field ${updateField}.`, 400, 'warn'
-          ));
+          );
         }
 
         // Check if updated field is equal to the original field
@@ -664,16 +655,16 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
           // field cannot be updated, reject error
-          return reject(new M.CustomError(
+          throw new M.CustomError(
             `Organization property [${updateField}] cannot be changed.`, 403, 'warn'
-          ));
+          );
         }
 
         // Check if updateField type is 'Mixed'
         if (Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof orgUpdated[updateField] !== 'object') {
-            return reject(new M.CustomError(`${updateField} must be an object`, 400, 'warn'));
+            throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
           }
 
           // Add and replace parameters of the type 'Mixed'
@@ -707,7 +698,6 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
  *
  * @param {User} reqUser - The object containing the  requesting user.
  * @param {String} organizationID - The ID of the org being deleted.
- * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
  *
  * @return {Promise} removed organization object
  *
@@ -729,17 +719,17 @@ function removeOrg(reqUser, organizationID) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     if (typeof organizationID !== 'string') {
-      return reject(new M.CustomError('Organization ID is not a string.', 400, 'warn'));
+      throw new M.CustomError('Organization ID is not a string.', 400, 'warn');
     }
 
     // Error Check: ensure reqUser is not deleting the default org
     if (organizationID === M.config.server.defaultOrganizationId) {
-      return reject(new M.CustomError('The default organization cannot be deleted.', 403, 'warn'));
+      throw new M.CustomError('The default organization cannot be deleted.', 403, 'warn');
     }
 
     // Error Check: ensure reqUser is a global admin if hard deleting
     if (!reqUser.admin) {
-      return reject(new M.CustomError('User does not have permissions to delete.', 403, 'warn'));
+      throw new M.CustomError('User does not have permissions to delete.', 403, 'warn');
     }
 
     // Find the organization
@@ -752,9 +742,7 @@ function removeOrg(reqUser, organizationID) {
     })
     // Delete the organization
     .then((foundProjects) => {
-      projects = foundProjects.map(p => {
-        return { id: utils.parseID(p.id).pop() };
-      });
+      projects = foundProjects.map(p => ({ id: utils.parseID(p.id).pop() }));
 
       // Delete all projects in the org
       return ProjController.removeProjects(reqUser, organizationID, projects);
@@ -839,15 +827,15 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
       assert.ok(typeof role === 'string', 'Role is not a string.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Check if role parameter NOT a valid role
     if (!['admin', 'write', 'read', 'REMOVE_ALL'].includes(role)) {
       // Role parameter NOT a valid role, reject error
-      return reject(new M.CustomError(
+      throw new M.CustomError(
         'The permission entered is not a valid permission.', 400, 'warn'
-      ));
+      );
     }
 
     // Sanitize parameters
@@ -865,9 +853,9 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
       // Check if requesting user is found user
       if (reqUser._id.toString() === foundUser._id.toString()) {
         // Requesting user is found user, reject error
-        return reject(new M.CustomError(
+        throw new M.CustomError(
           'User cannot change their own permissions.', 403, 'warn'
-        ));
+        );
       }
       // Find org
       // Note: organizationID is sanitized in findOrg
@@ -877,9 +865,9 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
       // Check requesting user NOT org admin and NOT global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         // Requesting user NOT org admin and NOT global admin, reject error
-        return reject(new M.CustomError(
+        throw new M.CustomError(
           'User cannot change organization permissions.', 403, 'warn'
-        ));
+        );
       }
 
       // Initialize permissions and get permissions levels
@@ -965,7 +953,7 @@ function findAllPermissions(reqUser, organizationID) {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Find the org

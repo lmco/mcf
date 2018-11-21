@@ -123,7 +123,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should throw an error saying the field is not of type string', updateTypeError);
   it('should update a project', updateProjectName);
   it('should update a project using the Project object', updateProjectObject);
-  //it('should update multiple projects', updateMultipleProjects);
+  it('should update multiple projects', updateMultipleProjects);
   it('should create a second project', createProject02);
   it('should reject attempt to create a project with a period in name', rejectCreatePeriodName);
   it('should reject creation of a project already made', rejectDuplicateProjectId);
@@ -313,27 +313,26 @@ function updateProjectObject(done) {
  */
 function updateMultipleProjects(done) {
   // Create query to update projects
-  const updateQuery = { id: { $in: [
-    testData.projects[4].id,
-    testData.projects[5].id
-  ] } };
+  const arrProjects = [
+    testData.projects[4],
+    testData.projects[5]
+  ];
 
-  // Create list of update parameters
-  const updateObj = {
-    custom: {
-      department: 'Space'
-    },
-    name: 'New Project Name'
-  };
+  // Update each project object
+  arrProjects.forEach((p) => {
+    p.custom = p.custom || {};
+    p.custom.department = 'Space';
+    p.name = 'Updated Project';
+  });
 
   // Update projects
-  ProjController.updateProjects(adminUser, updateQuery, updateObj)
+  ProjController.updateProjects(adminUser, org.id, arrProjects)
   .then((projects) => {
     // Verify returned data
-    chai.expect(projects[0].name).to.equal(updateObj.name);
-    chai.expect(projects[1].name).to.equal(updateObj.name);
-    chai.expect(projects[0].custom.department).to.equal(updateObj.custom.department);
-    chai.expect(projects[1].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(projects[0].name).to.equal('Updated Project');
+    chai.expect(projects[1].name).to.equal('Updated Project');
+    chai.expect(projects[0].custom.department).to.equal('Space');
+    chai.expect(projects[1].custom.department).to.equal('Space');
     done();
   })
   .catch((error) => {

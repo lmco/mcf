@@ -301,10 +301,10 @@ function patchProject(done) {
  * projects at the same time.
  */
 function patchMultipleProjects(done) {
-  const body = [testData.projects[4], testData.projects[5]];
+  const requestBody = [testData.projects[4], testData.projects[5]];
 
   // Update each project object
-  body.forEach((project) => {
+  requestBody.forEach((project) => {
     project.custom = project.custom || {};
     project.custom.department = 'Space';
     project.name = 'Updated Project';
@@ -315,7 +315,7 @@ function patchMultipleProjects(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(body)
+    body: JSON.stringify(requestBody)
   },
   (err, response, body) => {
     // Expect no error (request succeeds)

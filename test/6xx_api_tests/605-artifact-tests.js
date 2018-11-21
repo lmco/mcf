@@ -37,7 +37,6 @@ const utils = M.require('lib.utils');
 const testData = require(path.join(M.root, 'test', 'data.json'));
 const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let org = null;
-let proj = null;
 let adminUser = null;
 let projID = null;
 const test = M.config.test;
@@ -81,7 +80,6 @@ describe(M.getModuleName(module.filename), () => {
       return ProjController.createProject(adminUser, projData);
     })
     .then((retProj) => {
-      proj = retProj;
       projID = utils.parseID(retProj.id).pop();
       chai.expect(projID).to.equal(testData.projects[0].id);
       chai.expect(retProj.name).to.equal(testData.projects[0].name);

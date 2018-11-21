@@ -415,7 +415,7 @@ function patchProjects(done) {
   body.forEach((project) => {
     project.custom = project.custom || {};
     project.custom.department = 'Space';
-    project.name = 'Updated Project'
+    project.name = 'Updated Project';
   });
 
   const params = { orgid: org.id };

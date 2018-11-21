@@ -154,11 +154,9 @@ function updateProject(done) {
     id: utils.createID(org.id, testData.projects[0].id) },
   { name: testData.projects[1].name })
   // Find previously updated project
-  .then(() => {
-    return Project.findOne({
-      id: utils.createID(org.id, testData.projects[0].id)
-    });
-  })
+  .then(() => Project.findOne({
+    id: utils.createID(org.id, testData.projects[0].id)
+  }))
   .then((proj) => {
     // Ensure project name was successfully updated
     chai.expect(proj.name).to.equal(testData.projects[1].name);
@@ -212,7 +210,7 @@ function verifyProjectFieldMaxChar(done) {
   })
   .catch((error) => {
     // Expected error thrown: 'Project validation failed: id: Too many characters in username'
-    chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username')
+    chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username');
     done();
   });
 }

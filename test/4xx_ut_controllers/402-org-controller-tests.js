@@ -29,7 +29,6 @@ const path = require('path');
 const OrgController = M.require('controllers.organization-controller');
 const Project = M.require('models.project');
 const db = M.require('lib.db');
-const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
