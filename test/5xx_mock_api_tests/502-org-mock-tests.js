@@ -445,13 +445,10 @@ function patchOrgs(done) {
  */
 function deleteOrgs(done) {
   // Create request object
-  const body = {
-    orgs: [
-      testData.orgs[1],
-      testData.orgs[2]
-    ],
-    hardDelete: true
-  };
+  const body = [
+    testData.orgs[1],
+    testData.orgs[2]
+  ];
   const params = {};
   const method = 'DELETE';
   const req = getReq(params, body, method);

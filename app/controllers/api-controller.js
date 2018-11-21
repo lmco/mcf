@@ -357,57 +357,32 @@ function patchOrgs(req, res) {
  * @return {Object} res - Response object with orgs' public data
  */
 function deleteOrgs(req, res) {
+  let msg = null;
+  let err = null;
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    msg = 'Request Failed.';
+    err = new M.CustomError(msg, 500, 'critical');
+    return res.status(err.status).send(err);
   }
-
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['orgs', 'hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
+  // Error check: body must be an array
+  if (!Array.isArray(req.body)) {
+    msg = 'Body is not an array.';
+    err = new M.CustomError(err, 400, 'warn');
+    return res.status(err.status).send(err);
   }
-
-  // Initialize the delete query object
-  let deleteQuery = {};
-
-  // No orgs provided, return an error
-  if (!req.body.hasOwnProperty('orgs')) {
-    const error = new M.CustomError('Array of orgs not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-  // Org objects provided, delete all
-  if (req.body.orgs.every(o => typeof o === 'object')) {
-    // Query finds all orgs by their id
-    deleteQuery = { id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
-  }
-  // Org IDs provided, delete all
-  else if (req.body.orgs.every(o => typeof o === 'string')) {
-    // Query finds all orgs by their id
-    deleteQuery = { id: { $in: sani.sanitize(req.body.orgs) } };
-  }
-  // No valid org data was provided, reject
-  else {
-    const error = new M.CustomError('Orgs array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
+  // Error check, each item in the array must be an object
+  if (!req.body.every(o => typeof o === 'object')) {
+    msg = 'One or more items in the array is not an object';
+    err = new M.CustomError(msg, 400, 'warn');
+    return res.status(err.status).send(err);
   }
 
   // Remove the specified orgs
-  OrgController.removeOrgs(req.user, deleteQuery, hardDelete)
+  OrgController.removeOrgs(req.user, req.body)
+  // Return 200: OK and the deleted orgs
   .then((orgs) => {
-    // Return 200: OK and the deleted orgs
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })

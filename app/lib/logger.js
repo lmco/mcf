@@ -112,14 +112,15 @@ const formatter = printf((msg) => {
 
   // If we want colored logs, this is our return string
   if (M.config.log.colorize) {
-    const ts = `${fmt.color.grey}${msg.timestamp}${fmt.color.esc}`; // timestamp
+    const ts = `${fmt.color.light_grey}${msg.timestamp}${fmt.color.esc}`; // timestamp
     const f = `${fmt.color.cyan}${file}${fmt.color.esc}`;           // file
     // Print stack for error and critical logs
     let msgPrint = msg.message;
     if (msg.level.includes('error') || msg.level.includes('critical')) {
       msgPrint += `\n${msg.stack || reduced.join('\n')}`;
     }
-    return `${ts} [${level}] ${f}\u001b[30m:${line} ->\u001b[39m ${msgPrint}`;
+    const sep = `${fmt.color.light_grey}::${fmt.color.esc}`;
+    return `${ts} [${level}] ${f}\u001b[30m:${line} ${sep} ${msgPrint}`;
   }
 
   // If colorize is false, we remove colors from the log level, timestamp and file.
