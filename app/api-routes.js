@@ -513,11 +513,8 @@ api.route('/orgs/:orgid')
  *         required: true
  *         schema:
  *           type: object
- *           properties:
- *             projects:
- *               type: object
- *               description: An array of projects to create. Each project must
- *                            contain the name and id of that project.
+ *           description: An array of projects to create. Each project must
+ *                        contain the name and id of that project.
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST projects returns project data
@@ -543,18 +540,8 @@ api.route('/orgs/:orgid')
  *         required: true
  *         schema:
  *           type: object
- *           required:
- *             - projects
- *             - update
- *           properties:
- *             projects:
- *               type: object
- *               description: An array of projects to update. Can either be the
- *                            project objects or the ids of the projects.
- *             update:
- *               type: object
- *               description: An object containing fields to update in the
- *                            projects and their corresponding values.
+ *           description: An array of updated project objects.
+ *
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH project returns project data.
@@ -585,18 +572,7 @@ api.route('/orgs/:orgid')
  *         required: false
  *         schema:
  *           type: object
- *           properties:
- *             projects:
- *               type: object
- *               description: An array of projects to delete. Can either be the
- *                            project objects or the ids of the projects. If the
- *                            list is not provided, all projects under the
- *                            organization will be deleted.
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the project should be hard deleted or
- *                            not. The user must be a global admin to hard delete.
- *                            Defaults to false.
+ *           description: An array of projects to delete.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE projects return deleted project data.

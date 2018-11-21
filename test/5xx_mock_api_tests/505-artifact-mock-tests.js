@@ -28,6 +28,7 @@ const path = require('path');
 const ProjController = M.require('controllers.project-controller');
 const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testData = require(path.join(M.root, 'test', 'data.json'));
@@ -35,6 +36,7 @@ const testUtils = require(path.join(M.root, 'test', 'test-utils.js'));
 let adminUser = null;
 let org = null;
 let proj = null;
+let projID = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -73,6 +75,7 @@ describe(M.getModuleName(module.filename), () => {
     .then((retProj) => {
       // Set global project
       proj = retProj;
+      projID = utils.parseID(proj.id).pop();
       done();
     })
     .catch((error) => {
@@ -133,7 +136,7 @@ function postArtifact(done) {
   // Define params
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     artifactid: testData.artifacts[0].id
   };
   const method = 'POST';
@@ -165,7 +168,7 @@ function getArtifact(done) {
   const body = {};
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     artifactid: testData.artifacts[0].id
   };
   const method = 'GET';
@@ -211,7 +214,7 @@ function patchArtifact(done) {
   };
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     artifactid: testData.artifacts[0].id
   };
   const method = 'PATCH';
@@ -242,7 +245,7 @@ function deleteArtifact(done) {
   const body = { hardDelete: true };
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     artifactid: testData.artifacts[0].id
   };
   const method = 'DELETE';

@@ -75,7 +75,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query input
@@ -87,7 +87,7 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
 
     // Error Check: Ensure user has permissions to find deleted elements
     if (softDeleted && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
     // Check softDeleted flag true
     if (softDeleted) {
@@ -159,7 +159,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       });
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize organizationID and projectID
@@ -221,7 +221,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         }
 
         // Reject error
-        return reject(new M.CustomError(message, 403, 'warn'));
+        throw new M.CustomError(message, 403, 'warn');
       }
 
       // Find the project
@@ -230,7 +230,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
     .then((proj) => {
       // Error Check: ensure user has write permissions on project
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
       // Set the project for each element and convert to element objects
@@ -412,7 +412,7 @@ function updateElements(reqUser, query, updateInfo) {
       });
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Find the elements to update
@@ -425,7 +425,7 @@ function updateElements(reqUser, query, updateInfo) {
       elements.forEach((element) => {
         // Error Check: ensure user has permission to update element
         if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
-          return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+          throw new M.CustomError('User does not have permissions.', 403, 'warn');
         }
       });
 
@@ -469,10 +469,10 @@ function updateElements(reqUser, query, updateInfo) {
       // Check if some of the elements in updateMany failed
       if (!containsMixed && retQuery.n !== foundElements.length) {
         // The number updated does not match the number attempted, log it
-        return reject(new M.CustomError(
+        throw new M.CustomError(
           'Some of the following elements failed to update: '
           + `[${foundElements.map(e => e.uid)}].`, 500, 'error'
-        ));
+        );
       }
 
       // Find the updated elements to return them
@@ -511,14 +511,14 @@ function removeElements(reqUser, query, hardDelete = false) {
       assert.ok(typeof hardDelete === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'error', 'warn'));
+      throw new M.CustomError(error.message, 400, 'error', 'warn');
     }
 
     // If hard deleting, ensure user is a site-wide admin
     if (hardDelete && !reqUser.admin) {
-      return reject(new M.CustomError(
+      throw new M.CustomError(
         'User does not have permission to permanently delete a element.', 403, 'warn'
-      ));
+      );
     }
 
     // Define found elements array and child query
@@ -536,8 +536,8 @@ function removeElements(reqUser, query, hardDelete = false) {
       Object(elements).forEach((element) => {
         // Error Check: ensure user is global admin or project writer
         if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
-          return reject(new M.CustomError('User does not have permissions to '
-              + `delete elements in the project [${element.project.name}].`, 403, 'warn'));
+          throw new M.CustomError('User does not have permissions to '
+              + `delete elements in the project [${element.project.name}].`, 403, 'warn');
         }
 
         // If the element is a package, remove the children as well
@@ -602,7 +602,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
@@ -617,7 +617,7 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
 
     // Error Check: Ensure user has permissions to find deleted elements
     if (softDeleted && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
     // Check softDeleted flag true
     if (softDeleted) {
@@ -631,17 +631,17 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
       // Error Check: ensure at least one element was found
       if (elements.length === 0) {
         // No elements found, reject error
-        return reject(new M.CustomError('Element not found.', 404, 'warn'));
+        throw new M.CustomError('Element not found.', 404, 'warn');
       }
 
       // Error Check: ensure no more than one element was found
       if (elements.length > 1) {
-        return reject(new M.CustomError('More than one element found.', 400, 'warn'));
+        throw new M.CustomError('More than one element found.', 400, 'warn');
       }
 
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!elements[0].project.getPermissions(reqUser).read && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
       // All checks passed, resolve element
@@ -732,7 +732,7 @@ function createElement(reqUser, element) {
       }
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
@@ -749,7 +749,7 @@ function createElement(reqUser, element) {
     .then((proj) => {
       // Error check: make sure user has write permissions on project
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
       // Set foundProject to the found project
@@ -762,12 +762,12 @@ function createElement(reqUser, element) {
     .then((elements) => {
       // Error Check: ensure no elements were found
       if (elements.length > 0) {
-        return reject(new M.CustomError('Element already exists.', 400, 'warn'));
+        throw new M.CustomError('Element already exists.', 400, 'warn');
       }
 
       // Error Check - NOT included element type
       if (!Element.Element.getValidTypes().includes(elementType)) {
-        return reject(new M.CustomError('Invalid element type.', 400, 'warn'));
+        throw new M.CustomError('Invalid element type.', 400, 'warn');
       }
 
       // Create the new element object
@@ -841,7 +841,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       assert.ok(Element.Element.validateObjectKeys(elementUpdated), 'Element contains invalid keys.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Check if elementUpdated is instance of Element model
@@ -858,7 +858,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       // Error Check: ensure reqUser is a project admin or global admin
       if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
       // Get list of keys the user is trying to update
@@ -876,7 +876,7 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         // Error Check: check if updated field also exists in the original element.
         if (!element.toJSON().hasOwnProperty(updateField)) {
           // Original element does NOT contain updatedField, reject error
-          return reject(new M.CustomError(`Element does not contain field ${updateField}.`, 400, 'warn'));
+          throw new M.CustomError(`Element does not contain field ${updateField}.`, 400, 'warn');
         }
 
         // Check if updated field is equal to the original field
@@ -888,16 +888,16 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
           // field cannot be updated, reject error
-          return reject(new M.CustomError(
+          throw new M.CustomError(
             `Element property [${updateField}] cannot be changed.`, 403, 'warn'
-          ));
+          );
         }
 
         // Check if updateField type is 'Mixed'
         if (Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof elementUpdated[updateField] !== 'object') {
-            return reject(new M.CustomError(`${updateField} must be an object`, 400, 'warn'));
+            throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
           }
 
           // Update each value in the object

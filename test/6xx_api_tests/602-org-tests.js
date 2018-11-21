@@ -569,7 +569,7 @@ function deleteOrgs(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
-    body: JSON.stringify({ orgs: [testData.orgs[2], testData.orgs[3]], hardDelete: true })
+    body: JSON.stringify([testData.orgs[2], testData.orgs[3]])
   },
   function(err, response) {
     // Expect no error

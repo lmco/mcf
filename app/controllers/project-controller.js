@@ -80,17 +80,17 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
-    const searchParams = { uid: { $regex: `^${orgID}:` }, deleted: false };
+    const searchParams = { id: { $regex: `^${orgID}:` }, deleted: false };
 
     // Error Check: Ensure user has permissions to find deleted projects
     if (softDeleted && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
     // softDeleted flag true, remove deleted: false
     if (softDeleted) {
@@ -140,12 +140,16 @@ function createProjects(reqUser, organizationID, arrProjects) {
       });
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Create the find query
-    const findQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(organizationID)}:` } },
-      { id: { $in: sani.sanitize(arrProjects.map(p => p.id)) } }] };
+    const projectIDs = arrProjects.map(p => utils.createID(organizationID, p.id));
+    const findQuery = {
+      id: {
+        $in: sani.sanitize(projectIDs)
+      }
+    };
 
     // Initialize createdProjects
     let createdProjects = null;
@@ -157,8 +161,8 @@ function createProjects(reqUser, organizationID, arrProjects) {
       if (projects.length > 0) {
         // Get the ids of the projects that already exist
         const existingIDs = projects.map(p => p.id);
-        return reject(new M.CustomError(`Project(s) with the following id(s) ' +
-          'already exists: [${existingIDs.toString()}].`, 403, 'warn'));
+        throw new M.CustomError(`Project(s) with the following id(s) ' +
+          'already exists: [${existingIDs.toString()}].`, 403, 'warn');
       }
 
       // Find the organization
@@ -167,18 +171,17 @@ function createProjects(reqUser, organizationID, arrProjects) {
     .then((org) => {
       // Error Check: ensure user has write permissions on org
       if (!org.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
-      // Set the uid and org for each project
-      Object(arrProjects).forEach((project) => {
-        project.uid = utils.createID(org.id, project.id);
-        project.org = org._id;
-      });
 
       // Convert each project into a project object
       const projObjects = arrProjects.map(p => {
-        const projObject = new Project(sani.sanitize(p));
+        const projData = JSON.parse(JSON.stringify(p)); // Need to use a copy
+        projData.id = utils.createID(organizationID, projData.id);
+
+        const projObject = new Project(sani.sanitize(projData));
+        projObject.org = org._id;
         projObject.permissions.read.push(reqUser._id);
         projObject.permissions.write.push(reqUser._id);
         projObject.permissions.admin.push(reqUser._id);
@@ -198,14 +201,14 @@ function createProjects(reqUser, organizationID, arrProjects) {
       // Initialize promise array
       const promises = [];
       // Loop through each project
-      arrProjects.forEach(project => {
+      createdProjects.forEach(project => {
         // Create root element for each project
         const rootElement = {
           name: 'Model',
           id: 'model',
           type: 'Package',
           parent: null,
-          projectUID: utils.createID(sani.sanitize(organizationID), project.id)
+          projectUID: project.id
         };
         // Push the save of the element to the promise array
         promises.push(ElementController.createElement(reqUser, rootElement));
@@ -239,8 +242,8 @@ function createProjects(reqUser, organizationID, arrProjects) {
  * @description This function updates multiple projects at the same time.
  *
  * @param {User} reqUser - The object containing the requesting user.
- * @param {Object} query - The query used to find/update projects
- * @param {Object} updateInfo - An object containing updated project data
+ * @param {String} organizationID - The id of the org which contains the projects.
+ * @param {Array} arrProjects - Array of projects to update.
  *
  * @return {Promise} updated projects
  *
@@ -253,114 +256,138 @@ function createProjects(reqUser, organizationID, arrProjects) {
  *   M.log.error(error);
  * });
  */
-function updateProjects(reqUser, query, updateInfo) {
+function updateProjects(reqUser, organizationID, arrProjects) {
   return new Promise((resolve, reject) => {
-    // Define flag for updating 'Mixed' fields and foundProjects array
-    let containsMixed = false;
-    let foundProjects = [];
+    // Array of promises
+    const promisesArray = [];
 
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof query === 'object', 'Update query is not an object.');
-      assert.ok(typeof updateInfo === 'object', 'Update info is not an object.');
-      // Error Check: ensure updateInfo only contains valid keys
-      assert.ok(Project.validateObjectKeys(updateInfo), 'Updated object contains invalid keys.');
-      // Loop through each desired update
-      Object.keys(updateInfo).forEach((key) => {
-        // Error Check: ensure user can update each field
-        assert.ok(Project.schema.methods.getValidUpdateFields().includes(key),
-          `Project property [${key}] cannot be changed.`);
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(Array.isArray(arrProjects), 'Projects array is not an array.');
 
-        // Error Check: ensure parameter is not unique
-        assert.ok(!Project.schema.obj[key].unique,
-          `Cannot use batch update on the unique field [${key}].`);
-
-        // If the field is a mixed field, set the flag
-        if (Project.schema.obj[key].type.schemaName === 'Mixed') {
-          containsMixed = true;
-        }
-      });
+      // Make sure every project object has an ID
+      for (let i = 0; i < arrProjects.length; i++) {
+        const p = arrProjects[i];
+        assert.ok(p.hasOwnProperty('id'), `Project ${i + 1} does not have an ID.`);
+        assert.ok(typeof p.id === 'string', `Project ${i + 1} ID is not a string.`);
+      }
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
-    // Find the projects to update
-    findProjectsQuery(query)
-    .then((projects) => {
-      // Set foundProjects array
-      foundProjects = projects;
+    const projectIDs = arrProjects.map(p => sani.sanitize(utils.createID(organizationID, p.id)));
+    const findQuery = {
+      id: {
+        $in: projectIDs
+      }
+    };
 
-      // Loop through each found project
+    // Array of fields user can update
+    const updatableFields = Project.getValidUpdateFields();
+
+    // Find the projects to update
+    findProjectsQuery(findQuery)
+    .then((projects) => {
+      // Make sure all projects were found
+      // TODO - Consider giving user more meaningful error
+      if (projects.length !== arrProjects.length) {
+        throw new M.CustomError('One or more projects not found.', 404, 'warn');
+      }
+
+      // Loop through each found project and check permissions
       Object(projects).forEach((proj) => {
         // Error Check: ensure user has permission to update proj
         if (!proj.getPermissions(reqUser).admin && !reqUser.admin) {
-          return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+          throw new M.CustomError('User does not have permissions.', 403, 'warn');
         }
       });
 
-      // If updating a mixed field, update each project individually
-      if (containsMixed) {
-        M.log.info('Updating projects.... this could take a while.');
-        // Create array of promises
-        const promises = [];
-        // Loop through each project
-        Object(projects).forEach((proj) => {
-          // Loop through each update
-          Object.keys(updateInfo).forEach((key) => {
-            // If a 'Mixed' field
-            if (Project.schema.obj[key].type.schemaName === 'Mixed') {
-              // Merge changes into original 'Mixed' field
-              utils.updateAndCombineObjects(proj[key], sani.sanitize(updateInfo[key]));
+      // Map found project to object with ID keys
+      // This is to allow us to loop over user provided array and then have
+      // constant time lookup of DB project objects
+      const objProjects = {};
+      projects.forEach(p => {
+        objProjects[p.id] = p;
+      });
 
-              // Mark that the 'Mixed' field has been modified
-              proj.markModified(key);
+      // For each project update
+      for (let i = 0; i < arrProjects.length; i++) {
+        const update = arrProjects[i];
+        const updateId = utils.createID(organizationID, update.id);
+        const updateKeys = Object.keys(arrProjects[i]);
+
+        // For each field in project update
+        for (let j = 0; j < updateKeys.length; j++) {
+          const key = updateKeys[j];
+
+          // Skip ID, we don't update it
+          if (key === 'id') {
+            continue;
+          }
+
+          // If key is not updatable, throw an error
+          if (!updatableFields.includes(key)) {
+            const msg = `Field ${key} is not allowed to be updated.`;
+            throw new M.CustomError(msg, 403, 'warn');
+          }
+
+          // Update that field on the project
+          // If field is Mixed data type, combine new data with original obj
+          if (Project.schema.obj[key].type.schemaName === 'Mixed') {
+            // If mixed data is not an object, fail with explicit error message
+            if (typeof update[key] !== 'object') {
+              const msg = `Field ${key} must be an object`;
+              throw new M.CustomError(msg, 403, 'warn');
             }
-            else {
-              // Update the value in the proj
-              proj[key] = sani.sanitize(updateInfo[key]);
-            }
-          });
 
-          // Update last modified field
-          proj.lastModifiedBy = reqUser;
+            // Update the Mixed field in place
+            const originalObjField = objProjects[updateId][key];
+            const changesObj = sani.sanitize(update[key]);
+            utils.updateAndCombineObjects(originalObjField, changesObj);
 
-          // Add proj.save() to promise array
-          promises.push(proj.save());
-        });
+            // Mongoose requires Mixed field updates to use markModified()
+            // to change rather than replace the field
+            objProjects[updateId].markModified(key);
+          }
+          // Else, field is not mixed data. Sanitize it and update.
+          else {
+            objProjects[updateId][key] = sani.sanitize(update[key]);
+          }
 
-        // Once all promises complete, return
-        return Promise.all(promises);
+          // Update the last-modified by info
+          // TODO - lastModifiedBy should be a username rather than a ref
+          objProjects[updateId].lastModifiedBy = reqUser;
+        }
+
+        // Validate the changes, fail if invalid
+        const validationError = objProjects[updateId].validateSync();
+        if (validationError) {
+          throw M.CustomError.parseCustomError(validationError);
+        }
       }
 
-      // No mixed field update, update all together
-      return Project.updateMany(query, updateInfo);
-    })
-    .then((retQuery) => {
-      // Check if some of the projects in updateMany failed
-      if (!containsMixed && retQuery.n !== foundProjects.length) {
-        // The number updated does not match the number attempted, log it
-        return reject(new M.CustomError(
-          'Some of the following projects failed to update: '
-          + `[${foundProjects.map(p => p.id)}].`, 500, 'error'
-        ));
+      // Loop over projects again and save changes
+      for (let i = 0; i < arrProjects.length; i++) {
+        const id = utils.createID(organizationID, arrProjects[i].id);
+        promisesArray.push(objProjects[id].save());
       }
-
-      // Find the updated projects to return them
-      return findProjectsQuery(query);
+      return Promise.all(promisesArray);
     })
+    .then(() => findProjectsQuery(findQuery))
     // Return the updated projects
     .then((updatedProjects) => resolve(updatedProjects))
-    .catch((error) => M.CustomError.parseCustomError(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
 /**
  * @description The function deletes all projects for an org.
  *
- * @param {User} reqUser - The object containing the requesting user.
- * @param {Object} removeQuery - A query to determine which projects to delete.
- * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
+ * @param {User} _reqUser - The object containing the requesting user.
+ * @param {String} _organizationID - The projects organization id.
+ * @param {Array} _arrProjects - Array of project objects to delete.
  *
  * @return {Array} array of deleted projects
  *
@@ -373,60 +400,73 @@ function updateProjects(reqUser, query, updateInfo) {
  *   M.log.error(error);
  * });
  */
-function removeProjects(reqUser, removeQuery, hardDelete = false) {
+function removeProjects(_reqUser, _organizationID, _arrProjects = []) {
+  // Copy the parameters
+  const reqUser = JSON.parse(JSON.stringify(_reqUser));
+  const organizationID = _organizationID;
+  const arrProjects = JSON.parse(JSON.stringify(_arrProjects));
+
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof removeQuery === 'object', 'Remove query is not an object.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(Array.isArray(arrProjects), 'Projects is not an array.');
+
+      // Make sure every project object has an ID
+      for (let i = 0; i < arrProjects.length; i++) {
+        const p = arrProjects[i];
+        assert.ok(typeof p === 'object', 'At least one project is not an object.');
+        assert.ok(Object.hasOwnProperty.call(p, 'id'), `Project ${i + 1} does not have an ID.`);
+        assert.ok(typeof p.id === 'string', `Project ${i + 1} ID is not a string.`);
+      }
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
-    // If hard deleting, ensure user is a site-wide admin
-    if (hardDelete && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permission to permanently'
-         + ' delete a project.', 403, 'warn'));
+    // Ensure user is a global admin
+    if (!reqUser.admin) {
+      const msg = 'User does not have permission to permanently delete a project.';
+      throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define foundProjects
-    let foundProjects = null;
+    // Build remove search query
+    const orgID = sani.sanitize(organizationID);
+    const removeQuery = {
+      id: {
+        $in: arrProjects.map(p => utils.createID(orgID, p.id))
+      }
+    };
+
+    let deletedProjects = null;
 
     // Find the projects to check permissions
     findProjectsQuery(removeQuery)
-    .then((arrProjects) => {
-      // Set foundProjects
-      foundProjects = arrProjects;
-
+    .then((foundProjects) => {
       // Error Check: ensure user has permission to delete each project
-      Object(arrProjects).forEach((project) => {
+      Object(foundProjects).forEach((project) => {
+        // If user does not have permissions
         if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
           // User does not have permissions and is not a site-wide admin, reject
-          return reject(new M.CustomError('User does not have permission to '
-            + `delete the project ${project.id}.`, 403, 'warn'));
+          const msg = `User does not have permission to delete the project ${project.id}.`;
+          throw new M.CustomError(msg, 403, 'warn');
         }
       });
+      // The list of projects about to be deleted
+      deletedProjects = foundProjects;
 
       // Create delete query to remove elements
       const elementDeleteQuery = { project: { $in: foundProjects.map(p => p._id) } };
       // Delete all elements in the projects
-      return ElementController.removeElements(reqUser, elementDeleteQuery, hardDelete);
+      return ElementController.removeElements(reqUser, elementDeleteQuery, true);
     })
-
-    .then(() => {
-      // If hardDelete, remove projects otherwise update projects.
-      if (hardDelete) {
-        return Project.deleteMany(removeQuery);
-      }
-      return Project.updateMany(removeQuery, { deleted: true, deletedBy: reqUser });
-    })
+    // Remove projects
+    .then(() => Project.deleteMany(removeQuery))
     // Return deleted projects
-    .then(() => resolve(foundProjects))
+    .then(() => resolve(deletedProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
-
 
 /**
  * @description The function finds a project. Sanitizes the provided fields
@@ -457,20 +497,19 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
       assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
-    const projUID = utils.createID(orgID, projID);
+    const projID = utils.createID(orgID, sani.sanitize(projectID));
 
     // Set search Params for projUID and deleted = false
-    const searchParams = { uid: projUID, deleted: false };
+    const searchParams = { id: projID, deleted: false };
 
     // Error Check: Ensure user has permissions to find deleted projects
     if (softDeleted && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+      throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
     // softDeleted flag true, remove deleted: false
     if (softDeleted) {
@@ -483,19 +522,19 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
       // Error Check: ensure at least one project was found
       if (projects.length === 0) {
         // No projects found, reject error
-        return reject(new M.CustomError('Project not found.', 404, 'warn'));
+        throw new M.CustomError('Project not found.', 404, 'warn');
       }
 
       // Error Check: ensure no more than one project was found
       if (projects.length > 1) {
         // Projects length greater than one, reject error
-        return reject(new M.CustomError('More than one project found.', 400, 'warn'));
+        throw new M.CustomError('More than one project found.', 400, 'warn');
       }
 
       // Error Check: ensure reqUser has either read permissions or is global admin
       if (!projects[0].getPermissions(reqUser).read && !reqUser.admin) {
         // User does NOT have read access and is NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
       // All checks passed, resolve project
@@ -583,13 +622,13 @@ function createProject(reqUser, project) {
       }
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize query inputs
-    const projID = sani.sanitize(project.id);
     const projName = sani.sanitize(project.name);
     const orgID = sani.sanitize(project.org.id);
+    const projID = utils.createID(orgID, sani.sanitize(project.id));
 
     // Initialize function-wide variables
     let org = null;
@@ -599,7 +638,7 @@ function createProject(reqUser, project) {
     .then((_org) => {
       // Error check: make sure user has write permission on org
       if (!_org.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
       // Set function wide variable
@@ -611,7 +650,7 @@ function createProject(reqUser, project) {
     .then((foundProject) => {
       // Error Check: ensure no project was found
       if (foundProject.length > 0) {
-        return reject(new M.CustomError('A project with the same ID already exists.', 403, 'warn'));
+        throw new M.CustomError('A project with the same ID already exists.', 403, 'warn');
       }
 
       // Create the new project
@@ -624,12 +663,10 @@ function createProject(reqUser, project) {
           write: [reqUser._id],
           admin: [reqUser._id]
         },
-        uid: utils.createID(orgID, projID),
         custom: custom,
         visibility: visibility,
         createdBy: reqUser,
         lastModifiedBy: reqUser
-
       });
 
       // Save new project
@@ -643,7 +680,7 @@ function createProject(reqUser, project) {
         id: 'model',
         type: 'Package',
         parent: null,
-        projectUID: utils.createID(orgID, projID)
+        projectUID: projID
       };
       // Save  root model element
       return ElementController.createElement(reqUser, rootElement);
@@ -687,7 +724,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       assert.ok(Project.validateObjectKeys(projectUpdated), 'Update object contains invalid keys.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Check if projectUpdated is instance of Project model
@@ -704,7 +741,7 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
       // Error Check: ensure reqUser is a project admin or global admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
-        return reject(new M.CustomError('User does not have permissions.', 403, 'warn'));
+        throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
       // Get list of keys the user is trying to update
@@ -725,16 +762,16 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
         // Error Check: Check if field can be updated
         if (!validUpdateFields.includes(updateField)) {
           // field cannot be updated, reject error
-          return reject(new M.CustomError(
+          throw new M.CustomError(
             `Project property [${updateField}] cannot be changed.`, 403, 'warn'
-          ));
+          );
         }
 
         // Check if updateField type is 'Mixed'
         if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof projectUpdated[updateField] !== 'object') {
-            return reject(new M.CustomError(`${updateField} must be an object`, 400, 'warn'));
+            throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
           }
 
           // Update each value in the object
@@ -772,7 +809,6 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being deleted.
- * @param {Boolean} hardDelete - Flag denoting whether to hard or soft delete.
  *
  * @returns {Promise} deleted project object
  *
@@ -785,23 +821,22 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
  *   M.log.error(error);
  * });
  */
-function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
+function removeProject(reqUser, organizationID, projectID) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Error Check: if hard deleting, ensure user is global admin
-    if (hardDelete && !reqUser.admin) {
-      return reject(new M.CustomError(
+    if (!reqUser.admin) {
+      throw new M.CustomError(
         'User does not have permission to permanently delete a project.', 403, 'warn'
-      ));
+      );
     }
 
     // Define foundProject
@@ -813,21 +848,14 @@ function removeProject(reqUser, organizationID, projectID, hardDelete = false) {
       // Set foundProject
       foundProject = project;
 
-      // Error Check: ensure user has permissions to delete project
-      if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
-      }
-
       // Initialize element delete query
-      const elementDeleteQuery = { id: { $regex: `^${foundProject.uid}` } };
+      const elementDeleteQuery = { project: project._id };
 
       // Delete all elements on the project
-      return ElementController.removeElements(reqUser, elementDeleteQuery, hardDelete);
+      return ElementController.removeElements(reqUser, elementDeleteQuery, true);
     })
     // If hard delete, delete project, otherwise update project
-    .then(() => ((hardDelete)
-      ? Project.deleteOne({ id: foundProject.id })
-      : Project.updateOne({ id: foundProject.id }, { deleted: true, deletedBy: reqUser })))
+    .then(() => Project.deleteOne({ id: foundProject.id }))
     .then(() => resolve(foundProject))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -973,7 +1001,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
       assert.ok(typeof role === 'string', 'Role is not a string.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
+      throw new M.CustomError(error.message, 400, 'warn');
     }
 
     // Sanitize input
@@ -991,7 +1019,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
 
       // Error Check - Do not allow user to change their own permission
       if (reqUser.username === setUser.username) {
-        return reject(new M.CustomError('User cannot change their own permissions.', 403));
+        throw new M.CustomError('User cannot change their own permissions.', 403);
       }
       // Find project to set permissions on
       // Note: organizationID and projectID are sanitized in findProject()
@@ -1000,7 +1028,7 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
     .then((project) => {
       // Error Check - User must be admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
       // Get permission levels from Project schema method
@@ -1008,12 +1036,12 @@ function setPermissions(reqUser, organizationID, projectID, setUsername, role) {
 
       // Error Check - Make sure that a valid permission type was passed
       if (!permissionLevels.includes(permType)) {
-        return reject(new M.CustomError('Permission type not found.', 404, 'warn'));
+        throw new M.CustomError('Permission type not found.', 404, 'warn');
       }
 
       // Error Check - Do NOT allow user to change their own permissions
       if (reqUser.username === setUser.username) {
-        return reject(new M.CustomError('User cannot change their own permissions.', 403, 'warn'));
+        throw new M.CustomError('User cannot change their own permissions.', 403, 'warn');
       }
 
       // Grab the index of the permission type

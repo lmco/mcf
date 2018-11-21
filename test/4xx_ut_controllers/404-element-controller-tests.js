@@ -129,13 +129,13 @@ describe(M.getModuleName(module.filename), () => {
 function createPackage(done) {
   // Package data
   const newElement = testData.elements[0];
-  newElement.projectUID = utils.createID(org.id, proj.id);
+  newElement.projectUID = proj.id;
 
   // Create the element
   ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Element was created, verify its properties
-    chai.expect(retElem.id).to.equal(utils.createID(org.id, proj.id, testData.elements[0].id));
+    chai.expect(retElem.id).to.equal(utils.createID(proj.id, testData.elements[0].id));
     chai.expect(retElem.name).to.equal(testData.elements[0].name);
     done();
   })
@@ -152,11 +152,12 @@ function createPackage(done) {
  */
 function findElement(done) {
   // Find the element we just created
-  ElemController.findElement(adminUser, org.id, proj.id, testData.elements[0].id)
+  const projID = utils.parseID(proj.id).pop();
+  ElemController.findElement(adminUser, org.id, projID, testData.elements[0].id)
   .then((retElem) => {
     // Element was found, verify properties
     chai.expect(retElem.name).to.equal(testData.elements[0].name);
-    chai.expect(retElem.id).to.equal(utils.createID(org.id, proj.id, testData.elements[0].id));
+    chai.expect(retElem.id).to.equal(utils.createID(org.id, projID, testData.elements[0].id));
     done();
   })
   .catch((error) => {
@@ -174,16 +175,17 @@ function findElement(done) {
 function createChildElement(done) {
   // Element data
   const newElement = testData.elements[1];
-  newElement.projectUID = utils.createID(org.id, proj.id);
+  const projID = utils.parseID(proj.id).pop();
+  newElement.projectUID = proj.id;
 
   // Create the element
   ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Element was created, verify its properties
-    chai.expect(retElem.id).to.equal(utils.createID(org.id, proj.id, testData.elements[1].id));
+    chai.expect(retElem.id).to.equal(utils.createID(org.id, projID, testData.elements[1].id));
     chai.expect(retElem.parent).to.not.equal(null);
     // Find the parent element
-    return ElemController.findElement(adminUser, org.id, proj.id, testData.elements[1].id);
+    return ElemController.findElement(adminUser, org.id, projID, testData.elements[1].id);
   })
   .then((retElem2) => {
     // Expect the parent element to contain the new element
@@ -207,7 +209,7 @@ function createChildElement(done) {
 function rejectElementInvalidParentType(done) {
   // New element data
   const newElement = testData.invalidElements[0];
-  newElement.projectUID = utils.createID(org.id, proj.id);
+  newElement.projectUID = proj.id;
 
   // Create the new element, expected to fail
   ElemController.createElement(adminUser, newElement)
@@ -230,13 +232,13 @@ function rejectElementInvalidParentType(done) {
 function createBlockWithUUID(done) {
   // Element data
   const newElement = testData.elements[2];
-  newElement.projectUID = utils.createID(org.id, proj.id);
+  newElement.projectUID = proj.id;
 
   // Create the element
   ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Expect element create to succeed, verify element properties
-    chai.expect(retElem.id).to.equal(utils.createID(org.id, proj.id, testData.elements[2].id));
+    chai.expect(retElem.id).to.equal(utils.createID(proj.id, testData.elements[2].id));
     chai.expect(retElem.parent).to.not.equal(null);
     chai.expect(retElem.uuid).to.equal(testData.elements[2].uuid);
     done();
@@ -255,13 +257,13 @@ function createBlockWithUUID(done) {
 function createRelationship(done) {
   // Element data
   const newElement = testData.elements[3];
-  newElement.projectUID = utils.createID(org.id, proj.id);
+  newElement.projectUID = proj.id;
 
   // Create the relationship
   ElemController.createElement(adminUser, newElement)
   .then((retElem) => {
     // Expect createElement() to succeed and verify element properties
-    chai.expect(retElem.id).to.equal(utils.createID(org.id, proj.id, testData.elements[3].id));
+    chai.expect(retElem.id).to.equal(utils.createID(proj.id, testData.elements[3].id));
     chai.expect(retElem.target).to.not.equal(null);
     chai.expect(retElem.source).to.not.equal(null);
     done();
@@ -289,7 +291,8 @@ function createMultipleElements(done) {
   ];
 
   // Create new elements
-  ElemController.createElements(adminUser, org.id, proj.id, newElements)
+  const projID = utils.parseID(proj.id).pop();
+  ElemController.createElements(adminUser, org.id, projID, newElements)
   .then((elements) => {
     // Verify the elements were created
     chai.expect(elements.length).to.equal(6);
@@ -310,7 +313,7 @@ function createMultipleElements(done) {
 function rejectCreateElementExistingUUID(done) {
   // Element data
   const newElement = testData.invalidElements[1];
-  newElement.projectUID = utils.createID(org.id, proj.id);
+  newElement.projectUID = proj.id;
 
   // Create the element, expected to fail
   ElemController.createElement(adminUser, newElement)
@@ -332,7 +335,8 @@ function rejectCreateElementExistingUUID(done) {
  */
 function findElements(done) {
   // Lookup all elements in a project
-  ElemController.findElements(adminUser, org.id, proj.id)
+  const projID = utils.parseID(proj.id).pop();
+  ElemController.findElements(adminUser, org.id, projID)
   .then((retElems) => {
     // Expect 4 elements to be found
     chai.expect(retElems.length).to.equal(11);
@@ -351,7 +355,8 @@ function findElements(done) {
  */
 function findElementByUUID(done) {
   // Lookup the element
-  ElemController.findElement(adminUser, org.id, proj.id, testData.elements[2].uuid)
+  const projID = utils.parseID(proj.id).pop();
+  ElemController.findElement(adminUser, org.id, projID, testData.elements[2].uuid)
   .then((element) => {
     // Expect element to be found
     chai.expect(element.uuid).to.equal(testData.elements[2].uuid);
@@ -381,13 +386,14 @@ function updateElement(done) {
   };
 
   // Update the element with new data
-  ElemController.updateElement(adminUser, org.id, proj.id, testData.elements[0].id,
+  const projID = utils.parseID(proj.id).pop();
+  ElemController.updateElement(adminUser, org.id, projID, testData.elements[0].id,
     testData.elements[4])
-  .then(() => ElemController.findElement(adminUser, org.id, proj.id, testData.elements[0].id))
+  .then(() => ElemController.findElement(adminUser, org.id, projID, testData.elements[0].id))
   .then((retElem) => {
     // Expect findElement() to succeed
     // Verify the found element's properties
-    chai.expect(retElem.id).to.equal(utils.createID(org.id, proj.id, testData.elements[0].id));
+    chai.expect(retElem.id).to.equal(utils.createID(org.id, projID, testData.elements[0].id));
     chai.expect(retElem.name).to.equal(testData.elements[4].name);
     done();
   })
@@ -404,8 +410,10 @@ function updateElement(done) {
  */
 function updateMultipleElements(done) {
   // Create query to update elements
-  const ids = [utils.createID(org.id, proj.id, testData.elements[0].id),
-    utils.createID(org.id, proj.id, testData.elements[1].id)];
+  const ids = [
+    utils.createID(proj.id, testData.elements[0].id),
+    utils.createID(proj.id, testData.elements[1].id)
+  ];
   const updateQuery = { id: { $in: ids } };
 
   // Create list of update parameters
@@ -440,12 +448,13 @@ function updateMultipleElements(done) {
  */
 function softDeleteElement(done) {
   // Soft delete the element
-  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[0].id, false)
+  const projID = utils.parseID(proj.id).pop();
+  ElemController.removeElement(adminUser, org.id, projID, testData.elements[0].id, false)
   .then((retElem) => {
     // Verify that the element's deleted field is now true
     chai.expect(retElem.deleted).to.equal(true);
     // Try to find the element and expect it to fail
-    return ElemController.findElement(adminUser, org.id, proj.id, testData.elements[0].id);
+    return ElemController.findElement(adminUser, org.id, projID, testData.elements[0].id);
   })
   .then(() => {
     // Expected findElement() to fail
@@ -460,11 +469,11 @@ function softDeleteElement(done) {
     // Find element again
     // NOTE: The 'true' parameter tells the function to include soft-deleted
     // elements in the results
-    return ElemController.findElement(adminUser, org.id, proj.id, testData.elements[0].id, true);
+    return ElemController.findElement(adminUser, org.id, projID, testData.elements[0].id, true);
   })
   .then((retElem) => {
     // Find succeeded, verify element properties
-    chai.expect(retElem.id).to.equal(utils.createID(org.id, proj.id, testData.elements[0].id));
+    chai.expect(retElem.id).to.equal(utils.createID(org.id, projID, testData.elements[0].id));
     done();
   })
   .catch((error) => {
@@ -480,11 +489,12 @@ function softDeleteElement(done) {
  * Expected error thrown: 'Not Found'
  */
 function hardDeleteElement(done) {
+  const projID = utils.parseID(proj.id).pop();
   // Hard delete the element
-  ElemController.removeElement(adminUser, org.id, proj.id, testData.elements[0].id, true)
+  ElemController.removeElement(adminUser, org.id, projID, testData.elements[0].id, true)
   // Then search for the element (including soft-deleted elements)
   .then(() => ElemController
-  .findElement(adminUser, org.id, proj.id,
+  .findElement(adminUser, org.id, projID,
     testData.elements[0].id, true))
   .then(() => {
     // Expect no element found
@@ -504,12 +514,17 @@ function hardDeleteElement(done) {
  * all elements in a project.
  */
 function softDeleteAllElements(done) {
+  // The project ID (not the long-form UID)
+  const projID = utils.parseID(proj.id).pop();
+
   // Delete all elements in project
   ElemController.removeElements(adminUser, { project: proj._id }, false)
   // Find all existing elements in project, including soft-deleted elements
-  .then(() => ElemController.findElements(adminUser, org.id, proj.id, true))
+  .then(() => ElemController.findElements(adminUser, org.id, projID, true))
   .then((retElems) => {
     // Find succeeded, verify elements were returned
+    // 7 elements are expected rather than 10 because deleting the package
+    // in the previous test, also deleted its 3 children
     chai.expect(retElems.length).to.equal(7);
     // Verify elements deleted field is set to true
     chai.expect(retElems[0].deleted).to.equal(true);
@@ -528,8 +543,9 @@ function softDeleteAllElements(done) {
  * elements by default.
  */
 function verifyFindNonSoftDelElem(done) {
+  const projID = utils.parseID(proj.id).pop();
   // Find elements which have NOT been soft-deleted
-  ElemController.findElements(adminUser, org.id, proj.id)
+  ElemController.findElements(adminUser, org.id, projID)
   .then((elements) => {
     // Expect elements array to be empty
     chai.expect(elements.length).to.equal(0);
@@ -548,9 +564,10 @@ function verifyFindNonSoftDelElem(done) {
  * all elements in a project.
  */
 function hardDeleteAllElements(done) {
+  const projID = utils.parseID(proj.id).pop();
   // Delete all elements in project
   ElemController.removeElements(adminUser, { project: proj._id }, true)
-  .then(() => ElemController.findElements(adminUser, org.id, proj.id))
+  .then(() => ElemController.findElements(adminUser, org.id, projID))
   .then((elements) => {
     // Expect elements array to be empty
     chai.expect(elements.length).to.equal(0);

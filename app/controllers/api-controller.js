@@ -357,57 +357,32 @@ function patchOrgs(req, res) {
  * @return {Object} res - Response object with orgs' public data
  */
 function deleteOrgs(req, res) {
+  let msg = null;
+  let err = null;
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    msg = 'Request Failed.';
+    err = new M.CustomError(msg, 500, 'critical');
+    return res.status(err.status).send(err);
   }
-
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['orgs', 'hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
+  // Error check: body must be an array
+  if (!Array.isArray(req.body)) {
+    msg = 'Body is not an array.';
+    err = new M.CustomError(err, 400, 'warn');
+    return res.status(err.status).send(err);
   }
-
-  // Initialize the delete query object
-  let deleteQuery = {};
-
-  // No orgs provided, return an error
-  if (!req.body.hasOwnProperty('orgs')) {
-    const error = new M.CustomError('Array of orgs not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-  // Org objects provided, delete all
-  if (req.body.orgs.every(o => typeof o === 'object')) {
-    // Query finds all orgs by their id
-    deleteQuery = { id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
-  }
-  // Org IDs provided, delete all
-  else if (req.body.orgs.every(o => typeof o === 'string')) {
-    // Query finds all orgs by their id
-    deleteQuery = { id: { $in: sani.sanitize(req.body.orgs) } };
-  }
-  // No valid org data was provided, reject
-  else {
-    const error = new M.CustomError('Orgs array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
+  // Error check, each item in the array must be an object
+  if (!req.body.every(o => typeof o === 'object')) {
+    msg = 'One or more items in the array is not an object';
+    err = new M.CustomError(msg, 400, 'warn');
+    return res.status(err.status).send(err);
   }
 
   // Remove the specified orgs
-  OrgController.removeOrgs(req.user, deleteQuery, hardDelete)
+  OrgController.removeOrgs(req.user, req.body)
+  // Return 200: OK and the deleted orgs
   .then((orgs) => {
-    // Return 200: OK and the deleted orgs
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
@@ -809,14 +784,14 @@ function postProjects(req, res) {
   }
 
   // Error Check: check if projects array included in req.body
-  if (!req.body.hasOwnProperty('projects')) {
-    const error = new M.CustomError('Projects array not in request body.', 400, 'warn');
+  if (!Array.isArray(req.body)) {
+    const error = new M.CustomError('Request body is not an array.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
   // Create the specified projects
   // NOTE: createProjects() sanitizes req.params.orgid and the projects
-  ProjectController.createProjects(req.user, req.params.orgid, req.body.projects)
+  ProjectController.createProjects(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the new projects
     res.header('Content-Type', 'application/json');
@@ -843,12 +818,9 @@ function patchProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Initialize the update query object
-  let updateQuery = {};
-
   // Error Check: ensure update was provided in body
-  if (!req.body.hasOwnProperty('update')) {
-    const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
+  if (!Array.isArray(req.body)) {
+    const error = new M.CustomError('Request body is not an array.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
@@ -866,31 +838,9 @@ function patchProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // No projects provided, update all projects in the org
-  if (!req.body.hasOwnProperty('projects')) {
-    // Query finds all projects that start with 'orgid:'
-    updateQuery = { uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } };
-  }
-  // Project objects provided, update all
-  else if (req.body.projects.every(p => typeof p === 'object')) {
-    // Query finds all projects by their id and whose uid start with 'orgid:'
-    updateQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
-      { id: { $in: sani.sanitize(req.body.projects.map(p => p.id)) } }] };
-  }
-  // Project IDs provided, update all
-  else if (req.body.projects.every(p => typeof p === 'string')) {
-    // Query finds all projects by their id and whose uid start with 'orgid:'
-    updateQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
-      { id: { $in: sani.sanitize(req.body.projects) } }] };
-  }
-  // No valid project data was provided, reject
-  else {
-    const error = new M.CustomError('Projects array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
   // Update the specified projects
-  // NOTE: updateProjects() sanitizes req.body.update
-  ProjectController.updateProjects(req.user, updateQuery, req.body.update)
+  // NOTE: updateProjects() sanitizes req.params.orgid
+  ProjectController.updateProjects(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the updated projects
     res.header('Content-Type', 'application/json');
@@ -917,51 +867,8 @@ function deleteProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['projects', 'hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
-  // Initialize the delete query object
-  let deleteQuery = {};
-
-  // No projects provided, delete all projects in the org
-  if (!req.body.hasOwnProperty('projects')) {
-    // Query finds all projects that start with 'orgid:'
-    deleteQuery = { uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } };
-  }
-  // Project objects provided, delete all
-  else if (req.body.projects.every(p => typeof p === 'object')) {
-    // Query finds all projects by their id and whose uid start with 'orgid:'
-    deleteQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
-      { id: { $in: sani.sanitize(req.body.projects.map(p => p.id)) } }] };
-  }
-  // Project IDs provided, delete all
-  else if (req.body.projects.every(p => typeof p === 'string')) {
-    // Query finds all projects by their id and whose uid start with 'orgid:'
-    deleteQuery = { $and: [{ uid: { $regex: `^${sani.sanitize(req.params.orgid)}:` } },
-      { id: { $in: sani.sanitize(req.body.projects) } }] };
-  }
-  // No valid project data was provided, reject
-  else {
-    const error = new M.CustomError('Projects array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
   // Remove the specified projects
-  ProjectController.removeProjects(req.user, deleteQuery, hardDelete)
+  ProjectController.removeProjects(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the deleted projects
     res.header('Content-Type', 'application/json');
@@ -1254,7 +1161,7 @@ function postProjectRole(req, res) {
   .then((project) => {
     // Return 200: Ok and updated project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(project.getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));

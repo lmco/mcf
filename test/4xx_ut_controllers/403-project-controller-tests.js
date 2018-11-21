@@ -134,7 +134,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject updating due to non-Admin user', rejectNonAdminProjectUpdate);
   it('should find the permissions on the project', findPerm);
   it('should set the permissions on the project', setPerm);
-  it('should soft-delete a project', softDeleteProject);
   it('should delete a project', deleteProject);
   it('should delete second project', deleteProject02);
   it('should remove multiple projects', deleteMultipleProjects);
@@ -152,19 +151,22 @@ function createProject(done) {
 
   // Create the project via project controller
   ProjController.createProject(adminUser, projData)
-  .then((retProj) => ProjController.findProject(adminUser, org.id, retProj.id))
+  .then((retProj) => {
+    const split = utils.parseID(retProj.id);
+    return ProjController.findProject(adminUser, split[0], split[1]);
+  })
   .then((proj) => {
     // Set the file-global project
     project = proj;
 
     // Verify project was created successfully
-    chai.expect(proj.id).to.equal(testData.projects[0].id);
+    chai.expect(proj.id).to.equal(utils.createID(org.id, testData.projects[0].id));
     chai.expect(proj.name).to.equal(testData.projects[0].name);
     chai.expect(proj.custom.builtFor).to.equal(projData.custom.builtFor);
-    return Element.Element.find({ id: utils.createID(org.id, project.id, 'model') });
+    return Element.Element.find({ id: utils.createID(project.id, 'model') });
   })
   .then(element => {
-    chai.expect(element[0].id).to.equal(utils.createID(org.id, project.id, 'model'));
+    chai.expect(element[0].id).to.equal(utils.createID(project.id, 'model'));
     done();
   })
   .catch((error) => {
@@ -190,8 +192,11 @@ function createMultipleProjects(done) {
     // Verify the projects were created
     chai.expect(projects.length).to.equal(2);
     // Create array of elementUID's
-    const elementUIDs = [utils.createID(org.id, testData.projects[4].id, 'model'),
-      utils.createID(org.id, testData.projects[5].id, 'model')];
+    const elementUIDs = [
+      utils.createID(org.id, testData.projects[5].id, 'model'),
+      utils.createID(org.id, testData.projects[4].id, 'model')
+    ];
+
     // Query for elements
     return Element.Element.find({ id: { $in: elementUIDs } });
   })
@@ -256,6 +261,7 @@ function updateProjectName(done) {
 
   // Update project01 name to project02 name
   projData1.name = testData.projects[2].name;
+  delete projData1.id;
 
   // Update project
   ProjController.updateProject(adminUser, org.id, testData.projects[0].id, projData1)
@@ -296,31 +302,31 @@ function updateProjectObject(done) {
 }
 
 /**
+ * TODO
  * @description Updates multiple projects at the same time.
  */
 function updateMultipleProjects(done) {
   // Create query to update projects
-  const updateQuery = { id: { $in: [
-    testData.projects[4].id,
-    testData.projects[5].id
-  ] } };
+  const arrProjects = [
+    testData.projects[4],
+    testData.projects[5]
+  ];
 
-  // Create list of update parameters
-  const updateObj = {
-    custom: {
-      department: 'Space'
-    },
-    name: 'New Project Name'
-  };
+  // Update each project object
+  arrProjects.forEach((p) => {
+    p.custom = p.custom || {};
+    p.custom.department = 'Space';
+    p.name = 'Updated Project';
+  });
 
   // Update projects
-  ProjController.updateProjects(adminUser, updateQuery, updateObj)
+  ProjController.updateProjects(adminUser, org.id, arrProjects)
   .then((projects) => {
     // Verify returned data
-    chai.expect(projects[0].name).to.equal(updateObj.name);
-    chai.expect(projects[1].name).to.equal(updateObj.name);
-    chai.expect(projects[0].custom.department).to.equal(updateObj.custom.department);
-    chai.expect(projects[1].custom.department).to.equal(updateObj.custom.department);
+    chai.expect(projects[0].name).to.equal('Updated Project');
+    chai.expect(projects[1].name).to.equal('Updated Project');
+    chai.expect(projects[0].custom.department).to.equal('Space');
+    chai.expect(projects[1].custom.department).to.equal('Space');
     done();
   })
   .catch((error) => {
@@ -343,7 +349,7 @@ function createProject02(done) {
   ProjController.createProject(adminUser, projData)
   .then((proj) => {
     // Verify project fields
-    chai.expect(proj.id).to.equal(testData.projects[2].id);
+    chai.expect(proj.id).to.equal(utils.createID(org.id, testData.projects[2].id));
     chai.expect(proj.name).to.equal(testData.projects[2].name);
     done();
   })
@@ -512,7 +518,7 @@ function findProj(done) {
   ProjController.findProject(adminUser, orgId, projId)
   .then((proj) => {
     // Verify project fields
-    chai.expect(proj.id).to.equal(testData.projects[2].id);
+    chai.expect(proj.id).to.equal(utils.createID(org.id, testData.projects[2].id));
     chai.expect(proj.name).to.equal(testData.projects[2].name);
     done();
   })
@@ -619,7 +625,8 @@ function updateProj(done) {
   const projId = testData.projects[0].id;
   const updateProjData = Object.assign({}, testData.projects[1]);
   // Note: New project id must not change. Keep same project ID
-  updateProjData.id = projId;
+  // updateProjData.id = projId;
+  delete updateProjData.id;
   updateProjData.custom = { builtFor: 'built', version: '0.0' };
 
   // Update project
@@ -627,7 +634,7 @@ function updateProj(done) {
   .then(() => ProjController.findProject(adminUser, org.id, projId))
   .then((proj) => {
     // Verify project fields
-    chai.expect(proj.id).to.equal(updateProjData.id);
+    chai.expect(proj.id).to.equal(utils.createID(org.id, projId));
     chai.expect(proj.name).to.equal(updateProjData.name);
     chai.expect(proj.custom.builtFor).to.equal(updateProjData.custom.builtFor);
     chai.expect(proj.custom.version).to.equal(updateProjData.custom.version);
@@ -717,9 +724,10 @@ function findPerm(done) {
  */
 function setPerm(done) {
   // Admin sets permissions for non-admin
-  ProjController.setPermissions(adminUser, org.id, project.id.toString(),
-    nonAdminUser.username, 'write')
-  .then(() => ProjController.findProject(adminUser, org.id, project.id.toString()))
+  const projID = utils.parseID(project.id)[1];
+  const writeUser = nonAdminUser.username;
+  ProjController.setPermissions(adminUser, org.id, projID, writeUser, 'write')
+  .then(() => ProjController.findProject(adminUser, org.id, projID))
   .then((retProj) => {
     // Verify permissions for non-admin
     chai.expect(retProj.permissions.write[1]._id.toString()).to.equal(nonAdminUser._id.toString());
@@ -731,36 +739,6 @@ function setPerm(done) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies project NOT found after soft-deletion.
- * Expected error thrown: 'Not Found'
- */
-function softDeleteProject(done) {
-  // Create an element via the Element model
-  const elem = new Element.Block({
-    id: utils.createID(org.id, project.id, testData.elements[1].id),
-    project: project._id
-  });
-
-  // Save the element
-  elem.save()
-  // Soft-delete the project
-  .then(() => ProjController.removeProject(adminUser, org.id, project.id, false))
-  // Find project
-  .then(() => ProjController.findProject(adminUser, org.id, project.id))
-  .then(() => {
-    // Expected findProject() to fail
-    // Should not execute, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Not Found'
-    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
@@ -826,12 +804,16 @@ function deleteProject02(done) {
  */
 function deleteMultipleProjects(done) {
   // Define query to find projects
-  const query = { uid: { $in: [`${org.id}:${testData.projects[1].id}`,
-    `${org.id}:${testData.projects[4].id}`,
-    `${org.id}:${testData.projects[5].id}`] } };
+  const arrProjects = [
+    { id: testData.projects[0].id },
+    { id: testData.projects[1].id },
+    { id: testData.projects[4].id },
+    { id: testData.projects[5].id }
+  ];
+
 
   // Remove projects
-  ProjController.removeProjects(adminUser, query, true)
+  ProjController.removeProjects(adminUser, org.id, arrProjects)
   .then(() => ProjController.findProjects(adminUser, org.id, true))
   .then((foundProjects) => {
     // Expect foundProjects array to be empty

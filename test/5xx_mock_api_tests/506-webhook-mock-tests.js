@@ -27,6 +27,7 @@ const path = require('path');
 const ProjController = M.require('controllers.project-controller');
 const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
@@ -34,6 +35,7 @@ const testData = testUtils.importTestData();
 let adminUser = null;
 let org = null;
 let proj = null;
+let projID = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -72,6 +74,7 @@ describe(M.getModuleName(module.filename), () => {
     .then((retProj) => {
       // Set global project
       proj = retProj;
+      projID = utils.parseID(proj.id).pop();
       done();
     })
     .catch((error) => {
@@ -116,7 +119,7 @@ function postWebhook(done) {
   const body = testData.webhooks[0];
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     webhookid: testData.webhooks[0].id
   };
   const method = 'POST';
@@ -148,7 +151,7 @@ function getWebhook(done) {
   const body = {};
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     webhookid: testData.webhooks[0].id
   };
   const method = 'GET';
@@ -180,7 +183,7 @@ function patchWebhook(done) {
   const body = { name: 'Updated Webhook Name' };
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     webhookid: testData.webhooks[0].id
   };
   const method = 'PATCH';
@@ -211,7 +214,7 @@ function deleteWebhook(done) {
   const body = { hardDelete: true };
   const params = {
     orgid: org.id,
-    projectid: proj.id,
+    projectid: projID,
     webhookid: testData.webhooks[0].id
   };
   const method = 'DELETE';
