@@ -146,7 +146,7 @@ ArtifactSchema.statics.validateObjectKeys = function(object) {
   // Initialize returnBool to true
   let returnBool = true;
 
-  const validKeys = Object.keys(ArtifactSchema.obj);
+  const validKeys = Object.keys(ArtifactSchema.paths);
   validKeys.push('artifactBlob');
   // Check if the object is NOT an instance of the artifact model
   if (!(object instanceof mongoose.model('Artifact', ArtifactSchema))) {

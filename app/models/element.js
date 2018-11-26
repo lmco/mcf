@@ -391,7 +391,7 @@ ElementSchema.statics.validateObjectKeys = function(object) {
   let returnBool = true;
   // Check if the object is NOT an instance of the element model
   if (!(object instanceof mongoose.model('Element', ElementSchema))) {
-    let validKeys = Object.keys(ElementSchema.obj)
+    let validKeys = Object.keys(ElementSchema.paths)
     .concat(
       Object.keys(BlockSchema.obj),
       Object.keys(RelationshipSchema.obj),

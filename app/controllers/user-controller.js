@@ -395,7 +395,7 @@ function removeUsers(reqUser, _arrUsers) {
 
     // Build remove query
     const usernames = arrUsers.map(u => u.username);
-    const removeQuery = { username: { $in: usernames }};
+    const removeQuery = { username: { $in: usernames } };
     const orgProjQuery = { 'permissions.read': { $in: arrUsers.map(u => u._id) } };
     let foundUsers = [];
 

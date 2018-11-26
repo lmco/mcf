@@ -280,8 +280,8 @@ function updateOrgs(reqUser, query, updateInfo) {
           // Loop through each update
           Object.keys(updateInfo).forEach((key) => {
             // If a 'Mixed' field
-            if (Organization.schema.obj.hasOwnProperty(key) &&
-              Organization.schema.obj[key].type.schemaName === 'Mixed') {
+            if (Organization.schema.obj.hasOwnProperty(key)
+              && Organization.schema.obj[key].type.schemaName === 'Mixed') {
               // Merge changes into original 'Mixed' field
               utils.updateAndCombineObjects(org[key], sani.sanitize(updateInfo[key]));
 
@@ -506,8 +506,8 @@ function findOrgsQuery(orgQuery) {
   return new Promise((resolve, reject) => {
     // Find orgs
     Organization.find(orgQuery)
-    .populate('projects permissions.read permissions.write permissions.admin archivedBy' +
-      ' lastModifiedBy')
+    .populate('projects permissions.read permissions.write permissions.admin archivedBy'
+      + ' lastModifiedBy')
     .then((orgs) => resolve(orgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -693,8 +693,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
         }
 
         // Check if updateField type is 'Mixed'
-        if (Organization.schema.hasOwnProperty(updateField) &&
-          Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
+        if (Organization.schema.hasOwnProperty(updateField)
+          && Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof orgUpdated[updateField] !== 'object') {
             throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
@@ -708,21 +708,21 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
           org.markModified(updateField);
         }
         else {
-          // Schema type is not mixed
-          // Sanitize field and update field in org object
-          org[updateField] = sani.sanitize(orgUpdated[updateField]);
-
           // Set archivedBy if archived field is being changed
           if (updateField === 'archived') {
             // If the org is being archived
             if (orgUpdated[updateField] && !org[updateField]) {
-              org.archivedBy = reqUser._id;
+              org.archivedBy = reqUser;
             }
             // If the org is being unarchived
             else if (!orgUpdated[updateField] && org[updateField]) {
               org.archivedBy = null;
             }
           }
+
+          // Schema type is not mixed
+          // Sanitize field and update field in org object
+          org[updateField] = sani.sanitize(orgUpdated[updateField]);
         }
       }
       // Update last modified field

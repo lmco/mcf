@@ -170,7 +170,7 @@ ProjectSchema.methods.getPermissionLevels = function() {
  * @memberof ProjectSchema
  */
 ProjectSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'custom'];
+  return ['name', 'custom', 'archived'];
 };
 
 /**
@@ -240,7 +240,7 @@ ProjectSchema.statics.validateObjectKeys = function(object) {
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the project model
-      if (!Object.keys(ProjectSchema.obj).includes(key)) {
+      if (!Object.keys(ProjectSchema.paths).includes(key)) {
         // Key is not in project model, return false
         returnBool = false;
       }

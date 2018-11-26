@@ -102,7 +102,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should update an orgs name', updateOrg);
   it('should update an orgs name using model object', updateOrgObject);
   it('should update multiple orgs at the same time', updateMultipleOrgs);
+  it('should archive an org', archiveOrg);
+  it('should reject updating an archived org', rejectUpdateArchivedOrg);
   it('should find all orgs a user has access to', findAllExistingOrgs);
+  it('should reject finding an archived org', rejectFindArchivedOrg);
   it('should delete an existing org', deleteExistingOrg);
   it('should delete an existing org and its project', deleteProjectAndOrg);
   it('should reject update of default org', rejectUpdateDefaultOrg);
@@ -196,7 +199,7 @@ function findExistingOrg(done) {
 
 /**
  * @description Verifies a user CANNOT update permissions.
- * Expected error thrown: 'Forbidden'
+ * Expected error thrown: 'Bad Request'
  */
 function rejectUpdateImmutableField(done) {
   // Update organization
@@ -208,8 +211,8 @@ function rejectUpdateImmutableField(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Forbidden'
-    chai.expect(error.message).to.equal('Forbidden');
+    // Expected error thrown: 'Bad Request'
+    chai.expect(error.message).to.equal('Bad Request');
     done();
   });
 }
@@ -349,11 +352,61 @@ function updateMultipleOrgs(done) {
 }
 
 /**
+ * @description Verifies ability to archive an org.
+ */
+function archiveOrg(done) {
+  // Create org data
+  const orgID = testData.orgs[4].id;
+  const updateObj = { archived: true };
+
+  // Archive org
+  OrgController.updateOrg(adminUser, orgID, updateObj)
+  .then((updatedOrg) => {
+    // Verify updated org
+    chai.expect(updatedOrg.archived).to.equal(true);
+    chai.expect(updatedOrg.archivedOn).to.not.equal(null);
+    chai.expect(updatedOrg.archivedBy.username).to.equal(adminUser.username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies updateOrg() fails to update an org when the the org is
+ * currently archived.
+ * Expected error thrown: 'Forbidden
+ */
+function rejectUpdateArchivedOrg(done) {
+  // Create org data
+  const orgID = testData.orgs[4].id;
+  const updateObj = { name: 'Updated Org Name' };
+
+  // Update org
+  OrgController.updateOrg(adminUser, orgID, updateObj)
+  .then(() => {
+    // Expect updateOrg() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
  * @description Find all existing orgs a user has access to.
  */
 function findAllExistingOrgs(done) {
   // Find orgs via controller
-  OrgController.findOrgs(adminUser)
+  OrgController.findOrgs(adminUser, true)
   .then((orgs) => {
     // Verify correct number of orgs was returned
     chai.expect(orgs.length).to.equal(4);
@@ -367,6 +420,29 @@ function findAllExistingOrgs(done) {
   });
 }
 
+/**
+ * @description Verifies findOrg() fails to find an archived org when the
+ * optional third parameter 'archived' is not provided.
+ * Expected error thrown: 'Not Found'
+ */
+function rejectFindArchivedOrg(done) {
+  // Create org data
+  const orgID = testData.orgs[4].id;
+
+  // Find the org
+  OrgController.findOrg(adminUser, orgID)
+  .then(() => {
+    // Expect findOrg() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
+    done();
+  });
+}
 
 /**
  * @description Deletes an existing org.

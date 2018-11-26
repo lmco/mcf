@@ -339,7 +339,7 @@ function getOrgs(done) {
  */
 function deleteOrg(done) {
   // Create request object
-  const body = { hardDelete: true };
+  const body = {};
   const params = { orgid: testData.orgs[0].id };
   const method = 'DELETE';
   const req = getReq(params, body, method);

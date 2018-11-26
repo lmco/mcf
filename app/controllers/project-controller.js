@@ -62,7 +62,7 @@ const utils = M.require('lib.utils');
  * @param {Boolean} archived - The optional flag to denote also searching for
  *                             archived projects
  *
- * @return {Array} array of found project objects
+ * @return {Promise} array of found project objects
  *
  * @example
  * findProjects({User}, 'orgID', false)
@@ -115,7 +115,7 @@ function findProjects(reqUser, organizationID, archived = false) {
  * @param {String} organizationID - The ID of the organization to add projects to.
  * @param {Object} arrProjects - The object containing project data to create.
  *
- * @return {Array} Array of created projects
+ * @return {Promise} Array of created projects
  *
  * @example
  * createProjects({User}, 'orgID', [{Proj1}, {Proj2}, ...])
@@ -336,7 +336,8 @@ function updateProjects(reqUser, organizationID, arrProjects) {
 
           // Update that field on the project
           // If field is Mixed data type, combine new data with original obj
-          if (Project.schema.obj[key].type.schemaName === 'Mixed') {
+          if (Project.schema.obj.hasOwnProperty(key)
+            && Project.schema.obj[key].type.schemaName === 'Mixed') {
             // If mixed data is not an object, fail with explicit error message
             if (typeof update[key] !== 'object') {
               const msg = `Field ${key} must be an object`;
@@ -355,6 +356,18 @@ function updateProjects(reqUser, organizationID, arrProjects) {
           // Else, field is not mixed data. Sanitize it and update.
           else {
             objProjects[updateId][key] = sani.sanitize(update[key]);
+
+            // Set archivedBy if archived field is being changed
+            if (key === 'archived') {
+              // If the project is being archived
+              if (update[key] && !objProjects[updateId][key]) {
+                update.archivedBy = reqUser._id;
+              }
+              // If the project is being unarchived
+              else if (!update[key] && objProjects[updateId][key]) {
+                update.archivedBy = null;
+              }
+            }
           }
 
           // Update the last-modified by info
@@ -390,7 +403,7 @@ function updateProjects(reqUser, organizationID, arrProjects) {
  * @param {String} _organizationID - The projects organization id.
  * @param {Array} _arrProjects - Array of project objects to delete.
  *
- * @return {Array} array of deleted projects
+ * @return {Promise} array of deleted projects
  *
  * @example
  * removeProjects({User}, { uid: 'org:proj' }, false)
@@ -478,7 +491,7 @@ function removeProjects(_reqUser, _organizationID, _arrProjects = []) {
  * @param {String} projectID - The project ID of the Project which is being searched for.
  * @param {Boolean} archived - The flag to control whether or not to find archived projects.
  *
- * @return {Project} The found project
+ * @return {Promise} The found project
  *
  * @example
  * findProject({User}, 'orgID', 'projectID', false)
@@ -567,7 +580,7 @@ function findProjectsQuery(query) {
   return new Promise((resolve, reject) => {
     // Find projects
     Project.find(query)
-    .populate('org permissions.read permissions.write permissions.admin')
+    .populate('org permissions.read permissions.write permissions.admin archivedBy lastModifiedBy')
     .then((projects) => resolve(projects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -737,8 +750,13 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
 
     // Find project
     // Note: organizationID and projectID is sanitized in findProject()
-    findProject(reqUser, organizationID, projectID)
+    findProject(reqUser, organizationID, projectID, true)
     .then((project) => {
+      // Error Check: if project is currently archived, it must first be unarchived
+      if (project.archived && projectUpdated.archived !== false) {
+        throw new M.CustomError('Project must be unarchived first.', 403, 'warn');
+      }
+
       // Error Check: ensure reqUser is a project admin or global admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
@@ -769,7 +787,8 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
         }
 
         // Check if updateField type is 'Mixed'
-        if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
+        if (Project.schema.obj.hasOwnProperty(updateField)
+          && Project.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof projectUpdated[updateField] !== 'object') {
             throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
@@ -786,6 +805,18 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
           project.markModified(updateField);
         }
         else {
+          // Set archivedBy if archived field is being changed
+          if (updateField === 'archived') {
+            // If the project is being archived
+            if (projectUpdated[updateField] && !project[updateField]) {
+              project.archivedBy = reqUser;
+            }
+            // If the project is being unarchived
+            else if (!projectUpdated[updateField] && project[updateField]) {
+              project.archivedBy = null;
+            }
+          }
+
           // Schema type is not mixed
           // Sanitize field and update field in project object
           project[updateField] = sani.sanitize(projectUpdated[updateField]);
@@ -852,7 +883,7 @@ function removeProject(reqUser, organizationID, projectID) {
       const elementDeleteQuery = { project: project._id };
 
       // Delete all elements on the project
-      return ElementController.removeElements(reqUser, elementDeleteQuery, true);
+      return ElementController.removeElements(reqUser, elementDeleteQuery);
     })
     // If hard delete, delete project, otherwise update project
     .then(() => Project.deleteOne({ id: foundProject.id }))

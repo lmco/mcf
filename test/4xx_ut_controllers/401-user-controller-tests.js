@@ -482,7 +482,7 @@ function findExistingUser(done) {
 }
 
 /**
- * @description Verifies findUser() fails to find an archivedUser when
+ * @description Verifies findUser() fails to find an archived user when
  * the optional third parameter 'archived' is not provided.
  * Expected error thrown: 'Not Found'
  */

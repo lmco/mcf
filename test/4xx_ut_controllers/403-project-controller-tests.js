@@ -125,8 +125,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creation of project with invalid name', rejectInvalidProjectName);
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
   it('should reject creation of project with non-Admin user', rejectNonAdminCreateProject);
+  it('should archive a project', archiveProject);
+  it('should reject updating an archived project', rejectUpdateArchivedProject);
   it('should find a project', findProj);
   it('should find all projects which user has permissions on', findProjects);
+  it('should reject finding an archived project', rejectFindArchivedProject);
   it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
   it('should reject update to the id name', rejectProjectId);
@@ -508,6 +511,58 @@ function rejectNonAdminCreateProject(done) {
 }
 
 /**
+ * @description Verifies ability to archive a project
+ */
+function archiveProject(done) {
+  // Create project data
+  const orgID = org.id;
+  const projID = testData.projects[4].id;
+  const updateObj = { archived: true };
+
+  // Archive the project
+  ProjController.updateProject(adminUser, orgID, projID, updateObj)
+  .then((updatedProject) => {
+    // Verify updated project
+    chai.expect(updatedProject.archived).to.equal(true);
+    chai.expect(updatedProject.archivedOn).to.not.equal(null);
+    chai.expect(updatedProject.archivedBy.username).to.equal(adminUser.username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies updateProject() fails to update a project when the
+ * project is currently archived.
+ * Expected error thrown: 'Forbidden'
+ */
+function rejectUpdateArchivedProject(done) {
+  // Create project data
+  const orgID = org.id;
+  const projID = testData.projects[4].id;
+  const updateObj = { name: 'Updated Project' };
+
+  // Update project
+  ProjController.updateProject(adminUser, orgID, projID, updateObj)
+  .then(() => {
+    // Expect updateProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
  * @description Verify project created in createProject() is found.
  */
 function findProj(done) {
@@ -553,11 +608,11 @@ function findProjects(done) {
     projData.org = { id: org.id };
     return ProjController.createProject(adminUser2, projData);
   })
-  .then(() => ProjController.findProjects(adminUser, org.id))
-  .then((projs) => {
+  .then(() => ProjController.findProjects(adminUser, org.id, true))
+  .then((projects) => {
     // Verify project fields
-    chai.expect(projs.length).to.equal(5);
-    return OrgController.removeOrg(adminUser2, testData.orgs[1].id, true);
+    chai.expect(projects.length).to.equal(5);
+    return OrgController.removeOrg(adminUser2, testData.orgs[1].id);
   })
   .then(() => UserController.removeUser(adminUser, testData.users[2].username))
   .then(() => done())
@@ -565,6 +620,31 @@ function findProjects(done) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies findProject() fails to find an archived project when
+ * the optional third parameter 'archived' is not provided.
+ * Expected error thrown: 'Not Found'
+ */
+function rejectFindArchivedProject(done) {
+  // Create project data
+  const orgID = org.id;
+  const projID = testData.projects[4].id;
+
+  // Find the project
+  ProjController.findProject(adminUser, orgID, projID)
+  .then(() => {
+    // Expect findProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }

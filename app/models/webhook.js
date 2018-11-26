@@ -215,7 +215,7 @@ WebhookSchema.statics.validateObjectKeys = function(object) {
   let returnBool = true;
   // Check if the object is NOT an instance of the webhook model
   if (!(object instanceof mongoose.model('Webhook', WebhookSchema))) {
-    let validKeys = Object.keys(WebhookSchema.obj)
+    let validKeys = Object.keys(WebhookSchema.paths)
     .concat(
       Object.keys(OutgoingWebhookSchema.obj),
       Object.keys(IncomingWebhookSchema.obj)

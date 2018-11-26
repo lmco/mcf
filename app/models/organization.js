@@ -146,7 +146,7 @@ OrganizationSchema.methods.getPermissionLevels = function() {
  * @memberof OrganizationSchema
  */
 OrganizationSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'custom'];
+  return ['name', 'custom', 'archived'];
 };
 
 /**
@@ -188,7 +188,7 @@ OrganizationSchema.statics.validateObjectKeys = function(object) {
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the organization model
-      if (!Object.keys(OrganizationSchema.obj).includes(key)) {
+      if (!Object.keys(OrganizationSchema.paths).includes(key)) {
         // Key is not in organization model, return false
         returnBool = false;
       }

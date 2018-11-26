@@ -340,7 +340,7 @@ function getProject(done) {
  */
 function deleteProject(done) {
   // Create request object
-  const body = { hardDelete: true };
+  const body = {};
   const params = {
     orgid: org.id,
     projectid: testData.projects[0].id

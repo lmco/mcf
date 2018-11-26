@@ -1007,26 +1007,9 @@ function deleteProject(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
   // Remove the specified project
   // NOTE: removeProject() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid, hardDelete)
+  ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid)
   .then((project) => {
     // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
