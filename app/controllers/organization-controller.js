@@ -255,6 +255,8 @@ function updateOrgs(reqUser, query, updateInfo) {
 
       // Loop through each found org
       Object(orgs).forEach((org) => {
+        // TODO: Add check ensure user isn't trying to update an archived org
+
         // Error Check: ensure user has permission to update org
         if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
           throw new M.CustomError('User does not have permissions.', 403, 'warn');
@@ -278,7 +280,8 @@ function updateOrgs(reqUser, query, updateInfo) {
           // Loop through each update
           Object.keys(updateInfo).forEach((key) => {
             // If a 'Mixed' field
-            if (Organization.schema.obj[key].type.schemaName === 'Mixed') {
+            if (Organization.schema.obj.hasOwnProperty(key) &&
+              Organization.schema.obj[key].type.schemaName === 'Mixed') {
               // Merge changes into original 'Mixed' field
               utils.updateAndCombineObjects(org[key], sani.sanitize(updateInfo[key]));
 
@@ -288,6 +291,18 @@ function updateOrgs(reqUser, query, updateInfo) {
             else {
               // Update the value in the org
               org[key] = sani.sanitize(updateInfo[key]);
+
+              // Set archivedBy if archived field is being changed
+              if (key === 'archived') {
+                // If the org is being archived
+                if (updateInfo[key] && !org[key]) {
+                  updateInfo.archivedBy = reqUser._id;
+                }
+                // If the org is being unarchived
+                else if (!updateInfo[key] && org[key]) {
+                  updateInfo.archivedBy = null;
+                }
+              }
             }
           });
 
@@ -320,7 +335,7 @@ function updateOrgs(reqUser, query, updateInfo) {
     })
     // Return the updated orgs
     .then((updatedOrgs) => resolve(updatedOrgs))
-    .catch((error) => M.CustomError.parseCustomError(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -345,18 +360,19 @@ function removeOrgs(reqUser, arrOrgs) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete orgs.');
       assert.ok(Array.isArray(arrOrgs), 'Remove orgs is not an array');
       arrOrgs.forEach(org => {
         assert.ok(typeof org === 'object', 'Orgs array is not of objects');
       });
     }
     catch (error) {
-      throw new M.CustomError(error.message, 400, 'warn');
-    }
-
-    // Error Check: ensure reqUser is a global admin if hard deleting
-    if (!reqUser.admin) {
-      throw new M.CustomError('User does not have permissions.', 403, 'warn');
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permission')) {
+        statusCode = 403;
+      }
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define found orgs array
@@ -490,7 +506,8 @@ function findOrgsQuery(orgQuery) {
   return new Promise((resolve, reject) => {
     // Find orgs
     Organization.find(orgQuery)
-    .populate('projects permissions.read permissions.write permissions.admin')
+    .populate('projects permissions.read permissions.write permissions.admin archivedBy' +
+      ' lastModifiedBy')
     .then((orgs) => resolve(orgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -631,8 +648,13 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
 
     // Find organization
     // Note: organizationID is sanitized in findOrg()
-    findOrg(reqUser, organizationID)
+    findOrg(reqUser, organizationID, true)
     .then((org) => {
+      // Error Check: if org is currently archived, it must first be unarchived
+      if (org.archived && orgUpdated.archived !== false) {
+        throw new M.CustomError('Organization must be unarchived first.', 403, 'warn');
+      }
+
       // Error Check: ensure reqUser is an org admin or global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
@@ -671,7 +693,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
         }
 
         // Check if updateField type is 'Mixed'
-        if (Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
+        if (Organization.schema.hasOwnProperty(updateField) &&
+          Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof orgUpdated[updateField] !== 'object') {
             throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
@@ -688,6 +711,18 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
           // Schema type is not mixed
           // Sanitize field and update field in org object
           org[updateField] = sani.sanitize(orgUpdated[updateField]);
+
+          // Set archivedBy if archived field is being changed
+          if (updateField === 'archived') {
+            // If the org is being archived
+            if (orgUpdated[updateField] && !org[updateField]) {
+              org.archivedBy = reqUser._id;
+            }
+            // If the org is being unarchived
+            else if (!orgUpdated[updateField] && org[updateField]) {
+              org.archivedBy = null;
+            }
+          }
         }
       }
       // Update last modified field

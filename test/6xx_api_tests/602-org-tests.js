@@ -97,7 +97,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a POST with an empty name', rejectPostEmptyName);
   it('should reject a POST of an existing org', rejectPostExistingOrg);
   it('should reject a DELETE of a non-existing org', rejectDeleteNonExistingOrg);
-  it('should reject a DELETE of orgs with invalid param', rejectDeleteOrgs);
   it('should DELETE organization', deleteOrg);
   it('should DELETE multiple organizations', deleteOrgs);
 });
@@ -502,8 +501,7 @@ function rejectDeleteNonExistingOrg(done) {
     url: `${test.url}/api/orgs/${testData.ids[5].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({ hardDelete: false })
+    method: 'DELETE'
   },
   function(err, response, body) {
     // Expect no error
@@ -518,29 +516,6 @@ function rejectDeleteNonExistingOrg(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs fails when hardDelete is not a boolean.
- */
-function rejectDeleteOrgs(done) {
-  request({
-    url: `${test.url}/api/orgs`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({ orgs: [testData.orgs[2], testData.orgs[3]], hardDelete: 3 })
-  },
-  function(err, response, body) {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Verify error message in response
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-/**
  * @description Verifies DELETE /api/orgs/:orgid deletes an organization.
  */
 function deleteOrg(done) {
@@ -548,8 +523,7 @@ function deleteOrg(done) {
     url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({ hardDelete: true })
+    method: 'DELETE'
   },
   function(err, response) {
     // Expect no error

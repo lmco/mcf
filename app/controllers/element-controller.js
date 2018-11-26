@@ -535,7 +535,7 @@ function removeElements(reqUser, query) {
         // Error Check: ensure user is global admin or project writer
         if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
           throw new M.CustomError('User does not have permissions to '
-              + `delete/archive elements in the project [${element.project.name}].`, 403, 'warn');
+            + `delete/archive elements in the project [${element.project.name}].`, 403, 'warn');
         }
 
         // If the element is a package, remove the children as well
@@ -554,14 +554,10 @@ function removeElements(reqUser, query) {
       });
 
       // If hard delete, delete elements, otherwise update elements
-      return (hardDelete)
-        ? Element.Element.deleteMany(query)
-        : Element.Element.updateMany(query, { archived: true, archivedBy: reqUser });
+      return Element.Element.deleteMany(query);
     })
     // Delete any child elements
-    .then(() => ((hardDelete)
-      ? Element.Element.deleteMany(childQuery)
-      : Element.Element.updateMany(childQuery, { archived: true, archivedBy: reqUser })))
+    .then(() => Element.Element.deleteMany(childQuery))
     // Return the deleted/archived elements
     .then(() => resolve(foundElements))
     // Return reject with custom error
