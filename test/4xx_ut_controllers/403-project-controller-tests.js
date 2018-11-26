@@ -150,10 +150,9 @@ function createProject(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.projects[0]);
   projData.custom = { buildFor: 'build' };
-  projData.org = { id: org.id };
 
   // Create the project via project controller
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then((retProj) => {
     const split = utils.parseID(retProj.id);
     return ProjController.findProject(adminUser, split[0], split[1]);
@@ -346,10 +345,9 @@ function updateMultipleProjects(done) {
 function createProject02(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.projects[2]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then((proj) => {
     // Verify project fields
     chai.expect(proj.id).to.equal(utils.createID(org.id, testData.projects[2].id));
@@ -371,10 +369,9 @@ function createProject02(done) {
 function rejectCreatePeriodName(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[0]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should fail, throw error
@@ -395,10 +392,9 @@ function rejectCreatePeriodName(done) {
 function rejectDuplicateProjectId(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.projects[2]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -419,10 +415,9 @@ function rejectDuplicateProjectId(done) {
 function rejectInvalidProjectId(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[1]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -443,10 +438,9 @@ function rejectInvalidProjectId(done) {
 function rejectInvalidProjectName(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[2]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -467,10 +461,9 @@ function rejectInvalidProjectName(done) {
 function rejectInvalidOrgId(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[3]);
-  projData.org = { id: '' };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, '', projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -493,10 +486,9 @@ function rejectInvalidOrgId(done) {
 function rejectNonAdminCreateProject(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[0]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(nonAdminUser, projData)
+  ProjController.createProject(nonAdminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -605,8 +597,7 @@ function findProjects(done) {
   .then(() => {
     // Define and clone the project data
     const projData = Object.assign({}, testData.projects[1]);
-    projData.org = { id: org.id };
-    return ProjController.createProject(adminUser2, projData);
+    return ProjController.createProject(adminUser2, org.id, projData);
   })
   .then(() => ProjController.findProjects(adminUser, org.id, true))
   .then((projects) => {
