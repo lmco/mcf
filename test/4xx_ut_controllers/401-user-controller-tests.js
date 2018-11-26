@@ -93,7 +93,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject updating the last name with an invalid name', rejectInvalidLastNameUpdate);
   it('should reject updating the users username', rejectUsernameUpdate);
   it('should reject update from a non-admin user', rejectUserUpdateByNonAdmin);
+  it('should archive a user', archiveUser);
+  it('should reject updating an archived user', rejectUpdateArchivedUser);
   it('should find a user', findExistingUser);
+  it('should reject finding an archived user', rejectFindArchivedUser);
   it('should reject finding a user that does not exist', rejectFindNonExistentUser);
   it('should reject deleting a user with a non-admin user', rejectDeleteByNonAdmin);
   it('should reject deleting themselves', rejectDeleteSelf);
@@ -404,6 +407,57 @@ function rejectUserUpdateByNonAdmin(done) {
 }
 
 /**
+ * @description Verifies ability to archive a user
+ */
+function archiveUser(done) {
+  // Create user data
+  const username = testData.users[2].username;
+  const updateObj = { archived: true };
+
+  // Archive the user
+  UserController.updateUser(adminUser, username, updateObj)
+  .then((updatedUser) => {
+    // Verify updated user
+    chai.expect(updatedUser.archived).to.equal(true);
+    // TODO: Uncomment line below after completion of MBX-656
+    // chai.expect(updatedUser.archivedOn).to.not.equal(null);
+    chai.expect(updatedUser.archivedBy.username).to.equal(adminUser.username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies updateUser() fails to update a user when the user is
+ * currently archived.
+ * Expected error thrown: 'Forbidden'
+ */
+function rejectUpdateArchivedUser(done) {
+  // Create user data
+  const username = testData.users[2].username;
+  const updateObj = { fname: 'Updated' };
+
+  // Update user
+  UserController.updateUser(adminUser, username, updateObj)
+  .then(() => {
+    // Expect updateUser() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
  * @description Verifies findUser() retrieves a user.
  */
 function findExistingUser(done) {
@@ -428,7 +482,31 @@ function findExistingUser(done) {
 }
 
 /**
- * @description Verified findUser() fails when the user does not exist.
+ * @description Verifies findUser() fails to find an archivedUser when
+ * the optional third parameter 'archived' is not provided.
+ * Expected error thrown: 'Not Found'
+ */
+function rejectFindArchivedUser(done) {
+  // Create user data
+  const username = testData.users[2].username;
+
+  // Find the user
+  UserController.findUser(adminUser, username)
+  .then(() => {
+    // Expect findUser() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
+ * @description Verifies findUser() fails when the user does not exist.
  * Expected error thrown: 'Not Found'
  */
 function rejectFindNonExistentUser(done) {
@@ -526,17 +604,17 @@ function deleteUser(done) {
  * removes users from organizations they are apart of.
  */
 function deleteMultipleUsers(done) {
-  // Create query to delete users
-  const deleteQuery = { username: { $in: [
-    testData.users[2].username,
-    testData.users[4].username
-  ] } };
+  // Create array of users to delete
+  const arrUsers = [
+    { username: testData.users[2].username },
+    { username: testData.users[4].username }
+  ];
 
   // Define users array
   let users = [];
 
   // Delete the users
-  UserController.removeUsers(adminUser, deleteQuery, true)
+  UserController.removeUsers(adminUser, arrUsers)
   .then((deletedUsers) => {
     // Set users
     users = deletedUsers;
@@ -546,10 +624,10 @@ function deleteMultipleUsers(done) {
     // Find the default org
     return Organization.findOne({ id: M.config.server.defaultOrganizationId });
   })
-  .then((defaultorg) => {
+  .then((defaultOrg) => {
     // Verify deleted users are not in default org
-    chai.expect(defaultorg.permissions.read).to.not.have.members([users[0]._id, users[1]._id]);
-    chai.expect(defaultorg.permissions.write).to.not.have.members([users[0]._id, users[1]._id]);
+    chai.expect(defaultOrg.permissions.read).to.not.have.members([users[0]._id, users[1]._id]);
+    chai.expect(defaultOrg.permissions.write).to.not.have.members([users[0]._id, users[1]._id]);
     done();
   })
   .catch((error) => {

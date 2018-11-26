@@ -67,7 +67,7 @@ module.exports = function extensionPlugin(schema) {
     }
     // createdOn cannot be changed
     if (this.isModified('createdOn')) {
-      next(new M.CustomError('createdOn cannot be changed.', 400, 'warn'));
+      next(new M.CustomError('createdOn is protected and cannot be changed.', 400, 'warn'));
     }
     // Update time
     this.updatedOn = Date.now();

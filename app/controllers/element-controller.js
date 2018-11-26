@@ -490,13 +490,12 @@ function updateElements(reqUser, query, updateInfo) {
  *
  * @param {User} reqUser - The user object of the requesting user.
  * @param {Object} query - The query used to find/delete elements
- * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete.
  *
  * @return {Promise} resolve - deleted elements
  *                   reject -  error
  *
  * @example
- * removeElements({User}, { proj: 'projID' }, 'false')
+ * removeElements({User}, { proj: 'projID' })
  * .then(function(elements) {
  *   // Do something with the deleted elements
  * })
@@ -504,22 +503,20 @@ function updateElements(reqUser, query, updateInfo) {
  *   M.log.error(error);
  * });
  */
-function removeElements(reqUser, query, hardDelete = false) {
+function removeElements(reqUser, query) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete elements.');
       assert.ok(typeof query === 'object', 'Remove query is not an object.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
-      throw new M.CustomError(error.message, 400, 'error', 'warn');
-    }
-
-    // If hard deleting, ensure user is a site-wide admin
-    if (hardDelete && !reqUser.admin) {
-      throw new M.CustomError(
-        'User does not have permission to permanently delete a element.', 403, 'warn'
-      );
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permission')) {
+        statusCode = 403;
+      }
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define found elements array and child query
@@ -1010,6 +1007,7 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
       if (element.type === 'Package') {
         // Archive each of it's children
         element.contains.forEach((child) => {
+          // TODO: Sub packages also need their children to be deleted
           child.archived = true;
           child.archivedBy = reqUser;
           promises.push(child.save());

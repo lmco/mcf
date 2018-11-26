@@ -1352,49 +1352,8 @@ function deleteUsers(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['users', 'hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
-  // Initialize the delete query object
-  let deleteQuery = {};
-
-  // No users provided, return an error
-  if (!req.body.hasOwnProperty('users')) {
-    const error = new M.CustomError('Array of users not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-  // User objects provided, delete all
-  if (req.body.users.every(u => typeof u === 'object')) {
-    // Query finds all users by their username
-    deleteQuery = { username: { $in: sani.sanitize(req.body.users.map(u => u.username)) } };
-  }
-  // Usernames provided, delete all
-  else if (req.body.users.every(u => typeof u === 'string')) {
-    // Query finds all users by their username
-    deleteQuery = { username: { $in: sani.sanitize(req.body.users) } };
-  }
-  // No valid user data was provided, reject
-  else {
-    const error = new M.CustomError('User array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
   // Remove the specified users
-  UserController.removeUsers(req.user, deleteQuery, hardDelete)
+  UserController.removeUsers(req.user, req.body)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 

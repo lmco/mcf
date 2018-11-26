@@ -263,7 +263,7 @@ function updateUsers(reqUser, query, updateInfo) {
     catch (error) {
       let statusCode = 400;
       // Return a 403 if request is permissions related
-      if (error.message.includes('permissions')) {
+      if (error.message.includes('permission')) {
         statusCode = 403;
       }
       throw new M.CustomError(error.message, statusCode, 'warn');
@@ -282,6 +282,12 @@ function updateUsers(reqUser, query, updateInfo) {
         const promises = [];
         // Loop through each user
         Object(users).forEach((user) => {
+          // Error Check: ensure user isn't trying to archive self
+          if (reqUser.username === user.username && updateInfo.archived) {
+            throw new M.CustomError('User cannot archive themselves.', 403, 'warn');
+          }
+
+          // TODO: Add check ensure user isn't trying to update an archived user
           // Make a copy of the update object
           const tmpUpdateObj = Object.assign({}, updateInfo);
 
@@ -298,10 +304,24 @@ function updateUsers(reqUser, query, updateInfo) {
             }
 
             // If a 'Mixed' field
-            if (User.schema.obj[key].type.schemaName === 'Mixed') {
-              // Merge changes into original 'Mixed' field
-              utils.updateAndCombineObjects(user[key], sani.sanitize(tmpUpdateObj[key]));
-              tmpUpdateObj[key] = user[key];
+            if (User.schema.hasOwnProperty(key)) {
+              if (User.schema.obj[key].type.schemaName === 'Mixed') {
+                // Merge changes into original 'Mixed' field
+                utils.updateAndCombineObjects(user[key], sani.sanitize(tmpUpdateObj[key]));
+                tmpUpdateObj[key] = user[key];
+              }
+            }
+
+            // Set archivedBy if archived field is being changed
+            if (key === 'archived') {
+              // If the user is being archived
+              if (tmpUpdateObj[key] && !user[key]) {
+                tmpUpdateObj.archivedBy = reqUser._id;
+              }
+              // If the user is being unarchived
+              else if (!tmpUpdateObj[key] && user[key]) {
+                tmpUpdateObj.archivedBy = null;
+              }
             }
           });
 
@@ -333,21 +353,20 @@ function updateUsers(reqUser, query, updateInfo) {
     })
     // Return the updated users
     .then((updatedUsers) => resolve(updatedUsers))
-    .catch((error) => M.CustomError.parseCustomError(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
 /**
- * @description This function deletes/archived multiple users
+ * @description This function deletes multiple users
  *
  * @param {User} reqUser - The requesting user.
- * @param {Object} query - The query used to update/delete users.
- * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete or not.
+ * @param {Object} _arrUsers - Array of user objects to delete
  *
  * @returns {Promise} The newly deleted users.
  *
  * @example
- * removeUser({User}, { username: 'username' }, true)
+ * removeUser({User}, { username: 'username' })
  * .then(function(users) {
  *   // Do something with the deleted users
  * })
@@ -355,36 +374,44 @@ function updateUsers(reqUser, query, updateInfo) {
  *   M.log.error(error);
  * });
  */
-function removeUsers(reqUser, query, hardDelete = false) {
+function removeUsers(reqUser, _arrUsers) {
+  // Copy the parameters
+  const arrUsers = JSON.parse(JSON.stringify(_arrUsers));
+
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(reqUser.admin, 'User does not have permissions.');
-      assert.ok(typeof query === 'object', 'Remove query is not an object.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete users.');
+      assert.ok(Array.isArray(arrUsers), 'Users is not an array.');
     }
     catch (error) {
       let statusCode = 400;
       // Return a 403 if request is permissions related
-      if (error.message.includes('permissions')) {
+      if (error.message.includes('permission')) {
         statusCode = 403;
       }
       throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
-    // Define foundUsers array and findQuery
+    // Build remove query
+    const usernames = arrUsers.map(u => u.username);
+    const removeQuery = { username: { $in: usernames }};
+    const orgProjQuery = { 'permissions.read': { $in: arrUsers.map(u => u._id) } };
     let foundUsers = [];
-    let findQuery = {};
+
+    // Error Check: ensure user is not deleting themselves
+    if (usernames.includes(reqUser.username)) {
+      throw new M.CustomError('User cannot delete themselves.', 403, 'warn');
+    }
 
     // Find the users
-    findUsersQuery(query)
-    .then((users) => {
-      // Set foundUsers and findQuery
-      foundUsers = users;
-      findQuery = { 'permissions.read': { $in: foundUsers.map(u => u._id) } };
+    findUsersQuery(removeQuery)
+    .then((_foundUsers) => {
+      // Set foundUsers
+      foundUsers = _foundUsers;
 
-      // Find matching orgs
-      return OrgController.findOrgsQuery(findQuery);
+      // Find orgs which the users are apart of
+      return OrgController.findOrgsQuery(orgProjQuery);
     })
     .then((orgs) => {
       // Create an array of promises
@@ -408,7 +435,7 @@ function removeUsers(reqUser, query, hardDelete = false) {
       return Promise.all(promises);
     })
     // Find all projects the users are apart of
-    .then(() => ProjController.findProjectsQuery(findQuery))
+    .then(() => ProjController.findProjectsQuery(orgProjQuery))
     .then((projects) => {
       // Create an array of promises
       const promises = [];
@@ -430,18 +457,10 @@ function removeUsers(reqUser, query, hardDelete = false) {
       // Save all projects and return once all are saved
       return Promise.all(promises);
     })
-    // If hardDelete, delete users, otherwise archive them
-    .then(() => ((hardDelete)
-      ? User.deleteMany(query)
-      : User.updateMany(query, { archived: true, archivedBy: reqUser })))
-    .then((responseQuery) => {
-      // Handle case where not all users are successfully deleted/archived
-      if (responseQuery.n !== foundUsers.length) {
-        M.log.error('Some of the following users failed to delete/archive: '
-        + `[${foundUsers.map(u => u.username)}].`);
-      }
-      return resolve(foundUsers);
-    })
+    // Delete the users
+    .then(() => User.deleteMany(removeQuery))
+    // Return deleted users
+    .then(() => resolve(foundUsers))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -531,6 +550,7 @@ function findUsersQuery(usersQuery) {
   return new Promise((resolve, reject) => {
     // Find users
     User.find(usersQuery)
+    .populate('archivedBy lastModifiedBy')
     .then((users) => resolve(users))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -650,16 +670,26 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
     catch (error) {
       let statusCode = 400;
       // Return a 403 if request is permissions related
-      if (error.message.includes('permissions')) {
+      if (error.message.includes('permission')) {
         statusCode = 403;
       }
       throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
+    // Error Check: ensure user is not archiving themselves
+    if (reqUser.username === usernameToUpdate && newUserData.archived) {
+      throw new M.CustomError('User cannot archive themselves.', 403, 'warn');
+    }
+
     // Find user
     // Note: usernameToUpdate is sanitized in findUser()
-    findUser(reqUser, usernameToUpdate)
+    findUser(reqUser, usernameToUpdate, true)
     .then((user) => {
+      // Error Check: if user is currently archived, they must first be unarchived
+      if (user.archived && newUserData.archived !== false) {
+        throw new M.CustomError('User must be unarchived first.', 403, 'warn');
+      }
+
       // Get list of keys the user is trying to update
       const userUpdateFields = Object.keys(newUserData);
       // Get list of parameters which can be updated from model
@@ -688,10 +718,24 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
         }
 
         // If the field is of type 'Mixed'
-        if (User.schema.obj[field].type.schemaName === 'Mixed') {
-          // Update the user objects mixed field
-          utils.updateAndCombineObjects(user[field], sani.sanitize(newUserData[field]));
-          newUserData[field] = user[field];
+        if (User.schema.hasOwnProperty(field)) {
+          if (User.schema.obj[field].type.schemaName === 'Mixed') {
+            // Update the user objects mixed field
+            utils.updateAndCombineObjects(user[field], sani.sanitize(newUserData[field]));
+            newUserData[field] = user[field];
+          }
+        }
+
+        // Set archivedBy if archived field is being changed
+        if (field === 'archived') {
+          // If the user is being archived
+          if (newUserData[field] && !user[field]) {
+            newUserData.archivedBy = reqUser._id;
+          }
+          // If the user is being unarchived
+          else if (!newUserData[field] && user[field]) {
+            newUserData.archivedBy = null;
+          }
         }
       }
 
@@ -704,7 +748,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       // Update the user
       return User.updateOne(query, newUserData);
     })
-    .then(() => findUser(reqUser, usernameToUpdate))
+    .then(() => findUser(reqUser, usernameToUpdate, true))
     .then((updatedUser) => resolve(updatedUser))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -753,7 +797,7 @@ function removeUser(reqUser, usernameToDelete) {
     let userToDelete;
 
     // Get user object
-    findUser(reqUser, usernameToDelete)
+    findUser(reqUser, usernameToDelete, true)
     .then((user) => {
       // Set user
       userToDelete = user;
