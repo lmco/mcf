@@ -2017,28 +2017,11 @@ function deleteWebhook(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
   // Remove the specified webhook
   // NOTE: removeWebhook() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.webhookid
   WebhookController.removeWebhook(req.user, req.params.orgid,
-    req.params.projectid, req.params.webhookid, hardDelete)
+    req.params.projectid, req.params.webhookid)
   .then((success) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and success
@@ -2229,28 +2212,11 @@ function deleteArtifact(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
   // Remove the specified artifact
   // NOTE: removeArtifact() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.artifactid
   ArtifactController.removeArtifact(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid, hardDelete)
+    req.params.projectid, req.params.artifactid)
   .then((success) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and success

@@ -195,6 +195,11 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
     // Find artifact in database
     findArtifact(reqUser, organizationID, projectID, artID)
     .then((_artifact) => {
+      // Error Check: if artifact is currently archived, it must first be unarchived
+      if (_artifact.archived && artToUpdate.archived !== false) {
+        throw new M.CustomError('Artifact must be unarchived first.', 403, 'warn');
+      }
+
       // Error Check: ensure reqUser is a project admin or global admin
       if (!_artifact.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
@@ -235,18 +240,31 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
 
       // Loop through all updateable fields
       for (let i = 0; i < artifactUpdateFields.length; i++) {
+        const updateField = artifactUpdateFields[i];
         // Error Check: Check if field can be updated
-        if (!validUpdateFields.includes(artifactUpdateFields[i])
-          && artifactUpdateFields[i] !== 'artifactBlob') {
+        if (!validUpdateFields.includes(updateField)
+          && updateField !== 'artifactBlob') {
           // field cannot be updated, reject error
           throw new M.CustomError(
-            `Artifact property [${artifactUpdateFields[i]}] cannot be changed.`, 403, 'warn'
+            `Artifact property [${updateField}] cannot be changed.`, 403, 'warn'
           );
         }
 
+        // Set archivedBy if archived field is being changed
+        if (updateField === 'archived') {
+          // If the artifact is being archived
+          if (artToUpdate[updateField] && !_artifact[updateField]) {
+            _artifact.archivedBy = reqUser;
+          }
+          // If the artifact is being unarchived
+          else if (!artToUpdate[updateField] && _artifact[updateField]) {
+            _artifact.archivedBy = null;
+          }
+        }
+
         // Sanitize field and update field in artifact object
-        _artifact[artifactUpdateFields[i]] = sani.sanitize(
-          artToUpdate.metaData[artifactUpdateFields[i]]
+        _artifact[updateField] = sani.sanitize(
+          artToUpdate.metaData[updateField]
         );
       }
 
@@ -276,13 +294,12 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
  * @param {String} orgID - The organization ID for the org the project belongs to.
  * @param {String} projID - The project ID of the Project which is being searched for.
  * @param {String} artifactID - The Artifact ID
- * @param {Object} hardDelete  Flag denoting whether to delete or archive
  *
  * @return {Promise} resolve
  *                   reject - error
  *
  * @example
- * removeArtifact({User}, 'orgID', 'projectID', 'artifactID', false)
+ * removeArtifact({User}, 'orgID', 'projectID', 'artifactID')
  * .then(function(artifact) {
  *   // Do something with the newly deleted artifact
  * })
@@ -290,24 +307,22 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
  *   M.log.error(error);
  * });
  */
-function removeArtifact(reqUser, orgID, projID, artifactID, hardDelete = false) {
+function removeArtifact(reqUser, orgID, projID, artifactID) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete an artifact.');
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artifactID === 'string', 'Artifact ID is not a string.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      throw new M.CustomError(error.message, 400, 'warn');
-    }
-
-    // Error Check: if hard deleting, ensure user is global admin
-    if (hardDelete && !reqUser.admin) {
-      throw new M.CustomError(
-        'User does not have permission to permanently delete an artifact.', 403, 'warn'
-      );
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permission')) {
+        statusCode = 403;
+      }
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define function-wide found artifact
@@ -439,7 +454,7 @@ function findArtifactsQuery(artifactQuery) {
   return new Promise((resolve, reject) => {
     // Find artifact
     Artifact.find(artifactQuery)
-    .populate('project')
+    .populate('project archivedBy lastModifiedBy')
     .then((arrArtifact) => resolve(arrArtifact))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -503,7 +518,7 @@ function addArtifactOS(hashedName, artifactBlob) {
  * @param {String} hashName - folder's hash name
  */
 function removeArtifactOS(hashName) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // Create the main artifact path
     const artifactPath = path.join(M.root, M.config.artifact.path);
     // Create sub folder path and artifact path
@@ -545,7 +560,7 @@ function removeArtifactOS(hashName) {
  * it doesn't exist.
  */
 function createStorageDirectory() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // Create the main artifact path
     const artifactPath = path.join(M.root, M.config.artifact.path);
 

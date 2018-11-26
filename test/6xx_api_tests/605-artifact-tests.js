@@ -334,10 +334,7 @@ function rejectDeleteNonExistingArtifact(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -360,10 +357,7 @@ function deleteArtifact(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error

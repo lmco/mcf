@@ -11,7 +11,7 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Tests the organization model by performing various actions
- * such as a create, soft delete, and hard delete. The test Does NOT test the
+ * such as a create, archive, and delete. The test Does NOT test the
  * organization controller but instead directly manipulates data using the
  * database interface to check the organization model's methods, validators,
  * setters, and getters.

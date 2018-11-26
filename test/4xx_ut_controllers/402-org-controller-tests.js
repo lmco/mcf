@@ -547,7 +547,7 @@ function setUserOrgRole(done) {
   // Set user permissions via controller
   OrgController.setPermissions(adminUser, org.id.toString(), newUser.username, 'write')
   // Find org
-  .then(() => OrgController.findOrg(adminUser, org.id.toString()))
+  .then(() => OrgController.findOrg(adminUser, org.id.toString(), true))
   .then((retOrg2) => {
     // Verify user permissions on org
     chai.expect(retOrg2.permissions.write[1]._id.toString()).to.equal(newUser._id.toString());

@@ -131,7 +131,7 @@ ArtifactSchema.methods.getPublicData = function() {
  * @memberOf ArtifactSchema
  */
 ArtifactSchema.methods.getValidUpdateFields = function() {
-  return ['filename', 'contentType', 'hash'];
+  return ['filename', 'contentType', 'hash', 'archived'];
 };
 
 /**

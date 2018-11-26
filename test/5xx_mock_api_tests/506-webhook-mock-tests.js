@@ -211,7 +211,7 @@ function patchWebhook(done) {
  */
 function deleteWebhook(done) {
   // Create request object
-  const body = { hardDelete: true };
+  const body = {};
   const params = {
     orgid: org.id,
     projectid: projID,

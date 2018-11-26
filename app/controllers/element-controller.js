@@ -567,7 +567,7 @@ function removeElements(reqUser, query) {
         }
       });
 
-      // If hard delete, delete elements, otherwise update elements
+      // Delete elements
       return Element.Element.deleteMany(query);
     })
     // Delete any child elements

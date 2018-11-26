@@ -107,7 +107,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should find a webhook', findWebhook);
   it('should reject finding a non-existent webhook', rejectFindNonExistent);
   it('should update a webhook', updateWebhook);
-  it('should reject deleting a webhook with invalid function params', rejectDeleteInvalidParam);
   it('should archive a webhook', archiveWebhook);
   it('should delete a webhook', deleteWebhook);
 });
@@ -226,44 +225,22 @@ function updateWebhook(done) {
 }
 
 /**
- * @description Rejects deleting a webhook with invalid function parameters
- * Expected error thrown: 'Bad Request'
- */
-function rejectDeleteInvalidParam(done) {
-  // Delete the webhook
-  const projID = utils.parseID(proj.id).pop();
-  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id, 'invalid')
-  .then(() => {
-    // Expect removeWebhook() to fail
-    // Webhook was deleted, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-/**
  * @description Archives a webhook.
  */
 function archiveWebhook(done) {
-  // Archive webhook
+  // Define update parameters
+  const orgID = org.id;
   const projID = utils.parseID(proj.id).pop();
-  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id)
-  .then((success) => {
-    // Verify successful archive
-    chai.expect(success).to.equal(true);
+  const webhookID = testData.webhooks[0].id;
+  const updateObj = { archived: true };
 
-    // Find the archived webhook
-    return WebhookController.findWebhook(adminUser, org.id, projID, testData.webhooks[0].id, true);
-  })
-  .then((foundWebhook) => {
-    // Verify webhook has been archived
-    chai.expect(foundWebhook.archived).to.equal(true);
-    chai.expect(foundWebhook.archivedOn).not.to.equal(null);
+  // Archive webhook
+  WebhookController.updateWebhook(adminUser, orgID, projID, webhookID, updateObj)
+  .then((updatedWebhook) => {
+    // Verify successful archive
+    chai.expect(updatedWebhook.archived).to.equal(true);
+    chai.expect(updatedWebhook.archivedOn).to.not.equal(null);
+    chai.expect(updatedWebhook.archivedBy.username).to.equal(adminUser.username);
     done();
   })
   .catch((error) => {
@@ -281,7 +258,7 @@ function archiveWebhook(done) {
 function deleteWebhook(done) {
   // Delete webhook
   const projID = utils.parseID(proj.id).pop();
-  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id, true)
+  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id)
   .then((success) => {
     // Verify success
     chai.expect(success).to.equal(true);

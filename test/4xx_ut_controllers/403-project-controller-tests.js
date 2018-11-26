@@ -19,7 +19,7 @@
  * @description  This tests the Project Controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The project controller tests create,
- * update, find, soft delete, hard delete, and permissions of projects. As well
+ * update, find, archive, delete, and change permissions of projects as well
  * as test the controllers with invalid inputs.
  */
 
@@ -828,7 +828,7 @@ function setPerm(done) {
  * Expected error thrown: 'Not Found'
  */
 function deleteProject(done) {
-  // Hard-delete the project
+  // Delete project
   ProjController.removeProject(adminUser, org.id, project.id)
   .then(() => ProjController.findProject(adminUser, org.id, project.id))
   .then(() => {

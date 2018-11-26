@@ -198,7 +198,7 @@ IncomingWebhookSchema.methods.getPublicData = function() {
  * @memberof WebhookSchema
  */
 WebhookSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'custom'];
+  return ['name', 'custom', 'archived'];
 };
 
 

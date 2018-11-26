@@ -233,18 +233,7 @@ api.route('/version')
  *         required: true
  *         schema:
  *           type: object
- *           required:
- *             - orgs
- *           properties:
- *             orgs:
- *               type: object
- *               description: An array of orgs to delete. Can either be the
- *                            org objects or the ids of the orgs.
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the org should be hard
- *                            deleted or not. The user must be a global admin
- *                            to hard delete. Defaults to false.
+ *           description: An array of orgs objects to delete.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE orgs returns deleted orgs' data.
@@ -405,18 +394,6 @@ api.route('/orgs')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing delete options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the organization should be hard deleted or
- *                            not. The user must be a global admin to hard delete. Defaults to
- *                            false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE org return deleted org data.
@@ -781,18 +758,6 @@ api.route('/orgs/:orgid/projects')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing delete options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the project should be hard deleted or
- *                            not. The user must be a global admin to hard delete.
- *                            Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE project return deleted project data.
@@ -1432,11 +1397,6 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *                            element objects or the ids of the elements. If the
  *                            list is not provided, all elements under the
  *                            project will be deleted.
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the element should be
- *                            hard deleted or not. The user must be a global
- *                            admin to hard delete. Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE elements, returns elements data
@@ -1659,18 +1619,6 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing delete options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the element should be hard deleted or
- *                            not. The user must be a global admin to hard delete.
- *                            Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE element returns element data.
@@ -1815,10 +1763,6 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *               type: object
  *               description: An array of users to delete. Can either be a list
  *                            of user objects or of usernames.
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the users should be hard
- *                            deleted or not. Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE users return users data.
@@ -2277,18 +2221,6 @@ api.route('/users/:username')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing delete options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the webhook should be
- *                            hard deleted or not. The user must be a global
- *                            admin to hard delete. Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE webhook, returns true.
@@ -2552,11 +2484,6 @@ api.route('/webhooks/:webhookid')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: hardDelete
- *         type: boolean
- *         description: The boolean indicating if the artifact should be
- *                      hard deleted or not. The user must be a global
- *                      admin to hard delete. Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE artifact, returns true.

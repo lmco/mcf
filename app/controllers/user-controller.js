@@ -788,7 +788,7 @@ function removeUser(reqUser, usernameToDelete) {
       throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
-    // Error Check: request user cannot deleted self
+    // Error Check: request user cannot delete self
     if (reqUser.username === usernameToDelete) {
       throw new M.CustomError('User cannot delete themselves.', 403, 'warn');
     }

@@ -456,7 +456,7 @@ function findOrg(reqUser, organizationID, archived = false) {
     if (archived) {
       delete searchParams.archived;
     }
-
+    
     // Find orgs
     findOrgsQuery(searchParams)
     .then((orgs) => {
@@ -772,7 +772,7 @@ function removeOrg(reqUser, organizationID) {
       throw new M.CustomError('The default organization cannot be deleted.', 403, 'warn');
     }
 
-    // Error Check: ensure reqUser is a global admin if hard deleting
+    // Error Check: ensure reqUser is a global admin
     if (!reqUser.admin) {
       throw new M.CustomError('User does not have permissions to delete.', 403, 'warn');
     }
@@ -889,7 +889,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
     let foundUser;
 
     // Find searchedUser
-    UserController.findUser(reqUser, searchedUser)
+    UserController.findUser(reqUser, searchedUser, true)
     .then((user) => {
       // set foundUser
       foundUser = user;
@@ -903,7 +903,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
       }
       // Find org
       // Note: organizationID is sanitized in findOrg
-      return findOrg(reqUser, organizationID);
+      return findOrg(reqUser, organizationID, true);
     })
     .then((org) => {
       // Check requesting user NOT org admin and NOT global admin
@@ -1001,7 +1001,7 @@ function findAllPermissions(reqUser, organizationID) {
     }
 
     // Find the org
-    findOrg(reqUser, organizationID)
+    findOrg(reqUser, organizationID, true)
     .then((org) => {
       // Get the permission types for an org
       const permissionLevels = org.getPermissionLevels();

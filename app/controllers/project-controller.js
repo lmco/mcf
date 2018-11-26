@@ -885,7 +885,7 @@ function removeProject(reqUser, organizationID, projectID) {
       // Delete all elements on the project
       return ElementController.removeElements(reqUser, elementDeleteQuery);
     })
-    // If hard delete, delete project, otherwise update project
+    // Delete project
     .then(() => Project.deleteOne({ id: foundProject.id }))
     .then(() => resolve(foundProject))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));

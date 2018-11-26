@@ -242,7 +242,7 @@ function patchArtifact(done) {
  */
 function deleteArtifact(done) {
   // Create request object
-  const body = { hardDelete: true };
+  const body = {};
   const params = {
     orgid: org.id,
     projectid: projID,
