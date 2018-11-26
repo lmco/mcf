@@ -403,11 +403,12 @@ function updateElements(reqUser, query, updateInfo) {
           `Element property [${key}] cannot be changed.`);
 
         // Error Check: ensure parameter is not unique
-        assert.ok(!Element.Element.schema.obj[key].unique,
+
+        assert.ok(!Element.Element.schema.paths[key].options.unique,
           `Cannot use batch update on the unique field [${key}].`);
 
         // If the field is a mixed field, set the flag
-        if (Element.Element.schema.obj[key].type.schemaName === 'Mixed') {
+        if (Element.Element.schema.paths[key].instance === 'Mixed') {
           containsMixed = true;
         }
       });
@@ -437,16 +438,29 @@ function updateElements(reqUser, query, updateInfo) {
         const promises = [];
         // Loop through each element
         elements.forEach((element) => {
+          // TODO: Add check ensure user isn't trying to update an archived element
           // Loop through each update
           Object.keys(updateInfo).forEach((key) => {
             // If a 'Mixed' field
-            if (Element.Element.schema.obj[key].type.schemaName === 'Mixed') {
+            if (Element.Element.schema.obj.hasOwnProperty(key)
+              && Element.Element.schema.obj[key].type.schemaName === 'Mixed') {
               // Merge changes into original 'Mixed' field
               utils.updateAndCombineObjects(element[key], sani.sanitize(updateInfo[key]));
               // Mark that the 'Mixed' field has been modified
               element.markModified(key);
             }
             else {
+              // Set archivedBy if archived field is being changed
+              if (key === 'archived') {
+                // If the element is being archived
+                if (updateInfo[key] && !element[key]) {
+                  element.archivedBy = reqUser._id;
+                }
+                // If the element is being unarchived
+                else if (!updateInfo[key] && element[key]) {
+                  element.archivedBy = null;
+                }
+              }
               // Update the value in the element
               element[key] = sani.sanitize(updateInfo[key]);
             }
@@ -481,7 +495,7 @@ function updateElements(reqUser, query, updateInfo) {
     })
     // Return the updated elements
     .then((updatedElements) => resolve(updatedElements))
-    .catch((error) => M.CustomError.parseCustomError(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -667,7 +681,7 @@ function findElementsQuery(elementQuery) {
   return new Promise((resolve, reject) => {
     // Find elements
     Element.Element.find(elementQuery)
-    .populate('parent project source target contains')
+    .populate('parent project source target contains archivedBy lastModifiedBy')
     .then((arrElements) => resolve(arrElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -848,8 +862,13 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
 
     // Find element
     // Note: organizationID, projectID, and elementID are sanitized in findElement()
-    findElement(reqUser, organizationID, projectID, elementID)
+    findElement(reqUser, organizationID, projectID, elementID, true)
     .then((element) => {
+      // Error Check: if element is currently archived, it must first be unarchived
+      if (element.archived && elementUpdated.archived !== false) {
+        throw new M.CustomError('Element must be unarchived first.', 403, 'warn');
+      }
+
       // Error Check: ensure reqUser is a project admin or global admin
       if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
@@ -889,7 +908,8 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         }
 
         // Check if updateField type is 'Mixed'
-        if (Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
+        if (Element.Element.schema.obj.hasOwnProperty(updateField)
+          && Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof elementUpdated[updateField] !== 'object') {
             throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
@@ -906,6 +926,18 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
           element.markModified(updateField);
         }
         else {
+          // Set archivedBy if archived field is being changed
+          if (updateField === 'archived') {
+            // If the element is being archived
+            if (elementUpdated[updateField] && !element[updateField]) {
+              element.archivedBy = reqUser;
+            }
+            // If the element is being unarchived
+            else if (!elementUpdated[updateField] && element[updateField]) {
+              element.archivedBy = null;
+            }
+          }
+
           // Schema type is not mixed
           // Sanitize field and update field in element object
           element[updateField] = sani.sanitize(elementUpdated[updateField]);
@@ -937,13 +969,12 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
  * @param {String} organizationID  The organization ID.
  * @param {String} projectID  The project ID.
  * @param {String} elementID  The element ID.
- * @param {Object} hardDelete  Flag denoting whether to hard or soft delete.
  *
  * @return {Promise} resolve - deleted element
  *                   reject -  error
  *
  * @example
- * removeElement({User}, 'orgID', 'projectID', 'elementID', false)
+ * removeElement({User}, 'orgID', 'projectID', 'elementID')
  * .then(function(element) {
  *   // Do something with the newly deleted element
  * })
@@ -951,23 +982,22 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
  *   M.log.error(error);
  * });
  */
-function removeElement(reqUser, organizationID, projectID, elementID, hardDelete = false) {
+function removeElement(reqUser, organizationID, projectID, elementID) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete an element.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
-    }
-
-    // Error Check: if hard deleting, ensure user is global admin
-    if (hardDelete && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permission to hard delete an'
-        + ' element.', 403, 'warn'));
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permission')) {
+        statusCode = 403;
+      }
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define foundElement
@@ -981,50 +1011,21 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
 
       // Error Check: ensure user has permissions to delete element
       if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
       // Delete element
-      if (hardDelete) {
-        return Element.Element.deleteMany({ $or: [{ _id: element._id }, { parent: element._id }] });
-      }
-      // Create promises array
-      const promises = [];
-      // Archive element
-      element.archived = true;
-
-      // Update archivedBy field
-      element.archivedBy = reqUser;
-
-      // Add element.save() to promises array
-      promises.push(element.save());
-
-      // If the archived element is a package
-      if (element.type === 'Package') {
-        // Archive each of it's children
-        element.contains.forEach((child) => {
-          // TODO: Sub packages also need their children to be deleted
-          child.archived = true;
-          child.archivedBy = reqUser;
-          promises.push(child.save());
-        });
-      }
-
-      // Return once all promises are complete
-      return Promise.all(promises);
+      return Element.Element.deleteMany({ $or: [{ _id: element._id }, { parent: element._id }] });
     })
     .then(() => {
-      // Set archived boolean on foundElement
-      foundElement.archived = true;
-
       // Trigger webhooks
-      events.emit('Element Archived', foundElement);
+      events.emit('Element Deleted', foundElement);
 
       // If the archived element is a package
       if (foundElement.type === 'Package') {
         // Trigger webhook for each child also archived
         foundElement.contains.forEach((child) => {
-          events.emit('Element Archived', child);
+          events.emit('Element Deleted', child);
         });
       }
 

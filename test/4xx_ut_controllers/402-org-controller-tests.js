@@ -450,7 +450,7 @@ function rejectFindArchivedOrg(done) {
  */
 function deleteExistingOrg(done) {
   // Deletes org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
+  OrgController.removeOrg(adminUser, testData.orgs[0].id)
   // Find deleted org
   .then(() => OrgController.findOrg(adminUser, testData.orgs[0].id))
   // Expected findOrg() to fail
@@ -471,7 +471,7 @@ function deleteExistingOrg(done) {
  */
 function deleteProjectAndOrg(done) {
   // Delete an org via controller
-  OrgController.removeOrg(adminUser, testData.orgs[3].id, true)
+  OrgController.removeOrg(adminUser, testData.orgs[3].id)
   // Find deleted org
   .then(() => OrgController.findOrg(adminUser, testData.orgs[3].id))
   .then(() => {
@@ -526,7 +526,7 @@ function rejectUpdateDefaultOrg(done) {
  */
 function rejectDefaultOrgDelete(done) {
   // Delete default org
-  OrgController.removeOrg(adminUser, M.config.server.defaultOrganizationId, true)
+  OrgController.removeOrg(adminUser, M.config.server.defaultOrganizationId)
   .then(() => {
     // Expected removeOrg() to fail
     // Should not execute, force test to fail
@@ -722,7 +722,7 @@ function removeMultipleOrgs(done) {
   ];
 
   // Delete the organizations
-  OrgController.removeOrgs(adminUser, arrRmOrgs, true)
+  OrgController.removeOrgs(adminUser, arrRmOrgs)
   .then((orgs) => {
     // Check that correct number of orgs were deleted
     chai.expect(orgs.length).to.equal(2);

@@ -829,7 +829,7 @@ function setPerm(done) {
  */
 function deleteProject(done) {
   // Hard-delete the project
-  ProjController.removeProject(adminUser, org.id, project.id, true)
+  ProjController.removeProject(adminUser, org.id, project.id)
   .then(() => ProjController.findProject(adminUser, org.id, project.id))
   .then(() => {
     // Expected findProject() to fail
@@ -864,7 +864,7 @@ function deleteProject(done) {
  */
 function deleteProject02(done) {
   // Remove project
-  ProjController.removeProject(adminUser, org.id, testData.projects[2].id, true)
+  ProjController.removeProject(adminUser, org.id, testData.projects[2].id)
   .then(() => ProjController.findProject(adminUser, org.id, testData.projects[2].id))
   .then(() => {
     // Expected findProject() to fail

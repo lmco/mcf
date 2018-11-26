@@ -116,6 +116,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should update an element', updateElement);
   it('should update multiple elements', updateMultipleElements);
   it('should archive an element', archiveElement);
+  it('should reject finding an archived element', rejectFindArchivedElement);
   it('should delete an element', deleteElement);
   it('should archive all elements', archiveAllElements);
   it('should find all non-archived elements', verifyFindNonArchivedElem);
@@ -444,36 +445,21 @@ function updateMultipleElements(done) {
 
 /**
  * @description Verifies an element can be archived.
- * Expected error thrown: 'Not Found'
  */
 function archiveElement(done) {
-  // Archive the element
+  // Create element data
+  const orgID = org.id;
   const projID = utils.parseID(proj.id).pop();
-  ElemController.removeElement(adminUser, org.id, projID, testData.elements[0].id, false)
-  .then((retElem) => {
-    // Verify that the element's archived field is now true
-    chai.expect(retElem.archived).to.equal(true);
-    // Try to find the element and expect it to fail
-    return ElemController.findElement(adminUser, org.id, projID, testData.elements[0].id);
-  })
-  .then(() => {
-    // Expected findElement() to fail
-    // findElement() succeeded, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Not Found'
-    chai.expect(error.message).to.equal('Not Found');
+  const elementID = testData.elements[0].id;
+  const updateObj = { archived: true };
 
-    // Find element again
-    // NOTE: The 'true' parameter tells the function to include archived
-    // elements in the results
-    return ElemController.findElement(adminUser, org.id, projID, testData.elements[0].id, true);
-  })
-  .then((retElem) => {
-    // Find succeeded, verify element properties
-    chai.expect(retElem.id).to.equal(utils.createID(org.id, projID, testData.elements[0].id));
+  // Archive the element
+  ElemController.updateElement(adminUser, orgID, projID, elementID, updateObj)
+  .then((updatedElement) => {
+    // Verify updated element data
+    chai.expect(updatedElement.archived).to.equal(true);
+    chai.expect(updatedElement.archivedOn).to.not.equal(null);
+    chai.expect(updatedElement.archivedBy.username).to.equal(adminUser.username);
     done();
   })
   .catch((error) => {
@@ -485,13 +471,39 @@ function archiveElement(done) {
 }
 
 /**
+ * @description Verifies findElement() fails when attempting to find an archived
+ * element, and the third parameter 'archived' is false.
+ * Expected error thrown: 'Not Found'
+ */
+function rejectFindArchivedElement(done) {
+  // Create element data
+  const orgID = org.id;
+  const projID = utils.parseID(proj.id).pop();
+  const elementID = testData.elements[0].id;
+
+  // Find the element
+  ElemController.findElement(adminUser, orgID, projID, elementID, false)
+  .then(() => {
+    // Expect findElement() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
+    done();
+  });
+}
+
+/**
  * @description Verifies an element can be deleted.
  * Expected error thrown: 'Not Found'
  */
 function deleteElement(done) {
   const projID = utils.parseID(proj.id).pop();
   // Delete the element
-  ElemController.removeElement(adminUser, org.id, projID, testData.elements[0].id, true)
+  ElemController.removeElement(adminUser, org.id, projID, testData.elements[0].id)
   // Then search for the element (including archived elements)
   .then(() => ElemController
   .findElement(adminUser, org.id, projID,
@@ -513,11 +525,13 @@ function deleteElement(done) {
  * @description Verifies archiving of multiple elements.
  */
 function archiveAllElements(done) {
-  // The project ID (not the long-form UID)
+  // Create element data
   const projID = utils.parseID(proj.id).pop();
+  const query = { project: proj._id };
+  const updateObj = { archived: true };
 
   // Archive all elements in project
-  ElemController.removeElements(adminUser, { project: proj._id }, false)
+  ElemController.updateElements(adminUser, query, updateObj)
   // Find all existing elements in project, including archived elements
   .then(() => ElemController.findElements(adminUser, org.id, projID, true))
   .then((retElems) => {
@@ -569,7 +583,7 @@ function verifyFindNonArchivedElem(done) {
 function deleteAllElements(done) {
   const projID = utils.parseID(proj.id).pop();
   // Delete all elements in project
-  ElemController.removeElements(adminUser, { project: proj._id }, true)
+  ElemController.removeElements(adminUser, { project: proj._id })
   .then(() => ElemController.findElements(adminUser, org.id, projID))
   .then((elements) => {
     // Expect elements array to be empty

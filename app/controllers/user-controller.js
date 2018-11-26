@@ -730,7 +730,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
         if (field === 'archived') {
           // If the user is being archived
           if (newUserData[field] && !user[field]) {
-            newUserData.archivedBy = reqUser._id;
+            newUserData.archivedBy = reqUser;
           }
           // If the user is being unarchived
           else if (!newUserData[field] && user[field]) {

@@ -324,7 +324,7 @@ RelationshipSchema.pre('validate', function() {
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'documentation', 'custom'];
+  return ['name', 'documentation', 'custom', 'archived'];
 };
 
 

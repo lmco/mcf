@@ -1668,19 +1668,11 @@ function deleteElements(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['elements', 'hardDelete'].includes(key)) {
+    if (!['elements'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
 
   // Initialize the delete query object
   let deleteQuery = {};
@@ -1716,7 +1708,7 @@ function deleteElements(req, res) {
   }
 
   // Remove the specified elements
-  ElementController.removeElements(req.user, deleteQuery, hardDelete)
+  ElementController.removeElements(req.user, deleteQuery)
   .then((elements) => {
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
@@ -1874,28 +1866,11 @@ function deleteElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
   // Remove the specified element
   // NOTE: removeElement() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.elementid
   ElementController.removeElement(req.user, req.params.orgid,
-    req.params.projectid, req.params.elementid, hardDelete)
+    req.params.projectid, req.params.elementid)
   .then((element) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element

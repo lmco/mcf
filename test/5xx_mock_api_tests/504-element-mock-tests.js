@@ -218,7 +218,7 @@ function patchElement(done) {
  */
 function deleteElement(done) {
   // Create request object
-  const body = { hardDelete: true };
+  const body = {};
   const params = {
     orgid: org.id,
     projectid: projID,
@@ -362,8 +362,7 @@ function deleteElements(done) {
       testData.elements[9],
       testData.elements[11],
       testData.elements[10]
-    ],
-    hardDelete: true
+    ]
   };
   const params = { orgid: org.id, projectid: projID };
   const method = 'DELETE';
