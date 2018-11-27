@@ -84,6 +84,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET the posted user', getUser);
   it('should PATCH a user', patchUser);
   it('should DELETE a user', deleteUser);
+  it('should POST multiple users', postUsers);
+  it('should PATCH multiple users', patchUsers);
+  it('should DELETE multiple users', deleteUsers);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -252,6 +255,109 @@ function deleteUser(done) {
   apiController.deleteUser(req, res);
 }
 
+/**
+ * @description Verifies mock POST request to create multiple users.
+ */
+function postUsers(done) {
+  // Create request object
+  const body = {
+    users: [
+      testData.users[2],
+      testData.users[3]
+    ]
+  };
+  const params = {};
+  const method = 'POST';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // POSTs a user
+  apiController.postUsers(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update multiple users.
+ */
+function patchUsers(done) {
+  // Update request object
+  const body = {
+    users: [
+      testData.users[2],
+      testData.users[3]
+    ],
+    update: { custom: { department: 'Space', location: { country: 'USA' } } }
+  };
+  const params = {};
+  const method = 'PATCH';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+
+    // Declare user0
+    const user0 = json.filter(o => o.username === testData.users[2].username)[0];
+    chai.expect(user0.fname).to.equal(testData.users[2].fname);
+    chai.expect(user0.custom.department).to.equal('Space');
+    chai.expect(user0.custom.location.country).to.equal('USA');
+    done();
+  };
+
+  // PATCHs users
+  apiController.patchUsers(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete multiple users.
+ */
+function deleteUsers(done) {
+  // Delete request object
+  const body = {
+    hardDelete: true,
+    users: [
+      testData.users[2],
+      testData.users[3]
+    ]
+  };
+  const params = {};
+  const method = 'DELETE';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const json = JSON.parse(_data);
+    chai.expect(json.length).to.equal(2);
+    done();
+  };
+
+  // DELETEs users
+  apiController.deleteUsers(req, res);
+}
 
 /* ----------( Helper Functions )----------*/
 /**
