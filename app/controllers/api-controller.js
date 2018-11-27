@@ -87,7 +87,8 @@ module.exports = {
   getArtifact,
   postArtifact,
   patchArtifact,
-  deleteArtifact
+  deleteArtifact,
+  invalidRoute
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -961,12 +962,10 @@ function postProject(req, res) {
 
   // Set the orgid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
-  req.body.org = { id: req.params.orgid };
-  delete req.body.orgid;
 
   // Create project with provided parameters
-  // NOTE: createProject() sanitizes req.params.projectid, req.params.org.id and req.body.name
-  ProjectController.createProject(req.user, req.body)
+  // NOTE: createProject() sanitizes req.params.projectid, req.params.orgid and req.body.name
+  ProjectController.createProject(req.user, req.params.orgid, req.body)
   .then((project) => {
     // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
@@ -2357,4 +2356,19 @@ function deleteArtifact(req, res) {
     return res.status(200).send(formatJSON(success));
   })
   .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * ALL /api/*
+ *
+ * @description Returns an error message if a user tries to access an invalid
+ * api route.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response error message
+ */
+function invalidRoute(req, res) {
+  return res.status(404).send('Invalid Route or Method.');
 }
