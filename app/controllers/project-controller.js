@@ -753,7 +753,8 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
     .then((project) => {
       // Error Check: if project is currently archived, it must first be unarchived
       if (project.archived && projectUpdated.archived !== false) {
-        throw new M.CustomError('Project must be unarchived first.', 403, 'warn');
+        throw new M.CustomError('Project is archived. Archived objects cannot be'
+          + ' modified.', 403, 'warn');
       }
 
       // Error Check: ensure reqUser is a project admin or global admin

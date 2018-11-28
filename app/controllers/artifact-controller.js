@@ -197,7 +197,8 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
     .then((_artifact) => {
       // Error Check: if artifact is currently archived, it must first be unarchived
       if (_artifact.archived && artToUpdate.archived !== false) {
-        throw new M.CustomError('Artifact must be unarchived first.', 403, 'warn');
+        throw new M.CustomError('Artifact is archived. Archived objects cannot '
+          + 'be modified.', 403, 'warn');
       }
 
       // Error Check: ensure reqUser is a project admin or global admin

@@ -456,7 +456,7 @@ function findOrg(reqUser, organizationID, archived = false) {
     if (archived) {
       delete searchParams.archived;
     }
-    
+
     // Find orgs
     findOrgsQuery(searchParams)
     .then((orgs) => {
@@ -652,7 +652,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
     .then((org) => {
       // Error Check: if org is currently archived, it must first be unarchived
       if (org.archived && orgUpdated.archived !== false) {
-        throw new M.CustomError('Organization must be unarchived first.', 403, 'warn');
+        throw new M.CustomError('Organization is archived. Archived objects '
+          + 'cannot be modified.', 403, 'warn');
       }
 
       // Error Check: ensure reqUser is an org admin or global admin

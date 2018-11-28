@@ -219,7 +219,7 @@ function getOrgs(req, res) {
   let archived = false;
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
     if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
@@ -227,9 +227,9 @@ function getOrgs(req, res) {
     }
   });
 
-  // Check if archived was provided in the request body
-  if (req.body.hasOwnProperty('archived')) {
-    archived = req.body.archived;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Get all organizations the requesting user has access to
@@ -409,7 +409,7 @@ function getOrg(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
     if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
@@ -420,9 +420,9 @@ function getOrg(req, res) {
   // Define the optional archived flag
   let archived = false;
 
-  // Check if archived was provided in the request body
-  if (req.body.hasOwnProperty('archived')) {
-    archived = req.body.archived;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the org from it's id
@@ -710,7 +710,7 @@ function getProjects(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
     if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
@@ -721,9 +721,9 @@ function getProjects(req, res) {
   // Define the optional archived flag
   let archived = false;
 
-  // Check if archived was provided in the request body
-  if (req.body.hasOwnProperty('archived')) {
-    archived = req.body.archived;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Get all projects the requesting user has access to
@@ -881,7 +881,7 @@ function getProject(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
     if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
@@ -892,9 +892,9 @@ function getProject(req, res) {
   // Define the optional archived flag
   let archived = false;
 
-  // Check if archived was provided in the request body
-  if (req.body.hasOwnProperty('archived')) {
-    archived = req.body.archived;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the project from it's project.id and org.id
@@ -1500,7 +1500,7 @@ function getElements(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
     if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
@@ -1511,9 +1511,9 @@ function getElements(req, res) {
   // Define the optional archived flag
   let archived = false;
 
-  // Check if archived was provided in the request body
-  if (req.body.hasOwnProperty('archived')) {
-    archived = req.body.archived;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find all elements from it's org.id and project.id
@@ -1735,7 +1735,7 @@ function getElement(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
     if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
@@ -1746,9 +1746,9 @@ function getElement(req, res) {
   // Define the optional archived flag
   let archived = false;
 
-  // Check if archived was provided in the request body
-  if (req.body.hasOwnProperty('archived')) {
-    archived = req.body.archived;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the element from it's element.id, project.id, and org.id
@@ -1897,7 +1897,7 @@ function getWebhook(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
     if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
@@ -1908,9 +1908,9 @@ function getWebhook(req, res) {
   // Define the optional archived flag
   let archived = false;
 
-  // Check if archived was provided in the request body
-  if (req.body.hasOwnProperty('archived')) {
-    archived = req.body.archived;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the webhook from it's webhook.id, project.id, and org.id
@@ -2091,7 +2091,7 @@ function getArtifact(req, res) {
     return res.status(error.status).send(error);
   }
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
     if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
@@ -2101,9 +2101,9 @@ function getArtifact(req, res) {
   // Define the optional archived flag
   let archived = false;
 
-  // Check if archived was provided in the request body
-  if (req.body.hasOwnProperty('archived')) {
-    archived = req.body.archived;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the artifact from it's artifact.id, project.id, and org.id

@@ -297,7 +297,8 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
     .then((webhook) => {
       // Error Check: if webhook is currently archived, it must first be unarchived
       if (webhook.archived && webhookUpdated.archived !== false) {
-        throw new M.CustomError('Webhook must be unarchived first.', 403, 'warn');
+        throw new M.CustomError('Webhook is archived. Archived objects cannot be'
+          + ' modified.', 403, 'warn');
       }
 
       // Error Check: ensure reqUser is a project admin or global admin

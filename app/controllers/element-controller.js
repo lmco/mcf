@@ -866,7 +866,8 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
     .then((element) => {
       // Error Check: if element is currently archived, it must first be unarchived
       if (element.archived && elementUpdated.archived !== false) {
-        throw new M.CustomError('Element must be unarchived first.', 403, 'warn');
+        throw new M.CustomError('Element is archived. Archived objects cannot be'
+          + ' modified.', 403, 'warn');
       }
 
       // Error Check: ensure reqUser is a project admin or global admin

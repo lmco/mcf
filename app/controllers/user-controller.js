@@ -687,7 +687,8 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
     .then((user) => {
       // Error Check: if user is currently archived, they must first be unarchived
       if (user.archived && newUserData.archived !== false) {
-        throw new M.CustomError('User must be unarchived first.', 403, 'warn');
+        throw new M.CustomError('User is archived. Archived objects cannot be '
+        + 'modified.', 403, 'warn');
       }
 
       // Get list of keys the user is trying to update
