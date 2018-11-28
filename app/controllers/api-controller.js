@@ -20,6 +20,8 @@ const assert = require('assert');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
+const multer = require('multer');
+const upload = multer().single('image')
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
@@ -87,7 +89,9 @@ module.exports = {
   getArtifact,
   postArtifact,
   patchArtifact,
-  deleteArtifact
+  deleteArtifact,
+  getArtifacts,
+  postImage
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -2203,6 +2207,7 @@ function postIncomingWebhook(req, res) {
  * @return {Object} res response object with found artifact
  */
 function getArtifact(req, res) {
+  console.log('req: ', req.body);
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -2238,6 +2243,62 @@ function getArtifact(req, res) {
 }
 
 /**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts
+ *
+ * @description Takes an orgid and projectid in the URI and returns all artifacts
+ * of the project.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with artifacts
+ */
+function getArtifacts(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
+  // Find all artifacts from it's org.id and project.id
+  // NOTE: findArtifacts() sanitizes req.params.orgid and req.params.projectid
+  ArtifactController.findArtifacts(req.user, req.params.orgid, req.params.projectid, softDeleted)
+  .then((artifacts) => {
+    // Return only public artifact data
+    const artifactsPublicData = artifacts.map(e => e.getPublicData());
+
+    // Verify artifacts public data array is not empty
+    if (artifactsPublicData.length === 0) {
+      const error = new M.CustomError('No artifacts found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    // Return a 200: OK and public artifact data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(artifactsPublicData));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
  * POST /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  *
  * @description Takes an organization ID, project ID, and artifact ID in the URI
@@ -2248,33 +2309,65 @@ function getArtifact(req, res) {
  *
  * @return {Object} res response object with created artifact
  */
+function postImage(req, res){
+  upload(req, res, function(err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      console.log('Multer error');
+    } else if (err) {
+      // An unknown error occurred when uploading.
+      console.log('Unknown error');
+    }
+    console.log('req.body', req.body);
+    console.log('req.file', req.file.buffer);
+    res.send('hello back to you');
+  });
+}
+
 function postArtifact(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      console.log('Multer error:', err);
+      res.status(err.status).send(err);
 
-  // If artifact ID was provided in the body, ensure it matches artifact ID in params
-  if (req.body.hasOwnProperty('id') && (req.params.artifactid !== req.body.id)) {
-    const error = new M.CustomError('Artifact ID in the body does not match ID in the params.', 400);
-    return res.status(error.status).send(error);
-  }
+    } else if (err) {
+      // An unknown error occurred when uploading.
+      console.log('Unknown error:', err);
+      res.status(err.status).send(err);
+    }
+    console.log('req.body', req.body);
+    console.log('req.file.buffer', req.file.buffer);
+    console.log('req.file', req.file);
 
-  // Set id in request body
-  req.body.id = req.params.artifactid;
+    // Extract file meta data
+    req.body.filename = req.file.originalname;
+    req.body.contentType = req.file.minitype;
 
-  // Create artifact with provided parameters
-  // NOTE: createArtifact() sanitizes req.body
-  ArtifactController.createArtifact(req.user, req.params.orgid, req.params.projectid, req.body)
-  .then((artifact) => {
-    // Return 200: OK and created artifact
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(artifact.getPublicData()));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => {
-    res.status(error.status).send(error);
+    // Sanity Check: there should always be a user in the request
+    if (!req.user) {
+      const error = new M.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
+    // If artifact ID was provided in the body, ensure it matches artifact ID in params
+    if (Object.prototype.hasOwnProperty.call(req.body,'id') && (req.params.artifactid !== req.body.id)) {
+      const error = new M.CustomError('Artifact ID in the body does not match ID in the params.', 400);
+      return res.status(error.status).send(error);
+    }
+
+    // Create artifact with provided parameters
+    // NOTE: createArtifact() sanitizes req.body
+    ArtifactController.createArtifact(req.user, req.params.orgid, req.params.projectid, req.body, req.file.buffer)
+    .then((artifact) => {
+      // Return 200: OK and created artifact
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(formatJSON(artifact.getPublicData()));
+    })
+    // If an error was thrown, return it and its status
+    .catch((error) => {
+      res.status(error.status).send(error);
+    });
   });
 }
 
@@ -2356,5 +2449,61 @@ function deleteArtifact(req, res) {
     // Return 200: OK and success
     return res.status(200).send(formatJSON(success));
   })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts
+ *
+ * @description Takes an orgid and projectid in the URI and returns all artifacts
+ * of the project.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with artifacts
+ */
+function getArtifacts(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['softDeleted'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
+  // Define the optional softDelete flag
+  let softDeleted = false;
+
+  // Check if softDeleted was provided in the request body
+  if (req.body.hasOwnProperty('softDeleted')) {
+    softDeleted = req.body.softDeleted;
+  }
+
+  // Find all artifacts from it's org.id and project.id
+  // NOTE: findArtifacts() sanitizes req.params.orgid and req.params.projectid
+  ArtifactController.findArtifacts(req.user, req.params.orgid, req.params.projectid, softDeleted)
+  .then((artifacts) => {
+    // Return only public artifact data
+    const artifactsPublicData = artifacts.map(e => e.getPublicData());
+
+    // Verify artifacts public data array is not empty
+    if (artifactsPublicData.length === 0) {
+      const error = new M.CustomError('No artifacts found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    // Return a 200: OK and public artifact data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(artifactsPublicData));
+  })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }

@@ -101,8 +101,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should upload second artifact01 with same file', uploadSecondArtifact);
   it('should update artifact01 with new file', updateArtifact);
   it('should find updated artifact01 new filename', findArtifact);
-  it('should delete an artifact00', deleteArtifactFile);
-  it('should delete second artifact01', deleteSecondArtifactFile);
+  it('should all artifacts in project', findArtifacts);
+  //it('should delete an artifact00', deleteArtifactFile);
+  //it('should delete second artifact01', deleteSecondArtifactFile);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -114,23 +115,17 @@ describe(M.getModuleName(module.filename), () => {
 function uploadArtifact(done) {
   // Find and read image
   const imgPath = path.join(M.root, testData.artifacts[0].location, testData.artifacts[0].filename);
-  const artifactPNG = fs.readFileSync(imgPath);
+  const artifactBlob = fs.readFileSync(imgPath);
 
   // Define and initialize the meta data
   const artifactMetaData = {
     id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename,
-    artifactBlob: artifactPNG
-  };
-
-  const artifactObjData = {
-    metaData: artifactMetaData,
-    artifactBlob: artifactPNG
+    filename: testData.artifacts[0].filename
   };
 
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
-  ArtifactController.createArtifact(adminUser, org.id, projID, artifactObjData)
+  ArtifactController.createArtifact(adminUser, org.id, projID, artifactMetaData, artifactBlob)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[0].filename);
@@ -152,23 +147,17 @@ function uploadArtifact(done) {
 function uploadSecondArtifact(done) {
   // Find and read image
   const imgPath = path.join(M.root, testData.artifacts[1].location, testData.artifacts[1].filename);
-  const artifactPNG = fs.readFileSync(imgPath);
+  const artifactBlob = fs.readFileSync(imgPath);
 
   // Define and initialize the meta data
   const artifactMetaData = {
     id: testData.artifacts[1].id,
-    filename: testData.artifacts[1].filename,
-    artifactBlob: artifactPNG
-  };
-
-  const artifactObjData = {
-    metaData: artifactMetaData,
-    artifactBlob: artifactPNG
+    filename: testData.artifacts[1].filename
   };
 
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
-  ArtifactController.createArtifact(adminUser, org.id, projID, artifactObjData)
+  ArtifactController.createArtifact(adminUser, org.id, projID, artifactMetaData, artifactBlob)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[1].filename);
@@ -188,7 +177,7 @@ function uploadSecondArtifact(done) {
 function updateArtifact(done) {
   // Find and read image
   const imgPath = path.join(M.root, testData.artifacts[2].location, testData.artifacts[2].filename);
-  const artifactPNG = fs.readFileSync(imgPath);
+  const artifactBlob = fs.readFileSync(imgPath);
 
   // Extract the artifact id
   const artifactID = testData.artifacts[2].id;
@@ -199,17 +188,14 @@ function updateArtifact(done) {
     contentType: path.extname(testData.artifacts[2].filename)
   };
 
-  // Create artfact to update object
-  const artObjData = {
-    metaData: artMetaData,
-    artifactBlob: artifactPNG
-  };
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
-  ArtifactController.updateArtifact(adminUser, org.id, projID, artifactID, artObjData)
-  .then((artifact) => {
+  ArtifactController.updateArtifact(adminUser, org.id, projID, artifactID, artMetaData, artifactBlob)
+  .then((updatedArtifact) => {
     // Verify artifact created properly
-    chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
+    chai.expect(updatedArtifact.filename).to.equal(testData.artifacts[2].filename);
+    chai.expect(updatedArtifact.history[1].hash)
+      .to.equal('5d41098059578b5be7addfaef2bb5266fb40323128eac24e280e1779cc73748d');
     done();
   })
   .catch((error) => {
@@ -230,6 +216,26 @@ function findArtifact(done) {
   .then((artifact) => {
     // Verify artifact found properly
     chai.expect(artifact.id).to.equal(utils.createID(org.id, projID, testData.artifacts[2].id));
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Find multiple artifacts.
+ */
+function findArtifacts(done) {
+  // Find artifact
+  const projID = utils.parseID(proj.id).pop();
+  ArtifactController.findArtifacts(adminUser, org.id, projID)
+  .then((artifact) => {
+    // Verify number of artifacts found properly
+    chai.expect(artifact.length).to.equal(2);
     done();
   })
   .catch((error) => {
