@@ -36,6 +36,9 @@ module.exports = {
 // Node.js Modules
 const assert = require('assert');
 
+// NPM modules
+const uuidv4 = require('uuid/v4');
+
 // MBEE Modules
 const ProjController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
@@ -108,33 +111,340 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
   });
 }
 
-/**
- * @description This function creates multiple elements.
- *
- * @param {User} reqUser - The user object of the requesting user.
- * @param {String} organizationID - The ID of the organization housing the project.
- * @param {String} projectID - The ID of the project to add elements to.
- * @param {Object} arrElements - The object containing element data to create.
- *
- * @return {Promise} resolve - created elements
- *                   reject -  error
- *
- * @example
- * createElements({User}, 'orgID', 'projID', [{Elem1}, {Elem2}, ...])
- * .then(function(elements) {
- *   // Do something with the created elements
- * })
- * .catch(function(error) {
- *   M.log.error(error);
- * });
- */
+// /**
+//  * @description This function creates multiple elements.
+//  *
+//  * @param {User} reqUser - The user object of the requesting user.
+//  * @param {String} organizationID - The ID of the organization housing the project.
+//  * @param {String} projectID - The ID of the project to add elements to.
+//  * @param {Object} arrElements - The object containing element data to create.
+//  *
+//  * @return {Promise} resolve - created elements
+//  *                   reject -  error
+//  *
+//  * @example
+//  * createElements({User}, 'orgID', 'projID', [{Elem1}, {Elem2}, ...])
+//  * .then(function(elements) {
+//  *   // Do something with the created elements
+//  * })
+//  * .catch(function(error) {
+//  *   M.log.error(error);
+//  * });
+//  */
+// function createElements(reqUser, organizationID, projectID, arrElements) {
+//   return new Promise((resolve, reject) => {
+//     // Error Check: ensure input parameters are valid
+//     console.time('Parameter Check');
+//     try {
+//       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+//       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+//       assert.ok(typeof arrElements === 'object', 'Project array is not an object.');
+//       let index = 1;
+//       // Loop through each element, checking for valid ids and types
+//       Object(arrElements).forEach((element) => {
+//         assert.ok(element.hasOwnProperty('id'), `Element #${index} is missing an id.`);
+//         assert.ok(typeof element.id === 'string', `Element #${index}'s id is not a string.`);
+//         assert.ok(element.hasOwnProperty('type'), `Element #${index} is missing a type.`);
+//         assert.ok(Element.Element.getValidTypes().includes(utils.toTitleCase(element.type)),
+//           `Element #${index} has an invalid type of ${element.type}.`);
+//         // If element is a relationship, ensure source/target exist
+//         if (utils.toTitleCase(element.type) === 'Relationship') {
+//           assert.ok(element.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+//           assert.ok(typeof element.target === 'string',
+//             `Element #${index}'s target is not a string.`);
+//           assert.ok(element.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+//           assert.ok(typeof element.source === 'string',
+//             `Element #${index}'s source is not a string.`);
+//         }
+//         // Error Check: Ensure object contains valid keys
+//         assert.ok(Element.Element.validateObjectKeys(element),
+//           `Element #${index} contains invalid keys.`);
+//         index++;
+//       });
+//     }
+//     catch (error) {
+//       throw new M.CustomError(error.message, 400, 'warn');
+//     }
+//     console.timeEnd('Parameter Check');
+//     console.time('Sanitize');
+//     // Sanitize organizationID and projectID
+//     const orgID = sani.sanitize(organizationID);
+//     const projID = sani.sanitize(projectID);
+//
+//     // Initialize UID list, UUID list, created boolean and createdElements array
+//     const arrUID = [];
+//     const arrUUID = [];
+//     let created = false;
+//     let createdElements = [];
+//
+//     // Define arrays of different element types
+//     const packageArray = [];
+//     const relationshipArray = [];
+//     const blockArray = [];
+//     console.timeEnd('Sanitize');
+//     console.time('First Loop');
+//     // Loop through each element
+//     arrElements.forEach((element) => {
+//       // Generate unique UID for every element
+//       const uid = utils.createID(orgID, projID, element.id);
+//       arrUID.push(uid);
+//       element.uid = uid;
+//
+//       // If element has uuid, add it to list
+//       if (element.hasOwnProperty('uuid')) {
+//         arrUUID.push(element.uuid);
+//       }
+//
+//       // If element doesn't have parent, add it
+//       if (!element.hasOwnProperty('parent')) {
+//         element.parent = null;
+//       }
+//     });
+//     console.timeEnd('First Loop');
+//
+//     // Generate find query
+//     const findQuery = { $or: [{ id: { $in: arrUID } }, { uuid: { $in: arrUUID } }] };
+//
+//     // Find any existing elements that match the query
+//     console.time('Find Elements')
+//     findElementsQuery(findQuery)
+//     .then((elements) => {
+//       console.timeEnd('Find Elements');
+//       console.time('First Error Checks');
+//       // Error Check: ensure no elements already exist
+//       if (elements.length > 0) {
+//         // Get the ids of the elements that already exist
+//         const existingIDs = elements.map(e => e.id);
+//         const existingUUIDs = elements.filter(e => arrUUID.includes(e.uuid));
+//         let message = '';
+//
+//         // If an element with matching uuid exists
+//         if (existingUUIDs.length > 0) {
+//           message += `Elements(s) with the following uuid(s) ' +
+//           'already exists: [${existingUUIDs.toString()}].`;
+//         }
+//
+//         // If an elements with matching id exists
+//         if (existingIDs.length > 0) {
+//           message += ` Elements(s) with the following id(s) ' +
+//           'already exists: [${existingIDs.toString()}].`;
+//         }
+//
+//         // Reject error
+//         throw new M.CustomError(message, 403, 'warn');
+//       }
+//       console.timeEnd('First Error Checks');
+//       console.time('Find Project');
+//       // Find the project
+//       return ProjController.findProject(reqUser, orgID, projID);
+//     })
+//     .then((proj) => {
+//       console.timeEnd('Find Project');
+//       // Error Check: ensure user has write permissions on project
+//       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
+//         throw new M.CustomError('User does not have permissions.', 403, 'warn');
+//       }
+//       console.time('Second Loop');
+//       // Set the project for each element and convert to element objects
+//       arrElements.forEach((element) => {
+//         // Create element data object
+//         const elemData = {
+//           id: element.uid,
+//           name: element.name,
+//           project: proj._id,
+//           uuid: element.uuid,
+//           documentation: element.documentation,
+//           custom: element.custom,
+//           createdBy: reqUser._id,
+//           lastModifiedBy: reqUser._id
+//         };
+//
+//         // Add element to correct type array
+//         if (utils.toTitleCase(element.type) === 'Package') {
+//           // Create package object
+//           const pack = new Element.Package(sani.sanitize(elemData));
+//
+//           // Set hidden parent field used by middleware
+//           pack.$parent = element.parent;
+//
+//           // Add package to packageArray
+//           packageArray.push(pack);
+//         }
+//         else if (utils.toTitleCase(element.type) === 'Relationship') {
+//           // Create relationship object
+//           const rel = new Element.Relationship(sani.sanitize(elemData));
+//
+//           // Set hidden source, target, and parent fields used by middleware
+//           rel.$source = element.source;
+//           rel.$target = element.target;
+//           rel.$parent = element.parent;
+//
+//           // Add relationship to relationshipArray
+//           relationshipArray.push(rel);
+//         }
+//         else {
+//           // Create block object
+//           const block = new Element.Block(sani.sanitize(elemData));
+//
+//           // Set hidden parent field used by middleware
+//           block.$parent = element.parent;
+//
+//           // Add block to blockArray
+//           blockArray.push(block);
+//         }
+//       });
+//       console.timeEnd('Second Loop');
+//       console.time('Convert to JMI Type 2');
+//       const finishedElements = blockArray.concat(packageArray, relationshipArray);
+//       const jmi2 = utils.convertJMI(1, 2, finishedElements);
+//       console.timeEnd('Convert to JMI Type 2');
+//       console.time('ForEach Package');
+//       // Create array of package ids
+//
+//       const elemIDs = finishedElements.map(e => e.id);
+//       const packIDs = packageArray.map(p => p.id);
+//       let packageQuery = { id: { $in: [] }};
+//       // For each package
+//       packageArray.forEach((pack) => {
+//         // If the packages parent is also being created, set its _id
+//         if (pack.$parent) {
+//           const packID = utils.createID(orgID, projID, pack.$parent);
+//           // If the parent is in the package also being created
+//           if (packIDs.includes(packID)) {
+//             const parentObj = jmi2[packID];
+//             pack.parent = parentObj._id;
+//             pack.$parent = null;
+//             // Add package to parents contains array
+//             parentObj.contains.push(pack._id);
+//           }
+//           // Add the id to the package query to find
+//           else {
+//             packageQuery.id.$in.push(packID);
+//           }
+//         }
+//       });
+//       console.timeEnd('ForEach Package')
+//       console.time('ForEach Relationship')
+//       // Create array of relationship ids
+//       const relIDs = relationshipArray.map(r => r.id);
+//       // For each relationship
+//       relationshipArray.forEach((rel) => {
+//         // If the relationships target is also being created, set its _id
+//         if (rel.$target) {
+//           const targetID = utils.createID(orgID, projID, rel.$target);
+//           if (elemIDs.includes(targetID)) {
+//             rel.target = jmi2[targetID]._id;
+//             rel.$target = null;
+//           }
+//         }
+//
+//         // If the relationships source is also being created, set its _id
+//         if (rel.$source) {
+//           const sourceID = utils.createID(orgID, projID, rel.$source);
+//           if (elemIDs.includes(sourceID)) {
+//             rel.source = jmi2[sourceID]._id;
+//             rel.$source = null;
+//           }
+//         }
+//
+//         if (rel.$parent) {
+//           const packID = utils.createID(orgID, projID, rel.$parent);
+//           // If the parent is in the package also being created
+//           if (packIDs.includes(packID)) {
+//             const parentObj = jmi2[packID];
+//             rel.parent = parentObj._id;
+//             rel.$parent = null;
+//             // Add package to parents contains array
+//             parentObj.contains.push(rel._id);
+//           }
+//           // Add the id to the package query to find
+//           else {
+//             packageQuery.id.$in.push(packID);
+//           }
+//         }
+//       });
+//       console.timeEnd('ForEach Relationship')
+//       console.time('ForEach Block');
+//       blockArray.forEach((block) => {
+//         if (block.$parent) {
+//           const packID = utils.createID(orgID, projID, block.$parent);
+//           // If the parent is in the package also being created
+//           if (packIDs.includes(packID)) {
+//             const parentObj = jmi2[packID];
+//             block.parent = parentObj._id;
+//             block.$parent = null;
+//             // Add package to parents contains array
+//             parentObj.contains.push(block._id);
+//           }
+//           // Add the id to the package query to find
+//           else {
+//             packageQuery.id.$in.push(packID);
+//           }
+//         }
+//       });
+//       console.timeEnd('ForEach Block');
+//       // Set created boolean to true
+//       created = true;
+//       console.time('Create Packages')
+//       // Create packages first
+//       return Element.Element.create(packageArray);
+//     })
+//     .then((createdPackages) => {
+//       console.timeEnd('Create Packages');
+//       // Add createdPackages to createdElements array
+//       createdElements = createdPackages || [];
+//
+//       console.time('Create Blocks');
+//       // Create blocks second
+//       return Element.Element.create(blockArray);
+//     })
+//     .then((createdBlocks) => {
+//       console.timeEnd('Create Blocks');
+//       // Add createdBlocks to createdElements array
+//       createdElements = createdElements.concat(createdBlocks || []);
+//
+//       console.time('Create Relationships');
+//       // Create relationships third
+//       return Element.Element.create(relationshipArray);
+//     })
+//     .then((createdRelationships) => {
+//       console.timeEnd('Create Relationships')
+//       // Add createdRelationships to createdElements array
+//       createdElements = createdElements.concat(createdRelationships || []);
+//
+//       // Return all of the created elements
+//       const createdID = createdElements.map(e => e._id);
+//       console.time('Final Find Elements')
+//       return findElementsQuery({ _id: { $in: createdID } });
+//     })
+//     .then((elements) => {
+//       console.timeEnd('Final Find Elements')
+//       return resolve(elements);
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//       // If error is a CustomError, reject it
+//       if (error instanceof M.CustomError && !created) {
+//         return reject(error);
+//       }
+//       // If it's not a CustomError, the create failed so delete all successfully
+//       // created elements and reject the error.
+//       return Element.Element.deleteMany({ id: { $in: arrUID } })
+//       .then(() => reject(M.CustomError.parseCustomError(error)))
+//       .catch((error2) => reject(M.CustomError.parseCustomError(error2)));
+//     });
+//   });
+// }
+
 function createElements(reqUser, organizationID, projectID, arrElements) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
+    console.time('TOTAL TIME');
+    console.time('Parameter Check');
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof arrElements === 'object', 'Project array is not an object.');
+      assert.ok(Array.isArray(arrElements), 'Elements array is not an object.');
       let index = 1;
       // Loop through each element, checking for valid ids and types
       Object(arrElements).forEach((element) => {
@@ -161,22 +471,21 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
     }
+    console.timeEnd('Parameter Check');
 
+    console.time('Sanitize');
     // Sanitize organizationID and projectID
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
 
     // Initialize UID list, UUID list, created boolean and createdElements array
     const arrUID = [];
-    const arrUUID = [];
-    let created = false;
-    let createdElements = [];
+    // const arrUUID = [];
+    const elementObjects = [];
+    let jmi2 = {};
+    console.timeEnd('Sanitize');
 
-    // Define arrays of different element types
-    const packageArray = [];
-    const relationshipArray = [];
-    const blockArray = [];
-
+    console.time('First Loop');
     // Loop through each element
     arrElements.forEach((element) => {
       // Generate unique UID for every element
@@ -185,56 +494,60 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       element.uid = uid;
 
       // If element has uuid, add it to list
-      if (element.hasOwnProperty('uuid')) {
-        arrUUID.push(element.uuid);
-      }
-
-      // If element doesn't have parent, add it
-      if (!element.hasOwnProperty('parent')) {
-        element.parent = null;
+      if (!element.hasOwnProperty('uuid')) {
+        element.uuid = uuidv4();
       }
     });
+    console.timeEnd('First Loop');
 
     // Generate find query
-    const findQuery = { $or: [{ id: { $in: arrUID } }, { uuid: { $in: arrUUID } }] };
+    // TODO: A query this large can cause an error. Should evaluate need for the initial find
+    // elements query call
+    // const findQuery = { $or: [{ id: { $in: arrUID } }, { uuid: { $in: arrUUID } }] };
 
-    // Find any existing elements that match the query
-    findElementsQuery(findQuery)
-    .then((elements) => {
-      // Error Check: ensure no elements already exist
-      if (elements.length > 0) {
-        // Get the ids of the elements that already exist
-        const existingIDs = elements.map(e => e.id);
-        const existingUUIDs = elements.filter(e => arrUUID.includes(e.uuid));
-        let message = '';
-
-        // If an element with matching uuid exists
-        if (existingUUIDs.length > 0) {
-          message += `Elements(s) with the following uuid(s) ' +
-          'already exists: [${existingUUIDs.toString()}].`;
-        }
-
-        // If an elements with matching id exists
-        if (existingIDs.length > 0) {
-          message += ` Elements(s) with the following id(s) ' +
-          'already exists: [${existingIDs.toString()}].`;
-        }
-
-        // Reject error
-        throw new M.CustomError(message, 403, 'warn');
-      }
-
+    // // Find any existing elements that match the query
+    // console.time('Find Elements');
+    // findElementsQuery(findQuery)
+    // .then((elements) => {
+    //   console.timeEnd('Find Elements');
+    //   console.time('First Error Checks');
+    //   // Error Check: ensure no elements already exist
+    //   if (elements.length > 0) {
+    //     // Get the ids of the elements that already exist
+    //     const existingIDs = elements.map(e => e.id);
+    //     const existingUUIDs = elements.filter(e => arrUUID.includes(e.uuid));
+    //     let message = '';
+    //
+    //     // If an element with matching uuid exists
+    //     if (existingUUIDs.length > 0) {
+    //       message += `Element(s) with the following uuid(s) ' +
+    //       'already exists: [${existingUUIDs.toString()}].`;
+    //     }
+    //
+    //     // If an elements with matching id exists
+    //     if (existingIDs.length > 0) {
+    //       message += ` Element(s) with the following id(s) ' +
+    //       'already exists: [${existingIDs.toString()}].`;
+    //     }
+    //
+    //     // Reject error
+    //     throw new M.CustomError(message, 403, 'warn');
+    //   }
+    //   console.timeEnd('First Error Checks');
+      console.time('Find Project');
       // Find the project
-      return ProjController.findProject(reqUser, orgID, projID);
-    })
+    ProjController.findProject(reqUser, orgID, projID)
     .then((proj) => {
+      console.timeEnd('Find Project');
       // Error Check: ensure user has write permissions on project
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
         throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
+      console.time('Second Loop');
       // Set the project for each element and convert to element objects
       arrElements.forEach((element) => {
+        const elementType = utils.toTitleCase(element.type)
         // Create element data object
         const elemData = {
           id: element.uid,
@@ -248,17 +561,15 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         };
 
         // Add element to correct type array
-        if (utils.toTitleCase(element.type) === 'Package') {
+        if (elementType === 'Package') {
           // Create package object
           const pack = new Element.Package(sani.sanitize(elemData));
 
           // Set hidden parent field used by middleware
           pack.$parent = element.parent;
-
-          // Add package to packageArray
-          packageArray.push(pack);
+          elementObjects.push(pack);
         }
-        else if (utils.toTitleCase(element.type) === 'Relationship') {
+        else if (elementType === 'Relationship') {
           // Create relationship object
           const rel = new Element.Relationship(sani.sanitize(elemData));
 
@@ -266,9 +577,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           rel.$source = element.source;
           rel.$target = element.target;
           rel.$parent = element.parent;
-
-          // Add relationship to relationshipArray
-          relationshipArray.push(rel);
+          elementObjects.push(rel);
         }
         else {
           // Create block object
@@ -276,83 +585,119 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
 
           // Set hidden parent field used by middleware
           block.$parent = element.parent;
-
-          // Add block to blockArray
-          blockArray.push(block);
+          elementObjects.push(block);
         }
       });
+      console.timeEnd('Second Loop');
+      // Convert to elements array to JMI type 2 for easier lookup
+      jmi2 = utils.convertJMI(1, 2, elementObjects);
 
-      // Create array of package ids
-      const packIDs = packageArray.map(p => p.id);
-      // For each package
-      packageArray.forEach((pack) => {
-        // If the packages parent is also being created, set its _id
-        if (pack.$parent) {
-          const packID = utils.createID(orgID, projID, pack.$parent);
-          if (packIDs.includes(packID)) {
-            pack.parent = packageArray.filter(p => p.id === packID)[0]._id;
-            pack.$parent = null;
+      // Define array of elements that need to be searched for
+      const elementsToFind = [];
+
+      // Loop through each element and set its parent field, and optionally the
+      // source and target.
+      console.time('Third Loop');
+      elementObjects.forEach((element) => {
+        // If the element has a parent
+        if (element.$parent) {
+          const parentID = utils.createID(orgID, projID, element.$parent);
+
+          // If the element's parent is also being created
+          if (jmi2.hasOwnProperty(parentID)) {
+            const parentObj = jmi2[parentID];
+            element.parent = parentObj._id;
+            element.$parent = null;
+            // Add package to parents contains array
+            parentObj.contains.push(element._id);
           }
-
-          // Add package to parents contains array
-          packageArray.filter(p => p.id === packID)[0].contains.push(pack._id);
-        }
-      });
-
-      // Create array of relationship ids
-      const relIDs = relationshipArray.map(r => r.id);
-      // For each relationship
-      relationshipArray.forEach((rel) => {
-        // If the relationships target is also being created, set its _id
-        if (rel.$target) {
-          const targetID = utils.createID(orgID, projID, rel.$target);
-          if (relIDs.includes(targetID)) {
-            rel.target = relationshipArray.filter(r => r.id === targetID)[0]._id;
+          else {
+            elementsToFind.push(parentID);
           }
         }
 
-        // If the relationships source is also being created, set its _id
-        if (rel.$source) {
-          const sourceID = utils.createID(orgID, projID, rel.$source);
-          if (relIDs.includes(sourceID)) {
-            rel.source = relationshipArray.filter(r => r.id === sourceID)[0]._id;
+        // If the element is a relationship and has a source
+        if (element.$source) {
+          const sourceID = utils.createID(orgID, projID, element.$source);
+
+          // If the element's source is also being created
+          if (jmi2.hasOwnProperty(sourceID)) {
+            element.source = jmi2[sourceID]._id;
+            element.$source = null;
+          }
+          else {
+            elementsToFind.push(sourceID);
+          }
+        }
+
+        // If the element is a relationship and has a target
+        if (element.$target) {
+          const targetID = utils.createID(orgID, projID, element.$target);
+
+          // If the element's target is also being created
+          if (jmi2.hasOwnProperty(targetID)) {
+            element.target = jmi2[targetID]._id;
+            element.$target = null;
+          }
+          else {
+            elementsToFind.push(targetID);
           }
         }
       });
+      console.timeEnd('Third Loop');
 
-
-      // Set created boolean to true
-      created = true;
-
-      // Create packages first
-      return Element.Element.create(packageArray);
+      // Create query for finding elements
+      const findExtraElementsQuery = { id: { $in: elementsToFind }};
+      return findElementsQuery(findExtraElementsQuery);
     })
-    .then((createdPackages) => {
-      // Add createdPackages to createdElements array
-      createdElements = createdPackages || [];
+    .then((extraElements) => {
+      // Convert extraElements to JMI type 2
+      const extraElementsJMI2 = utils.convertJMI(1, 2, extraElements);
+      // Loop through each remaining element
+      console.time('Fourth Loop');
+      elementObjects.forEach((element) => {
+        // If the element has a parent
+        if (element.$parent) {
+          const parentID = utils.createID(orgID, projID, element.$parent);
 
-      // Create blocks second
-      return Element.Element.create(blockArray);
-    })
-    .then((createdBlocks) => {
-      // Add createdBlocks to createdElements array
-      createdElements = createdElements.concat(createdBlocks || []);
+          const parentObj = extraElementsJMI2[parentID];
+          element.parent = parentObj._id;
+          // TODO
+          // // Add package to parents contains array
+          // parentObj.contains.push(element._id);
+        }
 
-      // Create relationships third
-      return Element.Element.create(relationshipArray);
-    })
-    .then((createdRelationships) => {
-      // Add createdRelationships to createdElements array
-      createdElements = createdElements.concat(createdRelationships || []);
+        // If the element is a relationship and has a source
+        if (element.$source) {
+          const sourceID = utils.createID(orgID, projID, element.$source);
 
-      // Return all of the created elements
-      const createdID = createdElements.map(e => e._id);
-      return findElementsQuery({ _id: { $in: createdID } });
+          element.source = jmi2[sourceID]._id;
+        }
+
+        // If the element is a relationship and has a target
+        if (element.$target) {
+          const targetID = utils.createID(orgID, projID, element.$target);
+
+          element.target = jmi2[targetID]._id;
+        }
+
+      });
+      console.timeEnd('Fourth Loop');
+      console.time('Create');
+
+      // NOTE: At this point, all element objects should be ready for creation
+      return Element.Element.insertMany(elementObjects);
     })
-    .then((elements) => resolve(elements))
+    .then((elements) => {
+      console.log(elements.length);
+      console.timeEnd('Create');
+      console.timeEnd('TOTAL TIME');
+      return resolve(elementObjects);
+    })
     .catch((error) => {
+      console.log(error);
       // If error is a CustomError, reject it
-      if (error instanceof M.CustomError && !created) {
+      if (error instanceof M.CustomError) {
         return reject(error);
       }
       // If it's not a CustomError, the create failed so delete all successfully

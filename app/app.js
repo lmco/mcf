@@ -41,6 +41,8 @@ const User = M.require('models.user');
 
 // Initialize express app and export the object
 const app = express();
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 module.exports = app;
 
 /**

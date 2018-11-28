@@ -80,6 +80,7 @@ const options = { discriminatorKey: 'type' };
 const ElementSchema = new mongoose.Schema({
   id: {
     type: String,
+    index: true,
     required: true,
     unique: true,
     match: RegExp(validators.element.id),

@@ -281,3 +281,14 @@ module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
     }
   });
 };
+
+module.exports.convertJMI = function(from, to, data) {
+  if (from === 1 && to === 2) {
+    // Data should be an array
+    const returnObj = {};
+    data.forEach((object) => {
+      returnObj[object.id.toString()] = object;
+    });
+    return returnObj;
+  }
+};
