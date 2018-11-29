@@ -43,9 +43,8 @@ const extensions = M.require('models.plugin.extensions');
  * have write access.
  * @property {User} permissions.admin - An array of references to Users who
  * have admin access.
- * @property {Date} deletedOn - The date the Organization was soft deleted or
- * null if not deleted.
- * @property {Boolean} deleted - Indicates if an organization has been soft deleted.
+ * @property {Date} archivedOn - The date the org was archived or null
+ * @property {Boolean} archived - Indicates if an org has been archived.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
  * @property {virtual} project - A virtual field containing an array of Project
  * objects.
@@ -147,7 +146,7 @@ OrganizationSchema.methods.getPermissionLevels = function() {
  * @memberof OrganizationSchema
  */
 OrganizationSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'custom'];
+  return ['name', 'custom', 'archived'];
 };
 
 /**
@@ -189,7 +188,7 @@ OrganizationSchema.statics.validateObjectKeys = function(object) {
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the organization model
-      if (!Object.keys(OrganizationSchema.obj).includes(key)) {
+      if (!Object.keys(OrganizationSchema.paths).includes(key)) {
         // Key is not in organization model, return false
         returnBool = false;
       }

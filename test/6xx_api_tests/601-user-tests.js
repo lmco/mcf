@@ -435,11 +435,7 @@ function rejectDeleteNonExisting(done) {
     url: `${test.url}/api/users/${testData.usernames[1].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    // Set soft delete parameter in request body
-    body: JSON.stringify({
-      soft: false
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error
@@ -464,11 +460,7 @@ function deleteUser(done) {
     url: `${test.url}/api/users/${testData.users[1].username}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    // Set hard delete parameter in request body
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error
@@ -494,10 +486,7 @@ function deleteMultipleUsers(done) {
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true,
-      users: [testData.users[2], testData.users[4]]
-    })
+    body: JSON.stringify([testData.users[2], testData.users[4]])
   },
   (err, response, body) => {
     // Expect no error
@@ -523,10 +512,7 @@ function rejectDeleteNoUsers(done) {
     url: `${test.url}/api/users`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error

@@ -211,7 +211,7 @@ function getPublicData(done) {
 
     // Verify results
     chai.expect(outgoingPub.name).to.equal(testData.webhooks[0].name);
-    chai.expect(outgoingPub.deleted).to.equal(undefined);
+    chai.expect(outgoingPub.archived).to.equal(undefined);
 
     // Find incoming webhook
     return Webhook.Webhook.findOne({
@@ -225,7 +225,7 @@ function getPublicData(done) {
     // Verify results
     chai.expect(incomingPub.name).to.equal(testData.webhooks[2].name);
     chai.expect(incomingPub.token).to.equal(testData.webhooks[2].token);
-    chai.expect(incomingPub.deleted).to.equal(undefined);
+    chai.expect(incomingPub.archived).to.equal(undefined);
     done();
   })
   .catch((error) => {

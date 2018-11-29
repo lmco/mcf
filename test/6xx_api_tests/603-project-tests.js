@@ -431,10 +431,7 @@ function rejectDeleteNonexistingProject(done) {
     url: `${test.url}/api/orgs/${org.id}/projects/${testData.ids[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -457,10 +454,7 @@ function deleteProject(done) {
     url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response) => {
     // Expect no error
@@ -480,10 +474,7 @@ function deleteSecondProject(done) {
     url: `${test.url}/api/orgs/${org.id}/projects/${testData.projects[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response) => {
     // Expect no error
@@ -526,8 +517,7 @@ function rejectDeleteMultipleInvalidProjects(done) {
     ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      projects: [true, testData.projects[5]],
-      hardDelete: true
+      projects: [true, testData.projects[5]]
     })
   },
   (err, response, body) => {

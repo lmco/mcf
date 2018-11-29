@@ -331,13 +331,10 @@ function patchUsers(done) {
  */
 function deleteUsers(done) {
   // Delete request object
-  const body = {
-    hardDelete: true,
-    users: [
-      testData.users[2],
-      testData.users[3]
-    ]
-  };
+  const body = [
+    testData.users[2],
+    testData.users[3]
+  ];
   const params = {};
   const method = 'DELETE';
   const req = getReq(params, body, method);

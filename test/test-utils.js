@@ -222,7 +222,7 @@ module.exports.createOrganization = function(adminUser) {
 module.exports.removeOrganization = function(adminUser) {
   return new Promise((resolve, reject) => {
     // Find organization to ensure it exists
-    OrgController.removeOrg(adminUser, testData.orgs[0].id, true)
+    OrgController.removeOrg(adminUser, testData.orgs[0].id)
     .then((org) => resolve(org))
     .catch((error) => reject(error));
   });

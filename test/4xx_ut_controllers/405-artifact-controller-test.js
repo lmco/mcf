@@ -107,7 +107,7 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Update an artifact with a new file.
- * Note: This result in a different hash. Both files should be archieved
+ * Note: This result in a different hash. Both files should be archived
  * and artifact history is updated
  */
 function uploadArtifact(done) {
@@ -198,7 +198,7 @@ function updateArtifact(done) {
     contentType: path.extname(testData.artifacts[2].filename)
   };
 
-  // Create artfact to update object
+  // Create artifact to update object
   const artObjData = {
     metaData: artMetaData,
     artifactBlob: artifactPNG
@@ -246,9 +246,7 @@ function deleteArtifactFile(done) {
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
   ArtifactController.removeArtifact(adminUser, org.id, projID, testData.artifacts[0].id)
-  .then((artifactID) => {
-    done();
-  })
+  .then(() => done())
   .catch((error) => {
     M.log.error(error);
     // Expect no error
@@ -264,9 +262,7 @@ function deleteSecondArtifactFile(done) {
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
   ArtifactController.removeArtifact(adminUser, org.id, projID, testData.artifacts[1].id)
-  .then((artifactID) => {
-    done();
-  })
+  .then(() => done())
   .catch((error) => {
     M.log.error(error);
     // Expect no error

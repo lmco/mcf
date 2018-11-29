@@ -150,7 +150,7 @@ function uploadArtifact(done) {
 function updateArtifactFile(done) {
   const artifactFillId = utils.createID(project.id, testData.artifacts[0].id);
   // Find the artifact previously uploaded.
-  Artifact.find({ id: artifactFillId, deleted: false })
+  Artifact.find({ id: artifactFillId, archived: false })
   .then((artifactToUpdate) => {
     // Update the filename
     artifactToUpdate[0].filename = testData.artifacts[2].filename;

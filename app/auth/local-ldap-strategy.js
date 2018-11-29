@@ -50,7 +50,7 @@ function handleBasicAuth(req, res, username, password) {
     // Search locally for the user
     User.find({
       username: username,
-      deletedOn: null
+      archivedOn: null
     })
     .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
     .exec((findUserErr, users) => {
