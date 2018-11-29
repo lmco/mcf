@@ -74,10 +74,9 @@ describe(M.getModuleName(module.filename), () => {
 
       // Define project data
       const projData = testData.projects[0];
-      projData.org = { id: org.id };
 
       // Create project
-      return ProjController.createProject(adminUser, projData);
+      return ProjController.createProject(adminUser, org.id, projData);
     })
     .then((retProj) => {
       projID = utils.parseID(retProj.id).pop();
@@ -343,10 +342,7 @@ function rejectDeleteNonExistingArtifact(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -369,10 +365,7 @@ function deleteArtifact(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error

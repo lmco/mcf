@@ -59,10 +59,9 @@ describe(M.getModuleName(module.filename), () => {
 
       // Define project data
       const projData = testData.projects[0];
-      projData.org = { id: org.id };
 
       // Create project
-      return ProjController.createProject(adminUser, projData);
+      return ProjController.createProject(adminUser, org.id, projData);
     })
     .then((retProj) => {
       // Set global project
@@ -101,7 +100,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should upload second artifact01 with same file', uploadSecondArtifact);
   it('should update artifact01 with new file', updateArtifact);
   it('should find updated artifact01 new filename', findArtifact);
-  it('should all artifacts in project', findArtifacts);
+  it('should find all artifacts in project', findArtifacts);
   it('should delete an artifact00', deleteArtifactFile);
   it('should delete second artifact01', deleteSecondArtifactFile);
 });
@@ -109,7 +108,7 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Update an artifact with a new file.
- * Note: This result in a different hash. Both files should be archieved
+ * Note: This result in a different hash. Both files should be archived
  * and artifact history is updated
  */
 function uploadArtifact(done) {
@@ -254,9 +253,7 @@ function deleteArtifactFile(done) {
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
   ArtifactController.removeArtifact(adminUser, org.id, projID, testData.artifacts[0].id)
-  .then((artifactID) => {
-    done();
-  })
+  .then(() => done())
   .catch((error) => {
     M.log.error(error);
     // Expect no error
@@ -272,9 +269,7 @@ function deleteSecondArtifactFile(done) {
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
   ArtifactController.removeArtifact(adminUser, org.id, projID, testData.artifacts[1].id)
-  .then((artifactID) => {
-    done();
-  })
+  .then(() => done())
   .catch((error) => {
     M.log.error(error);
     // Expect no error

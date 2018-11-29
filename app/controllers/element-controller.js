@@ -53,7 +53,8 @@ const utils = M.require('lib.utils');
  * @param {User} reqUser - The user object of the requesting user.
  * @param {String} organizationID - The organization ID.
  * @param {String} projectID - The project ID.
- * @param {Boolean} softDeleted - A boolean value indicating whether to soft delete.
+ * @param {Boolean} archived - A boolean value indicating whether to also search
+ *                             for archived elements or not.
  *
  * @return {Promise} resolve - element
  *                   reject - error
@@ -66,13 +67,13 @@ const utils = M.require('lib.utils');
  *   M.log.error(error);
  * });
  */
-function findElements(reqUser, organizationID, projectID, softDeleted = false) {
+function findElements(reqUser, organizationID, projectID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -83,16 +84,16 @@ function findElements(reqUser, organizationID, projectID, softDeleted = false) {
     const projID = sani.sanitize(projectID);
     const projectUID = utils.createID(orgID, projID);
 
-    const searchParams = { id: { $regex: `^${projectUID}:` }, deleted: false };
+    const searchParams = { id: { $regex: `^${projectUID}:` }, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted elements
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived elements
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // Check softDeleted flag true
-    if (softDeleted) {
-      // softDeleted flag true and User Admin true, remove deleted: false
-      delete searchParams.deleted;
+    // Check archived flag true
+    if (archived) {
+      // archived flag true and User Admin true, remove archived: false
+      delete searchParams.archived;
     }
 
     // Find elements
@@ -402,11 +403,12 @@ function updateElements(reqUser, query, updateInfo) {
           `Element property [${key}] cannot be changed.`);
 
         // Error Check: ensure parameter is not unique
-        assert.ok(!Element.Element.schema.obj[key].unique,
+
+        assert.ok(!Element.Element.schema.paths[key].options.unique,
           `Cannot use batch update on the unique field [${key}].`);
 
         // If the field is a mixed field, set the flag
-        if (Element.Element.schema.obj[key].type.schemaName === 'Mixed') {
+        if (Element.Element.schema.paths[key].instance === 'Mixed') {
           containsMixed = true;
         }
       });
@@ -436,16 +438,29 @@ function updateElements(reqUser, query, updateInfo) {
         const promises = [];
         // Loop through each element
         elements.forEach((element) => {
+          // TODO: Add check ensure user isn't trying to update an archived element
           // Loop through each update
           Object.keys(updateInfo).forEach((key) => {
             // If a 'Mixed' field
-            if (Element.Element.schema.obj[key].type.schemaName === 'Mixed') {
+            if (Element.Element.schema.obj.hasOwnProperty(key)
+              && Element.Element.schema.obj[key].type.schemaName === 'Mixed') {
               // Merge changes into original 'Mixed' field
               utils.updateAndCombineObjects(element[key], sani.sanitize(updateInfo[key]));
               // Mark that the 'Mixed' field has been modified
               element.markModified(key);
             }
             else {
+              // Set archivedBy if archived field is being changed
+              if (key === 'archived') {
+                // If the element is being archived
+                if (updateInfo[key] && !element[key]) {
+                  element.archivedBy = reqUser._id;
+                }
+                // If the element is being unarchived
+                else if (!updateInfo[key] && element[key]) {
+                  element.archivedBy = null;
+                }
+              }
               // Update the value in the element
               element[key] = sani.sanitize(updateInfo[key]);
             }
@@ -480,7 +495,7 @@ function updateElements(reqUser, query, updateInfo) {
     })
     // Return the updated elements
     .then((updatedElements) => resolve(updatedElements))
-    .catch((error) => M.CustomError.parseCustomError(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
@@ -489,13 +504,12 @@ function updateElements(reqUser, query, updateInfo) {
  *
  * @param {User} reqUser - The user object of the requesting user.
  * @param {Object} query - The query used to find/delete elements
- * @param {Boolean} hardDelete - A boolean value indicating whether to hard delete.
  *
  * @return {Promise} resolve - deleted elements
  *                   reject -  error
  *
  * @example
- * removeElements({User}, { proj: 'projID' }, 'false')
+ * removeElements({User}, { proj: 'projID' })
  * .then(function(elements) {
  *   // Do something with the deleted elements
  * })
@@ -503,22 +517,20 @@ function updateElements(reqUser, query, updateInfo) {
  *   M.log.error(error);
  * });
  */
-function removeElements(reqUser, query, hardDelete = false) {
+function removeElements(reqUser, query) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete elements.');
       assert.ok(typeof query === 'object', 'Remove query is not an object.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard deleted flag is not a boolean.');
     }
     catch (error) {
-      throw new M.CustomError(error.message, 400, 'error', 'warn');
-    }
-
-    // If hard deleting, ensure user is a site-wide admin
-    if (hardDelete && !reqUser.admin) {
-      throw new M.CustomError(
-        'User does not have permission to permanently delete a element.', 403, 'warn'
-      );
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permission')) {
+        statusCode = 403;
+      }
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define found elements array and child query
@@ -537,7 +549,7 @@ function removeElements(reqUser, query, hardDelete = false) {
         // Error Check: ensure user is global admin or project writer
         if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
           throw new M.CustomError('User does not have permissions to '
-              + `delete elements in the project [${element.project.name}].`, 403, 'warn');
+            + `delete/archive elements in the project [${element.project.name}].`, 403, 'warn');
         }
 
         // If the element is a package, remove the children as well
@@ -555,16 +567,12 @@ function removeElements(reqUser, query, hardDelete = false) {
         }
       });
 
-      // If hard delete, delete elements, otherwise update elements
-      return (hardDelete)
-        ? Element.Element.deleteMany(query)
-        : Element.Element.updateMany(query, { deleted: true, deletedBy: reqUser });
+      // Delete elements
+      return Element.Element.deleteMany(query);
     })
     // Delete any child elements
-    .then(() => ((hardDelete)
-      ? Element.Element.deleteMany(childQuery)
-      : Element.Element.updateMany(childQuery, { deleted: true, deletedBy: reqUser })))
-    // Return the deleted elements
+    .then(() => Element.Element.deleteMany(childQuery))
+    // Return the deleted/archived elements
     .then(() => resolve(foundElements))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -578,7 +586,8 @@ function removeElements(reqUser, query, hardDelete = false) {
  * @param {String} organizationID - The organization ID.
  * @param {String} projectID - The project ID.
  * @param {String} elementID - The element ID.
- * @param {Boolean} softDeleted - A boolean value indicating whether to soft delete.
+ * @param {Boolean} archived - A boolean value indicating whether to also search
+ *                             for archived elements or not.
  *
  * @return {Promise} resolve - element
  *                   reject - error
@@ -592,14 +601,14 @@ function removeElements(reqUser, query, hardDelete = false) {
  *   M.log.error(error);
  * });
  */
-function findElement(reqUser, organizationID, projectID, elementID, softDeleted = false) {
+function findElement(reqUser, organizationID, projectID, elementID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -613,15 +622,15 @@ function findElement(reqUser, organizationID, projectID, elementID, softDeleted 
 
     // Search for an element that matches the id or uuid
     let searchParams = { $and: [{ $or: [{ id: elemUID },
-      { uuid: elemID }] }, { deleted: false }] };
+      { uuid: elemID }] }, { archived: false }] };
 
-    // Error Check: Ensure user has permissions to find deleted elements
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived elements
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // Check softDeleted flag true
-    if (softDeleted) {
-      // softDeleted flag true and User Admin true, remove deleted: false
+    // Check archived flag true
+    if (archived) {
+      // archived flag true and User Admin true, remove archived: false
       searchParams = { $or: [{ id: elemUID }, { uuid: elemID }] };
     }
 
@@ -672,7 +681,7 @@ function findElementsQuery(elementQuery) {
   return new Promise((resolve, reject) => {
     // Find elements
     Element.Element.find(elementQuery)
-    .populate('parent project source target contains')
+    .populate('parent project source target contains archivedBy lastModifiedBy')
     .then((arrElements) => resolve(arrElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -853,8 +862,14 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
 
     // Find element
     // Note: organizationID, projectID, and elementID are sanitized in findElement()
-    findElement(reqUser, organizationID, projectID, elementID)
+    findElement(reqUser, organizationID, projectID, elementID, true)
     .then((element) => {
+      // Error Check: if element is currently archived, it must first be unarchived
+      if (element.archived && elementUpdated.archived !== false) {
+        throw new M.CustomError('Element is archived. Archived objects cannot be'
+          + ' modified.', 403, 'warn');
+      }
+
       // Error Check: ensure reqUser is a project admin or global admin
       if (!element.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
@@ -894,7 +909,8 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
         }
 
         // Check if updateField type is 'Mixed'
-        if (Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
+        if (Element.Element.schema.obj.hasOwnProperty(updateField)
+          && Element.Element.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof elementUpdated[updateField] !== 'object') {
             throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
@@ -911,6 +927,18 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
           element.markModified(updateField);
         }
         else {
+          // Set archivedBy if archived field is being changed
+          if (updateField === 'archived') {
+            // If the element is being archived
+            if (elementUpdated[updateField] && !element[updateField]) {
+              element.archivedBy = reqUser;
+            }
+            // If the element is being unarchived
+            else if (!elementUpdated[updateField] && element[updateField]) {
+              element.archivedBy = null;
+            }
+          }
+
           // Schema type is not mixed
           // Sanitize field and update field in element object
           element[updateField] = sani.sanitize(elementUpdated[updateField]);
@@ -936,20 +964,18 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
 }
 
 /**
-==== BASE ====
- * @description This function deletes an element.
+ * @description This function deletes/archives an element.
  *
  * @param {User} reqUser  The user object of the requesting user.
  * @param {String} organizationID  The organization ID.
  * @param {String} projectID  The project ID.
  * @param {String} elementID  The element ID.
- * @param {Object} hardDelete  Flag denoting whether to hard or soft delete.
  *
  * @return {Promise} resolve - deleted element
  *                   reject -  error
  *
  * @example
- * removeElement({User}, 'orgID', 'projectID', 'elementID', false)
+ * removeElement({User}, 'orgID', 'projectID', 'elementID')
  * .then(function(element) {
  *   // Do something with the newly deleted element
  * })
@@ -957,23 +983,22 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
  *   M.log.error(error);
  * });
  */
-function removeElement(reqUser, organizationID, projectID, elementID, hardDelete = false) {
+function removeElement(reqUser, organizationID, projectID, elementID) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete an element.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof elementID === 'string', 'Element ID is not a string.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
-    }
-
-    // Error Check: if hard deleting, ensure user is global admin
-    if (hardDelete && !reqUser.admin) {
-      return reject(new M.CustomError('User does not have permission to hard delete an'
-        + ' element.', 403, 'warn'));
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permission')) {
+        statusCode = 403;
+      }
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define foundElement
@@ -987,47 +1012,19 @@ function removeElement(reqUser, organizationID, projectID, elementID, hardDelete
 
       // Error Check: ensure user has permissions to delete element
       if (!element.project.getPermissions(reqUser).write && !reqUser.admin) {
-        return reject(new M.CustomError('User does not have permission.', 403, 'warn'));
+        throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
-      // Hard delete
-      if (hardDelete) {
-        return Element.Element.deleteMany({ $or: [{ _id: element._id }, { parent: element._id }] });
-      }
-      // Create promises array
-      const promises = [];
-      // Soft delete
-      element.deleted = true;
-
-      // Update deleted by field
-      element.deletedBy = reqUser;
-
-      // Add element.save() to promises array
-      promises.push(element.save());
-
-      // If the deleted element is a package
-      if (element.type === 'Package') {
-        // Soft-delete each of it's children
-        element.contains.forEach((child) => {
-          child.deleted = true;
-          child.deletedBy = reqUser;
-          promises.push(child.save());
-        });
-      }
-
-      // Return once all promises are complete
-      return Promise.all(promises);
+      // Delete element
+      return Element.Element.deleteMany({ $or: [{ _id: element._id }, { parent: element._id }] });
     })
     .then(() => {
-      // Set deleted boolean on foundElement
-      foundElement.deleted = true;
-
       // Trigger webhooks
       events.emit('Element Deleted', foundElement);
 
-      // If the deleted element is a package
+      // If the archived element is a package
       if (foundElement.type === 'Package') {
-        // Trigger webhook for each child also deleted
+        // Trigger webhook for each child also archived
         foundElement.contains.forEach((child) => {
           events.emit('Element Deleted', child);
         });

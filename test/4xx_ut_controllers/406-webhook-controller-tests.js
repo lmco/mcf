@@ -64,10 +64,9 @@ describe(M.getModuleName(module.filename), () => {
 
       // Define project data
       const projData = testData.projects[0];
-      projData.org = { id: org.id };
 
       // Create project
-      return ProjController.createProject(adminUser, projData);
+      return ProjController.createProject(adminUser, org.id, projData);
     })
     .then((retProj) => {
       // Set global project
@@ -107,9 +106,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should find a webhook', findWebhook);
   it('should reject finding a non-existent webhook', rejectFindNonExistent);
   it('should update a webhook', updateWebhook);
-  it('should reject deleting a webhook with invalid function params', rejectDeleteInvalidParam);
-  it('should soft-delete a webhook', softDeleteWebhook);
-  it('should hard-delete a webhook', hardDeleteWebhook);
+  it('should archive a webhook', archiveWebhook);
+  it('should delete a webhook', deleteWebhook);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -226,44 +224,22 @@ function updateWebhook(done) {
 }
 
 /**
- * @description Rejects deleting a webhook with invalid function parameters
- * Expected error thrown: 'Bad Request'
+ * @description Archives a webhook.
  */
-function rejectDeleteInvalidParam(done) {
-  // Delete the webhook
+function archiveWebhook(done) {
+  // Define update parameters
+  const orgID = org.id;
   const projID = utils.parseID(proj.id).pop();
-  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id, 'invalid')
-  .then(() => {
-    // Expect removeWebhook() to fail
-    // Webhook was deleted, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
-    done();
-  });
-}
+  const webhookID = testData.webhooks[0].id;
+  const updateObj = { archived: true };
 
-/**
- * @description Soft deletes a webhook.
- */
-function softDeleteWebhook(done) {
-  // Soft delete webhook
-  const projID = utils.parseID(proj.id).pop();
-  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id)
-  .then((success) => {
-    // Verify successful delete
-    chai.expect(success).to.equal(true);
-
-    // Find the soft deleted webhook
-    return WebhookController.findWebhook(adminUser, org.id, projID, testData.webhooks[0].id, true);
-  })
-  .then((foundWebhook) => {
-    // Verify webhook has been soft deleted
-    chai.expect(foundWebhook.deleted).to.equal(true);
-    chai.expect(foundWebhook.deletedOn).not.to.equal(null);
+  // Archive webhook
+  WebhookController.updateWebhook(adminUser, orgID, projID, webhookID, updateObj)
+  .then((updatedWebhook) => {
+    // Verify successful archive
+    chai.expect(updatedWebhook.archived).to.equal(true);
+    chai.expect(updatedWebhook.archivedOn).to.not.equal(null);
+    chai.expect(updatedWebhook.archivedBy.username).to.equal(adminUser.username);
     done();
   })
   .catch((error) => {
@@ -275,13 +251,13 @@ function softDeleteWebhook(done) {
 }
 
 /**
- * @description Hard deletes a webhook.
+ * @description Deletes a webhook.
  * Expected error thrown: 'Not Found'
  */
-function hardDeleteWebhook(done) {
-  // Hard delete webhook
+function deleteWebhook(done) {
+  // Delete webhook
   const projID = utils.parseID(proj.id).pop();
-  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id, true)
+  WebhookController.removeWebhook(adminUser, org.id, projID, testData.webhooks[0].id)
   .then((success) => {
     // Verify success
     chai.expect(success).to.equal(true);

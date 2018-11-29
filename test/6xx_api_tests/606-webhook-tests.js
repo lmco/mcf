@@ -72,9 +72,9 @@ describe(M.getModuleName(module.filename), () => {
 
       // Define project data
       const projData = testData.projects[0];
-      projData.org = { id: org.id };
+
       // Create project
-      return ProjController.createProject(adminUser, projData);
+      return ProjController.createProject(adminUser, org.id, projData);
     })
     .then((retProj) => {
       projID = utils.parseID(retProj.id).pop();
@@ -330,10 +330,7 @@ function rejectDeleteNonExistingWebhook(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -356,10 +353,7 @@ function deleteOutgoingWebhook(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error
@@ -382,10 +376,7 @@ function deleteIncomingWebhook(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${testData.webhooks[2].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error

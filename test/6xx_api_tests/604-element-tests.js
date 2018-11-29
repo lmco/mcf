@@ -72,9 +72,9 @@ describe(M.getModuleName(module.filename), () => {
 
       // Define project data
       const projData = testData.projects[0];
-      projData.org = { id: org.id };
+
       // Create project
-      return ProjController.createProject(adminUser, projData);
+      return ProjController.createProject(adminUser, org.id, projData);
     })
     .then((retProj) => {
       projID = utils.parseID(retProj.id).pop();
@@ -382,10 +382,7 @@ function rejectDeleteNonexistingElement(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.ids[6].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -408,10 +405,7 @@ function deleteElement(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/elements/${testData.elements[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error
@@ -436,8 +430,7 @@ function deleteMultipleElements(done) {
     ca: readCaFile(),
     method: 'DELETE',
     body: JSON.stringify({
-      elements: [testData.elements[0], testData.elements[2], testData.elements[3]],
-      hardDelete: true
+      elements: [testData.elements[0], testData.elements[2], testData.elements[3]]
     })
   },
   (err, response, body) => {

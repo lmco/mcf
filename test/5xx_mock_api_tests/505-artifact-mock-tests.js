@@ -67,10 +67,9 @@ describe(M.getModuleName(module.filename), () => {
 
       // Define project data
       const projData = testData.projects[0];
-      projData.org = { id: org.id };
 
       // Create project
-      return ProjController.createProject(adminUser, projData);
+      return ProjController.createProject(adminUser, org.id, projData);
     })
     .then((retProj) => {
       // Set global project
@@ -239,7 +238,7 @@ function patchArtifact(done) {
  */
 function deleteArtifact(done) {
   // Create request object
-  const body = { hardDelete: true };
+  const body = {};
   const params = {
     orgid: org.id,
     projectid: projID,
@@ -273,10 +272,11 @@ function deleteArtifact(done) {
  * @param {Object} body - Body for API req
  * @param {Object} body - File data for API req
  * @param {String} method - API method of req
+ * @param {Object} query - Object containing query parameters
  *
  * @returns {Object} req - Request Object
  */
-function getReq(params, body, file, method) {
+function getReq(params, body, file, method, query = {}) {
   // Error-Check
   if (typeof params !== 'object') {
     throw M.CustomError('params is not of type object.');
@@ -290,6 +290,7 @@ function getReq(params, body, file, method) {
     method: method,
     params: params,
     body: body,
+    query: query,
     file: file,
     user: adminUser,
     session: {}

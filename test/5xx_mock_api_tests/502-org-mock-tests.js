@@ -339,7 +339,7 @@ function getOrgs(done) {
  */
 function deleteOrg(done) {
   // Create request object
-  const body = { hardDelete: true };
+  const body = {};
   const params = { orgid: testData.orgs[0].id };
   const method = 'DELETE';
   const req = getReq(params, body, method);
@@ -470,10 +470,11 @@ function deleteOrgs(done) {
  * @param {Object} params - Parameters for API req
  * @param {Object} body - Body for API req
  * @param {String} method - API method of req
+ * @param {Object} query - Object containing query parameters
  *
  * @returns {Object} req - Request Object
  */
-function getReq(params, body, method) {
+function getReq(params, body, method, query = {}) {
   // Error-Check
   if (typeof params !== 'object') {
     throw M.CustomError('params is not of type object.');
@@ -487,6 +488,7 @@ function getReq(params, body, method) {
     method: method,
     params: params,
     body: body,
+    query: query,
     user: adminUser,
     session: {}
   };

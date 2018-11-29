@@ -19,7 +19,7 @@
  * @description  This tests the Project Controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The project controller tests create,
- * update, find, soft delete, hard delete, and permissions of projects. As well
+ * update, find, archive, delete, and change permissions of projects as well
  * as test the controllers with invalid inputs.
  */
 
@@ -125,8 +125,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creation of project with invalid name', rejectInvalidProjectName);
   it('should reject creation of project with invalid Org', rejectInvalidOrgId);
   it('should reject creation of project with non-Admin user', rejectNonAdminCreateProject);
+  it('should archive a project', archiveProject);
+  it('should reject updating an archived project', rejectUpdateArchivedProject);
   it('should find a project', findProj);
   it('should find all projects which user has permissions on', findProjects);
+  it('should reject finding an archived project', rejectFindArchivedProject);
   it('should not find a project', rejectFindNonexistentProject);
   it('should update the original project', updateProj);
   it('should reject update to the id name', rejectProjectId);
@@ -147,10 +150,9 @@ function createProject(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.projects[0]);
   projData.custom = { buildFor: 'build' };
-  projData.org = { id: org.id };
 
   // Create the project via project controller
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then((retProj) => {
     const split = utils.parseID(retProj.id);
     return ProjController.findProject(adminUser, split[0], split[1]);
@@ -343,10 +345,9 @@ function updateMultipleProjects(done) {
 function createProject02(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.projects[2]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then((proj) => {
     // Verify project fields
     chai.expect(proj.id).to.equal(utils.createID(org.id, testData.projects[2].id));
@@ -368,10 +369,9 @@ function createProject02(done) {
 function rejectCreatePeriodName(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[0]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should fail, throw error
@@ -392,10 +392,9 @@ function rejectCreatePeriodName(done) {
 function rejectDuplicateProjectId(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.projects[2]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -416,10 +415,9 @@ function rejectDuplicateProjectId(done) {
 function rejectInvalidProjectId(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[1]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -440,10 +438,9 @@ function rejectInvalidProjectId(done) {
 function rejectInvalidProjectName(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[2]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -464,10 +461,9 @@ function rejectInvalidProjectName(done) {
 function rejectInvalidOrgId(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[3]);
-  projData.org = { id: '' };
 
   // Create project
-  ProjController.createProject(adminUser, projData)
+  ProjController.createProject(adminUser, '', projData)
   .then(() => {
     // Expected createProject() to fail
     // Should not execute, force test to fail
@@ -490,12 +486,63 @@ function rejectInvalidOrgId(done) {
 function rejectNonAdminCreateProject(done) {
   // Define and clone the project data
   const projData = Object.assign({}, testData.invalidProjects[0]);
-  projData.org = { id: org.id };
 
   // Create project
-  ProjController.createProject(nonAdminUser, projData)
+  ProjController.createProject(nonAdminUser, org.id, projData)
   .then(() => {
     // Expected createProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Forbidden'
+    chai.expect(error.message).to.equal('Forbidden');
+    done();
+  });
+}
+
+/**
+ * @description Verifies ability to archive a project
+ */
+function archiveProject(done) {
+  // Create project data
+  const orgID = org.id;
+  const projID = testData.projects[4].id;
+  const updateObj = { archived: true };
+
+  // Archive the project
+  ProjController.updateProject(adminUser, orgID, projID, updateObj)
+  .then((updatedProject) => {
+    // Verify updated project
+    chai.expect(updatedProject.archived).to.equal(true);
+    chai.expect(updatedProject.archivedOn).to.not.equal(null);
+    chai.expect(updatedProject.archivedBy.username).to.equal(adminUser.username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies updateProject() fails to update a project when the
+ * project is currently archived.
+ * Expected error thrown: 'Forbidden'
+ */
+function rejectUpdateArchivedProject(done) {
+  // Create project data
+  const orgID = org.id;
+  const projID = testData.projects[4].id;
+  const updateObj = { name: 'Updated Project' };
+
+  // Update project
+  ProjController.updateProject(adminUser, orgID, projID, updateObj)
+  .then(() => {
+    // Expect updateProject() to fail
     // Should not execute, force test to fail
     chai.assert(true === false);
     done();
@@ -550,14 +597,13 @@ function findProjects(done) {
   .then(() => {
     // Define and clone the project data
     const projData = Object.assign({}, testData.projects[1]);
-    projData.org = { id: org.id };
-    return ProjController.createProject(adminUser2, projData);
+    return ProjController.createProject(adminUser2, org.id, projData);
   })
-  .then(() => ProjController.findProjects(adminUser, org.id))
-  .then((projs) => {
+  .then(() => ProjController.findProjects(adminUser, org.id, true))
+  .then((projects) => {
     // Verify project fields
-    chai.expect(projs.length).to.equal(5);
-    return OrgController.removeOrg(adminUser2, testData.orgs[1].id, true);
+    chai.expect(projects.length).to.equal(5);
+    return OrgController.removeOrg(adminUser2, testData.orgs[1].id);
   })
   .then(() => UserController.removeUser(adminUser, testData.users[2].username))
   .then(() => done())
@@ -565,6 +611,31 @@ function findProjects(done) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies findProject() fails to find an archived project when
+ * the optional third parameter 'archived' is not provided.
+ * Expected error thrown: 'Not Found'
+ */
+function rejectFindArchivedProject(done) {
+  // Create project data
+  const orgID = org.id;
+  const projID = testData.projects[4].id;
+
+  // Find the project
+  ProjController.findProject(adminUser, orgID, projID)
+  .then(() => {
+    // Expect findProject() to fail
+    // Should not execute, force test to fail
+    chai.assert(true === false);
+    done();
+  })
+  .catch((error) => {
+    // Expected error thrown: 'Not Found'
+    chai.expect(error.message).to.equal('Not Found');
     done();
   });
 }
@@ -748,8 +819,8 @@ function setPerm(done) {
  * Expected error thrown: 'Not Found'
  */
 function deleteProject(done) {
-  // Hard-delete the project
-  ProjController.removeProject(adminUser, org.id, project.id, true)
+  // Delete project
+  ProjController.removeProject(adminUser, org.id, project.id)
   .then(() => ProjController.findProject(adminUser, org.id, project.id))
   .then(() => {
     // Expected findProject() to fail
@@ -784,7 +855,7 @@ function deleteProject(done) {
  */
 function deleteProject02(done) {
   // Remove project
-  ProjController.removeProject(adminUser, org.id, testData.projects[2].id, true)
+  ProjController.removeProject(adminUser, org.id, testData.projects[2].id)
   .then(() => ProjController.findProject(adminUser, org.id, testData.projects[2].id))
   .then(() => {
     // Expected findProject() to fail

@@ -89,7 +89,6 @@ describe(M.getModuleName(module.filename), () => {
       done();
     });
   });
-  // creates a user adds them to the org and then deletes them to check if it worked.
 
   /* Execute the tests */
   it('should create a project', createProject);

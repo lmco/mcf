@@ -48,8 +48,8 @@ const extensions = M.require('models.plugin.extensions');
  * User.
  * @property {Date} createdOn - The date which a User was created.
  * @property {Date} updatedOn - The date which an User was updated.
- * @property {Date} createdOn - The date the User was soft deleted or null.
- * @property {Boolean} deleted - Indicates if a User has been soft deleted.
+ * @property {Date} archivedOn - The date the user was archived or null
+ * @property {Boolean} archived - Indicates if a user has been archived.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
  * @property {virtual} name - The users full name.
  * @property {virtual} orgs.read - A list of Orgs the User has read access to.
@@ -120,17 +120,6 @@ const UserSchema = new mongoose.Schema({
   provider: {
     type: String,
     default: 'local'
-  },
-  deleted: {
-    type: Boolean,
-    default: false,
-    set: function(v) {
-      if (v) {
-        // Set the deletedOn date
-        this.deletedOn = Date.now();
-      }
-      return v;
-    }
   },
   custom: {
     type: mongoose.Schema.Types.Mixed,
@@ -259,7 +248,7 @@ UserSchema.methods.verifyPassword = function(pass) {
  * @memberOf UserSchema
  */
 UserSchema.methods.getValidUpdateFields = function() {
-  return ['fname', 'preferredName', 'lname', 'email', 'custom'];
+  return ['fname', 'preferredName', 'lname', 'email', 'custom', 'archived'];
 };
 
 /**
