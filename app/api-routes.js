@@ -2653,7 +2653,5 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts')
   APIController.getArtifacts
 );
 
-api.route('/multer').post(APIController.postImage);
-
 // Export the API router
 module.exports = api;

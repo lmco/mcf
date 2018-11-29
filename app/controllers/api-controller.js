@@ -21,7 +21,7 @@ const assert = require('assert');
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
 const multer = require('multer');
-const upload = multer().single('image')
+const upload = multer().single('file')
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
@@ -90,8 +90,7 @@ module.exports = {
   postArtifact,
   patchArtifact,
   deleteArtifact,
-  getArtifacts,
-  postImage
+  getArtifacts
 };
 /* ------------------------( API Helper Function )--------------------------- */
 /**
@@ -2207,7 +2206,6 @@ function postIncomingWebhook(req, res) {
  * @return {Object} res response object with found artifact
  */
 function getArtifact(req, res) {
-  console.log('req: ', req.body);
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -2309,40 +2307,20 @@ function getArtifacts(req, res) {
  *
  * @return {Object} res response object with created artifact
  */
-function postImage(req, res){
-  upload(req, res, function(err) {
-    if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading.
-      console.log('Multer error');
-    } else if (err) {
-      // An unknown error occurred when uploading.
-      console.log('Unknown error');
-    }
-    console.log('req.body', req.body);
-    console.log('req.file', req.file.buffer);
-    res.send('hello back to you');
-  });
-}
-
 function postArtifact(req, res) {
   upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading.
-      console.log('Multer error:', err);
-      res.status(err.status).send(err);
+      res.status(500).send(err);
 
     } else if (err) {
       // An unknown error occurred when uploading.
-      console.log('Unknown error:', err);
-      res.status(err.status).send(err);
+      res.status(500).send(err);
     }
-    console.log('req.body', req.body);
-    console.log('req.file.buffer', req.file.buffer);
-    console.log('req.file', req.file);
 
     // Extract file meta data
     req.body.filename = req.file.originalname;
-    req.body.contentType = req.file.minitype;
+    req.body.contentType = req.file.mimetype;
 
     // Sanity Check: there should always be a user in the request
     if (!req.user) {
@@ -2384,24 +2362,39 @@ function postArtifact(req, res) {
  * @return {Object} res response object with updated artifact
  */
 function patchArtifact(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      res.status(500).send(err);
 
-  // Update the specified artifact
-  // NOTE: updateArtifact() sanitizes req.params.orgid, req.params.projectid,
-  // and req.params.artifactid
-  ArtifactController.updateArtifact(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid, req.body)
-  .then((artifact) => {
-    // Return 200: OK and the updated artifact
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(artifact.getPublicData()));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+    } else if (err) {
+      // An unknown error occurred when uploading.
+      res.status(500).send(err);
+    }
+
+    // Extract file meta data
+    req.body.filename = req.file.originalname;
+    req.body.contentType = req.file.mimetype;
+
+    // Sanity Check: there should always be a user in the request
+    if (!req.user) {
+      const error = new M.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
+    // Update the specified artifact
+    // NOTE: updateArtifact() sanitizes req.params.orgid, req.params.projectid,
+    // and req.params.artifactid
+    ArtifactController.updateArtifact(req.user, req.params.orgid,
+      req.params.projectid, req.params.artifactid, req.body, req.file.buffer)
+    .then((artifact) => {
+      // Return 200: OK and the updated artifact
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(formatJSON(artifact.getPublicData()));
+    })
+    // If an error was thrown, return it and its status
+    .catch((error) => res.status(error.status).send(error));
+  });
 }
 
 /**

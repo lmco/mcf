@@ -102,8 +102,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should update artifact01 with new file', updateArtifact);
   it('should find updated artifact01 new filename', findArtifact);
   it('should all artifacts in project', findArtifacts);
-  //it('should delete an artifact00', deleteArtifactFile);
-  //it('should delete second artifact01', deleteSecondArtifactFile);
+  it('should delete an artifact00', deleteArtifactFile);
+  it('should delete second artifact01', deleteSecondArtifactFile);
 });
 
 /* --------------------( Tests )-------------------- */

@@ -116,22 +116,21 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies mock POST request to create an artifact.
  */
 function postArtifact(done) {
-  // Define new artifact
-  const artifact = {
-    id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename,
-    contentType: path.extname(testData.artifacts[0].filename)
-  };
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
-
-  // Create request body
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Define new artifact
+  const body = {
+    id: testData.artifacts[0].id,
+    contentType: path.extname(testData.artifacts[0].filename),
   };
+
+  const file = {
+    buffer: fs.readFileSync(imgPath),
+    originalname: testData.artifacts[0].filename,
+    mimetype: 'image/png'
+  }
 
   // Define params
   const params = {
@@ -139,9 +138,9 @@ function postArtifact(done) {
     projectid: projID,
     artifactid: testData.artifacts[0].id
   };
-  const method = 'POST';
-  const req = getReq(params, bodyRequest, method);
 
+  const method = 'POST';
+  const req = getReq(params, body, file, method);
   // Set response as empty object
   const res = {};
 
@@ -196,29 +195,27 @@ function getArtifact(done) {
  * @description Verifies mock PATCH request to update an artifact.
  */
 function patchArtifact(done) {
-  // Create request object
-  const artifact = {
-    filename: testData.artifacts[2].filename,
-    contentType: path.extname(testData.artifacts[2].filename)
-  };
-
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[2].filename
   );
 
-  // Form body
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
-  };
+  // Form body, no body fields to update
+  const body = {};
+
+  const file = {
+    buffer: fs.readFileSync(imgPath),
+    originalname: testData.artifacts[2].filename,
+    mimetype: 'image/png'
+  }
+
   const params = {
     orgid: org.id,
     projectid: projID,
     artifactid: testData.artifacts[0].id
   };
   const method = 'PATCH';
-  const req = getReq(params, bodyRequest, method);
+  const req = getReq(params, body, file, method);
 
   // Set response as empty object
   const res = {};
@@ -274,11 +271,12 @@ function deleteArtifact(done) {
  *
  * @param {Object} params - Parameters for API req
  * @param {Object} body - Body for API req
+ * @param {Object} body - File data for API req
  * @param {String} method - API method of req
  *
  * @returns {Object} req - Request Object
  */
-function getReq(params, body, method) {
+function getReq(params, body, file, method) {
   // Error-Check
   if (typeof params !== 'object') {
     throw M.CustomError('params is not of type object.');
@@ -292,6 +290,7 @@ function getReq(params, body, method) {
     method: method,
     params: params,
     body: body,
+    file: file,
     user: adminUser,
     session: {}
   };

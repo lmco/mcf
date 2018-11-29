@@ -56,7 +56,6 @@ const ProjController = M.require('controllers.project-controller');
  */
 function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
   return new Promise((resolve, reject) => {
-    console.log('artData: ', artData);
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
@@ -173,7 +172,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate, artifac
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
       assert.ok(typeof artToUpdate === 'object', 'Artifact to update is not an object.');
-      assert.ok(typeof artToUpdate === 'object', 'Artifact Blob is not an object.');
+      assert.ok(typeof artifactBlob === 'object', 'Artifact Blob is not an object.');
       assert.ok(Artifact.validateObjectKeys(artToUpdate),
         'Updated Artifact metadata contains invalid keys.');
     }
