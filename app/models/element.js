@@ -73,8 +73,8 @@ const options = { discriminatorKey: 'type' };
  * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
  * @property {Date} createdOn - The date which an element was created.
  * @property {Date} updatedOn - The date which an element was updated.
- * @property {Date} createdOn - The date the element was soft deleted or null
- * @property {Boolean} deleted - Indicates if a element has been soft deleted.
+ * @property {Date} archivedOn - The date the element was archived or null
+ * @property {Boolean} archived - Indicates if an element has been archived.
  *
  */
 const ElementSchema = new mongoose.Schema({
@@ -324,7 +324,7 @@ ElementSchema.pre('save', function(next) {
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'documentation', 'custom'];
+  return ['name', 'documentation', 'custom', 'archived'];
 };
 
 
@@ -391,7 +391,7 @@ ElementSchema.statics.validateObjectKeys = function(object) {
   let returnBool = true;
   // Check if the object is NOT an instance of the element model
   if (!(object instanceof mongoose.model('Element', ElementSchema))) {
-    let validKeys = Object.keys(ElementSchema.obj)
+    let validKeys = Object.keys(ElementSchema.paths)
     .concat(
       Object.keys(BlockSchema.obj),
       Object.keys(RelationshipSchema.obj),

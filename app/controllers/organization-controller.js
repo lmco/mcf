@@ -57,7 +57,8 @@ const utils = M.require('lib.utils');
  * @description This function finds all organizations a user belongs to.
  *
  * @param {User} reqUser - The user whose organizations to find
- * @param {Boolean} softDeleted - The optional flag to denote searching for deleted orgs
+ * @param {Boolean} archived - The optional flag to denote also searching for
+ *                             archived orgs.
  *
  * @return {Promise} resolve - Array of found organization objects
  *                    reject - error
@@ -72,11 +73,11 @@ const utils = M.require('lib.utils');
  * });
  *
  */
-function findOrgs(reqUser, softDeleted = false) {
+function findOrgs(reqUser, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -84,16 +85,16 @@ function findOrgs(reqUser, softDeleted = false) {
 
     const userID = sani.sanitize(reqUser._id);
 
-    // Set search Params for orgid and deleted = false
-    const searchParams = { 'permissions.read': userID, deleted: false };
+    // Set search Params for orgid and archived: false
+    const searchParams = { 'permissions.read': userID, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted orgs
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived orgs
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // softDeleted flag true, remove deleted: false
-    if (softDeleted) {
-      delete searchParams.deleted;
+    // archived flag true, remove archived: false
+    if (archived) {
+      delete searchParams.archived;
     }
 
     // Find Organizations user has read access
@@ -254,6 +255,8 @@ function updateOrgs(reqUser, query, updateInfo) {
 
       // Loop through each found org
       Object(orgs).forEach((org) => {
+        // TODO: Add check ensure user isn't trying to update an archived org
+
         // Error Check: ensure user has permission to update org
         if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
           throw new M.CustomError('User does not have permissions.', 403, 'warn');
@@ -277,7 +280,8 @@ function updateOrgs(reqUser, query, updateInfo) {
           // Loop through each update
           Object.keys(updateInfo).forEach((key) => {
             // If a 'Mixed' field
-            if (Organization.schema.obj[key].type.schemaName === 'Mixed') {
+            if (Organization.schema.obj.hasOwnProperty(key)
+              && Organization.schema.obj[key].type.schemaName === 'Mixed') {
               // Merge changes into original 'Mixed' field
               utils.updateAndCombineObjects(org[key], sani.sanitize(updateInfo[key]));
 
@@ -287,6 +291,18 @@ function updateOrgs(reqUser, query, updateInfo) {
             else {
               // Update the value in the org
               org[key] = sani.sanitize(updateInfo[key]);
+
+              // Set archivedBy if archived field is being changed
+              if (key === 'archived') {
+                // If the org is being archived
+                if (updateInfo[key] && !org[key]) {
+                  updateInfo.archivedBy = reqUser._id;
+                }
+                // If the org is being unarchived
+                else if (!updateInfo[key] && org[key]) {
+                  updateInfo.archivedBy = null;
+                }
+              }
             }
           });
 
@@ -319,12 +335,12 @@ function updateOrgs(reqUser, query, updateInfo) {
     })
     // Return the updated orgs
     .then((updatedOrgs) => resolve(updatedOrgs))
-    .catch((error) => M.CustomError.parseCustomError(error));
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
 /**
- * @description This functions deletes multiple orgs at a time.
+ * @description This function deletes multiple orgs at a time.
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {Array} arrOrgs - An array of organizations to delete.
@@ -344,18 +360,19 @@ function removeOrgs(reqUser, arrOrgs) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete orgs.');
       assert.ok(Array.isArray(arrOrgs), 'Remove orgs is not an array');
       arrOrgs.forEach(org => {
         assert.ok(typeof org === 'object', 'Orgs array is not of objects');
       });
     }
     catch (error) {
-      throw new M.CustomError(error.message, 400, 'warn');
-    }
-
-    // Error Check: ensure reqUser is a global admin if hard deleting
-    if (!reqUser.admin) {
-      throw new M.CustomError('User does not have permissions to delete.', 403, 'warn');
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permission')) {
+        statusCode = 403;
+      }
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define found orgs array
@@ -399,8 +416,8 @@ function removeOrgs(reqUser, arrOrgs) {
  *
  * @param {User} reqUser - The requesting user object.
  * @param {String} organizationID - The string of the org ID.
- * @param {Boolean} softDeleted - An optional flag that allows users to
- *  search for soft deleted projects as well.
+ * @param {Boolean} archived - An optional flag that allows users to
+ *  search for archived projects as well.
  *
  * @return {Promise} resolve - searched organization object
  *                    reject - error
@@ -414,12 +431,12 @@ function removeOrgs(reqUser, arrOrgs) {
  *   M.log.error(error);
  * });
  */
-function findOrg(reqUser, organizationID, softDeleted = false) {
+function findOrg(reqUser, organizationID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -428,16 +445,16 @@ function findOrg(reqUser, organizationID, softDeleted = false) {
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
-    // Set search Params for orgid and deleted = false
-    const searchParams = { id: orgID, deleted: false };
+    // Set search Params for orgid and archived: false
+    const searchParams = { id: orgID, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted orgs
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived orgs
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // softDeleted flag true, remove deleted: false
-    if (softDeleted) {
-      delete searchParams.deleted;
+    // archived flag true, remove archived: false
+    if (archived) {
+      delete searchParams.archived;
     }
 
     // Find orgs
@@ -489,7 +506,8 @@ function findOrgsQuery(orgQuery) {
   return new Promise((resolve, reject) => {
     // Find orgs
     Organization.find(orgQuery)
-    .populate('projects permissions.read permissions.write permissions.admin')
+    .populate('projects permissions.read permissions.write permissions.admin archivedBy'
+      + ' lastModifiedBy')
     .then((orgs) => resolve(orgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -630,8 +648,14 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
 
     // Find organization
     // Note: organizationID is sanitized in findOrg()
-    findOrg(reqUser, organizationID)
+    findOrg(reqUser, organizationID, true)
     .then((org) => {
+      // Error Check: if org is currently archived, it must first be unarchived
+      if (org.archived && orgUpdated.archived !== false) {
+        throw new M.CustomError('Organization is archived. Archived objects '
+          + 'cannot be modified.', 403, 'warn');
+      }
+
       // Error Check: ensure reqUser is an org admin or global admin
       if (!org.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
@@ -670,7 +694,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
         }
 
         // Check if updateField type is 'Mixed'
-        if (Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
+        if (Organization.schema.hasOwnProperty(updateField)
+          && Organization.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof orgUpdated[updateField] !== 'object') {
             throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
@@ -684,6 +709,18 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
           org.markModified(updateField);
         }
         else {
+          // Set archivedBy if archived field is being changed
+          if (updateField === 'archived') {
+            // If the org is being archived
+            if (orgUpdated[updateField] && !org[updateField]) {
+              org.archivedBy = reqUser;
+            }
+            // If the org is being unarchived
+            else if (!orgUpdated[updateField] && org[updateField]) {
+              org.archivedBy = null;
+            }
+          }
+
           // Schema type is not mixed
           // Sanitize field and update field in org object
           org[updateField] = sani.sanitize(orgUpdated[updateField]);
@@ -702,8 +739,8 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
 }
 
 /**
- * @description This function takes a user object, organization ID, and an
- * optional flag for soft or hard delete and deletes an organization.
+ * @description This function takes a user object and organization ID and
+ * deletes an organization.
  *
  * @param {User} reqUser - The object containing the  requesting user.
  * @param {String} organizationID - The ID of the org being deleted.
@@ -736,7 +773,7 @@ function removeOrg(reqUser, organizationID) {
       throw new M.CustomError('The default organization cannot be deleted.', 403, 'warn');
     }
 
-    // Error Check: ensure reqUser is a global admin if hard deleting
+    // Error Check: ensure reqUser is a global admin
     if (!reqUser.admin) {
       throw new M.CustomError('User does not have permissions to delete.', 403, 'warn');
     }
@@ -810,7 +847,7 @@ function findPermissions(reqUser, searchedUsername, organizationID) {
  * @description This function sets permissions for a user on an org
  *
  * @param {User} reqUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the org being deleted.
+ * @param {String} organizationID - The ID of the org.
  * @param {String} searchedUsername - The username of the user whose roles are to be changed.
  * @param {String} role - The new role for the user.
  *
@@ -853,7 +890,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
     let foundUser;
 
     // Find searchedUser
-    UserController.findUser(reqUser, searchedUser)
+    UserController.findUser(reqUser, searchedUser, true)
     .then((user) => {
       // set foundUser
       foundUser = user;
@@ -867,7 +904,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
       }
       // Find org
       // Note: organizationID is sanitized in findOrg
-      return findOrg(reqUser, organizationID);
+      return findOrg(reqUser, organizationID, true);
     })
     .then((org) => {
       // Check requesting user NOT org admin and NOT global admin
@@ -928,7 +965,7 @@ function setPermissions(reqUser, organizationID, searchedUsername, role) {
  * @description This function returns all user permissions of an org.
  *
  * @param {User} reqUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the org being deleted.
+ * @param {String} organizationID - The ID of the org.
  *
  * @returns {Promise} An object containing users permissions
  * {
@@ -965,7 +1002,7 @@ function findAllPermissions(reqUser, organizationID) {
     }
 
     // Find the org
-    findOrg(reqUser, organizationID)
+    findOrg(reqUser, organizationID, true)
     .then((org) => {
       // Get the permission types for an org
       const permissionLevels = org.getPermissionLevels();

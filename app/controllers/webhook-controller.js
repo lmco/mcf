@@ -50,8 +50,8 @@ const utils = M.require('lib.utils');
  * @param {String} organizationID - The organization ID.
  * @param {String} projectID - The project ID.
  * @param {String} webhookID - The ID of webhook to find.
- * @param {Boolean} softDeleted - A boolean value indicating whether find soft
- * deleted webhooks.
+ * @param {Boolean} archived - A boolean value indicating whether to also find
+ *                             archived webhooks.
  *
  * @return {Promise} resolve - found webhook
  *                    reject - error
@@ -65,14 +65,14 @@ const utils = M.require('lib.utils');
  *   M.log.error(error);
  * });
  */
-function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted = false) {
+function findWebhook(reqUser, organizationID, projectID, webhookID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof webhookID === 'string', 'Webhook ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -85,16 +85,16 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, softDeleted 
     const webUID = utils.createID(orgID, projID, webID);
 
     // Search for a webhook that matches the given uid
-    const findQuery = { id: webUID, deleted: false };
+    const findQuery = { id: webUID, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted webhooks
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived webhooks
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // Check softDeleted flag true
-    if (softDeleted) {
-      // softDeleted flag true and User Admin true, remove deleted: false
-      delete findQuery.deleted;
+    // Check archived flag true
+    if (archived) {
+      // archived flag true and User Admin true, remove archived: false
+      delete findQuery.archived;
     }
 
     // Find webhooks
@@ -144,7 +144,7 @@ function findWebhooksQuery(query) {
   return new Promise((resolve, reject) => {
     // Find webhooks
     Webhook.Webhook.find(query)
-    .populate('project')
+    .populate('project archivedBy lastModifiedBy')
     .then((webhooks) => resolve(webhooks))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -295,6 +295,12 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
     // Note: organizationID, projectID, and webhookID are sanitized in findWebhook()
     findWebhook(reqUser, organizationID, projectID, webhookID)
     .then((webhook) => {
+      // Error Check: if webhook is currently archived, it must first be unarchived
+      if (webhook.archived && webhookUpdated.archived !== false) {
+        throw new M.CustomError('Webhook is archived. Archived objects cannot be'
+          + ' modified.', 403, 'warn');
+      }
+
       // Error Check: ensure reqUser is a project admin or global admin
       if (!webhook.project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
@@ -333,7 +339,8 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
         }
 
         // Check if updateField type is 'Mixed'
-        if (Webhook.Webhook.schema.obj[updateField].type.schemaName === 'Mixed') {
+        if (Webhook.Webhook.schema.obj.hasOwnProperty(updateField)
+          && Webhook.Webhook.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof webhookUpdated[updateField] !== 'object') {
             throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
@@ -350,6 +357,18 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
           webhook.markModified(updateField);
         }
         else {
+          // Set archivedBy if archived field is being changed
+          if (updateField === 'archived') {
+            // If the webhook is being archived
+            if (webhookUpdated[updateField] && !webhook[updateField]) {
+              webhook.archivedBy = reqUser;
+            }
+            // If the webhook is being unarchived
+            else if (!webhookUpdated[updateField] && webhook[updateField]) {
+              webhook.archivedBy = null;
+            }
+          }
+
           // Schema type is not mixed
           // Sanitize field and update field in webhook object
           webhook[updateField] = sani.sanitize(webhookUpdated[updateField]);
@@ -375,13 +394,12 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
  * @param {String} organizationID - The organization ID.
  * @param {String} projectID - The project ID.
  * @param {String} webhookID - The ID of webhook to delete.
- * @param {Object} hardDelete - Flag denoting whether to hard or soft delete.
  *
  * @return {Promise} resolve - deleted webhook
  *                    reject - error
  *
  * @example
- * removeWebhook({User}, 'orgID', 'projID', 'webhookID', false)
+ * removeWebhook({User}, 'orgID', 'projID', 'webhookID')
  * .then(function(webhook) {
  *   // Do something with the newly deleted webhook
  * })
@@ -389,43 +407,26 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
  *   M.log.error(error);
  * });
  */
-function removeWebhook(reqUser, organizationID, projectID, webhookID, hardDelete = false) {
+function removeWebhook(reqUser, organizationID, projectID, webhookID) {
   return new Promise((resolve, reject) => {
     try {
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete a webhook.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof webhookID === 'string', 'Webhook ID is not a string.');
-      assert.ok(typeof hardDelete === 'boolean', 'Hard delete flag is not a boolean.');
     }
     catch (error) {
-      throw new M.CustomError(error.message, 400, 'warn');
-    }
-
-    // Error Check: if hard deleting, ensure user is global admin
-    if (hardDelete && !reqUser.admin) {
-      throw new M.CustomError('User does not have permission to hard delete a'
-        + ' webhook.', 403, 'warn');
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permission')) {
+        statusCode = 403;
+      }
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Find the webhook
     findWebhook(reqUser, organizationID, projectID, webhookID, true)
-    .then((webhook) => {
-      // Error Check: ensure user has permissions to delete webhook
-      if (!webhook.project.getPermissions(reqUser).write && !reqUser.admin) {
-        throw new M.CustomError('User does not have permission.', 403, 'warn');
-      }
-
-      // Hard delete
-      if (hardDelete) {
-        return Webhook.Webhook.deleteOne({ id: webhook.id });
-      }
-      // Soft delete
-      webhook.deleted = true;
-
-      // Update deleted by field
-      webhook.deletedBy = reqUser;
-      return webhook.save();
-    })
+    .then((webhook) => Webhook.Webhook.deleteOne({ id: webhook.id }))
     .then(() => resolve(true))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

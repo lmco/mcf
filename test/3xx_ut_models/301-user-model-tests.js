@@ -10,7 +10,7 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description Tests the user model by performing various actions such as a
- * find, create, updated, soft delete, and hard delete. Does NOT test the user
+ * find, create, updated, archive, and delete. Does NOT test the user
  * controller but instead directly manipulates data using mongoose to check
  * the user model methods, validators, setters, and getters.
  */
@@ -65,8 +65,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should NOT verify an invalid password', verifyInvalidPassword);
   it('should get a user from the database', getUser);
   it('should update a user', updateUser);
-  it('should soft delete a user', softDeleteUser);
-  it('should get a soft deleted user', getSoftDeletedUser);
+  it('should archive a user', archiveUser);
   it('should delete a user', deleteUser);
 });
 
@@ -94,7 +93,7 @@ function createUser(done) {
  */
 function getUser(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({ username: testData.users[1].username, deletedOn: null })
+  User.findOne({ username: testData.users[1].username })
   .then((user) => {
     // Check first, last, and preferred name
     chai.expect(user.fname).to.equal(testData.users[1].fname);
@@ -118,7 +117,7 @@ function getUser(done) {
  */
 function verifyValidPassword(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({ username: testData.users[1].username, deletedOn: null })
+  User.findOne({ username: testData.users[1].username })
   // Verify the user's password
   .then((user) => user.verifyPassword(testData.users[1].password))
   .then((result) => {
@@ -140,7 +139,7 @@ function verifyValidPassword(done) {
  */
 function verifyInvalidPassword(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({ username: testData.users[1].username, deletedOn: null })
+  User.findOne({ username: testData.users[1].username })
   // Attempt to verify the user's incorrect password
   .then((user) => user.verifyPassword('incorrectPassword'))
   .then((result) => {
@@ -164,7 +163,7 @@ function updateUser(done) {
   // Define query
   const query = { username: testData.users[1].username };
 
-  // Define new userdata
+  // Define newUserData
   const newUserData = {
     fname: `${testData.users[1].fname}edit`,
     lname: testData.users[1].lname
@@ -189,30 +188,30 @@ function updateUser(done) {
 }
 
 /**
- * @description Checks that a user can be soft deleted.
+ * @description Checks that a user can be archived,
  */
-function softDeleteUser(done) {
+function archiveUser(done) {
   // LM: Changed from findOneAndUpdate to a findOne and Save
   // Note: findOneAndUpdate does not call setters, and was causing strange
-  // behavior with the deleted and deletedOn fields.
+  // behavior with the archived and archivedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
 
   // Define query
   const query = { username: testData.users[1].username };
 
-  // Define new userdata
-  const newUserData = {
-    deleted: true,
-    deletedOn: Date.now()
+  // Define updateObject
+  const updateObject = {
+    archived: true,
+    archivedOn: Date.now()
   };
   // Find the user previously created and updated in createUser and updateUser
   // tests.
-  User.updateOne(query, newUserData)
-  .then((user) => User.findOne(query))
-  .then((deletedUser) => {
-    // Verify the soft delete was successful
-    chai.expect(deletedUser.deletedOn).to.not.equal(null);
-    chai.expect(deletedUser.deleted).to.equal(true);
+  User.updateOne(query, updateObject)
+  .then(() => User.findOne(query))
+  .then((archivedUser) => {
+    // Verify the archive was successful
+    chai.expect(archivedUser.archivedOn).to.not.equal(null);
+    chai.expect(archivedUser.archived).to.equal(true);
     done();
   })
   .catch((error) => {
@@ -224,26 +223,7 @@ function softDeleteUser(done) {
 }
 
 /**
- * @description Finds a user who has been soft deleted.
- */
-function getSoftDeletedUser(done) {
-  // Finds the user who was previously soft deleted in softDeleteUser
-  User.findOne({ username: testData.users[1].username })
-  .then((user) => {
-    // Check the correct user was found
-    chai.expect(user.username).to.equal(testData.users[1].username);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Hard delete a user
+ * @description Delete a user
  */
 function deleteUser(done) {
   // Find the previously created user from the createUser test.
