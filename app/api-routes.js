@@ -2600,7 +2600,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/artifacts
+ * /api/orgs/:orgid/projects/:projectid/artifacts:
  *   get:
  *     tags:
  *       - artifacts
@@ -2628,9 +2628,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
  *           properties:
  *             softDeleted:
  *               type: boolean
- *               description: The boolean indicating if soft deleted artifacts are returned. The user
- *                            must be a global admin or an admin on the organization to find soft
- *                            deleted artifacts.
+ *               description: The boolean indicating if soft deleted artifacts are returned.
+ *                            The user must be a global admin or an admin on the organization
+ *                            to find soft deleted artifacts.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET artifacts returns org data.

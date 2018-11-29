@@ -123,14 +123,14 @@ function postArtifact(done) {
   // Define new artifact
   const body = {
     id: testData.artifacts[0].id,
-    contentType: path.extname(testData.artifacts[0].filename),
+    contentType: path.extname(testData.artifacts[0].filename)
   };
 
   const file = {
     buffer: fs.readFileSync(imgPath),
     originalname: testData.artifacts[0].filename,
     mimetype: 'image/png'
-  }
+  };
 
   // Define params
   const params = {
@@ -207,7 +207,7 @@ function patchArtifact(done) {
     buffer: fs.readFileSync(imgPath),
     originalname: testData.artifacts[2].filename,
     mimetype: 'image/png'
-  }
+  };
 
   const params = {
     orgid: org.id,

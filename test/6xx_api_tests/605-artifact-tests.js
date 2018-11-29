@@ -143,8 +143,8 @@ function postArtifact(done) {
         filename: imgPath,
         contentType: null
       }
-    },
-  }
+    }
+  };
 
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
@@ -206,8 +206,8 @@ function patchArtifact(done) {
         filename: imgPath,
         contentType: null
       }
-    },
-  }
+    }
+  };
 
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
@@ -248,8 +248,8 @@ function rejectExistingPostArtifact(done) {
         filename: imgPath,
         contentType: null
       }
-    },
-  }
+    }
+  };
 
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
@@ -312,8 +312,8 @@ function rejectPatchArtifact(done) {
         filename: imgPath,
         contentType: null
       }
-    },
-  }
+    }
+  };
 
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,

@@ -190,12 +190,13 @@ function updateArtifact(done) {
 
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
-  ArtifactController.updateArtifact(adminUser, org.id, projID, artifactID, artMetaData, artifactBlob)
+  ArtifactController.updateArtifact(adminUser, org.id, projID, artifactID,
+    artMetaData, artifactBlob)
   .then((updatedArtifact) => {
     // Verify artifact created properly
     chai.expect(updatedArtifact.filename).to.equal(testData.artifacts[2].filename);
     chai.expect(updatedArtifact.history[1].hash)
-      .to.equal('5d41098059578b5be7addfaef2bb5266fb40323128eac24e280e1779cc73748d');
+    .to.equal('5d41098059578b5be7addfaef2bb5266fb40323128eac24e280e1779cc73748d');
     done();
   })
   .catch((error) => {
