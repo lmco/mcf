@@ -147,14 +147,15 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       let index = 1;
       const validTypes = Element.Element.getValidTypes();
       // Loop through each element, checking for valid ids and types
-      Object(arrElements).forEach((element) => {
+      arrElements.forEach((element) => {
         assert.ok(element.hasOwnProperty('id'), `Element #${index} is missing an id.`);
         assert.ok(typeof element.id === 'string', `Element #${index}'s id is not a string.`);
         assert.ok(element.hasOwnProperty('type'), `Element #${index} is missing a type.`);
-        assert.ok(validTypes.includes(utils.toTitleCase(element.type)),
+        element.type = utils.toTitleCase(element.type);
+        assert.ok(validTypes.includes(element.type),
           `Element #${index} has an invalid type of ${element.type}.`);
         // If element is a relationship, ensure source/target exist
-        if (utils.toTitleCase(element.type) === 'Relationship') {
+        if (element.type === 'Relationship') {
           assert.ok(element.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
           assert.ok(typeof element.target === 'string',
             `Element #${index}'s target is not a string.`);
@@ -236,11 +237,8 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       console.time('FOR LOOP: Create element objects');
       // Set the project for each element and convert to element objects
       arrElements.forEach((element) => {
-        // Title case the element type
-        const elementType = utils.toTitleCase(element.type);
-
-        // Create element data object
-        const elemData = {
+        // Create element data object and sanitize data
+        const elemData = sani.sanitize({
           id: element.uid,
           name: element.name,
           project: proj._id,
@@ -249,10 +247,11 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           custom: element.custom,
           createdBy: reqUser._id,
           lastModifiedBy: reqUser._id
-        };
+        });
 
+        // TODO: This is the bottleneck
         // Create the element object
-        const elemObject = Element[elementType](sani.sanitize(elemData));
+        const elemObject = Element[element.type](elemData);
 
         // Add hidden fields
         elemObject.$parent = utils.createID(orgID, projID, element.parent);
@@ -285,7 +284,6 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           if (jmi2.hasOwnProperty(element.$parent)) {
             const parentObj = jmi2[element.$parent];
             element.parent = parentObj._id;
-            element.$parent = null;
             // Add package to parents contains array
             parentObj.contains.push(element._id);
           }
@@ -297,11 +295,10 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         }
 
         // If the element is a relationship and has a source and target
-        if (element.type === 'Relationship' && element.$source && element.$target) {
+        if (element.type === 'Relationship') {
           // If the element's source is also being created
           if (jmi2.hasOwnProperty(element.$source)) {
             element.source = jmi2[element.$source]._id;
-            element.$source = null;
           }
           else {
             // Add elements source to list of elements to search for in DB
@@ -312,7 +309,6 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           // If the element's target is also being created
           if (jmi2.hasOwnProperty(element.$target)) {
             element.target = jmi2[element.$target]._id;
-            element.$target = null;
           }
           else {
             // Add elements target to list of elements to search for in DB
@@ -357,6 +353,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       console.timeEnd('Local logic');
       console.time('Create in DB');
 
+      // TODO: This is the other bottleneck
       // Create all new elements
       return Element.Element.insertMany(elementObjects);
     })
