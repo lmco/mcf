@@ -322,7 +322,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       console.time('Find extra elements');
       // Create query for finding elements
       const findExtraElementsQuery = { id: { $in: elementsToFind } };
-
+      
       // Find extra elements, and only return id and _id for faster lookup
       return Element.Element.find(findExtraElementsQuery, 'id');
     })
