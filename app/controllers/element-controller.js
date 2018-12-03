@@ -137,6 +137,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
     // Error Check: ensure input parameters are valid
     console.time('TOTAL TIME');
     console.time('Local logic');
+    console.time('Parameter Check');
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
@@ -170,16 +171,16 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
     }
-
+    console.timeEnd('Parameter Check');
+    console.time('FOR LOOP: Get UID and UUID');
     // Sanitize organizationID and projectID
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
 
-    // Initialize arrUID, element object list, jmi type 2 object, remainingElements
+    // Initialize arrUID, element object list, remainingElements
     const arrUID = [];
     const arrUUID = [];
     const elementObjects = [];
-    let jmi2 = {};
     const remainingElements = [];
 
     // For each element, create the uid and uuid
@@ -195,40 +196,44 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       arrUUID.push(element.uuid);
     });
 
+    console.timeEnd('FOR LOOP: Get UID and UUID');
+    console.time('Find Existing Elements');
     // Create list of promises for finding any existing elements
     const findPromises = [];
-    const numBatches = arrElements.length/20000;
+    const numBatches = arrElements.length / 50000;
 
     // For the number of batches
     for (let i = 0; i < numBatches; i++) {
       // Define find query
       const query = { $or: [
-        { uuid: { $in: arrUUID.slice(i * 20000, i * 20000 + 20000) }},
-        { id: { $in: arrUID.slice(i * 20000, i * 20000 + 20000) }}
-      ]};
+        { uuid: { $in: arrUUID.slice(i * 50000, i * 50000 + 50000) } },
+        { id: { $in: arrUID.slice(i * 50000, i * 50000 + 50000) } }
+      ] };
       // Attempt to find any elements already in existence
-      findPromises.push(Element.Element.find(query, '-project -createdOn -createdBy -archived' +
-        ' -archivedOn -name -type -documentation -updatedOn -lastModifiedBy -contains -parent' +
-        ' -source -target -')
+      findPromises.push(Element.Element.find(query, 'id uuid')
       .then((elements) => {
-        console.log('Post find');
+        // TODO: Produce a more meaningful error
+        // TODO: Figure out how to limit to only one error thrown, rather than one per promise
         if (elements.length > 0) {
-          console.log(elements);
-          throw new M.CustomError('Element already found....', 403, 'warn');
+          throw new M.CustomError('Element(s) already found....', 403, 'warn');
         }
       }));
     }
     // Find all elements
     Promise.all(findPromises)
     // Find the project to ensure requesting user has permissions
-    .then(() => ProjController.findProject(reqUser, orgID, projID))
+    .then(() => {
+      console.timeEnd('Find Existing Elements');
+      console.time('Find Project');
+      return ProjController.findProject(reqUser, orgID, projID);
+    })
     .then((proj) => {
-      console.log('Made it here');
       // Error Check: ensure user has write permissions on project or is global admin
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
         throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
-
+      console.timeEnd('Find Project');
+      console.time('FOR LOOP: Create element objects');
       // Set the project for each element and convert to element objects
       arrElements.forEach((element) => {
         // Title case the element type
@@ -239,7 +244,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           id: element.uid,
           name: element.name,
           project: proj._id,
-          uuid: element.uuid || uuidv4(),
+          uuid: element.uuid,
           documentation: element.documentation,
           custom: element.custom,
           createdBy: reqUser._id,
@@ -258,12 +263,15 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           ? utils.createID(orgID, projID, element.target)
           : null;
 
-        // Add element object to an array of objects
+        // Add element object to an array of element objects
         elementObjects.push(elemObject);
       });
 
+      console.timeEnd('FOR LOOP: Create element objects');
+      console.time('FOR LOOP: Set parent, source, target');
+
       // Convert elements array to JMI type 2 for easier lookup
-      jmi2 = utils.convertJMI(1, 2, elementObjects);
+      const jmi2 = utils.convertJMI(1, 2, elementObjects);
 
       // Define array of elements that need to be searched for in DB
       const elementsToFind = [];
@@ -282,52 +290,57 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
             parentObj.contains.push(element._id);
           }
           else {
+            // Add elements parent to list of elements to search for in DB
             elementsToFind.push(element.$parent);
             remainingElements.push(element);
           }
         }
 
-        // If the element is a relationship and has a source
-        if (element.$source) {
+        // If the element is a relationship and has a source and target
+        if (element.type === 'Relationship' && element.$source && element.$target) {
           // If the element's source is also being created
           if (jmi2.hasOwnProperty(element.$source)) {
             element.source = jmi2[element.$source]._id;
             element.$source = null;
           }
           else {
+            // Add elements source to list of elements to search for in DB
             elementsToFind.push(element.$source);
             remainingElements.push(element);
           }
-        }
 
-        // If the element is a relationship and has a target
-        if (element.$target) {
           // If the element's target is also being created
           if (jmi2.hasOwnProperty(element.$target)) {
             element.target = jmi2[element.$target]._id;
             element.$target = null;
           }
           else {
+            // Add elements target to list of elements to search for in DB
             elementsToFind.push(element.$target);
             remainingElements.push(element);
           }
         }
       });
 
+      console.timeEnd('FOR LOOP: Set parent, source, target');
+      console.time('Find extra elements');
       // Create query for finding elements
-      const findExtraElementsQuery = { id: { $in: elementsToFind }};
-      return findElementsQuery(findExtraElementsQuery);
+      const findExtraElementsQuery = { id: { $in: elementsToFind } };
+
+      // Find extra elements, and only return id and _id for faster lookup
+      return Element.Element.find(findExtraElementsQuery, 'id');
     })
     .then((extraElements) => {
-      console.log('Made it here');
-      // Convert extraElements to JMI type 2
+      console.timeEnd('Find extra elements');
+      console.time('FOR LOOP: Set leftover parent, source, target');
+      // Convert extraElements to JMI type 2 for easier lookup
       const extraElementsJMI2 = utils.convertJMI(1, 2, extraElements);
-      // Loop through each remaining element
+      // Loop through each remaining element that does not have it's parent,
+      // source, or target set yet
       remainingElements.forEach((element) => {
         // If the element has a parent
         if (element.$parent) {
-          const parentObj = extraElementsJMI2[element.$parent];
-          element.parent = parentObj._id;
+          element.parent = extraElementsJMI2[element.$parent]._id;
         }
 
         // If the element is a relationship and has a source
@@ -340,6 +353,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
           element.target = extraElementsJMI2[element.$target]._id;
         }
       });
+      console.timeEnd('FOR LOOP: Set leftover parent, source, target');
       console.timeEnd('Local logic');
       console.time('Create in DB');
 
@@ -347,23 +361,12 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       return Element.Element.insertMany(elementObjects);
     })
     .then((elements) => {
-      console.log('Made it here');
       console.timeEnd('Create in DB');
       console.timeEnd('TOTAL TIME');
+      // TODO: Figure out what to return here, since elements are not populated
       return resolve(elements);
     })
-    .catch((error) => {
-      console.log(error);
-      // If error is a CustomError, reject it
-      if (error instanceof M.CustomError) {
-        return reject(error);
-      }
-      // If it's not a CustomError, the create failed so delete all successfully
-      // created elements and reject the error.
-      return Element.Element.deleteMany({ id: { $in: arrUID } })
-      .then(() => reject(M.CustomError.parseCustomError(error)))
-      .catch((error2) => reject(M.CustomError.parseCustomError(error2)));
-    });
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 

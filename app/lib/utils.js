@@ -307,7 +307,6 @@ module.exports.convertJMI = function(from, to, data) {
     });
     return returnObj;
   }
-  else {
-    throw new M.CustomError('JMI conversion not yet implemented.', 501, 'warn');
-  }
+
+  throw new M.CustomError('JMI conversion not yet implemented.', 501, 'warn');
 };

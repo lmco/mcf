@@ -1569,10 +1569,7 @@ function postElements(req, res) {
     return res.status(200).send(formatJSON(data));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    return res.status(error.status).send(error)
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
