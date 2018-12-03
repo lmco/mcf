@@ -2553,7 +2553,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
  *               description: The boolean indicating if soft deleted artifacts are returned.
  *                            The user must be a global admin or an admin on the organization

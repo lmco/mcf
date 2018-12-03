@@ -469,7 +469,7 @@ function findArtifactsQuery(artifactQuery) {
  * @param {User} reqUser - The user object of the requesting user.
  * @param {String} organizationID - The organization ID.
  * @param {String} projectID - The project ID.
- * @param {Boolean} softDeleted - A boolean value indicating whether to soft delete.
+ * @param {Boolean} archived - A boolean value indicating whether to soft delete.
  *
  * @return {Promise} resolve - artifact
  *                   reject - error
@@ -482,13 +482,13 @@ function findArtifactsQuery(artifactQuery) {
  *   M.log.error(error);
  * });
  */
-function findArtifacts(reqUser, organizationID, projectID, softDeleted = false) {
+function findArtifacts(reqUser, organizationID, projectID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Soft deleted flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -501,12 +501,12 @@ function findArtifacts(reqUser, organizationID, projectID, softDeleted = false) 
     const searchParams = { id: { $regex: `^${projectUID}:` }, archived: false };
 
     // Error Check: Ensure user has permissions to find deleted artifacts
-    if (softDeleted && !reqUser.admin) {
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // Check softDeleted flag true
-    if (softDeleted) {
-      // softDeleted flag true and User Admin true, remove deleted: false
+    // Check archived flag true
+    if (archived) {
+      // archived flag true and User Admin true, remove deleted: false
       delete searchParams.deleted;
     }
 

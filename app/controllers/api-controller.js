@@ -2143,23 +2143,23 @@ function getArtifacts(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
   }
 
   // Find all artifacts from it's org.id and project.id
   // NOTE: findArtifacts() sanitizes req.params.orgid and req.params.projectid
-  ArtifactController.findArtifacts(req.user, req.params.orgid, req.params.projectid, softDeleted)
+  ArtifactController.findArtifacts(req.user, req.params.orgid, req.params.projectid, archived)
   .then((artifacts) => {
     // Return only public artifact data
     const artifactsPublicData = artifacts.map(e => e.getPublicData());
