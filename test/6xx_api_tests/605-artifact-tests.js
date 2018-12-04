@@ -113,6 +113,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should POST an artifact', postArtifact);
   it('should GET the previously created Artifact', getArtifact);
+  it('should GET the Artifacts binary', getArtifactBlob);
   it('should PATCH the previously created Artifact', patchArtifact);
   it('should reject a POST with an existing id field', rejectExistingPostArtifact);
   it('should reject a GET of a non-existing Artifact', rejectGetArtifact);
@@ -183,6 +184,30 @@ function getArtifact(done) {
     // Verify response body
     const json = JSON.parse(body);
     chai.expect(json.id).to.equal(testData.artifacts[0].id);
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid/download
+ * finds and returns the Artifact binary.
+ */
+function getArtifactBlob(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}/download`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    console.log(response);
+    // Verify response body
+    //const json = JSON.parse(body);
+    //chai.expect(json.id).to.equal(testData.artifacts[0].id);
     done();
   });
 }

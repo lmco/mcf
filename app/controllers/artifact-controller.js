@@ -27,7 +27,8 @@ module.exports = {
   removeArtifact,
   updateArtifact,
   findArtifact,
-  findArtifacts
+  findArtifacts,
+  getArtifactBlob
 };
 
 // Node.js Modules
@@ -488,7 +489,7 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof archived === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -520,6 +521,43 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
       return resolve(res);
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+/**
+ * @description This function returns the artifact binary file.
+ *
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {String} organizationID - The organization ID.
+ * @param {String} projectID - The project ID.
+ * @param {String} artifactID - The artifact ID.
+ * @param {Boolean} archived - A boolean value indicating whether to soft delete.
+ *
+ * @return {Promise} resolve - artifact
+ *                   reject - error
+ @example
+ * getArtifactBlob({User}, 'orgID', 'projectID', 'artifactID' false)
+ * .then(function(artifact) {
+ *   // Do something with the found artifact binary
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function getArtifactBlob(reqUser, organizationID, projectID, artifactID) {
+  return new Promise((resolve, reject) => {
+    findArtifact(reqUser, organizationID, projectID, artifactID)
+    .then((artifact) => {
+      // Artifact metadata found, get the binary
+      return getArtifactOS(artifact.history[artifact.history.length-1].hash);
+    })
+    .then((ArtifactBlob) =>{
+      return resolve(ArtifactBlob);
+    })
+    .catch((error) => {
+      reject(M.CustomError.parseCustomError(error))
+
+    });
   });
 }
 
@@ -594,7 +632,7 @@ function addArtifactOS(hashedName, artifactBlob) {
  * @description This function removes the artifact blob file and sub folder
  * from the file system.
  *
- * @param {String} hashName - folder's hash name
+ * @param {String} hashedName - hash name of the file
  */
 function removeArtifactOS(hashName) {
   return new Promise((resolve) => {
@@ -631,6 +669,31 @@ function removeArtifactOS(hashName) {
       }
     });
     return resolve();
+  });
+}
+
+/**
+ * @description This function get the artifact blob file
+ * from the file system.
+ *
+ * @param {String} hashedName - hash name of the file
+ */
+function getArtifactOS(hashName) {
+  return new Promise((resolve, reject) => {
+    // Create the main artifact path
+    const artifactPath = path.join(M.root, M.config.artifact.path);
+    // Create sub folder path and artifact path
+    // Note: Folder name is the first 2 characters from the generated hash
+    const folderPath = path.join(artifactPath, hashName.substring(0, 2));
+    const filePath = path.join(folderPath, hashName);
+    try {
+      // Read the artifact file
+      // Note: Use sync to ensure file is read before advancing
+      return resolve(fs.readFileSync(filePath));
+    }
+    catch (err) {
+      return reject(new M.CustomError('Artifact binary not found.', 404, 'warn'));
+    }
   });
 }
 

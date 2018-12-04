@@ -100,9 +100,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should upload second artifact01 with same file', uploadSecondArtifact);
   it('should update artifact01 with new file', updateArtifact);
   it('should find updated artifact01 new filename', findArtifact);
+  it('should get the artifact binary data', getArtifactBlob);
   it('should find all artifacts in project', findArtifacts);
   it('should delete an artifact00', deleteArtifactFile);
   it('should delete second artifact01', deleteSecondArtifactFile);
+
 });
 
 /* --------------------( Tests )-------------------- */
@@ -196,6 +198,26 @@ function updateArtifact(done) {
     chai.expect(updatedArtifact.filename).to.equal(testData.artifacts[2].filename);
     chai.expect(updatedArtifact.history[1].hash)
     .to.equal('5d41098059578b5be7addfaef2bb5266fb40323128eac24e280e1779cc73748d');
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Get an existing artifact's binary data.
+ */
+function getArtifactBlob(done) {
+  // Find artifact
+  const projID = utils.parseID(proj.id).pop();
+  ArtifactController.getArtifactBlob(adminUser, org.id, projID, testData.artifacts[2].id)
+  .then((artifact) => {
+    // Verify a buffer was returned
+    chai.expect(Buffer.isBuffer(artifact)).to.equal(true);
     done();
   })
   .catch((error) => {

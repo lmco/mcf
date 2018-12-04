@@ -2531,8 +2531,8 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
  *   get:
  *     tags:
  *       - artifacts
- *     description: Returns a list of all artifacts and their public data that the requesting
- *                  user has access to within a project.
+ *     description: Returns a list of all artifacts and their public data from a project
+ *                  a user has access to
  *     produces:
  *       - application/json
  *     parameters:
@@ -2546,18 +2546,11 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing get artifact options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             archived:
- *               type: boolean
- *               description: The boolean indicating if soft deleted artifacts are returned.
- *                            The user must be a global admin or an admin on the organization
- *                            to find soft deleted artifacts.
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: URI
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET artifacts returns org data.
@@ -2578,6 +2571,56 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.getArtifacts
+);
+
+/**
+ * @swagger
+ * /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Finds and returns the artifact binary.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to return.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      correct permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid/download')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getArtifactBlob
 );
 
 // Catches any invalid api route not defined above.

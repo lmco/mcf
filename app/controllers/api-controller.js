@@ -91,6 +91,7 @@ module.exports = {
   patchArtifact,
   deleteArtifact,
   getArtifacts,
+  getArtifactBlob,
   invalidRoute
 };
 /* ------------------------( API Helper Function )--------------------------- */
@@ -2308,6 +2309,46 @@ function deleteArtifact(req, res) {
     // Return 200: OK and success
     return res.status(200).send(formatJSON(success));
   })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Gets an artifact binary file by its artifact.id, project.id, and org.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with found artifact
+ */
+function getArtifactBlob(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+  // Check if invalid key passed in
+  Object.keys(req.query).forEach((key) => {
+    // If invalid key, reject
+    if (!['archived'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+  // Find the artifact from it's artifact.id, project.id, and org.id
+  // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
+  ArtifactController.getArtifactBlob(req.user, req.params.orgid,
+    req.params.projectid, req.params.artifactid)
+  .then((artifactBlob) => {
+    // Return a 200: OK and the artifact
+    res.header('Content-Type', 'application/octet-stream');
+    res.header('Content-Disposition', 'artifact');
+    console.log("Sending API controller");
+    console.log(res.header);
+    return res.status(200).send(artifactBlob);
+  })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
