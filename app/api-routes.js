@@ -2525,6 +2525,61 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
   APIController.deleteArtifact
 );
 
+/**
+ * @swagger
+ * /api/orgs/:orgid/projects/:projectid/artifacts:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Returns a list of all artifacts and their public data that the requesting
+ *                  user has access to within a project.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose artifacts to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project whose artifacts to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing get artifact options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             archived:
+ *               type: boolean
+ *               description: The boolean indicating if archived artifacts are returned.
+ *                            The user must be a global admin or an admin on the organization
+ *                            to find archived artifacts.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifacts returns org data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifacts due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifacts due to not being logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifacts due to not having permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifacts due to artifacts not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifacts due to a server side issue.
+ *
+ */
+api.route('/orgs/:orgid/projects/:projectid/artifacts')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getArtifacts
+);
+
 // Catches any invalid api route not defined above.
 api.use('*', APIController.invalidRoute);
 

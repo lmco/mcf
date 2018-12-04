@@ -24,6 +24,8 @@
 
 // Node modules
 const chai = require('chai');
+const { execSync } = require('child_process');
+const path = require('path');    // Find directory paths
 
 // NPM modules
 const mongoose = require('mongoose');
@@ -69,6 +71,7 @@ describe(M.getModuleName(module.filename), function() {
    */
   it('clean database', cleanDB);
   it('should create the default org if it doesn\'t exist', createDefaultOrg);
+  it('should clear artifact storage folder', clearArtifactStorage);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -115,4 +118,14 @@ function createDefaultOrg(done) {
     chai.expect(error.message).to.equal(null);
     done();
   });
+}
+
+/**
+ * @description Clears the artifact storage folder
+ */
+function clearArtifactStorage(done) {
+  const artifactPath = path.join(M.root, M.config.artifact.path);
+  // Remove artifacts
+  execSync(`rm -rf ${artifactPath}/*`);
+  done();
 }

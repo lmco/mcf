@@ -53,7 +53,7 @@ module.exports.connect = function() {
     if (M.config.db.ssl) {
       connectURL += '?ssl=true';
       // Retrieve CA file from /certs directory
-      const caPath = path.join(M.root, 'certs', M.config.db.ca);
+      const caPath = path.join(M.root, M.config.db.ca);
       const caFile = fs.readFileSync(caPath, 'utf8');
       options.sslCA = caFile;
     }
