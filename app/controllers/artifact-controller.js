@@ -50,7 +50,7 @@ const ProjController = M.require('controllers.project-controller');
  * @param {String} projID - The project ID of the Project which is being searched for.
  * @param {Object} artData - The JSON object containing the Artifact data
  * @param {Buffer} artifactBlob - Buffer containing the artifact blob
- *
+ *ƒ
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
@@ -469,7 +469,7 @@ function findArtifactsQuery(artifactQuery) {
  * @param {User} reqUser - The user object of the requesting user.
  * @param {String} organizationID - The organization ID.
  * @param {String} projectID - The project ID.
- * @param {Boolean} archived - A boolean value indicating whether to soft delete.
+ * @param {Boolean} archived - A boolean value indicating whether to archived.
  *
  * @return {Promise} resolve - artifact
  *                   reject - error
@@ -488,7 +488,7 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof archived === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -507,7 +507,7 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
     // Check archived flag true
     if (archived) {
       // archived flag true and User Admin true, remove deleted: false
-      delete searchParams.deleted;
+      delete searchParams.archived;
     }
 
     // Find artifacts

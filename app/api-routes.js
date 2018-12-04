@@ -2555,9 +2555,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
  *           properties:
  *             archived:
  *               type: boolean
- *               description: The boolean indicating if soft deleted artifacts are returned.
+ *               description: The boolean indicating if archived artifacts are returned.
  *                            The user must be a global admin or an admin on the organization
- *                            to find soft deleted artifacts.
+ *                            to find archived artifacts.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET artifacts returns org data.
