@@ -226,6 +226,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
     .then(() => {
       console.timeEnd('Find Existing Elements');
       console.time('Find Project');
+      // TODO: Find project before attempting to find elements
       return ProjController.findProject(reqUser, orgID, projID);
     })
     .then((proj) => {
@@ -238,6 +239,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       // Set the project for each element and convert to element objects
       arrElements.forEach((element) => {
         // Create element data object and sanitize data
+        // TODO: Sanitize entire arrElements object prior to for loop?
         const elemData = sani.sanitize({
           id: element.uid,
           name: element.name,
@@ -322,7 +324,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       console.time('Find extra elements');
       // Create query for finding elements
       const findExtraElementsQuery = { id: { $in: elementsToFind } };
-      
+
       // Find extra elements, and only return id and _id for faster lookup
       return Element.Element.find(findExtraElementsQuery, 'id');
     })
@@ -333,6 +335,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       const extraElementsJMI2 = utils.convertJMI(1, 2, extraElements);
       // Loop through each remaining element that does not have it's parent,
       // source, or target set yet
+      // TODO: Throw an error if the parent/source/target was not found
       remainingElements.forEach((element) => {
         // If the element has a parent
         if (element.$parent) {
