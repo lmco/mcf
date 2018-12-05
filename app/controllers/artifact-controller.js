@@ -26,7 +26,8 @@ module.exports = {
   createArtifact,
   removeArtifact,
   updateArtifact,
-  findArtifact
+  findArtifact,
+  findArtifacts
 };
 
 // Node.js Modules
@@ -48,19 +49,19 @@ const ProjController = M.require('controllers.project-controller');
  * @param {String} orgID - The organization ID for the org the project belongs to.
  * @param {String} projID - The project ID of the Project which is being searched for.
  * @param {Object} artData - The JSON object containing the Artifact data
- *
+ * @param {Buffer} artifactBlob - Buffer containing the artifact blob
+ *ƒ
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
-function createArtifact(reqUser, orgID, projID, artData) {
+function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof artData.metaData.id === 'string', 'Artifact ID is not a string.');
-      assert.ok(typeof artData.metaData === 'object', 'Artifact is not a object.');
-      assert.ok(Artifact.validateObjectKeys(artData.metaData),
+      assert.ok(typeof artData.id === 'string', 'Artifact ID is not a string.');
+      assert.ok(Artifact.validateObjectKeys(artData),
         'Artifact metadata contains invalid keys.');
     }
     catch (error) {
@@ -70,7 +71,7 @@ function createArtifact(reqUser, orgID, projID, artData) {
     // Sanitize query inputs
     const organizationID = sani.sanitize(orgID);
     const projectID = sani.sanitize(projID);
-    const artID = sani.sanitize(artData.metaData.id);
+    const artID = sani.sanitize(artData.id);
 
     // Define function-wide variables
     // Create the full artifact id
@@ -101,11 +102,15 @@ function createArtifact(reqUser, orgID, projID, artData) {
         throw new M.CustomError('Artifact already exists.', 400, 'warn');
       }
 
-      // Convert JSON object to buffer
-      const artifactBlob = Buffer.from(JSON.stringify(artData.artifactBlob));
+      if (artifactBlob) {
+        // Generate hash
+        hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+      }
+      else {
+        // No artifact binary provided, set null
+        hashedName = null;
+      }
 
-      // Generate hash
-      hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
       // Define new hash history data
       const historyData = {
@@ -116,14 +121,12 @@ function createArtifact(reqUser, orgID, projID, artData) {
       // Create the new Artifact
       const artifact = new Artifact({
         id: artifactFullId,
-        filename: artData.metaData.filename,
-        contentType: path.extname(artData.metaData.filename),
+        filename: artData.filename,
+        contentType: path.extname(artData.filename),
         history: historyData,
         project: foundProj,
         lastModifiedBy: reqUser,
         createdBy: reqUser
-
-
       });
 
       // Save artifact object to the database
@@ -140,7 +143,7 @@ function createArtifact(reqUser, orgID, projID, artData) {
       //     NOT Exist - Returns calling addArtifactOS()
       //     Exist - Returns resolve Artifact
       return (!fs.existsSync(path.join(artifactPath, hashedName.substring(0, 2), hashedName)))
-        ? addArtifactOS(hashedName, artData.artifactBlob)
+        ? addArtifactOS(hashedName, artifactBlob)
         : resolve(_artifact);
     })
     .then(() => resolve(createdArtifact))
@@ -156,11 +159,12 @@ function createArtifact(reqUser, orgID, projID, artData) {
  * @param {String} projID - The project ID of the Project which is being searched for.
  * @param {String} artifactID - The Artifact ID
  * @param {Object} artToUpdate - JSON object containing updated Artifact data
+ * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  *
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
-function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
+function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate, artifactBlob) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
@@ -168,8 +172,8 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(typeof artifactID === 'string', 'Artifact Id is not a string.');
       assert.ok(typeof artToUpdate === 'object', 'Artifact to update is not an object.');
-      assert.ok(typeof artToUpdate.metaData === 'object', 'Artifact Blob is not an object.');
-      assert.ok(Artifact.validateObjectKeys(artToUpdate.metaData),
+      assert.ok(typeof artifactBlob === 'object', 'Artifact Blob is not an object.');
+      assert.ok(Artifact.validateObjectKeys(artToUpdate),
         'Updated Artifact metadata contains invalid keys.');
     }
     catch (error) {
@@ -192,6 +196,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
       // artifactToUpdate is instance of Artifact model, convert to JSON
       artToUpdate = artToUpdate.toJSON(); // eslint-disable-line no-param-reassign
     }
+
     // Find artifact in database
     findArtifact(reqUser, organizationID, projectID, artID)
     .then((_artifact) => {
@@ -208,10 +213,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
       }
 
       // Check if Artifact blob is part of the update
-      if (artToUpdate.artifactBlob) {
-        // Convert JSON object to buffer
-        const artifactBlob = Buffer.from(JSON.stringify(artToUpdate.artifactBlob));
-
+      if (artifactBlob) {
         // Generate hash
         hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
@@ -234,7 +236,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
       }
 
       // Define and get a list of artifact keys to update
-      const artifactUpdateFields = Object.keys(artToUpdate.metaData);
+      const artifactUpdateFields = Object.keys(artToUpdate);
 
       // Get list of parameters which can be updated from model
       const validUpdateFields = _artifact.getValidUpdateFields();
@@ -265,7 +267,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
 
         // Sanitize field and update field in artifact object
         _artifact[updateField] = sani.sanitize(
-          artToUpdate.metaData[updateField]
+          artToUpdate[updateField]
         );
       }
 
@@ -278,7 +280,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate) {
     .then((_artifact) => {
       updatedArtifact = _artifact;
       return (isNewHash)
-        ? addArtifactOS(hashedName, artToUpdate.artifactBlob)
+        ? addArtifactOS(hashedName, artifactBlob)
         : resolve(_artifact);
     })
     .then(() => resolve(updatedArtifact))
@@ -462,6 +464,66 @@ function findArtifactsQuery(artifactQuery) {
 }
 
 /**
+ * @description This function returns all artifacts attached to the project.
+ *
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {String} organizationID - The organization ID.
+ * @param {String} projectID - The project ID.
+ * @param {Boolean} archived - A boolean value indicating whether to archived.
+ *
+ * @return {Promise} resolve - artifact
+ *                   reject - error
+ @example
+ * findArtifacts({User}, 'orgID', 'projectID', false)
+ * .then(function(artifact) {
+ *   // Do something with the found artifact
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function findArtifacts(reqUser, organizationID, projectID, archived = false) {
+  return new Promise((resolve, reject) => {
+    // Error Check: ensure input parameters are valid
+    try {
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
+    }
+    catch (error) {
+      throw new M.CustomError(error.message, 400, 'warn');
+    }
+
+    // Sanitize query input
+    const orgID = sani.sanitize(organizationID);
+    const projID = sani.sanitize(projectID);
+    const projectUID = utils.createID(orgID, projID);
+    const searchParams = { id: { $regex: `^${projectUID}:` }, archived: false };
+
+    // Error Check: Ensure user has permissions to find deleted artifacts
+    if (archived && !reqUser.admin) {
+      throw new M.CustomError('User does not have permissions.', 403, 'warn');
+    }
+    // Check archived flag true
+    if (archived) {
+      // archived flag true and User Admin true, remove deleted: false
+      delete searchParams.archived;
+    }
+
+    // Find artifacts
+    findArtifactsQuery(searchParams)
+    .then((artifacts) => {
+      // Filter results to only the artifacts on which user has read access
+      const res = artifacts.filter(e => e.project.getPermissions(reqUser).read || reqUser.admin);
+
+      // Return resulting artifacts
+      return resolve(res);
+    })
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+/**
  * @description This function adds the artifact blob file to the file system.
  *
  * @param {String} hashedName - hash name of the file
@@ -490,6 +552,22 @@ function addArtifactOS(hashedName, artifactBlob) {
               throw M.CustomError.parseCustomError(makeDirectoryError);
             }
           });
+          // Check if file already exist
+          fs.exists(filePath, (fileExist) => {
+            if (!fileExist) {
+              try {
+                // Write out artifact file, defaults to 666 permission.
+                fs.writeFileSync(filePath, artifactBlob);
+              }
+              catch (error) {
+                // Error occurred, log it
+                throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
+              }
+            }
+          });
+        }
+        else {
+          // TODO: Code repeated again, rewrite
           // Check if file already exist
           fs.exists(filePath, (fileExist) => {
             if (!fileExist) {

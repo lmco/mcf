@@ -66,8 +66,10 @@ function initApp() {
     app.use(express.static(staticDir));
     app.use('/favicon.ico', express.static('build/public/img/favicon.ico'));
 
-    // Allows receiving JSON in the request body
+    // for parsing application/json
     app.use(bodyParser.json());
+
+    // for parsing application/xwww-form-urlencoded
     app.use(bodyParser.urlencoded({ extended: true }));
 
     // Trust proxy for IP logging

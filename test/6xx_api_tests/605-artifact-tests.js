@@ -128,27 +128,29 @@ describe(M.getModuleName(module.filename), () => {
  * creates an artifact.
  */
 function postArtifact(done) {
-  // Define new artifact
-  const artifact = {
-    id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename,
-    contentType: path.extname(testData.artifacts[0].filename)
-  };
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
 
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Define form data
+  const fileData = {
+    id: testData.artifacts[0].id,
+    file: {
+      value: fs.createReadStream(imgPath),
+      options: {
+        filename: imgPath,
+        contentType: null
+      }
+    }
   };
+
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(bodyRequest)
+    formData: fileData
   },
   (err, response, body) => {
     // Expect no error
@@ -190,26 +192,29 @@ function getArtifact(done) {
  * updates an Artifact.
  */
 function patchArtifact(done) {
-  // Define artifact fields to update
-  const artifact = {
-    filename: testData.artifacts[2].filename,
-    contentType: path.extname(testData.artifacts[2].filename)
-  };
   // Get png test file
   const imgPath = path.join(
-    M.root, testData.artifacts[0].location, testData.artifacts[2].filename
+    M.root, testData.artifacts[2].location, testData.artifacts[2].filename
   );
 
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Define form data
+  const fileData = {
+    file: {
+      value: fs.createReadStream(imgPath),
+      options: {
+        filename: imgPath,
+        contentType: null
+      }
+    }
   };
+
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(bodyRequest)
+    formData: fileData
+
   },
   (err, response, body) => {
     // Expect no error
@@ -228,27 +233,29 @@ function patchArtifact(done) {
  * Fails to creates an Artifact with an existing ID.
  */
 function rejectExistingPostArtifact(done) {
-  // Define new artifact
-  const artifact = {
-    id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename,
-    contentType: path.extname(testData.artifacts[0].filename)
-  };
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
 
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Define form data
+  const fileData = {
+    id: testData.artifacts[0].id,
+    file: {
+      value: fs.createReadStream(imgPath),
+      options: {
+        filename: imgPath,
+        contentType: null
+      }
+    }
   };
+
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(bodyRequest)
+    formData: fileData
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -290,27 +297,29 @@ function rejectGetArtifact(done) {
  * fails to update an immutable Artifact id field.
  */
 function rejectPatchArtifact(done) {
-  // Define artifact fields to update
-  const artifact = {
-    id: testData.artifacts[2].id,
-    filename: testData.artifacts[2].filename,
-    contentType: path.extname(testData.artifacts[2].filename)
-  };
   // Get png test file
   const imgPath = path.join(
-    M.root, testData.artifacts[0].location, testData.artifacts[2].filename
+    M.root, testData.artifacts[2].location, testData.artifacts[2].filename
   );
 
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Define form data
+  const fileData = {
+    id: testData.artifacts[0].id,
+    file: {
+      value: fs.createReadStream(imgPath),
+      options: {
+        filename: imgPath,
+        contentType: null
+      }
+    }
   };
+
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(bodyRequest)
+    formData: fileData
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -375,7 +384,7 @@ function getHeaders() {
   const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
-    'Content-Type': 'application/json',
+    'Content-Type': 'multipart/form-data',
     authorization: s
   };
 }
