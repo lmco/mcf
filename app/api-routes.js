@@ -2557,6 +2557,18 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: content
+ *         description: The object containing get artifact options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             archived:
+ *               type: boolean
+ *               description: The boolean indicating if soft deleted artifacts are returned.
+ *                            The user must be a global admin or an admin on the organization
+ *                            to find soft deleted artifacts.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET artifacts returns org data.
