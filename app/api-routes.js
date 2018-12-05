@@ -2344,7 +2344,7 @@ api.route('/webhooks/:webhookid')
  *       - artifacts
  *     description: Creates a new artifact.
  *     produces:
- *       - application/json
+ *       - multipart/form-data; boundary
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
@@ -2378,8 +2378,14 @@ api.route('/webhooks/:webhookid')
  *             filename:
  *               type: string
  *               description: The name for the artifact file.
- *       - name: artifactBlob
- *         description: The artifact blob data.
+ *       - name: id
+ *         description: This is form-data with key:value pair. The key is default to 'id' and
+ *                      the value is the matching artifactid in the parameters.
+ *         in: body
+ *         required: true
+ *       - name: file
+ *         description: This is form-data with key:value pair. The key is default to 'file' and
+ *                      the value is the uploaded artifact file.
  *         in: body
  *         required: true
  *     responses:
