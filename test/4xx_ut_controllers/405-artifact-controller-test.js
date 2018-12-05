@@ -104,7 +104,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should find all artifacts in project', findArtifacts);
   it('should delete an artifact00', deleteArtifactFile);
   it('should delete second artifact01', deleteSecondArtifactFile);
-
 });
 
 /* --------------------( Tests )-------------------- */
@@ -121,7 +120,8 @@ function uploadArtifact(done) {
   // Define and initialize the meta data
   const artifactMetaData = {
     id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename
+    filename: testData.artifacts[0].filename,
+    contentType: 'image/png'
   };
 
   // Create artifact
@@ -153,7 +153,8 @@ function uploadSecondArtifact(done) {
   // Define and initialize the meta data
   const artifactMetaData = {
     id: testData.artifacts[1].id,
-    filename: testData.artifacts[1].filename
+    filename: testData.artifacts[1].filename,
+    contentType: 'image/png'
   };
 
   // Create artifact
@@ -217,7 +218,8 @@ function getArtifactBlob(done) {
   ArtifactController.getArtifactBlob(adminUser, org.id, projID, testData.artifacts[2].id)
   .then((artifact) => {
     // Verify a buffer was returned
-    chai.expect(Buffer.isBuffer(artifact)).to.equal(true);
+    chai.expect(Buffer.isBuffer(artifact.artifactBlob)).to.equal(true);
+    chai.expect(utils.parseID(artifact.artifactMeta.id).pop()).to.equal(testData.artifacts[2].id);
     done();
   })
   .catch((error) => {

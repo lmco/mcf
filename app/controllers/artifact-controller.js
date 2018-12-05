@@ -123,7 +123,7 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
       const artifact = new Artifact({
         id: artifactFullId,
         filename: artData.filename,
-        contentType: path.extname(artData.filename),
+        contentType: artData.contentType,
         history: historyData,
         project: foundProj,
         lastModifiedBy: reqUser,
@@ -546,17 +546,18 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
  */
 function getArtifactBlob(reqUser, organizationID, projectID, artifactID) {
   return new Promise((resolve, reject) => {
+    let artifactMeta;
     findArtifact(reqUser, organizationID, projectID, artifactID)
-    .then((artifact) => {
-      // Artifact metadata found, get the binary
-      return getArtifactOS(artifact.history[artifact.history.length-1].hash);
-    })
-    .then((ArtifactBlob) =>{
-      return resolve(ArtifactBlob);
-    })
-    .catch((error) => {
-      reject(M.CustomError.parseCustomError(error))
+    .then((foundArtifact) => {
+      // Artifact metadata found, save it
+      artifactMeta = foundArtifact;
 
+      // Get the Artifact Blob
+      return getArtifactOS(artifactMeta.history[artifactMeta.history.length - 1].hash);
+    })
+    .then((ArtifactBlob) => resolve({ artifactBlob: ArtifactBlob, artifactMeta: artifactMeta }))
+    .catch((error) => {
+      reject(M.CustomError.parseCustomError(error));
     });
   });
 }

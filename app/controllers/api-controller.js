@@ -2340,13 +2340,12 @@ function getArtifactBlob(req, res) {
   // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
   ArtifactController.getArtifactBlob(req.user, req.params.orgid,
     req.params.projectid, req.params.artifactid)
-  .then((artifactBlob) => {
+  .then((artifact) => {
     // Return a 200: OK and the artifact
-    res.header('Content-Type', 'application/octet-stream');
-    res.header('Content-Disposition', 'artifact');
-    console.log("Sending API controller");
-    console.log(res.header);
-    return res.status(200).send(artifactBlob);
+    // res.header('Content-Type', 'application/octet-stream');
+    res.header('Content-Type', `${artifact.artifactMeta.contentType}`);
+    res.header('Content-Disposition', `attachment; filename='${artifact.artifactMeta.filename}'`);
+    return res.status(200).send(artifact.artifactBlob);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));

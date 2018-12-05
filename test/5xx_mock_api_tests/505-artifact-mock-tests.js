@@ -288,15 +288,12 @@ function getArtifactBlob(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.artifacts[0].id);
-    chai.expect(json.name).to.equal(testData.artifacts[0].name);
+    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
     done();
   };
 
   // GETs an artifact
   apiController.getArtifactBlob(req, res);
-  console.log("post send");
 }
 
 /* ----------( Helper Functions )----------*/

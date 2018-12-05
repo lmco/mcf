@@ -204,10 +204,6 @@ function getArtifactBlob(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
-    console.log(response);
-    // Verify response body
-    //const json = JSON.parse(body);
-    //chai.expect(json.id).to.equal(testData.artifacts[0].id);
     done();
   });
 }
