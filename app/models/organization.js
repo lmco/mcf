@@ -51,27 +51,11 @@ const extensions = M.require('models.plugin.extensions');
  *
  */
 const OrganizationSchema = new mongoose.Schema({
-  id: {
+  _id: {
     type: String,
     required: true,
-    index: true,
-    unique: true,
     match: RegExp(validators.org.id),
-    maxlength: [64, 'Too many characters in ID'],
-    set: function(_id) {
-      // Check value undefined
-      if (typeof this.id === 'undefined') {
-        // Return value to set it
-        return _id;
-      }
-      // Check value NOT equal to db value
-      if (_id !== this.id) {
-        // Immutable field, return error
-        M.log.warn('ID cannot be changed.');
-      }
-      // No change, return the value
-      return this.id;
-    }
+    maxlength: [64, 'Too many characters in ID']
   },
   name: {
     type: String,
@@ -126,7 +110,7 @@ OrganizationSchema.methods.getPublicData = function() {
 
   // Return the organization public fields
   return {
-    id: this.id,
+    id: this._id,
     name: this.name,
     permissions: permissions,
     custom: this.custom
@@ -183,12 +167,16 @@ OrganizationSchema.methods.getPermissions = function(user) {
 OrganizationSchema.statics.validateObjectKeys = function(object) {
   // Initialize returnBool to true
   let returnBool = true;
+  // Set list array of valid keys
+  const validKeys = Object.keys(OrganizationSchema.paths);
+  // Add 'id' to list of valid keys, for 0.6.0 support
+  validKeys.push('id');
   // Check if the object is NOT an instance of the organization model
   if (!(object instanceof mongoose.model('Organization', OrganizationSchema))) {
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the organization model
-      if (!Object.keys(OrganizationSchema.paths).includes(key)) {
+      if (!validKeys.includes(key)) {
         // Key is not in organization model, return false
         returnBool = false;
       }

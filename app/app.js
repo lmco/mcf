@@ -133,7 +133,7 @@ function createDefaultOrganization() {
       // Set userIDs to the _id of the users array
       userIDs = users.map(u => u._id);
       // Find the default organization
-      return Organization.findOne({ id: M.config.server.defaultOrganizationId });
+      return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
     })
     .then(org => {
       // Check if org is NOT null
@@ -149,7 +149,7 @@ function createDefaultOrganization() {
       // Default organization does NOT exist, create it and add all active users
       // to permissions list
       const defaultOrg = new Organization({
-        id: M.config.server.defaultOrganizationId,
+        _id: M.config.server.defaultOrganizationId,
         name: M.config.server.defaultOrganizationName,
         permissions: {
           read: userIDs,

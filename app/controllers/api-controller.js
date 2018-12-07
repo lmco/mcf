@@ -325,12 +325,12 @@ function patchOrgs(req, res) {
   // Org objects provided, delete all
   if (req.body.orgs.every(o => typeof o === 'object')) {
     // Query finds all orgs by their id
-    updateQuery = { id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
+    updateQuery = { _id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
   }
   // Org IDs provided, delete all
   else if (req.body.orgs.every(o => typeof o === 'string')) {
     // Query finds all orgs by their id
-    updateQuery = { id: { $in: sani.sanitize(req.body.orgs) } };
+    updateQuery = { _id: { $in: sani.sanitize(req.body.orgs) } };
   }
   // No valid org data was provided, reject
   else {

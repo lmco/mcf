@@ -313,7 +313,7 @@ function updateOrgObject(done) {
  */
 function updateMultipleOrgs(done) {
   // Create query to update orgs
-  const updateQuery = { id: { $in: [
+  const updateQuery = { _id: { $in: [
     testData.orgs[1].id,
     testData.orgs[4].id
   ] } };
