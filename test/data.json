@@ -144,7 +144,6 @@
       "id": "text-parser",
       "name": "Text Parser",
       "parent": "nlp",
-      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9",
       "custom": {
         "language": "english"
       }
@@ -155,7 +154,7 @@
       "parent": "nlp",
       "name": "Speech to Text",
       "source": "speech-recognition",
-      "target": "text-parser",
+      "target": "speech-recognition",
       "custom": {
         "language": "english"
       }
@@ -172,7 +171,7 @@
       "id": "batchelem1",
       "name": "Batch Element 1",
       "type": "Package",
-      "parent": null
+      "parent": "model"
     },
     {
       "id": "batchelem2",
