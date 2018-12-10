@@ -594,36 +594,31 @@ function addArtifactOS(hashedName, artifactBlob) {
       const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
       const filePath = path.join(folderPath, hashedName);
 
-      // Check sub folder exist
-      fs.exists(folderPath, (foldExists) => {
-        // Check results
-        if (!foldExists) {
-          // Directory does NOT exist, create it
-          // Note: Use sync to ensure directory created before advancing
-          fs.mkdirSync(folderPath, (makeDirectoryError) => {
-            if (makeDirectoryError) {
-              throw M.CustomError.parseCustomError(makeDirectoryError);
-            }
-          });
-        }
-        // Check if file already exist
-        fs.exists(filePath, (fileExist) => {
-          if (!fileExist) {
-            try {
-              // Write out artifact file, defaults to 666 permission.
-              fs.writeFileSync(filePath, artifactBlob);
-            }
-            catch (error) {
-              // Error occurred, log it
-              throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
-            }
-            // Return resolve
-            return resolve();
+      // Check results
+      if (!fs.existsSync(folderPath)) {
+        // Directory does NOT exist, create it
+        // Note: Use sync to ensure directory created before advancing
+        fs.mkdirSync(folderPath, (makeDirectoryError) => {
+          if (makeDirectoryError) {
+            throw M.CustomError.parseCustomError(makeDirectoryError);
           }
-          // Return resolve
-          return resolve();
         });
-      });
+      }
+      // Check if file already exist
+      if (!fs.existsSync(filePath)) {
+        try {
+          // Write out artifact file, defaults to 666 permission.
+          fs.writeFileSync(filePath, artifactBlob);
+        }
+        catch (error) {
+          // Error occurred, log it
+          throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
+        }
+        // Return resolve
+        return resolve();
+      }
+      // Return resolve
+      return resolve();
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -712,19 +707,16 @@ function createStorageDirectory() {
     // Create the main artifact path
     const artifactPath = path.join(M.root, M.config.artifact.path);
 
-    // Check file exist
-    fs.exists(artifactPath, (exists) => {
-      // Check directory NOT exist
-      if (!exists) {
-        // Directory does NOT exist, create it
-        fs.mkdirSync(artifactPath, (error) => {
-          // Check for errors
-          if (error) {
-            throw new M.CustomError(error.message, 500, 'warn');
-          }
-        });
-      }
-      return resolve();
-    });
+    // Check directory NOT exist
+    if (!fs.existsSync(artifactPath)) {
+      // Directory does NOT exist, create it
+      fs.mkdirSync(artifactPath, (error) => {
+        // Check for errors
+        if (error) {
+          throw new M.CustomError(error.message, 500, 'warn');
+        }
+      });
+    }
+    return resolve();
   });
 }
