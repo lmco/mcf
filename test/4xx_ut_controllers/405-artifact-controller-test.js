@@ -80,6 +80,7 @@ describe(M.getModuleName(module.filename), () => {
    * After: Remove Organization and project.
    * Close database connection.
    */
+  /*
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
@@ -94,6 +95,7 @@ describe(M.getModuleName(module.filename), () => {
       done();
     });
   });
+  */
 
   /* Execute the tests */
   it('should upload artifact00', uploadArtifact);
@@ -119,14 +121,14 @@ function uploadArtifact(done) {
 
   // Define and initialize the meta data
   const artifactMetaData = {
-    id: testData.artifacts[0].id,
     filename: testData.artifacts[0].filename,
     contentType: 'image/png'
   };
 
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
-  ArtifactController.createArtifact(adminUser, org.id, projID, artifactMetaData, artifactBlob)
+  ArtifactController.createArtifact(adminUser, org.id, projID,
+    testData.artifacts[0].id, artifactMetaData, artifactBlob)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[0].filename);
@@ -152,14 +154,14 @@ function uploadSecondArtifact(done) {
 
   // Define and initialize the meta data
   const artifactMetaData = {
-    id: testData.artifacts[1].id,
     filename: testData.artifacts[1].filename,
     contentType: 'image/png'
   };
 
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
-  ArtifactController.createArtifact(adminUser, org.id, projID, artifactMetaData, artifactBlob)
+  ArtifactController.createArtifact(adminUser, org.id, projID,
+    testData.artifacts[1].id, artifactMetaData, artifactBlob)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[1].filename);

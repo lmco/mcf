@@ -95,7 +95,6 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: Delete organization and admin user
    */
-  /*
   after((done) => {
     // Delete organization
     testUtils.removeOrganization(adminUser)
@@ -109,7 +108,7 @@ describe(M.getModuleName(module.filename), () => {
       done();
     });
   });
-*/
+
 
   /* Execute the tests */
   it('should POST an artifact', postArtifact);
@@ -120,7 +119,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a GET of a non-existing Artifact', rejectGetArtifact);
   it('should reject a PATCH of an immutable Artifact field', rejectPatchArtifact);
   it('should reject a DELETE of a non-existing Artifact', rejectDeleteNonExistingArtifact);
-  //it('should DELETE the previously created Artifact', deleteArtifact);
+  it('should DELETE the previously created Artifact', deleteArtifact);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -137,7 +136,6 @@ function postArtifact(done) {
 
   // Define form data
   const fileData = {
-    id: testData.artifacts[0].id,
     file: {
       value: fs.createReadStream(imgPath),
       options: {
@@ -156,6 +154,7 @@ function postArtifact(done) {
     formData: fileData
   },
   (err, response, body) => {
+    //console.log(response);
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK

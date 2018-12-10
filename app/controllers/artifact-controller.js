@@ -65,13 +65,13 @@ const ProjController = M.require('controllers.project-controller');
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
-function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
+function createArtifact(reqUser, orgID, projID, artID, artData, artifactBlob) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof artData.id === 'string', 'Artifact ID is not a string.');
+      assert.ok(typeof artID === 'string', 'Artifact ID is not a string.');
       assert.ok(Artifact.validateObjectKeys(artData),
         'Artifact metadata contains invalid keys.');
     }
@@ -82,11 +82,11 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
     // Sanitize query inputs
     const organizationID = sani.sanitize(orgID);
     const projectID = sani.sanitize(projID);
-    const artID = sani.sanitize(artData.id);
+    const artifactID = sani.sanitize(artID);
 
     // Define function-wide variables
     // Create the full artifact id
-    const artifactFullId = utils.createID(organizationID, projectID, artID);
+    const artifactFullId = utils.createID(organizationID, projectID, artifactID);
     let createdArtifact = null;
     let hashedName = '';
 
@@ -468,7 +468,7 @@ function findArtifactsQuery(artifactQuery) {
   return new Promise((resolve, reject) => {
     // Find artifact
     Artifact.find(artifactQuery)
-    .populate('project archivedBy lastModifiedBy')
+    .populate('history.user project archivedBy lastModifiedBy')
     .then((arrArtifact) => resolve(arrArtifact))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

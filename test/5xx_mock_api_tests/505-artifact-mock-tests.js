@@ -122,7 +122,6 @@ function postArtifact(done) {
   );
   // Define new artifact
   const body = {
-    id: testData.artifacts[0].id,
     contentType: path.extname(testData.artifacts[0].filename)
   };
 
