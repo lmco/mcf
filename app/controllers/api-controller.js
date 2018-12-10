@@ -2206,8 +2206,8 @@ function postArtifact(req, res) {
     }
 
     // Sanity Check: originalname/mimitype are required fields
-    if (!(Object.prototype.hasOwnProperty.call(req.file, 'originalname')
-      && Object.prototype.hasOwnProperty.call(req.file, 'mimetype'))) {
+    if (!req.file.hasOwnProperty('originalname')
+      && (req.file.hasOwnProperty('mimetype'))) {
       const error = new M.CustomError('Bad request. File not defined.', 400, 'warn');
       return res.status(error.status).send(error);
     }
@@ -2223,7 +2223,7 @@ function postArtifact(req, res) {
     }
 
     // If artifact ID was provided in the body, ensure it matches artifact ID in params
-    if (Object.prototype.hasOwnProperty.call(req.body, 'id') && (req.params.artifactid !== req.body.id)) {
+    if (req.body.hasOwnProperty('id') && (req.params.artifactid !== req.body.id)) {
       const error = new M.CustomError('Artifact ID in the body does not match ID in the params.', 400);
       return res.status(error.status).send(error);
     }

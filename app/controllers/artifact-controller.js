@@ -605,38 +605,24 @@ function addArtifactOS(hashedName, artifactBlob) {
               throw M.CustomError.parseCustomError(makeDirectoryError);
             }
           });
-          // Check if file already exist
-          fs.exists(filePath, (fileExist) => {
-            if (!fileExist) {
-              try {
-                // Write out artifact file, defaults to 666 permission.
-                fs.writeFileSync(filePath, artifactBlob);
-              }
-              catch (error) {
-                // Error occurred, log it
-                throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
-              }
-            }
-          });
         }
-        else {
-          // TODO: Code repeated again, rewrite
-          // Check if file already exist
-          fs.exists(filePath, (fileExist) => {
-            if (!fileExist) {
-              try {
-                // Write out artifact file, defaults to 666 permission.
-                fs.writeFileSync(filePath, artifactBlob);
-              }
-              catch (error) {
-                // Error occurred, log it
-                throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
-              }
+        // Check if file already exist
+        fs.exists(filePath, (fileExist) => {
+          if (!fileExist) {
+            try {
+              // Write out artifact file, defaults to 666 permission.
+              fs.writeFileSync(filePath, artifactBlob);
             }
-          });
-        }
-        // Return resolve
-        return resolve();
+            catch (error) {
+              // Error occurred, log it
+              throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
+            }
+            // Return resolve
+            return resolve();
+          }
+          // Return resolve
+          return resolve();
+        });
       });
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
