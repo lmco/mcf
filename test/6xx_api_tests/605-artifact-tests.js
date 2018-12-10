@@ -154,7 +154,6 @@ function postArtifact(done) {
     formData: fileData
   },
   (err, response, body) => {
-    //console.log(response);
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
@@ -198,53 +197,36 @@ function getArtifactBlob(done) {
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}/download`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'GET'
+    method: 'GET',
+    encoding: null
   },
   (err, response, body) => {
-    // Get png test file
-    const imgPath = path.join(
-      M.root, testData.artifacts[0].location, testData.artifacts[0].filename
-    );
-
-    /*
-    var bodyBuffer = Buffer.from( body, 'latin1' );
-    console.log('body latin1: ',bodyBuffer);
-
-    bodyBuffer = Buffer.from( body, 'ascii' );
-    console.log('body ascii:  ',bodyBuffer);
-
-    bodyBuffer = Buffer.from( body, 'utf8' );
-    console.log('body utf8:   ',bodyBuffer);
-
-    bodyBuffer = Buffer.from( body, 'ucs2' );
-    console.log('body ucs2:   ',bodyBuffer);
-
-    bodyBuffer = Buffer.from( body, 'binary' );
-    console.log('body binary: ',bodyBuffer);
-*/
-    try {
-      let binary = fs.readFileSync(imgPath);
-      console.log('original:    ', binary);
-      if (binary === body){
-        console.log("same");
-      }
-
-      fs.writeFileSync('/Users/e309363/tmp/original.png', binary);
-      fs.writeFileSync('/Users/e309363/tmp/bodyResponse.png', body);
-
-    }
-    catch{
-
-    }
-
-
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify content type
     chai.expect(response.headers['content-type']).to.equal('image/png');
-    chai.expect(body).to.not.equal(null);
+
+    // Get png test file
+    const imgPath = path.join(
+      M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+    );
+
+    try {
+      // Read original file
+      const originalBinary = fs.readFileSync(imgPath);
+      // Original file NOT equal with file response
+      if (Buffer.compare(originalBinary, body) !== 0) {
+        // Should not execute, force test to fail
+        chai.assert(true === false);
+      }
+    }
+    catch (error) {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
+    }
     done();
   });
 }

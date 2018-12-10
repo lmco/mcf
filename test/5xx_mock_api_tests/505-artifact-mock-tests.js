@@ -284,7 +284,6 @@ function getArtifactBlob(done) {
   // Verifies status code and headers
   resFunctions(res);
 
-
   // Verifies the response data
   res.send = function send(_data) {
     chai.expect(Buffer.isBuffer(_data)).to.equal(true);

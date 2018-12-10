@@ -80,7 +80,6 @@ describe(M.getModuleName(module.filename), () => {
    * After: Remove Organization and project.
    * Close database connection.
    */
-  /*
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
@@ -95,7 +94,6 @@ describe(M.getModuleName(module.filename), () => {
       done();
     });
   });
-  */
 
   /* Execute the tests */
   it('should upload artifact00', uploadArtifact);

@@ -2179,8 +2179,7 @@ function getArtifacts(req, res) {
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
@@ -2205,12 +2204,10 @@ function postArtifact(req, res) {
       // An unknown error occurred when uploading.
       res.status(500).send(err);
     }
-    console.log(req.file);
-    console.log(req.body);
-    console.log(req.header);
+
     // Sanity Check: originalname/mimitype are required fields
-    if (!(Object.prototype.hasOwnProperty.call(req.file, 'originalname') &
-      Object.prototype.hasOwnProperty.call(req.file, 'mimetype'))) {
+    if (!(Object.prototype.hasOwnProperty.call(req.file, 'originalname')
+      && Object.prototype.hasOwnProperty.call(req.file, 'mimetype'))) {
       const error = new M.CustomError('Bad request. File not defined.', 400, 'warn');
       return res.status(error.status).send(error);
     }

@@ -2577,9 +2577,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts')
  *   get:
  *     tags:
  *       - artifacts
- *     description: Finds and returns the artifact binary.
+ *     description: Finds and returns the artifact's arbitrary binary.
  *     produces:
- *       - application/json
+ *       - application/octet-stream
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.

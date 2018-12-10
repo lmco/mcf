@@ -121,13 +121,11 @@ ArtifactSchema.methods.getPublicData = function() {
     contentType: this.contentType,
     createdBy: this.createdBy.username,
     lastModified: this.lastModified,
-    history: this.history.map(h => {
-      return {
-        hash: h.hash,
-        user: h.user.username,
-        updatedOn: h.updatedOn
-      };
-    })
+    history: this.history.map(h => ({
+      hash: h.hash,
+      user: h.user.username,
+      updatedOn: h.updatedOn
+    }))
   };
 };
 
