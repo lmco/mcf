@@ -2375,9 +2375,12 @@ api.route('/webhooks/:webhookid')
  *               type: string
  *               description: The ID of the artifact. If this is provided, it
  *                            must match the artifact ID provided in the URI.
- *             filename:
+ *             originalname:
  *               type: string
  *               description: The name for the artifact file.
+ *             mimetype:
+ *               type: string
+ *               description: File type consists of type/subtype. ex. 'image/png'
  *       - name: id
  *         description: This is form-data with key:value pair. The key is default to 'id' and
  *                      the value is the matching artifactid in the parameters.
@@ -2566,9 +2569,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
  *           properties:
  *             archived:
  *               type: boolean
- *               description: The boolean indicating if soft deleted artifacts are returned.
+ *               description: The boolean indicating if archived artifacts are returned.
  *                            The user must be a global admin or an admin on the organization
- *                            to find soft deleted artifacts.
+ *                            to find archived artifacts.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET artifacts returns org data.
@@ -2593,7 +2596,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid:
+ * /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid/download:
  *   get:
  *     tags:
  *       - artifacts

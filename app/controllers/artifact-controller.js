@@ -17,6 +17,16 @@
  *
  * @description This implements the behavior and logic for artifacts.
  * It also provides function for interacting with artifacts.
+ *
+ * An Artifact represents arbitrary data or binary file. Example: PDFs, docx, dat,
+ * png, and any other binary file.
+ *
+ * There are basically two parts to Artifacts. The artifact metadata and the binary blob.
+ * Artifact Metadata: This controller directs and stores any metadata of artifacts in the
+ * mongo database via mongoose calls. Examples of metadata are artifact IDs, user, and filename.
+ *
+ * Artifact Blob: The actual binary file. This controller stores blobs on the filesystem utilizing
+ * the fs library.
  */
 
 // Expose artifact controller functions
@@ -103,6 +113,7 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
         throw new M.CustomError('Artifact already exists.', 400, 'warn');
       }
 
+      // Verify artifactBlob defined
       if (artifactBlob) {
         // Generate hash
         hashedName = mbeeCrypto.sha256Hash(artifactBlob);
@@ -111,7 +122,6 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
         // No artifact binary provided, set null
         hashedName = null;
       }
-
 
       // Define new hash history data
       const historyData = {
@@ -370,7 +380,7 @@ function removeArtifact(reqUser, orgID, projID, artifactID) {
   });
 }
 
-/** //TODO: Create a function that returns artifact binary
+/**
  * @description This function finds an artifact based on artifact full id.
  *
  * @param {User} reqUser - The requesting user
@@ -531,12 +541,11 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
  * @param {String} organizationID - The organization ID.
  * @param {String} projectID - The project ID.
  * @param {String} artifactID - The artifact ID.
- * @param {Boolean} archived - A boolean value indicating whether to soft delete.
  *
  * @return {Promise} resolve - artifact
  *                   reject - error
  @example
- * getArtifactBlob({User}, 'orgID', 'projectID', 'artifactID' false)
+ * getArtifactBlob({User}, 'orgID', 'projectID', 'artifactID')
  * .then(function(artifact) {
  *   // Do something with the found artifact binary
  * })
@@ -570,6 +579,11 @@ function getArtifactBlob(reqUser, organizationID, projectID, artifactID) {
  */
 function addArtifactOS(hashedName, artifactBlob) {
   return new Promise((resolve, reject) => {
+    // Check hashname for null
+    if (hashedName === null) {
+      // Remote link, return resolve
+      return resolve();
+    }
     // Creates main artifact directory if not exist
     createStorageDirectory()
     .then(() => {
@@ -635,14 +649,19 @@ function addArtifactOS(hashedName, artifactBlob) {
  *
  * @param {String} hashedName - hash name of the file
  */
-function removeArtifactOS(hashName) {
+function removeArtifactOS(hashedName) {
   return new Promise((resolve) => {
+    // Check hashname for null
+    if (hashedName === null) {
+      // Remote link, return resolve
+      return resolve();
+    }
     // Create the main artifact path
     const artifactPath = path.join(M.root, M.config.artifact.path);
     // Create sub folder path and artifact path
     // Note: Folder name is the first 2 characters from the generated hash
-    const folderPath = path.join(artifactPath, hashName.substring(0, 2));
-    const filePath = path.join(folderPath, hashName);
+    const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
+    const filePath = path.join(folderPath, hashedName);
 
     // Remove the artifact file
     // Note: Use sync to ensure file is removed before advancing

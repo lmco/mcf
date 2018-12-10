@@ -2201,6 +2201,13 @@ function postArtifact(req, res) {
       res.status(500).send(err);
     }
 
+    // Sanity Check: originalname/mimitype are required fields
+    if (!(Object.prototype.hasOwnProperty.call(req.body, 'originalname') &&
+      Object.prototype.hasOwnProperty.call(req.body, 'mimetype'))) {
+      const error = new M.CustomError('Bad request.', 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+
     // Extract file meta data
     req.body.filename = req.file.originalname;
     req.body.contentType = req.file.mimetype;

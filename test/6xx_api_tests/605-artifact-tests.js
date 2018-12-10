@@ -95,6 +95,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: Delete organization and admin user
    */
+  /*
   after((done) => {
     // Delete organization
     testUtils.removeOrganization(adminUser)
@@ -108,7 +109,7 @@ describe(M.getModuleName(module.filename), () => {
       done();
     });
   });
-
+*/
 
   /* Execute the tests */
   it('should POST an artifact', postArtifact);
@@ -119,7 +120,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a GET of a non-existing Artifact', rejectGetArtifact);
   it('should reject a PATCH of an immutable Artifact field', rejectPatchArtifact);
   it('should reject a DELETE of a non-existing Artifact', rejectDeleteNonExistingArtifact);
-  it('should DELETE the previously created Artifact', deleteArtifact);
+  //it('should DELETE the previously created Artifact', deleteArtifact);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -142,6 +143,7 @@ function postArtifact(done) {
       options: {
         filename: imgPath,
         contentType: null
+
       }
     }
   };
@@ -200,10 +202,50 @@ function getArtifactBlob(done) {
     method: 'GET'
   },
   (err, response, body) => {
+    // Get png test file
+    const imgPath = path.join(
+      M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+    );
+
+    /*
+    var bodyBuffer = Buffer.from( body, 'latin1' );
+    console.log('body latin1: ',bodyBuffer);
+
+    bodyBuffer = Buffer.from( body, 'ascii' );
+    console.log('body ascii:  ',bodyBuffer);
+
+    bodyBuffer = Buffer.from( body, 'utf8' );
+    console.log('body utf8:   ',bodyBuffer);
+
+    bodyBuffer = Buffer.from( body, 'ucs2' );
+    console.log('body ucs2:   ',bodyBuffer);
+
+    bodyBuffer = Buffer.from( body, 'binary' );
+    console.log('body binary: ',bodyBuffer);
+*/
+    try {
+      let binary = fs.readFileSync(imgPath);
+      console.log('original:    ', binary);
+      if (binary === body){
+        console.log("same");
+      }
+
+      fs.writeFileSync('/Users/e309363/tmp/original.png', binary);
+      fs.writeFileSync('/Users/e309363/tmp/bodyResponse.png', body);
+
+    }
+    catch{
+
+    }
+
+
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify content type
+    chai.expect(response.headers['content-type']).to.equal('image/png');
+    chai.expect(body).to.not.equal(null);
     done();
   });
 }
