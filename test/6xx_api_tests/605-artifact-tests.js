@@ -166,12 +166,12 @@ function postArtifact(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * finds and returns the previously created Artifact.
  */
 function getArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -189,12 +189,12 @@ function getArtifact(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid/download
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid/download
  * finds and returns the Artifact binary.
  */
 function getArtifactBlob(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}/download`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}/download`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET',
@@ -232,7 +232,7 @@ function getArtifactBlob(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * updates an Artifact.
  */
 function patchArtifact(done) {
@@ -253,7 +253,7 @@ function patchArtifact(done) {
   };
 
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -273,7 +273,7 @@ function patchArtifact(done) {
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * Fails to create an Artifact with an existing ID.
  */
 function rejectExistingPostArtifact(done) {
@@ -295,7 +295,7 @@ function rejectExistingPostArtifact(done) {
   };
 
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
@@ -314,12 +314,12 @@ function rejectExistingPostArtifact(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * fails to find a non-existing Artifact.
  */
 function rejectGetArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -337,7 +337,7 @@ function rejectGetArtifact(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * fails to update an immutable Artifact id field.
  */
 function rejectPatchArtifact(done) {
@@ -359,7 +359,7 @@ function rejectPatchArtifact(done) {
   };
 
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
@@ -378,12 +378,12 @@ function rejectPatchArtifact(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * fails to delete a non-existing Artifact.
  */
 function rejectDeleteNonExistingArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE'
@@ -401,12 +401,12 @@ function rejectDeleteNonExistingArtifact(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * deletes the previously created Artifact.
  */
 function deleteArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'DELETE'
