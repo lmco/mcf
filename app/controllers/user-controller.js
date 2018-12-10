@@ -632,7 +632,7 @@ function createUser(reqUser, newUserData) {
         lname: sani.sanitize(newUserData.lname || undefined),
         preferredName: sani.sanitize(newUserData.preferredName || undefined),
         admin: sani.sanitize(newUserData.admin || undefined),
-        provided: sani.sanitize(newUserData.provider || undefined),
+        provided: sani.sanitize(newUserData.provider),
         custom: sani.sanitize(newUserData.custom || {})
       });
 
