@@ -274,7 +274,7 @@ function patchArtifact(done) {
 
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
- * Fails to creates an Artifact with an existing ID.
+ * Fails to create an Artifact with an existing ID.
  */
 function rejectExistingPostArtifact(done) {
   // Get png test file
