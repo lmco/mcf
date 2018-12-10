@@ -281,3 +281,32 @@ module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
     }
   });
 };
+
+/**
+ * @description Converts data between different JMI types
+ *
+ * @param {Number} from - The current JMI version of the data.
+ * @param {Number} to - The JMI version to convert the data to.
+ * @param {Object} data - The data to convert between JMI versions.
+ *
+ */
+module.exports.convertJMI = function(from, to, data) {
+  // Convert JMI type 1 to type 2
+  if (from === 1 && to === 2) {
+    // Error Check: Ensure data is in JMI type 1
+    try {
+      assert.ok(Array.isArray(data), 'Data is not in JMI type 1.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
+    const returnObj = {};
+    data.forEach((object) => {
+      returnObj[object.id.toString()] = object;
+    });
+    return returnObj;
+  }
+
+  throw new M.CustomError('JMI conversion not yet implemented.', 501, 'warn');
+};

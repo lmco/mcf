@@ -44,7 +44,6 @@ const assert = require('assert');
 
 // NPM modules
 const mongoose = require('mongoose');
-const uuidv4 = require('uuid/v4');
 
 // MBEE modules
 const utils = M.require('lib.utils');
@@ -63,7 +62,6 @@ const options = { discriminatorKey: 'type' };
  * @description The base schema definition inherited by all other element types.
  *
  * @property {String} id - The elements non-unique element ID.
- * @property {String} uuid - The elements RFC 4122 id, automatically generated
  * or taken from another source if imported.
  * @property {String} name - THe elements non-unique name.
  * @property {Project} project - A reference to an element's project.
@@ -99,15 +97,6 @@ const ElementSchema = new mongoose.Schema({
       // No change, return the value
       return this.id;
     }
-  },
-  uuid: {
-    type: String,
-    required: false,
-    unique: true,
-    set: function(v) {
-      return v;
-    },
-    match: RegExp(validators.element.uuid)
   },
   name: {
     type: String,
@@ -224,12 +213,6 @@ ElementSchema.pre('find', function(next) {
 ElementSchema.pre('save', function(next) {
   // Run our defined setters
   this.updatedOn = '';
-
-  // If UUID is not yet defined, we auto-generate when the element is saved.
-  // This allows UUID to be optionally specified on element creation.
-  if (this.uuid === undefined || this.uuid === '') {
-    this.uuid = uuidv4();
-  }
   next();
 });
 
@@ -278,7 +261,8 @@ ElementSchema.pre('validate', function() {
 RelationshipSchema.pre('validate', function() {
   return new Promise((resolve, reject) => {
     // If source and target are already defined, return
-    if (this.source !== undefined && this.target !== undefined) {
+    if (this.$source === undefined || this.$target === undefined
+      || this.$target === null || this.$source === null) {
       return resolve();
     }
 
