@@ -100,6 +100,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should upload second artifact01 with same file', uploadSecondArtifact);
   it('should update artifact01 with new file', updateArtifact);
   it('should find updated artifact01 new filename', findArtifact);
+  it('should get the artifact binary data', getArtifactBlob);
   it('should find all artifacts in project', findArtifacts);
   it('should delete an artifact00', deleteArtifactFile);
   it('should delete second artifact01', deleteSecondArtifactFile);
@@ -118,13 +119,14 @@ function uploadArtifact(done) {
 
   // Define and initialize the meta data
   const artifactMetaData = {
-    id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename
+    filename: testData.artifacts[0].filename,
+    contentType: 'image/png'
   };
 
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
-  ArtifactController.createArtifact(adminUser, org.id, projID, artifactMetaData, artifactBlob)
+  ArtifactController.createArtifact(adminUser, org.id, projID,
+    testData.artifacts[0].id, artifactMetaData, artifactBlob)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[0].filename);
@@ -150,13 +152,14 @@ function uploadSecondArtifact(done) {
 
   // Define and initialize the meta data
   const artifactMetaData = {
-    id: testData.artifacts[1].id,
-    filename: testData.artifacts[1].filename
+    filename: testData.artifacts[1].filename,
+    contentType: 'image/png'
   };
 
   // Create artifact
   const projID = utils.parseID(proj.id).pop();
-  ArtifactController.createArtifact(adminUser, org.id, projID, artifactMetaData, artifactBlob)
+  ArtifactController.createArtifact(adminUser, org.id, projID,
+    testData.artifacts[1].id, artifactMetaData, artifactBlob)
   .then((artifact) => {
     // Verify artifact created properly
     chai.expect(artifact.filename).to.equal(testData.artifacts[1].filename);
@@ -196,6 +199,27 @@ function updateArtifact(done) {
     chai.expect(updatedArtifact.filename).to.equal(testData.artifacts[2].filename);
     chai.expect(updatedArtifact.history[1].hash)
     .to.equal('5d41098059578b5be7addfaef2bb5266fb40323128eac24e280e1779cc73748d');
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Get an existing artifact's binary data.
+ */
+function getArtifactBlob(done) {
+  // Find artifact
+  const projID = utils.parseID(proj.id).pop();
+  ArtifactController.getArtifactBlob(adminUser, org.id, projID, testData.artifacts[2].id)
+  .then((artifact) => {
+    // Verify a buffer was returned
+    chai.expect(Buffer.isBuffer(artifact.artifactBlob)).to.equal(true);
+    chai.expect(utils.parseID(artifact.artifactMeta.id).pop()).to.equal(testData.artifacts[2].id);
     done();
   })
   .catch((error) => {
