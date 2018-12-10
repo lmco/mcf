@@ -2518,7 +2518,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
  *     tags:
  *       - artifacts
  *     description: Returns a list of all artifacts and their public data from a project
- *                  a user has access to
+ *                  a user has access to.
  *     produces:
  *       - application/json
  *     parameters:
