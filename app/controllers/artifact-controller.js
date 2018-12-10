@@ -63,6 +63,11 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
       assert.ok(typeof artData.id === 'string', 'Artifact ID is not a string.');
       assert.ok(Artifact.validateObjectKeys(artData),
         'Artifact metadata contains invalid keys.');
+
+      // If _id provided, ensure it matches the id
+      if (artData._id !== undefined) {
+        assert.ok(artData._id === artData.id, '_id and id do not match.');
+      }
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -94,7 +99,7 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
       foundProj = proj;
 
       // Error check - check if the artifact already exists
-      return findArtifactsQuery({ id: artifactFullId });
+      return findArtifactsQuery({ _id: artifactFullId });
     })
     .then((_artifact) => {
       // Error Check: ensure no artifact were found
@@ -120,7 +125,7 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
 
       // Create the new Artifact
       const artifact = new Artifact({
-        id: artifactFullId,
+        _id: artifactFullId,
         filename: artData.filename,
         contentType: path.extname(artData.filename),
         history: historyData,
@@ -241,7 +246,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate, artifac
       // Get list of parameters which can be updated from model
       const validUpdateFields = _artifact.getValidUpdateFields();
 
-      // Loop through all updateable fields
+      // Loop through all updatable fields
       for (let i = 0; i < artifactUpdateFields.length; i++) {
         const updateField = artifactUpdateFields[i];
         // Error Check: Check if field can be updated
@@ -403,7 +408,7 @@ function findArtifact(reqUser, orgID, projID, artifactID, archived = false) {
 
     // Define the search params
     const searchParams = {
-      id: artifactFullID,
+      _id: artifactFullID,
       archived: false
     };
 
@@ -498,7 +503,7 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     const projectUID = utils.createID(orgID, projID);
-    const searchParams = { id: { $regex: `^${projectUID}:` }, archived: false };
+    const searchParams = { _id: { $regex: `^${projectUID}:` }, archived: false };
 
     // Error Check: Ensure user has permissions to find deleted artifacts
     if (archived && !reqUser.admin) {

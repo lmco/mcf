@@ -64,27 +64,16 @@ const extensions = M.require('models.plugin.extensions');
  *
  */
 const UserSchema = new mongoose.Schema({
-  username: {
+  _id: {
     type: String,
     required: true,
-    index: true,
-    unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    match: RegExp(validators.user.username),
-    set: function(_username) {
-      // Check value undefined
-      if (typeof this.username === 'undefined') {
-        // Return value to set it
-        return _username;
-      }
-      // Check value NOT equal to db value
-      if (_username !== this.username) {
-        // Immutable field, return error
-        M.log.warn('Username cannot be changed.');
-      }
-      // No change, return the value
-      return this.username;
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.user.username).test(v);
+      },
+      message: `${this._id} is not a valid username.`
     }
   },
   password: {
@@ -128,43 +117,47 @@ const UserSchema = new mongoose.Schema({
 });
 UserSchema.virtual('orgs.read', {
   ref: 'Organization',
-  localField: '_id',
+  localField: 'String',
   foreignField: 'permissions.read',
   justOne: false
 });
 UserSchema.virtual('orgs.write', {
   ref: 'Organization',
-  localField: '_id',
+  localField: 'String',
   foreignField: 'permissions.write',
   justOne: false
 });
 UserSchema.virtual('orgs.admin', {
   ref: 'Organization',
-  localField: '_id',
+  localField: 'String',
   foreignField: 'permissions.admin',
   justOne: false
 });
 UserSchema.virtual('proj.read', {
   ref: 'Project',
-  localField: '_id',
+  localField: 'String',
   foreignField: 'permissions.read',
   justOne: false
 });
 UserSchema.virtual('proj.write', {
   ref: 'Project',
-  localField: '_id',
+  localField: 'String',
   foreignField: 'permissions.write',
   justOne: false
 });
 UserSchema.virtual('proj.admin', {
   ref: 'Project',
-  localField: '_id',
+  localField: 'String',
   foreignField: 'permissions.admin',
   justOne: false
 });
 UserSchema.virtual('name')
 .get(function() {
   return `${this.fname} ${this.lname}`;
+});
+UserSchema.virtual('username')
+.get(function() {
+  return this._id;
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
@@ -257,7 +250,7 @@ UserSchema.methods.getValidUpdateFields = function() {
  */
 UserSchema.methods.getPublicData = function() {
   return {
-    username: this.username,
+    username: this._id,
     name: this.name,
     fname: this.fname,
     preferredName: this.preferredName,

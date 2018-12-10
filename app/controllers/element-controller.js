@@ -84,7 +84,7 @@ function findElements(reqUser, organizationID, projectID, archived = false) {
     const projID = sani.sanitize(projectID);
     const projectUID = utils.createID(orgID, projID);
 
-    const searchParams = { id: { $regex: `^${projectUID}:` }, archived: false };
+    const searchParams = { _id: { $regex: `^${projectUID}:` }, archived: false };
 
     // Error Check: Ensure user has permissions to find archived elements
     if (archived && !reqUser.admin) {
@@ -132,7 +132,6 @@ function findElements(reqUser, organizationID, projectID, archived = false) {
 function createElements(reqUser, organizationID, projectID, arrElements) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
-    console.time('TOTAL TIME');
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
@@ -145,12 +144,18 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       arrElements.forEach((element) => {
         assert.ok(element.hasOwnProperty('id'), `Element #${index} is missing an id.`);
         assert.ok(typeof element.id === 'string', `Element #${index}'s id is not a string.`);
+        // If _id provided, ensure it matches the id
+        if (element.hasOwnProperty('_id')) {
+          assert.ok(element._id === element.id, '_id and id do not match.');
+        }
         assert.ok(element.hasOwnProperty('type'), `Element #${index} is missing a type.`);
         element.type = utils.toTitleCase(element.type);
         assert.ok(validTypes.includes(element.type),
           `Element #${index} has an invalid type of ${element.type}.`);
-        assert.ok(element.hasOwnProperty('parent'), `Element #${index} is missing a parent id.`);
-        assert.ok(element.parent !== null, `Element #${index} parent id is null.`);
+        // If element parent no provided, set it to the root model element
+        if (!element.hasOwnProperty('parent') || element.parent === null) {
+          element.parent = 'model';
+        }
         // If element is a relationship, ensure source/target exist
         if (element.type === 'Relationship') {
           assert.ok(element.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
@@ -204,9 +209,9 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       // For the number of batches
       for (let i = 0; i < numBatches; i++) {
         // Define find query
-        const query = { id: { $in: arrUID.slice(i * 50000, i * 50000 + 50000) } };
+        const query = { _id: { $in: arrUID.slice(i * 50000, i * 50000 + 50000) } };
         // Attempt to find any elements already in existence
-        findPromises.push(Element.Element.find(query, 'id uuid')
+        findPromises.push(Element.Element.find(query, '_id')
         .then((elements) => {
           // TODO: Produce a more meaningful error
           if (elements.length > 0) {
@@ -226,7 +231,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       arrElements.forEach((element) => {
         // Create element data object and sanitize data
         const elemObject = Element[element.type]({
-          id: element.uid,
+          _id: element.uid,
           name: element.name,
           project: projObject._id,
           documentation: element.documentation,
@@ -279,7 +284,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
         if (element.type === 'Relationship') {
           // If the element's source is also being created
           if (jmi2.hasOwnProperty(element.$source)) {
-            element.source = jmi2[element.$source]._id;
+            element.source = element.$source;
             element.$source = null;
           }
           else {
@@ -290,7 +295,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
 
           // If the element's target is also being created
           if (jmi2.hasOwnProperty(element.$target)) {
-            element.target = jmi2[element.$target]._id;
+            element.target = element.$target;
             element.$target = null;
           }
           else {
@@ -302,10 +307,10 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       });
 
       // Create query for finding elements
-      const findExtraElementsQuery = { id: { $in: elementsToFind } };
+      const findExtraElementsQuery = { _id: { $in: elementsToFind } };
 
       // Find extra elements, and only return id and _id for faster lookup
-      return Element.Element.find(findExtraElementsQuery, 'id');
+      return Element.Element.find(findExtraElementsQuery, '_id');
     })
     .then((extraElements) => {
       // Convert extraElements to JMI type 2 for easier lookup
@@ -353,11 +358,7 @@ function createElements(reqUser, organizationID, projectID, arrElements) {
       // Create all new elements
       return Element.Element.insertMany(elementObjects);
     })
-    .then((elements) => {
-      console.timeEnd('TOTAL TIME');
-      // TODO: Figure out what to return here, since elements are not populated
-      return resolve(elements);
-    })
+    .then((elements) => resolve(elements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -532,14 +533,14 @@ function removeElements(reqUser, query) {
 
     // Define found elements array and child query
     let foundElements = [];
-    const childQuery = { id: { $in: [] } };
+    const childQuery = { _id: { $in: [] } };
 
     // Find the elements to delete
     findElementsQuery(query)
     .then((elements) => {
       // Set foundElements
       foundElements = elements;
-      const foundElementsIDs = foundElements.map(e => e._id.toString());
+      const foundElementsIDs = foundElements.map(e => e._id);
 
       // Loop through each found element
       Object(elements).forEach((element) => {
@@ -554,12 +555,12 @@ function removeElements(reqUser, query) {
           // For each child element
           element.contains.forEach((child) => {
             // Add child to foundElements
-            if (!foundElementsIDs.includes(child._id.toString())) {
+            if (!foundElementsIDs.includes(child._id)) {
               foundElements.push(child);
             }
 
             // Add child to child query
-            childQuery.id.$in.push(child.id);
+            childQuery._id.$in.push(child.id);
           });
         }
       });
@@ -568,6 +569,7 @@ function removeElements(reqUser, query) {
       return Element.Element.deleteMany(query);
     })
     // Delete any child elements
+    // TODO: This only removes one level of child elements
     .then(() => Element.Element.deleteMany(childQuery))
     // Return the deleted/archived elements
     .then(() => resolve(foundElements))
@@ -618,8 +620,7 @@ function findElement(reqUser, organizationID, projectID, elementID, archived = f
     const elemUID = utils.createID(orgID, projID, elemID);
 
     // Search for an element that matches the id or uuid
-    let searchParams = { $and: [{ $or: [{ id: elemUID },
-      { uuid: elemID }] }, { archived: false }] };
+    const searchParams = { _id: elemUID, archived: false };
 
     // Error Check: Ensure user has permissions to find archived elements
     if (archived && !reqUser.admin) {
@@ -628,7 +629,7 @@ function findElement(reqUser, organizationID, projectID, elementID, archived = f
     // Check archived flag true
     if (archived) {
       // archived flag true and User Admin true, remove archived: false
-      searchParams = { $or: [{ id: elemUID }, { uuid: elemID }] };
+      delete searchParams.archived;
     }
 
     // Find elements
@@ -732,6 +733,11 @@ function createElement(reqUser, element) {
       if (typeof element.documentation === 'string') {
         documentation = sani.sanitize(element.documentation);
       }
+
+      // If _id was provided, ensure it matches the id
+      if (element.hasOwnProperty('_id')) {
+        assert.ok(element._id === element.id, '_id and id do not match.');
+      }
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -757,9 +763,8 @@ function createElement(reqUser, element) {
       // Set foundProject to the found project
       foundProj = proj;
 
-      // Error check - check if the element already exists
-      // Must nest promises since the catch uses proj, returned from findProject.
-      return findElementsQuery({ id: elemUID });
+      // Check if the element already exists
+      return findElementsQuery({ _id: elemUID });
     })
     .then((elements) => {
       // Error Check: ensure no elements were found
@@ -767,6 +772,7 @@ function createElement(reqUser, element) {
         throw new M.CustomError('Element already exists.', 400, 'warn');
       }
 
+      // TODO: move to the param check
       // Error Check - NOT included element type
       if (!Element.Element.getValidTypes().includes(elementType)) {
         throw new M.CustomError('Invalid element type.', 400, 'warn');
@@ -774,13 +780,13 @@ function createElement(reqUser, element) {
 
       // Create the new element object
       const elemObject = new Element[elementType]({
-        id: elemUID,
+        _id: elemUID,
         name: elemName,
         project: foundProj,
         custom: custom,
         documentation: documentation,
-        createdBy: reqUser,
-        lastModifiedBy: reqUser
+        createdBy: reqUser._id,
+        lastModifiedBy: reqUser._id
       });
 
         // Set the hidden parent field, used by middleware
@@ -880,12 +886,6 @@ function updateElement(reqUser, organizationID, projectID, elementID, elementUpd
       // Loop through elemUpdateFields
       for (let i = 0; i < elemUpdateFields.length; i++) {
         updateField = elemUpdateFields[i];
-
-        // Error Check: check if updated field also exists in the original element.
-        if (!element.toJSON().hasOwnProperty(updateField)) {
-          // Original element does NOT contain updatedField, reject error
-          throw new M.CustomError(`Element does not contain field ${updateField}.`, 400, 'warn');
-        }
 
         // Check if updated field is equal to the original field
         if (utils.deepEqual(element.toJSON()[updateField], elementUpdated[updateField])) {
@@ -1008,6 +1008,7 @@ function removeElement(reqUser, organizationID, projectID, elementID) {
         throw new M.CustomError('User does not have permission.', 403, 'warn');
       }
 
+      // TODO: Only removes one level of children
       // Delete element
       return Element.Element.deleteMany({ $or: [{ _id: element._id }, { parent: element._id }] });
     })

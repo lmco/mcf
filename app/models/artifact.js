@@ -51,27 +51,12 @@ const extensions = M.require('models.plugin.extensions');
  *
  */
 const ArtifactSchema = new mongoose.Schema({
-  id: {
+  _id: {
     type: String,
     required: true,
-    index: true,
     match: RegExp(validators.artifact.id),
     maxlength: [255, 'Artifact ID is too long'],
-    minlength: [2, 'Artifact ID is too short'],
-    set: function(_id) {
-      // Check value undefined
-      if (typeof this.id === 'undefined') {
-        // Return value to set it
-        return _id;
-      }
-      // Check value NOT equal to db value
-      if (_id !== this.id) {
-        // Immutable field, return error
-        M.log.warn('ID cannot be changed.');
-      }
-      // No change, return the value
-      return this.id;
-    }
+    minlength: [2, 'Artifact ID is too short']
   },
   history: [{
     hash: {
@@ -84,7 +69,7 @@ const ArtifactSchema = new mongoose.Schema({
       required: true
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User',
       required: true
     }
@@ -98,7 +83,7 @@ const ArtifactSchema = new mongoose.Schema({
     required: true
   },
   project: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'Project',
     required: true
 
@@ -116,7 +101,7 @@ ArtifactSchema.plugin(extensions);
  */
 ArtifactSchema.methods.getPublicData = function() {
   return {
-    id: utils.parseID(this.id)[2],
+    id: utils.parseID(this._id)[2],
     filename: this.filename,
     history: this.history,
     contentType: this.contentType,
@@ -148,6 +133,7 @@ ArtifactSchema.statics.validateObjectKeys = function(object) {
 
   const validKeys = Object.keys(ArtifactSchema.paths);
   validKeys.push('artifactBlob');
+  validKeys.push('id');
   // Check if the object is NOT an instance of the artifact model
   if (!(object instanceof mongoose.model('Artifact', ArtifactSchema))) {
     // Loop through each key of the object

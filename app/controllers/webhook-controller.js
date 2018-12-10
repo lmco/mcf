@@ -85,7 +85,7 @@ function findWebhook(reqUser, organizationID, projectID, webhookID, archived = f
     const webUID = utils.createID(orgID, projID, webID);
 
     // Search for a webhook that matches the given uid
-    const findQuery = { id: webUID, archived: false };
+    const findQuery = { _id: webUID, archived: false };
 
     // Error Check: Ensure user has permissions to find archived webhooks
     if (archived && !reqUser.admin) {
@@ -184,6 +184,11 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(Webhook.Webhook.validateObjectKeys(webhookData),
         'Webhook object contains invalid keys.');
+
+      // If _id provided, ensure it matches the id
+      if (webhookData.hasOwnProperty('_id')) {
+        assert.ok(webhookData._id === webhookData.id, '_id and id do not match.');
+      }
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -196,7 +201,7 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
     const webhookUID = utils.createID(orgID, projID, webID);
 
     // Verify another webhook with same ID does NOT exist
-    findWebhooksQuery({ id: webhookUID })
+    findWebhooksQuery({ _id: webhookUID })
     .then((foundWebhook) => {
       // Error Check: ensure no existing webhook was found
       if (foundWebhook.length > 0) {
@@ -216,7 +221,7 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
       const webhookObj = (utils.toTitleCase(webhookData.type) === 'Outgoing')
         // Outgoing Webhook
         ? new Webhook.Outgoing({
-          id: webhookUID,
+          _id: webhookUID,
           name: sani.sanitize(webhookData.name),
           project: project,
           triggers: sani.sanitize(webhookData.triggers),
@@ -225,7 +230,7 @@ function createWebhook(reqUser, organizationID, projectID, webhookData) {
         })
         // Incoming Webhook
         : new Webhook.Incoming({
-          id: webhookUID,
+          _id: webhookUID,
           name: sani.sanitize(webhookData.name),
           project: project,
           triggers: sani.sanitize(webhookData.triggers),
@@ -317,12 +322,6 @@ function updateWebhook(reqUser, organizationID, projectID, webhookID, webhookUpd
       // Loop through webhookUpdateFields
       for (let i = 0; i < webhookUpdateFields.length; i++) {
         updateField = webhookUpdateFields[i];
-
-        // Error Check: check if updated field also exists in the original webhook.
-        if (!webhook.toJSON().hasOwnProperty(updateField)) {
-          // Original webhook does NOT contain updatedField, reject error
-          throw new M.CustomError(`Webhook does not contain field ${updateField}.`, 400, 'warn');
-        }
 
         // Check if updated field is equal to the original field
         if (utils.deepEqual(webhook.toJSON()[updateField], webhookUpdated[updateField])) {
@@ -426,7 +425,7 @@ function removeWebhook(reqUser, organizationID, projectID, webhookID) {
 
     // Find the webhook
     findWebhook(reqUser, organizationID, projectID, webhookID, true)
-    .then((webhook) => Webhook.Webhook.deleteOne({ id: webhook.id }))
+    .then((webhook) => Webhook.Webhook.deleteOne({ _id: webhook._id }))
     .then(() => resolve(true))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

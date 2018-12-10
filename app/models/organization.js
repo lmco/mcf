@@ -65,15 +65,15 @@ const OrganizationSchema = new mongoose.Schema({
   },
   permissions: {
     read: [{
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     }],
     write: [{
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     }],
     admin: [{
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     }]
   },
@@ -85,7 +85,7 @@ const OrganizationSchema = new mongoose.Schema({
 
 OrganizationSchema.virtual('projects', {
   ref: 'Project',
-  localField: '_id',
+  localField: 'String',
   foreignField: 'org',
   justOne: false
 });
@@ -144,15 +144,15 @@ OrganizationSchema.methods.getValidUpdateFields = function() {
  */
 OrganizationSchema.methods.getPermissions = function(user) {
   // Map org permissions lists user._ids to strings
-  const read = this.permissions.read.map(u => u._id.toString());
-  const write = this.permissions.write.map(u => u._id.toString());
-  const admin = this.permissions.admin.map(u => u._id.toString());
+  const read = this.permissions.read.map(u => u._id);
+  const write = this.permissions.write.map(u => u._id);
+  const admin = this.permissions.admin.map(u => u._id);
 
   // Return an object containing user permissions
   return {
-    read: read.includes(user._id.toString()),
-    write: write.includes(user._id.toString()),
-    admin: admin.includes(user._id.toString())
+    read: read.includes(user._id),
+    write: write.includes(user._id),
+    admin: admin.includes(user._id)
   };
 };
 

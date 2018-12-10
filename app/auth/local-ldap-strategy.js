@@ -49,7 +49,7 @@ function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
     // Search locally for the user
     User.find({
-      username: username,
+      _id: username,
       archivedOn: null
     })
     .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')

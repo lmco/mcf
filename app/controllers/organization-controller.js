@@ -401,19 +401,16 @@ function removeOrgs(reqUser, arrOrgs) {
         }
       });
 
-      // TODO: Uncomment when fix Project _id
-      //   // Delete all projects in the orgs
-      //   return Project.deleteMany({
-      //     org: {
-      //       $in: orgs.map(o => o._id)
-      //     }
-      //   });
-      // })
-      // // Delete the orgs
-      // .then(() => Organization.deleteMany(query))
-      // Return the deleted orgs
-      return Organization.deleteMany(query);
+      // Delete all projects in the orgs
+      return Project.deleteMany({
+        org: {
+          $in: orgs.map(o => o._id)
+        }
+      });
     })
+    // Delete the orgs
+    .then(() => Organization.deleteMany(query))
+    // Return the deleted orgs
     .then(() => resolve(foundOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -515,10 +512,7 @@ function findOrgsQuery(orgQuery) {
   return new Promise((resolve, reject) => {
     // Find orgs
     Organization.find(orgQuery)
-      // TODO Uncomment after fixing project _id
-    // .populate('projects permissions.read permissions.write permissions.admin archivedBy'
-    //   + ' lastModifiedBy')
-    .populate('permissions.read permissions.write permissions.admin archivedBy'
+    .populate('projects permissions.read permissions.write permissions.admin archivedBy'
       + ' lastModifiedBy')
     .then((orgs) => resolve(orgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -592,8 +586,6 @@ function createOrg(reqUser, newOrgData) {
           'An organization with the same ID already exists.', 403, 'warn'
         );
       }
-
-      console.log(orgID);
 
       // Create the new org
       const newOrg = new Organization({
@@ -689,14 +681,6 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
       // Loop through orgUpdateFields
       for (let i = 0; i < orgUpdateFields.length; i++) {
         const updateField = orgUpdateFields[i];
-
-        // Check if original org does NOT contain updatedField
-        if (!org.toJSON().hasOwnProperty(updateField)) {
-          // Original org does NOT contain updatedField, reject error
-          throw new M.CustomError(
-            `Organization does not contain field ${updateField}.`, 400, 'warn'
-          );
-        }
 
         // Check if updated field is equal to the original field
         if (utils.deepEqual(org.toJSON()[updateField], orgUpdated[updateField])) {

@@ -42,7 +42,7 @@ module.exports.createNonadminUser = function() {
     let newUser = null;
 
     // Check any admin exist
-    User.findOne({ username: testData.users[1].username })
+    User.findOne({ _id: testData.users[1].username })
     .then((foundUser) => {
       // Check user found
       if (foundUser !== null) {
@@ -52,7 +52,7 @@ module.exports.createNonadminUser = function() {
 
       // Create user
       const user = new User({
-        username: testData.users[1].username,
+        _id: testData.users[1].username,
         password: testData.users[1].password,
         fname: testData.users[1].fname,
         lname: testData.users[1].lname,
@@ -92,7 +92,7 @@ module.exports.createAdminUser = function() {
     let newAdminUser = null;
 
     // Check any admin exist
-    User.findOne({ username: testData.users[0].adminUsername })
+    User.findOne({ _id: testData.users[0].adminUsername })
     .then((foundUser) => {
       // Check user found
       if (foundUser !== null) {
@@ -102,7 +102,7 @@ module.exports.createAdminUser = function() {
 
       // Create user
       const user = new User({
-        username: testData.users[0].adminUsername,
+        _id: testData.users[0].adminUsername,
         password: testData.users[0].adminPassword,
         provider: 'local',
         admin: true
@@ -141,7 +141,7 @@ module.exports.removeNonadminUser = function() {
     let userToDelete = null;
 
     // Find admin user
-    User.findOne({ username: testData.users[1].username })
+    User.findOne({ _id: testData.users[1].username })
     .then((foundUser) => {
       // Save user and remove user
       userToDelete = foundUser;
@@ -151,9 +151,9 @@ module.exports.removeNonadminUser = function() {
     .then((orgs) => {
       // Remove user from permissions list in each project
       orgs[0].permissions.read = orgs[0].permissions.read
-      .filter(user => user._id.toString() !== userToDelete._id.toString());
+      .filter(user => user !== userToDelete._id.toString());
       orgs[0].permissions.write = orgs[0].permissions.write
-      .filter(user => user._id.toString() !== userToDelete._id.toString());
+      .filter(user => user !== userToDelete._id.toString());
       return orgs[0].save();
     })
     .then(() => resolve(userToDelete.username))
@@ -171,7 +171,7 @@ module.exports.removeAdminUser = function() {
     let userToDelete = null;
 
     // Find admin user
-    User.findOne({ username: testData.users[0].adminUsername })
+    User.findOne({ _id: testData.users[0].adminUsername })
     .then((foundUser) => {
       // Save user and remove user
       userToDelete = foundUser;
@@ -181,9 +181,9 @@ module.exports.removeAdminUser = function() {
     .then((orgs) => {
       // Remove user from permissions list in each project
       orgs[0].permissions.read = orgs[0].permissions.read
-      .filter(user => user._id.toString() !== userToDelete._id.toString());
+      .filter(user => user !== userToDelete._id.toString());
       orgs[0].permissions.write = orgs[0].permissions.write
-      .filter(user => user._id.toString() !== userToDelete._id.toString());
+      .filter(user => user !== userToDelete._id.toString());
       return orgs[0].save();
     })
     .then(() => resolve(userToDelete.username))

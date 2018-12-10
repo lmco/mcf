@@ -56,30 +56,14 @@ const extensions = M.require('models.plugin.extensions');
  *
  */
 const ProjectSchema = new mongoose.Schema({
-  id: {
+  _id: {
     type: String,
     required: true,
-    index: true,
-    unique: true,
     match: RegExp(validators.project.id),
-    maxlength: [255, 'Too many characters in username'],
-    set: function(_id) {
-      // Check value undefined
-      if (typeof this.id === 'undefined') {
-        // Return value to set it
-        return _id;
-      }
-      // Check value NOT equal to db value
-      if (_id !== this.id) {
-        // Immutable field, return error
-        M.log.warn('ID cannot be changed.');
-      }
-      // No change, return the value
-      return this.id;
-    }
+    maxlength: [255, 'Too many characters in username']
   },
   org: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'Organization',
     required: true,
     set: function(_org) {
@@ -104,15 +88,15 @@ const ProjectSchema = new mongoose.Schema({
   },
   permissions: {
     read: [{
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     }],
     write: [{
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     }],
     admin: [{
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     }]
   },
@@ -146,10 +130,10 @@ ProjectSchema.methods.getPublicData = function() {
 
   // Return the projects public fields
   return {
-    id: utils.parseID(this.id).pop(),
+    id: utils.parseID(this._id).pop(),
     // NOTE (jk): Not sure why the toString is needed, but a buffer gets
     // returned when posting a project via the API
-    org: this.org.id,
+    org: this.org._id,
     name: this.name,
     permissions: permissions,
     custom: this.custom,
@@ -192,15 +176,15 @@ ProjectSchema.methods.getVisibilityLevels = function() {
  */
 ProjectSchema.methods.getPermissions = function(user) {
   // Map project.permissions user._ids to strings
-  const read = this.permissions.read.map(u => u._id.toString());
-  const write = this.permissions.write.map(u => u._id.toString());
-  const admin = this.permissions.admin.map(u => u._id.toString());
+  const read = this.permissions.read.map(u => u._id);
+  const write = this.permissions.write.map(u => u._id);
+  const admin = this.permissions.admin.map(u => u._id);
 
   // If user exists in any of the list, set the permission to true
   const permissions = {
-    read: read.includes(user._id.toString()),
-    write: write.includes(user._id.toString()),
-    admin: admin.includes(user._id.toString())
+    read: read.includes(user._id),
+    write: write.includes(user._id),
+    admin: admin.includes(user._id)
   };
 
   // If projects visibility is internal
@@ -235,12 +219,16 @@ ProjectSchema.statics.getValidUpdateFields = function() {
 ProjectSchema.statics.validateObjectKeys = function(object) {
   // Initialize returnBool to true
   let returnBool = true;
+  // Set list array of valid keys
+  const validKeys = Object.keys(ProjectSchema.paths);
+  // Add 'id' to list of valid keys, for 0.6.0 support
+  validKeys.push('id');
   // Check if the object is NOT an instance of the project model
   if (!(object instanceof mongoose.model('Project', ProjectSchema))) {
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the project model
-      if (!Object.keys(ProjectSchema.paths).includes(key)) {
+      if (!validKeys.includes(key)) {
         // Key is not in project model, return false
         returnBool = false;
       }

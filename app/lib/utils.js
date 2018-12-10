@@ -303,7 +303,7 @@ module.exports.convertJMI = function(from, to, data) {
 
     const returnObj = {};
     data.forEach((object) => {
-      returnObj[object.id.toString()] = object;
+      returnObj[object._id.toString()] = object;
     });
     return returnObj;
   }

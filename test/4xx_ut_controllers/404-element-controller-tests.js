@@ -343,7 +343,7 @@ function updateMultipleElements(done) {
     utils.createID(proj.id, testData.elements[0].id),
     utils.createID(proj.id, testData.elements[1].id)
   ];
-  const updateQuery = { id: { $in: ids } };
+  const updateQuery = { _id: { $in: ids } };
 
   // Create list of update parameters
   const updateObj = {

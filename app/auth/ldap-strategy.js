@@ -340,7 +340,7 @@ function ldapSync(ldapUserObj) {
       // Error message 'Not Found', create user in database
       // Initialize userData with LDAP information
       const initData = new User({
-        username: ldapUserObj[ldapConfig.attributes.username],
+        _id: ldapUserObj[ldapConfig.attributes.username],
         fname: ldapUserObj[ldapConfig.attributes.firstName],
         preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
         lname: ldapUserObj[ldapConfig.attributes.lastName],
@@ -348,6 +348,7 @@ function ldapSync(ldapUserObj) {
         provider: 'ldap'
       });
 
+      // TODO: LDAP users are not being added to the default org (MBX-686)
       // Save ldap user
       return initData.save()
       // Save successful, resolve user model object

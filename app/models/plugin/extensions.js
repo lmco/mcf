@@ -20,21 +20,18 @@
  * archivedOn, updatedOn, and archived.
  */
 
-// NPM modules
-const mongoose = require('mongoose');
-
 module.exports = function extensionPlugin(schema) {
   schema.add({
     archivedBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     },
     createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     },
     lastModifiedBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     },
     createdOn: {

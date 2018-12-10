@@ -191,7 +191,7 @@ function createDefaultAdmin() {
       // No global admin exists, create local user as global admin
       const adminUserData = new User({
         // Set username and password of global admin user from configuration.
-        username: M.config.server.defaultAdminUsername,
+        _id: M.config.server.defaultAdminUsername,
         password: M.config.server.defaultAdminPassword,
         provider: 'local',
         admin: true

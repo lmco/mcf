@@ -61,7 +61,7 @@ const utils = M.require('lib.utils');
 function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
     User.findOne({
-      username: username,
+      _id: username,
       archivedOn: null
     }, (findUserErr, user) => {
       // Check for errors
@@ -125,7 +125,7 @@ function handleTokenAuth(req, res, token) {
     if (Date.now() < Date.parse(decryptedToken.expires)) {
       // Not expired, find user
       User.findOne({
-        username: sani.sanitize(decryptedToken.username),
+        _id: sani.sanitize(decryptedToken.username),
         archivedOn: null
       }, (findUserTokenErr, user) => {
         if (findUserTokenErr) {
