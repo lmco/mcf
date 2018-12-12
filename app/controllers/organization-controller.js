@@ -135,6 +135,10 @@ function createOrgs(reqUser, arrOrgs) {
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
         // Error Check: ensure object only contains valid keys
         assert.ok(Organization.validateObjectKeys(org), `Org #${index} contains invalid keys.`);
+        // If user provided _id, ensure _id and id match
+        if (org.hasOwnProperty('_id')) {
+          assert.ok(org._id === org.id, `Org #${index} id and _id do not match.`);
+        }
         index++;
       });
     }
@@ -148,7 +152,7 @@ function createOrgs(reqUser, arrOrgs) {
     }
 
     // Create the find query
-    const findQuery = { id: { $in: sani.sanitize(arrOrgs.map(o => o.id)) } };
+    const findQuery = { _id: { $in: sani.sanitize(arrOrgs.map(o => o.id)) } };
 
     // Ensure no orgs are already created
     findOrgsQuery(findQuery)
@@ -156,13 +160,16 @@ function createOrgs(reqUser, arrOrgs) {
       // Error Check: ensure no orgs have already been created
       if (foundOrgs.length > 0) {
         // Get the ID's of the conflicting orgs
-        const foundIDs = foundOrgs.map(o => o.id);
+        const foundIDs = foundOrgs.map(o => o._id);
         throw new M.CustomError('Org(s) with the following ID(s) already'
           + ` exists: [${foundIDs.toString()}].`, 403, 'warn');
       }
 
       // Convert each object in arrOrgs into an Org object and set permissions
       const orgObjects = arrOrgs.map(o => {
+        // Set the _id field with supplied id
+        o._id = o.id;
+
         const orgObject = new Organization(sani.sanitize(o));
         orgObject.permissions.read.push(reqUser._id);
         orgObject.permissions.write.push(reqUser._id);
@@ -177,8 +184,8 @@ function createOrgs(reqUser, arrOrgs) {
     })
     .then((createdOrgs) => {
       // Create the find query
-      const findcreatedOrgsQuery = { id: { $in: sani.sanitize(createdOrgs.map(o => o.id)) } };
-      return findOrgsQuery(findcreatedOrgsQuery);
+      const findCreatedOrgsQuery = { _id: { $in: sani.sanitize(createdOrgs.map(o => o._id)) } };
+      return findOrgsQuery(findCreatedOrgsQuery);
     })
     .then((foundOrgs) => resolve(foundOrgs))
     .catch((error) => {
@@ -377,7 +384,7 @@ function removeOrgs(reqUser, arrOrgs) {
 
     // Define found orgs array
     let foundOrgs = [];
-    const query = { id: { $in: arrOrgs.map(o => o.id) } };
+    const query = { _id: { $in: arrOrgs.map(o => o.id) } };
 
     // Find the orgs the user wishes to delete
     findOrgsQuery(query)
@@ -388,12 +395,11 @@ function removeOrgs(reqUser, arrOrgs) {
       // Loop through each found org
       Object(orgs).forEach((org) => {
         // Error Check: ensure reqUser is not deleting the default org
-        if (org.id === M.config.server.defaultOrganizationId) {
+        if (org._id === M.config.server.defaultOrganizationId) {
           // orgID is default, reject error.
           throw new M.CustomError('The default organization cannot be deleted.', 403, 'warn');
         }
       });
-
 
       // Delete all projects in the orgs
       return Project.deleteMany({
@@ -446,7 +452,7 @@ function findOrg(reqUser, organizationID, archived = false) {
     const orgID = sani.sanitize(organizationID);
 
     // Set search Params for orgid and archived: false
-    const searchParams = { id: orgID, archived: false };
+    const searchParams = { _id: orgID, archived: false };
 
     // Error Check: Ensure user has permissions to find archived orgs
     if (archived && !reqUser.admin) {
@@ -552,6 +558,11 @@ function createOrg(reqUser, newOrgData) {
           'Custom in request body is not an object.');
         custom = sani.sanitize(newOrgData.custom);
       }
+
+      // If user also provided an _id field, ensure id and _id match
+      if (newOrgData.hasOwnProperty('_id')) {
+        assert.ok(newOrgData._id === newOrgData.id, '_id and id do not match.');
+      }
     }
     catch (error) {
       let statusCode = 400;
@@ -567,7 +578,7 @@ function createOrg(reqUser, newOrgData) {
     const orgName = sani.sanitize(newOrgData.name);
 
     // Check if org already exists
-    findOrgsQuery({ id: orgID })
+    findOrgsQuery({ _id: orgID })
     .then((foundOrg) => {
       // Error Check: ensure no org was found
       if (foundOrg.length > 0) {
@@ -578,22 +589,22 @@ function createOrg(reqUser, newOrgData) {
 
       // Create the new org
       const newOrg = new Organization({
-        id: orgID,
+        _id: orgID,
         name: orgName,
         permissions: {
           admin: [reqUser._id],
           write: [reqUser._id],
           read: [reqUser._id]
         },
-        createdBy: reqUser,
-        lastModifiedBy: reqUser,
+        createdBy: reqUser._id,
+        lastModifiedBy: reqUser._id,
         custom: custom
       });
       // Save new org
       return newOrg.save();
     })
     // Find created org
-    .then((createdOrg) => findOrgsQuery({ id: createdOrg.id }))
+    .then((createdOrg) => findOrgsQuery({ _id: createdOrg.id }))
     // Return found org
     .then((foundOrg) => resolve(foundOrg[0]))
     // Return reject with custom error
@@ -670,14 +681,6 @@ function updateOrg(reqUser, organizationID, orgUpdated) {
       // Loop through orgUpdateFields
       for (let i = 0; i < orgUpdateFields.length; i++) {
         const updateField = orgUpdateFields[i];
-
-        // Check if original org does NOT contain updatedField
-        if (!org.toJSON().hasOwnProperty(updateField)) {
-          // Original org does NOT contain updatedField, reject error
-          throw new M.CustomError(
-            `Organization does not contain field ${updateField}.`, 400, 'warn'
-          );
-        }
 
         // Check if updated field is equal to the original field
         if (utils.deepEqual(org.toJSON()[updateField], orgUpdated[updateField])) {
@@ -793,7 +796,7 @@ function removeOrg(reqUser, organizationID) {
       return ProjController.removeProjects(reqUser, organizationID, projects);
     })
     // Delete the org
-    .then(() => Organization.deleteOne({ id: org.id }))
+    .then(() => Organization.deleteOne({ _id: org.id }))
     // Resolve the deleted org
     .then(() => resolve(org))
     // Catch errors and reject with custom error

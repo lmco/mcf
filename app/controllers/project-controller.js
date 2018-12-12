@@ -87,7 +87,7 @@ function findProjects(reqUser, organizationID, archived = false) {
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
-    const searchParams = { id: { $regex: `^${orgID}:` }, archived: false };
+    const searchParams = { _id: { $regex: `^${orgID}:` }, archived: false };
 
     // Error Check: Ensure user has permissions to find archived projects
     if (archived && !reqUser.admin) {
@@ -137,6 +137,10 @@ function createProjects(reqUser, organizationID, arrProjects) {
         assert.ok(typeof project.id === 'string', `Project #${index}'s id is not a string.`);
         // Error Check: ensure object only contains valid keys
         assert.ok(Project.validateObjectKeys(project), `Project #${index} contains invalid keys.`);
+        // If user provided _id, ensure _id and id match
+        if (project.hasOwnProperty('_id')) {
+          assert.ok(project._id === project.id, `Project #${index} id and _id do not match.`);
+        }
         index++;
       });
     }
@@ -147,7 +151,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
     // Create the find query
     const projectIDs = arrProjects.map(p => utils.createID(organizationID, p.id));
     const findQuery = {
-      id: {
+      _id: {
         $in: sani.sanitize(projectIDs)
       }
     };
@@ -161,7 +165,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
       // Error Check: ensure no projects already exist
       if (projects.length > 0) {
         // Get the ids of the projects that already exist
-        const existingIDs = projects.map(p => p.id);
+        const existingIDs = projects.map(p => p._id);
         throw new M.CustomError(`Project(s) with the following id(s) ' +
           'already exists: [${existingIDs.toString()}].`, 403, 'warn');
       }
@@ -175,11 +179,10 @@ function createProjects(reqUser, organizationID, arrProjects) {
         throw new M.CustomError('User does not have permissions.', 403, 'warn');
       }
 
-
       // Convert each project into a project object
       const projObjects = arrProjects.map(p => {
         const projData = JSON.parse(JSON.stringify(p)); // Need to use a copy
-        projData.id = utils.createID(organizationID, projData.id);
+        projData._id = utils.createID(organizationID, projData.id);
 
         const projObject = new Project(sani.sanitize(projData));
         projObject.org = org._id;
@@ -220,7 +223,7 @@ function createProjects(reqUser, organizationID, arrProjects) {
     })
     .then(() => {
       // Create the find query
-      const refindQuery = { id: { $in: sani.sanitize(createdProjects.map(o => o.id)) } };
+      const refindQuery = { _id: { $in: sani.sanitize(createdProjects.map(p => p._id)) } };
       return findProjectsQuery(refindQuery);
     })
     .then((foundProjects) => resolve(foundProjects))
@@ -280,7 +283,7 @@ function updateProjects(reqUser, organizationID, arrProjects) {
 
     const projectIDs = arrProjects.map(p => sani.sanitize(utils.createID(organizationID, p.id)));
     const findQuery = {
-      id: {
+      _id: {
         $in: projectIDs
       }
     };
@@ -447,7 +450,7 @@ function removeProjects(_reqUser, _organizationID, _arrProjects = []) {
     // Build remove search query
     const orgID = sani.sanitize(organizationID);
     const removeQuery = {
-      id: {
+      _id: {
         $in: arrProjects.map(p => utils.createID(orgID, p.id))
       }
     };
@@ -472,7 +475,7 @@ function removeProjects(_reqUser, _organizationID, _arrProjects = []) {
       // Create delete query to remove elements
       const elementDeleteQuery = { project: { $in: foundProjects.map(p => p._id) } };
       // Delete all elements in the projects
-      return ElementController.removeElements(reqUser, elementDeleteQuery, true);
+      return ElementController.removeElements(reqUser, elementDeleteQuery);
     })
     // Remove projects
     .then(() => Project.deleteMany(removeQuery))
@@ -519,7 +522,7 @@ function findProject(reqUser, organizationID, projectID, archived = false) {
     const projID = utils.createID(orgID, sani.sanitize(projectID));
 
     // Set search Params for projUID and archived: false
-    const searchParams = { id: projID, archived: false };
+    const searchParams = { _id: projID, archived: false };
 
     // Error Check: Ensure user has permissions to find archived projects
     if (archived && !reqUser.admin) {
@@ -633,6 +636,11 @@ function createProject(reqUser, organizationID, project) {
         assert.ok(visLevels.includes(visibility), 'Invalid visibility level');
         visibility = project.visibility;
       }
+
+      // If user also provided an _id field, ensure id and _id match
+      if (project.hasOwnProperty('_id')) {
+        assert.ok(project._id === project.id, '_id and id do not match.');
+      }
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -658,7 +666,7 @@ function createProject(reqUser, organizationID, project) {
       org = _org;
 
       // Check if project already exists
-      return findProjectsQuery({ id: projID });
+      return findProjectsQuery({ _id: projID });
     })
     .then((foundProject) => {
       // Error Check: ensure no project was found
@@ -668,7 +676,7 @@ function createProject(reqUser, organizationID, project) {
 
       // Create the new project
       const newProject = new Project({
-        id: projID,
+        _id: projID,
         name: projName,
         org: org._id,
         permissions: {
@@ -699,7 +707,7 @@ function createProject(reqUser, organizationID, project) {
       return ElementController.createElement(reqUser, rootElement);
     })
     // Return the created project
-    .then(() => findProjectsQuery({ id: createdProject.id }))
+    .then(() => findProjectsQuery({ _id: createdProject._id }))
     .then((foundProject) => resolve(foundProject[0]))
     // Return reject with custom error
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -886,7 +894,7 @@ function removeProject(reqUser, organizationID, projectID) {
       return ElementController.removeElements(reqUser, elementDeleteQuery);
     })
     // Delete project
-    .then(() => Project.deleteOne({ id: foundProject.id }))
+    .then(() => Project.deleteOne({ _id: foundProject._id }))
     .then(() => resolve(foundProject))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

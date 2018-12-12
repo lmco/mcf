@@ -184,14 +184,14 @@ function createMultipleUsers(done) {
     createdUsers = users;
 
     // Find the default org
-    return Organization.findOne({ id: M.config.server.defaultOrganizationId });
+    return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
   })
   .then((defaultOrg) => {
     // Verify users have been added to default org
-    chai.expect(defaultOrg.permissions.read).to.include(createdUsers[0]._id.toString());
-    chai.expect(defaultOrg.permissions.read).to.include(createdUsers[1]._id.toString());
-    chai.expect(defaultOrg.permissions.write).to.include(createdUsers[0]._id.toString());
-    chai.expect(defaultOrg.permissions.write).to.include(createdUsers[1]._id.toString());
+    chai.expect(defaultOrg.permissions.read).to.include(createdUsers[0]._id);
+    chai.expect(defaultOrg.permissions.read).to.include(createdUsers[1]._id);
+    chai.expect(defaultOrg.permissions.write).to.include(createdUsers[0]._id);
+    chai.expect(defaultOrg.permissions.write).to.include(createdUsers[1]._id);
     done();
   })
   .catch((error) => {
@@ -301,7 +301,7 @@ function updateFirstName(done) {
  */
 function updateMultipleUsers(done) {
   // Create query to update users
-  const updateQuery = { username: { $in: [
+  const updateQuery = { _id: { $in: [
     testData.users[2].username,
     testData.users[4].username
   ] } };
@@ -622,7 +622,7 @@ function deleteMultipleUsers(done) {
     chai.expect(deletedUsers.length).to.equal(2);
 
     // Find the default org
-    return Organization.findOne({ id: M.config.server.defaultOrganizationId });
+    return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
   })
   .then((defaultOrg) => {
     // Verify deleted users are not in default org

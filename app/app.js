@@ -67,10 +67,10 @@ function initApp() {
     app.use('/favicon.ico', express.static('build/public/img/favicon.ico'));
 
     // for parsing application/json
-    app.use(bodyParser.json());
+    app.use(bodyParser.json({ limit: '50mb' }));
 
     // for parsing application/xwww-form-urlencoded
-    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
     // Trust proxy for IP logging
     app.enable('trust proxy');
@@ -133,7 +133,7 @@ function createDefaultOrganization() {
       // Set userIDs to the _id of the users array
       userIDs = users.map(u => u._id);
       // Find the default organization
-      return Organization.findOne({ id: M.config.server.defaultOrganizationId });
+      return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
     })
     .then(org => {
       // Check if org is NOT null
@@ -149,7 +149,7 @@ function createDefaultOrganization() {
       // Default organization does NOT exist, create it and add all active users
       // to permissions list
       const defaultOrg = new Organization({
-        id: M.config.server.defaultOrganizationId,
+        _id: M.config.server.defaultOrganizationId,
         name: M.config.server.defaultOrganizationName,
         permissions: {
           read: userIDs,
@@ -189,7 +189,7 @@ function createDefaultAdmin() {
       // No global admin exists, create local user as global admin
       const adminUserData = new User({
         // Set username and password of global admin user from configuration.
-        username: M.config.server.defaultAdminUsername,
+        _id: M.config.server.defaultAdminUsername,
         password: M.config.server.defaultAdminPassword,
         provider: 'local',
         admin: true

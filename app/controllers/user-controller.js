@@ -122,6 +122,10 @@ function createUsers(reqUser, arrNewUsers) {
         assert.ok(userObject.hasOwnProperty('username'), `Username not provided user #${index}.`);
         assert.ok(typeof userObject.username === 'string',
           `Username in user #${index} is not a string.`);
+        // If _id provided, ensure it matches username
+        if (userObject.hasOwnProperty('_id')) {
+          assert.ok(userObject._id === userObject.username, '_id and username do not match.');
+        }
         index++;
       });
     }
@@ -139,7 +143,7 @@ function createUsers(reqUser, arrNewUsers) {
     let created = false;
 
     // Create find query
-    const findQuery = { username: { $in: sani.sanitize(arrNewUsers.map(u => u.username)) } };
+    const findQuery = { _id: { $in: sani.sanitize(arrNewUsers.map(u => u.username)) } };
 
     // Attempt to find existing users
     findUsersQuery(findQuery)
@@ -148,18 +152,28 @@ function createUsers(reqUser, arrNewUsers) {
       if (users.length > 0) {
         // One or more users exists, reject
         throw new M.CustomError('User(s) with matching username(s) '
-          + ` already exist: [${users.map(u => u.username).toString()}].`, 403, 'warn');
+          + ` already exist: [${users.map(u => u._id).toString()}].`, 403, 'warn');
       }
 
       // Create user objects
-      const userObjects = arrNewUsers.map(u => new User(sani.sanitize(u)));
+      const userObjects = arrNewUsers.map(u => new User({
+        _id: sani.sanitize(u.username),
+        password: u.password || undefined,
+        email: sani.sanitize(u.email || undefined),
+        fname: sani.sanitize(u.fname || undefined),
+        lname: sani.sanitize(u.lname || undefined),
+        preferredName: sani.sanitize(u.preferredName || undefined),
+        admin: sani.sanitize(u.admin || undefined),
+        provided: sani.sanitize(u.provider || undefined),
+        custom: sani.sanitize(u.custom || {})
+      }));
 
       // Loop through all the new users
       userObjects.forEach((user) => {
         // Error Check: ensure password is provided if local strategy
         if (user.password === undefined && user.provider === 'local') {
           throw new M.CustomError(
-            `Password is required for local user [${user.username}`, 403, 'warn'
+            `Password is required for local user [${user._id}`, 403, 'warn'
           );
         }
 
@@ -185,8 +199,8 @@ function createUsers(reqUser, arrNewUsers) {
       // Loop through each created user
       Object(createdUsers).forEach((user) => {
         // Add each user to read/write list of default org
-        defaultOrg.permissions.read.push(user._id.toString());
-        defaultOrg.permissions.write.push(user._id.toString());
+        defaultOrg.permissions.read.push(user._id);
+        defaultOrg.permissions.write.push(user._id);
       });
 
       // Save the updated default org
@@ -395,8 +409,8 @@ function removeUsers(reqUser, _arrUsers) {
 
     // Build remove query
     const usernames = arrUsers.map(u => u.username);
-    const removeQuery = { username: { $in: usernames } };
-    const orgProjQuery = { 'permissions.read': { $in: arrUsers.map(u => u._id) } };
+    const removeQuery = { _id: { $in: usernames } };
+    const orgProjQuery = { 'permissions.read': { $in: usernames } };
     let foundUsers = [];
 
     // Error Check: ensure user is not deleting themselves
@@ -421,11 +435,11 @@ function removeUsers(reqUser, _arrUsers) {
       Object(orgs).forEach((org) => {
         // Remove users from permissions list in each org
         org.permissions.read = org.permissions.read
-        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        .filter(user => !foundUsers.map(u => u._id).includes(user._id));
         org.permissions.write = org.permissions.write
-        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        .filter(user => !foundUsers.map(u => u._id).includes(user._id));
         org.permissions.admin = org.permissions.admin
-        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        .filter(user => !foundUsers.map(u => u._id).includes(user._id));
 
         // Add save operation to list of promises
         promises.push(org.save());
@@ -444,11 +458,11 @@ function removeUsers(reqUser, _arrUsers) {
       Object(projects).forEach((proj) => {
         // Remove users from permissions list in each project
         proj.permissions.read = proj.permissions.read
-        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        .filter(user => !foundUsers.map(u => u._id).includes(user._id));
         proj.permissions.write = proj.permissions.write
-        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        .filter(user => !foundUsers.map(u => u._id).includes(user._id));
         proj.permissions.admin = proj.permissions.admin
-        .filter(user => !foundUsers.map(u => u._id.toString()).includes(user._id.toString()));
+        .filter(user => !foundUsers.map(u => u._id).includes(user._id));
 
         // Add save operation to list of promises
         promises.push(proj.save());
@@ -499,7 +513,7 @@ function findUser(reqUser, searchedUsername, archived = false) {
     // Sanitize query inputs
     const username = sani.sanitize(searchedUsername);
 
-    const searchParams = { username: username, archived: false };
+    const searchParams = { _id: username, archived: false };
 
     // Check archived flag true and User Admin true
     if (archived && reqUser.admin) {
@@ -582,6 +596,10 @@ function createUser(reqUser, newUserData) {
       assert.ok(newUserData.hasOwnProperty('username'), 'Username not provided in request body.');
       assert.ok(typeof newUserData.username === 'string',
         'Username in request body is not a string.');
+      // If _id provided, ensure it matches username
+      if (newUserData.hasOwnProperty('_id')) {
+        assert.ok(newUserData._id === newUserData.username, '_id and username do not match.');
+      }
     }
     catch (error) {
       let statusCode = 400;
@@ -596,7 +614,7 @@ function createUser(reqUser, newUserData) {
     let createdUser = null;
 
     // Check if user already exists
-    findUsersQuery({ username: sani.sanitize(newUserData.username) })
+    findUsersQuery({ _id: sani.sanitize(newUserData.username) })
     .then((users) => {
       // Error Check: ensure no user was found
       if (users.length >= 1) {
@@ -606,7 +624,17 @@ function createUser(reqUser, newUserData) {
       }
 
       // Create the new user
-      const user = new User(sani.sanitize(newUserData));
+      const user = new User({
+        _id: sani.sanitize(newUserData.username),
+        password: newUserData.password || undefined,
+        email: sani.sanitize(newUserData.email || undefined),
+        fname: sani.sanitize(newUserData.fname || undefined),
+        lname: sani.sanitize(newUserData.lname || undefined),
+        preferredName: sani.sanitize(newUserData.preferredName || undefined),
+        admin: sani.sanitize(newUserData.admin || undefined),
+        provided: sani.sanitize(newUserData.provider),
+        custom: sani.sanitize(newUserData.custom || {})
+      });
 
       // Update the created by and last modified field
       user.createdBy = reqUser;
@@ -623,7 +651,7 @@ function createUser(reqUser, newUserData) {
     .then((user) => {
       createdUser = user;
       // Find the default organization
-      return OrgController.findOrgsQuery({ id: M.config.server.defaultOrganizationId });
+      return OrgController.findOrgsQuery({ _id: M.config.server.defaultOrganizationId });
     })
     .then((orgs) => {
       // Add user to default org read/write permissions
@@ -741,7 +769,7 @@ function updateUser(reqUser, usernameToUpdate, newUserData) {
       }
 
       // Define query
-      const query = { username: user.username };
+      const query = { _id: user.username };
 
       // Set lastModifiedBy field
       newUserData.lastModifiedBy = reqUser._id;
@@ -817,11 +845,11 @@ function removeUser(reqUser, usernameToDelete) {
       Object(orgs).forEach((org) => {
         // Remove user from permissions list in each org
         org.permissions.read = org.permissions.read
-        .filter(user => user._id.toString() !== userToDelete._id.toString());
+        .filter(user => user._id !== userToDelete._id);
         org.permissions.write = org.permissions.write
-        .filter(user => user._id.toString() !== userToDelete._id.toString());
+        .filter(user => user._id !== userToDelete._id);
         org.permissions.admin = org.permissions.admin
-        .filter(user => user._id.toString() !== userToDelete._id.toString());
+        .filter(user => user._id !== userToDelete._id);
 
         // Add save operation to list of promises
         promises.push(org.save());

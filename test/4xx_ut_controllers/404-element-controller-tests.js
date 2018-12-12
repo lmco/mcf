@@ -106,12 +106,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a child element', createChildElement);
   it('should fail creating an element with a '
     + 'non-package parent', rejectElementInvalidParentType);
-  it('should create a block element', createBlockWithUUID);
   it('should create a relationship', createRelationship);
   it('should create multiple elements', createMultipleElements);
-  it('should fail creating an element with existing uuid', rejectCreateElementExistingUUID);
   it('should find all elements for a project', findElements);
-  it('should find an element by its uuid', findElementByUUID);
   it('should update an element', updateElement);
   it('should update multiple elements', updateMultipleElements);
   it('should archive an element', archiveElement);
@@ -137,6 +134,7 @@ function createPackage(done) {
     // Element was created, verify its properties
     chai.expect(retElem.id).to.equal(utils.createID(proj.id, testData.elements[0].id));
     chai.expect(retElem.name).to.equal(testData.elements[0].name);
+
     done();
   })
   .catch((error) => {
@@ -227,31 +225,6 @@ function rejectElementInvalidParentType(done) {
 }
 
 /**
- * @description Verifies block element created with a provided UUID.
- */
-function createBlockWithUUID(done) {
-  // Element data
-  const newElement = testData.elements[2];
-  newElement.projectUID = proj.id;
-
-  // Create the element
-  ElemController.createElement(adminUser, newElement)
-  .then((retElem) => {
-    // Expect element create to succeed, verify element properties
-    chai.expect(retElem.id).to.equal(utils.createID(proj.id, testData.elements[2].id));
-    chai.expect(retElem.parent).to.not.equal(null);
-    chai.expect(retElem.uuid).to.equal(testData.elements[2].uuid);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-    done();
-  });
-}
-
-/**
  * @description Verifies elements of type 'Relationship' can be created.
  */
 function createRelationship(done) {
@@ -307,30 +280,6 @@ function createMultipleElements(done) {
 }
 
 /**
- * @description Verifies UUID is unique.
- * Expected error thrown: 'Bad Request'
- */
-function rejectCreateElementExistingUUID(done) {
-  // Element data
-  const newElement = testData.invalidElements[1];
-  newElement.projectUID = proj.id;
-
-  // Create the element, expected to fail
-  ElemController.createElement(adminUser, newElement)
-  .then(() => {
-    // Expect createElement() to fail
-    // Element create succeeded, force test to fail
-    chai.assert(true === false);
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Bad Request'
-    chai.expect(error.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-/**
  * @description Verifies that all elements for a project can be found.
  */
 function findElements(done) {
@@ -338,34 +287,14 @@ function findElements(done) {
   const projID = utils.parseID(proj.id).pop();
   ElemController.findElements(adminUser, org.id, projID)
   .then((retElems) => {
-    // Expect 4 elements to be found
-    chai.expect(retElems.length).to.equal(11);
+    // Expect 10 elements to be found
+    chai.expect(retElems.length).to.equal(10);
     done();
   })
   .catch((error) => {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies an element can be found by UUID
- */
-function findElementByUUID(done) {
-  // Lookup the element
-  const projID = utils.parseID(proj.id).pop();
-  ElemController.findElement(adminUser, org.id, projID, testData.elements[2].uuid)
-  .then((element) => {
-    // Expect element to be found
-    chai.expect(element.uuid).to.equal(testData.elements[2].uuid);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
     done();
   });
 }
@@ -414,7 +343,7 @@ function updateMultipleElements(done) {
     utils.createID(proj.id, testData.elements[0].id),
     utils.createID(proj.id, testData.elements[1].id)
   ];
-  const updateQuery = { id: { $in: ids } };
+  const updateQuery = { _id: { $in: ids } };
 
   // Create list of update parameters
   const updateObj = {

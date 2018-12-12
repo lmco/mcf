@@ -44,7 +44,6 @@ const assert = require('assert');
 
 // NPM modules
 const mongoose = require('mongoose');
-const uuidv4 = require('uuid/v4');
 
 // MBEE modules
 const utils = M.require('lib.utils');
@@ -63,7 +62,6 @@ const options = { discriminatorKey: 'type' };
  * @description The base schema definition inherited by all other element types.
  *
  * @property {String} id - The elements non-unique element ID.
- * @property {String} uuid - The elements RFC 4122 id, automatically generated
  * or taken from another source if imported.
  * @property {String} name - THe elements non-unique name.
  * @property {Project} project - A reference to an element's project.
@@ -78,36 +76,12 @@ const options = { discriminatorKey: 'type' };
  *
  */
 const ElementSchema = new mongoose.Schema({
-  id: {
+  _id: {
     type: String,
     required: true,
-    unique: true,
     match: RegExp(validators.element.id),
     maxlength: [64, 'Element ID is too long'],
-    minlength: [2, 'Element ID is too short'],
-    set: function(_id) {
-      // Check value undefined
-      if (typeof this.id === 'undefined') {
-        // Return value to set it
-        return _id;
-      }
-      // Check value NOT equal to db value
-      if (_id !== this.id) {
-        // Immutable field, return error
-        M.log.warn('ID cannot be changed.');
-      }
-      // No change, return the value
-      return this.id;
-    }
-  },
-  uuid: {
-    type: String,
-    required: false,
-    unique: true,
-    set: function(v) {
-      return v;
-    },
-    match: RegExp(validators.element.uuid)
+    minlength: [2, 'Element ID is too short']
   },
   name: {
     type: String,
@@ -117,7 +91,7 @@ const ElementSchema = new mongoose.Schema({
     minlength: [0, 'Element name is too short']
   },
   project: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
     ref: 'Project',
     set: function(_proj) {
@@ -136,7 +110,7 @@ const ElementSchema = new mongoose.Schema({
     }
   },
   parent: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: false,
     default: null,
     ref: 'Package'
@@ -173,12 +147,12 @@ const BlockSchema = new mongoose.Schema({}, options);
  */
 const RelationshipSchema = new mongoose.Schema({
   source: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'Element',
     required: true
   },
   target: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'Element',
     required: true
   }
@@ -196,7 +170,7 @@ const RelationshipSchema = new mongoose.Schema({
  */
 const PackageSchema = new mongoose.Schema({
   contains: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'Element',
     required: false
   }]
@@ -224,12 +198,6 @@ ElementSchema.pre('find', function(next) {
 ElementSchema.pre('save', function(next) {
   // Run our defined setters
   this.updatedOn = '';
-
-  // If UUID is not yet defined, we auto-generate when the element is saved.
-  // This allows UUID to be optionally specified on element creation.
-  if (this.uuid === undefined || this.uuid === '') {
-    this.uuid = uuidv4();
-  }
   next();
 });
 
@@ -245,11 +213,11 @@ ElementSchema.pre('validate', function() {
     }
 
     // Create the parent id for searching
-    const idParts = utils.parseID(this.id);
+    const idParts = utils.parseID(this._id);
     const parentID = utils.createID(idParts[0], idParts[1], this.$parent);
 
     // Find the parent to update it
-    Element.findOne({ id: parentID }) // eslint-disable-line no-use-before-define
+    Element.findOne({ _id: parentID }) // eslint-disable-line no-use-before-define
     .then((parent) => {
       // Error Check: ensure parent element type is package
       if (parent.type !== 'Package') {
@@ -278,7 +246,8 @@ ElementSchema.pre('validate', function() {
 RelationshipSchema.pre('validate', function() {
   return new Promise((resolve, reject) => {
     // If source and target are already defined, return
-    if (this.source !== undefined && this.target !== undefined) {
+    if (this.$source === undefined || this.$target === undefined
+      || this.$target === null || this.$source === null) {
       return resolve();
     }
 
@@ -294,18 +263,18 @@ RelationshipSchema.pre('validate', function() {
     }
 
     // Create the target and source IDs for searching
-    const idParts = utils.parseID(this.id);
+    const idParts = utils.parseID(this._id);
     const targetID = utils.createID(idParts[0], idParts[1], this.$target);
     const sourceID = utils.createID(idParts[0], idParts[1], this.$source);
 
     // Find the target element
-    Element.findOne({ id: targetID }) // eslint-disable-line no-use-before-define
+    Element.findOne({ _id: targetID }) // eslint-disable-line no-use-before-define
     .then((target) => {
       // Set relationship target reference
       this.target = this.target || target;
 
       // Find the source element
-      return Element.findOne({ id: sourceID }); // eslint-disable-line no-use-before-define
+      return Element.findOne({ _id: sourceID }); // eslint-disable-line no-use-before-define
     })
     .then((source) => {
       // Set relationship source reference
@@ -346,11 +315,10 @@ ElementSchema.statics.getValidTypes = function() {
  */
 ElementSchema.methods.getPublicData = function() {
   const data = {
-    id: utils.parseID(this.id)[2],
-    uuid: this.uuid,
+    id: utils.parseID(this._id).pop(),
     name: this.name,
-    project: this.project.id,
-    org: utils.parseID(this.id)[0],
+    project: utils.parseID(this._id)[1],
+    org: utils.parseID(this._id)[0],
     createdOn: this.createdOn,
     updatedOn: this.updatedOn,
     documentation: this.documentation,
@@ -358,13 +326,11 @@ ElementSchema.methods.getPublicData = function() {
     type: this.type.toLowerCase()
   };
 
-  if (this.parent && this.parent.id) {
-    try {
-      data.parent = utils.parseID(this.parent.id.toString())[2];
-    }
-    catch (error) {
-      data.parent = this.parent;
-    }
+  // Handle parent element
+  if (this.parent) {
+    this.parent = (this.parent._id)
+      ? utils.parseID(this.parent._id).pop()
+      : utils.parseID(this.parent).pop();
   }
   else {
     data.parent = null;
@@ -372,7 +338,9 @@ ElementSchema.methods.getPublicData = function() {
 
   // only packages have a contains field
   if (data.type === 'package') {
-    data.contains = this.contains.map(e => utils.parseID(e.id)[2]);
+    data.contains = (this.contains.every(e => typeof e === 'object'))
+      ? this.contains.map(e => utils.parseID(e._id).pop())
+      : this.contains.map(e => utils.parseID(e).pop());
   }
 
   return data;
@@ -400,6 +368,7 @@ ElementSchema.statics.validateObjectKeys = function(object) {
     validKeys = validKeys.filter((elem, pos) => validKeys.indexOf(elem) === pos);
     validKeys.push('projectUID');
     validKeys.push('type');
+    validKeys.push('id');
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the element model

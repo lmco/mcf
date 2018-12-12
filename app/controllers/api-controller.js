@@ -325,12 +325,12 @@ function patchOrgs(req, res) {
   // Org objects provided, delete all
   if (req.body.orgs.every(o => typeof o === 'object')) {
     // Query finds all orgs by their id
-    updateQuery = { id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
+    updateQuery = { _id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
   }
   // Org IDs provided, delete all
   else if (req.body.orgs.every(o => typeof o === 'string')) {
     // Query finds all orgs by their id
-    updateQuery = { id: { $in: sani.sanitize(req.body.orgs) } };
+    updateQuery = { _id: { $in: sani.sanitize(req.body.orgs) } };
   }
   // No valid org data was provided, reject
   else {
@@ -1277,12 +1277,12 @@ function patchUsers(req, res) {
   // User objects provided, update all
   if (req.body.users.every(u => typeof u === 'object')) {
     // Query finds all users by their username
-    updateQuery = { username: { $in: sani.sanitize(req.body.users.map(u => u.username)) } };
+    updateQuery = { _id: { $in: sani.sanitize(req.body.users.map(u => u.username)) } };
   }
   // Usernames provided, update all
   else if (req.body.users.every(u => typeof u === 'string')) {
     // Query finds all users by their username
-    updateQuery = { username: { $in: sani.sanitize(req.body.users) } };
+    updateQuery = { _id: { $in: sani.sanitize(req.body.users) } };
   }
   // No valid user data was provided, reject
   else {
@@ -1612,7 +1612,7 @@ function patchElements(req, res) {
   // No elements provided, update all elements in the project
   if (!req.body.hasOwnProperty('elements')) {
     // Query finds all elements that start with 'orgid:projectid:'
-    updateQuery = { id: { $regex: `^${sani.sanitize(utils.createID(
+    updateQuery = { _id: { $regex: `^${sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid
     ))}:` } };
   }
@@ -1622,7 +1622,7 @@ function patchElements(req, res) {
     const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e.id
     )));
-    updateQuery = { id: { $in: uids } };
+    updateQuery = { _id: { $in: uids } };
   }
   // Element IDs provided, update all
   else if (req.body.elements.every(e => typeof e === 'string')) {
@@ -1631,7 +1631,7 @@ function patchElements(req, res) {
     const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e
     )));
-    updateQuery = { id: { $in: uids } };
+    updateQuery = { _id: { $in: uids } };
   }
   // No valid element data was provided, reject
   else {
@@ -1682,7 +1682,7 @@ function deleteElements(req, res) {
   // No elements provided, delete all elements in the project
   if (!req.body.hasOwnProperty('elements')) {
     // Query finds all elements that start with 'orgid:projectid:'
-    deleteQuery = { id: { $regex: `^${sani.sanitize(utils.createID(
+    deleteQuery = { _id: { $regex: `^${sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid
     ))}:` } };
   }
@@ -1692,7 +1692,7 @@ function deleteElements(req, res) {
     const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e.id
     )));
-    deleteQuery = { id: { $in: uids } };
+    deleteQuery = { _id: { $in: uids } };
   }
   // Element IDs provided, delete all
   else if (req.body.elements.every(e => typeof e === 'string')) {
@@ -1701,7 +1701,7 @@ function deleteElements(req, res) {
     const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
       req.params.orgid, req.params.projectid, e
     )));
-    deleteQuery = { id: { $in: uids } };
+    deleteQuery = { _id: { $in: uids } };
   }
   // No valid element data was provided, reject
   else {
@@ -2049,7 +2049,7 @@ function postIncomingWebhook(req, res) {
   const webhookUID = Buffer.from(req.params.webhookid, 'base64').toString();
 
   // Find the webhook
-  WebhookController.findWebhooksQuery({ id: sani.sanitize(webhookUID), archived: false })
+  WebhookController.findWebhooksQuery({ _id: sani.sanitize(webhookUID), archived: false })
   .then((foundWebhook) => {
     // If no webhooks are found, return a 404 Not Found
     if (foundWebhook.length === 0) {

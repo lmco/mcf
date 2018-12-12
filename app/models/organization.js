@@ -51,27 +51,11 @@ const extensions = M.require('models.plugin.extensions');
  *
  */
 const OrganizationSchema = new mongoose.Schema({
-  id: {
+  _id: {
     type: String,
     required: true,
-    index: true,
-    unique: true,
     match: RegExp(validators.org.id),
-    maxlength: [64, 'Too many characters in ID'],
-    set: function(_id) {
-      // Check value undefined
-      if (typeof this.id === 'undefined') {
-        // Return value to set it
-        return _id;
-      }
-      // Check value NOT equal to db value
-      if (_id !== this.id) {
-        // Immutable field, return error
-        M.log.warn('ID cannot be changed.');
-      }
-      // No change, return the value
-      return this.id;
-    }
+    maxlength: [64, 'Too many characters in ID']
   },
   name: {
     type: String,
@@ -81,15 +65,15 @@ const OrganizationSchema = new mongoose.Schema({
   },
   permissions: {
     read: [{
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     }],
     write: [{
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     }],
     admin: [{
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User'
     }]
   },
@@ -101,7 +85,7 @@ const OrganizationSchema = new mongoose.Schema({
 
 OrganizationSchema.virtual('projects', {
   ref: 'Project',
-  localField: '_id',
+  localField: 'String',
   foreignField: 'org',
   justOne: false
 });
@@ -126,7 +110,7 @@ OrganizationSchema.methods.getPublicData = function() {
 
   // Return the organization public fields
   return {
-    id: this.id,
+    id: this._id,
     name: this.name,
     permissions: permissions,
     custom: this.custom
@@ -160,15 +144,15 @@ OrganizationSchema.methods.getValidUpdateFields = function() {
  */
 OrganizationSchema.methods.getPermissions = function(user) {
   // Map org permissions lists user._ids to strings
-  const read = this.permissions.read.map(u => u._id.toString());
-  const write = this.permissions.write.map(u => u._id.toString());
-  const admin = this.permissions.admin.map(u => u._id.toString());
+  const read = this.permissions.read.map(u => u._id);
+  const write = this.permissions.write.map(u => u._id);
+  const admin = this.permissions.admin.map(u => u._id);
 
   // Return an object containing user permissions
   return {
-    read: read.includes(user._id.toString()),
-    write: write.includes(user._id.toString()),
-    admin: admin.includes(user._id.toString())
+    read: read.includes(user._id),
+    write: write.includes(user._id),
+    admin: admin.includes(user._id)
   };
 };
 
@@ -183,12 +167,16 @@ OrganizationSchema.methods.getPermissions = function(user) {
 OrganizationSchema.statics.validateObjectKeys = function(object) {
   // Initialize returnBool to true
   let returnBool = true;
+  // Set list array of valid keys
+  const validKeys = Object.keys(OrganizationSchema.paths);
+  // Add 'id' to list of valid keys, for 0.6.0 support
+  validKeys.push('id');
   // Check if the object is NOT an instance of the organization model
   if (!(object instanceof mongoose.model('Organization', OrganizationSchema))) {
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the organization model
-      if (!Object.keys(OrganizationSchema.paths).includes(key)) {
+      if (!validKeys.includes(key)) {
         // Key is not in organization model, return false
         returnBool = false;
       }

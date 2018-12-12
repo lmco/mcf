@@ -54,7 +54,7 @@ describe(M.getModuleName(module.filename), () => {
     .then(() => {
       // Create a parent organization before creating any projects
       org = new Org({
-        id: testData.orgs[0].id,
+        _id: testData.orgs[0].id,
         name: testData.orgs[0].name
       });
 
@@ -79,7 +79,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Delete the org
-    Org.findOneAndRemove({ id: org.id })
+    Org.findOneAndRemove({ _id: org._id })
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -106,7 +106,7 @@ describe(M.getModuleName(module.filename), () => {
 function createProject(done) {
   // Create a project model object
   const newProject = new Project({
-    id: utils.createID(org.id, testData.projects[0].id),
+    _id: utils.createID(org._id, testData.projects[0].id),
     name: testData.projects[0].name,
     org: org._id
   });
@@ -126,7 +126,7 @@ function createProject(done) {
  */
 function findProject(done) {
   // Find the project
-  Project.findOne({ id: utils.createID(org.id, testData.projects[0].id) })
+  Project.findOne({ _id: utils.createID(org._id, testData.projects[0].id) })
   .then((proj) => {
     // Ensure project data is correct
     chai.expect(proj.name).to.equal(testData.projects[0].name);
@@ -146,11 +146,11 @@ function findProject(done) {
 function updateProject(done) {
   // Find and update project previously created in createProject test
   Project.findOneAndUpdate({
-    id: utils.createID(org.id, testData.projects[0].id) },
+    _id: utils.createID(org._id, testData.projects[0].id) },
   { name: testData.projects[1].name })
   // Find previously updated project
   .then(() => Project.findOne({
-    id: utils.createID(org.id, testData.projects[0].id)
+    _id: utils.createID(org._id, testData.projects[0].id)
   }))
   .then((proj) => {
     // Ensure project name was successfully updated
@@ -170,8 +170,8 @@ function updateProject(done) {
  */
 function deleteProject(done) {
   // Find and remove the project previously created in createProject test.
-  Project.findOneAndRemove({ id: utils.createID(org.id, testData.projects[0].id) })
-  .then(() => Project.find({ id: utils.createID(org.id, testData.projects[0].id) }))
+  Project.findOneAndRemove({ _id: utils.createID(org._id, testData.projects[0].id) })
+  .then(() => Project.find({ _id: utils.createID(org._id, testData.projects[0].id) }))
   .then((projects) => {
     // Expect to find no projects
     chai.expect(projects.length).to.equal(0);
@@ -192,7 +192,7 @@ function deleteProject(done) {
 function verifyProjectFieldMaxChar(done) {
   // Create a new model project
   const newProject = new Project({
-    id: utils.createID(org.id, testData.projects[3].id),
+    _id: utils.createID(org._id, testData.projects[3].id),
     name: testData.projects[3].name,
     org: org._id
   });
@@ -204,8 +204,9 @@ function verifyProjectFieldMaxChar(done) {
     done();
   })
   .catch((error) => {
-    // Expected error thrown: 'Project validation failed: id: Too many characters in username'
-    chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username');
+    // Expected error thrown: 'Project validation failed: _id: Too many characters in username'
+    chai.expect(error.message).to.equal('Project validation failed: _id: Too many characters in'
+      + ' username');
     done();
   });
 }

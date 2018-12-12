@@ -37,10 +37,9 @@ const validators = M.require('lib.validators');
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
  */
 const WebhookSchema = new mongoose.Schema({
-  id: {
+  _id: {
     type: String,
     required: true,
-    unique: true,
     match: RegExp(validators.webhook.id)
   },
   name: {
@@ -48,7 +47,7 @@ const WebhookSchema = new mongoose.Schema({
     required: true
   },
   project: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
     ref: 'Project',
     set: function(_proj) {
@@ -170,7 +169,7 @@ IncomingWebhookSchema.methods.verifyAuthority = function(value) {
  */
 OutgoingWebhookSchema.methods.getPublicData = function() {
   return {
-    id: utils.parseID(this.id)[2],
+    id: utils.parseID(this._id)[2],
     name: this.name,
     triggers: this.triggers,
     responses: this.responses,
@@ -184,7 +183,7 @@ OutgoingWebhookSchema.methods.getPublicData = function() {
  */
 IncomingWebhookSchema.methods.getPublicData = function() {
   return {
-    id: utils.parseID(this.id)[2],
+    id: utils.parseID(this._id)[2],
     name: this.name,
     triggers: this.triggers,
     token: this.token,
@@ -222,6 +221,7 @@ WebhookSchema.statics.validateObjectKeys = function(object) {
     );
     validKeys = validKeys.filter((elem, pos) => validKeys.indexOf(elem) === pos);
     validKeys.push('type');
+    validKeys.push('id');
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the webhook model
