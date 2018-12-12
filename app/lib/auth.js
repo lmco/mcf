@@ -280,9 +280,9 @@ function authenticate(req, res, next) {
 /**
  * @description Validates a users password with set rules.
  * Note: If validatePassword() function is NOT defined in custom strategy then
- * default rules will be applied.
+ * validation will fail.
  *
- * @param {String} password - Password to verify
+ * @param {String} password - Password to validate.
  * @param {String} provider - the type of authentication strategy (ldap, local, etc.)
  * @returns {Boolean} - If password is correctly validated
  */
@@ -292,42 +292,9 @@ function validatePassword(password, provider) {
     return AuthModule.validatePassword(password, provider);
   }
 
-  // Use the appropriate provider rules
-  switch (provider) {
-    case 'local':
-      // Use default for local provider
-      // validate password not defined, use DEFAULT password rules
-      try {
-        // At least 8 characters
-        const lengthValidator = (password.length >= 8);
-        // At least 1 digit
-        const digitsValidator = (password.match(/[0-9]/g).length >= 1);
-        // At least 1 lowercase letter
-        const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
-        // At least 1 uppercase letter
-        const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
-        // At least 1 special character
-        const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
-
-        // Return concatenated result
-        return (lengthValidator
-          && digitsValidator
-          && lowercaseValidator
-          && uppercaseValidator
-          && specialCharValidator);
-      }
-      catch (error) {
-        // Explicitly NOT logging error to avoid password logging
-        return false;
-      }
-    case 'ldap':
-      // LDAP does not require validation locally
-      return true;
-    default:
-      // Unknown provider, failed validation
-      // Explicitly NOT logging error to avoid password logging
-      return false;
-  }
+  // Unknown provider, failed validation
+  // Explicitly NOT logging error to avoid password logging
+  return false;
 }
 
 // Export above functions

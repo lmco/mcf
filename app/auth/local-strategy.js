@@ -181,7 +181,7 @@ function doLogin(req, res, next) {
 /**
  * @description Validates a users password with set rules.
  *
- * @param {String} password - Password to verify
+ * @param {String} password - Password to validate.
  * @returns {Boolean} - If password is correctly validated
  */
 function validatePassword(password) {

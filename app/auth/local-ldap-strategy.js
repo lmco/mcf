@@ -128,7 +128,7 @@ function doLogin(req, res, next) {
 /**
  * @description Validates a users password with set rules.
  *
- * @param {String} password - Password to verify
+ * @param {String} password - Password to validate.
  * @param {String} provider - the type of authentication strategy (ldap, local, etc.)
  * @returns {Boolean} - If password is correctly validated
  */
@@ -140,7 +140,7 @@ function validatePassword(password, provider) {
       return LocalStrategy.validatePassword(password);
     case 'ldap':
       // LDAP does not require validation locally
-      return true;
+      return LDAPStrategy.validatePassword(password);
     default:
       // Unknown provider, failed validation
       // Explicitly NOT logging error to avoid password logging
