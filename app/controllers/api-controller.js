@@ -91,6 +91,7 @@ module.exports = {
   patchArtifact,
   deleteArtifact,
   getArtifacts,
+  getArtifactBlob,
   invalidRoute
 };
 /* ------------------------( API Helper Function )--------------------------- */
@@ -2116,7 +2117,9 @@ function getArtifact(req, res) {
   .then((artifact) => {
     // Return a 200: OK and the artifact
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(artifact.getPublicData()));
+
+    const publicData = artifact.getPublicData();
+    return res.status(200).send(formatJSON(publicData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -2162,7 +2165,7 @@ function getArtifacts(req, res) {
   ArtifactController.findArtifacts(req.user, req.params.orgid, req.params.projectid, archived)
   .then((artifacts) => {
     // Return only public artifact data
-    const artifactsPublicData = artifacts.map(e => e.getPublicData());
+    const artifactsPublicData = artifacts.map(a => a.getPublicData());
 
     // Verify artifacts public data array is not empty
     if (artifactsPublicData.length === 0) {
@@ -2175,7 +2178,9 @@ function getArtifacts(req, res) {
     return res.status(200).send(formatJSON(artifactsPublicData));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    res.status(error.status).send(error);
+  });
 }
 
 /**
@@ -2200,6 +2205,13 @@ function postArtifact(req, res) {
       res.status(500).send(err);
     }
 
+    // Sanity Check: originalname/mimitype are required fields
+    if (!(Object.prototype.hasOwnProperty.call(req.file, 'originalname')
+      && Object.prototype.hasOwnProperty.call(req.file, 'mimetype'))) {
+      const error = new M.CustomError('Bad request. File not defined.', 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+
     // Extract file meta data
     req.body.filename = req.file.originalname;
     req.body.contentType = req.file.mimetype;
@@ -2211,7 +2223,7 @@ function postArtifact(req, res) {
     }
 
     // If artifact ID was provided in the body, ensure it matches artifact ID in params
-    if (Object.prototype.hasOwnProperty.call(req.body, 'id') && (req.params.artifactid !== req.body.id)) {
+    if (Object.prototype.hasOwnProperty.call('id') && (req.params.artifactid !== req.body.id)) {
       const error = new M.CustomError('Artifact ID in the body does not match ID in the params.', 400);
       return res.status(error.status).send(error);
     }
@@ -2219,7 +2231,7 @@ function postArtifact(req, res) {
     // Create artifact with provided parameters
     // NOTE: createArtifact() sanitizes req.body
     ArtifactController.createArtifact(req.user, req.params.orgid,
-      req.params.projectid, req.body, req.file.buffer)
+      req.params.projectid, req.params.artifactid, req.body, req.file.buffer)
     .then((artifact) => {
       // Return 200: OK and created artifact
       res.header('Content-Type', 'application/json');
@@ -2308,6 +2320,45 @@ function deleteArtifact(req, res) {
     // Return 200: OK and success
     return res.status(200).send(formatJSON(success));
   })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Gets an artifact binary file by its artifact.id, project.id, and org.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with found artifact
+ */
+function getArtifactBlob(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+  // Check if invalid key passed in
+  Object.keys(req.query).forEach((key) => {
+    // If invalid key, reject
+    if (!['archived'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+  // Find the artifact from it's artifact.id, project.id, and org.id
+  // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
+  ArtifactController.getArtifactBlob(req.user, req.params.orgid,
+    req.params.projectid, req.params.artifactid)
+  .then((artifact) => {
+    // Return a 200: OK and the artifact
+    // res.header('Content-Type', 'application/octet-stream');
+    res.header('Content-Type', `${artifact.artifactMeta.contentType}`);
+    res.header('Content-Disposition', `attachment; filename='${artifact.artifactMeta.filename}'`);
+    return res.status(200).send(artifact.artifactBlob);
+  })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 
