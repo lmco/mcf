@@ -41,8 +41,6 @@ const User = M.require('models.user');
 
 // Initialize express app and export the object
 const app = express();
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 module.exports = app;
 
 /**
@@ -69,10 +67,10 @@ function initApp() {
     app.use('/favicon.ico', express.static('build/public/img/favicon.ico'));
 
     // for parsing application/json
-    app.use(bodyParser.json());
+    app.use(bodyParser.json({ limit: '50mb' }));
 
     // for parsing application/xwww-form-urlencoded
-    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
     // Trust proxy for IP logging
     app.enable('trust proxy');
