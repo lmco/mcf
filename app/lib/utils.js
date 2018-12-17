@@ -270,6 +270,7 @@ module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
     if (!firstKeys.includes(key)) {
       originalObj[key] = updateObj[key];
     }
+    // TODO: Figure out how to handle arrays, probably append data, rather than replace? (MBX-697)
     // If the key is in originalObject, and it's value is a nested object,
     // recursively call this function with the value of the key/value pair
     else if (typeof originalObj[key] === 'object' && typeof updateObj[key] === 'object') {
@@ -303,7 +304,7 @@ module.exports.convertJMI = function(from, to, data) {
 
     const returnObj = {};
     data.forEach((object) => {
-      returnObj[object._id.toString()] = object;
+      returnObj[object._id] = object;
     });
     return returnObj;
   }

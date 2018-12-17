@@ -59,9 +59,7 @@ const OrganizationSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: true,
-    unique: true,
-    match: RegExp(validators.org.name)
+    required: true
   },
   permissions: {
     read: [{
@@ -132,6 +130,10 @@ OrganizationSchema.methods.getPermissionLevels = function() {
 OrganizationSchema.methods.getValidUpdateFields = function() {
   return ['name', 'custom', 'archived'];
 };
+
+OrganizationSchema.statics.getValidUpdateFields = function() {
+  return OrganizationSchema.methods.getValidUpdateFields();
+}
 
 /**
  * @description Returns the permissions a user has on the org

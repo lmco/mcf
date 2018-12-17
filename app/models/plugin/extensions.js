@@ -24,15 +24,18 @@ module.exports = function extensionPlugin(schema) {
   schema.add({
     archivedBy: {
       type: String,
-      ref: 'User'
+      ref: 'User',
+      default: null
     },
     createdBy: {
       type: String,
-      ref: 'User'
+      ref: 'User',
+      default: null
     },
     lastModifiedBy: {
       type: String,
-      ref: 'User'
+      ref: 'User',
+      default: null
     },
     createdOn: {
       type: Date,
@@ -43,7 +46,8 @@ module.exports = function extensionPlugin(schema) {
       default: null
     },
     updatedOn: {
-      type: Date
+      type: Date,
+      default: null
     },
     archived: {
       type: Boolean,

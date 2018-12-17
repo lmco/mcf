@@ -23,7 +23,7 @@
 const utils = M.require('lib.utils');
 
 // This ID is used as the common regex for other ID fields in this module
-const id = '([a-z0-9])([-_a-z0-9]){0,}';
+const id = '([_a-z0-9])([-_a-z0-9]){0,}';
 
 /**
  * @description Regular Expressions to validate organization data
@@ -31,8 +31,8 @@ const id = '([a-z0-9])([-_a-z0-9]){0,}';
  * id:
  *   - CANNOT include the follow reserved words: css, js, im, login, logout,
  *     about, assets, static, public
- *   - MUST start with a lowercase letter or a number
- *   - MUST only include lowercase letters, numbers or '-'
+ *   - MUST start with a lowercase letter, number or '_'
+ *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - MUST be of length 1 or more
  *   Examples:
  *     - org1 [valid]
@@ -52,16 +52,15 @@ const id = '([a-z0-9])([-_a-z0-9]){0,}';
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.org = {
-  id: `^(?!(css|js|img|login|logout|about|assets|static|public|api|organizations|projects|users))${id}$`,
-  name: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
+  id: `^(?!(css|js|img|login|logout|about|assets|static|public|api|organizations|projects|users))${id}$`
 };
 
 /**
  * @description Regular Expressions to validate project data
  *
  * id:
- *   - MUST start with lowercase letter or a number
- *   - MUST only include lowercase letters, numbers, or '-'
+ *   - MUST start with a lowercase letter, number or '_'
+ *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - Must be of length 1 or more
  *   - The following reserved words are not valid: "edit"
  *   Examples:
@@ -70,20 +69,9 @@ module.exports.org = {
  *      - f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
  *      - -project [invalid - must start with a letter or a number]
  *      - myProject [invalid - cannot use uppercase characters]
- * name:
- *   - MUST start with a letter or number
- *   - MUST only include lowercase letters, uppercase letters, numbers,
- *     '-', or whitespace
- *   - MUST be of length 1 or more
- *   Examples:
- *     - "Project 1" [valid]
- *     - "An project name - with dashes" [valid]
- *     - "No invalid chars (e.g. ', $, &, etc)" [invalid - no special characters]
- *     - " " [invalid - cannot start with a space]
  */
 module.exports.project = {
-  id: `^${id}${utils.ID_DELIMITER}(?!(edit))${id}$`,
-  name: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
+  id: `^${id}${utils.ID_DELIMITER}(?!(edit))${id}$`
 };
 
 
@@ -91,8 +79,8 @@ module.exports.project = {
  * @description Regular Expressions to validate element data
  *
  * id:
- *   - Each segment MUST start with lowercase letter or a number
- *   - Each segment MUST only include lowercase letters, numbers, or '-'
+ *   - MUST start with a lowercase letter, number or '_'
+ *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - each segment MUST be of length 1 or more
  *   Examples:
  *      - orgid:projid:elementid [valid]
@@ -101,22 +89,9 @@ module.exports.project = {
  *      - orgid:projid:-element [invalid - must start with a letter or a number]
  *      - orgid:projid:myElement [invalid - cannot use uppercase characters]
  *      - my-element [invalid - must contain org and proj segments]
- * name:
- *   - MUST start with a lowercase letter, uppercase letter, or number
- *   - MUST only include lowercase letters, uppercase letters, numbers,
- *     '-', or whitespace
- *   - MUST be of length 1 or more
- * uuid:
- *   - MUST follow the following format: xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
- *     where x is a number or a lowercase letter from a-f
- *   Examples:
- *     - f81d4fae-7dec-11d0-a765-00a0c91e6bf6
- *
  */
 module.exports.element = {
-  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
-  name: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
-  uuid: '([a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12})'
+  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
 
 /**
@@ -211,8 +186,8 @@ module.exports.url = {
  *     - " " [invalid - cannot start with a space]
  *
  * id:
- *   - Each segment MUST start with lowercase letter or a number
- *   - Each segment MUST only include lowercase letters, numbers, or '-'
+ *   - MUST start with a lowercase letter, number or '_'
+ *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - each segment MUST be of length 1 or more
  *   Examples:
  *      - orgid:projid:artifactid [valid]
@@ -232,8 +207,8 @@ module.exports.artifact = {
  * @description Regular Expressions to validate webhook data
  *
  * id:
- *   - Each segment MUST start with lowercase letter or a number
- *   - Each segment MUST only include lowercase letters, numbers, or '-'
+ *   - MUST start with a lowercase letter, number or '_'
+ *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - each segment MUST be of length 1 or more
  *   Examples:
  *      - orgid:projid:webhookid [valid]

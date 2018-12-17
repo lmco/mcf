@@ -95,28 +95,38 @@
   "projects": [
     {
       "id": "project00",
-      "name": "Project 00"
+      "name": "Project 00",
+      "custom": {
+        "location": "Location 00"
+      }
     },
     {
       "id": "project01",
-      "name": "Project 01"
+      "name": "Project 01",
+      "custom": {
+        "location": "Location 01"
+      }
     },
     {
       "id": "project02",
-      "name": "Project 02"
+      "name": "Project 02",
+      "custom": {
+        "location": "Location 02"
+      }
     },
     {
-      "id": "thisisaverylongidnamepleaseacceptmeorbreakthisisaverylongidnamepleaseacceptmeorbreakthisisaverylongidnamepleaseacceptmeorbreakthisisaverylongidnamepleaseacceptmeorbreakthisisaverylongidnamepleaseacceptmeorbreakthisisaverylongidnamepleaseacceptmeorbreakthisisaverylongidnamepleaseacceptmeorbreakthisisaverylongidnamepleaseacceptmeorbreak",
-      "name": "Long Id",
-      "org": {"id": "testorg00"}
+      "id": "project3",
+      "name": "Project 03",
+      "custom": {
+        "location": "Location 03"
+      }
     },
     {
-      "id": "project4",
-      "name": "Project 04"
-    },
-    {
-      "id": "project05",
-      "name": "Project 05"
+      "id": "project04",
+      "name": "Project 04",
+      "custom": {
+        "location": "Location 04"
+      }
     }
 
   ],
