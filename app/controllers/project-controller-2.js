@@ -48,9 +48,10 @@ const utils = M.require('lib.utils');
 function find(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
+    // TODO: if projects not provided but options were, we need to set options equal to projects
     const orgID = sani.sanitize(organizationID);
     const saniProjects = (projects !== undefined)
-      ? JSON.parse(JSON.stringify(sani.sanitize(projects)))
+      ? sani.sanitize(JSON.parse(JSON.stringify(projects)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
@@ -113,7 +114,7 @@ function create(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters and function-wide variables
     const orgID = sani.sanitize(organizationID);
-    const saniProjects = JSON.parse(JSON.stringify(sani.sanitize(projects)));
+    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let createdProjects = [];
 
@@ -232,11 +233,12 @@ function create(requestingUser, organizationID, projects, options) {
 
 function update(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
-    // Sanitize input parameters and function-wide variables
+    // Sanitize input parameters and create function-wide variables
     const orgID = sani.sanitize(organizationID);
-    const saniProjects = JSON.parse(JSON.stringify(sani.sanitize(projects)));
+    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundProjects = [];
+    let projectsToUpdate = [];
 
     // Ensure parameters are valid
     try {
@@ -247,9 +249,6 @@ function update(requestingUser, organizationID, projects, options) {
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
     }
-
-    // create array projectsToUpdate
-    let projectsToUpdate = [];
 
     // Check the type of the projects parameter
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
@@ -269,7 +268,7 @@ function update(requestingUser, organizationID, projects, options) {
     try {
       let index = 1;
       projectsToUpdate.forEach((proj) => {
-        // Ensure each proj has an id and that its a string
+        // Ensure each project has an id and that its a string
         assert.ok(proj.hasOwnProperty('id'), `Project #${index} does not have an id.`);
         assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);
         proj.id = utils.createID(orgID, proj.id);
@@ -304,7 +303,7 @@ function update(requestingUser, organizationID, projects, options) {
       // For each found project
       foundProjects.forEach((proj) => {
         const updateProj = jmiType2[proj._id];
-        // Remove id field from update object
+        // Remove id and _id field from update object
         delete updateProj.id;
         delete updateProj._id;
 
@@ -349,9 +348,8 @@ function update(requestingUser, organizationID, projects, options) {
               }
             }
 
-            // Schema type is not mixed
-            // Sanitize field and update field in proj object
-            proj[key] = sani.sanitize(updateProj[key]);
+            // Schema type is not mixed, update field in proj object
+            proj[key] = updateProj[key];
           }
         });
 
@@ -378,7 +376,7 @@ function remove(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters and function-wide variables
     const orgID = sani.sanitize(organizationID);
-    const saniProjects = JSON.parse(JSON.stringify(sani.sanitize(projects)));
+    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundProjects = [];
 
@@ -431,7 +429,7 @@ function remove(requestingUser, organizationID, projects, options) {
     // Delete the projects
     .then(() => Project.deleteMany(searchQuery))
     .then((retQuery) => {
-      // Verify that all of the project were correctly deleted
+      // Verify that all of the projects were correctly deleted
       if (retQuery.n !== foundProjects.length) {
         M.log.error('Some of the following projects were not '
         + `deleted [${saniProjects.toString()}].`);

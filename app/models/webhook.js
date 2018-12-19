@@ -196,10 +196,17 @@ IncomingWebhookSchema.methods.getPublicData = function() {
  * @description Returns webhook fields that can be changed
  * @memberof WebhookSchema
  */
-WebhookSchema.methods.getValidUpdateFields = function() {
+WebhookSchema.statics.getValidUpdateFields = function() {
   return ['name', 'custom', 'archived'];
 };
 
+/**
+ * @description Returns valid webhook types
+ * @memberOf WebhookSchema
+ */
+WebhookSchema.statics.getValidTypes = function() {
+  return ['Incoming', 'Outgoing'];
+};
 
 /**
  * @description Validates an object to ensure that it only contains keys

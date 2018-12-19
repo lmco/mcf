@@ -43,7 +43,7 @@ const utils = M.require('lib.utils');
 function find(requestingUser, organizationID, projectID, elements, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
-    const saniElements = JSON.parse(JSON.stringify(sani.sanitize(elements)));
+    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
@@ -105,7 +105,7 @@ function find(requestingUser, organizationID, projectID, elements, options) {
         throw new M.CustomError('Invalid input for finding elements.', 400, 'warn');
       }
 
-      // Find the projects
+      // Find the elements
       return Element.Element.find(searchQuery)
       .populate('project contains parent source target archivedBy '
         + 'lastModifiedBy createdBy');
@@ -118,8 +118,8 @@ function find(requestingUser, organizationID, projectID, elements, options) {
 
 function create(requestingUser, organizationID, projectID, elements, options) {
   return new Promise((resolve, reject) => {
-    // Sanitize input parameters and function-wide variables
-    const saniElements = JSON.parse(JSON.stringify(sani.sanitize(elements)));
+    // Sanitize input parameters and create function-wide variables
+    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
@@ -162,10 +162,10 @@ function create(requestingUser, organizationID, projectID, elements, options) {
       let index = 1;
       const validTypes = Element.Element.getValidTypes();
       elementsToCreate.forEach((elem) => {
-        // Ensure each element has an id and that its a string
+        // Ensure each element has an id and that it's a string
         assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
         assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
-        elem.id = utils.createID(orgID, elem.id);
+        elem.id = utils.createID(orgID, projID, elem.id);
         arrIDs.push(elem.id);
         elem._id = elem.id;
 
@@ -218,7 +218,7 @@ function create(requestingUser, organizationID, projectID, elements, options) {
     .then((foundElements) => {
       // If there are any foundElements, there is a conflict
       if (foundElements.length > 0) {
-        // Get arrays of the foundElements's ids and names
+        // Get array of the foundElements's ids
         const foundElementIDs = foundElements.map(e => e._id);
 
         // There are one or more elements with conflicting IDs

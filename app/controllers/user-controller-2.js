@@ -47,7 +47,7 @@ function find(requestingUser, users, options) {
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniUsers = (users !== undefined)
-      ? JSON.parse(JSON.stringify(sani.sanitize(users)))
+      ? sani.sanitize(JSON.parse(JSON.stringify(users)))
       : undefined;
 
 
@@ -105,7 +105,7 @@ function create(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniUsers = JSON.parse(JSON.stringify(sani.sanitize(users)));
+    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
     let createdUsers = [];
 
     // Ensure parameters are valid
@@ -210,7 +210,7 @@ function create(requestingUser, users, options) {
 function update(requestingUSer, users, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = JSON.parse(JSON.stringify(sani.sanitize(users)));
+    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
     const reqUser = JSON.parse(JSON.stringify(requestingUSer));
     let foundUsers = [];
     let usersToUpdate = [];
@@ -319,9 +319,8 @@ function update(requestingUSer, users, options) {
               }
             }
 
-            // Schema type is not mixed
-            // Sanitize field and update field in org object
-            user[key] = sani.sanitize(updateUser[key]);
+            // Schema type is not mixed, update field in user object
+            user[key] = updateUser[key];
           }
         });
 
@@ -349,7 +348,7 @@ function remove(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniUsers = JSON.parse(JSON.stringify(sani.sanitize(users)));
+    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
     let foundUsers = [];
     let foundUsernames = [];
 

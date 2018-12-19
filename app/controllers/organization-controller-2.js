@@ -48,7 +48,7 @@ function find(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
     const saniOrgs = (orgs !== undefined)
-      ? JSON.parse(JSON.stringify(sani.sanitize(orgs)))
+      ? sani.sanitize(JSON.parse(JSON.stringify(orgs)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
@@ -109,7 +109,7 @@ function find(requestingUser, orgs, options) {
 function create(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
-    const saniOrgs = JSON.parse(JSON.stringify(sani.sanitize(orgs)));
+    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
     // Ensure parameters are valid
@@ -199,7 +199,7 @@ function create(requestingUser, orgs, options) {
 function update(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = JSON.parse(JSON.stringify(sani.sanitize(orgs)));
+    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundOrgs = [];
     let orgsToUpdate = [];
@@ -316,9 +316,8 @@ function update(requestingUser, orgs, options) {
               }
             }
 
-            // Schema type is not mixed
-            // Sanitize field and update field in org object
-            org[key] = sani.sanitize(updateOrg[key]);
+            // Schema type is not mixed, update field in org object
+            org[key] = updateOrg[key];
           }
         });
 
@@ -344,7 +343,7 @@ function update(requestingUser, orgs, options) {
 function remove(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = JSON.parse(JSON.stringify(sani.sanitize(orgs)));
+    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundOrgs = [];
 

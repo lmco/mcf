@@ -28,8 +28,10 @@ const path = require('path');
 
 // MBEE modules
 const Organization = M.require('models.organization');
+const Project = M.require('models.project');
 const User = M.require('models.user');
 const OrgController = M.require('controllers.organization-controller');
+const utils = M.require('lib.utils');
 const testData = require(path.join(M.root, 'test', 'data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
 /**
@@ -207,7 +209,6 @@ module.exports.createOrganization = function(adminUser) {
         read: [adminUser._id]
       },
       custom: null,
-      visibility: 'private'
     });
     newOrg.save()
     .then((_newOrg) => resolve(_newOrg))
@@ -224,6 +225,29 @@ module.exports.removeOrganization = function(adminUser) {
     // Find organization to ensure it exists
     OrgController.removeOrg(adminUser, testData.orgs[0].id)
     .then((org) => resolve(org))
+    .catch((error) => reject(error));
+  });
+};
+
+/**
+ * @description Helper function to create project in MBEE tests
+ */
+module.exports.createProject = function(adminUser, orgID) {
+  return new Promise((resolve, reject) => {
+    // Create the new project
+    const newProject = new Project({
+      _id: utils.createID(orgID, testData.projects[0].id),
+      org: orgID,
+      name: testData.projects[0].name,
+      permissions: {
+        admin: [adminUser._id],
+        write: [adminUser._id],
+        read: [adminUser._id]
+      },
+      custom: null,
+    });
+    newProject.save()
+    .then((_newProj) => resolve(_newProj))
     .catch((error) => reject(error));
   });
 };

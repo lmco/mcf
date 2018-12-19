@@ -249,7 +249,10 @@
           "method": "GET"
         }
       ],
-      "type": "Outgoing"
+      "type": "Outgoing",
+      "custom": {
+        "location": "Location 01"
+      }
     },
     {
       "id": "webhook2",
@@ -261,7 +264,10 @@
           "method": "GET"
         }
       ],
-      "type": "Outgoing"
+      "type": "Outgoing",
+      "custom": {
+        "location": "Location 02"
+      }
     },
     {
       "id": "webhook3",
@@ -269,7 +275,10 @@
       "triggers": ["First Trigger", "Second Trigger", "Third Trigger"],
       "type": "Incoming",
       "token": "12345",
-      "tokenLocation": "test-token"
+      "tokenLocation": "test-token",
+      "custom": {
+        "location": "Location 03"
+      }
     }
   ],
 
