@@ -41,7 +41,6 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 
-
 function find(requestingUser, organizationID, projectID, webhooks, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
@@ -110,8 +109,7 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
       }
 
       // Find the webhooks
-      return Webhook.Webhook.find(searchQuery)
-      .populate('project contains archivedBy lastModifiedBy createdBy');
+      return Webhook.Webhook.find(searchQuery);
     })
     .then((foundWebhooks) => resolve(foundWebhooks))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -185,13 +183,13 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the project to verify existence and permissions
-    Project.findOne( { _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) })
     .populate('permissions.read permissions.write permissions.admin')
     .then((foundProject) => {
       // If project not found
       if (!foundProject) {
-        throw new M.CustomError(`Project ${projID} `+
-        `not found in the org ${orgID}.`, 404, 'warn');
+        throw new M.CustomError(`Project ${projID} `
+        + `not found in the org ${orgID}.`, 404, 'warn');
       }
 
       // Verify user has write permissions on the project
@@ -258,8 +256,14 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
     }
 
     // Find the project
-    Project.find({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((foundProject) => {
+      // If project not found
+      if (!foundProject) {
+        throw new M.CustomError(`Project ${projID} `
+          + `not found in the org ${orgID}.`, 404, 'warn');
+      }
+
       // Verify user has write permissions on the project
       if (!foundProject.getPermissions(reqUser).write && !reqUser.admin) {
         throw new M.CustomError('User does not have permission to update'
@@ -298,7 +302,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       }
 
       // Create searchQuery
-      searchQuery = { _id: {$in: arrIDs}, project: foundProject._id };
+      searchQuery = { _id: { $in: arrIDs }, project: foundProject._id };
 
       // Find the webhooks to update
       return Webhook.Webhook.find(searchQuery);
@@ -376,8 +380,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       // Return when all promises have been completed
       return Promise.all(promises);
     })
-    .then(() => Webhook.Webhook.find(searchQuery)
-    .populate('project contains archivedBy lastModifiedBy createdBy'))
+    .then(() => Webhook.Webhook.find(searchQuery))
     .then((foundUpdatedWebhooks) => resolve(foundUpdatedWebhooks))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -432,7 +435,7 @@ function remove(requestingUser, organizationID, projectID, webhooks, options) {
       foundWebhooks = _foundWebhooks;
 
       // Delete the webhooks
-      return Webhook.Webhook.deleteMany(searchQuery)
+      return Webhook.Webhook.deleteMany(searchQuery);
     })
     .then((retQuery) => {
       // Verify that all of the webhooks were correctly deleted

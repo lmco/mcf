@@ -208,7 +208,7 @@ module.exports.createOrganization = function(adminUser) {
         write: [adminUser._id],
         read: [adminUser._id]
       },
-      custom: null,
+      custom: null
     });
     newOrg.save()
     .then((_newOrg) => resolve(_newOrg))
@@ -244,7 +244,7 @@ module.exports.createProject = function(adminUser, orgID) {
         write: [adminUser._id],
         read: [adminUser._id]
       },
-      custom: null,
+      custom: null
     });
     newProject.save()
     .then((_newProj) => resolve(_newProj))
