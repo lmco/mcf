@@ -92,7 +92,7 @@ module.exports.createAdminUser = function() {
     let newAdminUser = null;
 
     // Check any admin exist
-    User.findOne({ _id: testData.users[0].adminUsername })
+    User.findOne({ _id: testData.adminUser.username })
     .then((foundUser) => {
       // Check user found
       if (foundUser !== null) {
@@ -102,8 +102,8 @@ module.exports.createAdminUser = function() {
 
       // Create user
       const user = new User({
-        _id: testData.users[0].adminUsername,
-        password: testData.users[0].adminPassword,
+        _id: testData.adminUser.username,
+        password: testData.adminUser.password,
         provider: 'local',
         admin: true
       });
@@ -171,7 +171,7 @@ module.exports.removeAdminUser = function() {
     let userToDelete = null;
 
     // Find admin user
-    User.findOne({ _id: testData.users[0].adminUsername })
+    User.findOne({ _id: testData.adminUser.username })
     .then((foundUser) => {
       // Save user and remove user
       userToDelete = foundUser;

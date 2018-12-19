@@ -49,7 +49,9 @@ function find(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
     const orgID = sani.sanitize(organizationID);
-    const saniProjects = JSON.parse(JSON.stringify(sani.sanitize(projects)));
+    const saniProjects = (projects !== undefined)
+      ? JSON.parse(JSON.stringify(sani.sanitize(projects)))
+      : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
     // Initialize valid options
@@ -320,7 +322,7 @@ function update(requestingUser, organizationID, projects, options) {
               + 'be changed.', 400, 'warn');
           }
 
-          // If the type of field is custom data
+          // If the type of field is mixed
           if (Project.schema.obj[key].type.schemaName === 'Mixed') {
             // Only objects should be passed into mixed data
             if (typeof updateProj !== 'object') {

@@ -47,7 +47,9 @@ const utils = M.require('lib.utils');
 function find(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
-    const saniOrgs = JSON.parse(JSON.stringify(sani.sanitize(orgs)));
+    const saniOrgs = (orgs !== undefined)
+      ? JSON.parse(JSON.stringify(sani.sanitize(orgs)))
+      : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
     // Initialize valid options
@@ -200,6 +202,7 @@ function update(requestingUser, orgs, options) {
     const saniOrgs = JSON.parse(JSON.stringify(sani.sanitize(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundOrgs = [];
+    let orgsToUpdate = [];
 
     // Ensure parameters are valid
     try {
@@ -209,8 +212,6 @@ function update(requestingUser, orgs, options) {
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
     }
-
-    let orgsToUpdate = [];
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
@@ -288,7 +289,7 @@ function update(requestingUser, orgs, options) {
             + 'be changed.', 400, 'warn');
           }
 
-          // If the type of field is custom data
+          // If the type of field is mixed
           if (Organization.schema.obj[key].type.schemaName === 'Mixed') {
             // Only objects should be passed into mixed data
             if (typeof updateOrg !== 'object') {

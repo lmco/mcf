@@ -244,6 +244,10 @@ UserSchema.methods.getValidUpdateFields = function() {
   return ['fname', 'preferredName', 'lname', 'email', 'custom', 'archived'];
 };
 
+UserSchema.statics.getValidUpdateFields = function() {
+  return UserSchema.methods.getValidUpdateFields();
+};
+
 /**
  * @description Returns a user's public data.
  * @memberOf UserSchema

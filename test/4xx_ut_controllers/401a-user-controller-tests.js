@@ -1,0 +1,517 @@
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module  test.401-user-controller-tests
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.<br/>
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
+ *
+ * @description Tests the user controller functionality: create,
+ * delete, update, and find users.
+ */
+
+// NPM modules
+const chai = require('chai');
+const path = require('path');
+
+// MBEE modules
+const UserController = M.require('controllers.user-controller-2');
+const Organization = M.require('models.organization');
+const db = M.require('lib.db');
+const utils = M.require('lib.utils');
+
+/* --------------------( Test Data )-------------------- */
+// Variables used across test functions
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testData = testUtils.importTestData();
+let adminUser = null;
+
+/* --------------------( Main )-------------------- */
+/**
+ * The "describe" function is provided by Mocha and provides a way of wrapping
+ * or grouping several "it" tests into a single group. In this case, the name of
+ * that group (the first parameter passed into describe) is derived from the
+ * name of the current file.
+ */
+describe(M.getModuleName(module.filename), () => {
+  /**
+   * Before: Create admin user.
+   */
+  before((done) => {
+    // Connect to the database
+    db.connect()
+    // Create test admin
+    .then(() => testUtils.createAdminUser())
+    .then((user) => {
+      // Set global admin user
+      adminUser = user;
+      done();
+    })
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
+  });
+
+  /**
+   * After: Delete admin user.
+   */
+  after((done) => {
+    // Removing admin user
+    testUtils.removeAdminUser()
+    .then(() => db.disconnect())
+    .then(() => done())
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
+  });
+
+  /* Execute the tests */
+  it('should create a user', createUser);
+  it('should create multiple users', createUsers);
+  it('should find a user', findUser);
+  it('should find multiple users', findUsers);
+  it('should find all users', findAllUsers);
+  it('should update a user', updateUser);
+  // // it('should update multiple users', updateUsers);
+  it('should delete a user', deleteUser);
+  it('should delete multiple users', deleteUsers);
+});
+
+/* --------------------( Tests )-------------------- */
+/**
+ * @description Creates a user using the user controller
+ */
+function createUser(done) {
+  const userData = testData.users[0];
+
+  // Create user via controller
+  UserController.create(adminUser, userData)
+  .then((createdUsers) => {
+    // Expect createdUsers array to contain 1 user
+    chai.expect(createdUsers.length).to.equal(1);
+    const createdUser = createdUsers[0];
+
+    // Verify user created properly
+    chai.expect(createdUser._id).to.equal(userData.username);
+    chai.expect(createdUser.username).to.equal(userData.username);
+    chai.expect(createdUser.preferredName).to.equal(userData.preferredName);
+    chai.expect(createdUser.fname).to.equal(userData.fname);
+    chai.expect(createdUser.lname).to.equal(userData.lname);
+    chai.expect(createdUser.admin).to.equal(userData.admin);
+    chai.expect(createdUser.custom).to.deep.equal(userData.custom);
+
+    // Expect the password to be hashed
+    chai.expect(createdUser.password).to.not.equal(userData.password);
+
+    // Verify additional properties
+    chai.expect(createdUser.createdBy).to.equal(adminUser.username);
+    chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdUser.archivedBy).to.equal(null);
+    chai.expect(createdUser.createdOn).to.not.equal(null);
+    // TODO: Why is updatedOn ot null?
+    // chai.expect(createdUser.updatedOn).to.equal(null);
+    chai.expect(createdUser.archivedOn).to.equal(null);
+
+    // Find the default org
+    return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultOrg) => {
+    // Verify the user has read/write permission on the default org
+    chai.expect(defaultOrg.permissions.read).to.include(userData.username);
+    chai.expect(defaultOrg.permissions.write).to.include(userData.username);
+    chai.expect(defaultOrg.permissions.admin).to.not.include(userData.username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates multiple users using the user controller
+ */
+function createUsers(done) {
+  const userDataObjects = [
+    testData.users[1],
+    testData.users[2],
+    testData.users[3]
+  ];
+
+  // Create users via controller
+  UserController.create(adminUser, userDataObjects)
+  .then((createdUsers) => {
+    // Expect createdUsers not to be empty
+    chai.expect(createdUsers.length).to.equal(userDataObjects.length);
+
+    // Convert createdUsers to JMI type 2 for easier lookup
+    const jmi2Users = utils.convertJMI(1, 2, createdUsers);
+    // Loops through each user data object
+    userDataObjects.forEach((userDataObject) => {
+      const createdUser = jmi2Users[userDataObject.username];
+
+      // Verify user created properly
+      chai.expect(createdUser._id).to.equal(userDataObject.username);
+      chai.expect(createdUser.username).to.equal(userDataObject.username);
+      chai.expect(createdUser.preferredName).to.equal(userDataObject.preferredName);
+      chai.expect(createdUser.fname).to.equal(userDataObject.fname);
+      chai.expect(createdUser.lname).to.equal(userDataObject.lname);
+      chai.expect(createdUser.admin).to.equal(userDataObject.admin);
+      chai.expect(createdUser.custom).to.deep.equal(userDataObject.custom);
+
+      // Expect the password to be hashed
+      chai.expect(createdUser.password).to.not.equal(userDataObject.password);
+
+      // Verify additional properties
+      chai.expect(createdUser.createdBy).to.equal(adminUser.username);
+      chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdUser.archivedBy).to.equal(null);
+      chai.expect(createdUser.createdOn).to.not.equal(null);
+      // TODO: Why is updatedOn ot null?
+      // chai.expect(createdUser.updatedOn).to.equal(null);
+      chai.expect(createdUser.archivedOn).to.equal(null);
+    });
+
+    // Find the default org
+    return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultOrg) => {
+    const usernames = userDataObjects.map(u => u.username);
+    // Verify the user has read/write permission on the default org
+    chai.expect(defaultOrg.permissions.read).to.include.members(usernames);
+    chai.expect(defaultOrg.permissions.write).to.include.members(usernames);
+    chai.expect(defaultOrg.permissions.admin).to.not.include.members(usernames);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Finds a user using the user controller
+ */
+function findUser(done) {
+  const userData = testData.users[0];
+
+  // Find user via controller
+  UserController.find(adminUser, userData.username)
+  .then((foundUsers) => {
+    // Expect foundUsers array to contain 1 user
+    chai.expect(foundUsers.length).to.equal(1);
+    const foundUser = foundUsers[0];
+
+    // Verify user created properly
+    chai.expect(foundUser._id).to.equal(userData.username);
+    chai.expect(foundUser.username).to.equal(userData.username);
+    chai.expect(foundUser.preferredName).to.equal(userData.preferredName);
+    chai.expect(foundUser.fname).to.equal(userData.fname);
+    chai.expect(foundUser.lname).to.equal(userData.lname);
+    chai.expect(foundUser.admin).to.equal(userData.admin);
+    chai.expect(foundUser.custom).to.deep.equal(userData.custom);
+
+    // Expect the password to be hashed
+    chai.expect(foundUser.password).to.not.equal(userData.password);
+
+    // Verify additional properties
+    chai.expect(foundUser.createdBy._id).to.equal(adminUser.username);
+    chai.expect(foundUser.lastModifiedBy._id).to.equal(adminUser.username);
+    chai.expect(foundUser.archivedBy).to.equal(null);
+    chai.expect(foundUser.createdOn).to.not.equal(null);
+    // TODO: Why is updatedOn ot null?
+    // chai.expect(foundUser.updatedOn).to.equal(null);
+    chai.expect(foundUser.archivedOn).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Finds multiple users using the user controller
+ */
+function findUsers(done) {
+  const userDataObjects = [
+    testData.users[1],
+    testData.users[2],
+    testData.users[3]
+  ];
+
+  // Create list of usernames to find
+  const usernames = userDataObjects.map(u => u.username);
+
+  // Find users via controller
+  UserController.find(adminUser, usernames)
+  .then((foundUsers) => {
+    // Expect foundUsers not to be empty
+    chai.expect(foundUsers.length).to.equal(userDataObjects.length);
+
+    // Convert foundUsers to JMI type 2 for easier lookup
+    const jmi2Users = utils.convertJMI(1, 2, foundUsers);
+    // Loop through each user data object
+    userDataObjects.forEach((userDataObject) => {
+      const foundUser = jmi2Users[userDataObject.username];
+
+      // Verify user created properly
+      chai.expect(foundUser._id).to.equal(userDataObject.username);
+      chai.expect(foundUser.username).to.equal(userDataObject.username);
+      chai.expect(foundUser.preferredName).to.equal(userDataObject.preferredName);
+      chai.expect(foundUser.fname).to.equal(userDataObject.fname);
+      chai.expect(foundUser.lname).to.equal(userDataObject.lname);
+      chai.expect(foundUser.admin).to.equal(userDataObject.admin);
+      chai.expect(foundUser.custom).to.deep.equal(userDataObject.custom);
+
+      // Expect the password to be hashed
+      chai.expect(foundUser.password).to.not.equal(userDataObject.password);
+
+      // Verify additional properties
+      chai.expect(foundUser.createdBy._id).to.equal(adminUser.username);
+      chai.expect(foundUser.lastModifiedBy._id).to.equal(adminUser.username);
+      chai.expect(foundUser.archivedBy).to.equal(null);
+      chai.expect(foundUser.createdOn).to.not.equal(null);
+      // TODO: Why is updatedOn ot null?
+      // chai.expect(foundUser.updatedOn).to.equal(null);
+      chai.expect(foundUser.archivedOn).to.equal(null);
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Finds all users in the database using the user controller
+ */
+function findAllUsers(done) {
+  const userDataObjects = [
+    testData.adminUser,
+    testData.users[0],
+    testData.users[1],
+    testData.users[2],
+    testData.users[3]
+  ];
+
+  // Find users via controller
+  UserController.find(adminUser)
+  .then((foundUsers) => {
+    // TODO: What if there are other users in the database?
+    // Expect foundUsers not to be empty
+    chai.expect(foundUsers.length).to.equal(userDataObjects.length);
+
+    // Convert foundUsers to JMI type 2 for easier lookup
+    const jmi2Users = utils.convertJMI(1, 2, foundUsers);
+    // Loop through each user data object
+    userDataObjects.forEach((userDataObject) => {
+      const foundUser = jmi2Users[userDataObject.username];
+
+      if (foundUser.username !== adminUser.username) {
+        // Verify user created properly
+        chai.expect(foundUser._id).to.equal(userDataObject.username);
+        chai.expect(foundUser.username).to.equal(userDataObject.username);
+        chai.expect(foundUser.preferredName).to.equal(userDataObject.preferredName);
+        chai.expect(foundUser.fname).to.equal(userDataObject.fname);
+        chai.expect(foundUser.lname).to.equal(userDataObject.lname);
+        chai.expect(foundUser.admin).to.equal(userDataObject.admin);
+        chai.expect(foundUser.custom).to.deep.equal(userDataObject.custom);
+
+        // Expect the password to be hashed
+        chai.expect(foundUser.password).to.not.equal(userDataObject.password);
+
+        // Verify additional properties
+        chai.expect(foundUser.createdBy._id).to.equal(adminUser.username);
+        chai.expect(foundUser.lastModifiedBy._id).to.equal(adminUser.username);
+        chai.expect(foundUser.archivedBy).to.equal(null);
+        chai.expect(foundUser.createdOn).to.not.equal(null);
+        // TODO: Why is updatedOn ot null?
+        // chai.expect(foundUser.updatedOn).to.equal(null);
+        chai.expect(foundUser.archivedOn).to.equal(null);
+      }
+      // Admin user special cases
+      else {
+        chai.expect(foundUser._id).to.equal(userDataObject.username);
+        chai.expect(foundUser.username).to.equal(userDataObject.username);
+        chai.expect(foundUser.password).to.not.equal(userDataObject.password);
+      }
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates a user using the user controller
+ */
+function updateUser(done) {
+  const userData = testData.users[0];
+
+  // Create object to update user
+  const updateObj = {
+    preferredName: 'Name Updated',
+    username: userData.username
+  };
+
+  // Update user via controller
+  UserController.update(adminUser, updateObj)
+  .then((updatedUsers) => {
+    // Expect updatedUsers array to contain 1 user
+    chai.expect(updatedUsers.length).to.equal(1);
+    const updatedUser = updatedUsers[0];
+
+    // Verify user created properly
+    chai.expect(updatedUser._id).to.equal(userData.username);
+    chai.expect(updatedUser.username).to.equal(userData.username);
+    chai.expect(updatedUser.preferredName).to.equal(updateObj.preferredName);
+    chai.expect(updatedUser.fname).to.equal(userData.fname);
+    chai.expect(updatedUser.lname).to.equal(userData.lname);
+    chai.expect(updatedUser.admin).to.equal(userData.admin);
+    chai.expect(updatedUser.custom).to.deep.equal(userData.custom);
+
+    // Expect the password to be hashed
+    chai.expect(updatedUser.password).to.not.equal(userData.password);
+
+    // Verify additional properties
+    chai.expect(updatedUser.createdBy._id).to.equal(adminUser.username);
+    chai.expect(updatedUser.lastModifiedBy._id).to.equal(adminUser.username);
+    chai.expect(updatedUser.archivedBy).to.equal(null);
+    chai.expect(updatedUser.createdOn).to.not.equal(null);
+    chai.expect(updatedUser.updatedOn).to.equal(null);
+    chai.expect(updatedUser.archivedOn).to.equal(null);
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Deletes a user using the user controller
+ */
+function deleteUser(done) {
+  const userData = testData.users[0];
+
+  // Delete user via controller
+  UserController.remove(adminUser, userData.username)
+  .then((deletedUsers) => {
+    // Expect deletedUsers array to contain 1 user
+    chai.expect(deletedUsers.length).to.equal(1);
+    const deletedUser = deletedUsers[0];
+
+    // Verify correct user deleted
+    chai.expect(deletedUser._id).to.equal(userData.username);
+
+    // Attempt to find the deleted user
+    return UserController.find(adminUser, userData.username, { archived: true });
+  })
+  .then((foundUsers) => {
+    // Expect foundUsers array to be empty
+    chai.expect(foundUsers.length).to.equal(0);
+
+    // Find the default org
+    return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultOrg) => {
+    // Verify the user is NOT part of the default org
+    chai.expect(defaultOrg.permissions.read).to.not.include(userData.username);
+    chai.expect(defaultOrg.permissions.write).to.not.include(userData.username);
+    chai.expect(defaultOrg.permissions.admin).to.not.include(userData.username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Deletes multiple users using the user controller
+ */
+function deleteUsers(done) {
+  const userDataObjects = [
+    testData.users[1],
+    testData.users[2],
+    testData.users[3]
+  ];
+
+  // Create list of usernames to delete
+  const usernames = userDataObjects.map(u => u.username);
+
+  // Delete users via controller
+  UserController.remove(adminUser, usernames)
+  .then((deletedUsers) => {
+    // Expect deletedUsers not to be empty
+    chai.expect(deletedUsers.length).to.equal(userDataObjects.length);
+
+    // Convert deletedUsers to JMI type 2 for easier lookup
+    const jmi2Users = utils.convertJMI(1, 2, deletedUsers);
+    // Loop through each user data object
+    userDataObjects.forEach((userDataObject) => {
+      const deletedUser = jmi2Users[userDataObject.username];
+
+      // Verify correct user deleted
+      chai.expect(deletedUser._id).to.equal(userDataObject.username);
+    });
+
+    // Attempt to find the deleted users
+    return UserController.find(adminUser, usernames, { archived: true });
+  })
+  .then((foundUsers) => {
+    // Expect foundUsers array to be empty
+    chai.expect(foundUsers.length).to.equal(0);
+
+    // Find the default org
+    return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultOrg) => {
+    // Verify the users are NOT part of the default org
+    chai.expect(defaultOrg.permissions.read).to.not.include.members(usernames);
+    chai.expect(defaultOrg.permissions.write).to.not.include.members(usernames);
+    chai.expect(defaultOrg.permissions.admin).to.not.include.members(usernames);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}

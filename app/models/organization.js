@@ -133,7 +133,7 @@ OrganizationSchema.methods.getValidUpdateFields = function() {
 
 OrganizationSchema.statics.getValidUpdateFields = function() {
   return OrganizationSchema.methods.getValidUpdateFields();
-}
+};
 
 /**
  * @description Returns the permissions a user has on the org

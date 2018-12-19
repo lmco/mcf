@@ -87,8 +87,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should create multiple orgs', createOrgs);
   it('should find an org', findOrg);
   it('should find multiple orgs', findOrgs);
-  // TODO: Add a findAllOrgs test
-  // it('should find all orgs', findAllOrgs);
+  it('should find all orgs', findAllOrgs);
   it('should update an org', updateOrg);
   it('should update multiple orgs', updateOrgs);
   it('should delete an org', deleteOrg);
@@ -276,6 +275,71 @@ function findOrgs(done) {
 }
 
 /**
+ * @description Finds all organizations the user has access to using the org
+ * controller
+ */
+function findAllOrgs(done) {
+  const orgDataObjects = [
+    {
+      id: M.config.server.defaultOrganizationId,
+      name: M.config.server.defaultOrganizationName
+    },
+    testData.orgs[0],
+    testData.orgs[1],
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
+
+  // Find orgs via controller
+  OrgController.find(adminUser)
+  .then((foundOrgs) => {
+    // TODO: What if there are other orgs in the database?
+    // Expect foundOrgs not to be empty
+    chai.expect(foundOrgs.length).to.equal(orgDataObjects.length);
+
+    // Convert foundOrgs to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs);
+    // Loop through each org data object
+    orgDataObjects.forEach((orgDataObject) => {
+      const foundOrg = jmi2Orgs[orgDataObject.id];
+
+      // If the org was created in tests
+      if (foundOrg._id !== M.config.server.defaultOrganizationId) {
+        // Verify correct org found
+        chai.expect(foundOrg.id).to.equal(orgDataObject.id);
+        chai.expect(foundOrg._id).to.equal(orgDataObject.id);
+        chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+        chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom);
+        chai.expect(foundOrg.permissions.admin[0]._id).to.equal(adminUser.username);
+        chai.expect(foundOrg.permissions.write[0]._id).to.equal(adminUser.username);
+        chai.expect(foundOrg.permissions.read[0]._id).to.equal(adminUser.username);
+
+        // Verify additional properties
+        chai.expect(foundOrg.createdBy._id).to.equal(adminUser.username);
+        chai.expect(foundOrg.lastModifiedBy._id).to.equal(adminUser.username);
+        chai.expect(foundOrg.archivedBy).to.equal(null);
+        chai.expect(foundOrg.createdOn).to.not.equal(null);
+        chai.expect(foundOrg.updatedOn).to.equal(null);
+        chai.expect(foundOrg.archivedOn).to.equal(null);
+      }
+      // Special case for default org since it has no custom data
+      else {
+        chai.expect(foundOrg.id).to.equal(orgDataObject.id);
+        chai.expect(foundOrg._id).to.equal(orgDataObject.id);
+        chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+      }
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
  * @description Updates an organization using the org controller
  */
 function updateOrg(done) {
@@ -310,7 +374,7 @@ function updateOrg(done) {
     chai.expect(updatedOrg.createdOn).to.not.equal(null);
     chai.expect(updatedOrg.updatedOn).to.not.equal(null);
     chai.expect(updatedOrg.archivedOn).to.equal(null);
-    done()
+    done();
   })
   .catch((error) => {
     M.log.error(error);
@@ -331,12 +395,10 @@ function updateOrgs(done) {
   ];
 
   // Create objects to update orgs
-  const updateObjects = orgDataObjects.map(o => {
-    return {
-      name: `${o.name}_edit`,
-      id: o.id
-    };
-  });
+  const updateObjects = orgDataObjects.map(o => ({
+    name: `${o.name}_edit`,
+    id: o.id
+  }));
 
   // Update orgs via controller
   OrgController.update(adminUser, updateObjects)

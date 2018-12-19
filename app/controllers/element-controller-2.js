@@ -84,7 +84,7 @@ function find(requestingUser, organizationID, projectID, elements, options) {
       }
 
       // Define the searchQuery
-      const searchQuery = {project: project._id, archived: false};
+      const searchQuery = { project: project._id, archived: false };
       // If the archived field is true, remove it from the query
       if (archived) {
         delete searchQuery.archived;
@@ -93,7 +93,7 @@ function find(requestingUser, organizationID, projectID, elements, options) {
       // Check the type of the elements parameter
       if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')) {
         // An array of element ids, find all
-        searchQuery._id = {$in: saniElements.map(e => utils.createID(orgID, projID, e))};
+        searchQuery._id = { $in: saniElements.map(e => utils.createID(orgID, projID, e)) };
       }
       else if (typeof saniElements === 'string') {
         // A single element id
@@ -107,8 +107,8 @@ function find(requestingUser, organizationID, projectID, elements, options) {
 
       // Find the projects
       return Element.Element.find(searchQuery)
-      .populate('project contains parent source target archivedBy ' +
-        'lastModifiedBy createdBy')
+      .populate('project contains parent source target archivedBy '
+        + 'lastModifiedBy createdBy');
     })
     .then((foundElements) => resolve(foundElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -123,8 +123,8 @@ function create(requestingUser, organizationID, projectID, elements, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
-    let createdElements = [];
-    let remainingElements = [];
+    const createdElements = [];
+    const remainingElements = [];
 
     // Ensure parameters are valid
     try {
@@ -305,6 +305,6 @@ function create(requestingUser, organizationID, projectID, elements, options) {
     })
     .then((extraElements) => {
 
-    })
+    });
   });
 }
