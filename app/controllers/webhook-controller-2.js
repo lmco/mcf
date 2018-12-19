@@ -51,8 +51,14 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
       ? sani.sanitize(JSON.parse(JSON.stringify(webhooks)))
       : undefined;
 
+    // Set options if no webhooks were provided, but options were
+    if (typeof webhooks === 'object' && webhooks !== null && !Array.isArray(webhooks)) {
+      options = webhooks; // eslint-disable-line no-param-reassign
+    }
+
     // Initialize valid options
     let archived = false;
+    let populateString = '';
 
     // Ensure parameters are valid
     try {
@@ -69,6 +75,15 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
           assert.ok(typeof options.archived === 'boolean', 'The option \'archived\''
             + ' is not a boolean.');
           archived = options.archived;
+        }
+
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'project createdBy lastModifiedBy archivedBy';
+          }
         }
       }
     }
@@ -109,7 +124,8 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
       }
 
       // Find the webhooks
-      return Webhook.Webhook.find(searchQuery);
+      return Webhook.Webhook.find(searchQuery)
+      .populate(populateString);
     })
     .then((foundWebhooks) => resolve(foundWebhooks))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -126,11 +142,23 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
     const saniWebhooks = sani.sanitize(JSON.parse(JSON.stringify(webhooks)));
     let webhooksToCreate = [];
 
+    // Initialize valid options
+    let populate = false;
+
     // Ensure parameters are valid
     try {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          populate = options.populated;
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -225,7 +253,14 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
       // Create the webhooks
       return Webhook.Webhook.insertMany(webhookObjects);
     })
-    .then((createdWebhooks) => resolve(createdWebhooks))
+    .then((createdWebhooks) => {
+      if (populate) {
+        return Webhook.Webhook.find(searchQuery)
+        .populate('project createdBy lastModifiedBy archivedBy');
+      }
+
+      return resolve(createdWebhooks);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -242,6 +277,9 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
     let webhooksToUpdate = [];
     let searchQuery = {};
 
+    // Initialize valid options
+    let populateString = '';
+
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field
@@ -250,6 +288,17 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       // Ensure orgID and projID are strings
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'project createdBy lastModifiedBy archivedBy';
+          }
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -305,7 +354,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       searchQuery = { _id: { $in: arrIDs }, project: foundProject._id };
 
       // Find the webhooks to update
-      return Webhook.Webhook.find(searchQuery);
+      return Webhook.Webhook.find(searchQuery).populate(populateString);
     })
     .then((_foundWebhooks) => {
       // Set function-wide foundWebhooks
@@ -396,6 +445,9 @@ function remove(requestingUser, organizationID, projectID, webhooks, options) {
     const saniWebhooks = sani.sanitize(JSON.parse(JSON.stringify(webhooks)));
     let foundWebhooks = [];
 
+    // Initialize valid options
+    let populateString = '';
+
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field and is a system admin
@@ -405,6 +457,18 @@ function remove(requestingUser, organizationID, projectID, webhooks, options) {
       // Ensure orgID and projID are strings
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'projects permissions.read permissions.write '
+              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+          }
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -428,8 +492,7 @@ function remove(requestingUser, organizationID, projectID, webhooks, options) {
     }
 
     // Find the webhooks to delete
-    Webhook.Webhook.find(searchQuery)
-    .populate('project contains archivedBy lastModifiedBy createdBy')
+    Webhook.Webhook.find(searchQuery).populate(populateString)
     .then((_foundWebhooks) => {
       // Set function-wide foundWebhooks
       foundWebhooks = _foundWebhooks;

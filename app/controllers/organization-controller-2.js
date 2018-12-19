@@ -43,7 +43,7 @@ const Webhook = M.require('models.webhook');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
-// TODO: Consider adding a supported option to return a populated org
+
 function find(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
@@ -52,9 +52,14 @@ function find(requestingUser, orgs, options) {
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
+    // Set options if no orgs were provided, but options were
+    if (typeof orgs === 'object' && orgs !== null && !Array.isArray(orgs)) {
+      options = orgs; // eslint-disable-line no-param-reassign
+    }
+
     // Initialize valid options
     let archived = false;
-    // TODO: Should check typeof orgs first, in case no orgs are passed in, but options are
+    let populateString = '';
 
     // TODO: Consider changing to single if statements, rather than try/catch
     // Ensure parameters are valid
@@ -68,6 +73,16 @@ function find(requestingUser, orgs, options) {
           assert.ok(typeof options.archived === 'boolean', 'The option \'archived\''
             + ' is not a boolean.');
           archived = options.archived;
+        }
+
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'projects permissions.read permissions.write '
+              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+          }
         }
       }
     }
@@ -98,8 +113,7 @@ function find(requestingUser, orgs, options) {
 
     // Find the orgs
     Organization.find(searchQuery)
-    .populate('projects permissions.read permissions.write permissions.admin'
-      + ' archivedBy lastModifiedBy createdBy')
+    .populate(populateString)
     .then((foundOrgs) => resolve(foundOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -112,11 +126,23 @@ function create(requestingUser, orgs, options) {
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
+    // Initialize valid options
+    let populate = false;
+
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field and is a system admin
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
       assert.ok(reqUser.admin, 'User does not have permissions to create orgs.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          populate = options.populated;
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -191,7 +217,15 @@ function create(requestingUser, orgs, options) {
       // Create the organizations
       return Organization.insertMany(orgObjects);
     })
-    .then((createdOrgs) => resolve(createdOrgs))
+    .then((createdOrgs) => {
+      if (populate) {
+        return resolve(Organization.find({ _id: { $in: arrIDs } })
+        .populate('projects permissions.read permissions.write '
+          + 'permissions.admin archivedBy lastModifiedBy createdBy'));
+      }
+
+      return resolve(createdOrgs);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -204,10 +238,25 @@ function update(requestingUser, orgs, options) {
     let foundOrgs = [];
     let orgsToUpdate = [];
 
+    // Initialize valid options
+    let populateString = '';
+
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'projects permissions.read permissions.write '
+              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+          }
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -332,8 +381,7 @@ function update(requestingUser, orgs, options) {
       return Promise.all(promises);
     })
     .then(() => Organization.find(searchQuery)
-    .populate('projects permissions.read permissions.write permissions.admin'
-      + ' archivedBy lastModifiedBy createdBy'))
+    .populate(populateString))
     .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -347,11 +395,26 @@ function remove(requestingUser, orgs, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundOrgs = [];
 
+    // Initialize valid options
+    let populateString = '';
+
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
       assert.ok(reqUser.admin, 'User does not have permissions to delete orgs.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'projects permissions.read permissions.write '
+              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+          }
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -377,8 +440,7 @@ function remove(requestingUser, orgs, options) {
 
     // Find the orgs to delete
     Organization.find(searchQuery)
-    .populate('projects permissions.read permissions.write permissions.admin'
-      + ' archivedBy lastModifiedBy createdBy')
+    .populate(populateString)
     .then((_foundOrgs) => {
       // Set function-wde foundOrgs and create ownedQuery
       foundOrgs = _foundOrgs;

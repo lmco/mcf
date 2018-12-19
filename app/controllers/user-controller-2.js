@@ -50,9 +50,14 @@ function find(requestingUser, users, options) {
       ? sani.sanitize(JSON.parse(JSON.stringify(users)))
       : undefined;
 
+    // Set options if no users were provided, but options were
+    if (typeof users === 'object' && users !== null && !Array.isArray(users)) {
+      options = users; // eslint-disable-line no-param-reassign
+    }
 
     // Initialize valid options
     let archived = false;
+    let populateString = '';
 
     // Ensure parameters are valid
     try {
@@ -65,6 +70,16 @@ function find(requestingUser, users, options) {
           assert.ok(typeof options.archived === 'boolean', 'The option \'archived\''
             + ' is not a boolean.');
           archived = options.archived;
+        }
+
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'orgs.read orgs.write orgs.admin proj.read '
+              + 'proj.write proj.admin archivedBy lastModifiedBy createdBy';
+          }
         }
       }
     }
@@ -94,8 +109,7 @@ function find(requestingUser, users, options) {
     }
     // Find the users
     User.find(searchQuery)
-    .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin'
-      + ' archivedBy lastModifiedBy createdBy')
+    .populate(populateString)
     .then((foundUser) => resolve(foundUser))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -108,11 +122,23 @@ function create(requestingUser, users, options) {
     const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
     let createdUsers = [];
 
+    // Initialize valid options
+    let populate = false;
+
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field and is a system admin
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
       assert.ok(reqUser.admin, 'User does not have permissions to create users.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          populate = options.populated;
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -202,7 +228,16 @@ function create(requestingUser, users, options) {
       // Save the updated default org
       return defaultOrg.save();
     })
-    .then(() => resolve(createdUsers))
+    .then(() => {
+      // If user wants populated users, find and populate
+      if (populate) {
+        return resolve(User.find({ _id: { $in: arrUsernames } })
+        .populate('orgs.read orgs.write orgs.admin proj.read '
+          + 'proj.write proj.admin archivedBy lastModifiedBy createdBy'));
+      }
+
+      return resolve(createdUsers);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -215,11 +250,26 @@ function update(requestingUSer, users, options) {
     let foundUsers = [];
     let usersToUpdate = [];
 
+    // Initialize valid options
+    let populateString = '';
+
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
       // TODO How should we handle the update permissions?
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'orgs.read orgs.write orgs.admin proj.read '
+              + 'proj.write proj.admin archivedBy lastModifiedBy createdBy';
+          }
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -336,8 +386,7 @@ function update(requestingUSer, users, options) {
       return Promise.all(promises);
     })
     .then(() => User.find(searchQuery)
-    .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin'
-      + ' archivedBy lastModifiedBy createdBy'))
+    .populate(populateString))
     .then((foundUpdatedUsers) => resolve(foundUpdatedUsers))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -352,11 +401,26 @@ function remove(requestingUser, users, options) {
     let foundUsers = [];
     let foundUsernames = [];
 
+    // Initialize valid options
+    let populateString = '';
+
     // Ensure parameters are valid
     try {
       // Ensure the requesting user has an _id and is a system admin
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
       assert.ok(reqUser.admin, 'User does not have permissions to delete users.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'orgs.read orgs.write orgs.admin proj.read '
+              + 'proj.write proj.admin archivedBy lastModifiedBy createdBy';
+          }
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -382,8 +446,7 @@ function remove(requestingUser, users, options) {
 
     // Find the users to delete
     User.find(searchQuery)
-    .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin'
-      + ' archivedBy lastModifiedBy createdBy')
+    .populate(populateString)
     .then((_foundUsers) => {
       // Set function-wide foundUsers and foundUsernames
       foundUsers = _foundUsers;

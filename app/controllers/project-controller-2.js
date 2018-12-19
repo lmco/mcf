@@ -48,15 +48,20 @@ const utils = M.require('lib.utils');
 function find(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
-    // TODO: if projects not provided but options were, we need to set options equal to projects
     const orgID = sani.sanitize(organizationID);
     const saniProjects = (projects !== undefined)
       ? sani.sanitize(JSON.parse(JSON.stringify(projects)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
+    // Set options if no projects were provided, but options were
+    if (typeof projects === 'object' && projects !== null && !Array.isArray(projects)) {
+      options = projects; // eslint-disable-line no-param-reassign
+    }
+
     // Initialize valid options
     let archived = false;
+    let populateString = '';
 
     // Ensure parameters are valid
     try {
@@ -72,6 +77,16 @@ function find(requestingUser, organizationID, projects, options) {
           assert.ok(typeof options.archived === 'boolean', 'The option \'archived\''
             + ' is not a boolean.');
           archived = options.archived;
+        }
+
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'org permissions.read permissions.write '
+              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+          }
         }
       }
     }
@@ -102,8 +117,7 @@ function find(requestingUser, organizationID, projects, options) {
 
     // Find the projects
     Project.find(searchQuery)
-    .populate('org permissions.read permissions.write permissions.admin'
-      + ' archivedBy lastModifiedBy createdBy')
+    .populate(populateString)
     .then((foundProjects) => resolve(foundProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -118,10 +132,22 @@ function create(requestingUser, organizationID, projects, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let createdProjects = [];
 
+    // Initialize valid options
+    let populate = false;
+
     // Ensure parameters are valid
     try {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          populate = options.populated;
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -225,7 +251,15 @@ function create(requestingUser, organizationID, projects, options) {
       // Create the elements
       return Element.Element.insertMany(elemObjects);
     })
-    .then(() => resolve(createdProjects))
+    .then(() => {
+      if (populate) {
+        return resolve(Project.find({ _id: { $in: arrIDs } })
+        .populate('org permissions.read permissions.write permissions.admin '
+          + 'archivedBy lastModifiedBy createdBy'));
+      }
+
+      return resolve(createdProjects);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -240,11 +274,26 @@ function update(requestingUser, organizationID, projects, options) {
     let foundProjects = [];
     let projectsToUpdate = [];
 
+    // Initialize valid options
+    let populateString = '';
+
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'org permissions.read permissions.write '
+              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+          }
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -288,8 +337,6 @@ function update(requestingUser, organizationID, projects, options) {
 
     // Find the projects to update
     Project.find(searchQuery)
-    .populate('org permissions.read permissions.write permissions.admin'
-      + ' archivedBy lastModifiedBy createdBy')
     .then((_foundProjects) => {
       // Set function-wide foundProjects
       foundProjects = _foundProjects;
@@ -364,8 +411,7 @@ function update(requestingUser, organizationID, projects, options) {
       return Promise.all(promises);
     })
     .then(() => Project.find(searchQuery)
-    .populate('org permissions.read permissions.write permissions.admin'
-      + ' archivedBy lastModifiedBy createdBy'))
+    .populate(populateString))
     .then((foundUpdatedProjects) => resolve(foundUpdatedProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -380,12 +426,27 @@ function remove(requestingUser, organizationID, projects, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundProjects = [];
 
+    // Initialize valid options
+    let populateString = '';
+
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
       assert.ok(reqUser.admin, 'User does not have permissions to delete orgs.');
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
+
+      if (options) {
+        // If the option 'populated' is supplied, ensure it's a boolean
+        if (options.hasOwnProperty('populated')) {
+          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
+            + ' is not a boolean.');
+          if (options.populated) {
+            populateString = 'org permissions.read permissions.write '
+              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+          }
+        }
+      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
@@ -413,8 +474,7 @@ function remove(requestingUser, organizationID, projects, options) {
 
     // Find the projects to delete
     Project.find(searchQuery)
-    .populate('org permissions.read permissions.write permissions.admin'
-      + ' archivedBy lastModifiedBy createdBy')
+    .populate(populateString)
     .then((_foundProjects) => {
       // Set the function-wide foundProjects and create ownedQuery
       foundProjects = _foundProjects;

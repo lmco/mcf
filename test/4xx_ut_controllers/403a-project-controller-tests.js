@@ -206,7 +206,7 @@ function findProject(done) {
   const projData = testData.projects[0];
 
   // Find project via controller
-  ProjController.find(adminUser, org.id, projData.id)
+  ProjController.find(adminUser, org.id, projData.id, { populated: true })
   .then((foundProjects) => {
     // Expect foundProjects array to contain 1 project
     chai.expect(foundProjects.length).to.equal(1);
@@ -255,7 +255,7 @@ function findProjects(done) {
   const projIDs = projDataObjects.map(p => p.id);
 
   // Find projects via controller
-  ProjController.find(adminUser, org.id, projIDs)
+  ProjController.find(adminUser, org.id, projIDs, { populated: true })
   .then((foundProjects) => {
     // Expect foundProjects not to be empty
     chai.expect(foundProjects.length).to.equal(projDataObjects.length);
@@ -310,7 +310,7 @@ function findAllProjects(done) {
   ];
 
   // Find projects via controller
-  ProjController.find(adminUser, org.id)
+  ProjController.find(adminUser, org.id, { populated: true })
   .then((foundProjects) => {
     // Expect foundProjects not to be empty
     chai.expect(foundProjects.length).to.equal(projDataObjects.length);
@@ -375,14 +375,14 @@ function updateProject(done) {
     chai.expect(updatedProj._id).to.equal(utils.createID(org.id, projData.id));
     chai.expect(updatedProj.name).to.equal(`${projData.name}_edit`);
     chai.expect(updatedProj.custom).to.deep.equal(projData.custom);
-    chai.expect(updatedProj.org._id).to.equal(org.id);
-    chai.expect(updatedProj.permissions.admin[0]._id).to.equal(adminUser.username);
-    chai.expect(updatedProj.permissions.write[0]._id).to.equal(adminUser.username);
-    chai.expect(updatedProj.permissions.read[0]._id).to.equal(adminUser.username);
+    chai.expect(updatedProj.org).to.equal(org.id);
+    chai.expect(updatedProj.permissions.admin[0]).to.equal(adminUser.username);
+    chai.expect(updatedProj.permissions.write[0]).to.equal(adminUser.username);
+    chai.expect(updatedProj.permissions.read[0]).to.equal(adminUser.username);
 
     // Verify additional properties
-    chai.expect(updatedProj.createdBy._id).to.equal(adminUser.username);
-    chai.expect(updatedProj.lastModifiedBy._id).to.equal(adminUser.username);
+    chai.expect(updatedProj.createdBy).to.equal(adminUser.username);
+    chai.expect(updatedProj.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(updatedProj.archivedBy).to.equal(null);
     chai.expect(updatedProj.createdOn).to.not.equal(null);
     chai.expect(updatedProj.updatedOn).to.not.equal(null);
@@ -432,14 +432,14 @@ function updateProjects(done) {
       chai.expect(updatedProj._id).to.equal(projectID);
       chai.expect(updatedProj.name).to.equal(`${projDataObject.name}_edit`);
       chai.expect(updatedProj.custom).to.deep.equal(projDataObject.custom);
-      chai.expect(updatedProj.org._id).to.equal(org.id);
-      chai.expect(updatedProj.permissions.admin[0]._id).to.equal(adminUser.username);
-      chai.expect(updatedProj.permissions.write[0]._id).to.equal(adminUser.username);
-      chai.expect(updatedProj.permissions.read[0]._id).to.equal(adminUser.username);
+      chai.expect(updatedProj.org).to.equal(org.id);
+      chai.expect(updatedProj.permissions.admin[0]).to.equal(adminUser.username);
+      chai.expect(updatedProj.permissions.write[0]).to.equal(adminUser.username);
+      chai.expect(updatedProj.permissions.read[0]).to.equal(adminUser.username);
 
       // Verify additional properties
-      chai.expect(updatedProj.createdBy._id).to.equal(adminUser.username);
-      chai.expect(updatedProj.lastModifiedBy._id).to.equal(adminUser.username);
+      chai.expect(updatedProj.createdBy).to.equal(adminUser.username);
+      chai.expect(updatedProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(updatedProj.archivedBy).to.equal(null);
       chai.expect(updatedProj.createdOn).to.not.equal(null);
       chai.expect(updatedProj.updatedOn).to.not.equal(null);
