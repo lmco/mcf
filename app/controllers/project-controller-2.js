@@ -195,8 +195,6 @@ function create(requestingUser, organizationID, projects, options) {
 
     // Find the organization to verify existence and permissions
     Organization.findOne({ _id: orgID })
-    // TODO: Rewrite getPermissions to handle populated or non-populated users
-    .populate('permissions.read permissions.write permissions.admin')
     .then((foundOrg) => {
       // Verify user has write permissions on the org
       if (!foundOrg.getPermissions(reqUser).write && !reqUser.admin) {

@@ -145,10 +145,20 @@ OrganizationSchema.statics.getValidUpdateFields = function() {
  * and values being booleans
  */
 OrganizationSchema.methods.getPermissions = function(user) {
-  // Map org permissions lists user._ids to strings
-  const read = this.permissions.read.map(u => u._id);
-  const write = this.permissions.write.map(u => u._id);
-  const admin = this.permissions.admin.map(u => u._id);
+  let read = this.permissions.read;
+  let write = this.permissions.write;
+  let admin = this.permissions.admin;
+
+  // If populated, map org permissions lists user._ids to strings
+  if (read.every(u => typeof u === 'object')) {
+    read = this.permissions.read.map(u => u._id);
+  }
+  if (write.every(u => typeof u === 'object')) {
+    write = this.permissions.write.map(u => u._id);
+  }
+  if (admin.every(u => typeof u === 'object')) {
+    admin = this.permissions.admin.map(u => u._id);
+  }
 
   // Return an object containing user permissions
   return {

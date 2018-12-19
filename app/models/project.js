@@ -174,10 +174,28 @@ ProjectSchema.methods.getVisibilityLevels = function() {
  *  and values being booleans
  */
 ProjectSchema.methods.getPermissions = function(user) {
-  // Map project.permissions user._ids to strings
-  const read = this.permissions.read.map(u => u._id);
-  const write = this.permissions.write.map(u => u._id);
-  const admin = this.permissions.admin.map(u => u._id);
+  let read = this.permissions.read;
+  const write = this.permissions.write;
+  const admin = this.permissions.admin;
+
+  // If this.permissions.read is populated
+  if (this.permissions.read.every(u => typeof u === 'object')) {
+    // Map _ids
+    read = this.permissions.read.map(u => u._id);
+  }
+
+  // If this.permissions.write is populated
+  if (this.permissions.write.every(u => typeof u === 'object')) {
+    // Map _ids
+    read = this.permissions.write.map(u => u._id);
+  }
+
+  // If this.permissions.admin is populated
+  if (this.permissions.admin.every(u => typeof u === 'object')) {
+    // Map _ids
+    read = this.permissions.admin.map(u => u._id);
+  }
+
 
   // If user exists in any of the list, set the permission to true
   const permissions = {
@@ -189,7 +207,12 @@ ProjectSchema.methods.getPermissions = function(user) {
   // If projects visibility is internal
   if (this.visibility === 'internal') {
     // Get all orgs which user has read permissions on
-    const orgs = user.orgs.read.map(o => o._id.toString());
+    let orgs = user.orgs.read;
+
+    // If user.orgs.read is populated
+    if (user.orgs.read.every(o => typeof o === 'object')) {
+      orgs = user.orgs.read.map(o => o._id.toString());
+    }
     // See if the user has read permissions on the project's org,
     // they have read permissions on the project
     permissions.read = orgs.includes(this.org.toString());

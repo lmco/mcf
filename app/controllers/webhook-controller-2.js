@@ -93,7 +93,6 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
 
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) })
-    .populate('permissions.read permissions.write permissions.admin')
     .then((foundProject) => {
       // Verify the user has read permissions on the project
       if (!foundProject.getPermissions(reqUser).read && !reqUser.admin) {
@@ -212,7 +211,6 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
 
     // Find the project to verify existence and permissions
     Project.findOne({ _id: utils.createID(orgID, projID) })
-    .populate('permissions.read permissions.write permissions.admin')
     .then((foundProject) => {
       // If project not found
       if (!foundProject) {

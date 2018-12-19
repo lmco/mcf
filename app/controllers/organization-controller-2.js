@@ -299,8 +299,6 @@ function update(requestingUser, orgs, options) {
 
     // Find the orgs to update
     Organization.find(searchQuery)
-    .populate('projects permissions.read permissions.write permissions.admin'
-      + ' archivedBy lastModifiedBy createdBy')
     .then((_foundOrgs) => {
       // Set function-wide foundOrgs
       foundOrgs = _foundOrgs;
