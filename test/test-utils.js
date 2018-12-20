@@ -38,7 +38,7 @@ delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
  * @description Helper function to create test non-admin user in
  * MBEE tests.
  */
-module.exports.createNonadminUser = function() {
+module.exports.createNonAdminUser = function() {
   return new Promise((resolve, reject) => {
     // Define new user
     let newUser = null;
@@ -137,7 +137,7 @@ module.exports.createAdminUser = function() {
  * @description Helper function to delete test user in
  * MBEE tests.
  */
-module.exports.removeNonadminUser = function() {
+module.exports.removeNonAdminUser = function() {
   return new Promise((resolve, reject) => {
     // Define user id
     let userToDelete = null;

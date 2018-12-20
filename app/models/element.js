@@ -112,7 +112,22 @@ const ElementSchema = new mongoose.Schema({
     type: String,
     required: false,
     default: null,
-    ref: 'Package'
+    ref: 'Element'
+  },
+  contains: [{
+    type: String,
+    ref: 'Element',
+    default: []
+  }],
+  source: {
+    type: String,
+    ref: 'Element',
+    default: null
+  },
+  target: {
+    type: String,
+    ref: 'Element',
+    default: null
   },
   documentation: {
     type: String,
@@ -124,81 +139,11 @@ const ElementSchema = new mongoose.Schema({
   }
 }, options); // end of ElementSchema
 
-/**
- * @namespace
- *
- * @description The Block schema is an Element discriminator which does not add
- * any additional functionality to the Element schema.
- *
- */
-const BlockSchema = new mongoose.Schema({}, options);
-
-/**
- * @namespace
- *
- * @description The Relationship schema is an Element discriminator which
- * extends elements by adding source and target fields used to describe a
- * connection, link, etc. between two elements.
- *
- * @property {Element} source - Defines the origin of a relationship.
- * @property {Element} target - Defines the end of a relationship.
- *
- */
-const RelationshipSchema = new mongoose.Schema({
-  source: {
-    type: String,
-    ref: 'Element',
-    required: true
-  },
-  target: {
-    type: String,
-    ref: 'Element',
-    required: true
-  }
-}, options);
-
-/**
- * @namespace
- *
- * @description The Package schema is an Element discriminator which
- * extends elements by adding a contains field used to provide structure and
- * to group elements.
- *
- * @property {Array} contains - An array of sub elements _id
- *
- */
-const PackageSchema = new mongoose.Schema({
-  contains: [{
-    type: String,
-    ref: 'Element',
-    required: false
-  }]
-}, options);
-
 /* ---------------------------( Model Plugin )---------------------------- */
 // Use extensions model plugin;
 ElementSchema.plugin(extensions);
 
 /* --------------------------( Element Middleware )-------------------------- */
-
-/**
- * @description Pre-find actions
- * @memberOf ElementSchema
- */
-ElementSchema.pre('find', function(next) {
-  this.populate('project');
-  next();
-});
-
-/**
- * @description Pre-save actions.
- * @memberof ElementSchema
- */
-ElementSchema.pre('save', function(next) {
-  // Run our defined setters
-  this.updatedOn = '';
-  next();
-});
 
 /**
  * @description Pre-validate actions for all elements
@@ -238,52 +183,6 @@ ElementSchema.pre('validate', function() {
   });
 });
 
-/**
- * @description Pre-validate actions for a relationship.
- * @memberOf RelationshipSchema
- */
-RelationshipSchema.pre('validate', function() {
-  return new Promise((resolve, reject) => {
-    // If source and target are already defined, return
-    if (this.$source === undefined || this.$target === undefined
-      || this.$target === null || this.$source === null) {
-      return resolve();
-    }
-
-    // Error Check: ensure target and source are provided
-    try {
-      assert.ok(this.hasOwnProperty('$target'), 'Element target not provided.');
-      assert.ok(this.hasOwnProperty('$source'), 'Element source not provided.');
-      assert.ok(typeof this.$target === 'string', 'Element target is not a string.');
-      assert.ok(typeof this.$source === 'string', 'Element source is not a string');
-    }
-    catch (error) {
-      return reject(new M.CustomError(error.message, 400, 'warn'));
-    }
-
-    // Create the target and source IDs for searching
-    const idParts = utils.parseID(this._id);
-    const targetID = utils.createID(idParts[0], idParts[1], this.$target);
-    const sourceID = utils.createID(idParts[0], idParts[1], this.$source);
-
-    // Find the target element
-    Element.findOne({ _id: targetID }) // eslint-disable-line no-use-before-define
-    .then((target) => {
-      // Set relationship target reference
-      this.target = this.target || target;
-
-      // Find the source element
-      return Element.findOne({ _id: sourceID }); // eslint-disable-line no-use-before-define
-    })
-    .then((source) => {
-      // Set relationship source reference
-      this.source = this.source || source;
-      return resolve();
-    })
-    .catch((error) => reject(new M.CustomError(error.message, 500, 'warn')));
-  });
-});
-
 
 /* ---------------------------( Element Methods )---------------------------- */
 
@@ -293,19 +192,6 @@ RelationshipSchema.pre('validate', function() {
  */
 ElementSchema.methods.getValidUpdateFields = function() {
   return ['name', 'documentation', 'custom', 'archived'];
-};
-
-
-/**
- * @description Returns valid element types
- * @memberof ElementSchema
- */
-ElementSchema.methods.getValidTypes = function() {
-  return ['Relationship', 'Block', 'Package'];
-};
-
-ElementSchema.statics.getValidTypes = function() {
-  return ElementSchema.methods.getValidTypes();
 };
 
 /**
@@ -321,8 +207,7 @@ ElementSchema.methods.getPublicData = function() {
     createdOn: this.createdOn,
     updatedOn: this.updatedOn,
     documentation: this.documentation,
-    custom: this.custom,
-    type: this.type.toLowerCase()
+    custom: this.custom
   };
 
   // Handle parent element
@@ -335,12 +220,9 @@ ElementSchema.methods.getPublicData = function() {
     data.parent = null;
   }
 
-  // only packages have a contains field
-  if (data.type === 'package') {
-    data.contains = (this.contains.every(e => typeof e === 'object'))
-      ? this.contains.map(e => utils.parseID(e._id).pop())
-      : this.contains.map(e => utils.parseID(e).pop());
-  }
+  data.contains = (this.contains.every(e => typeof e === 'object'))
+    ? this.contains.map(e => utils.parseID(e._id).pop())
+    : this.contains.map(e => utils.parseID(e).pop());
 
   return data;
 };
@@ -358,15 +240,8 @@ ElementSchema.statics.validateObjectKeys = function(object) {
   let returnBool = true;
   // Check if the object is NOT an instance of the element model
   if (!(object instanceof mongoose.model('Element', ElementSchema))) {
-    let validKeys = Object.keys(ElementSchema.paths)
-    .concat(
-      Object.keys(BlockSchema.obj),
-      Object.keys(RelationshipSchema.obj),
-      Object.keys(PackageSchema.obj)
-    );
+    let validKeys = Object.keys(ElementSchema.paths);
     validKeys = validKeys.filter((elem, pos) => validKeys.indexOf(elem) === pos);
-    validKeys.push('projectUID');
-    validKeys.push('type');
     validKeys.push('id');
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
@@ -394,14 +269,8 @@ ElementSchema.index({ name: 'text', documentation: 'text' });
 /* ------------------------------( Models )---------------------------------- */
 
 const Element = mongoose.model('Element', ElementSchema);
-const Block = Element.discriminator('Block', BlockSchema);
-const Relationship = Element.discriminator('Relationship', RelationshipSchema);
-const Package = Element.discriminator('Package', PackageSchema);
-
 
 /* ------------------------( Element Schema Export )------------------------- */
 
 module.exports.Element = Element;
-module.exports.Block = Block;
-module.exports.Relationship = Relationship;
-module.exports.Package = Package;
+

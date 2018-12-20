@@ -58,7 +58,7 @@ describe(M.getModuleName(module.filename), () => {
       // Set global admin user
       adminUser = user;
 
-      return testUtils.createNonadminUser();
+      return testUtils.createNonAdminUser();
     })
     .then((nonadminUser) => {
       newUser = nonadminUser;
@@ -80,7 +80,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing non-admin user
-    testUtils.removeNonadminUser()
+    testUtils.removeNonAdminUser()
     .then(() => testUtils.removeAdminUser())
     .then(() => db.disconnect())
     .then(() => done())

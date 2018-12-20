@@ -127,8 +127,7 @@ function createUser(done) {
     chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdUser.archivedBy).to.equal(null);
     chai.expect(createdUser.createdOn).to.not.equal(null);
-    // TODO: Why is updatedOn ot null?
-    // chai.expect(createdUser.updatedOn).to.equal(null);
+    chai.expect(createdUser.updatedOn).to.equal(null);
     chai.expect(createdUser.archivedOn).to.equal(null);
 
     // Find the default org
@@ -188,8 +187,7 @@ function createUsers(done) {
       chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(createdUser.archivedBy).to.equal(null);
       chai.expect(createdUser.createdOn).to.not.equal(null);
-      // TODO: Why is updatedOn ot null?
-      // chai.expect(createdUser.updatedOn).to.equal(null);
+      chai.expect(createdUser.updatedOn).to.equal(null);
       chai.expect(createdUser.archivedOn).to.equal(null);
     });
 
@@ -242,8 +240,7 @@ function findUser(done) {
     chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundUser.archivedBy).to.equal(null);
     chai.expect(foundUser.createdOn).to.not.equal(null);
-    // TODO: Why is updatedOn ot null?
-    // chai.expect(foundUser.updatedOn).to.equal(null);
+    chai.expect(foundUser.updatedOn).to.equal(null);
     chai.expect(foundUser.archivedOn).to.equal(null);
     done();
   })
@@ -297,8 +294,7 @@ function findUsers(done) {
       chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundUser.archivedBy).to.equal(null);
       chai.expect(foundUser.createdOn).to.not.equal(null);
-      // TODO: Why is updatedOn ot null?
-      // chai.expect(foundUser.updatedOn).to.equal(null);
+      chai.expect(foundUser.updatedOn).to.equal(null);
       chai.expect(foundUser.archivedOn).to.equal(null);
     });
     done();
@@ -354,8 +350,7 @@ function findAllUsers(done) {
         chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
         chai.expect(foundUser.archivedBy).to.equal(null);
         chai.expect(foundUser.createdOn).to.not.equal(null);
-        // TODO: Why is updatedOn ot null?
-        // chai.expect(foundUser.updatedOn).to.equal(null);
+        chai.expect(foundUser.updatedOn).to.not.equal(null);
         chai.expect(foundUser.archivedOn).to.equal(null);
       }
       // Admin user special cases
@@ -411,7 +406,7 @@ function updateUser(done) {
     chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(updatedUser.archivedBy).to.equal(null);
     chai.expect(updatedUser.createdOn).to.not.equal(null);
-    chai.expect(updatedUser.updatedOn).to.equal(null);
+    chai.expect(updatedUser.updatedOn).to.not.equal(null);
     chai.expect(updatedUser.archivedOn).to.equal(null);
   })
   .catch((error) => {

@@ -352,7 +352,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       searchQuery = { _id: { $in: arrIDs }, project: foundProject._id };
 
       // Find the webhooks to update
-      return Webhook.Webhook.find(searchQuery).populate(populateString);
+      return Webhook.Webhook.find(searchQuery);
     })
     .then((_foundWebhooks) => {
       // Set function-wide foundWebhooks
@@ -427,7 +427,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       // Return when all promises have been completed
       return Promise.all(promises);
     })
-    .then(() => Webhook.Webhook.find(searchQuery))
+    .then(() => Webhook.Webhook.find(searchQuery).populate(populateString))
     .then((foundUpdatedWebhooks) => resolve(foundUpdatedWebhooks))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -462,8 +462,7 @@ function remove(requestingUser, organizationID, projectID, webhooks, options) {
           assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
             + ' is not a boolean.');
           if (options.populated) {
-            populateString = 'projects permissions.read permissions.write '
-              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+            populateString = 'project archivedBy lastModifiedBy createdBy';
           }
         }
       }

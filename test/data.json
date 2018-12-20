@@ -308,6 +308,10 @@
     {
       "id": "imfake",
       "name": "invalidproject"
+    },
+    {
+      "id": "toolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectidtoolongprojectid",
+      "name": "Too Long Project ID"
     }
   ],
 
@@ -324,8 +328,7 @@
       "name": "invalid element 01",
       "projectUID": "testorg00:project00",
       "type": "Block",
-      "parent": "elem0",
-      "uuid": "f239c90b-8cc2-475c-985c-ef653dc183b9"
+      "parent": "elem0"
     },
     {
       "id": "elem6",

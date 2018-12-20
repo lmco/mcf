@@ -257,7 +257,6 @@ function update(requestingUSer, users, options) {
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      // TODO How should we handle the update permissions?
 
       if (options) {
         // If the option 'populated' is supplied, ensure it's a boolean
@@ -359,6 +358,7 @@ function update(requestingUSer, users, options) {
           else {
             // Set archivedBy if archived field is being changed
             if (key === 'archived') {
+              // TODO: Should a user be able to archive themselves?
               // If the user is being archived
               if (updateUser[key] && !user[key]) {
                 user.archivedBy = reqUser;

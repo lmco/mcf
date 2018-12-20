@@ -230,11 +230,12 @@ function findWebhook(done) {
   const webhookData = testData.webhooks[0];
 
   // Find webhook via controller
-  WebhookController.find(adminUser, org.id, projID, webhookData.id)
+  WebhookController.find(adminUser, org.id, projID, webhookData.id, { populated: true })
   .then((foundWebhooks) => {
     // Expect foundWebhooks array to contain 1 webhook
     chai.expect(foundWebhooks.length).to.equal(1);
     const foundWebhook = foundWebhooks[0];
+    console.log(JSON.stringify(foundWebhook))
 
     // Verify webhook created properly
     chai.expect(foundWebhook.id).to.equal(utils.createID(org.id, projID, webhookData.id));

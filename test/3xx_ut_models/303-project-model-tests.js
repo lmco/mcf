@@ -192,8 +192,8 @@ function deleteProject(done) {
 function verifyProjectFieldMaxChar(done) {
   // Create a new model project
   const newProject = new Project({
-    _id: utils.createID(org._id, testData.projects[3].id),
-    name: testData.projects[3].name,
+    _id: utils.createID(org._id, testData.invalidProjects[4].id),
+    name: testData.invalidProjects[4].name,
     org: org._id
   });
 

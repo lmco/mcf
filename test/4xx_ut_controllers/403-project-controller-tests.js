@@ -66,7 +66,7 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = _adminUser;
 
       // Create non-admin user
-      return testUtils.createNonadminUser();
+      return testUtils.createNonAdminUser();
     })
     .then((_nonadminUser) => {
       nonAdminUser = _nonadminUser;
@@ -98,7 +98,7 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Removing the organization created
     testUtils.removeOrganization(adminUser)
-    .then(() => testUtils.removeNonadminUser())
+    .then(() => testUtils.removeNonAdminUser())
     .then(() => testUtils.removeAdminUser())
     .then(() => db.disconnect())
     .then(() => done())
