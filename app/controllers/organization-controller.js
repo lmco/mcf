@@ -65,7 +65,6 @@ const utils = M.require('lib.utils');
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
  */
 function find(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
@@ -471,7 +470,6 @@ function update(requestingUser, orgs, options) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
  */
 function remove(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {

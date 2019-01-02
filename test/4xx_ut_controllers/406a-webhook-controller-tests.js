@@ -26,7 +26,7 @@ const chai = require('chai');
 const path = require('path');
 
 // MBEE modules
-const WebhookController = M.require('controllers.webhook-controller-2');
+const WebhookController = M.require('controllers.webhook-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 

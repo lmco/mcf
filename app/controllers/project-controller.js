@@ -45,7 +45,7 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 /**
- * @description This function finds one or many organizations.
+ * @description This function finds one or many projects.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {String} organizationID - The ID of the owning organization.
@@ -67,7 +67,6 @@ const utils = M.require('lib.utils');
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
  */
 function find(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
@@ -506,7 +505,6 @@ function update(requestingUser, organizationID, projects, options) {
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- *
  */
 function remove(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
