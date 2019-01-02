@@ -83,7 +83,7 @@ const OrganizationSchema = new mongoose.Schema({
 
 OrganizationSchema.virtual('projects', {
   ref: 'Project',
-  localField: 'String',
+  localField: '_id',
   foreignField: 'org',
   justOne: false
 });

@@ -42,8 +42,15 @@ const utils = M.require('lib.utils');
 
 function find(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
+    // Ensure user is on the master branch
+    if (branch !== 'master') {
+      throw new M.CustomError('User must be on the master branch.', 400, 'warn');
+    }
+
     // Sanitize input parameters
-    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const saniElements = (elements !== undefined)
+      ? sani.sanitize(JSON.parse(JSON.stringify(elements)))
+      : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
@@ -61,9 +68,6 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-
-      // Ensure branch is master
-      assert.ok(branch === 'master', 'User must be on the master branch.');
 
       // Ensure orgID and projID are strings
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
@@ -93,7 +97,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     }
 
     // Find the project
-    Project.find({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((project) => {
       // Verify the user has read permissions on the project
       if (!project.getPermissions(reqUser).read && !reqUser.admin) {
@@ -134,6 +138,11 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
 function create(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
+    // Ensure user is on the master branch
+    if (branch !== 'master') {
+      throw new M.CustomError('User must be on the master branch.', 400, 'warn');
+    }
+
     // Sanitize input parameters and create function-wide variables
     const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -150,9 +159,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-
-      // Ensure user is on the master branch
-      assert.ok(branch === 'master', 'User must be on the master branch.');
 
       if (options) {
         // If the option 'populated' is supplied, ensure it's a boolean
@@ -186,7 +192,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Create array of id's for lookup
     const arrIDs = [];
-
 
     // Check that each element has an id and set the parent if null
     try {
@@ -238,20 +243,25 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           + ` elements on the project ${foundProject._id}.`, 403, 'warn');
       }
 
-      // Find any existing, conflicting elements
-      return Element.find(searchQuery, '_id');
-    })
-    .then((foundElements) => {
-      // If there are any foundElements, there is a conflict
-      if (foundElements.length > 0) {
-        // Get array of the foundElements's ids
-        const foundElementIDs = foundElements.map(e => e._id);
+      const promises = [];
+      for (let i = 0; i < arrIDs.length / 100000; i++) {
+        // Split arrIDs into batches of 100000
+        const tmpQuery = { _id: { $in: arrIDs.slice(i * 100000, i * 100000 + 100000) } };
+        promises.push(Element.find(tmpQuery, '_id')
+        .then((foundElements) => {
+          if (foundElements.length > 0) {
+            // Get array of the foundElements's ids
+            const foundElementIDs = foundElements.map(e => e._id);
 
-        // There are one or more elements with conflicting IDs
-        throw new M.CustomError('Elements with the following IDs already exist'
-          + ` [${foundElementIDs.toString()}].`, 403, 'warn');
+            // There are one or more elements with conflicting IDs
+            throw new M.CustomError('Elements with the following IDs already exist'
+                + ` [${foundElementIDs.toString()}].`, 403, 'warn');
+          }
+        }));
       }
-
+      return Promise.all(promises);
+    })
+    .then(() => {
       // For each object of element data, create the element object
       elementObjects = elementsToCreate.map((e) => {
         const elemObj = new Element(e);
@@ -287,8 +297,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
             const parentObj = jmi2[element.$parent];
             element.parent = parentObj._id;
             element.$parent = null;
-            // Add package to parents contains array
-            parentObj.contains.push(element._id);
           }
           else {
             // Add elements parent to list of elements to search for in DB
@@ -375,18 +383,16 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         }
       });
 
-      // Create all new elements
       return Element.insertMany(elementObjects);
     })
-    .then((elements) => {
+    .then((createdElements) => {
       if (populate) {
         return resolve(Element.find(searchQuery)
-          .populate('project contains parent source target archivedBy '
-            + 'lastModifiedBy createdBy'))
+        .populate('project contains parent source target archivedBy '
+            + 'lastModifiedBy createdBy'));
       }
-      else {
-        return resolve(elements)
-      }
+
+      return resolve(createdElements);
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -394,6 +400,11 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
 function update(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
+    // Ensure user is on the master branch
+    if (branch !== 'master') {
+      throw new M.CustomError('User must be on the master branch.', 400, 'warn');
+    }
+
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
@@ -414,9 +425,6 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // Ensure that orgID and projID are strings
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-
-      // Ensure that branch is master
-      assert.ok(branch === 'master', 'User must be on master branch.');
 
       if (options) {
         // If the option 'populated' is supplied, ensure it's a boolean
@@ -481,7 +489,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Create searchQuery
-      searchQuery = {_id: {$in: arrIDs}, project: foundProject._id};
+      searchQuery = { _id: { $in: arrIDs }, project: foundProject._id };
 
       // Find the elements to update
       return Element.find(searchQuery);
@@ -567,6 +575,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
 function remove(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
+    // Ensure user is on the master branch
+    if (branch !== 'master') {
+      throw new M.CustomError('User must be on the master branch.', 400, 'warn');
+    }
+
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
@@ -593,8 +606,8 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
             + ' is not a boolean.');
           if (options.populated) {
-            populateString = 'project contains parent source target archivedBy ' +
-              'lastModifiedBy createdBy';
+            populateString = 'project contains parent source target archivedBy '
+              + 'lastModifiedBy createdBy';
           }
         }
       }
@@ -626,18 +639,61 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Set function-wide foundElements
       foundElements = _foundElements;
 
-      // TODO: Handle deleting children
-      // Delete the elements
-      return Element.deleteMany(searchQuery);
+      // Return when all promises have been completed
+      return findElementTree(foundElements.map(e => e._id));
     })
-    .then((retQuery) => {
-      // Verify that all of the elements were correctly deleted
-      if (retQuery.n !== foundElements.length) {
-        M.log.error('Some of the following elements were not '
-          + `deleted [${saniElements.toString()}].`);
+    .then((foundIDs) => {
+      const promises = [];
+
+      // Split elements into batches of 100000 or less
+      for (let i = 0; i < foundIDs.length / 100000; i++) {
+        const batchIDs = foundIDs.slice(i * 100000, i * 100000 + 100000);
+        // Delete batch
+        promises.push(Element.deleteMany({ _id: { $in: batchIDs } }));
       }
-      return resolve(foundElements);
+      // Return when all deletes have completed
+      return Promise.all(promises);
     })
+    // TODO: What should we return here?
+    .then(() => resolve(foundElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+let arr = [];
+
+function findElementTree(elementIDs) {
+  return new Promise((resolve, reject) => {
+    // Set the global foundElements array to initial element IDs
+    arr = elementIDs;
+    // Find the given element and its sub-tree
+    findElementTreeHelper(elementIDs)
+    .then((foundElements) => resolve(foundElements))
+    .catch((error) => reject(error));
+  });
+}
+
+function findElementTreeHelper(ids) {
+  return new Promise((resolve, reject) => {
+    Element.find({ parent: { $in: ids } }, '_id')
+    .then(elements => {
+      const foundIDs = elements.map(e => e._id);
+      arr = arr.concat(foundIDs);
+      if (foundIDs.length === 0) {
+        return '';
+      }
+
+      if (foundIDs.length > 100000) {
+        for (let i = 0; i < foundIDs.length / 100000; i++) {
+          const tmpIDs = foundIDs.slice(i * 100000, i * 100000 + 100000);
+          return findElementTreeHelper(tmpIDs);
+        }
+      }
+      else {
+        return findElementTreeHelper(foundIDs);
+      }
+    })
+    .then(() => resolve(arr))
+    .catch((error) => reject(error));
   });
 }

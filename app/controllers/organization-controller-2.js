@@ -456,7 +456,7 @@ function remove(requestingUser, orgs, options) {
       // TODO: Remove artifacts
       // TODO: Remove orphaned artifacts via controller
       // Delete any elements in the org
-      return Element.Element.deleteMany(ownedQuery);
+      return Element.deleteMany(ownedQuery);
     })
     // Delete any webhooks in the org
     .then(() => Webhook.Webhook.deleteMany(ownedQuery))

@@ -25,7 +25,7 @@ const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData();
+const testData = testUtils.importTestData('data.json');
 let adminUser = null;
 let org = null;
 let proj = null;

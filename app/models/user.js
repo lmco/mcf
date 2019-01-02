@@ -117,37 +117,37 @@ const UserSchema = new mongoose.Schema({
 });
 UserSchema.virtual('orgs.read', {
   ref: 'Organization',
-  localField: 'String',
+  localField: '_id',
   foreignField: 'permissions.read',
   justOne: false
 });
 UserSchema.virtual('orgs.write', {
   ref: 'Organization',
-  localField: 'String',
+  localField: '_id',
   foreignField: 'permissions.write',
   justOne: false
 });
 UserSchema.virtual('orgs.admin', {
   ref: 'Organization',
-  localField: 'String',
+  localField: '_id',
   foreignField: 'permissions.admin',
   justOne: false
 });
 UserSchema.virtual('proj.read', {
   ref: 'Project',
-  localField: 'String',
+  localField: '_id',
   foreignField: 'permissions.read',
   justOne: false
 });
 UserSchema.virtual('proj.write', {
   ref: 'Project',
-  localField: 'String',
+  localField: '_id',
   foreignField: 'permissions.write',
   justOne: false
 });
 UserSchema.virtual('proj.admin', {
   ref: 'Project',
-  localField: 'String',
+  localField: '_id',
   foreignField: 'permissions.admin',
   justOne: false
 });

@@ -133,15 +133,14 @@
 
   "elements": [
     {
-      "type": "Package",
       "id": "nlp",
       "name": "Natural Language Processing",
+      "parent": "model",
       "custom": {
         "language": "english"
       }
     },
     {
-      "type": "Block",
       "id": "speech-recognition",
       "name": "Speech Recognition",
       "parent": "nlp",
@@ -150,7 +149,6 @@
       }
     },
     {
-      "type": "Block",
       "id": "text-parser",
       "name": "Text Parser",
       "parent": "nlp",
@@ -159,7 +157,6 @@
       }
     },
     {
-      "type": "Relationship",
       "id": "speech-to-text",
       "parent": "nlp",
       "name": "Speech to Text",
@@ -180,42 +177,48 @@
     {
       "id": "batchelem1",
       "name": "Batch Element 1",
-      "type": "Package",
-      "parent": "model"
+      "parent": "model",
+      "documentation": "Element #1",
+      "custom": {}
     },
     {
       "id": "batchelem2",
       "name": "Batch Element 2",
-      "type": "Package",
-      "parent": "batchelem1"
+      "parent": "batchelem1",
+      "documentation": "Element #2",
+      "custom": {}
     },
     {
       "id": "batchelem3",
       "name": "Batch Element 3",
-      "type": "Block",
-      "parent": "batchelem1"
+      "parent": "batchelem1",
+      "documentation": "Element #3",
+      "custom": {}
     },
     {
       "id": "batchelem4",
       "name": "Batch Element 4",
-      "type": "Block",
-      "parent": "batchelem2"
+      "parent": "batchelem2",
+      "documentation": "Element #4",
+      "custom": {}
     },
     {
       "id": "batchelem5",
       "name": "Batch Element 5",
-      "type": "Relationship",
       "parent": "batchelem2",
       "source": "batchelem3",
-      "target": "batchelem4"
+      "target": "batchelem4",
+      "documentation": "Element #5",
+      "custom": {}
     },
     {
       "id": "batchelem6",
       "name": "Batch Element 6",
-      "type": "Relationship",
       "parent": "batchelem2",
       "source": "batchelem3",
-      "target": "batchelem5"
+      "target": "batchelem5",
+      "documentation": "Element #6",
+      "custom": {}
     }
   ],
 

@@ -27,10 +27,11 @@
 const path = require('path');
 
 // MBEE modules
+const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
-const OrgController = M.require('controllers.organization-controller');
+const Webhook = M.require('models.webhook');
 const utils = M.require('lib.utils');
 const testData = require(path.join(M.root, 'test', 'data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
@@ -222,8 +223,17 @@ module.exports.createOrganization = function(adminUser) {
  */
 module.exports.removeOrganization = function(adminUser) {
   return new Promise((resolve, reject) => {
-    // Find organization to ensure it exists
-    OrgController.removeOrg(adminUser, testData.orgs[0].id)
+    // Create query for deleting items in the orgs
+    const ownedQuery = { _id: { $regex: `^${testData.orgs[0].id}:` } };
+
+    // Delete elements
+    Element.deleteMany(ownedQuery)
+    // Delete any webhooks in the org
+    .then(() => Webhook.Webhook.deleteMany(ownedQuery))
+    // Delete any projects in the org
+    .then(() => Project.deleteMany({ org: testData.orgs[0].id }))
+    // Delete the orgs
+    .then(() => Organization.deleteMany({ _id: testData.orgs[0].id }))
     .then((org) => resolve(org))
     .catch((error) => reject(error));
   });
@@ -234,6 +244,7 @@ module.exports.removeOrganization = function(adminUser) {
  */
 module.exports.createProject = function(adminUser, orgID) {
   return new Promise((resolve, reject) => {
+    let createdProject = {};
     // Create the new project
     const newProject = new Project({
       _id: utils.createID(orgID, testData.projects[0].id),
@@ -247,7 +258,18 @@ module.exports.createProject = function(adminUser, orgID) {
       custom: null
     });
     newProject.save()
-    .then((_newProj) => resolve(_newProj))
+    .then((_newProj) => {
+      createdProject = _newProj;
+
+      const newElement = new Element({
+        _id: utils.createID(orgID, testData.projects[0].id, 'model'),
+        project: _newProj._id,
+        name: 'Model'
+      });
+
+      return newElement.save();
+    })
+    .then(() => resolve(createdProject))
     .catch((error) => reject(error));
   });
 };
@@ -255,12 +277,15 @@ module.exports.createProject = function(adminUser, orgID) {
 /**
  * @description Helper function to import a copy of test data
  */
-module.exports.importTestData = function() {
+module.exports.importTestData = function(filename) {
   // Clear require cache so a new copy is imported
-  delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
+  delete require.cache[require.resolve(path.join(M.root, 'test', filename))];
   // Import a copy of the data.json
   // eslint-disable-next-line global-require
-  const testDataFresh = require(path.join(M.root, 'test', 'data.json'));
+  const testDataFresh = require(path.join(M.root, 'test', filename));
   // Return a newly assigned copy of the fresh data
+  if (Array.isArray(testDataFresh)) {
+    return Object.assign([], testDataFresh);
+  }
   return Object.assign({}, testDataFresh);
 };

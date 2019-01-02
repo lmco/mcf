@@ -39,9 +39,6 @@
  * either the root package or some other package in the hierarchy).</p>
  */
 
-// Node.js modules
-const assert = require('assert');
-
 // NPM modules
 const mongoose = require('mongoose');
 
@@ -49,9 +46,6 @@ const mongoose = require('mongoose');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
-
-// Mongoose options - for discriminators
-const options = { discriminatorKey: 'type' };
 
 
 /* ---------------------------( Element Schemas )---------------------------- */
@@ -114,11 +108,6 @@ const ElementSchema = new mongoose.Schema({
     default: null,
     ref: 'Element'
   },
-  contains: [{
-    type: String,
-    ref: 'Element',
-    default: []
-  }],
   source: {
     type: String,
     ref: 'Element',
@@ -137,51 +126,19 @@ const ElementSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: {}
   }
-}, options); // end of ElementSchema
+}); // end of ElementSchema
+
+ElementSchema.virtual('contains', {
+  ref: 'Element',
+  localField: '_id',
+  foreignField: 'parent',
+  justOne: false,
+  default: []
+});
 
 /* ---------------------------( Model Plugin )---------------------------- */
 // Use extensions model plugin;
 ElementSchema.plugin(extensions);
-
-/* --------------------------( Element Middleware )-------------------------- */
-
-/**
- * @description Pre-validate actions for all elements
- * @memberOf ElementSchema
- */
-ElementSchema.pre('validate', function() {
-  return new Promise((resolve, reject) => {
-    // If element has no parent or parent is already defined, return
-    if (this.$parent === null || this.$parent === undefined) {
-      return resolve();
-    }
-
-    // Create the parent id for searching
-    const idParts = utils.parseID(this._id);
-    const parentID = utils.createID(idParts[0], idParts[1], this.$parent);
-
-    // Find the parent to update it
-    Element.findOne({ _id: parentID }) // eslint-disable-line no-use-before-define
-    .then((parent) => {
-      // Error Check: ensure parent element type is package
-      if (parent.type !== 'Package') {
-        // Parent Element type is not package, throw error
-        return reject(new M.CustomError('Parent element is not of type Package.', 400, 'warn'));
-      }
-
-      // Set parent field of new element
-      this.parent = parent;
-
-      // Add _id of new element to parents 'contain' list
-      parent.contains.push(this._id);
-
-      // Save updated parent element
-      return parent.save();
-    })
-    .then(() => resolve())
-    .catch((error) => reject(new M.CustomError(error.message, 500, 'warn')));
-  });
-});
 
 
 /* ---------------------------( Element Methods )---------------------------- */
@@ -194,16 +151,23 @@ ElementSchema.methods.getValidUpdateFields = function() {
   return ['name', 'documentation', 'custom', 'archived'];
 };
 
+ElementSchema.statics.getValidUpdateFields = function() {
+  return ['name', 'documentation', 'custom', 'archived'];
+};
+
 /**
  * @description Returns the element public data
  * @memberOf ElementSchema
  */
 ElementSchema.methods.getPublicData = function() {
+  // Parse the element ID
+  const idParts = utils.parseID(this._id);
+
   const data = {
-    id: utils.parseID(this._id).pop(),
+    id: idParts.pop(),
     name: this.name,
-    project: utils.parseID(this._id)[1],
-    org: utils.parseID(this._id)[0],
+    project: idParts[1],
+    org: idParts[0],
     createdOn: this.createdOn,
     updatedOn: this.updatedOn,
     documentation: this.documentation,
@@ -220,6 +184,21 @@ ElementSchema.methods.getPublicData = function() {
     data.parent = null;
   }
 
+  // Handle source element
+  if (this.source) {
+    this.source = (this.source._id)
+      ? utils.parseID(this.source._id).pop()
+      : utils.parseID(this.source).pop();
+  }
+
+  // Handle target element
+  if (this.target) {
+    this.target = (this.target._id)
+      ? utils.parseID(this.target._id).pop()
+      : utils.parseID(this.target).pop();
+  }
+
+  // Handle the virtual contains field
   data.contains = (this.contains.every(e => typeof e === 'object'))
     ? this.contains.map(e => utils.parseID(e._id).pop())
     : this.contains.map(e => utils.parseID(e).pop());
@@ -266,11 +245,13 @@ ElementSchema.statics.validateObjectKeys = function(object) {
 ElementSchema.index({ name: 'text', documentation: 'text' });
 
 
-/* ------------------------------( Models )---------------------------------- */
+/* -----------------------( Organization Properties )------------------------ */
 
-const Element = mongoose.model('Element', ElementSchema);
+// Required for virtual getters
+ElementSchema.set('toJSON', { virtuals: true });
+ElementSchema.set('toObject', { virtuals: true });
+
 
 /* ------------------------( Element Schema Export )------------------------- */
 
-module.exports.Element = Element;
-
+module.exports = mongoose.model('Element', ElementSchema);

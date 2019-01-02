@@ -33,7 +33,7 @@ const utils = M.require('lib.utils');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData();
+const testData = testUtils.importTestData('data.json');
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -235,7 +235,6 @@ function findWebhook(done) {
     // Expect foundWebhooks array to contain 1 webhook
     chai.expect(foundWebhooks.length).to.equal(1);
     const foundWebhook = foundWebhooks[0];
-    console.log(JSON.stringify(foundWebhook))
 
     // Verify webhook created properly
     chai.expect(foundWebhook.id).to.equal(utils.createID(org.id, projID, webhookData.id));
