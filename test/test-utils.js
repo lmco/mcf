@@ -221,7 +221,7 @@ module.exports.createOrganization = function(adminUser) {
  * @description Helper function to remove organization in
  * MBEE tests.
  */
-module.exports.removeOrganization = function(adminUser) {
+module.exports.removeOrganization = function() {
   return new Promise((resolve, reject) => {
     // Create query for deleting items in the orgs
     const ownedQuery = { _id: { $regex: `^${testData.orgs[0].id}:` } };
