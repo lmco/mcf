@@ -25,7 +25,7 @@ const chai = require('chai');
 const path = require('path');
 
 // MBEE modules
-const ElementController = M.require('controllers.element-controller-2');
+const ElementController = M.require('controllers.element-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
