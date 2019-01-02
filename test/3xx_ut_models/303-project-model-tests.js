@@ -169,7 +169,7 @@ function updateProject(done) {
  * @description Deletes the project previously created in createProject test.
  */
 function deleteProject(done) {
-  // Find and remove the project previously created in createProject test.
+  // Find and remove the project previously created in createproject test.
   Project.findOneAndRemove({ _id: utils.createID(org._id, testData.projects[0].id) })
   .then(() => Project.find({ _id: utils.createID(org._id, testData.projects[0].id) }))
   .then((projects) => {

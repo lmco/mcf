@@ -53,20 +53,20 @@ describe(M.getModuleName(module.filename), () => {
     // Open the database connection
     db.connect()
     // Create test admin
-    .then(() => testUtils.createAdminUser())
+    .then(() => testUtils.createTestAdmin())
     .then((_adminUser) => {
       // Set global admin user
       adminUser = _adminUser;
 
       // Create organization
-      return testUtils.createOrganization(adminUser);
+      return testUtils.createTestOrg(adminUser);
     })
     .then((retOrg) => {
       // Set global organization
       org = retOrg;
 
       // Create project
-      return testUtils.createProject(adminUser, org.id);
+      return testUtils.createTestProject(adminUser, org.id);
     })
     .then((retProj) => {
       // Set global project
@@ -89,8 +89,8 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
-    testUtils.removeOrganization(adminUser)
-    .then(() => testUtils.removeAdminUser())
+    testUtils.removeTestOrg(adminUser)
+    .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -156,7 +156,7 @@ function createElement(done) {
     chai.expect(createdElem.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdElem.archivedBy).to.equal(null);
     chai.expect(createdElem.createdOn).to.not.equal(null);
-    chai.expect(createdElem.updatedOn).to.equal(null);
+    chai.expect(createdElem.updatedOn).to.not.equal(null);
     chai.expect(createdElem.archivedOn).to.equal(null);
     done();
   })
@@ -223,7 +223,7 @@ function createElements(done) {
       chai.expect(createdElem.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(createdElem.archivedBy).to.equal(null);
       chai.expect(createdElem.createdOn).to.not.equal(null);
-      chai.expect(createdElem.updatedOn).to.equal(null);
+      chai.expect(createdElem.updatedOn).to.not.equal(null);
       chai.expect(createdElem.archivedOn).to.equal(null);
     });
     done();
@@ -278,7 +278,7 @@ function findElement(done) {
     chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundElement.archivedBy).to.equal(null);
     chai.expect(foundElement.createdOn).to.not.equal(null);
-    chai.expect(foundElement.updatedOn).to.equal(null);
+    chai.expect(foundElement.updatedOn).to.not.equal(null);
     chai.expect(foundElement.archivedOn).to.equal(null);
     done();
   })
@@ -348,7 +348,7 @@ function findElements(done) {
       chai.expect(foundElem.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundElem.archivedBy).to.equal(null);
       chai.expect(foundElem.createdOn).to.not.equal(null);
-      chai.expect(foundElem.updatedOn).to.equal(null);
+      chai.expect(foundElem.updatedOn).to.not.equal(null);
       chai.expect(foundElem.archivedOn).to.equal(null);
     });
     done();
@@ -417,7 +417,7 @@ function findAllElements(done) {
       chai.expect(foundElem.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundElem.archivedBy).to.equal(null);
       chai.expect(foundElem.createdOn).to.not.equal(null);
-      chai.expect(foundElem.updatedOn).to.equal(null);
+      chai.expect(foundElem.updatedOn).to.not.equal(null);
       chai.expect(foundElem.archivedOn).to.equal(null);
     });
     done();

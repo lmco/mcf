@@ -62,10 +62,6 @@ module.exports = function extensionPlugin(schema) {
   });
 
   schema.pre('save', function(next) {
-    // updateOn is protected
-    if (this.isModified('updatedOn')) {
-      next(new M.CustomError('updatedOn is protected and cannot be changed.', 400, 'warn'));
-    }
     // createdOn cannot be changed
     if (this.isModified('createdOn')) {
       next(new M.CustomError('createdOn is protected and cannot be changed.', 400, 'warn'));

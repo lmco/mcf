@@ -54,20 +54,20 @@ describe(M.getModuleName(module.filename), () => {
     // Open the database connection
     db.connect()
     // Create test admin
-    .then(() => testUtils.createAdminUser())
+    .then(() => testUtils.createTestAdmin())
     .then((_adminUser) => {
       // Set global admin user
       adminUser = _adminUser;
 
       // Create organization
-      return testUtils.createOrganization(adminUser);
+      return testUtils.createTestOrg(adminUser);
     })
     .then((retOrg) => {
       // Set global organization
       org = retOrg;
 
       // Create project
-      return testUtils.createProject(adminUser, org.id);
+      return testUtils.createTestProject(adminUser, org.id);
     })
     .then((retProj) => {
       // Set global project
@@ -90,8 +90,8 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
-    testUtils.removeOrganization(adminUser)
-    .then(() => testUtils.removeAdminUser())
+    testUtils.removeTestOrg(adminUser)
+    .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -152,7 +152,7 @@ function createWebhook(done) {
     chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdWebhook.archivedBy).to.equal(null);
     chai.expect(createdWebhook.createdOn).to.not.equal(null);
-    chai.expect(createdWebhook.updatedOn).to.equal(null);
+    chai.expect(createdWebhook.updatedOn).to.not.equal(null);
     chai.expect(createdWebhook.archivedOn).to.equal(null);
     done();
   })
@@ -210,7 +210,7 @@ function createWebhooks(done) {
       chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(createdWebhook.archivedBy).to.equal(null);
       chai.expect(createdWebhook.createdOn).to.not.equal(null);
-      chai.expect(createdWebhook.updatedOn).to.equal(null);
+      chai.expect(createdWebhook.updatedOn).to.not.equal(null);
       chai.expect(createdWebhook.archivedOn).to.equal(null);
     });
     done();
@@ -230,13 +230,13 @@ function findWebhook(done) {
   const webhookData = testData.webhooks[0];
 
   // Find webhook via controller
-  WebhookController.find(adminUser, org.id, projID, webhookData.id, { populated: true })
+  WebhookController.find(adminUser, org.id, projID, webhookData.id)
   .then((foundWebhooks) => {
     // Expect foundWebhooks array to contain 1 webhook
     chai.expect(foundWebhooks.length).to.equal(1);
     const foundWebhook = foundWebhooks[0];
 
-    // Verify webhook created properly
+    // Verify correct webhook found
     chai.expect(foundWebhook.id).to.equal(utils.createID(org.id, projID, webhookData.id));
     chai.expect(foundWebhook._id).to.equal(utils.createID(org.id, projID, webhookData.id));
     chai.expect(foundWebhook.name).to.equal(webhookData.name);
@@ -260,7 +260,7 @@ function findWebhook(done) {
     chai.expect(foundWebhook.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundWebhook.archivedBy).to.equal(null);
     chai.expect(foundWebhook.createdOn).to.not.equal(null);
-    chai.expect(foundWebhook.updatedOn).to.equal(null);
+    chai.expect(foundWebhook.updatedOn).to.not.equal(null);
     chai.expect(foundWebhook.archivedOn).to.equal(null);
     done();
   })
@@ -321,7 +321,7 @@ function findWebhooks(done) {
       chai.expect(foundWebhook.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundWebhook.archivedBy).to.equal(null);
       chai.expect(foundWebhook.createdOn).to.not.equal(null);
-      chai.expect(foundWebhook.updatedOn).to.equal(null);
+      chai.expect(foundWebhook.updatedOn).to.not.equal(null);
       chai.expect(foundWebhook.archivedOn).to.equal(null);
     });
     done();
@@ -382,7 +382,7 @@ function findAllWebhooks(done) {
       chai.expect(foundWebhook.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundWebhook.archivedBy).to.equal(null);
       chai.expect(foundWebhook.createdOn).to.not.equal(null);
-      chai.expect(foundWebhook.updatedOn).to.equal(null);
+      chai.expect(foundWebhook.updatedOn).to.not.equal(null);
       chai.expect(foundWebhook.archivedOn).to.equal(null);
     });
     done();

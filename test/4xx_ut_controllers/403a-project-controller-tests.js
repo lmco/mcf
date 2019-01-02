@@ -56,12 +56,12 @@ describe(M.getModuleName(module.filename), () => {
     // Connect db
     db.connect()
     // Create test admin
-    .then(() => testUtils.createAdminUser())
+    .then(() => testUtils.createTestAdmin())
     .then((_adminUser) => {
       // Set global admin user
       adminUser = _adminUser;
       // Create a global organization
-      return testUtils.createOrganization(adminUser);
+      return testUtils.createTestOrg(adminUser);
     })
     .then((retOrg) => {
       // Set global org
@@ -81,9 +81,9 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    testUtils.removeOrganization(adminUser)
+    testUtils.removeTestOrg(adminUser)
     // Remove the admin user
-    .then(() => testUtils.removeAdminUser())
+    .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -135,7 +135,7 @@ function createProject(done) {
     chai.expect(createdProj.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdProj.archivedBy).to.equal(null);
     chai.expect(createdProj.createdOn).to.not.equal(null);
-    chai.expect(createdProj.updatedOn).to.equal(null);
+    chai.expect(createdProj.updatedOn).to.not.equal(null);
     chai.expect(createdProj.archivedOn).to.equal(null);
     done();
   })
@@ -186,7 +186,7 @@ function createProjects(done) {
       chai.expect(createdProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(createdProj.archivedBy).to.equal(null);
       chai.expect(createdProj.createdOn).to.not.equal(null);
-      chai.expect(createdProj.updatedOn).to.equal(null);
+      chai.expect(createdProj.updatedOn).to.not.equal(null);
       chai.expect(createdProj.archivedOn).to.equal(null);
     });
     done();
@@ -217,9 +217,9 @@ function findProject(done) {
     chai.expect(foundProj._id).to.equal(utils.createID(org.id, projData.id));
     chai.expect(foundProj.name).to.equal(projData.name);
     chai.expect(foundProj.custom).to.deep.equal(projData.custom);
-    chai.expect(foundProj.permissions.admin[0]._id).to.equal(adminUser.username);
-    chai.expect(foundProj.permissions.write[0]._id).to.equal(adminUser.username);
-    chai.expect(foundProj.permissions.read[0]._id).to.equal(adminUser.username);
+    chai.expect(foundProj.permissions.admin[0]).to.equal(adminUser.username);
+    chai.expect(foundProj.permissions.write[0]).to.equal(adminUser.username);
+    chai.expect(foundProj.permissions.read[0]).to.equal(adminUser.username);
     chai.expect(foundProj.org).to.equal(org.id);
 
     // Verify additional properties
@@ -227,7 +227,7 @@ function findProject(done) {
     chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundProj.archivedBy).to.equal(null);
     chai.expect(foundProj.createdOn).to.not.equal(null);
-    chai.expect(foundProj.updatedOn).to.equal(null);
+    chai.expect(foundProj.updatedOn).to.not.equal(null);
     chai.expect(foundProj.archivedOn).to.equal(null);
     done();
   })
@@ -271,9 +271,9 @@ function findProjects(done) {
       chai.expect(foundProj._id).to.equal(projectID);
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom);
-      chai.expect(foundProj.permissions.admin[0]._id).to.equal(adminUser.username);
-      chai.expect(foundProj.permissions.write[0]._id).to.equal(adminUser.username);
-      chai.expect(foundProj.permissions.read[0]._id).to.equal(adminUser.username);
+      chai.expect(foundProj.permissions.admin[0]).to.equal(adminUser.username);
+      chai.expect(foundProj.permissions.write[0]).to.equal(adminUser.username);
+      chai.expect(foundProj.permissions.read[0]).to.equal(adminUser.username);
       chai.expect(foundProj.org).to.equal(org.id);
 
       // Verify additional properties
@@ -281,7 +281,7 @@ function findProjects(done) {
       chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundProj.archivedBy).to.equal(null);
       chai.expect(foundProj.createdOn).to.not.equal(null);
-      chai.expect(foundProj.updatedOn).to.equal(null);
+      chai.expect(foundProj.updatedOn).to.not.equal(null);
       chai.expect(foundProj.archivedOn).to.equal(null);
     });
     done();
@@ -325,9 +325,9 @@ function findAllProjects(done) {
       chai.expect(foundProj._id).to.equal(projectID);
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom);
-      chai.expect(foundProj.permissions.admin[0]._id).to.equal(adminUser.username);
-      chai.expect(foundProj.permissions.write[0]._id).to.equal(adminUser.username);
-      chai.expect(foundProj.permissions.read[0]._id).to.equal(adminUser.username);
+      chai.expect(foundProj.permissions.admin[0]).to.equal(adminUser.username);
+      chai.expect(foundProj.permissions.write[0]).to.equal(adminUser.username);
+      chai.expect(foundProj.permissions.read[0]).to.equal(adminUser.username);
       chai.expect(foundProj.org).to.equal(org.id);
 
       // Verify additional properties
@@ -335,7 +335,7 @@ function findAllProjects(done) {
       chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundProj.archivedBy).to.equal(null);
       chai.expect(foundProj.createdOn).to.not.equal(null);
-      chai.expect(foundProj.updatedOn).to.equal(null);
+      chai.expect(foundProj.updatedOn).to.not.equal(null);
       chai.expect(foundProj.archivedOn).to.equal(null);
     });
     done();

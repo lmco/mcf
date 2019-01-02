@@ -50,7 +50,7 @@ describe(M.getModuleName(module.filename), () => {
     // Connect db
     db.connect()
     // Create test admin
-    .then(() => testUtils.createAdminUser())
+    .then(() => testUtils.createTestAdmin())
     .then((_adminUser) => {
       // Set global admin user
       adminUser = _adminUser;
@@ -64,7 +64,7 @@ describe(M.getModuleName(module.filename), () => {
       chai.expect(nonAdminUser.fname).to.equal(testData.users[1].fname);
       chai.expect(nonAdminUser.lname).to.equal(testData.users[1].lname);
     })
-    .then(() => testUtils.createOrganization(adminUser))
+    .then(() => testUtils.createTestOrg(adminUser))
     .then((retOrg) => {
       org = retOrg;
       chai.expect(retOrg.id).to.equal(testData.orgs[0].id);
@@ -87,9 +87,9 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    testUtils.removeOrganization(adminUser)
+    testUtils.removeTestOrg(adminUser)
     .then(() => testUtils.removeNonAdminUser())
-    .then(() => testUtils.removeAdminUser())
+    .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {

@@ -228,6 +228,7 @@ function create(requestingUser, organizationID, projects, options) {
         };
         projObj.lastModifiedBy = reqUser._id;
         projObj.createdBy = reqUser._id;
+        projObj.updatedOn = Date.now();
         return projObj;
       });
 
@@ -239,15 +240,17 @@ function create(requestingUser, organizationID, projects, options) {
       createdProjects = _createdProjects;
 
       // Create a root model element for each project
-      const elemObjects = createdProjects.map((p) => new Element.Package({
+      const elemObjects = createdProjects.map((p) => new Element({
         _id: utils.createID(p._id, 'model'),
         name: 'Model',
         parent: null,
-        project: p._id
+        project: p._id,
+        lastModifiedBy: reqUser._id,
+        createdBy: reqUser._id
       }));
 
       // Create the elements
-      return Element.Element.insertMany(elemObjects);
+      return Element.insertMany(elemObjects);
     })
     .then(() => {
       if (populate) {
@@ -480,7 +483,7 @@ function remove(requestingUser, organizationID, projects, options) {
 
       // TODO: Remove artifacts
       // Delete any elements in the project
-      return Element.Element.deleteMany(ownedQuery);
+      return Element.deleteMany(ownedQuery);
     })
     // Delete any webhooks in the project
     .then(() => Webhook.Webhook.deleteMany(ownedQuery))

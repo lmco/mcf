@@ -97,7 +97,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove the org created in before()
-    testUtils.removeOrganization()
+    testUtils.removeTestOrg()
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {

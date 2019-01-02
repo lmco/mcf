@@ -89,7 +89,7 @@ module.exports.createNonAdminUser = function() {
  * @description Helper function to create test admin user in
  * MBEE tests.
  */
-module.exports.createAdminUser = function() {
+module.exports.createTestAdmin = function() {
   return new Promise((resolve, reject) => {
     // Define new user
     let newAdminUser = null;
@@ -168,7 +168,7 @@ module.exports.removeNonAdminUser = function() {
  * @description Helper function to delete test admin user in
  * MBEE tests.
  */
-module.exports.removeAdminUser = function() {
+module.exports.removeTestAdmin = function() {
   return new Promise((resolve, reject) => {
     // Define user id
     let userToDelete = null;
@@ -198,7 +198,7 @@ module.exports.removeAdminUser = function() {
  * @description Helper function to create organization in
  * MBEE tests.
  */
-module.exports.createOrganization = function(adminUser) {
+module.exports.createTestOrg = function(adminUser) {
   return new Promise((resolve, reject) => {
     // Create the new organization
     const newOrg = new Organization({
@@ -221,7 +221,7 @@ module.exports.createOrganization = function(adminUser) {
  * @description Helper function to remove organization in
  * MBEE tests.
  */
-module.exports.removeOrganization = function() {
+module.exports.removeTestOrg = function() {
   return new Promise((resolve, reject) => {
     // Create query for deleting items in the orgs
     const ownedQuery = { _id: { $regex: `^${testData.orgs[0].id}:` } };
@@ -242,7 +242,7 @@ module.exports.removeOrganization = function() {
 /**
  * @description Helper function to create project in MBEE tests
  */
-module.exports.createProject = function(adminUser, orgID) {
+module.exports.createTestProject = function(adminUser, orgID) {
   return new Promise((resolve, reject) => {
     let createdProject = {};
     // Create the new project

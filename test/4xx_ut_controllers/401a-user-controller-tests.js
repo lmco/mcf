@@ -53,7 +53,7 @@ describe(M.getModuleName(module.filename), () => {
     // Connect to the database
     db.connect()
     // Create test admin
-    .then(() => testUtils.createAdminUser())
+    .then(() => testUtils.createTestAdmin())
     .then((user) => {
       // Set global admin user
       adminUser = user;
@@ -72,7 +72,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing admin user
-    testUtils.removeAdminUser()
+    testUtils.removeTestAdmin()
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -89,9 +89,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should find a user', findUser);
   it('should find multiple users', findUsers);
   it('should find all users', findAllUsers);
-  // TODO: Figure out update
-  // it('should update a user', updateUser);
-  // it('should update multiple users', updateUsers);
+  it('should update a user', updateUser);
+  it('should update multiple users', updateUsers);
   it('should delete a user', deleteUser);
   it('should delete multiple users', deleteUsers);
 });
@@ -127,7 +126,7 @@ function createUser(done) {
     chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdUser.archivedBy).to.equal(null);
     chai.expect(createdUser.createdOn).to.not.equal(null);
-    chai.expect(createdUser.updatedOn).to.equal(null);
+    chai.expect(createdUser.updatedOn).to.not.equal(null);
     chai.expect(createdUser.archivedOn).to.equal(null);
 
     // Find the default org
@@ -187,7 +186,7 @@ function createUsers(done) {
       chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(createdUser.archivedBy).to.equal(null);
       chai.expect(createdUser.createdOn).to.not.equal(null);
-      chai.expect(createdUser.updatedOn).to.equal(null);
+      chai.expect(createdUser.updatedOn).to.not.equal(null);
       chai.expect(createdUser.archivedOn).to.equal(null);
     });
 
@@ -240,7 +239,7 @@ function findUser(done) {
     chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundUser.archivedBy).to.equal(null);
     chai.expect(foundUser.createdOn).to.not.equal(null);
-    chai.expect(foundUser.updatedOn).to.equal(null);
+    chai.expect(foundUser.updatedOn).to.not.equal(null);
     chai.expect(foundUser.archivedOn).to.equal(null);
     done();
   })
@@ -294,7 +293,7 @@ function findUsers(done) {
       chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundUser.archivedBy).to.equal(null);
       chai.expect(foundUser.createdOn).to.not.equal(null);
-      chai.expect(foundUser.updatedOn).to.equal(null);
+      chai.expect(foundUser.updatedOn).to.not.equal(null);
       chai.expect(foundUser.archivedOn).to.equal(null);
     });
     done();
@@ -408,6 +407,66 @@ function updateUser(done) {
     chai.expect(updatedUser.createdOn).to.not.equal(null);
     chai.expect(updatedUser.updatedOn).to.not.equal(null);
     chai.expect(updatedUser.archivedOn).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates multiple users using the user controller
+ */
+function updateUsers(done) {
+  const userDataObjects = [
+    testData.users[0],
+    testData.users[1],
+    testData.users[2],
+    testData.users[3]
+  ];
+
+  // Create object to update user
+  const updateObjects = userDataObjects.map((u) => ({
+    preferredName: 'Name Updated',
+    username: u.username
+  }));
+
+  // Update user via controller
+  UserController.update(adminUser, updateObjects)
+  .then((updatedUsers) => {
+    // Expect updatedUsers array to not be empty
+    chai.expect(updatedUsers.length).to.equal(userDataObjects.length);
+
+    // Convert updatedUsers to JMI type 2 for easier lookup
+    const jmi2Users = utils.convertJMI(1, 2, updatedUsers);
+    // Loop through each user data object
+    userDataObjects.forEach((userDataObject) => {
+      const updatedUser = jmi2Users[userDataObject.username];
+
+      // Verify user created properly
+      chai.expect(updatedUser._id).to.equal(userDataObject.username);
+      chai.expect(updatedUser.username).to.equal(userDataObject.username);
+      chai.expect(updatedUser.preferredName).to.equal('Name Updated');
+      chai.expect(updatedUser.fname).to.equal(userDataObject.fname);
+      chai.expect(updatedUser.lname).to.equal(userDataObject.lname);
+      chai.expect(updatedUser.admin).to.equal(userDataObject.admin);
+      chai.expect(updatedUser.custom).to.deep.equal(userDataObject.custom);
+
+      // Expect the password to be hashed
+      chai.expect(updatedUser.password).to.not.equal(userDataObject.password);
+
+      // Verify additional properties
+      chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
+      chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedUser.archivedBy).to.equal(null);
+      chai.expect(updatedUser.createdOn).to.not.equal(null);
+      chai.expect(updatedUser.updatedOn).to.not.equal(null);
+      chai.expect(updatedUser.archivedOn).to.equal(null);
+    });
+    done();
   })
   .catch((error) => {
     M.log.error(error);

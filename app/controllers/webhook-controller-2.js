@@ -245,6 +245,7 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
         webhookObj.project = utils.createID(orgID, projID);
         webhookObj.lastModifiedBy = reqUser._id;
         webhookObj.createdBy = reqUser._id;
+        webhookObj.updatedOn = Date.now();
         return webhookObj;
       });
 

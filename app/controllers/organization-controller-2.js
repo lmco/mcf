@@ -211,6 +211,7 @@ function create(requestingUser, orgs, options) {
         };
         orgObj.lastModifiedBy = reqUser._id;
         orgObj.createdBy = reqUser._id;
+        orgObj.updatedOn = Date.now();
         return orgObj;
       });
 

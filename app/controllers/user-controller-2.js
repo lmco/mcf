@@ -201,6 +201,7 @@ function create(requestingUser, users, options) {
         const userObj = new User(u);
         userObj.lastModifiedBy = reqUser._id;
         userObj.createdBy = reqUser._id;
+        userObj.updatedOn = Date.now();
         return userObj;
       });
 
@@ -354,32 +355,29 @@ function update(requestingUSer, users, options) {
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             user.markModified(key);
-          }
-          else {
-            // Set archivedBy if archived field is being changed
-            if (key === 'archived') {
-              // TODO: Should a user be able to archive themselves?
-              // If the user is being archived
-              if (updateUser[key] && !user[key]) {
-                user.archivedBy = reqUser;
-              }
-              // If the user is being unarchived
-              else if (!updateUser[key] && user[key]) {
-                user.archivedBy = null;
-              }
-            }
 
-            // Schema type is not mixed, update field in user object
-            user[key] = updateUser[key];
+            // Set the updateUser mixed field to the modified version
+            updateUser[key] = user[key];
+          }
+          // Set archivedBy if archived field is being changed
+          else if (key === 'archived') {
+            // TODO: Should a user be able to archive themselves?
+            // If the user is being archived
+            if (updateUser[key] && !user[key]) {
+              updateUser.archivedBy = reqUser;
+            }
+            // If the user is being unarchived
+            else if (!updateUser[key] && user[key]) {
+              updateUser.archivedBy = null;
+            }
           }
         });
 
         // Update last modified field
-        user.lastModifiedBy = reqUser;
+        updateUser.lastModifiedBy = reqUser;
 
-        // TODO: We cant use the .save() function because of the password validation...
         // Update the user
-        promises.push(user.updateOne());
+        promises.push(user.updateOne(updateUser));
       });
 
       // Return when all promises have been completed

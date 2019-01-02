@@ -53,13 +53,13 @@ describe(M.getModuleName(module.filename), () => {
     // Open the database connection
     db.connect()
     // Create test admin
-    .then(() => testUtils.createAdminUser())
+    .then(() => testUtils.createTestAdmin())
     .then((_adminUser) => {
       // Set global admin user
       adminUser = _adminUser;
 
       // Create organization
-      return testUtils.createOrganization(adminUser);
+      return testUtils.createTestOrg(adminUser);
     })
     .then((retOrg) => {
       // Set global organization
@@ -92,8 +92,8 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
-    testUtils.removeOrganization(adminUser)
-    .then(() => testUtils.removeAdminUser())
+    testUtils.removeTestOrg(adminUser)
+    .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {

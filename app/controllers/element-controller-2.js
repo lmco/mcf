@@ -63,6 +63,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     // Initialize valid options
     let archived = false;
     let populateString = '';
+    let subtree = false;
 
     // Ensure input parameters are valid
     try {
@@ -90,6 +91,13 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
               + 'lastModifiedBy createdBy';
           }
         }
+
+        // If the option 'subtree' is supplied ensure it's a boolean
+        if (options.hasOwnProperty('subtree')) {
+          assert.ok(typeof options.subtree === 'boolean', 'The option \'subtree\''
+            + ' is not a boolean.');
+          subtree = options.subtree;
+        }
       }
     }
     catch (msg) {
@@ -105,26 +113,44 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           + ` elements on the project ${project._id}.`, 403, 'warn');
       }
 
+      let elementsToFind = [];
+
+      // Check the type of the elements parameter
+      if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')) {
+        // An array of element ids, find all
+        elementsToFind = saniElements.map(e => utils.createID(orgID, projID, e));
+      }
+      else if (typeof saniElements === 'string') {
+        // A single element id
+        elementsToFind = [utils.createID(orgID, projID, saniElements)];
+      }
+      else if (((typeof saniElements === 'object' && saniElements !== null)
+        || saniElements === undefined)) {
+        // Find all elements in the project
+        elementsToFind = [];
+      }
+      else {
+        // Invalid parameter, throw an error
+        throw new M.CustomError('Invalid input for finding elements.', 400, 'warn');
+      }
+
+      // If wanting to find subtree, find subtree ids
+      if (subtree) {
+        return findElementTree(orgID, projID, 'master', elementsToFind);
+      }
+
+      return elementsToFind;
+    })
+    .then((elementIDs) => {
       // Define the searchQuery
-      const searchQuery = { project: project._id, archived: false };
+      const searchQuery = { project: utils.createID(orgID, projID), archived: false };
       // If the archived field is true, remove it from the query
       if (archived) {
         delete searchQuery.archived;
       }
 
-      // Check the type of the elements parameter
-      if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')) {
-        // An array of element ids, find all
-        searchQuery._id = { $in: saniElements.map(e => utils.createID(orgID, projID, e)) };
-      }
-      else if (typeof saniElements === 'string') {
-        // A single element id
-        searchQuery._id = utils.createID(orgID, projID, saniElements);
-      }
-      else if (!((typeof saniElements === 'object' && saniElements !== null)
-        || saniElements === undefined)) {
-        // Invalid parameter, throw an error
-        throw new M.CustomError('Invalid input for finding elements.', 400, 'warn');
+      if (elementIDs.length !== 0) {
+        searchQuery._id = { $in: elementIDs };
       }
 
       // Find the elements
@@ -269,6 +295,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         elemObj.project = utils.createID(orgID, projID);
         elemObj.lastModifiedBy = reqUser._id;
         elemObj.createdBy = reqUser._id;
+        elemObj.updatedOn = Date.now();
 
         // Add hidden fields
         elemObj.$parent = utils.createID(orgID, projID, e.parent);
@@ -640,7 +667,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       foundElements = _foundElements;
 
       // Return when all promises have been completed
-      return findElementTree(foundElements.map(e => e._id));
+      return findElementTree(orgID, projID, 'master', foundElements.map(e => e._id));
     })
     .then((foundIDs) => {
       const promises = [];
@@ -654,46 +681,68 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Return when all deletes have completed
       return Promise.all(promises);
     })
-    // TODO: What should we return here?
+    // TODO: What should we return here? Do we want to return the elements the user specified in
+    // the function parameter, or do we want to return all the specified elements and their
+    // children. If we return all the children as well, do we return just the ID's or the entire
+    // object?
     .then(() => resolve(foundElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
-let arr = [];
+/**
+ * @description A helper function that recursively finds element(s) subtree and
+ * returns the subtree as an array of ids.
+ *
+ * @param {Array} elementIDs - An array of ids to find the subtrees of.
+ *
+ * @returns {Promise} Array of element ids.
+ */
+function findElementTree(organizationID, projectID, branch, elementIDs) {
+  // Ensure elementIDs is an array
+  if (!Array.isArray(elementIDs)) {
+    throw new M.CustomError('ElementIDs array is not an array.', 400, 'warn');
+  }
 
-function findElementTree(elementIDs) {
-  return new Promise((resolve, reject) => {
-    // Set the global foundElements array to initial element IDs
-    arr = elementIDs;
-    // Find the given element and its sub-tree
-    findElementTreeHelper(elementIDs)
-    .then((foundElements) => resolve(foundElements))
-    .catch((error) => reject(error));
-  });
-}
+  // Set the foundElements array to initial element IDs
+  let foundElements = elementIDs;
 
-function findElementTreeHelper(ids) {
-  return new Promise((resolve, reject) => {
-    Element.find({ parent: { $in: ids } }, '_id')
-    .then(elements => {
-      const foundIDs = elements.map(e => e._id);
-      arr = arr.concat(foundIDs);
-      if (foundIDs.length === 0) {
-        return '';
-      }
+  // If no elements provided, find all elements in project
+  if (foundElements.length === 0) {
+    foundElements = [utils.createID(organizationID, projectID, 'model')];
+  }
 
-      if (foundIDs.length > 100000) {
+  // Define nested helper function
+  function findElementTreeHelper(ids) {
+    return new Promise((resolve, reject) => {
+      // Find all elements whose parent is in the list of given ids
+      Element.find({ parent: { $in: ids } }, '_id')
+      .then(elements => {
+        // Get a list of element ids
+        const foundIDs = elements.map(e => e._id);
+        // Add these elements to the global list of found elements
+        foundElements = foundElements.concat(foundIDs);
+
+        // If no elements were found, exit the recursive function
+        if (foundIDs.length === 0) {
+          return '';
+        }
+
+        // Recursively find the sub-children of the found elements in batches of 100000 or less
         for (let i = 0; i < foundIDs.length / 100000; i++) {
           const tmpIDs = foundIDs.slice(i * 100000, i * 100000 + 100000);
           return findElementTreeHelper(tmpIDs);
         }
-      }
-      else {
-        return findElementTreeHelper(foundIDs);
-      }
-    })
-    .then(() => resolve(arr))
+      })
+      .then(() => resolve())
+      .catch((error) => reject(error));
+    });
+  }
+
+  return new Promise((resolve, reject) => {
+    // Find the elements sub-tree
+    findElementTreeHelper(foundElements)
+    .then(() => resolve(foundElements))
     .catch((error) => reject(error));
   });
 }

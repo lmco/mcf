@@ -52,7 +52,7 @@ describe(M.getModuleName(module.filename), () => {
     // Connect to the database
     db.connect()
     // Create test admin
-    .then(() => testUtils.createAdminUser())
+    .then(() => testUtils.createTestAdmin())
     .then((user) => {
       // Set global admin user
       adminUser = user;
@@ -71,7 +71,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing admin user
-    testUtils.removeAdminUser()
+    testUtils.removeTestAdmin()
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -122,7 +122,7 @@ function createOrg(done) {
     chai.expect(createdOrg.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdOrg.archivedBy).to.equal(null);
     chai.expect(createdOrg.createdOn).to.not.equal(null);
-    chai.expect(createdOrg.updatedOn).to.equal(null);
+    chai.expect(createdOrg.updatedOn).to.not.equal(null);
     chai.expect(createdOrg.archivedOn).to.equal(null);
     done();
   })
@@ -170,7 +170,7 @@ function createOrgs(done) {
       chai.expect(createdOrg.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(createdOrg.archivedBy).to.equal(null);
       chai.expect(createdOrg.createdOn).to.not.equal(null);
-      chai.expect(createdOrg.updatedOn).to.equal(null);
+      chai.expect(createdOrg.updatedOn).to.not.equal(null);
       chai.expect(createdOrg.archivedOn).to.equal(null);
     });
     done();
@@ -210,7 +210,7 @@ function findOrg(done) {
     chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundOrg.archivedBy).to.equal(null);
     chai.expect(foundOrg.createdOn).to.not.equal(null);
-    chai.expect(foundOrg.updatedOn).to.equal(null);
+    chai.expect(foundOrg.updatedOn).to.not.equal(null);
     chai.expect(foundOrg.archivedOn).to.equal(null);
     done();
   })
@@ -261,7 +261,7 @@ function findOrgs(done) {
       chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundOrg.archivedBy).to.equal(null);
       chai.expect(foundOrg.createdOn).to.not.equal(null);
-      chai.expect(foundOrg.updatedOn).to.equal(null);
+      chai.expect(foundOrg.updatedOn).to.not.equal(null);
       chai.expect(foundOrg.archivedOn).to.equal(null);
     });
     done();
@@ -319,7 +319,7 @@ function findAllOrgs(done) {
         chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
         chai.expect(foundOrg.archivedBy).to.equal(null);
         chai.expect(foundOrg.createdOn).to.not.equal(null);
-        chai.expect(foundOrg.updatedOn).to.equal(null);
+        chai.expect(foundOrg.updatedOn).to.not.equal(null);
         chai.expect(foundOrg.archivedOn).to.equal(null);
       }
       // Special case for default org since it has no custom data

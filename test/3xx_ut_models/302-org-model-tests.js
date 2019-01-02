@@ -49,7 +49,7 @@ describe(M.getModuleName(module.filename), () => {
   before((done) => {
     db.connect()
     // Create admin user
-    .then(() => testUtils.createAdminUser())
+    .then(() => testUtils.createTestAdmin())
     .then((user) => {
       userAdmin = user;
       done();
@@ -68,7 +68,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove admin user
-    testUtils.removeAdminUser()
+    testUtils.removeTestAdmin()
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
