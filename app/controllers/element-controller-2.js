@@ -647,7 +647,8 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     const searchQuery = {};
 
     // Check the type of the elements parameter
-    if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')) {
+    if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')
+      && saniElements.length !== 0) {
       // An array of element ids, remove all
       searchQuery._id = { $in: saniElements.map(e => utils.createID(orgID, projID, e)) };
     }
