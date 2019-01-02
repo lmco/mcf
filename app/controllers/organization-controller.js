@@ -142,7 +142,6 @@ function find(requestingUser, orgs, options) {
   });
 }
 
-
 /**
  * @description This functions creates one or many orgs.
  *
@@ -275,13 +274,12 @@ function create(requestingUser, orgs, options) {
   });
 }
 
-
 /**
  * @description This function updates one or many orgs.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {Array/Object} orgs - Either an array of objects containing updates to
- * a organizations, or a single object containing updates.
+ * organizations, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported option is the boolean 'populated'.
  *

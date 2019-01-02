@@ -29,7 +29,7 @@ const chai = require('chai');
 const path = require('path');
 
 // MBEE modules
-const ProjController = M.require('controllers.project-controller-2');
+const ProjController = M.require('controllers.project-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
