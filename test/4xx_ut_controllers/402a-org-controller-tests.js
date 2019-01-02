@@ -27,7 +27,7 @@ const chai = require('chai');
 const path = require('path');
 
 // MBEE modules
-const OrgController = M.require('controllers.organization-controller-2');
+const OrgController = M.require('controllers.organization-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 

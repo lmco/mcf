@@ -43,7 +43,30 @@ const Webhook = M.require('models.webhook');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
-
+/**
+ * @description This function finds one or many organizations.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {Array/String} orgs - The organizations to find. Can either be an
+ * array of org ids, a single org id, or not provided, which defaults to every
+ * org being found.
+ * @param {Object} options - An optional parameter that provides supported
+ * options. Currently the only supported options are the booleans 'archived' and
+ * 'populated'
+ *
+ * @return {Promise} resolve - Array of found organization objects
+ *                   reject - error
+ *
+ * @example
+ * find({User}, ['org1', 'org2'], { populated: true })
+ * .then(function(orgs) {
+ *   // Do something with the found orgs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ *
+ */
 function find(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
@@ -120,6 +143,27 @@ function find(requestingUser, orgs, options) {
 }
 
 
+/**
+ * @description This functions creates one or many orgs.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {Array/Object} orgs - Either an array of objects containing org data
+ * or a single object containing org data to create.
+ * @param {Object} options - An optional parameter that provides supported
+ * options. Currently the only supported option is the boolean 'populated'.
+ *
+ * @return {Promise} resolve - Array of created organization objects
+ *                   reject - error
+ *
+ * @example
+ * create({User}, [{Org1}, {Org2}, ...], { populated: true })
+ * .then(function(orgs) {
+ *   // Do something with the newly created orgs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
 function create(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
@@ -231,6 +275,28 @@ function create(requestingUser, orgs, options) {
   });
 }
 
+
+/**
+ * @description This function updates one or many orgs.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {Array/Object} orgs - Either an array of objects containing updates to
+ * a organizations, or a single object containing updates.
+ * @param {Object} options - An optional parameter that provides supported
+ * options. Currently the only supported option is the boolean 'populated'.
+ *
+ * @return {Promise} resolve - Array of updated organization objects
+ *                   reject - error
+ *
+ * @example
+ * update({User}, [{Updated Org 1}, {Updated Org 2}...], { populated: true })
+ * .then(function(orgs) {
+ *   // Do something with the newly updated orgs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
 function update(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters and function-wide variables
@@ -386,7 +452,29 @@ function update(requestingUser, orgs, options) {
   });
 }
 
-
+/**
+ * @description This function removes one or many organizations as well as the
+ * projects, elements, webhooks and artifacts that belong to them.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {Array/String} orgs - The organizations to remove. Can either be an
+ * array of org ids or a single org id.
+ * @param {Object} options - An optional parameter that provides supported
+ * options. Currently the only supported option is the boolean 'populated'.
+ *
+ * @return {Promise} resolve - Array of deleted organization objects
+ *                   reject - error
+ *
+ * @example
+ * remove({User}, ['org1', 'org2'], { populated: true })
+ * .then(function(orgs) {
+ *   // Do something with the deleted orgs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ *
+ */
 function remove(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters and function-wide variables
