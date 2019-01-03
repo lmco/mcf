@@ -10,6 +10,7 @@
       "preferredName": "nonadmin user",
       "fname": "userFirstname",
       "lname": "userLastname",
+      "email": "user1@test.com",
       "admin": false,
       "custom": {
         "location": "Location01"
@@ -21,6 +22,7 @@
       "preferredName": "nonadmin user",
       "fname": "userFirstname",
       "lname": "userLastname",
+      "email": "user2@test.com",
       "admin": false,
       "custom": {
         "location": "Location02"
@@ -32,6 +34,7 @@
       "preferredName": "nonadmin user",
       "fname": "userFirstname",
       "lname": "userLastname",
+      "email": "user3@test.com",
       "admin": false,
       "custom": {
         "location": "Location03"
@@ -43,6 +46,7 @@
       "preferredName": "nonadmin user",
       "fname": "userFirstname",
       "lname": "userLastname",
+      "email": "user4@test.com",
       "admin": false,
       "custom": {
         "location": "Location04"

@@ -289,3 +289,49 @@ module.exports.importTestData = function(filename) {
   }
   return Object.assign({}, testDataFresh);
 };
+
+/**
+ * @description Helper function for setting mock request parameters.
+ *
+ * @param {Object} user - The user making the request
+ * @param {Object} params - Parameters for API req
+ * @param {Object} body - Body for API req
+ * @param {String} method - API method of req
+ *
+ * @returns {Object} req - Request Object
+ */
+module.exports.createRequest = function(user, params, body, method) {
+  // Error-Check
+  if (typeof params !== 'object') {
+    throw M.CustomError('params is not of type object.');
+  }
+  if (typeof params !== 'object') {
+    throw M.CustomError('body is not of type object.');
+  }
+
+  return {
+    headers: getHeaders(),
+    method: method,
+    params: params,
+    body: body,
+    user: user,
+    session: {}
+  };
+};
+
+/**
+ * @description Helper function for setting mock response status and header.
+ *
+ * @param {Object} res - Response Object
+ */
+module.exports.createResponse = function(res) {
+  // Verifies the response code: 200 OK
+  res.status = function status(code) {
+    chai.expect(code).to.equal(200);
+    return this;
+  };
+  // Provides headers to response object
+  res.header = function header(a, b) {
+    return this;
+  };
+};

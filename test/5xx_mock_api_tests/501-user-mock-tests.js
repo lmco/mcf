@@ -385,23 +385,7 @@ function getReq(params, body, method) {
   };
 }
 
-/**
- * @description This is a common function used in every test to verify the
- * status code of the api request and provide the headers.
- *
- * @param {Object} res - Response Object
- */
-function resFunctions(res) {
-  // Verifies the response code: 200 OK
-  res.status = function status(code) {
-    chai.expect(code).to.equal(200);
-    return this;
-  };
-  // Provides headers to response object
-  res.header = function header(a, b) {
-    return this;
-  };
-}
+
 
 /**
  * @description Helper function for setting the request header.
