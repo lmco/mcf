@@ -314,6 +314,8 @@ function sixToSeven() {
 
       return mongoose.connection.db.collection('organizations').dropIndex('id_1');
     })
+    // Delete name unique index on organizations collection
+    .then(() => mongoose.connection.db.collection('organizations').dropIndex('name_1'))
     // Delete id unique index on projects collection
     .then(() => mongoose.connection.db.collection('projects').dropIndex('id_1'))
     // Delete uuid unique index on elements collection
