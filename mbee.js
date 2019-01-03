@@ -172,7 +172,7 @@ function main() {
       + '\n\n  node mbee build\n\n');
     process.exit(0);
   }
-  const tasks = ['clean', 'build', 'lint', 'docker', 'start', 'test'];
+  const tasks = ['clean', 'build', 'lint', 'docker', 'start', 'test', 'migrate'];
   if (tasks.includes(subcommand)) {
     // eslint-disable-next-line global-require
     const task = require(path.join(M.root, 'scripts', subcommand));
