@@ -74,8 +74,9 @@ module.exports.createNonAdminUser = function() {
     })
     .then((orgs) => {
       // Add user to default org read/write permissions
-      orgs[0].permissions.read.push(newUser._id.toString());
-      orgs[0].permissions.write.push(newUser._id.toString());
+      orgs[0].permissions[newUser._id] = ['read', 'write'];
+
+      orgs[0].markModified('permissions');
 
       // Save the updated org
       return orgs[0].save();
@@ -123,8 +124,9 @@ module.exports.createTestAdmin = function() {
     })
     .then((orgs) => {
       // Add user to default org read/write permissions
-      orgs[0].permissions.read.push(newAdminUser._id.toString());
-      orgs[0].permissions.write.push(newAdminUser._id.toString());
+      orgs[0].permissions[newAdminUser._id] = ['read', 'write'];
+
+      orgs[0].markModified('permissions');
 
       // Save the updated org
       return orgs[0].save();
@@ -153,10 +155,8 @@ module.exports.removeNonAdminUser = function() {
     .then(() => Organization.find({ _id: M.config.server.defaultOrganizationId }))
     .then((orgs) => {
       // Remove user from permissions list in each project
-      orgs[0].permissions.read = orgs[0].permissions.read
-      .filter(user => user !== userToDelete._id.toString());
-      orgs[0].permissions.write = orgs[0].permissions.write
-      .filter(user => user !== userToDelete._id.toString());
+      delete orgs[0].permissions[userToDelete._id];
+      orgs[0].markModified('permissions');
       return orgs[0].save();
     })
     .then(() => resolve(userToDelete.username))
@@ -183,10 +183,8 @@ module.exports.removeTestAdmin = function() {
     .then(() => Organization.find({ _id: M.config.server.defaultOrganizationId }))
     .then((orgs) => {
       // Remove user from permissions list in each project
-      orgs[0].permissions.read = orgs[0].permissions.read
-      .filter(user => user !== userToDelete._id.toString());
-      orgs[0].permissions.write = orgs[0].permissions.write
-      .filter(user => user !== userToDelete._id.toString());
+      delete orgs[0].permissions[userToDelete._id];
+      orgs[0].markModified('permissions');
       return orgs[0].save();
     })
     .then(() => resolve(userToDelete.username))
@@ -204,13 +202,10 @@ module.exports.createTestOrg = function(adminUser) {
     const newOrg = new Organization({
       _id: testData.orgs[0].id,
       name: testData.orgs[0].name,
-      permissions: {
-        admin: [adminUser._id],
-        write: [adminUser._id],
-        read: [adminUser._id]
-      },
       custom: null
     });
+    newOrg.permissions[adminUser._id] = ['read', 'write', 'admin'];
+
     newOrg.save()
     .then((_newOrg) => resolve(_newOrg))
     .catch((error) => reject(error));
@@ -250,13 +245,10 @@ module.exports.createTestProject = function(adminUser, orgID) {
       _id: utils.createID(orgID, testData.projects[0].id),
       org: orgID,
       name: testData.projects[0].name,
-      permissions: {
-        admin: [adminUser._id],
-        write: [adminUser._id],
-        read: [adminUser._id]
-      },
       custom: null
     });
+    newProject.permissions[adminUser._id] = ['read', 'write', 'admin'];
+
     newProject.save()
     .then((_newProj) => {
       createdProject = _newProj;

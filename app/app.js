@@ -186,6 +186,7 @@ function createDefaultAdmin() {
       }
       // set userCreated to true
       userCreated = true;
+      // TODO: Add default admin to default org
       // No global admin exists, create local user as global admin
       const adminUserData = new User({
         // Set username and password of global admin user from configuration.

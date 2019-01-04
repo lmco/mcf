@@ -34,22 +34,12 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description Defines the Project Schema
  *
- * @property {String} id - The project's non-unique id.
+ * @property {String} _id - The project's non-unique id.
  * @property {Organization} org - A reference to the project's organization.
- * @property {String} uid - The projects unique id name-spaced using a
- * project's organization.
  * @property {String} name - The project's non-unique project name.
- * @property {User} permissions - An object whose keys identify a projects's
- * roles. The key values are an array of references to users who hold those
- * roles.
- * @property {User} permissions.read - An array of references to Users who have
- * read access
- * @property {User} permissions.write - An array of references to Users who have
- * write access
- * @property {User} permissions.admin - An array of references to Users who have
- * admin access
- * @property {Date} archivedOn - The date the project was archived or null
- * @property {Boolean} archived - Indicates if a project has been archived.
+ * @property {Schema.Types.Mixed} permissions - An object whose keys identify a
+ * projects's roles. The keys are the users username, and values are arrays of
+ * given permissions.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
  * @property {String} visibility - The visibility level of a project defining
  * its permissions behaviour.
@@ -86,18 +76,8 @@ const ProjectSchema = new mongoose.Schema({
     required: true
   },
   permissions: {
-    read: [{
-      type: String,
-      ref: 'User'
-    }],
-    write: [{
-      type: String,
-      ref: 'User'
-    }],
-    admin: [{
-      type: String,
-      ref: 'User'
-    }]
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   },
   custom: {
     type: mongoose.Schema.Types.Mixed,
@@ -120,19 +100,29 @@ ProjectSchema.plugin(extensions);
  * @memberof ProjectSchema
  */
 ProjectSchema.methods.getPublicData = function() {
-  // Map read, write, and admin references to only contain user public data
   const permissions = {
-    read: this.permissions.read.map(u => u.username),
-    write: this.permissions.write.map(u => u.username),
-    admin: this.permissions.admin.map(u => u.username)
+    read: [],
+    write: [],
+    admin: []
   };
+
+  // Map read, write, and admin permissions to arrays
+  this.permissions.forEach(u => {
+    if (this.permissions[u].includes('read')) {
+      permissions.read.push(u);
+    }
+    if (this.permissions[u].includes('write')) {
+      permissions.write.push(u);
+    }
+    if (this.permissions[u].includes('admin')) {
+      permissions.admin.push(u);
+    }
+  });
 
   // Return the projects public fields
   return {
     id: utils.parseID(this._id).pop(),
-    // NOTE (jk): Not sure why the toString is needed, but a buffer gets
-    // returned when posting a project via the API
-    org: this.org._id,
+    org: this.org._id || this.org,
     name: this.name,
     permissions: permissions,
     custom: this.custom,
@@ -147,13 +137,19 @@ ProjectSchema.methods.getPublicData = function() {
 ProjectSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
+ProjectSchema.statics.getPermissionLevels = function() {
+  return ProjectSchema.methods.getPermissionLevels();
+};
 
 /**
  * @description Returns project fields that can be changed
  * @memberof ProjectSchema
  */
 ProjectSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'custom', 'archived'];
+  return ['name', 'custom', 'archived', 'permissions'];
+};
+ProjectSchema.statics.getValidUpdateFields = function() {
+  return ProjectSchema.methods.getValidUpdateFields();
 };
 
 /**
@@ -163,72 +159,10 @@ ProjectSchema.methods.getValidUpdateFields = function() {
 ProjectSchema.methods.getVisibilityLevels = function() {
   return ['internal', 'private'];
 };
-
-/**
- * @description Returns the permissions of the user has on the project
- *
- * @param {User} user  The user whose permissions are being returned
- * @memberof ProjectSchema
- *
- * @returns {Object} A json object with keys being the permission levels
- *  and values being booleans
- */
-ProjectSchema.methods.getPermissions = function(user) {
-  let read = this.permissions.read;
-  const write = this.permissions.write;
-  const admin = this.permissions.admin;
-
-  // If this.permissions.read is populated
-  if (this.permissions.read.every(u => typeof u === 'object')) {
-    // Map _ids
-    read = this.permissions.read.map(u => u._id);
-  }
-
-  // If this.permissions.write is populated
-  if (this.permissions.write.every(u => typeof u === 'object')) {
-    // Map _ids
-    read = this.permissions.write.map(u => u._id);
-  }
-
-  // If this.permissions.admin is populated
-  if (this.permissions.admin.every(u => typeof u === 'object')) {
-    // Map _ids
-    read = this.permissions.admin.map(u => u._id);
-  }
-
-
-  // If user exists in any of the list, set the permission to true
-  const permissions = {
-    read: read.includes(user._id),
-    write: write.includes(user._id),
-    admin: admin.includes(user._id)
-  };
-
-  // If projects visibility is internal
-  if (this.visibility === 'internal') {
-    // Get all orgs which user has read permissions on
-    let orgs = user.orgs.read;
-
-    // If user.orgs.read is populated
-    if (user.orgs.read.every(o => typeof o === 'object')) {
-      orgs = user.orgs.read.map(o => o._id.toString());
-    }
-    // See if the user has read permissions on the project's org,
-    // they have read permissions on the project
-    permissions.read = orgs.includes(this.org.toString());
-  }
-  return permissions;
-};
-
-// TODO - Should method use statics instead of statics using methods?
 ProjectSchema.statics.getVisibilityLevels = function() {
   return ProjectSchema.methods.getVisibilityLevels();
 };
 
-// TODO - Should method use statics instead of statics using methods?
-ProjectSchema.statics.getValidUpdateFields = function() {
-  return ProjectSchema.methods.getValidUpdateFields();
-};
 
 /**
  * @description Validates an object to ensure that it only contains keys

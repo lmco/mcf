@@ -32,22 +32,14 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description Defines the Organization Schema
  *
- * @property {String} id - The organization's unique ID.
+ * @property {String} _id - The organization's unique ID.
  * @property {String} name - The organization's name.
- * @property {String} permissions - An object whose keys identify an
- * organization's roles. The key values are an array of references to users
- * who hold those roles.
- * @property {User} permissions.read - An array of references to Users who
- * have read access.
- * @property {User} permissions.write - An array of references to Users who
- * have write access.
- * @property {User} permissions.admin - An array of references to Users who
- * have admin access.
- * @property {Date} archivedOn - The date the org was archived or null
- * @property {Boolean} archived - Indicates if an org has been archived.
+ * @property {Schema.Types.Mixed} permissions - An object whose keys identify an
+ * organization's roles. The keys are usernames and the values are arrays
+ * containing the users permissions.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
- * @property {virtual} project - A virtual field containing an array of Project
- * objects.
+ * @property {virtual} projects - A virtual field containing an array of Project
+ * objects the organization contains.
  *
  */
 const OrganizationSchema = new mongoose.Schema({
@@ -62,18 +54,8 @@ const OrganizationSchema = new mongoose.Schema({
     required: true
   },
   permissions: {
-    read: [{
-      type: String,
-      ref: 'User'
-    }],
-    write: [{
-      type: String,
-      ref: 'User'
-    }],
-    admin: [{
-      type: String,
-      ref: 'User'
-    }]
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   },
   custom: {
     type: mongoose.Schema.Types.Mixed,
@@ -99,12 +81,24 @@ OrganizationSchema.plugin(extensions);
  * @memberof OrganizationSchema
  */
 OrganizationSchema.methods.getPublicData = function() {
-  // Map read, write, and admin references to only contain user public data
   const permissions = {
-    read: this.permissions.read.map(u => u.username),
-    write: this.permissions.write.map(u => u.username),
-    admin: this.permissions.admin.map(u => u.username)
+    read: [],
+    write: [],
+    admin: []
   };
+
+  // Map read, write, and admin permissions to arrays
+  this.permissions.forEach(u => {
+    if (this.permissions[u].includes('read')) {
+      permissions.read.push(u);
+    }
+    if (this.permissions[u].includes('write')) {
+      permissions.write.push(u);
+    }
+    if (this.permissions[u].includes('admin')) {
+      permissions.admin.push(u);
+    }
+  });
 
   // Return the organization public fields
   return {
@@ -122,57 +116,28 @@ OrganizationSchema.methods.getPublicData = function() {
 OrganizationSchema.methods.getPermissionLevels = function() {
   return ['REMOVE_ALL', 'read', 'write', 'admin'];
 };
+OrganizationSchema.statics.getPermissionLevels = function() {
+  return OrganizationSchema.methods.getPermissionLevels();
+};
 
 /**
  * @description Returns organization fields that can be changed
  * @memberof OrganizationSchema
  */
 OrganizationSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'custom', 'archived'];
+  return ['name', 'custom', 'archived', 'permissions'];
 };
-
 OrganizationSchema.statics.getValidUpdateFields = function() {
   return OrganizationSchema.methods.getValidUpdateFields();
 };
 
-/**
- * @description Returns the permissions a user has on the org
- *
- * @param {User} user  The user whose permissions are being returned
- * @memberof OrganizationSchema
- *
- * @returns {Object} A json object with keys being the permission levels
- * and values being booleans
- */
-OrganizationSchema.methods.getPermissions = function(user) {
-  let read = this.permissions.read;
-  let write = this.permissions.write;
-  let admin = this.permissions.admin;
-
-  // If populated, map org permissions lists user._ids to strings
-  if (read.every(u => typeof u === 'object')) {
-    read = this.permissions.read.map(u => u._id);
-  }
-  if (write.every(u => typeof u === 'object')) {
-    write = this.permissions.write.map(u => u._id);
-  }
-  if (admin.every(u => typeof u === 'object')) {
-    admin = this.permissions.admin.map(u => u._id);
-  }
-
-  // Return an object containing user permissions
-  return {
-    read: read.includes(user._id),
-    write: write.includes(user._id),
-    admin: admin.includes(user._id)
-  };
-};
 
 /**
  * @description Validates an object to ensure that it only contains keys
  * which exist in the organization model.
  *
- * @param {Object} object to check keys of.
+ * @param {Object} object - The object to check keys of.
+ *
  * @return {boolean} The boolean indicating if the object contained only
  * existing fields.
  */

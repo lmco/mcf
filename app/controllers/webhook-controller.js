@@ -100,7 +100,7 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
             + ' is not a boolean.');
           archived = options.archived;
         }
-
+        // TODO: Handle the ability to only return specific populated fields
         // If the option 'populated' is supplied, ensure it's a boolean
         if (options.hasOwnProperty('populated')) {
           assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
@@ -118,13 +118,19 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((foundProject) => {
+      // Ensure project was found
+      if (foundProject === null) {
+        throw new M.CustomError(`The project [${projID}] was not found.`, 404, 'warn');
+      }
+
       // Verify the user has read permissions on the project
-      if (!foundProject.getPermissions(reqUser).read && !reqUser.admin) {
+      if (!foundProject.permissions[reqUser._id]
+        || (!foundProject.permissions[reqUser._id].includes('read') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to get'
             + ` webhooks on the project ${foundProject._id}.`, 403, 'warn');
       }
 
-      // Define the searchQuery
+      // Define searchQuery
       const searchQuery = { project: foundProject._id, archived: false };
       // If the archived field is true, remove it from the query
       if (archived) {
@@ -265,7 +271,8 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
       }
 
       // Verify user has write permissions on the project
-      if (!foundProject.getPermissions(reqUser).write && !reqUser.admin) {
+      if (!foundProject.permissions[reqUser._id]
+        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to create'
             + ` webhooks on the project ${foundProject._id}.`, 403, 'warn');
       }
@@ -381,7 +388,8 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       }
 
       // Verify user has write permissions on the project
-      if (!foundProject.getPermissions(reqUser).write && !reqUser.admin) {
+      if (!foundProject.permissions[reqUser._id]
+        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to update'
             + ` webhooks on the project ${foundProject._id}.`, 403, 'warn');
       }
@@ -511,9 +519,9 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Array/String} webhooks - The webhooks to remove. Can either be an
  * array of webhook ids or a single webhook id.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted webhook objects
+ * @return {Promise} resolve - Array of deleted webhook ids
  *                   reject - error
  *
  * @example
@@ -534,35 +542,21 @@ function remove(requestingUser, organizationID, projectID, webhooks, options) {
     const saniWebhooks = sani.sanitize(JSON.parse(JSON.stringify(webhooks)));
     let foundWebhooks = [];
 
-    // Initialize valid options
-    let populateString = '';
-
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field and is a system admin
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      assert.ok(reqUser.admin, 'User does not have permissions to delete orgs.');
+      assert.ok(reqUser.admin, 'User does not have permissions to delete webhooks.');
 
       // Ensure orgID and projID are strings
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-
-      if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'project archivedBy lastModifiedBy createdBy';
-          }
-        }
-      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define the searchQuery
+    // Define searchQuery
     const searchQuery = {};
 
     // Check the type of the webhooks parameter
@@ -580,7 +574,7 @@ function remove(requestingUser, organizationID, projectID, webhooks, options) {
     }
 
     // Find the webhooks to delete
-    Webhook.Webhook.find(searchQuery).populate(populateString)
+    Webhook.Webhook.find(searchQuery)
     .then((_foundWebhooks) => {
       // Set function-wide foundWebhooks
       foundWebhooks = _foundWebhooks;
@@ -594,7 +588,7 @@ function remove(requestingUser, organizationID, projectID, webhooks, options) {
         M.log.error('Some of the following webhooks were not '
             + `deleted [${saniWebhooks.toString()}].`);
       }
-      return resolve(foundWebhooks);
+      return resolve(foundWebhooks.map(w => w._id));
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

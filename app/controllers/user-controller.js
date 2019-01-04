@@ -100,8 +100,7 @@ function find(requestingUser, users, options) {
           assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
             + ' is not a boolean.');
           if (options.populated) {
-            populateString = 'orgs.read orgs.write orgs.admin proj.read '
-              + 'proj.write proj.admin archivedBy lastModifiedBy createdBy';
+            populateString = 'archivedBy lastModifiedBy createdBy';
           }
         }
       }
@@ -110,7 +109,7 @@ function find(requestingUser, users, options) {
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define the searchQuery
+    // Define searchQuery
     const searchQuery = { archived: false };
     // If the archived field is true, remove it from the query
     if (archived) {
@@ -266,9 +265,11 @@ function create(requestingUser, users, options) {
     .then((defaultOrg) => {
       // Add each created user to the default org with read/write
       createdUsers.forEach((user) => {
-        defaultOrg.permissions.read.push(user._id);
-        defaultOrg.permissions.write.push(user._id);
+        defaultOrg.permissions[user._id] = ['read', 'write'];
       });
+
+      // Mark the default orgs permissions as modified
+      defaultOrg.markModified('permissions');
 
       // Save the updated default org
       return defaultOrg.save();
@@ -277,8 +278,7 @@ function create(requestingUser, users, options) {
       // If user wants populated users, find and populate
       if (populate) {
         return resolve(User.find({ _id: { $in: arrUsernames } })
-        .populate('orgs.read orgs.write orgs.admin proj.read '
-              + 'proj.write proj.admin archivedBy lastModifiedBy createdBy'));
+        .populate('archivedBy lastModifiedBy createdBy'));
       }
 
       return resolve(createdUsers);
@@ -330,8 +330,7 @@ function update(requestingUser, users, options) {
           assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
             + ' is not a boolean.');
           if (options.populated) {
-            populateString = 'orgs.read orgs.write orgs.admin proj.read '
-              + 'proj.write proj.admin archivedBy lastModifiedBy createdBy';
+            populateString = 'archivedBy lastModifiedBy createdBy';
           }
         }
       }
@@ -426,7 +425,11 @@ function update(requestingUser, users, options) {
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
-            // TODO: Should a user be able to archive themselves?
+            // User cannot archive or unarchive themselves
+            if (user._id === reqUser._id) {
+              throw new M.CustomError('User cannot archive or unarchive themselves', 403, 'warn');
+            }
+
             // If the user is being archived
             if (updateUser[key] && !user[key]) {
               updateUser.archivedBy = reqUser;
@@ -462,9 +465,9 @@ function update(requestingUser, users, options) {
  * @param {Array/String} users - The users to remove. Can either be an array of
  * user ids or a single user id.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted user objects
+ * @return {Promise} resolve - Array of deleted users usernames
  *                   reject - error
  *
  * @example
@@ -484,32 +487,17 @@ function remove(requestingUser, users, options) {
     let foundUsers = [];
     let foundUsernames = [];
 
-    // Initialize valid options
-    let populateString = '';
-
     // Ensure parameters are valid
     try {
       // Ensure the requesting user has an _id and is a system admin
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
       assert.ok(reqUser.admin, 'User does not have permissions to delete users.');
-
-      if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'orgs.read orgs.write orgs.admin proj.read '
-              + 'proj.write proj.admin archivedBy lastModifiedBy createdBy';
-          }
-        }
-      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define the searchQuery and memberQuery
+    // Define searchQuery and memberQuery
     const searchQuery = {};
     const memberQuery = {};
 
@@ -529,14 +517,15 @@ function remove(requestingUser, users, options) {
 
     // Find the users to delete
     User.find(searchQuery)
-    .populate(populateString)
     .then((_foundUsers) => {
       // Set function-wide foundUsers and foundUsernames
       foundUsers = _foundUsers;
       foundUsernames = foundUsers.map(u => u._id);
 
       // Create memberQuery
-      memberQuery['permissions.read'] = { $in: foundUsers };
+      foundUsers.forEach((user) => {
+        memberQuery[`permissions.${user.username}`] = 'read';
+      });
 
       // Check that user can remove each user
       foundUsers.forEach((user) => {
@@ -553,11 +542,11 @@ function remove(requestingUser, users, options) {
       const promises = [];
       // For each org, remove users from permissions lists
       orgs.forEach((org) => {
-        org.permissions = {
-          admin: org.permissions.admin.filter(u => !foundUsernames.includes(u)),
-          write: org.permissions.write.filter(u => !foundUsernames.includes(u)),
-          read: org.permissions.read.filter(u => !foundUsernames.includes(u))
-        };
+        foundUsernames.forEach((user) => {
+          delete org.permissions[user];
+        });
+
+        org.markModified('permissions');
 
         // Add save operation to promise array
         promises.push(org.save());
@@ -572,11 +561,11 @@ function remove(requestingUser, users, options) {
       const promises = [];
       // For each project, remove users from permissions lists
       projects.forEach((proj) => {
-        proj.permissions = {
-          admin: proj.permissions.admin.filter(u => !foundUsernames.includes(u)),
-          write: proj.permissions.write.filter(u => !foundUsernames.includes(u)),
-          read: proj.permissions.read.filter(u => !foundUsernames.includes(u))
-        };
+        foundUsernames.forEach((user) => {
+          delete proj.permissions[user];
+        });
+
+        proj.markModified('permissions');
 
         // Add save operation to promise array
         promises.push(proj.save());
@@ -588,7 +577,7 @@ function remove(requestingUser, users, options) {
     // Remove the users
     .then(() => User.deleteMany(searchQuery))
     // Return the deleted users
-    .then(() => resolve(foundUsers))
+    .then(() => resolve(foundUsernames))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

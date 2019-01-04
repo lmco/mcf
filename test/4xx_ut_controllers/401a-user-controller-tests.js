@@ -134,9 +134,9 @@ function createUser(done) {
   })
   .then((defaultOrg) => {
     // Verify the user has read/write permission on the default org
-    chai.expect(defaultOrg.permissions.read).to.include(userData.username);
-    chai.expect(defaultOrg.permissions.write).to.include(userData.username);
-    chai.expect(defaultOrg.permissions.admin).to.not.include(userData.username);
+    chai.expect(defaultOrg.permissions[userData.username]).to.include('read');
+    chai.expect(defaultOrg.permissions[userData.username]).to.include('write');
+    chai.expect(defaultOrg.permissions[userData.username]).to.not.include('admin');
     done();
   })
   .catch((error) => {
@@ -196,9 +196,11 @@ function createUsers(done) {
   .then((defaultOrg) => {
     const usernames = userDataObjects.map(u => u.username);
     // Verify the user has read/write permission on the default org
-    chai.expect(defaultOrg.permissions.read).to.include.members(usernames);
-    chai.expect(defaultOrg.permissions.write).to.include.members(usernames);
-    chai.expect(defaultOrg.permissions.admin).to.not.include.members(usernames);
+    usernames.forEach((username) => {
+      chai.expect(defaultOrg.permissions[username]).to.include('read');
+      chai.expect(defaultOrg.permissions[username]).to.include('write');
+      chai.expect(defaultOrg.permissions[username]).to.not.include('admin');
+    });
     done();
   })
   .catch((error) => {
@@ -487,10 +489,9 @@ function deleteUser(done) {
   .then((deletedUsers) => {
     // Expect deletedUsers array to contain 1 user
     chai.expect(deletedUsers.length).to.equal(1);
-    const deletedUser = deletedUsers[0];
 
     // Verify correct user deleted
-    chai.expect(deletedUser._id).to.equal(userData.username);
+    chai.expect(deletedUsers).to.include(userData.username);
 
     // Attempt to find the deleted user
     return UserController.find(adminUser, userData.username, { archived: true });
@@ -504,9 +505,7 @@ function deleteUser(done) {
   })
   .then((defaultOrg) => {
     // Verify the user is NOT part of the default org
-    chai.expect(defaultOrg.permissions.read).to.not.include(userData.username);
-    chai.expect(defaultOrg.permissions.write).to.not.include(userData.username);
-    chai.expect(defaultOrg.permissions.admin).to.not.include(userData.username);
+    chai.expect(defaultOrg.permissions).to.not.include.keys(userData.username);
     done();
   })
   .catch((error) => {
@@ -536,14 +535,10 @@ function deleteUsers(done) {
     // Expect deletedUsers not to be empty
     chai.expect(deletedUsers.length).to.equal(userDataObjects.length);
 
-    // Convert deletedUsers to JMI type 2 for easier lookup
-    const jmi2Users = utils.convertJMI(1, 2, deletedUsers);
     // Loop through each user data object
     userDataObjects.forEach((userDataObject) => {
-      const deletedUser = jmi2Users[userDataObject.username];
-
       // Verify correct user deleted
-      chai.expect(deletedUser._id).to.equal(userDataObject.username);
+      chai.expect(deletedUsers).to.include(userDataObject.username);
     });
 
     // Attempt to find the deleted users
@@ -558,9 +553,7 @@ function deleteUsers(done) {
   })
   .then((defaultOrg) => {
     // Verify the users are NOT part of the default org
-    chai.expect(defaultOrg.permissions.read).to.not.include.members(usernames);
-    chai.expect(defaultOrg.permissions.write).to.not.include.members(usernames);
-    chai.expect(defaultOrg.permissions.admin).to.not.include.members(usernames);
+    chai.expect(defaultOrg.permissions).to.not.include.keys(usernames);
     done();
   })
   .catch((error) => {

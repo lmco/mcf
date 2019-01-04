@@ -107,8 +107,7 @@ function find(requestingUser, organizationID, projects, options) {
           assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
             + ' is not a boolean.');
           if (options.populated) {
-            populateString = 'org permissions.read permissions.write '
-              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+            populateString = 'org archivedBy lastModifiedBy createdBy';
           }
         }
       }
@@ -117,8 +116,9 @@ function find(requestingUser, organizationID, projects, options) {
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define the searchQuery
-    const searchQuery = { 'permissions.read': reqUser._id, archived: false };
+    // Define searchQuery
+    const searchQuery = { archived: false };
+    searchQuery[`permissions.${reqUser._id}`] = 'read';
     // If the archived field is true, remove it from the query
     if (archived) {
       delete searchQuery.archived;
@@ -240,8 +240,14 @@ function create(requestingUser, organizationID, projects, options) {
     // Find the organization to verify existence and permissions
     Organization.findOne({ _id: orgID })
     .then((foundOrg) => {
+      // If the org was not found
+      if (foundOrg === null) {
+        throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
+      }
+
       // Verify user has write permissions on the org
-      if (!foundOrg.getPermissions(reqUser).write && !reqUser.admin) {
+      if (!foundOrg.permissions[reqUser._id]
+        || (!foundOrg.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
         return resolve([]);
       }
 
@@ -265,11 +271,7 @@ function create(requestingUser, organizationID, projects, options) {
         // Set org
         projObj.org = orgID;
         // Set permissions
-        projObj.permissions = {
-          admin: [reqUser._id],
-          write: [reqUser._id],
-          read: [reqUser._id]
-        };
+        projObj.permissions[reqUser._id] = ['read', 'write', 'admin'];
         projObj.lastModifiedBy = reqUser._id;
         projObj.createdBy = reqUser._id;
         projObj.updatedOn = Date.now();
@@ -290,7 +292,9 @@ function create(requestingUser, organizationID, projects, options) {
         parent: null,
         project: p._id,
         lastModifiedBy: reqUser._id,
-        createdBy: reqUser._id
+        createdBy: reqUser._id,
+        createdOn: Date.now(),
+        updatedOn: Date.now()
       }));
 
         // Create the elements
@@ -299,8 +303,7 @@ function create(requestingUser, organizationID, projects, options) {
     .then(() => {
       if (populate) {
         return resolve(Project.find({ _id: { $in: arrIDs } })
-        .populate('org permissions.read permissions.write permissions.admin '
-              + 'archivedBy lastModifiedBy createdBy'));
+        .populate('org archivedBy lastModifiedBy createdBy'));
       }
 
       return resolve(createdProjects);
@@ -355,8 +358,7 @@ function update(requestingUser, organizationID, projects, options) {
           assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
             + ' is not a boolean.');
           if (options.populated) {
-            populateString = 'org permissions.read permissions.write '
-              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+            populateString = 'org archivedBy lastModifiedBy createdBy';
           }
         }
       }
@@ -397,13 +399,20 @@ function update(requestingUser, organizationID, projects, options) {
     }
 
     // Create searchQuery
-    const searchQuery = { _id: { $in: arrIDs }, 'permissions.admin': reqUser._id };
-    // TODO: Discuss converting permissions to an object, rather than an array
-    // const searchQuery = { _id: { $in: arrIDs }, `permissions.${reqUser._id}`: 'admin' };
+    const searchQuery = { _id: { $in: arrIDs } };
+    searchQuery[`permissions.${reqUser._id}`] = 'admin';
 
     // Find the projects to update
     Project.find(searchQuery)
     .then((_foundProjects) => {
+      // Verify the same number of projects are found as desired
+      if (_foundProjects.length !== arrIDs.length) {
+        const foundIDs = _foundProjects.map(p => p._id);
+        const notFound = arrIDs.filter(p => !foundIDs.includes(p));
+        throw new M.CustomError(
+          `The following projects were not found: [${notFound.toString()}].`, 404, 'warn'
+        );
+      }
       // Set function-wide foundProjects
       foundProjects = _foundProjects;
 
@@ -441,9 +450,50 @@ function update(requestingUser, organizationID, projects, options) {
               throw new M.CustomError(`${key} must be an object`, 400, 'warn');
             }
 
-            // Add and replace parameters of the type 'Mixed'
-            utils.updateAndCombineObjects(proj[key], updateProj[key]);
+            // If the user is updating permissions
+            if (key === 'permissions') {
+              // Get a list of valid project permissions
+              const validPermissions = Project.getPermissionLevels();
 
+              // Loop through each user provided
+              updateProj[key].keys().forEach((user) => {
+                let permValue = updateProj[key][user];
+                // Value must be an string containing highest permissions
+                if (typeof permValue !== 'string') {
+                  throw new M.CustomError(`Permission for ${user} must be a string.`, 400, 'warn');
+                }
+
+                // Lowercase the permission value
+                permValue = permValue.toLowerCase();
+
+                // Value must be valid permission
+                if (!validPermissions.includes(permValue)) {
+                  throw new M.CustomError(
+                    `${permValue} is not a valid permission`, 400, 'warn'
+                  );
+                }
+
+                // Set stored permissions value based on provided permValue
+                switch (permValue) {
+                  case 'read':
+                    proj.permissions[user] = ['read'];
+                    break;
+                  case 'write':
+                    proj.permissions[user] = ['read', 'write'];
+                    break;
+                  case 'admin':
+                    proj.permissions[user] = ['read', 'write', 'admin'];
+                    break;
+                  // Default case, delete user from project
+                  default:
+                    delete proj.permissions[user];
+                }
+              });
+            }
+            else {
+              // Add and replace parameters of the type 'Mixed'
+              utils.updateAndCombineObjects(proj[key], updateProj[key]);
+            }
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             proj.markModified(key);
@@ -492,9 +542,9 @@ function update(requestingUser, organizationID, projects, options) {
  * @param {Array/String} projects - The projects to remove. Can either be an
  * array of project ids or a single project id.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted project objects
+ * @return {Promise} resolve - Array of deleted project ids
  *                   reject - error
  *
  * @example
@@ -514,33 +564,18 @@ function remove(requestingUser, organizationID, projects, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundProjects = [];
 
-    // Initialize valid options
-    let populateString = '';
-
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      assert.ok(reqUser.admin, 'User does not have permissions to delete orgs.');
+      assert.ok(reqUser.admin, 'User does not have permissions to delete projects.');
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
-
-      if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'org permissions.read permissions.write '
-              + 'permissions.admin archivedBy lastModifiedBy createdBy';
-          }
-        }
-      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define the searchQuery and ownedQuery
+    // Define searchQuery and ownedQuery
     const searchQuery = {};
     const ownedQuery = {};
 
@@ -558,11 +593,8 @@ function remove(requestingUser, organizationID, projects, options) {
       throw new M.CustomError('Invalid input for removing projects.', 400, 'warn');
     }
 
-    // TODO: Should we find the org first?
-
     // Find the projects to delete
     Project.find(searchQuery)
-    .populate(populateString)
     .then((_foundProjects) => {
       // Set the function-wide foundProjects and create ownedQuery
       foundProjects = _foundProjects;
@@ -582,7 +614,7 @@ function remove(requestingUser, organizationID, projects, options) {
         M.log.error('Some of the following projects were not '
             + `deleted [${saniProjects.toString()}].`);
       }
-      return resolve(foundProjects);
+      return resolve(foundProjects.map(p => p._id));
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });

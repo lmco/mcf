@@ -134,7 +134,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((project) => {
       // Verify the user has read permissions on the project
-      if (!project.getPermissions(reqUser).read && !reqUser.admin) {
+      if (!project.permissions[reqUser._id]
+        || (!project.permissions[reqUser._id].includes('read') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to get'
             + ` elements on the project ${project._id}.`, 403, 'warn');
       }
@@ -168,7 +169,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       return elementsToFind;
     })
     .then((elementIDs) => {
-      // Define the searchQuery
+      // Define searchQuery
       const searchQuery = { project: utils.createID(orgID, projID), archived: false };
       // If the archived field is true, remove it from the query
       if (archived) {
@@ -180,6 +181,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       }
 
       // Find the elements
+      // TODO: Find in batches
       return Element.find(searchQuery).populate(populateString);
     })
     .then((foundElements) => resolve(foundElements))
@@ -313,7 +315,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((foundProject) => {
       // Verify user has write permissions on the project
-      if (!foundProject.getPermissions(reqUser).write && !reqUser.admin) {
+      if (!foundProject.permissions[reqUser._id]
+        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to create'
             + ` elements on the project ${foundProject._id}.`, 403, 'warn');
       }
@@ -322,6 +325,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       for (let i = 0; i < arrIDs.length / 100000; i++) {
         // Split arrIDs into batches of 100000
         const tmpQuery = { _id: { $in: arrIDs.slice(i * 100000, i * 100000 + 100000) } };
+        // Attempt to find any elements with matching _id
         promises.push(Element.find(tmpQuery, '_id')
         .then((foundElements) => {
           if (foundElements.length > 0) {
@@ -552,7 +556,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Verify user has write permissions on the project
-      if (!foundProject.getPermissions(reqUser).write && !reqUser.admin) {
+      if (!foundProject.permissions[reqUser._id]
+        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to update'
             + ` elements on the project ${foundProject._id}.`, 403, 'warn');
       }
@@ -684,9 +689,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Array/String} elements - The elements to remove. Can either be an
  * array of element ids or a single element id.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted element objects
+ * @return {Promise} resolve - Array of deleted element ids
  *                   reject - error
  *
  * @example
@@ -711,37 +716,23 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     const projID = sani.sanitize(projectID);
     const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
     let foundElements = [];
-
-    // Initialize valid options
-    let populateString = '';
+    let foundIDs = [];
 
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field and is a system admin
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      assert.ok(reqUser.admin, 'User does not have permissions to delete orgs.');
+      assert.ok(reqUser.admin, 'User does not have permissions to delete elements.');
 
       // Ensure orgID and projID are strings
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-
-      if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'project contains parent source target archivedBy '
-              + 'lastModifiedBy createdBy';
-          }
-        }
-      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define the searchQuery
+    // Define searchQuery
     const searchQuery = {};
 
     // Check the type of the elements parameter
@@ -760,7 +751,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Find the elements to delete
-    Element.find(searchQuery).populate(populateString)
+    Element.find(searchQuery)
     .then((_foundElements) => {
       // Set function-wide foundElements
       foundElements = _foundElements;
@@ -768,7 +759,8 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Return when all promises have been completed
       return findElementTree(orgID, projID, 'master', foundElements.map(e => e._id));
     })
-    .then((foundIDs) => {
+    .then((_foundIDs) => {
+      foundIDs = _foundIDs;
       const promises = [];
 
       // Split elements into batches of 100000 or less
@@ -780,11 +772,19 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Return when all deletes have completed
       return Promise.all(promises);
     })
-    // TODO: What should we return here? Do we want to return the elements the user specified in
-    // the function parameter, or do we want to return all the specified elements and their
-    // children. If we return all the children as well, do we return just the ID's or the entire
-    // object?
-    .then(() => resolve(foundElements))
+    .then(() => {
+      const uniqueIDs = [];
+
+      // Parse foundIDs and only return unique ones
+      foundIDs.forEach((id) => {
+        if (!uniqueIDs.includes(id)) {
+          uniqueIDs.push(id);
+        }
+      });
+
+      // Return just the unique ids
+      return resolve(uniqueIDs);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

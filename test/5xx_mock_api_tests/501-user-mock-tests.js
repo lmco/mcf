@@ -386,7 +386,6 @@ function getReq(params, body, method) {
 }
 
 
-
 /**
  * @description Helper function for setting the request header.
  */

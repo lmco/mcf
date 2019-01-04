@@ -113,9 +113,9 @@ function createOrg(done) {
     chai.expect(createdOrg._id).to.equal(orgData.id);
     chai.expect(createdOrg.name).to.equal(orgData.name);
     chai.expect(createdOrg.custom).to.deep.equal(orgData.custom);
-    chai.expect(createdOrg.permissions.admin[0]).to.equal(adminUser.username);
-    chai.expect(createdOrg.permissions.write[0]).to.equal(adminUser.username);
-    chai.expect(createdOrg.permissions.read[0]).to.equal(adminUser.username);
+    chai.expect(createdOrg.permissions[adminUser._id]).to.include('read');
+    chai.expect(createdOrg.permissions[adminUser._id]).to.include('write');
+    chai.expect(createdOrg.permissions[adminUser._id]).to.include('admin');
 
     // Verify additional properties
     chai.expect(createdOrg.createdBy).to.equal(adminUser.username);
@@ -161,9 +161,9 @@ function createOrgs(done) {
       chai.expect(createdOrg._id).to.equal(orgDataObject.id);
       chai.expect(createdOrg.name).to.equal(orgDataObject.name);
       chai.expect(createdOrg.custom).to.deep.equal(orgDataObject.custom);
-      chai.expect(createdOrg.permissions.admin[0]).to.equal(adminUser.username);
-      chai.expect(createdOrg.permissions.write[0]).to.equal(adminUser.username);
-      chai.expect(createdOrg.permissions.read[0]).to.equal(adminUser.username);
+      chai.expect(createdOrg.permissions[adminUser._id]).to.include('read');
+      chai.expect(createdOrg.permissions[adminUser._id]).to.include('write');
+      chai.expect(createdOrg.permissions[adminUser._id]).to.include('admin');
 
       // Verify additional properties
       chai.expect(createdOrg.createdBy).to.equal(adminUser.username);
@@ -201,9 +201,9 @@ function findOrg(done) {
     chai.expect(foundOrg._id).to.equal(orgData.id);
     chai.expect(foundOrg.name).to.equal(orgData.name);
     chai.expect(foundOrg.custom).to.deep.equal(orgData.custom);
-    chai.expect(foundOrg.permissions.admin[0]).to.equal(adminUser.username);
-    chai.expect(foundOrg.permissions.write[0]).to.equal(adminUser.username);
-    chai.expect(foundOrg.permissions.read[0]).to.equal(adminUser.username);
+    chai.expect(foundOrg.permissions[adminUser._id]).to.include('read');
+    chai.expect(foundOrg.permissions[adminUser._id]).to.include('write');
+    chai.expect(foundOrg.permissions[adminUser._id]).to.include('admin');
 
     // Verify additional properties
     chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
@@ -252,9 +252,9 @@ function findOrgs(done) {
       chai.expect(foundOrg._id).to.equal(orgDataObject.id);
       chai.expect(foundOrg.name).to.equal(orgDataObject.name);
       chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom);
-      chai.expect(foundOrg.permissions.admin[0]).to.equal(adminUser.username);
-      chai.expect(foundOrg.permissions.write[0]).to.equal(adminUser.username);
-      chai.expect(foundOrg.permissions.read[0]).to.equal(adminUser.username);
+      chai.expect(foundOrg.permissions[adminUser._id]).to.include('read');
+      chai.expect(foundOrg.permissions[adminUser._id]).to.include('write');
+      chai.expect(foundOrg.permissions[adminUser._id]).to.include('admin');
 
       // Verify additional properties
       chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
@@ -310,9 +310,9 @@ function findAllOrgs(done) {
         chai.expect(foundOrg._id).to.equal(orgDataObject.id);
         chai.expect(foundOrg.name).to.equal(orgDataObject.name);
         chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom);
-        chai.expect(foundOrg.permissions.admin[0]).to.equal(adminUser.username);
-        chai.expect(foundOrg.permissions.write[0]).to.equal(adminUser.username);
-        chai.expect(foundOrg.permissions.read[0]).to.equal(adminUser.username);
+        chai.expect(foundOrg.permissions[adminUser._id]).to.include('read');
+        chai.expect(foundOrg.permissions[adminUser._id]).to.include('write');
+        chai.expect(foundOrg.permissions[adminUser._id]).to.include('admin');
 
         // Verify additional properties
         chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
@@ -363,9 +363,9 @@ function updateOrg(done) {
     chai.expect(updatedOrg._id).to.equal(orgData.id);
     chai.expect(updatedOrg.name).to.equal(`${orgData.name}_edit`);
     chai.expect(updatedOrg.custom).to.deep.equal(orgData.custom);
-    chai.expect(updatedOrg.permissions.admin[0]).to.equal(adminUser.username);
-    chai.expect(updatedOrg.permissions.write[0]).to.equal(adminUser.username);
-    chai.expect(updatedOrg.permissions.read[0]).to.equal(adminUser.username);
+    chai.expect(updatedOrg.permissions[adminUser._id]).to.include('read');
+    chai.expect(updatedOrg.permissions[adminUser._id]).to.include('write');
+    chai.expect(updatedOrg.permissions[adminUser._id]).to.include('admin');
 
     // Verify additional properties
     chai.expect(updatedOrg.createdBy).to.equal(adminUser.username);
@@ -417,9 +417,9 @@ function updateOrgs(done) {
       chai.expect(updatedOrg._id).to.equal(orgDataObject.id);
       chai.expect(updatedOrg.name).to.equal(`${orgDataObject.name}_edit`);
       chai.expect(updatedOrg.custom).to.deep.equal(orgDataObject.custom);
-      chai.expect(updatedOrg.permissions.admin[0]).to.equal(adminUser.username);
-      chai.expect(updatedOrg.permissions.write[0]).to.equal(adminUser.username);
-      chai.expect(updatedOrg.permissions.read[0]).to.equal(adminUser.username);
+      chai.expect(updatedOrg.permissions[adminUser._id]).to.include('read');
+      chai.expect(updatedOrg.permissions[adminUser._id]).to.include('write');
+      chai.expect(updatedOrg.permissions[adminUser._id]).to.include('admin');
 
       // Verify additional properties
       chai.expect(updatedOrg.createdBy).to.equal(adminUser.username);
@@ -450,12 +450,10 @@ function deleteOrg(done) {
   .then((deletedOrgs) => {
     // Expect deletedOrgs array to contain 1 org
     chai.expect(deletedOrgs.length).to.equal(1);
-    const deletedOrg = deletedOrgs[0];
+    const deletedOrgID = deletedOrgs[0];
 
     // Verify correct org deleted
-    chai.expect(deletedOrg.id).to.equal(orgData.id);
-    chai.expect(deletedOrg._id).to.equal(orgData.id);
-    chai.expect(deletedOrg.name).to.equal(`${orgData.name}_edit`);
+    chai.expect(deletedOrgID).to.equal(orgData.id);
 
     // Attempt to find the deleted org
     return OrgController.find(adminUser, orgData.id, { archived: true });
@@ -492,15 +490,10 @@ function deleteOrgs(done) {
     // Expect deletedOrgs not to be empty
     chai.expect(deletedOrgs.length).to.equal(orgDataObjects.length);
 
-    // Convert deletedOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, deletedOrgs);
     // Loop through each org data object
     orgDataObjects.forEach((orgDataObject) => {
-      const deletedOrg = jmi2Orgs[orgDataObject.id];
       // Verify correct org deleted
-      chai.expect(deletedOrg.id).to.equal(orgDataObject.id);
-      chai.expect(deletedOrg._id).to.equal(orgDataObject.id);
-      chai.expect(deletedOrg.name).to.equal(`${orgDataObject.name}_edit`);
+      chai.expect(deletedOrgs).to.include(orgDataObject.id);
     });
 
     // Attempt to find the deleted orgs

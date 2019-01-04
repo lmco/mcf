@@ -575,12 +575,8 @@ function deleteElement(done) {
   .then((deletedElements) => {
     // Expect deletedElements array to contain 1 element
     chai.expect(deletedElements.length).to.equal(1);
-    const deletedElement = deletedElements[0];
-
     // Verify correct element deleted
-    chai.expect(deletedElement.id).to.equal(utils.createID(org.id, projID, elemData.id));
-    chai.expect(deletedElement._id).to.equal(utils.createID(org.id, projID, elemData.id));
-    chai.expect(deletedElement.name).to.equal(`${elemData.name}_edit`);
+    chai.expect(deletedElements).to.include(utils.createID(org.id, projID, elemData.id));
 
     // Attempt to find the deleted element
     return ElementController.find(adminUser, org.id, projID, 'master',
@@ -621,17 +617,11 @@ function deleteElements(done) {
     // Expect deletedElements not to be empty
     chai.expect(deletedElements.length).to.equal(elemDataObjects.length);
 
-    // Convert deletedElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, deletedElements);
     // Loop through each element data object
     elemDataObjects.forEach((elemDataObject) => {
       const elementID = utils.createID(org.id, projID, elemDataObject.id);
-      const deletedElement = jmi2Elements[elementID];
-
       // Verify correct element deleted
-      chai.expect(deletedElement.id).to.equal(utils.createID(org.id, projID, elemDataObject.id));
-      chai.expect(deletedElement._id).to.equal(utils.createID(org.id, projID, elemDataObject.id));
-      chai.expect(deletedElement.name).to.equal(`${elemDataObject.name}_edit`);
+      chai.expect(deletedElements).to.include(elementID);
     });
 
     // Attempt to find the deleted elements

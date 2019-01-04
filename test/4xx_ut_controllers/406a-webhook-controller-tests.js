@@ -529,12 +529,8 @@ function deleteWebhook(done) {
   .then((deletedWebhooks) => {
     // Expect deletedWebhooks array to contain 1 webhook
     chai.expect(deletedWebhooks.length).to.equal(1);
-    const deletedWebhook = deletedWebhooks[0];
-
     // Verify correct webhook deleted
-    chai.expect(deletedWebhook.id).to.equal(utils.createID(org.id, projID, webhookData.id));
-    chai.expect(deletedWebhook._id).to.equal(utils.createID(org.id, projID, webhookData.id));
-    chai.expect(deletedWebhook.name).to.equal(`${webhookData.name}_edit`);
+    chai.expect(deletedWebhooks).to.include(utils.createID(org.id, projID, webhookData.id));
 
     // Attempt to find the deleted webhook
     return WebhookController.find(adminUser, org.id, projID, webhookData.id, { archived: true });
@@ -570,17 +566,11 @@ function deleteWebhooks(done) {
     // Expect deletedWebhooks not to be empty
     chai.expect(deletedWebhooks.length).to.equal(webhookDataObjects.length);
 
-    // Convert deletedWebhooks to JMI type 2 for easier lookup
-    const jmi2Webhooks = utils.convertJMI(1, 2, deletedWebhooks);
     // Loop through each webhook data object
     webhookDataObjects.forEach((webhookDataObject) => {
       const webhookID = utils.createID(org.id, projID, webhookDataObject.id);
-      const deletedWebhook = jmi2Webhooks[webhookID];
-
       // Verify correct webhook deleted
-      chai.expect(deletedWebhook.id).to.equal(webhookID);
-      chai.expect(deletedWebhook._id).to.equal(webhookID);
-      chai.expect(deletedWebhook.name).to.equal(`${webhookDataObject.name}_edit`);
+      chai.expect(deletedWebhooks).to.include(webhookID);
     });
 
     // Attempt to find the deleted webhooks

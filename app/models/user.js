@@ -37,7 +37,7 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description Defines the User Schema
  *
- * @property {String} username - The Users unique name.
+ * @property {String} _id - The Users unique name.
  * @property {String} password - The Users password.
  * @property {String} email - The Users email.
  * @property {String} fname - The Users first name.
@@ -46,21 +46,9 @@ const extensions = M.require('models.plugin.extensions');
  * @property {Boolean} admin - Indicates if the User is a global admin.
  * @property {String} provider - Defines the authentication provider for the
  * User.
- * @property {Date} createdOn - The date which a User was created.
- * @property {Date} updatedOn - The date which an User was updated.
- * @property {Date} archivedOn - The date the user was archived or null
- * @property {Boolean} archived - Indicates if a user has been archived.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
  * @property {virtual} name - The users full name.
- * @property {virtual} orgs.read - A list of Orgs the User has read access to.
- * @property {virtual} orgs.write - A list of Orgs the User has write access to.
- * @property {virtual} orgs.admin - A list of Orgs the User has admin access to.
- * @property {virtual} project.read - A list of Projects the User has read
- * access to.
- * @property {virtual} project.write - A list of Projects the User has write
- * access to.
- * @property {virtual} project.admin - A list of Projects the User has admin
- * access to.
+ * @property {virtual} username - The users _id, with friendly title.
  *
  */
 const UserSchema = new mongoose.Schema({
@@ -115,42 +103,6 @@ const UserSchema = new mongoose.Schema({
     default: {}
   }
 });
-UserSchema.virtual('orgs.read', {
-  ref: 'Organization',
-  localField: '_id',
-  foreignField: 'permissions.read',
-  justOne: false
-});
-UserSchema.virtual('orgs.write', {
-  ref: 'Organization',
-  localField: '_id',
-  foreignField: 'permissions.write',
-  justOne: false
-});
-UserSchema.virtual('orgs.admin', {
-  ref: 'Organization',
-  localField: '_id',
-  foreignField: 'permissions.admin',
-  justOne: false
-});
-UserSchema.virtual('proj.read', {
-  ref: 'Project',
-  localField: '_id',
-  foreignField: 'permissions.read',
-  justOne: false
-});
-UserSchema.virtual('proj.write', {
-  ref: 'Project',
-  localField: '_id',
-  foreignField: 'permissions.write',
-  justOne: false
-});
-UserSchema.virtual('proj.admin', {
-  ref: 'Project',
-  localField: '_id',
-  foreignField: 'permissions.admin',
-  justOne: false
-});
 UserSchema.virtual('name')
 .get(function() {
   return `${this.fname} ${this.lname}`;
@@ -165,26 +117,6 @@ UserSchema.virtual('username')
 UserSchema.plugin(extensions);
 
 /* ---------------------------( User Middleware )---------------------------- */
-/**
- * @description Run our pre-defined setters on find.
- * @memberOf UserSchema
- */
-UserSchema.pre('find', function(next) {
-  // Populate virtual fields prior to find
-  this.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin');
-  next();
-});
-
-/**
- * @description Run our pre-defined setters on findOne.
- * @memberOf UserSchema
- */
-UserSchema.pre('findOne', function(next) {
-  // Populate virtual fields prior to findOne
-  this.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin');
-  next();
-});
-
 /**
  * @description Run our pre-defined setters on save.
  * @memberOf UserSchema

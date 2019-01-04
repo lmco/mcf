@@ -69,10 +69,10 @@ const utils = M.require('lib.utils');
 function find(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = (orgs !== undefined)
       ? sani.sanitize(JSON.parse(JSON.stringify(orgs)))
       : undefined;
-    const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
     // Set options if no orgs were provided, but options were
     if (typeof orgs === 'object' && orgs !== null && !Array.isArray(orgs)) {
@@ -102,8 +102,7 @@ function find(requestingUser, orgs, options) {
           assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
             + ' is not a boolean.');
           if (options.populated) {
-            populateString = 'projects permissions.read permissions.write '
-              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+            populateString = 'projects archivedBy lastModifiedBy createdBy';
           }
         }
       }
@@ -112,8 +111,9 @@ function find(requestingUser, orgs, options) {
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define the searchQuery
-    const searchQuery = { 'permissions.read': reqUser._id, archived: false };
+    // Define searchQuery
+    const searchQuery = { archived: false };
+    searchQuery[`permissions.${reqUser._id}`] = 'read';
     // If the archived field is true, remove it from the query
     if (archived) {
       delete searchQuery.archived;
@@ -165,8 +165,8 @@ function find(requestingUser, orgs, options) {
 function create(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Sanitize input parameters
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
 
     // Initialize valid options
     let populate = false;
@@ -218,6 +218,7 @@ function create(requestingUser, orgs, options) {
         assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
         arrIDs.push(org.id);
+        // Set the _id equal to the id
         org._id = org.id;
         index++;
       });
@@ -246,25 +247,20 @@ function create(requestingUser, orgs, options) {
       const orgObjects = orgsToCreate.map((o) => {
         const orgObj = new Organization(o);
         // Set permissions
-        orgObj.permissions = {
-          admin: [reqUser._id],
-          write: [reqUser._id],
-          read: [reqUser._id]
-        };
+        orgObj.permissions[reqUser._id] = ['read', 'write', 'admin'];
         orgObj.lastModifiedBy = reqUser._id;
         orgObj.createdBy = reqUser._id;
         orgObj.updatedOn = Date.now();
         return orgObj;
       });
 
-        // Create the organizations
+      // Create the organizations
       return Organization.insertMany(orgObjects);
     })
     .then((createdOrgs) => {
       if (populate) {
         return resolve(Organization.find({ _id: { $in: arrIDs } })
-        .populate('projects permissions.read permissions.write '
-              + 'permissions.admin archivedBy lastModifiedBy createdBy'));
+        .populate('projects archivedBy lastModifiedBy createdBy'));
       }
 
       return resolve(createdOrgs);
@@ -316,8 +312,7 @@ function update(requestingUser, orgs, options) {
           assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
             + ' is not a boolean.');
           if (options.populated) {
-            populateString = 'projects permissions.read permissions.write '
-              + 'permissions.admin archivedBy lastModifiedBy createdBy';
+            populateString = 'projects archivedBy lastModifiedBy createdBy';
           }
         }
       }
@@ -348,6 +343,7 @@ function update(requestingUser, orgs, options) {
         assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
         arrIDs.push(org.id);
+        // Set the _id equal to the id
         org._id = org.id;
         index++;
       });
@@ -357,13 +353,20 @@ function update(requestingUser, orgs, options) {
     }
 
     // Create searchQuery
-    const searchQuery = { _id: { $in: arrIDs }, 'permissions.admin': reqUser._id };
-    // TODO: Discuss converting permissions to an object, rather than an array
-    // const searchQuery = { _id: { $in: arrIDs }, `permissions.${reqUser._id}`: 'admin' };
+    const searchQuery = { _id: { $in: arrIDs } };
+    searchQuery[`permissions.${reqUser._id}`] = 'admin';
 
     // Find the orgs to update
     Organization.find(searchQuery)
     .then((_foundOrgs) => {
+      // Verify the same number of orgs are found as desired
+      if (_foundOrgs.length !== arrIDs.length) {
+        const foundIDs = _foundOrgs.map(o => o._id);
+        const notFound = arrIDs.filter(o => !foundIDs.includes(o));
+        throw new M.CustomError(
+          `The following orgs were not found: [${notFound.toString()}].`, 404, 'warn'
+        );
+      }
       // Set function-wide foundOrgs
       foundOrgs = _foundOrgs;
 
@@ -407,9 +410,50 @@ function update(requestingUser, orgs, options) {
               throw new M.CustomError(`${key} must be an object`, 400, 'warn');
             }
 
-            // Add and replace parameters of the type 'Mixed'
-            utils.updateAndCombineObjects(org[key], updateOrg[key]);
+            // If the user is updating permissions
+            if (key === 'permissions') {
+              // Get a list of valid org permissions
+              const validPermissions = Organization.getPermissionLevels();
 
+              // Loop through each user provided
+              updateOrg[key].keys().forEach((user) => {
+                let permValue = updateOrg[key][user];
+                // Value must be an string containing highest permissions
+                if (typeof permValue !== 'string') {
+                  throw new M.CustomError(`Permission for ${user} must be a string.`, 400, 'warn');
+                }
+
+                // Lowercase the permission value
+                permValue = permValue.toLowerCase();
+
+                // Value must be valid permission
+                if (!validPermissions.includes(permValue)) {
+                  throw new M.CustomError(
+                    `${permValue} is not a valid permission`, 400, 'warn'
+                  );
+                }
+
+                // Set stored permissions value based on provided permValue
+                switch (permValue) {
+                  case 'read':
+                    org.permissions[user] = ['read'];
+                    break;
+                  case 'write':
+                    org.permissions[user] = ['read', 'write'];
+                    break;
+                  case 'admin':
+                    org.permissions[user] = ['read', 'write', 'admin'];
+                    break;
+                  // Default case, delete user from org
+                  default:
+                    delete org.permissions[user];
+                }
+              });
+            }
+            else {
+              // Add and replace parameters of the type 'Mixed'
+              utils.updateAndCombineObjects(org[key], updateOrg[key]);
+            }
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             org.markModified(key);
@@ -457,9 +501,9 @@ function update(requestingUser, orgs, options) {
  * @param {Array/String} orgs - The organizations to remove. Can either be an
  * array of org ids or a single org id.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted organization objects
+ * @return {Promise} resolve - Array of deleted organization ids
  *                   reject - error
  *
  * @example
@@ -478,32 +522,18 @@ function remove(requestingUser, orgs, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundOrgs = [];
 
-    // Initialize valid options
-    let populateString = '';
 
     // Ensure parameters are valid
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
       assert.ok(reqUser.admin, 'User does not have permissions to delete orgs.');
-
-      if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'projects permissions.read permissions.write '
-              + 'permissions.admin archivedBy lastModifiedBy createdBy';
-          }
-        }
-      }
     }
     catch (msg) {
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define the searchQuery and ownedQuery
+    // Define searchQuery and ownedQuery
     const searchQuery = {};
     const ownedQuery = {};
 
@@ -523,7 +553,6 @@ function remove(requestingUser, orgs, options) {
 
     // Find the orgs to delete
     Organization.find(searchQuery)
-    .populate(populateString)
     .then((_foundOrgs) => {
       // Set function-wde foundOrgs and create ownedQuery
       foundOrgs = _foundOrgs;
@@ -554,7 +583,7 @@ function remove(requestingUser, orgs, options) {
       if (retQuery.n !== foundOrgs.length) {
         M.log.error(`Some of the following orgs were not deleted [${saniOrgs.toString()}].`);
       }
-      return resolve(foundOrgs);
+      return resolve(foundOrgs.map(o => o._id));
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
