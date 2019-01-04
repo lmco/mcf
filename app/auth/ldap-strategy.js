@@ -315,7 +315,7 @@ function ldapSync(ldapUserObj) {
   // Define and return promise
   return new Promise((resolve, reject) => {
     // Search for user in database
-    UserController.findUser({ admin: true }, ldapUserObj[ldapConfig.attributes.username])
+    UserController.find({ admin: true }, ldapUserObj[ldapConfig.attributes.username])
     .then(foundUser => {
       // User exists, update database with LDAP information
       const userSave = foundUser;

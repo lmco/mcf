@@ -88,7 +88,7 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
     let foundProj = null;
 
     // Error Check: make sure the project exists
-    ProjController.findProject(reqUser, orgID, projID)
+    ProjController.find(reqUser, orgID, projID)
     .then((proj) => {
       // Error check: make sure user has write permission on project
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {

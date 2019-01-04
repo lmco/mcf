@@ -35,7 +35,6 @@ const flash = require('express-flash');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
-const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
 
@@ -128,7 +127,7 @@ function createDefaultOrganization() {
     let userIDs = null;
 
     // Find all users
-    UserController.findUsers({ admin: true })
+    User.find({})
     .then(users => {
       // Set userIDs to the _id of the users array
       userIDs = users.map(u => u._id);
@@ -140,6 +139,7 @@ function createDefaultOrganization() {
       if (org !== null) {
         // Default organization exists, prune user permissions to only include
         // active users.
+        // TODO: Remove users based on new format of permissions
         org.permissions.read = userIDs;
         org.permissions.write = userIDs;
         return org.save();
@@ -150,12 +150,14 @@ function createDefaultOrganization() {
       // to permissions list
       const defaultOrg = new Organization({
         _id: M.config.server.defaultOrganizationId,
-        name: M.config.server.defaultOrganizationName,
-        permissions: {
-          read: userIDs,
-          write: userIDs
-        }
+        name: M.config.server.defaultOrganizationName
       });
+
+      // Add each existing user to default org
+      userIDs.forEach((user) => {
+        defaultOrg.permissions[user] = ['read', 'write'];
+      });
+
       // Save new default organization
       return defaultOrg.save();
     })
