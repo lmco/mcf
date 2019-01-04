@@ -51,14 +51,14 @@ const utils = M.require('lib.utils');
  * array of org ids, a single org id, or not provided, which defaults to every
  * org being found.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported options are the booleans 'archived' and
- * 'populated'
+ * options. Currently the only supported options are the boolean 'archived' and
+ * the string 'populate'.
  *
  * @return {Promise} resolve - Array of found organization objects
  *                   reject - error
  *
  * @example
- * find({User}, ['org1', 'org2'], { populated: true })
+ * find({User}, ['org1', 'org2'], { populate: 'createdBy' })
  * .then(function(orgs) {
  *   // Do something with the found orgs
  * })
@@ -97,13 +97,11 @@ function find(requestingUser, orgs, options) {
           archived = options.archived;
         }
 
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'projects archivedBy lastModifiedBy createdBy';
-          }
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
         }
       }
     }
@@ -148,13 +146,13 @@ function find(requestingUser, orgs, options) {
  * @param {Array/Object} orgs - Either an array of objects containing org data
  * or a single object containing org data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently the only supported option is the string 'populate'.
  *
  * @return {Promise} resolve - Array of created organization objects
  *                   reject - error
  *
  * @example
- * create({User}, [{Org1}, {Org2}, ...], { populated: true })
+ * create({User}, [{Org1}, {Org2}, ...], { populate: 'createdBy' })
  * .then(function(orgs) {
  *   // Do something with the newly created orgs
  * })
@@ -169,6 +167,7 @@ function create(requestingUser, orgs, options) {
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
 
     // Initialize valid options
+    let populateString = '';
     let populate = false;
 
     // Ensure parameters are valid
@@ -178,11 +177,12 @@ function create(requestingUser, orgs, options) {
       assert.ok(reqUser.admin, 'User does not have permissions to create orgs.');
 
       if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          populate = options.populated;
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
+          populate = true;
         }
       }
     }
@@ -260,7 +260,7 @@ function create(requestingUser, orgs, options) {
     .then((createdOrgs) => {
       if (populate) {
         return resolve(Organization.find({ _id: { $in: arrIDs } })
-        .populate('projects archivedBy lastModifiedBy createdBy'));
+        .populate(populateString));
       }
 
       return resolve(createdOrgs);
@@ -276,13 +276,13 @@ function create(requestingUser, orgs, options) {
  * @param {Array/Object} orgs - Either an array of objects containing updates to
  * organizations, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently the only supported option is the string 'populate'.
  *
  * @return {Promise} resolve - Array of updated organization objects
  *                   reject - error
  *
  * @example
- * update({User}, [{Updated Org 1}, {Updated Org 2}...], { populated: true })
+ * update({User}, [{Updated Org 1}, {Updated Org 2}...], { populate: 'createdBy' })
  * .then(function(orgs) {
  *   // Do something with the newly updated orgs
  * })
@@ -307,13 +307,11 @@ function update(requestingUser, orgs, options) {
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
 
       if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'projects archivedBy lastModifiedBy createdBy';
-          }
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
         }
       }
     }
@@ -507,7 +505,7 @@ function update(requestingUser, orgs, options) {
  *                   reject - error
  *
  * @example
- * remove({User}, ['org1', 'org2'], { populated: true })
+ * remove({User}, ['org1', 'org2'])
  * .then(function(orgs) {
  *   // Do something with the deleted orgs
  * })

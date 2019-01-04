@@ -51,14 +51,14 @@ const utils = M.require('lib.utils');
  * of element ids, a single element id, or not provided, which defaults to every
  * element in a project being found.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported options are the booleans 'archived',
- * 'populated', and subtree.
+ * options. Currently the only supported options are the booleans 'archived'
+ * and 'subtree' and the string 'populate'
  *
  * @return {Promise} resolve - Array of found element objects
  *                   reject - error
  *
  * @example
- * find({User}, 'orgID', 'projID', 'branchID', ['elem1', 'elem2'], { populated: true })
+ * find({User}, 'orgID', 'projID', 'branchID', ['elem1', 'elem2'], { populate: 'parent' })
  * .then(function(elements) {
  *   // Do something with the found elements
  * })
@@ -108,14 +108,11 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           archived = options.archived;
         }
 
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'project contains parent source target archivedBy '
-              + 'lastModifiedBy createdBy';
-          }
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
         }
 
         // If the option 'subtree' is supplied ensure it's a boolean
@@ -199,13 +196,13 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {Array/Object} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently the only supported option is the string 'populate'.
  *
  * @return {Promise} resolve - Array of created element objects
  *                   reject - error
  *
  * @example
- * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populated: true })
+ * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: 'parent' })
  * .then(function(elements) {
  *   // Do something with the newly created elements
  * })
@@ -229,6 +226,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     const remainingElements = [];
 
     // Initialize valid options
+    let populateString = '';
     let populate = false;
 
     // Ensure parameters are valid
@@ -238,11 +236,12 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
 
       if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          populate = options.populated;
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
+          populate = true;
         }
       }
     }
@@ -468,8 +467,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     .then((createdElements) => {
       if (populate) {
         return resolve(Element.find(searchQuery)
-        .populate('project contains parent source target archivedBy '
-              + 'lastModifiedBy createdBy'));
+        .populate(populateString));
       }
 
       return resolve(createdElements);
@@ -488,13 +486,13 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Array/Object} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently the only supported option is the string 'populate'.
  *
  * @return {Promise} resolve - Array of updated element objects
  *                   reject - error
  *
  * @example
- * update({User}, 'orgID', 'projID', branch', [{Elem1}, {Elem22}...], { populated: true })
+ * update({User}, 'orgID', 'projID', branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
  * .then(function(elements) {
  *   // Do something with the newly updated elements
  * })
@@ -531,14 +529,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
 
       if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'project contains parent source target archivedBy '
-              + 'lastModifiedBy createdBy';
-          }
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populated === 'string', 'The option \'populated\''
+            + ' is not a string.');
+          populateString = options.populate;
         }
       }
     }
@@ -695,7 +690,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  *                   reject - error
  *
  * @example
- * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'], { populated: true })
+ * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'])
  * .then(function(elements) {
  *   // Do something with the deleted elements
  * })

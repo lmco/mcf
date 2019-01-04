@@ -50,14 +50,14 @@ const utils = M.require('lib.utils');
  * of webhook ids, a single webhook id, or not provided, which defaults to every
  * webhook being found.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported options are the booleans 'archived' and
- * 'populated'
+ * options. Currently the only supported options are the boolean 'archived' and
+ * the string 'populate'.
  *
  * @return {Promise} resolve - Array of found webhook objects
  *                   reject - error
  *
  * @example
- * find({User}, 'orgID', 'projID', ['web1', 'web2'], { populated: true })
+ * find({User}, 'orgID', 'projID', ['web1', 'web2'], { populate: 'project' })
  * .then(function(webhooks) {
  *   // Do something with the found webhooks
  * })
@@ -100,14 +100,12 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
             + ' is not a boolean.');
           archived = options.archived;
         }
-        // TODO: Handle the ability to only return specific populated fields
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'project createdBy lastModifiedBy archivedBy';
-          }
+
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
         }
       }
     }
@@ -170,13 +168,13 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Array/Object} webhooks - Either an array of objects containing
  * webhook data or a single object containing webhook data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently the only supported option is the string 'populate'.
  *
  * @return {Promise} resolve - Array of created webhook objects
  *                   reject - error
  *
  * @example
- * create({User}, 'orgID', 'projID', [{Web1}, {Web2}, ...], { populated: true })
+ * create({User}, 'orgID', 'projID', [{Web1}, {Web2}, ...], { populate: 'project })
  * .then(function(webhooks) {
  *   // Do something with the newly created webhooks
  * })
@@ -194,6 +192,7 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
     let webhooksToCreate = [];
 
     // Initialize valid options
+    let populateString = '';
     let populate = false;
 
     // Ensure parameters are valid
@@ -203,11 +202,12 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
 
       if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          populate = options.populated;
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
+          populate = true;
         }
       }
     }
@@ -308,7 +308,7 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
     .then((createdWebhooks) => {
       if (populate) {
         return Webhook.Webhook.find(searchQuery)
-        .populate('project createdBy lastModifiedBy archivedBy');
+        .populate(populateString);
       }
 
       return resolve(createdWebhooks);
@@ -326,13 +326,13 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Array/Object} webhooks - Either an array of objects containing
  * updates to webhooks, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently the only supported option is the string 'populate'.
  *
  * @return {Promise} resolve - Array of updated webhook objects
  *                   reject - error
  *
  * @example
- * update({User}, 'orgID', 'projID', [{Updated Web 1}, {Updated Web 2}...], { populated: true })
+ * update({User}, 'orgID', 'projID', [{Updated Web 1}, {Updated Web 2}...], { populate: 'project' })
  * .then(function(webhooks) {
  *   // Do something with the newly updated webhooks
  * })
@@ -364,13 +364,11 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
 
       if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'project createdBy lastModifiedBy archivedBy';
-          }
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
         }
       }
     }
@@ -525,7 +523,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
  *                   reject - error
  *
  * @example
- * remove({User}, 'orgID', 'projID', ['web1', 'web2'], { populated: true })
+ * remove({User}, 'orgID', 'projID', ['web1', 'web2'])
  * .then(function(webhooks) {
  *   // Do something with the deleted webhooks
  * })

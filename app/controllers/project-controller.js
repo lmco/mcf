@@ -53,14 +53,14 @@ const utils = M.require('lib.utils');
  * of project ids, a single project id, or not provided, which defaults to every
  * project being found.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported options are the booleans 'archived' and
- * 'populated'
+ * options. Currently the only supported options are the boolean 'archived' and
+ * the string 'populate'
  *
  * @return {Promise} resolve - Array of found project objects
  *                   reject - error
  *
  * @example
- * find({User}, 'orgID', ['proj1', 'proj2'], { populated: true })
+ * find({User}, 'orgID', ['proj1', 'proj2'], { populate: 'org' })
  * .then(function(projects) {
  *   // Do something with the found projects
  * })
@@ -102,13 +102,11 @@ function find(requestingUser, organizationID, projects, options) {
           archived = options.archived;
         }
 
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'org archivedBy lastModifiedBy createdBy';
-          }
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
         }
       }
     }
@@ -154,13 +152,13 @@ function find(requestingUser, organizationID, projects, options) {
  * @param {Array/Object} projects - Either an array of objects containing
  * project data or a single object containing project data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently the only supported option is the string 'populate'.
  *
  * @return {Promise} resolve - Array of created project objects
  *                   reject - error
  *
  * @example
- * create({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populated: true })
+ * create({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
  * .then(function(projects) {
  *   // Do something with the newly created projects
  * })
@@ -177,6 +175,7 @@ function create(requestingUser, organizationID, projects, options) {
     let createdProjects = [];
 
     // Initialize valid options
+    let populateString = '';
     let populate = false;
 
     // Ensure parameters are valid
@@ -185,11 +184,12 @@ function create(requestingUser, organizationID, projects, options) {
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
 
       if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          populate = options.populated;
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
+          populate = true;
         }
       }
     }
@@ -303,7 +303,7 @@ function create(requestingUser, organizationID, projects, options) {
     .then(() => {
       if (populate) {
         return resolve(Project.find({ _id: { $in: arrIDs } })
-        .populate('org archivedBy lastModifiedBy createdBy'));
+        .populate(populateString));
       }
 
       return resolve(createdProjects);
@@ -320,13 +320,13 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {Array/Object} projects - Either an array of objects containing
  * updates to projects, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the boolean 'populated'.
+ * options. Currently the only supported option is the string 'populate'.
  *
  * @return {Promise} resolve - Array of updated project objects
  *                   reject - error
  *
  * @example
- * update({User}, 'orgID', [{Updated Proj 1}, {Updated Proj 2}...], { populated: true })
+ * update({User}, 'orgID', [{Updated Proj 1}, {Updated Proj 2}...], { populate: 'org' })
  * .then(function(projects) {
  *   // Do something with the newly updated projects
  * })
@@ -353,13 +353,11 @@ function update(requestingUser, organizationID, projects, options) {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
 
       if (options) {
-        // If the option 'populated' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('populated')) {
-          assert.ok(typeof options.populated === 'boolean', 'The option \'populated\''
-            + ' is not a boolean.');
-          if (options.populated) {
-            populateString = 'org archivedBy lastModifiedBy createdBy';
-          }
+        // If the option 'populate' is supplied, ensure it's a string
+        if (options.hasOwnProperty('populate')) {
+          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
+            + ' is not a string.');
+          populateString = options.populate;
         }
       }
     }
@@ -548,7 +546,7 @@ function update(requestingUser, organizationID, projects, options) {
  *                   reject - error
  *
  * @example
- * remove({User}, 'orgID', ['proj1', 'proj2'], { populated: true })
+ * remove({User}, 'orgID', ['proj1', 'proj2'])
  * .then(function(projects) {
  *   // Do something with the deleted projects
  * })
