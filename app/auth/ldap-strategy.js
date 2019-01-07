@@ -322,7 +322,7 @@ function ldapSync(ldapUserObj) {
       userSave.fname = ldapUserObj[ldapConfig.attributes.firstName];
       userSave.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
       userSave.lname = ldapUserObj[ldapConfig.attributes.lastName];
-      userSave.email = ldapUserObj[ldapConfig.attributes.eMail];
+      userSave.email = ldapUserObj[ldapConfig.attributes.email];
 
       // Save updated user to database
       foundUser.save()
@@ -344,7 +344,7 @@ function ldapSync(ldapUserObj) {
         fname: ldapUserObj[ldapConfig.attributes.firstName],
         preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
         lname: ldapUserObj[ldapConfig.attributes.lastName],
-        email: ldapUserObj[ldapConfig.attributes.eMail],
+        email: ldapUserObj[ldapConfig.attributes.email],
         provider: 'ldap'
       });
 
