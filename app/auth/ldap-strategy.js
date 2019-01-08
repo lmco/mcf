@@ -34,8 +34,8 @@ const ldap = require('ldapjs');
 
 // MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
+const Organization = M.require('models.organization');
 const User = M.require('models.user');
-const UserController = M.require('controllers.user-controller');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
@@ -151,13 +151,13 @@ function ldapConnect() {
     // Now if it's not an array, fail
     if (!Array.isArray(ldapCA)) {
       M.log.error('Failed to load LDAP CA certificates (invalid type)');
-      return reject(new M.CustomError('An error occured.', 500));
+      return reject(new M.CustomError('An error occurred.', 500));
     }
 
     // If any items in the array are not strings, fail
     if (!utils.checkType(ldapCA, 'string')) {
       M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
-      return reject(new M.CustomError('An error occured.', 500));
+      return reject(new M.CustomError('An error occurred.', 500));
     }
 
     M.log.verbose('Reading LDAP server CAs ...');
@@ -314,15 +314,17 @@ function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');
   // Define and return promise
   return new Promise((resolve, reject) => {
+    // If user is created, store object function-wide
+    let newUserObj = {};
+
     // Search for user in database
-    UserController.find({ admin: true }, ldapUserObj[ldapConfig.attributes.username])
+    User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] })
     .then(foundUser => {
       // User exists, update database with LDAP information
-      const userSave = foundUser;
-      userSave.fname = ldapUserObj[ldapConfig.attributes.firstName];
-      userSave.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
-      userSave.lname = ldapUserObj[ldapConfig.attributes.lastName];
-      userSave.email = ldapUserObj[ldapConfig.attributes.email];
+      foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
+      foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
+      foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
+      foundUser.email = ldapUserObj[ldapConfig.attributes.email];
 
       // Save updated user to database
       foundUser.save()
@@ -348,11 +350,24 @@ function ldapSync(ldapUserObj) {
         provider: 'ldap'
       });
 
-      // TODO: LDAP users are not being added to the default org (MBX-686)
       // Save ldap user
       return initData.save()
-      // Save successful, resolve user model object
-      .then(userSaveNew => resolve(userSaveNew))
+      .then(userSaveNew => {
+        // Save user to function-wide variable
+        newUserObj = userSaveNew;
+
+        // Find the default org
+        return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+      })
+      .then((defaultOrg) => {
+        // Add the user to the default org
+        defaultOrg.permissions[newUserObj._id] = ['read', 'write'];
+
+        // Save the updated default org
+        return defaultOrg.save();
+      })
+      // Return the new user
+      .then(() => resolve(newUserObj))
       // Save failed, reject error
       .catch(saveErr => reject(saveErr));
     });

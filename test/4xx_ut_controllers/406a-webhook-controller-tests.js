@@ -143,8 +143,10 @@ function createWebhook(done) {
     }
     // Outgoing webhook
     else {
-      // TODO: Figure out how to compare responses...
-      // chai.expect(createdWebhook.responses).to.eql(webhookData.responses);
+      // Test that all URLs provided are attached to a webhook
+      const createdURLs = createdWebhook.responses.map(r => r.url);
+      const dataURLs = webhookData.responses.map(r => r.url);
+      chai.expect(createdURLs).to.have.members(dataURLs);
     }
 
     // Verify additional properties
@@ -201,8 +203,10 @@ function createWebhooks(done) {
       }
       // Outgoing webhook
       else {
-        // TODO: Figure out how to compare responses...
-        // chai.expect(createdWebhook.responses).to.eql(webhookDataObject.responses);
+        // Test that all URLs provided are attached to a webhook
+        const createdURLs = createdWebhook.responses.map(r => r.url);
+        const dataURLs = webhookDataObject.responses.map(r => r.url);
+        chai.expect(createdURLs).to.have.members(dataURLs);
       }
 
       // Verify additional properties
@@ -251,8 +255,10 @@ function findWebhook(done) {
     }
     // Outgoing webhook
     else {
-      // TODO: Figure out how to compare responses...
-      // chai.expect(foundWebhook.responses).to.eql(webhookData.responses);
+      // Test that all URLs provided are attached to a webhook
+      const foundURLs = foundWebhook.responses.map(r => r.url);
+      const dataURLs = webhookData.responses.map(r => r.url);
+      chai.expect(foundURLs).to.have.members(dataURLs);
     }
 
     // Verify additional properties
@@ -312,8 +318,10 @@ function findWebhooks(done) {
       }
       // Outgoing webhook
       else {
-        // TODO: Figure out how to compare responses...
-        // chai.expect(foundWebhook.responses).to.eql(webhookDataObject.responses);
+        // Test that all URLs provided are attached to a webhook
+        const foundURLs = foundWebhook.responses.map(r => r.url);
+        const dataURLs = webhookDataObject.responses.map(r => r.url);
+        chai.expect(foundURLs).to.have.members(dataURLs);
       }
 
       // Verify additional properties
@@ -348,8 +356,8 @@ function findAllWebhooks(done) {
   // Find webhook via controller
   WebhookController.find(adminUser, org.id, projID)
   .then((foundWebhooks) => {
-    // Expect foundWebhooks not to be empty
-    chai.expect(foundWebhooks.length).to.equal(webhookDataObjects.length);
+    // Expect foundWebhooks not to be empty. Cannot know exact number in db
+    chai.expect(foundWebhooks.length).to.not.equal(0);
 
     // Convert foundWebhooks to JMI type 2 for easier lookup
     const jmi2Webhooks = utils.convertJMI(1, 2, foundWebhooks);
@@ -373,8 +381,10 @@ function findAllWebhooks(done) {
       }
       // Outgoing webhook
       else {
-        // TODO: Figure out how to compare responses...
-        // chai.expect(foundWebhook.responses).to.eql(webhookDataObject.responses);
+        // Test that all URLs provided are attached to a webhook
+        const foundURLs = foundWebhook.responses.map(r => r.url);
+        const dataURLs = webhookDataObject.responses.map(r => r.url);
+        chai.expect(foundURLs).to.have.members(dataURLs);
       }
 
       // Verify additional properties
@@ -432,8 +442,10 @@ function updateWebhook(done) {
     }
     // Outgoing webhook
     else {
-      // TODO: Figure out how to compare responses...
-      // chai.expect(updatedWebhook.responses).to.eql(webhookData.responses);
+      // Test that all URLs provided are attached to a webhook
+      const updateURLs = updatedWebhook.responses.map(r => r.url);
+      const dataURLs = webhookData.responses.map(r => r.url);
+      chai.expect(updateURLs).to.have.members(dataURLs);
     }
 
     // Verify additional properties
@@ -496,8 +508,10 @@ function updateWebhooks(done) {
       }
       // Outgoing webhook
       else {
-        // TODO: Figure out how to compare responses...
-        // chai.expect(updatedWebhook.responses).to.eql(webhookDataObject.responses);
+        // Test that all URLs provided are attached to a webhook
+        const updateURLs = updatedWebhook.responses.map(r => r.url);
+        const dataURLs = webhookDataObject.responses.map(r => r.url);
+        chai.expect(updateURLs).to.have.members(dataURLs);
       }
 
       // Verify additional properties

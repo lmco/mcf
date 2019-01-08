@@ -310,8 +310,8 @@ function findAllProjects(done) {
   // Find projects via controller
   ProjController.find(adminUser, org.id)
   .then((foundProjects) => {
-    // Expect foundProjects not to be empty
-    chai.expect(foundProjects.length).to.equal(projDataObjects.length);
+    // Expect foundProjects not to be empty. Cannot know exact number in db
+    chai.expect(foundProjects.length).to.not.equal(0);
 
     // Convert foundProjects to JMI type 2 for easier lookup
     const jmi2Projects = utils.convertJMI(1, 2, foundProjects);
