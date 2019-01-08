@@ -315,6 +315,7 @@ function update(requestingUser, users, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUsers = [];
     let usersToUpdate = [];
+    const duplicateCheck = {};
 
     // Initialize valid options
     let populateString = '';
@@ -358,6 +359,14 @@ function update(requestingUser, users, options) {
         // Ensure each user has a username and that its a string
         assert.ok(user.hasOwnProperty('username'), `User #${index} does not have a username.`);
         assert.ok(typeof user.username === 'string', `User #${index}'s username is not a string.`);
+        // If a duplicate ID, throw an error
+        if (duplicateCheck[user.username]) {
+          throw new M.CustomError(`Multiple objects with the same ID [${user.username}] exist in`
+            + ' the update.', 400, 'warn');
+        }
+        else {
+          duplicateCheck[user.username] = user.username;
+        }
         arrUsernames.push(user.username);
         user._id = user.username;
         index++;
@@ -373,6 +382,14 @@ function update(requestingUser, users, options) {
     // Find the users to update
     User.find(searchQuery)
     .then((_foundUsers) => {
+      // Verify the same number of users are found as desired
+      if (_foundUsers.length !== arrUsernames.length) {
+        const foundIDs = _foundUsers.map(u => u._id);
+        const notFound = arrUsernames.filter(u => !foundIDs.includes(u));
+        throw new M.CustomError(
+          `The following users were not found: [${notFound.toString()}].`, 404, 'warn'
+        );
+      }
       // Set the function-wide foundUsers
       foundUsers = _foundUsers;
 

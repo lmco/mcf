@@ -1244,7 +1244,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/elements:
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements:
  *   get:
  *     tags:
  *       - elements
@@ -1413,7 +1413,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         description: Internal Server Error, Failed to DELETE elements due to
  *                      server side issue.
  */
-api.route('/orgs/:orgid/projects/:projectid/elements')
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -1437,7 +1437,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/elements/:elementid:
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid:
  *   get:
  *     tags:
  *       - elements
@@ -1633,7 +1633,7 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *       500:
  *         description: Internal Server Error, Failed to DELETE element due to server side issue.
  */
-api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,

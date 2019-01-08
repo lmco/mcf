@@ -350,6 +350,8 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
     let foundWebhooks = [];
     let webhooksToUpdate = [];
     let searchQuery = {};
+    const arrIDs = [];
+    const duplicateCheck = {};
 
     // Initialize valid options
     let populateString = '';
@@ -406,7 +408,6 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       }
 
       // Create list of ids
-      const arrIDs = [];
       try {
         let index = 1;
         webhooksToUpdate.forEach((webhook) => {
@@ -414,6 +415,14 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
           assert.ok(webhook.hasOwnProperty('id'), `Webhook #${index} does not have an id.`);
           assert.ok(typeof webhook.id === 'string', `Webhook #${index}'s id is not a string.`);
           webhook.id = utils.createID(orgID, projID, webhook.id);
+          // If a duplicate ID, throw an error
+          if (duplicateCheck[webhook.id]) {
+            throw new M.CustomError(`Multiple objects with the same ID [${webhook.id}] exist in `
+              + 'the update.', 400, 'warn');
+          }
+          else {
+            duplicateCheck[webhook.id] = webhook.id;
+          }
           arrIDs.push(webhook.id);
           webhook._id = webhook.id;
           index++;
@@ -430,6 +439,14 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       return Webhook.Webhook.find(searchQuery);
     })
     .then((_foundWebhooks) => {
+      // Verify the same number of webhooks are found as desired
+      if (_foundWebhooks.length !== arrIDs.length) {
+        const foundIDs = _foundWebhooks.map(w => w._id);
+        const notFound = arrIDs.filter(w => !foundIDs.includes(w));
+        throw new M.CustomError(
+          `The following webhooks were not found: [${notFound.toString()}].`, 404, 'warn'
+        );
+      }
       // Set function-wide foundWebhooks
       foundWebhooks = _foundWebhooks;
 

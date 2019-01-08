@@ -342,6 +342,7 @@ function update(requestingUser, organizationID, projects, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundProjects = [];
     let projectsToUpdate = [];
+    const duplicateCheck = {};
 
     // Initialize valid options
     let populateString = '';
@@ -387,6 +388,14 @@ function update(requestingUser, organizationID, projects, options) {
         assert.ok(proj.hasOwnProperty('id'), `Project #${index} does not have an id.`);
         assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);
         proj.id = utils.createID(orgID, proj.id);
+        // If a duplicate ID, throw an error
+        if (duplicateCheck[proj.id]) {
+          throw new M.CustomError(`Multiple objects with the same ID [${proj.id}] exist in the`
+            + ' update.', 400, 'warn');
+        }
+        else {
+          duplicateCheck[proj.id] = proj.id;
+        }
         arrIDs.push(proj.id);
         proj._id = proj.id;
         index++;
