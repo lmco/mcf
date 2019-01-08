@@ -126,6 +126,23 @@ function sixToSeven() {
         org.permissions.write = org.permissions.write.map((u) => jmiUsers[u].username);
         org.permissions.admin = org.permissions.admin.map((u) => jmiUsers[u].username);
 
+        const newPermissions = {};
+        // Convert permissions from arrays to objects with usernames as the keys,
+        // permissions as the values
+        org.permissions.read.forEach((user) => {
+          if (org.permissions.admin.includes(user)) {
+            newPermissions[user] = ['read', 'write', 'admin'];
+          }
+          else if (org.permissions.write.includes(user)) {
+            newPermissions[user] = ['read', 'write'];
+          }
+          else {
+            newPermissions[user] = ['read'];
+          }
+        });
+
+        org.permissions = newPermissions;
+
         // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
         if (org.createdBy) {
           org.createdBy = jmiUsers[org.createdBy].username;
@@ -171,6 +188,23 @@ function sixToSeven() {
         project.permissions.read = project.permissions.read.map((u) => jmiUsers[u].username);
         project.permissions.write = project.permissions.write.map((u) => jmiUsers[u].username);
         project.permissions.admin = project.permissions.admin.map((u) => jmiUsers[u].username);
+
+        const newPermissions = {};
+        // Convert permissions from arrays to objects with usernames as the keys,
+        // permissions as the values
+        project.permissions.read.forEach((user) => {
+          if (project.permissions.admin.includes(user)) {
+            newPermissions[user] = ['read', 'write', 'admin'];
+          }
+          else if (project.permissions.write.includes(user)) {
+            newPermissions[user] = ['read', 'write'];
+          }
+          else {
+            newPermissions[user] = ['read'];
+          }
+        });
+
+        project.permissions = newPermissions;
 
         // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
         if (project.createdBy) {
@@ -325,13 +359,29 @@ function sixToSeven() {
     // Delete id unique index on webhooks collection
     .then(() => mongoose.connection.db.collection('webhooks').dropIndex('id_1'))
     // Insert updated orgs
-    .then(() => mongoose.connection.db.collection('organizations').insertMany(orgsToInsert))
+    .then(() => {
+      if (orgsToInsert.length > 0) {
+        return mongoose.connection.db.collection('organizations').insertMany(orgsToInsert)
+      }
+    })
     // Insert updated projects
-    .then(() => mongoose.connection.db.collection('projects').insertMany(projectsToInsert))
+    .then(() => {
+      if (projectsToInsert.length > 0) {
+        mongoose.connection.db.collection('projects').insertMany(projectsToInsert)
+      }
+    })
     // Insert updated elements
-    .then(() => mongoose.connection.db.collection('elements').insertMany(elementsToInsert))
+    .then(() => {
+      if (elementsToInsert.length > 0) {
+        mongoose.connection.db.collection('elements').insertMany(elementsToInsert)
+      }
+    })
     // Insert updated users
-    .then(() => mongoose.connection.db.collection('users').insertMany(usersToInsert))
+    .then(() => {
+      if (usersToInsert.length > 0) {
+        mongoose.connection.db.collection('users').insertMany(usersToInsert)
+      }
+    })
     .then(() => db.disconnect())
     .then(() => {
       M.log.info('Database migration complete');
