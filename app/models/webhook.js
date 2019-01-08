@@ -209,6 +209,18 @@ WebhookSchema.statics.getValidTypes = function() {
 };
 
 /**
+ * @description Returns a list of fields a requesting user can populate
+ * @memberOf WebhookSchema
+ */
+WebhookSchema.methods.getValidPopulateFields = function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project'];
+};
+
+WebhookSchema.statics.getValidPopulateFields = function() {
+  return WebhookSchema.methods.getValidPopulateFields();
+};
+
+/**
  * @description Validates an object to ensure that it only contains keys
  * which exist in the webhook model.
  *

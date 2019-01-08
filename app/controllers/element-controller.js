@@ -118,6 +118,14 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
             + ' is not an array.');
           assert.ok(options.populate.every(o => typeof o === 'string'),
             'Every value in the populate array must be a string.');
+
+          // Ensure each field is able to be populated
+          const validPopulateFields = Element.getValidPopulateFields();
+          options.populate.forEach((p) => {
+            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
+              + ' be populated.');
+          });
+
           populateString = options.populate.join(' ');
         }
 
@@ -274,6 +282,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
             + ' is not an array.');
           assert.ok(options.populate.every(o => typeof o === 'string'),
             'Every value in the populate array must be a string.');
+
+          // Ensure each field is able to be populated
+          const validPopulateFields = Element.getValidPopulateFields();
+          options.populate.forEach((p) => {
+            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
+              + ' be populated.');
+          });
+
           populateString = options.populate.join(' ');
           populate = true;
         }
@@ -585,6 +601,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             + ' is not an array.');
           assert.ok(options.populate.every(o => typeof o === 'string'),
             'Every value in the populate array must be a string.');
+
+          // Ensure each field is able to be populated
+          const validPopulateFields = Element.getValidPopulateFields();
+          options.populate.forEach((p) => {
+            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
+              + ' be populated.');
+          });
+
           populateString = options.populate.join(' ');
         }
       }
