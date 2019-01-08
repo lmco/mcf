@@ -613,6 +613,17 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'object')) {
         // elements is an array, update many elements
         elementsToUpdate = saniElements;
+
+        // Ensure element keys are valid to update in bulk
+        const validBulkFields = Element.getValidBulkUpdateFields();
+        validBulkFields.push('id');
+        elementsToUpdate.forEach((e) => {
+          Object.keys(e).forEach((key) => {
+            if (!validBulkFields.includes(key)) {
+              throw new M.CustomError(`Cannot update the field ${key} in bulk.`, 400, 'warn');
+            }
+          });
+        });
       }
       else if (typeof saniElements === 'object') {
         // elements is an object, update a single element
