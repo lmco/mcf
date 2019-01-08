@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.404-element-controller-tests
+ * @module  test.404a-element-controller-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -32,7 +32,6 @@ const utils = M.require('lib.utils');
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
 const testData = testUtils.importTestData('data.json');
-// const largeData = testUtils.importTestData('10x10_no_type.json');
 let adminUser = null;
 let org = null;
 let proj = null;

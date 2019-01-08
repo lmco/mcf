@@ -31,6 +31,9 @@ module.exports = {
   remove
 };
 
+// Disable eslint rule for logic in nested promises
+/* eslint-disable no-loop-func */
+
 // Node.js Modules
 const assert = require('assert');
 
@@ -80,6 +83,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
+    let foundElements = [];
 
     // Set options if no elements were provided, but options were
     if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
@@ -173,15 +177,40 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         delete searchQuery.archived;
       }
 
-      if (elementIDs.length !== 0) {
-        searchQuery._id = { $in: elementIDs };
+      // If no IDs provided, find all elements in a project
+      if (elementIDs.length === 0) {
+        // Find all elements in a project
+        return Element.find(searchQuery).populate(populateString);
+      }
+      // Find elements by ID
+
+      const promises = [];
+
+      // Find elements in batches
+      for (let i = 0; i < elementIDs.length / 50000; i++) {
+        // Split elementIDs list into batches of 50000
+        searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
+
+        // Add find operation to promises array
+        promises.push(Element.find(searchQuery).populate(populateString)
+        .then((_foundElements) => {
+          foundElements = foundElements.concat(_foundElements);
+        }));
       }
 
-      // Find the elements
-      // TODO: Find in batches
-      return Element.find(searchQuery).populate(populateString);
+      // Return when all elements have been found
+      return Promise.all(promises);
     })
-    .then((foundElements) => resolve(foundElements))
+    .then((found) => {
+      // If each item in found is not undefined, its the return from Element.find()
+      if (!found.every(o => typeof o === 'undefined')) {
+        return resolve(found);
+      }
+      // Each item in found is undefined, which is the return from Promise.all(), return
+      // foundElements
+
+      return resolve(foundElements);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -224,6 +253,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     const projID = sani.sanitize(projectID);
     let elementObjects = [];
     const remainingElements = [];
+    let populatedElements = [];
 
     // Initialize valid options
     let populateString = '';
@@ -307,9 +337,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Create searchQuery to search for any existing, conflicting elements
-    const searchQuery = { _id: { $in: arrIDs } };
-
     // Find the project to verify existence and permissions
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((foundProject) => {
@@ -321,9 +348,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       const promises = [];
-      for (let i = 0; i < arrIDs.length / 100000; i++) {
-        // Split arrIDs into batches of 100000
-        const tmpQuery = { _id: { $in: arrIDs.slice(i * 100000, i * 100000 + 100000) } };
+      for (let i = 0; i < arrIDs.length / 50000; i++) {
+        // Split arrIDs into batches of 50000
+        const tmpQuery = { _id: { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) } };
         // Attempt to find any elements with matching _id
         promises.push(Element.find(tmpQuery, '_id')
         .then((foundElements) => {
@@ -466,12 +493,28 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     })
     .then((createdElements) => {
       if (populate) {
-        return resolve(Element.find(searchQuery)
-        .populate(populateString));
+        const promises = [];
+        const createdIDs = createdElements.map(e => e._id);
+
+        // Find elements in batches
+        for (let i = 0; i < createdIDs.length / 50000; i++) {
+          // Split elementIDs list into batches of 50000
+          const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
+
+          // Add find operation to promises array
+          promises.push(Element.find(tmpQuery).populate(populateString)
+          .then((_foundElements) => {
+            populatedElements = populatedElements.concat(_foundElements);
+          }));
+        }
+
+        // Return when all elements have been found
+        return Promise.all(promises);
       }
 
       return resolve(createdElements);
     })
+    .then(() => resolve(populatedElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -515,6 +558,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     let foundElements = [];
     let elementsToUpdate = [];
     let searchQuery = {};
+    const duplicateCheck = {};
+    let foundUpdatedElements = [];
+    const arrIDs = [];
 
     // Initialize valid options
     let populateString = '';
@@ -571,7 +617,6 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Create list of ids
-      const arrIDs = [];
       try {
         let index = 1;
         elementsToUpdate.forEach((elem) => {
@@ -579,6 +624,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
           assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
           elem.id = utils.createID(orgID, projID, elem.id);
+          // If a duplicate ID, throw an error
+          if (duplicateCheck[elem.id]) {
+            throw new M.CustomError(`Multiple objects with the same ID [${elem.id}] exist in the`
+              + ' update.', 400, 'warn');
+          }
+          else {
+            duplicateCheck[elem.id] = elem.id;
+          }
           arrIDs.push(elem.id);
           elem._id = elem.id;
           index++;
@@ -588,19 +641,37 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         throw new M.CustomError(msg, 403, 'warn');
       }
 
-      // Create searchQuery
-      searchQuery = { _id: { $in: arrIDs }, project: foundProject._id };
+      const promises = [];
+      searchQuery = { project: foundProject._id };
 
-      // Find the elements to update
-      return Element.find(searchQuery);
+      // Find elements in batches
+      for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
+        // Split elementIDs list into batches of 50000
+        searchQuery._id = elementsToUpdate.slice(i * 50000, i * 50000 + 50000);
+
+        // Add find operation to promises array
+        promises.push(Element.find(searchQuery)
+        .then((_foundElements) => {
+          foundElements = foundElements.concat(_foundElements);
+        }));
+      }
+
+      // Return when all elements have been found
+      return Promise.all(promises);
     })
-    .then((_foundElements) => {
-      // Set function-wide foundElements
-      foundElements = _foundElements;
+    .then(() => {
+      // Verify the same number of elements are found as desired
+      if (foundElements.length !== arrIDs.length) {
+        const foundIDs = foundElements.map(e => e._id);
+        const notFound = arrIDs.filter(e => !foundIDs.includes(e));
+        throw new M.CustomError(
+          `The following elements were not found: [${notFound.toString()}].`, 404, 'warn'
+        );
+      }
 
       // Convert elementsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, elementsToUpdate);
-      const promises = [];
+      const bulkArray = [];
       // Get array of editable parameters
       const validFields = Element.getValidUpdateFields();
 
@@ -638,37 +709,56 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             element.markModified(key);
-          }
-          else {
-            // Set archivedBy if archived field is being changed
-            if (key === 'archived') {
-              // If the element is being archived
-              if (updateElement[key] && !element[key]) {
-                element.archivedBy = reqUser;
-              }
-              // If the element is being unarchived
-              else if (!updateElement[key] && element[key]) {
-                element.archivedBy = null;
-              }
-            }
 
-            // Schema type is not mixed, update field in element object
-            element[key] = updateElement[key];
+            // Set updateElement mixed field
+            updateElement[key] = element[key];
+          }
+          // Set archivedBy if archived field is being changed
+          else if (key === 'archived') {
+            // If the element is being archived
+            if (updateElement[key] && !element[key]) {
+              updateElement.archivedBy = reqUser;
+            }
+            // If the element is being unarchived
+            else if (!updateElement[key] && element[key]) {
+              updateElement.archivedBy = null;
+            }
           }
         });
 
         // Update last modified field
-        element.lastModifiedBy = reqUser;
+        updateElement.lastModifiedBy = reqUser._id;
 
         // Update the project
-        promises.push(element.save());
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: element._id },
+            update: updateElement
+          }
+        });
       });
 
       // Return when all promises have been completed
-      return Promise.all(promises);
+      return Element.bulkWrite(bulkArray);
     })
-    .then(() => Element.find(searchQuery).populate(populateString))
-    .then((foundUpdatedElements) => resolve(foundUpdatedElements))
+    .then(() => {
+      const promises2 = [];
+      // Find elements in batches
+      for (let i = 0; i < arrIDs.length / 50000; i++) {
+        // Split arrIDs list into batches of 50000
+        searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
+
+        // Add find operation to promises array
+        promises2.push(Element.find(searchQuery).populate(populateString)
+        .then((_foundElements) => {
+          foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+        }));
+      }
+
+      // Return when all elements have been found
+      return Promise.all(promises2);
+    })
+    .then(() => resolve(foundUpdatedElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -710,7 +800,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
-    let foundElements = [];
+    let elementsToFind = [];
     let foundIDs = [];
 
     // Ensure parameters are valid
@@ -727,40 +817,29 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       throw new M.CustomError(msg, 403, 'warn');
     }
 
-    // Define searchQuery
-    const searchQuery = {};
-
     // Check the type of the elements parameter
     if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')
       && saniElements.length !== 0) {
       // An array of element ids, remove all
-      searchQuery._id = { $in: saniElements.map(e => utils.createID(orgID, projID, e)) };
+      elementsToFind = saniElements.map(e => utils.createID(orgID, projID, e));
     }
     else if (typeof saniElements === 'string') {
       // A single element id, remove one
-      searchQuery._id = utils.createID(orgID, projID, saniElements);
+      elementsToFind = [utils.createID(orgID, projID, saniElements)];
     }
     else {
       // Invalid parameter, throw an error
       throw new M.CustomError('Invalid input for removing elements.', 400, 'warn');
     }
-
-    // Find the elements to delete
-    Element.find(searchQuery)
-    .then((_foundElements) => {
-      // Set function-wide foundElements
-      foundElements = _foundElements;
-
-      // Return when all promises have been completed
-      return findElementTree(orgID, projID, 'master', foundElements.map(e => e._id));
-    })
+    // Find all element IDs and their subtree IDs
+    findElementTree(orgID, projID, 'master', elementsToFind)
     .then((_foundIDs) => {
       foundIDs = _foundIDs;
       const promises = [];
 
-      // Split elements into batches of 100000 or less
-      for (let i = 0; i < foundIDs.length / 100000; i++) {
-        const batchIDs = foundIDs.slice(i * 100000, i * 100000 + 100000);
+      // Split elements into batches of 50000 or less
+      for (let i = 0; i < foundIDs.length / 50000; i++) {
+        const batchIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
         // Delete batch
         promises.push(Element.deleteMany({ _id: { $in: batchIDs } }));
       }
@@ -768,17 +847,17 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       return Promise.all(promises);
     })
     .then(() => {
-      const uniqueIDs = [];
+      const uniqueIDs = {};
 
       // Parse foundIDs and only return unique ones
       foundIDs.forEach((id) => {
-        if (!uniqueIDs.includes(id)) {
-          uniqueIDs.push(id);
+        if (!uniqueIDs[id]) {
+          uniqueIDs[id] = id;
         }
       });
 
       // Return just the unique ids
-      return resolve(uniqueIDs);
+      return resolve(Object.keys(uniqueIDs));
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -835,9 +914,9 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
           return '';
         }
 
-        // Recursively find the sub-children of the found elements in batches of 100000 or less
-        for (let i = 0; i < foundIDs.length / 100000; i++) {
-          const tmpIDs = foundIDs.slice(i * 100000, i * 100000 + 100000);
+        // Recursively find the sub-children of the found elements in batches of 50000 or less
+        for (let i = 0; i < foundIDs.length / 50000; i++) {
+          const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
           return findElementTreeHelper(tmpIDs);
         }
       })
@@ -847,8 +926,16 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
   }
 
   return new Promise((resolve, reject) => {
-    // Find the elements sub-tree
-    findElementTreeHelper(foundElements)
+    const promises = [];
+
+    // If initial batch of ids is greater than 50000, split up in batches
+    for (let i = 0; i < foundElements.length / 50000; i++) {
+      const tmpIDs = foundElements.slice(i * 50000, i * 50000 + 50000);
+      // Find elements subtree
+      promises.push(findElementTreeHelper(tmpIDs));
+    }
+
+    Promise.all(promises)
     .then(() => resolve(foundElements))
     .catch((error) => reject(error));
   });
