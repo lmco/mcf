@@ -55,7 +55,7 @@ const utils = M.require('lib.utils');
  * element in a project being found.
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the booleans 'archived'
- * and 'subtree' and the string 'populate'
+ * and 'subtree' and the array of strings 'populate'
  *
  * @return {Promise} resolve - Array of found element objects
  *                   reject - error
@@ -114,9 +114,11 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
 
         // If the option 'subtree' is supplied ensure it's a boolean
@@ -225,7 +227,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {Array/Object} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of created element objects
  *                   reject - error
@@ -268,9 +270,11 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
           populate = true;
         }
       }
@@ -529,7 +533,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Array/Object} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of updated element objects
  *                   reject - error
@@ -577,9 +581,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populated === 'string', 'The option \'populated\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
