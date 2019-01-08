@@ -181,6 +181,18 @@ UserSchema.statics.getValidUpdateFields = function() {
 };
 
 /**
+ * @description Returns a list of fields a requesting user can populate
+ * @memberOf UserSchema
+ */
+UserSchema.methods.getValidPopulateFields = function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy'];
+};
+
+UserSchema.statics.getValidPopulateFields = function() {
+  return UserSchema.methods.getValidPopulateFields();
+};
+
+/**
  * @description Returns a user's public data.
  * @memberOf UserSchema
  */

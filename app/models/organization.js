@@ -131,6 +131,18 @@ OrganizationSchema.statics.getValidUpdateFields = function() {
   return OrganizationSchema.methods.getValidUpdateFields();
 };
 
+/**
+ * @description Returns a list of fields a requesting user can populate
+ * @memberOf OrganizationSchema
+ */
+OrganizationSchema.methods.getValidPopulateFields = function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy'];
+};
+
+OrganizationSchema.statics.getValidPopulateFields = function() {
+  return OrganizationSchema.methods.getValidPopulateFields();
+};
+
 
 /**
  * @description Validates an object to ensure that it only contains keys

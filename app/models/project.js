@@ -163,6 +163,18 @@ ProjectSchema.statics.getVisibilityLevels = function() {
   return ProjectSchema.methods.getVisibilityLevels();
 };
 
+/**
+ * @description Returns a list of fields a requesting user can populate
+ * @memberOf ProjectSchema
+ */
+ProjectSchema.methods.getValidPopulateFields = function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
+};
+
+ProjectSchema.statics.getValidPopulateFields = function() {
+  return ProjectSchema.methods.getValidPopulateFields();
+};
+
 
 /**
  * @description Validates an object to ensure that it only contains keys
