@@ -395,7 +395,7 @@ function update(requestingUser, users, options) {
 
       // Convert usersToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, usersToUpdate);
-      const promises = [];
+      const bulkArray = [];
       // Get array of editable parameters
       const validFields = User.getValidUpdateFields();
 
@@ -447,7 +447,7 @@ function update(requestingUser, users, options) {
 
             // If the user is being archived
             if (updateUser[key] && !user[key]) {
-              updateUser.archivedBy = reqUser;
+              updateUser.archivedBy = reqUser._id;
             }
             // If the user is being unarchived
             else if (!updateUser[key] && user[key]) {
@@ -457,14 +457,19 @@ function update(requestingUser, users, options) {
         });
 
         // Update last modified field
-        updateUser.lastModifiedBy = reqUser;
+        updateUser.lastModifiedBy = reqUser._id;
 
         // Update the user
-        promises.push(user.updateOne(updateUser));
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: user._id },
+            update: updateUser
+          }
+        });
       });
 
-      // Return when all promises have been completed
-      return Promise.all(promises);
+      // Update all users through a bulk write to the database
+      return User.bulkWrite(bulkArray);
     })
     .then(() => User.find(searchQuery)
     .populate(populateString))

@@ -452,7 +452,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
 
       // Convert webhooksToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, webhooksToUpdate);
-      const promises = [];
+      const bulkArray = [];
       // Get array of editable parameters
       const validFields = Webhook.Webhook.getValidUpdateFields();
 
@@ -487,37 +487,40 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
             // Add and replace parameters of the type 'Mixed'
             utils.updateAndCombineObjects(webhook[key], updateWebhook[key]);
 
+            // Set updateWebhook mixed field
+            updateWebhook[key] = webhook[key];
+
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             webhook.markModified(key);
           }
-          else {
-            // Set archivedBy if archived field is being changed
-            if (key === 'archived') {
-              // If the webhook is being archived
-              if (updateWebhook[key] && !webhook[key]) {
-                webhook.archivedBy = reqUser;
-              }
-              // If the webhook is being unarchived
-              else if (!updateWebhook[key] && webhook[key]) {
-                webhook.archivedBy = null;
-              }
+          // Set archivedBy if archived field is being changed
+          else if (key === 'archived') {
+            // If the webhook is being archived
+            if (updateWebhook[key] && !webhook[key]) {
+              updateWebhook.archivedBy = reqUser._id;
             }
-
-            // Schema type is not mixed, update field in webhook object
-            webhook[key] = updateWebhook[key];
+            // If the webhook is being unarchived
+            else if (!updateWebhook[key] && webhook[key]) {
+              updateWebhook.archivedBy = null;
+            }
           }
         });
 
         // Update last modified field
-        webhook.lastModifiedBy = reqUser;
+        updateWebhook.lastModifiedBy = reqUser._id;
 
         // Update the project
-        promises.push(webhook.save());
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: webhook._id },
+            update: updateWebhook
+          }
+        });
       });
 
-      // Return when all promises have been completed
-      return Promise.all(promises);
+      // Update all webhooks through a bulk write to the database
+      return Webhook.Webhook.bulkWrite(bulkArray);
     })
     .then(() => Webhook.Webhook.find(searchQuery).populate(populateString))
     .then((foundUpdatedWebhooks) => resolve(foundUpdatedWebhooks))

@@ -425,7 +425,7 @@ function update(requestingUser, organizationID, projects, options) {
 
       // Convert projectsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, projectsToUpdate);
-      const promises = [];
+      const bulkArray = [];
       // Get array of editable parameters
       const validFields = Project.getValidUpdateFields();
 
@@ -495,43 +495,49 @@ function update(requestingUser, organizationID, projects, options) {
                   default:
                     delete proj.permissions[user];
                 }
+
+                // Copy permissions from proj to update object
+                updateProj.permissions = proj.permissions;
               });
             }
             else {
               // Add and replace parameters of the type 'Mixed'
               utils.updateAndCombineObjects(proj[key], updateProj[key]);
+
+              // Set mixed field in updateProj
+              updateProj[key] = proj[key];
             }
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             proj.markModified(key);
           }
-          else {
-            // Set archivedBy if archived field is being changed
-            if (key === 'archived') {
-              // If the proj is being archived
-              if (updateProj[key] && !proj[key]) {
-                proj.archivedBy = reqUser;
-              }
-              // If the proj is being unarchived
-              else if (!updateProj[key] && proj[key]) {
-                proj.archivedBy = null;
-              }
+          // Set archivedBy if archived field is being changed
+          else if (key === 'archived') {
+            // If the proj is being archived
+            if (updateProj[key] && !proj[key]) {
+              updateProj.archivedBy = reqUser._id;
             }
-
-            // Schema type is not mixed, update field in proj object
-            proj[key] = updateProj[key];
+            // If the proj is being unarchived
+            else if (!updateProj[key] && proj[key]) {
+              updateProj.archivedBy = null;
+            }
           }
         });
 
         // Update last modified field
-        proj.lastModifiedBy = reqUser;
+        updateProj.lastModifiedBy = reqUser._id;
 
         // Update the project
-        promises.push(proj.save());
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: proj._id },
+            update: updateProj
+          }
+        });
       });
 
-      // Return when all promises have been completed
-      return Promise.all(promises);
+      // Update all projects through a bulk write to the database
+      return Project.bulkWrite(bulkArray);
     })
     .then(() => Project.find(searchQuery)
     .populate(populateString))

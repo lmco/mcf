@@ -706,18 +706,18 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             // Add and replace parameters of the type 'Mixed'
             utils.updateAndCombineObjects(element[key], updateElement[key]);
 
+            // Set updateElement mixed field
+            updateElement[key] = element[key];
+
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             element.markModified(key);
-
-            // Set updateElement mixed field
-            updateElement[key] = element[key];
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
             // If the element is being archived
             if (updateElement[key] && !element[key]) {
-              updateElement.archivedBy = reqUser;
+              updateElement.archivedBy = reqUser._id;
             }
             // If the element is being unarchived
             else if (!updateElement[key] && element[key]) {
@@ -729,7 +729,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         // Update last modified field
         updateElement.lastModifiedBy = reqUser._id;
 
-        // Update the project
+        // Update the element
         bulkArray.push({
           updateOne: {
             filter: { _id: element._id },
@@ -738,7 +738,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         });
       });
 
-      // Return when all promises have been completed
+      // Update all elements through a bulk write to the database
       return Element.bulkWrite(bulkArray);
     })
     .then(() => {

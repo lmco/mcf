@@ -378,7 +378,7 @@ function update(requestingUser, orgs, options) {
 
       // Convert orgsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, orgsToUpdate);
-      const promises = [];
+      const bulkArray = [];
       // Get array of editable parameters
       const validFields = Organization.getValidUpdateFields();
 
@@ -454,43 +454,49 @@ function update(requestingUser, orgs, options) {
                   default:
                     delete org.permissions[user];
                 }
+
+                // Copy permissions from org to update object
+                updateOrg.permissions = org.permissions;
               });
             }
             else {
               // Add and replace parameters of the type 'Mixed'
               utils.updateAndCombineObjects(org[key], updateOrg[key]);
+
+              // Set mixed field in updateOrg
+              updateOrg[key] = org[key];
             }
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             org.markModified(key);
           }
-          else {
-            // Set archivedBy if archived field is being changed
-            if (key === 'archived') {
-              // If the org is being archived
-              if (updateOrg[key] && !org[key]) {
-                org.archivedBy = reqUser;
-              }
-              // If the org is being unarchived
-              else if (!updateOrg[key] && org[key]) {
-                org.archivedBy = null;
-              }
+          // Set archivedBy if archived field is being changed
+          else if (key === 'archived') {
+            // If the org is being archived
+            if (updateOrg[key] && !org[key]) {
+              updateOrg.archivedBy = reqUser._id;
             }
-
-            // Schema type is not mixed, update field in org object
-            org[key] = updateOrg[key];
+            // If the org is being unarchived
+            else if (!updateOrg[key] && org[key]) {
+              updateOrg.archivedBy = null;
+            }
           }
         });
 
         // Update last modified field
-        org.lastModifiedBy = reqUser;
+        updateOrg.lastModifiedBy = reqUser._id;
 
         // Update the org
-        promises.push(org.save());
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: org._id },
+            update: updateOrg
+          }
+        });
       });
 
-      // Return when all promises have been completed
-      return Promise.all(promises);
+      // Update all orgs through a bulk write to the database
+      return Organization.bulkWrite(bulkArray);
     })
     .then(() => Organization.find(searchQuery)
     .populate(populateString))
