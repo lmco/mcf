@@ -52,7 +52,7 @@ const utils = M.require('lib.utils');
  * org being found.
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the boolean 'archived' and
- * the string 'populate'.
+ * the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of found organization objects
  *                   reject - error
@@ -98,9 +98,11 @@ function find(requestingUser, orgs, options) {
 
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -145,7 +147,7 @@ function find(requestingUser, orgs, options) {
  * @param {Array/Object} orgs - Either an array of objects containing org data
  * or a single object containing org data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of created organization objects
  *                   reject - error
@@ -178,9 +180,11 @@ function create(requestingUser, orgs, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
           populate = true;
         }
       }
@@ -275,7 +279,7 @@ function create(requestingUser, orgs, options) {
  * @param {Array/Object} orgs - Either an array of objects containing updates to
  * organizations, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of updated organization objects
  *                   reject - error
@@ -309,9 +313,11 @@ function update(requestingUser, orgs, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }

@@ -51,7 +51,7 @@ const utils = M.require('lib.utils');
  * webhook being found.
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the boolean 'archived' and
- * the string 'populate'.
+ * the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of found webhook objects
  *                   reject - error
@@ -103,9 +103,11 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
 
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -168,7 +170,7 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Array/Object} webhooks - Either an array of objects containing
  * webhook data or a single object containing webhook data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of created webhook objects
  *                   reject - error
@@ -204,9 +206,11 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
           populate = true;
         }
       }
@@ -326,7 +330,7 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Array/Object} webhooks - Either an array of objects containing
  * updates to webhooks, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of updated webhook objects
  *                   reject - error
@@ -368,9 +372,11 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
