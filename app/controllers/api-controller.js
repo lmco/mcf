@@ -236,8 +236,8 @@ function getOrgs(req, res) {
   }
 
   // Get all organizations the requesting user has access to
-  // NOTE: findOrgs() sanitizes req.user.
-  OrgController.findOrgs(req.user, archived)
+  // NOTE: find() sanitizes req.user.
+  OrgController.find(req.user, archived)
   .then((orgs) => {
     // Return only public organization data
     const orgsPublicData = orgs.map(o => o.getPublicData());
@@ -281,7 +281,7 @@ function postOrgs(req, res) {
 
   // Create organizations in request body
   // NOTE: createOrgs() sanitizes req.body.orgs
-  OrgController.createOrgs(req.user, req.body.orgs)
+  OrgController.create(req.user, req.body.orgs)
   .then((orgs) => {
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
@@ -340,7 +340,7 @@ function patchOrgs(req, res) {
 
   // Update the specified orgs
   // NOTE: updateOrgs() sanitizes req.body.update
-  OrgController.updateOrgs(req.user, updateQuery, req.body.update)
+  OrgController.update(req.user, updateQuery, req.body.update)
   .then((orgs) => {
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
@@ -384,7 +384,7 @@ function deleteOrgs(req, res) {
   }
 
   // Remove the specified orgs
-  OrgController.removeOrgs(req.user, req.body)
+  OrgController.remove(req.user, req.body)
   // Return 200: OK and the deleted orgs
   .then((orgs) => {
     res.header('Content-Type', 'application/json');
@@ -430,7 +430,7 @@ function getOrg(req, res) {
 
   // Find the org from it's id
   // NOTE: findOrg() sanitizes req.params.orgid
-  OrgController.findOrg(req.user, req.params.orgid, archived)
+  OrgController.find(req.user, req.params.orgid, archived)
   .then((org) => {
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
@@ -470,8 +470,8 @@ function postOrg(req, res) {
   req.body.id = req.params.orgid;
 
   // Create the organization with provided parameters
-  // NOTE: createOrg() sanitizes req.params.org.id and req.body.name
-  OrgController.createOrg(req.user, req.body)
+  // NOTE: create() sanitizes req.params.org.id and req.body.name
+  OrgController.create(req.user, req.body)
   .then((org) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
@@ -508,8 +508,8 @@ function patchOrg(req, res) {
   }
 
   // Update the specified organization
-  // NOTE: updateOrg() sanitizes req.params.orgid
-  OrgController.updateOrg(req.user, req.params.orgid, req.body)
+  // NOTE: update() sanitizes req.params.orgid
+  OrgController.update(req.user, req.params.orgid, req.body)
   .then((org) => {
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
@@ -538,8 +538,8 @@ function deleteOrg(req, res) {
   }
 
   // Remove the specified organization
-  // NOTE: removeOrg() sanitizes req.params.orgid
-  OrgController.removeOrg(req.user, req.params.orgid)
+  // NOTE: remove() sanitizes req.params.orgid
+  OrgController.remove(req.user, req.params.orgid)
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');
@@ -567,10 +567,13 @@ function getOrgRole(req, res) {
     return res.status(error.status).send(error);
   }
 
+
   // Find the permissions the foundUser has within the organization
   // NOTE: findPermissions() sanitizes req.params.orgid
-  OrgController.findPermissions(req.user, req.params.username, req.params.orgid)
-  .then((roles) => {
+  //OrgController.findPermissions(req.user, req.params.username, req.params.orgid)
+  OrgController.find(req.user, req.params.username, req.params.orgid)
+  .then((org) => {
+    console.log(org);
     // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(roles));
@@ -730,8 +733,8 @@ function getProjects(req, res) {
   }
 
   // Get all projects the requesting user has access to
-  // NOTE: findProjects() sanitizes req.user and org.id.
-  ProjectController.findProjects(req.user, req.params.orgid, archived)
+  // NOTE: find() sanitizes req.user and org.id.
+  ProjectController.find(req.user, req.params.orgid, archived)
   .then((projects) => {
     // Return only public project data
     const projectPublicData = [];
@@ -777,8 +780,8 @@ function postProjects(req, res) {
   }
 
   // Create the specified projects
-  // NOTE: createProjects() sanitizes req.params.orgid and the projects
-  ProjectController.createProjects(req.user, req.params.orgid, req.body)
+  // NOTE: create() sanitizes req.params.orgid and the projects
+  ProjectController.create(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the new projects
     res.header('Content-Type', 'application/json');
@@ -826,8 +829,8 @@ function patchProjects(req, res) {
   }
 
   // Update the specified projects
-  // NOTE: updateProjects() sanitizes req.params.orgid
-  ProjectController.updateProjects(req.user, req.params.orgid, req.body)
+  // NOTE: update() sanitizes req.params.orgid
+  ProjectController.update(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the updated projects
     res.header('Content-Type', 'application/json');
@@ -855,7 +858,7 @@ function deleteProjects(req, res) {
   }
 
   // Remove the specified projects
-  ProjectController.removeProjects(req.user, req.params.orgid, req.body)
+  ProjectController.remove(req.user, req.params.orgid, req.body)
   .then((projects) => {
     // Return 200: OK and the deleted projects
     res.header('Content-Type', 'application/json');
@@ -901,8 +904,8 @@ function getProject(req, res) {
   }
 
   // Find the project from it's project.id and org.id
-  // NOTE: findProject() sanitizes req.params.projectid and req.params.orgid
-  ProjectController.findProject(req.user, req.params.orgid, req.params.projectid, archived)
+  // NOTE: find() sanitizes req.params.projectid and req.params.orgid
+  ProjectController.find(req.user, req.params.orgid, req.params.projectid, archived)
   .then((project) => {
     // Return a 200: OK and the project's public data
     res.header('Content-Type', 'application/json');
@@ -950,8 +953,8 @@ function postProject(req, res) {
   req.body.id = req.params.projectid;
 
   // Create project with provided parameters
-  // NOTE: createProject() sanitizes req.params.projectid, req.params.orgid and req.body.name
-  ProjectController.createProject(req.user, req.params.orgid, req.body)
+  // NOTE: create() sanitizes req.params.projectid, req.params.orgid and req.body.name
+  ProjectController.create(req.user, req.params.orgid, req.body)
   .then((project) => {
     // Return 200: OK and created project
     res.header('Content-Type', 'application/json');
@@ -980,8 +983,8 @@ function patchProject(req, res) {
   }
 
   // Update the specified project
-  // NOTE: updateProject() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.updateProject(req.user, req.params.orgid, req.params.projectid, req.body)
+  // NOTE: update() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.update(req.user, req.params.orgid, req.params.projectid, req.body)
   .then((project) => {
     // Return 200: OK and the updated project
     res.header('Content-Type', 'application/json');
@@ -1010,8 +1013,8 @@ function deleteProject(req, res) {
   }
 
   // Remove the specified project
-  // NOTE: removeProject() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid)
+  // NOTE: remove() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.remove(req.user, req.params.orgid, req.params.projectid)
   .then((project) => {
     // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
@@ -1191,7 +1194,7 @@ function getUsers(req, res) {
   }
 
   // Get all users in MBEE
-  UserController.findUsers(req.user)
+  UserController.find(req.user)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -1228,8 +1231,8 @@ function postUsers(req, res) {
   }
 
   // Create users
-  // NOTE: createUsers() sanitizes req.body.users
-  UserController.createUsers(req.user, req.body.users)
+  // NOTE: create() sanitizes req.body.users
+  UserController.create(req.user, req.body.users)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -1291,12 +1294,13 @@ function patchUsers(req, res) {
   }
 
   // Update the specified users
-  // NOTE: updateUsers() sanitizes req.body.update
-  UserController.updateUsers(req.user, updateQuery, req.body.update)
+  // NOTE: update() sanitizes req.body.update
+  UserController.update(req.user, updateQuery, req.body.update)
   .then((users) => {
     // Return 200: OK and the updated users
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(users));
+    const publicUsers = users.map(u => u.getPublicData());
+    return res.status(200).send(formatJSON(publicUsers));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1321,7 +1325,7 @@ function deleteUsers(req, res) {
   }
 
   // Remove the specified users
-  UserController.removeUsers(req.user, req.body)
+  UserController.remove(req.user, req.body)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -1351,12 +1355,12 @@ function getUser(req, res) {
   }
 
   // Find the member from it's username
-  // NOTE: findUser() sanitizes req.params.username
-  UserController.findUser(req.user, req.params.username)
+  // NOTE: find() sanitizes req.params.username
+  UserController.find(req.user, req.params.username)
   .then((user) => {
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user.getPublicData()));
+    return res.status(200).send(formatJSON(user[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1391,12 +1395,12 @@ function postUser(req, res) {
   req.body.username = req.params.username;
 
   // Create user with provided parameters
-  // NOTE: createUser() sanitizes req.body
-  UserController.createUser(req.user, req.body)
+  // NOTE: create() sanitizes req.body
+  UserController.create(req.user, req.body)
   .then((user) => {
     // Return 200: OK and created user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user.getPublicData()));
+    return res.status(200).send(formatJSON(user[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1421,14 +1425,18 @@ function patchUser(req, res) {
   }
 
   // Update the specified user
-  // NOTE: updateUser() sanitizes req.params.username and req.body
-  UserController.updateUser(req.user, req.params.username, req.body)
+  // NOTE: update() sanitizes req.params.username and req.body
+  UserController.update(req.user, req.params, req.body)
   .then((user) => {
+    //console.log(user)
     res.header('Content-Type', 'application/json');
     // Return 200: OK and updated user
-    return res.status(200).send(formatJSON(user.getPublicData()));
+    return res.status(200).send(formatJSON(user[0].getPublicData()));
   })
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error)
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -1450,12 +1458,12 @@ function deleteUser(req, res) {
   }
 
   // Remove the specified user
-  // NOTE: removeUser() sanitizes req.params.username
-  UserController.removeUser(req.user, req.params.username)
+  // NOTE: remove() sanitizes req.params.username
+  UserController.remove(req.user, req.params.username)
   .then((user) => {
     // Return 200: OK and the deleted user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user.getPublicData()));
+    return res.status(200).send(formatJSON(user[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1520,8 +1528,8 @@ function getElements(req, res) {
   }
 
   // Find all elements from it's org.id and project.id
-  // NOTE: findElements() sanitizes req.params.orgid and req.params.projectid
-  ElementController.findElements(req.user, req.params.orgid, req.params.projectid, archived)
+  // NOTE: find() sanitizes req.params.orgid and req.params.projectid
+  ElementController.find(req.user, req.params.orgid, req.params.projectid, archived)
   .then((elements) => {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
@@ -1558,8 +1566,8 @@ function postElements(req, res) {
   }
 
   // Create the specified elements
-  // NOTE: createElements() sanitizes req.params.orgid, req.params.projectid and the elements
-  ElementController.createElements(req.user, req.params.orgid,
+  // NOTE: create() sanitizes req.params.orgid, req.params.projectid and the elements
+  ElementController.create(req.user, req.params.orgid,
     req.params.projectid, req.body)
   .then((elements) => {
     const data = [];
@@ -1640,8 +1648,8 @@ function patchElements(req, res) {
   }
 
   // Update the specified projects
-  // NOTE: updateElements() sanitizes req.body.update
-  ElementController.updateElements(req.user, updateQuery, req.body.update)
+  // NOTE: update() sanitizes req.body.update
+  ElementController.update(req.user, updateQuery, req.body.update)
   .then((elements) => {
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
@@ -1710,7 +1718,7 @@ function deleteElements(req, res) {
   }
 
   // Remove the specified elements
-  ElementController.removeElements(req.user, deleteQuery)
+  ElementController.remove(req.user, deleteQuery)
   .then((elements) => {
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
@@ -1755,8 +1763,8 @@ function getElement(req, res) {
   }
 
   // Find the element from it's element.id, project.id, and org.id
-  // NOTE: findElement() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
-  ElementController.findElement(req.user, req.params.orgid,
+  // NOTE: find() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
+  ElementController.find(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid, archived)
   .then((element) => {
     // Return a 200: OK and the element
@@ -1806,8 +1814,8 @@ function postElement(req, res) {
   req.body.projectUID = projUID;
 
   // Create element with provided parameters
-  // NOTE: createElement() sanitizes req.body.name
-  ElementController.createElement(req.user, req.body)
+  // NOTE: create() sanitizes req.body.name
+  ElementController.create(req.user, req.body)
   .then((element) => {
     // Return 200: OK and created element
     res.header('Content-Type', 'application/json');
@@ -1839,7 +1847,7 @@ function patchElement(req, res) {
   // Update the specified element
   // NOTE: updateElement() sanitizes req.params.orgid, req.params.projectid,
   // and req.params.elementid
-  ElementController.updateElement(req.user, req.params.orgid,
+  ElementController.update(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid, req.body)
   .then((element) => {
     // Return 200: OK and the updated element
@@ -1871,7 +1879,7 @@ function deleteElement(req, res) {
   // Remove the specified element
   // NOTE: removeElement() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.elementid
-  ElementController.removeElement(req.user, req.params.orgid,
+  ElementController.remove(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid)
   .then((element) => {
     res.header('Content-Type', 'application/json');
@@ -1917,8 +1925,8 @@ function getWebhook(req, res) {
   }
 
   // Find the webhook from it's webhook.id, project.id, and org.id
-  // NOTE: findWebhook() sanitizes req.params.webhookid, req.params.projectid, req.params.orgid
-  WebhookController.findWebhook(req.user, req.params.orgid,
+  // NOTE: find() sanitizes req.params.webhookid, req.params.projectid, req.params.orgid
+  WebhookController.find(req.user, req.params.orgid,
     req.params.projectid, req.params.webhookid, archived)
   .then((webhook) => {
     // Return a 200: OK and the webhook
@@ -1957,8 +1965,8 @@ function postWebhook(req, res) {
   req.body.id = req.params.webhookid;
 
   // Create webhook with provided parameters
-  // NOTE: createWebhook() sanitizes req.body
-  WebhookController.createWebhook(req.user, req.params.orgid, req.params.projectid, req.body)
+  // NOTE: creat() sanitizes req.body
+  WebhookController.create(req.user, req.params.orgid, req.params.projectid, req.body)
   .then((webhook) => {
     // Return 200: OK and created webhook
     res.header('Content-Type', 'application/json');
@@ -1990,7 +1998,7 @@ function patchWebhook(req, res) {
   // Update the specified webhook
   // NOTE: updateWebhook() sanitizes req.params.orgid, req.params.projectid,
   // and req.params.webhookid
-  WebhookController.updateWebhook(req.user, req.params.orgid,
+  WebhookController.update(req.user, req.params.orgid,
     req.params.projectid, req.params.webhookid, req.body)
   .then((webhook) => {
     // Return 200: OK and the updated webhook
@@ -2022,7 +2030,7 @@ function deleteWebhook(req, res) {
   // Remove the specified webhook
   // NOTE: removeWebhook() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.webhookid
-  WebhookController.removeWebhook(req.user, req.params.orgid,
+  WebhookController.remove(req.user, req.params.orgid,
     req.params.projectid, req.params.webhookid)
   .then((success) => {
     res.header('Content-Type', 'application/json');

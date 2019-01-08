@@ -104,12 +104,12 @@ function whoami(done) {
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.username).to.equal(testData.users[0].adminUsername);
+    chai.expect(json.username).to.equal(testData.adminUser.username);
     done();
   };
 
@@ -132,7 +132,7 @@ function getUsers(done) {
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -159,7 +159,7 @@ function postUser(done) {
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -187,7 +187,7 @@ function getUser(done) {
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -210,12 +210,11 @@ function patchUser(done) {
   const params = { username: testData.users[1].username };
   const method = 'PATCH';
   const req = getReq(params, body, method);
-
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -242,7 +241,7 @@ function deleteUser(done) {
   const req = getReq(params, body, method);
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -274,7 +273,7 @@ function postUsers(done) {
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -307,7 +306,7 @@ function patchUsers(done) {
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -343,7 +342,7 @@ function deleteUsers(done) {
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {

@@ -369,7 +369,7 @@ function update(requestingUser, users, options) {
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrUsernames } };
-
+    console.log(searchQuery);
     // Find the users to update
     User.find(searchQuery)
     .then((_foundUsers) => {
@@ -440,8 +440,8 @@ function update(requestingUser, users, options) {
         });
 
         // Update last modified field
-        updateUser.lastModifiedBy = reqUser;
-
+        updateUser.lastModifiedBy = reqUser._id;
+        console.log(updateUser)
         // Update the user
         promises.push(user.updateOne(updateUser));
       });
