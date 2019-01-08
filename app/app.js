@@ -145,6 +145,9 @@ function createDefaultOrganization() {
           }
         });
 
+        // Mark the permissions field modified, require for 'mixed' fields
+        org.markModified('permissions');
+
         // Save the update organization
         return org.save();
       }
