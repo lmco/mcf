@@ -323,9 +323,8 @@ function findAllUsers(done) {
   // Find users via controller
   UserController.find(adminUser)
   .then((foundUsers) => {
-    // TODO: What if there are other users in the database?
     // Expect foundUsers not to be empty
-    chai.expect(foundUsers.length).to.equal(userDataObjects.length);
+    chai.expect(foundUsers.length).to.not.equal(0);
 
     // Convert foundUsers to JMI type 2 for easier lookup
     const jmi2Users = utils.convertJMI(1, 2, foundUsers);

@@ -54,7 +54,7 @@ const utils = M.require('lib.utils');
  * project being found.
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the boolean 'archived' and
- * the string 'populate'
+ * the array of strings 'populate'
  *
  * @return {Promise} resolve - Array of found project objects
  *                   reject - error
@@ -104,9 +104,11 @@ function find(requestingUser, organizationID, projects, options) {
 
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -152,7 +154,7 @@ function find(requestingUser, organizationID, projects, options) {
  * @param {Array/Object} projects - Either an array of objects containing
  * project data or a single object containing project data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of created project objects
  *                   reject - error
@@ -186,9 +188,11 @@ function create(requestingUser, organizationID, projects, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
           populate = true;
         }
       }
@@ -320,7 +324,7 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {Array/Object} projects - Either an array of objects containing
  * updates to projects, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of updated project objects
  *                   reject - error
@@ -356,9 +360,11 @@ function update(requestingUser, organizationID, projects, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -425,7 +431,7 @@ function update(requestingUser, organizationID, projects, options) {
 
       // Convert projectsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, projectsToUpdate);
-      const promises = [];
+      const bulkArray = [];
       // Get array of editable parameters
       const validFields = Project.getValidUpdateFields();
 
@@ -495,43 +501,49 @@ function update(requestingUser, organizationID, projects, options) {
                   default:
                     delete proj.permissions[user];
                 }
+
+                // Copy permissions from proj to update object
+                updateProj.permissions = proj.permissions;
               });
             }
             else {
               // Add and replace parameters of the type 'Mixed'
               utils.updateAndCombineObjects(proj[key], updateProj[key]);
+
+              // Set mixed field in updateProj
+              updateProj[key] = proj[key];
             }
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             proj.markModified(key);
           }
-          else {
-            // Set archivedBy if archived field is being changed
-            if (key === 'archived') {
-              // If the proj is being archived
-              if (updateProj[key] && !proj[key]) {
-                proj.archivedBy = reqUser;
-              }
-              // If the proj is being unarchived
-              else if (!updateProj[key] && proj[key]) {
-                proj.archivedBy = null;
-              }
+          // Set archivedBy if archived field is being changed
+          else if (key === 'archived') {
+            // If the proj is being archived
+            if (updateProj[key] && !proj[key]) {
+              updateProj.archivedBy = reqUser._id;
             }
-
-            // Schema type is not mixed, update field in proj object
-            proj[key] = updateProj[key];
+            // If the proj is being unarchived
+            else if (!updateProj[key] && proj[key]) {
+              updateProj.archivedBy = null;
+            }
           }
         });
 
         // Update last modified field
-        proj.lastModifiedBy = reqUser;
+        updateProj.lastModifiedBy = reqUser._id;
 
         // Update the project
-        promises.push(proj.save());
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: proj._id },
+            update: updateProj
+          }
+        });
       });
 
-      // Return when all promises have been completed
-      return Promise.all(promises);
+      // Update all projects through a bulk write to the database
+      return Project.bulkWrite(bulkArray);
     })
     .then(() => Project.find(searchQuery)
     .populate(populateString))

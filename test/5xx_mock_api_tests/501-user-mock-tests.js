@@ -205,8 +205,12 @@ function getUser(done) {
  * @description Verifies mock PATCH request to update the user.
  */
 function patchUser(done) {
-  // Create request object
-  const body = testData.names[9];
+  // Create request body object
+  // Note: Contains update fields
+  const body = {
+    fname: testData.names[9].fname
+  };
+
   const params = { username: testData.users[1].username };
   const method = 'PATCH';
   const req = getReq(params, body, method);
@@ -224,7 +228,7 @@ function patchUser(done) {
     done();
   };
 
-  // PATCHs a user
+  // PATCH a user
   apiController.patchUser(req, res);
 }
 

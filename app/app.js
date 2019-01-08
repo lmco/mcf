@@ -47,8 +47,8 @@ module.exports = app;
  * default admin and default organization if needed.
  */
 db.connect()
-.then(() => createDefaultAdmin())
 .then(() => createDefaultOrganization())
+.then(() => createDefaultAdmin())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);
@@ -139,9 +139,16 @@ function createDefaultOrganization() {
       if (org !== null) {
         // Default organization exists, prune user permissions to only include
         // active users.
-        // TODO: Remove users based on new format of permissions
-        org.permissions.read = userIDs;
-        org.permissions.write = userIDs;
+        Object.keys(org.permissions).forEach((user) => {
+          if (!userIDs.includes(user)) {
+            delete org.permissions.user;
+          }
+        });
+
+        // Mark the permissions field modified, require for 'mixed' fields
+        org.markModified('permissions');
+
+        // Save the update organization
         return org.save();
       }
       // Set createdOrg to true
@@ -188,7 +195,6 @@ function createDefaultAdmin() {
       }
       // set userCreated to true
       userCreated = true;
-      // TODO: Add default admin to default org
       // No global admin exists, create local user as global admin
       const adminUserData = new User({
         // Set username and password of global admin user from configuration.
@@ -199,6 +205,14 @@ function createDefaultAdmin() {
       });
       // Save new global admin user
       return adminUserData.save();
+    })
+    .then(() => Organization.findOne({ _id: M.config.server.defaultOrganizationId }))
+    .then((defaultOrg) => {
+      // Add default admin to default org
+      defaultOrg.permissions[M.config.server.defaultAdminUsername] = ['read', 'write'];
+
+      // Save the updated default org
+      return defaultOrg.save();
     })
     // Resolve on success of saved admin
     .then(() => {

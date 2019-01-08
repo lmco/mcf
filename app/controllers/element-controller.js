@@ -55,7 +55,7 @@ const utils = M.require('lib.utils');
  * element in a project being found.
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the booleans 'archived'
- * and 'subtree' and the string 'populate'
+ * and 'subtree' and the array of strings 'populate'
  *
  * @return {Promise} resolve - Array of found element objects
  *                   reject - error
@@ -114,9 +114,11 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
 
         // If the option 'subtree' is supplied ensure it's a boolean
@@ -225,7 +227,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {Array/Object} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of created element objects
  *                   reject - error
@@ -268,9 +270,11 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
           populate = true;
         }
       }
@@ -529,7 +533,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Array/Object} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of updated element objects
  *                   reject - error
@@ -577,9 +581,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populated === 'string', 'The option \'populated\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -706,18 +712,18 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             // Add and replace parameters of the type 'Mixed'
             utils.updateAndCombineObjects(element[key], updateElement[key]);
 
+            // Set updateElement mixed field
+            updateElement[key] = element[key];
+
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             element.markModified(key);
-
-            // Set updateElement mixed field
-            updateElement[key] = element[key];
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
             // If the element is being archived
             if (updateElement[key] && !element[key]) {
-              updateElement.archivedBy = reqUser;
+              updateElement.archivedBy = reqUser._id;
             }
             // If the element is being unarchived
             else if (!updateElement[key] && element[key]) {
@@ -729,7 +735,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         // Update last modified field
         updateElement.lastModifiedBy = reqUser._id;
 
-        // Update the project
+        // Update the element
         bulkArray.push({
           updateOne: {
             filter: { _id: element._id },
@@ -738,7 +744,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         });
       });
 
-      // Return when all promises have been completed
+      // Update all elements through a bulk write to the database
       return Element.bulkWrite(bulkArray);
     })
     .then(() => {

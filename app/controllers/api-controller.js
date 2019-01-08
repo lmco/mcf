@@ -1292,6 +1292,8 @@ function patchUsers(req, res) {
     const error = new M.CustomError('Users array contains invalid types.', 400, 'warn');
     return res.status(error.status).send(error);
   }
+  // Extract options from request query
+  const options = req.query;
 
   // Update the specified users
   // NOTE: update() sanitizes req.body.update
@@ -1323,9 +1325,11 @@ function deleteUsers(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+  // Extract options from request query
+  const options = req.query;
 
   // Remove the specified users
-  UserController.remove(req.user, req.body)
+  UserController.remove(req.user, req.body, options)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -1353,10 +1357,12 @@ function getUser(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+  // Extract options from request query
+  const options = utils.parseOptions(req.query);
 
   // Find the member from it's username
   // NOTE: find() sanitizes req.params.username
-  UserController.find(req.user, req.params.username)
+  UserController.find(req.user, req.params.username, options)
   .then((user) => {
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
@@ -1424,11 +1430,21 @@ function patchUser(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If username was provided in the body, ensure it matches username in params
+  if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
+    const error = new M.CustomError(
+      'Username in body does not match username in params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+  // Set body username
+  req.body.username = req.params.username;
+
   // Update the specified user
   // NOTE: update() sanitizes req.params.username and req.body
-  UserController.update(req.user, req.params, req.body)
+  UserController.update(req.user, req.body. req.body.option)
   .then((user) => {
-    //console.log(user)
+    console.log(user)
     res.header('Content-Type', 'application/json');
     // Return 200: OK and updated user
     return res.status(200).send(formatJSON(user[0].getPublicData()));

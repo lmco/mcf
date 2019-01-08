@@ -51,7 +51,7 @@ const utils = M.require('lib.utils');
  * webhook being found.
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the boolean 'archived' and
- * the string 'populate'.
+ * the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of found webhook objects
  *                   reject - error
@@ -103,9 +103,11 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
 
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -168,7 +170,7 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Array/Object} webhooks - Either an array of objects containing
  * webhook data or a single object containing webhook data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of created webhook objects
  *                   reject - error
@@ -204,9 +206,11 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
           populate = true;
         }
       }
@@ -326,7 +330,7 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Array/Object} webhooks - Either an array of objects containing
  * updates to webhooks, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of updated webhook objects
  *                   reject - error
@@ -368,9 +372,11 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -452,7 +458,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
 
       // Convert webhooksToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, webhooksToUpdate);
-      const promises = [];
+      const bulkArray = [];
       // Get array of editable parameters
       const validFields = Webhook.Webhook.getValidUpdateFields();
 
@@ -487,37 +493,40 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
             // Add and replace parameters of the type 'Mixed'
             utils.updateAndCombineObjects(webhook[key], updateWebhook[key]);
 
+            // Set updateWebhook mixed field
+            updateWebhook[key] = webhook[key];
+
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             webhook.markModified(key);
           }
-          else {
-            // Set archivedBy if archived field is being changed
-            if (key === 'archived') {
-              // If the webhook is being archived
-              if (updateWebhook[key] && !webhook[key]) {
-                webhook.archivedBy = reqUser;
-              }
-              // If the webhook is being unarchived
-              else if (!updateWebhook[key] && webhook[key]) {
-                webhook.archivedBy = null;
-              }
+          // Set archivedBy if archived field is being changed
+          else if (key === 'archived') {
+            // If the webhook is being archived
+            if (updateWebhook[key] && !webhook[key]) {
+              updateWebhook.archivedBy = reqUser._id;
             }
-
-            // Schema type is not mixed, update field in webhook object
-            webhook[key] = updateWebhook[key];
+            // If the webhook is being unarchived
+            else if (!updateWebhook[key] && webhook[key]) {
+              updateWebhook.archivedBy = null;
+            }
           }
         });
 
         // Update last modified field
-        webhook.lastModifiedBy = reqUser;
+        updateWebhook.lastModifiedBy = reqUser._id;
 
         // Update the project
-        promises.push(webhook.save());
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: webhook._id },
+            update: updateWebhook
+          }
+        });
       });
 
-      // Return when all promises have been completed
-      return Promise.all(promises);
+      // Update all webhooks through a bulk write to the database
+      return Webhook.Webhook.bulkWrite(bulkArray);
     })
     .then(() => Webhook.Webhook.find(searchQuery).populate(populateString))
     .then((foundUpdatedWebhooks) => resolve(foundUpdatedWebhooks))

@@ -311,3 +311,54 @@ module.exports.convertJMI = function(from, to, data) {
 
   throw new M.CustomError('JMI conversion not yet implemented.', 501, 'warn');
 };
+
+/**
+ * @description Parse option string into option objects.
+ * Note: Boolean strings are converted to booleans
+ *          ex. "true" => true
+ *       string seperated commas are converted to arrays
+ *          ex. "createdBy, modifiedBy" => {["createdBy", "modifiedBy"]}
+ *
+ * @param {options} from - The current JMI version of the data.
+ *
+ */
+module.exports.parseOptions = function(options) {
+  // Define option expected type
+  const validOptions = {
+    populate: 'string',
+    subtree: 'boolean',
+    achieved: 'boolean'
+  }
+
+  console.log('Options: ' ,options);
+
+  // Define empty parsed option object
+  let parsedOptions = {};
+
+  // Loop through all options
+  Object.keys(options).forEach((option) => {
+    // Check for ','
+    if(options[option].includes(',')) {
+      // Multiple options, split into array
+      parsedOptions[option] = options[option].split(',');
+    }
+    else {
+      // Set single option
+      parsedOptions[option] = options[option];
+    }
+
+    // Check option of boolean type
+    if (validOptions[option] == 'boolean') {
+      // Check and convert string to boolean
+      if (options[option] == 'true'){
+        parsedOptions[option] = true;
+      }
+      else if(options[option] == 'false') {
+        parsedOptions[option] = false;
+      }
+    }
+  });
+  console.log('Parsed Options: ' ,parsedOptions);
+  return parsedOptions;
+}
+

@@ -51,7 +51,7 @@ const utils = M.require('lib.utils');
  * being found.
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the boolean 'archived' and
- * the string 'populate'
+ * the array of strings 'populate'
  *
  * @return {Promise} resolve - Array of found user objects
  *                   reject - error
@@ -97,9 +97,11 @@ function find(requestingUser, users, options) {
 
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -127,6 +129,7 @@ function find(requestingUser, users, options) {
       // Invalid parameter, throw an error
       throw new M.CustomError('Invalid input for finding users.', 400, 'warn');
     }
+    // TODO: Find users in batches (possibility of more than 100,000 users)
     // Find the users
     User.find(searchQuery)
     .populate(populateString)
@@ -142,7 +145,7 @@ function find(requestingUser, users, options) {
  * @param {Array/Object} users - Either an array of objects containing user data
  * or a single object containing user data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of created user objects
  *                   reject - error
@@ -176,9 +179,11 @@ function create(requestingUser, users, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
           populate = true;
         }
       }
@@ -294,7 +299,7 @@ function create(requestingUser, users, options) {
  * @param {Array/Object} users - Either an array of objects containing updates
  * to users, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of updated user objects
  *                   reject - error
@@ -328,9 +333,11 @@ function update(requestingUser, users, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -395,7 +402,7 @@ function update(requestingUser, users, options) {
 
       // Convert usersToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, usersToUpdate);
-      const promises = [];
+      const bulkArray = [];
       // Get array of editable parameters
       const validFields = User.getValidUpdateFields();
 
@@ -447,7 +454,7 @@ function update(requestingUser, users, options) {
 
             // If the user is being archived
             if (updateUser[key] && !user[key]) {
-              updateUser.archivedBy = reqUser;
+              updateUser.archivedBy = reqUser._id;
             }
             // If the user is being unarchived
             else if (!updateUser[key] && user[key]) {
@@ -458,13 +465,18 @@ function update(requestingUser, users, options) {
 
         // Update last modified field
         updateUser.lastModifiedBy = reqUser._id;
-        console.log(updateUser)
+
         // Update the user
-        promises.push(user.updateOne(updateUser));
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: user._id },
+            update: updateUser
+          }
+        });
       });
 
-      // Return when all promises have been completed
-      return Promise.all(promises);
+      // Update all users through a bulk write to the database
+      return User.bulkWrite(bulkArray);
     })
     .then(() => User.find(searchQuery)
     .populate(populateString))

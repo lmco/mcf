@@ -52,7 +52,7 @@ const utils = M.require('lib.utils');
  * org being found.
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the boolean 'archived' and
- * the string 'populate'.
+ * the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of found organization objects
  *                   reject - error
@@ -98,9 +98,11 @@ function find(requestingUser, orgs, options) {
 
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -145,7 +147,7 @@ function find(requestingUser, orgs, options) {
  * @param {Array/Object} orgs - Either an array of objects containing org data
  * or a single object containing org data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of created organization objects
  *                   reject - error
@@ -178,9 +180,11 @@ function create(requestingUser, orgs, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
           populate = true;
         }
       }
@@ -275,7 +279,7 @@ function create(requestingUser, orgs, options) {
  * @param {Array/Object} orgs - Either an array of objects containing updates to
  * organizations, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the string 'populate'.
+ * options. Currently the only supported option is the array of strings 'populate'.
  *
  * @return {Promise} resolve - Array of updated organization objects
  *                   reject - error
@@ -309,9 +313,11 @@ function update(requestingUser, orgs, options) {
       if (options) {
         // If the option 'populate' is supplied, ensure it's a string
         if (options.hasOwnProperty('populate')) {
-          assert.ok(typeof options.populate === 'string', 'The option \'populate\''
-            + ' is not a string.');
-          populateString = options.populate;
+          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
+            + ' is not an array.');
+          assert.ok(options.populate.every(o => typeof o === 'string'),
+            'Every value in the populate array must be a string.');
+          populateString = options.populate.join(' ');
         }
       }
     }
@@ -378,7 +384,7 @@ function update(requestingUser, orgs, options) {
 
       // Convert orgsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, orgsToUpdate);
-      const promises = [];
+      const bulkArray = [];
       // Get array of editable parameters
       const validFields = Organization.getValidUpdateFields();
 
@@ -454,43 +460,49 @@ function update(requestingUser, orgs, options) {
                   default:
                     delete org.permissions[user];
                 }
+
+                // Copy permissions from org to update object
+                updateOrg.permissions = org.permissions;
               });
             }
             else {
               // Add and replace parameters of the type 'Mixed'
               utils.updateAndCombineObjects(org[key], updateOrg[key]);
+
+              // Set mixed field in updateOrg
+              updateOrg[key] = org[key];
             }
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
             org.markModified(key);
           }
-          else {
-            // Set archivedBy if archived field is being changed
-            if (key === 'archived') {
-              // If the org is being archived
-              if (updateOrg[key] && !org[key]) {
-                org.archivedBy = reqUser;
-              }
-              // If the org is being unarchived
-              else if (!updateOrg[key] && org[key]) {
-                org.archivedBy = null;
-              }
+          // Set archivedBy if archived field is being changed
+          else if (key === 'archived') {
+            // If the org is being archived
+            if (updateOrg[key] && !org[key]) {
+              updateOrg.archivedBy = reqUser._id;
             }
-
-            // Schema type is not mixed, update field in org object
-            org[key] = updateOrg[key];
+            // If the org is being unarchived
+            else if (!updateOrg[key] && org[key]) {
+              updateOrg.archivedBy = null;
+            }
           }
         });
 
         // Update last modified field
-        org.lastModifiedBy = reqUser;
+        updateOrg.lastModifiedBy = reqUser._id;
 
         // Update the org
-        promises.push(org.save());
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: org._id },
+            update: updateOrg
+          }
+        });
       });
 
-      // Return when all promises have been completed
-      return Promise.all(promises);
+      // Update all orgs through a bulk write to the database
+      return Organization.bulkWrite(bulkArray);
     })
     .then(() => Organization.find(searchQuery)
     .populate(populateString))
