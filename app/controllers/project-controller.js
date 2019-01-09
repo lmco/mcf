@@ -481,7 +481,8 @@ function update(requestingUser, organizationID, projects, options) {
           }
 
           // If the type of field is mixed
-          if (Project.schema.obj[key].type.schemaName === 'Mixed') {
+          if (Project.schema.obj[key]
+            && Project.schema.obj[key].type.schemaName === 'Mixed') {
             // Only objects should be passed into mixed data
             if (typeof updateProj !== 'object') {
               throw new M.CustomError(`${key} must be an object`, 400, 'warn');

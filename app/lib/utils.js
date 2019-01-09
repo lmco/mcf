@@ -289,9 +289,10 @@ module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
  * @param {Number} from - The current JMI version of the data.
  * @param {Number} to - The JMI version to convert the data to.
  * @param {Object} data - The data to convert between JMI versions.
+ * @param {String} field - The field to parse type 1 on
  *
  */
-module.exports.convertJMI = function(from, to, data) {
+module.exports.convertJMI = function(from, to, data, field = '_id') {
   // Convert JMI type 1 to type 2
   if (from === 1 && to === 2) {
     // Error Check: Ensure data is in JMI type 1
@@ -304,7 +305,7 @@ module.exports.convertJMI = function(from, to, data) {
 
     const returnObj = {};
     data.forEach((object) => {
-      returnObj[object._id] = object;
+      returnObj[object[field]] = object;
     });
     return returnObj;
   }
@@ -332,7 +333,7 @@ module.exports.parseOptions = function(options, validOptions) {
     // Check option of boolean type
     if (validOptions[option] === 'boolean') {
       // Check and convert string to boolean
-      if (options[option] === 'true'){
+      if (options[option] === 'true') {
         parsedOptions[option] = true;
       }
       else if (options[option] === 'false') {
@@ -355,5 +356,4 @@ module.exports.parseOptions = function(options, validOptions) {
     }
   });
   return parsedOptions;
-}
-
+};
