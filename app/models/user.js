@@ -205,7 +205,12 @@ UserSchema.methods.getPublicData = function() {
     lname: this.lname,
     email: this.email,
     createdOn: this.createdOn,
+    createdBy: this.createdBy._id || this.createdBy,
     updatedOn: this.updatedOn,
+    lastModifiedBy: this.lastModifiedBy._id || this.lastModifiedBy,
+    archived: (this.archived) ? true : undefined,
+    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
+    archivedBy: (this.archivedBy) ? this.archivedBy._id || this.archivedBy : undefined,
     admin: this.admin
   };
 };
