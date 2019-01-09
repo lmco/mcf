@@ -211,6 +211,8 @@ function createDefaultAdmin() {
       // Add default admin to default org
       defaultOrg.permissions[M.config.server.defaultAdminUsername] = ['read', 'write'];
 
+      defaultOrg.markModified('permissions');
+
       // Save the updated default org
       return defaultOrg.save();
     })
