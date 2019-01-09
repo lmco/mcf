@@ -88,7 +88,7 @@ OrganizationSchema.methods.getPublicData = function() {
   };
 
   // Map read, write, and admin permissions to arrays
-  this.permissions.forEach(u => {
+  Object.keys(this.permissions).forEach(u => {
     if (this.permissions[u].includes('read')) {
       permissions.read.push(u);
     }
