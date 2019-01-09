@@ -34,6 +34,13 @@ const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
+// Define option expected type
+const validOptions = {
+  populate: 'array',
+  subtree: 'boolean',
+  archived: 'boolean'
+}
+
 // Expose `ElementController`
 module.exports = {
   swaggerJSON,
@@ -218,26 +225,21 @@ function getOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Define the optional archived flag
-  let archived = false;
-
   // Check if invalid key passed in
   Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['archived'].includes(key)) {
+    if (!['archived', 'populate'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
-  }
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, validOptions);
 
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes req.user.
-  OrgController.find(req.user, archived)
+  OrgController.find(req.user, options)
   .then((orgs) => {
     // Return only public organization data
     const orgsPublicData = orgs.map(o => o.getPublicData());
@@ -253,7 +255,9 @@ function getOrgs(req, res) {
     return res.status(200).send(formatJSON(orgsPublicData));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -273,15 +277,12 @@ function postOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: ensure org data array is provided in the body
-  if (!req.body.hasOwnProperty('orgs')) {
-    const error = new M.CustomError('Orgs array not in request body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, validOptions);
 
   // Create organizations in request body
   // NOTE: createOrgs() sanitizes req.body.orgs
-  OrgController.create(req.user, req.body.orgs)
+  OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
@@ -308,39 +309,12 @@ function patchOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Initialize the delete query object
-  let updateQuery = {};
-
-  // Error Check: ensure update was provided in body
-  if (!req.body.hasOwnProperty('update')) {
-    const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
-  // No orgs provided, return an error
-  if (!req.body.hasOwnProperty('orgs')) {
-    const error = new M.CustomError('Array of orgs not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-  // Org objects provided, delete all
-  if (req.body.orgs.every(o => typeof o === 'object')) {
-    // Query finds all orgs by their id
-    updateQuery = { _id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
-  }
-  // Org IDs provided, delete all
-  else if (req.body.orgs.every(o => typeof o === 'string')) {
-    // Query finds all orgs by their id
-    updateQuery = { _id: { $in: sani.sanitize(req.body.orgs) } };
-  }
-  // No valid org data was provided, reject
-  else {
-    const error = new M.CustomError('Orgs array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, validOptions);
 
   // Update the specified orgs
   // NOTE: updateOrgs() sanitizes req.body.update
-  OrgController.update(req.user, updateQuery, req.body.update)
+  OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
@@ -573,7 +547,6 @@ function getOrgRole(req, res) {
   //OrgController.findPermissions(req.user, req.params.username, req.params.orgid)
   OrgController.find(req.user, req.params.username, req.params.orgid)
   .then((org) => {
-    console.log(org);
     // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(roles));
@@ -1358,7 +1331,7 @@ function getUser(req, res) {
     return res.status(error.status).send(error);
   }
   // Extract options from request query
-  const options = utils.parseOptions(req.query);
+  const options = utils.parseOptions(req.query, validOptions);
 
   // Find the member from it's username
   // NOTE: find() sanitizes req.params.username
@@ -1444,7 +1417,6 @@ function patchUser(req, res) {
   // NOTE: update() sanitizes req.params.username and req.body
   UserController.update(req.user, req.body. req.body.option)
   .then((user) => {
-    console.log(user)
     res.header('Content-Type', 'application/json');
     // Return 200: OK and updated user
     return res.status(200).send(formatJSON(user[0].getPublicData()));

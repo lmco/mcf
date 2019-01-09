@@ -128,9 +128,9 @@ ProjectSchema.methods.getPublicData = function() {
     custom: this.custom,
     visibility: this.visibility,
     createdOn: this.createdOn,
-    createdBy: this.createdBy._id || this.createdBy,
+    createdBy: (this.createdBy) ? this.createdBy._id || this.createdBy : undefined,
     updatedOn: this.updatedOn,
-    lastModifiedBy: this.lastModifiedBy._id || this.lastModifiedBy,
+    lastModifiedBy: (this.lastModifiedBy) ? this.lastModifiedBy._id || this.lastModifiedBy : undefined,
     archived: (this.archived) ? true : undefined,
     archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
     archivedBy: (this.archivedBy) ? this.archivedBy._id || this.archivedBy : undefined

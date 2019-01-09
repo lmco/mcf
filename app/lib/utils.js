@@ -319,46 +319,41 @@ module.exports.convertJMI = function(from, to, data) {
  *       string seperated commas are converted to arrays
  *          ex. "createdBy, modifiedBy" => {["createdBy", "modifiedBy"]}
  *
- * @param {options} from - The current JMI version of the data.
- *
+ * @param {options} - An optional parameter that provides supported
+ * options.
+ * @param {validOptions} - An object containing valid option as keys and
+ * the object's data type as values. ex. populate: 'array'
  */
-module.exports.parseOptions = function(options) {
-  // Define option expected type
-  const validOptions = {
-    populate: 'string',
-    subtree: 'boolean',
-    achieved: 'boolean'
-  }
-
-  console.log('Options: ' ,options);
-
-  // Define empty parsed option object
-  let parsedOptions = {};
-
+module.exports.parseOptions = function(options, validOptions) {
+  // Define parsed option object
+  const parsedOptions = {};
   // Loop through all options
   Object.keys(options).forEach((option) => {
-    // Check for ','
-    if(options[option].includes(',')) {
-      // Multiple options, split into array
-      parsedOptions[option] = options[option].split(',');
-    }
-    else {
-      // Set single option
-      parsedOptions[option] = options[option];
-    }
-
     // Check option of boolean type
-    if (validOptions[option] == 'boolean') {
+    if (validOptions[option] === 'boolean') {
       // Check and convert string to boolean
-      if (options[option] == 'true'){
+      if (options[option] === 'true'){
         parsedOptions[option] = true;
       }
-      else if(options[option] == 'false') {
+      else if (options[option] === 'false') {
         parsedOptions[option] = false;
       }
     }
+    // Check array type
+    else if (validOptions[option] === 'array') {
+      if (options[option].includes(',')) {
+        // Multiple options, split into array
+        parsedOptions[option] = options[option].split(',');
+      }
+      else {
+        // Set single option within array
+        parsedOptions[option] = [options[option]];
+      }
+    }
+    else {
+      parsedOptions[option] = options[option];
+    }
   });
-  console.log('Parsed Options: ' ,parsedOptions);
   return parsedOptions;
 }
 
