@@ -141,6 +141,17 @@ api.route('/version')
  *         If the user is not a member of any organizations, an empty array is returned.
  *     produces:
  *       - application/json
+ *     parameters:
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET orgs returns orgs' data.
@@ -172,6 +183,12 @@ api.route('/version')
  *             orgs:
  *               type: object
  *               description: An array of objects containing organization data.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST orgs returns orgs' data.
@@ -208,6 +225,12 @@ api.route('/version')
  *               type: object
  *               description: An object containing fields to update in the orgs
  *                            and their corresponding values.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH orgs returns orgs' data.
@@ -284,6 +307,16 @@ api.route('/orgs')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET org returns org data.
@@ -331,6 +364,12 @@ api.route('/orgs')
  *             custom:
  *               type: JSON Object
  *               description: Custom JSON data that can be added to an organization
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST org returns org data.
@@ -368,6 +407,12 @@ api.route('/orgs')
  *             custom:
  *               type: JSON Object
  *               description: The updated custom JSON data of the organization.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH org returns updated org data.
@@ -458,6 +503,16 @@ api.route('/orgs/:orgid')
  *               description: The boolean indicating if archived projects are returned. The user
  *                            must be a global admin or an admin on the organization to find
  *                            archived projects.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects returns org data.
@@ -492,6 +547,12 @@ api.route('/orgs/:orgid')
  *           type: object
  *           description: An array of projects to create. Each project must
  *                        contain the name and id of that project.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST projects returns project data
@@ -518,7 +579,12 @@ api.route('/orgs/:orgid')
  *         schema:
  *           type: object
  *           description: An array of updated project objects.
- *
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH project returns project data.
@@ -616,6 +682,16 @@ api.route('/orgs/:orgid/projects')
  *               description: The boolean indicating if a archived project is returned. The user
  *                            must be a global admin or an admin on the organization to find an
  *                            archived project.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET project returns project data.
@@ -683,6 +759,12 @@ api.route('/orgs/:orgid/projects')
  *               type: string
  *               description: Indicates the visibility of the project. Can be either
  *                            private or internal. Defaults to private if not included.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST project return project data.
@@ -727,6 +809,12 @@ api.route('/orgs/:orgid/projects')
  *             custom:
  *               type: JSON Object
  *               description: The updated custom data for the project.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH project returns updated project data.
@@ -794,7 +882,7 @@ api.route('/orgs/:orgid/projects/:projectid')
   APIController.deleteProject
 );
 
-
+// TODO: COME BACK TO THIS
 /**
  * @swagger
  * /api/orgs/:orgid/members:
@@ -830,7 +918,7 @@ api.route('/orgs/:orgid/members')
   Middleware.logRoute,
   APIController.getAllOrgMemRoles
 );
-
+// TODO: COME BACK TO THIS
 /**
  * @swagger
  * /api/orgs/:orgid/members/:username:
@@ -1005,7 +1093,7 @@ api.route('/orgs/:orgid/members/:username')
   Middleware.logRoute,
   APIController.deleteOrgRole
 );
-
+// TODO: COME BACK TO THIS
 /**
  * @swagger
  * /api/orgs/:orgid/projects/:projectid/members:
@@ -1046,7 +1134,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
   Middleware.logRoute,
   APIController.getAllProjMemRoles
 );
-
+// TODO: COME BACK TO THIS
 /**
  * @swagger
  * /api/orgs/:orgid/projects/:projectid/members/:username:
@@ -1262,6 +1350,11 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
  *       - name: content
  *         description: The object containing get elements options.
  *         in: body
@@ -1274,6 +1367,20 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *               description: The boolean indicating if a archived element is returned. The user
  *                            must be a global admin or an admin on the project to find archived
  *                            elements.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
+ *       - name: subtree
+ *         description: If true, returns all elements in the search elements subtree.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements returns elements data
@@ -1306,6 +1413,11 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
  *       - name: content
  *         description: The object containing the element data.
  *         in: body
@@ -1313,6 +1425,12 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         schema:
  *           type: object
  *           description: An array of element objects to create.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST element, return element data.
@@ -1335,6 +1453,21 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
  *       - name: content
  *         description: The object containing the element data.
  *         in: body
@@ -1353,6 +1486,12 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *               type: object
  *               description: An object containing fields to update in the
  *                            elements and their corresponding values.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH elements, returns elements data
@@ -1381,6 +1520,11 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         type: string
  *       - name: projectid
  *         description: The ID of the project whose elements to delete.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
  *         in: URI
  *         required: true
  *         type: string
@@ -1455,23 +1599,30 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
  *       - name: elementid
  *         description: The ID of the element to return.
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing get element options.
- *         in: body
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
  *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             archived:
- *               type: boolean
- *               description: The boolean indicating if the archived element is returned. The
- *                            user must be a global admin or an admin on the project to
- *                            find a archived element.
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
+ *       - name: subtree
+ *         description: If true, returns all elements in the search elements subtree.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET element returns element data.
@@ -1503,6 +1654,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
  *       - name: elementid
  *         description: The ID of the element to be created.
  *         in: URI
@@ -1531,6 +1687,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *             custom:
  *               type: JSON Object
  *               description: Custom JSON data that can be added to the element.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST element returns element data.
@@ -1562,6 +1724,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
  *       - name: elementid
  *         description: The ID of the element to be updated.
  *         in: URI
@@ -1583,6 +1750,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *             custom:
  *               type: JSON Object
  *               description: The updated custom JSON data for the element.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH element returns element data.
@@ -1611,6 +1784,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
  *         in: URI
  *         required: true
  *         type: string
@@ -1665,7 +1843,16 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *     produces:
  *       - application/json
  *     parameters:
- *       - N/A
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users returns public user data.
@@ -1698,6 +1885,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *               type: object
  *               description: An array of users to create. Each user must
  *                            contain the username of that user.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST users returns public users data.
@@ -1731,6 +1924,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *               type: object
  *               description: An object containing fields to update in the users
  *                            and their corresponding values.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH users, returns public users data.
@@ -1808,6 +2007,15 @@ api.route('/users')
  *     tags:
  *       - users
  *     description: Returns the currently logged in user's public information
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET current user information returns user public data.
@@ -1844,6 +2052,16 @@ api.route('/users/whoami')
  *         required: true
  *         type: string
  *         in: URI
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET user returns user public data.
@@ -1903,6 +2121,12 @@ api.route('/users/whoami')
  *             custom:
  *               type: JSON Object
  *               description: Custom JSON data that can be added to a user.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST user returns public user data.
@@ -1952,6 +2176,12 @@ api.route('/users/whoami')
  *             custom:
  *               type: JSON Object
  *               description: The updated custom JSON data for the user.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH user returns public user data.
@@ -2056,6 +2286,16 @@ api.route('/users/:username')
  *                            is returned. The user must be a global admin or an
  *                            admin on the project to find an archived
  *                            webhook.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET webhook, returns webhook data.
@@ -2127,6 +2367,12 @@ api.route('/users/:username')
  *             custom:
  *               type: JSON Object
  *               description: Custom JSON data that can be added to the webhook.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST webhook, returns webhook data.
@@ -2180,6 +2426,12 @@ api.route('/users/:username')
  *             custom:
  *               type: JSON Object
  *               description: The updated custom JSON data for the webhook.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH webhook, returns webhook data.
