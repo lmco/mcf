@@ -107,7 +107,7 @@ ProjectSchema.methods.getPublicData = function() {
   };
 
   // Map read, write, and admin permissions to arrays
-  this.permissions.forEach(u => {
+  Object.keys(this.permissions).forEach(u => {
     if (this.permissions[u].includes('read')) {
       permissions.read.push(u);
     }
@@ -126,7 +126,14 @@ ProjectSchema.methods.getPublicData = function() {
     name: this.name,
     permissions: permissions,
     custom: this.custom,
-    visibility: this.visibility
+    visibility: this.visibility,
+    createdOn: this.createdOn,
+    createdBy: this.createdBy._id || this.createdBy,
+    updatedOn: this.updatedOn,
+    lastModifiedBy: this.lastModifiedBy._id || this.lastModifiedBy,
+    archived: (this.archived) ? true : undefined,
+    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
+    archivedBy: (this.archivedBy) ? this.archivedBy._id || this.archivedBy : undefined
   };
 };
 

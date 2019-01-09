@@ -88,7 +88,7 @@ OrganizationSchema.methods.getPublicData = function() {
   };
 
   // Map read, write, and admin permissions to arrays
-  this.permissions.forEach(u => {
+  Object.keys(this.permissions).forEach(u => {
     if (this.permissions[u].includes('read')) {
       permissions.read.push(u);
     }
@@ -105,7 +105,14 @@ OrganizationSchema.methods.getPublicData = function() {
     id: this._id,
     name: this.name,
     permissions: permissions,
-    custom: this.custom
+    custom: this.custom,
+    createdOn: this.createdOn,
+    createdBy: this.createdBy._id || this.createdBy,
+    updatedOn: this.updatedOn,
+    lastModifiedBy: this.lastModifiedBy._id || this.lastModifiedBy,
+    archived: (this.archived) ? true : undefined,
+    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
+    archivedBy: (this.archivedBy) ? this.archivedBy._id || this.archivedBy : undefined
   };
 };
 
