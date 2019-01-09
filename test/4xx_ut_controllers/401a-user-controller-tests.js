@@ -218,12 +218,11 @@ function findUser(done) {
   const userData = testData.users[0];
 
   // Find user via controller
-  UserController.find(adminUser, userData.username, { populate: ['admin']})
+  UserController.find(adminUser, userData.username)
   .then((foundUsers) => {
     // Expect foundUsers array to contain 1 user
     chai.expect(foundUsers.length).to.equal(1);
     const foundUser = foundUsers[0];
-    console.log(foundUser)
 
     // Verify user created properly
     chai.expect(foundUser._id).to.equal(userData.username);

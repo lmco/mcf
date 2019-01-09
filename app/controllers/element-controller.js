@@ -599,14 +599,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // If project not found
       if (!foundProject) {
         throw new M.CustomError(`Project ${projID} `
-            + `not found in the org ${orgID}.`, 404, 'warn');
+          + `not found in the org ${orgID}.`, 404, 'warn');
       }
 
       // Verify user has write permissions on the project
       if (!foundProject.permissions[reqUser._id]
         || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to update'
-            + ` elements on the project ${foundProject._id}.`, 403, 'warn');
+          + ` elements on the project ${foundProject._id}.`, 403, 'warn');
       }
 
       // Check the type of the elements parameter
@@ -617,8 +617,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         // Ensure element keys are valid to update in bulk
         const validBulkFields = Element.getValidBulkUpdateFields();
         validBulkFields.push('id');
+        // For each element
         elementsToUpdate.forEach((e) => {
+          // For each key
           Object.keys(e).forEach((key) => {
+            // If it can't be updated in bulk,throw an error
             if (!validBulkFields.includes(key)) {
               throw new M.CustomError(`Cannot update the field ${key} in bulk.`, 400, 'warn');
             }
@@ -628,11 +631,19 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       else if (typeof saniElements === 'object') {
         // elements is an object, update a single element
         elementsToUpdate = [saniElements];
+        // If updating parent, ensure it won't cause a circular reference
+        if (saniElements.hasOwnProperty('parent')) {
+          // Turn parent ID into a namespaced ID
+          saniElements.parent = utils.createID(orgID, projID, saniElements.parent);
+          // Find if a circular reference exists
+          return moveElementCheck(orgID, projID, branch, saniElements);
+        }
       }
       else {
         throw new M.CustomError('Invalid input for updating elements.', 400, 'warn');
       }
-
+    })
+    .then(() => {
       // Create list of ids
       try {
         let index = 1;
@@ -659,7 +670,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       const promises = [];
-      searchQuery = { project: foundProject._id };
+      searchQuery = { project: utils.createID(orgID, projID) };
 
       // Find elements in batches
       for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
@@ -893,7 +904,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
  *                   reject - error
  *
  * @example
- * remove('orgID', 'projID', 'branch', ['elem1', 'elem2',...])
+ * findElementTree('orgID', 'projID', 'branch', ['elem1', 'elem2',...])
  * .then(function(elementIDs) {
  *   // Do something with the found element IDs
  * })
@@ -938,7 +949,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
         }
       })
       .then(() => resolve())
-      .catch((error) => reject(error));
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
     });
   }
 
@@ -955,5 +966,48 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
     Promise.all(promises)
     .then(() => resolve(foundElements))
     .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description A non-exposed helper function that throws an error if an
+ * elements parent is in the given elements subtree.
+ *
+ * @param {String} organizationID - The ID of the owning organization.
+ * @param {String} projectID - The ID of the owning project.
+ * @param {String} branch - The ID of the branch to find elements from.
+ * @param {Object} element - The element whose parent is being checked.
+ *
+ * @return {Promise} resolve
+ *                   reject - error
+ *
+ * @example
+ * moveElementCheck('orgID', 'projID', 'branch', {Elem1})
+ * .then(function() {
+ *   // Continue with normal process
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function moveElementCheck(organizationID, projectID, branch, element) {
+  return new Promise((resolve, reject) => {
+    // Attempt to find the new parent element to ensure existence
+    Element.findOne({ _id: element.parent })
+    // Find the subtree of the element
+    .then(() => findElementTree(organizationID, projectID, branch,
+      [utils.createID(organizationID, projectID, element.id)]))
+    .then((subtreeIDs) => {
+      // Check if subtree ids contain new parent
+      if (subtreeIDs.includes(element.parent)) {
+        throw new M.CustomError('A circular reference exists in the model,'
+          + 'element cannot be moved.', 400, 'warn');
+      }
+      else {
+        // Return successfully with nothing
+        return resolve();
+      }
+    })
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
