@@ -142,6 +142,17 @@ api.route('/version')
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: orgs
+ *         description: Comma separated list of IDs to search for. If both the
+ *                      query parameter and body are not provided, all objects
+ *                      the user has access to are found.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: body
+ *         description: An array of object IDs to search for. If both query
+ *                      parameter and body are not provided, all objects the user
+ *                      has access to are found.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -344,7 +355,7 @@ api.route('/orgs')
  *                            only contain lowercase letters, numbers, and dashes
  *                            ("-") and must begin with a letter.
  *             custom:
- *               type: JSON Object
+ *               type: object
  *               description: Custom JSON data that can be added to an organization
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
@@ -387,7 +398,7 @@ api.route('/orgs')
  *               type: string
  *               description: The updated name of the organization.
  *             custom:
- *               type: JSON Object
+ *               type: object
  *               description: The updated custom JSON data of the organization.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
@@ -468,6 +479,17 @@ api.route('/orgs/:orgid')
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: projects
+ *         description: Comma separated list of IDs to search for. If both the
+ *                      query parameter and body are not provided, all objects
+ *                      the user has access to are found.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: body
+ *         description: An array of object IDs to search for. If both query
+ *                      parameter and body are not provided, all objects the user
+ *                      has access to are found.
  *       - name: orgid
  *         description: The ID of the organization whose projects to get.
  *         in: URI
@@ -702,7 +724,7 @@ api.route('/orgs/:orgid/projects')
  *                      only consist of only letters, numbers, and dashes
  *                      (e.g. "-").
  *             custom:
- *               type: JSON Object
+ *               type: object
  *               description: Custom JSON data that can be added to a project.
  *             visibility:
  *               type: string
@@ -756,7 +778,7 @@ api.route('/orgs/:orgid/projects')
  *               type: string
  *               description: The updated name for the project.
  *             custom:
- *               type: JSON Object
+ *               type: object
  *               description: The updated custom data for the project.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
@@ -1268,6 +1290,17 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: elements
+ *         description: Comma separated list of IDs to search for. If both the
+ *                      query parameter and body are not provided, all objects
+ *                      the user has access to are found.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: body
+ *         description: An array of object IDs to search for. If both query
+ *                      parameter and body are not provided, all objects the user
+ *                      has access to are found.
  *       - name: orgid
  *         description: The ID of the organization containing the project.
  *         in: URI
@@ -1757,6 +1790,17 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: users
+ *         description: Comma separated list of IDs to search for. If both the
+ *                      query parameter and body are not provided, all objects
+ *                      the user has access to are found.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: body
+ *         description: An array of object IDs to search for. If both query
+ *                      parameter and body are not provided, all objects the user
+ *                      has access to are found.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -2014,7 +2058,7 @@ api.route('/users/whoami')
  *               type: string
  *               description: The user's email address.
  *             custom:
- *               type: JSON Object
+ *               type: object
  *               description: Custom JSON data that can be added to a user.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
@@ -2068,7 +2112,7 @@ api.route('/users/whoami')
  *               type: string
  *               description: The user's updated email address.
  *             custom:
- *               type: JSON Object
+ *               type: object
  *               description: The updated custom JSON data for the user.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
@@ -2259,7 +2303,7 @@ api.route('/users/:username')
  *                            an event, the a request of type 'method' will be
  *                            sent to the specified URL.
  *             custom:
- *               type: JSON Object
+ *               type: object
  *               description: Custom JSON data that can be added to the webhook.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
@@ -2318,7 +2362,7 @@ api.route('/users/:username')
  *               type: string
  *               description: The updated name for the webhook.
  *             custom:
- *               type: JSON Object
+ *               type: object
  *               description: The updated custom JSON data for the webhook.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
