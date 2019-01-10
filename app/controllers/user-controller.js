@@ -409,7 +409,6 @@ function update(requestingUser, users, options) {
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrUsernames } };
-    console.log(searchQuery);
     // Find the users to update
     User.find(searchQuery)
     .then((_foundUsers) => {
@@ -453,7 +452,8 @@ function update(requestingUser, users, options) {
           }
 
           // If the type of field is mixed
-          if (User.schema.obj[key].type.schemaName === 'Mixed') {
+          if (User.schema.obj[key]
+            && User.schema.obj[key].type.schemaName === 'Mixed') {
             // Only objects should be passed into mixed data
             if (typeof updateUser !== 'object') {
               throw new M.CustomError(`${key} must be an object`, 400, 'warn');

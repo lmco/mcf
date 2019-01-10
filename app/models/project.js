@@ -119,21 +119,61 @@ ProjectSchema.methods.getPublicData = function() {
     }
   });
 
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
+
+  // If this.createdBy is defined
+  if (this.createdBy) {
+    // If this.createdBy is populated
+    if (this.createdBy.hasOwnProperty('_id')) {
+      // Get the public data of createdBy
+      createdBy = this.createdBy.getPublicData();
+    }
+    else {
+      createdBy = this.createdBy
+    }
+  }
+
+  // If this.lastModifiedBy is defined
+  if (this.lastModifiedBy) {
+    // If this.lastModifiedBy is populated
+    if (this.lastModifiedBy.hasOwnProperty('_id')) {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = this.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = this.lastModifiedBy
+    }
+  }
+
+  // If this.archivedBy is defined
+  if (this.archivedBy) {
+    // If this.archivedBy is populated
+    if (this.archivedBy.hasOwnProperty('_id')) {
+      // Get the public data of archivedBy
+      archivedBy = this.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = this.archivedBy
+    }
+  }
+
   // Return the projects public fields
   return {
     id: utils.parseID(this._id).pop(),
-    org: this.org._id || this.org,
+    org: (this.org.hasOwnProperty('_id')) ? this.org.getPublicData() : this.org,
     name: this.name,
     permissions: permissions,
     custom: this.custom,
     visibility: this.visibility,
     createdOn: this.createdOn,
-    createdBy: (this.createdBy) ? this.createdBy._id || this.createdBy : undefined,
+    createdBy: createdBy,
     updatedOn: this.updatedOn,
-    lastModifiedBy: (this.lastModifiedBy) ? this.lastModifiedBy._id || this.lastModifiedBy : undefined,
+    lastModifiedBy: lastModifiedBy,
     archived: (this.archived) ? true : undefined,
     archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
-    archivedBy: (this.archivedBy) ? this.archivedBy._id || this.archivedBy : undefined
+    archivedBy: archivedBy
   };
 };
 
@@ -142,7 +182,7 @@ ProjectSchema.methods.getPublicData = function() {
  * @memberof ProjectSchema
  */
 ProjectSchema.methods.getPermissionLevels = function() {
-  return ['REMOVE_ALL', 'read', 'write', 'admin'];
+  return ['remove_all', 'read', 'write', 'admin'];
 };
 ProjectSchema.statics.getPermissionLevels = function() {
   return ProjectSchema.methods.getPermissionLevels();

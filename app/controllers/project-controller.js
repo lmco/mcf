@@ -481,7 +481,8 @@ function update(requestingUser, organizationID, projects, options) {
           }
 
           // If the type of field is mixed
-          if (Project.schema.obj[key].type.schemaName === 'Mixed') {
+          if (Project.schema.obj[key]
+            && Project.schema.obj[key].type.schemaName === 'Mixed') {
             // Only objects should be passed into mixed data
             if (typeof updateProj !== 'object') {
               throw new M.CustomError(`${key} must be an object`, 400, 'warn');
@@ -493,7 +494,7 @@ function update(requestingUser, organizationID, projects, options) {
               const validPermissions = Project.getPermissionLevels();
 
               // Loop through each user provided
-              updateProj[key].keys().forEach((user) => {
+              Object.keys(updateProj[key]).forEach((user) => {
                 let permValue = updateProj[key][user];
                 // Value must be an string containing highest permissions
                 if (typeof permValue !== 'string') {
