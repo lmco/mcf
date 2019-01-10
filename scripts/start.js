@@ -76,7 +76,6 @@ function start(args) {
     else {
       httpServer = http.createServer(app);
     }
-
   }
 
   // Create HTTPS Server
