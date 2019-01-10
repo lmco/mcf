@@ -197,6 +197,46 @@ UserSchema.statics.getValidPopulateFields = function() {
  * @memberOf UserSchema
  */
 UserSchema.methods.getPublicData = function() {
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
+
+  // If this.createdBy is defined
+  if (this.createdBy) {
+    // If this.createdBy is populated
+    if (typeof this.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = this.createdBy.getPublicData();
+    }
+    else {
+      createdBy = this.createdBy;
+    }
+  }
+
+  // If this.lastModifiedBy is defined
+  if (this.lastModifiedBy) {
+    // If this.lastModifiedBy is populated
+    if (typeof this.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = this.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = this.lastModifiedBy;
+    }
+  }
+
+  // If this.archivedBy is defined
+  if (this.archivedBy) {
+    // If this.archivedBy is populated
+    if (typeof this.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = this.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = this.archivedBy;
+    }
+  }
+
   return {
     username: this._id,
     name: this.name,
@@ -205,12 +245,12 @@ UserSchema.methods.getPublicData = function() {
     lname: this.lname,
     email: this.email,
     createdOn: this.createdOn,
-    createdBy: this.createdBy._id || this.createdBy,
+    createdBy: createdBy,
     updatedOn: this.updatedOn,
-    lastModifiedBy: this.lastModifiedBy._id || this.lastModifiedBy,
+    lastModifiedBy: lastModifiedBy,
     archived: (this.archived) ? true : undefined,
     archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
-    archivedBy: (this.archivedBy) ? this.archivedBy._id || this.archivedBy : undefined,
+    archivedBy: archivedBy,
     admin: this.admin
   };
 };

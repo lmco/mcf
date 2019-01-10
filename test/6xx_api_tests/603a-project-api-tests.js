@@ -55,30 +55,30 @@ describe(M.getModuleName(module.filename), () => {
     // Connect db
     db.connect()
     // Create test admin
-      .then(() => testUtils.createTestAdmin())
-      .then((_adminUser) => {
-        // Set global admin user
-        adminUser = _adminUser;
+    .then(() => testUtils.createTestAdmin())
+    .then((_adminUser) => {
+      // Set global admin user
+      adminUser = _adminUser;
 
-        // Create non-admin user
-        return testUtils.createNonAdminUser();
-      })
-      .then((_nonAdminUser) => {
-        nonAdminUser = _nonAdminUser;
+      // Create non-admin user
+      return testUtils.createNonAdminUser();
+    })
+    .then((_nonAdminUser) => {
+      nonAdminUser = _nonAdminUser;
 
-        // Create tes org
-        return testUtils.createTestOrg(adminUser);
-      })
-      .then((retOrg) => {
-        org = retOrg;
-        done();
-      })
-      .catch((error) => {
-        M.log.error(error);
-        // Expect no error
-        chai.expect(error).to.equal(null);
-        done();
-      });
+      // Create tes org
+      return testUtils.createTestOrg(adminUser);
+    })
+    .then((retOrg) => {
+      org = retOrg;
+      done();
+    })
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
   });
 
   /**
@@ -87,16 +87,16 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Removing the test organization
     testUtils.removeTestOrg(adminUser)
-      .then(() => testUtils.removeTestAdmin())
-      .then(() => testUtils.removeNonAdminUser())
-      .then(() => db.disconnect())
-      .then(() => done())
-      .catch((error) => {
-        M.log.error(error);
-        // Expect no error
-        chai.expect(error).to.equal(null);
-        done();
-      });
+    .then(() => testUtils.removeTestAdmin())
+    .then(() => testUtils.removeNonAdminUser())
+    .then(() => db.disconnect())
+    .then(() => done())
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
   });
 
   /* Execute tests */
@@ -170,48 +170,48 @@ function postProjects(done) {
     testData.projects[4]
   ];
   request({
-      url: `${test.url}/api/orgs/${org.id}/projects`,
-      headers: testUtils.getHeaders(),
-      ca: testUtils.readCaFile(),
-      method: 'POST',
-      body: JSON.stringify(projData)
-    },
-    (err, response, body) => {
-      // Expect no error
-      chai.expect(err).to.equal(null);
-      // Expect response status: 200 OK
-      chai.expect(response.statusCode).to.equal(200);
-      // Verify response body
-      const createdProjects = JSON.parse(body);
-      chai.expect(createdProjects.length).to.equal(projData.length);
+    url: `${test.url}/api/orgs/${org.id}/projects`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(projData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const createdProjects = JSON.parse(body);
+    chai.expect(createdProjects.length).to.equal(projData.length);
 
-      // Convert createdProjects to JMI type 2 for easier lookup
-      const jmi2Projects = utils.convertJMI(1, 2, createdProjects, 'id');
-      // Loop through each project data object
-      projData.forEach((projDataObject) => {
-        const createdProj = jmi2Projects[projDataObject.id];
+    // Convert createdProjects to JMI type 2 for easier lookup
+    const jmi2Projects = utils.convertJMI(1, 2, createdProjects, 'id');
+    // Loop through each project data object
+    projData.forEach((projDataObject) => {
+      const createdProj = jmi2Projects[projDataObject.id];
 
-        // Verify project created properly
-        chai.expect(createdProj.id).to.equal(projDataObject.id);
-        chai.expect(createdProj.name).to.equal(projDataObject.name);
-        chai.expect(createdProj.custom).to.deep.equal(projDataObject.custom || {});
-        chai.expect(createdProj.permissions.read).to.include(adminUser.username);
-        chai.expect(createdProj.permissions.write).to.include(adminUser.username);
-        chai.expect(createdProj.permissions.admin).to.include(adminUser.username);
-        chai.expect(createdProj.org).to.equal(org.id);
-        chai.expect(createdProj.visibility).to.equal(projDataObject.visibility || 'private');
+      // Verify project created properly
+      chai.expect(createdProj.id).to.equal(projDataObject.id);
+      chai.expect(createdProj.name).to.equal(projDataObject.name);
+      chai.expect(createdProj.custom).to.deep.equal(projDataObject.custom || {});
+      chai.expect(createdProj.permissions.read).to.include(adminUser.username);
+      chai.expect(createdProj.permissions.write).to.include(adminUser.username);
+      chai.expect(createdProj.permissions.admin).to.include(adminUser.username);
+      chai.expect(createdProj.org).to.equal(org.id);
+      chai.expect(createdProj.visibility).to.equal(projDataObject.visibility || 'private');
 
-        // Verify additional properties
-        chai.expect(createdProj.createdBy).to.equal(adminUser.username);
-        chai.expect(createdProj.lastModifiedBy).to.equal(adminUser.username);
-        chai.expect(createdProj.createdOn).to.not.equal(null);
-        chai.expect(createdProj.updatedOn).to.not.equal(null);
+      // Verify additional properties
+      chai.expect(createdProj.createdBy).to.equal(adminUser.username);
+      chai.expect(createdProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdProj.createdOn).to.not.equal(null);
+      chai.expect(createdProj.updatedOn).to.not.equal(null);
 
-        // Verify specific fields not returned
-        chai.expect(createdProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
-      });
-      done();
+      // Verify specific fields not returned
+      chai.expect(createdProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
     });
+    done();
+  });
 }
 
 /**
@@ -221,39 +221,39 @@ function postProjects(done) {
 function getProject(done) {
   const projData = testData.projects[0];
   request({
-      url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
-      headers: testUtils.getHeaders(),
-      ca: testUtils.readCaFile(),
-      method: 'GET'
-    },
-    (err, response, body) => {
-      // Expect no error
-      chai.expect(err).to.equal(null);
-      // Expect response status: 200 OK
-      chai.expect(response.statusCode).to.equal(200);
-      // Verify response body
-      const foundProj = JSON.parse(body);
+    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundProj = JSON.parse(body);
 
-      // Verify project created properly
-      chai.expect(foundProj.id).to.equal(projData.id);
-      chai.expect(foundProj.name).to.equal(projData.name);
-      chai.expect(foundProj.custom).to.deep.equal(projData.custom || {});
-      chai.expect(foundProj.permissions.read).to.include(adminUser.username);
-      chai.expect(foundProj.permissions.write).to.include(adminUser.username);
-      chai.expect(foundProj.permissions.admin).to.include(adminUser.username);
-      chai.expect(foundProj.org).to.equal(org.id);
-      chai.expect(foundProj.visibility).to.equal(projData.visibility || 'private');
+    // Verify project created properly
+    chai.expect(foundProj.id).to.equal(projData.id);
+    chai.expect(foundProj.name).to.equal(projData.name);
+    chai.expect(foundProj.custom).to.deep.equal(projData.custom || {});
+    chai.expect(foundProj.permissions.read).to.include(adminUser.username);
+    chai.expect(foundProj.permissions.write).to.include(adminUser.username);
+    chai.expect(foundProj.permissions.admin).to.include(adminUser.username);
+    chai.expect(foundProj.org).to.equal(org.id);
+    chai.expect(foundProj.visibility).to.equal(projData.visibility || 'private');
 
-      // Verify additional properties
-      chai.expect(foundProj.createdBy).to.equal(adminUser.username);
-      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundProj.createdOn).to.not.equal(null);
-      chai.expect(foundProj.updatedOn).to.not.equal(null);
+    // Verify additional properties
+    chai.expect(foundProj.createdBy).to.equal(adminUser.username);
+    chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundProj.createdOn).to.not.equal(null);
+    chai.expect(foundProj.updatedOn).to.not.equal(null);
 
-      // Verify specific fields not returned
-      chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
-      done();
-    });
+    // Verify specific fields not returned
+    chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
+    done();
+  });
 }
 
 
@@ -270,47 +270,47 @@ function getProjects(done) {
   ];
   const projIDs = projData.map(p => p.id).join(',');
   request({
-      url: `${test.url}/api/orgs/${org.id}/projects?projectIDs=${projIDs}`,
-      headers: testUtils.getHeaders(),
-      ca: testUtils.readCaFile(),
-      method: 'GET'
-    },
-    (err, response, body) => {
-      // Expect no error
-      chai.expect(err).to.equal(null);
-      // Expect response status: 200 OK
-      chai.expect(response.statusCode).to.equal(200);
-      // Verify response body
-      const foundProjects = JSON.parse(body);
-      chai.expect(foundProjects.length).to.equal(projData.length);
+    url: `${test.url}/api/orgs/${org.id}/projects?projectIDs=${projIDs}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundProjects = JSON.parse(body);
+    chai.expect(foundProjects.length).to.equal(projData.length);
 
-      // Convert foundProjects to JMI type 2 for easier lookup
-      const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
-      // Loop through each project data object
-      projData.forEach((projDataObject) => {
-        const foundProj = jmi2Projects[projDataObject.id];
+    // Convert foundProjects to JMI type 2 for easier lookup
+    const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
+    // Loop through each project data object
+    projData.forEach((projDataObject) => {
+      const foundProj = jmi2Projects[projDataObject.id];
 
-        // Verify project created properly
-        chai.expect(foundProj.id).to.equal(projDataObject.id);
-        chai.expect(foundProj.name).to.equal(projDataObject.name);
-        chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
-        chai.expect(foundProj.permissions.read).to.include(adminUser.username);
-        chai.expect(foundProj.permissions.write).to.include(adminUser.username);
-        chai.expect(foundProj.permissions.admin).to.include(adminUser.username);
-        chai.expect(foundProj.org).to.equal(org.id);
-        chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
+      // Verify project created properly
+      chai.expect(foundProj.id).to.equal(projDataObject.id);
+      chai.expect(foundProj.name).to.equal(projDataObject.name);
+      chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
+      chai.expect(foundProj.permissions.read).to.include(adminUser.username);
+      chai.expect(foundProj.permissions.write).to.include(adminUser.username);
+      chai.expect(foundProj.permissions.admin).to.include(adminUser.username);
+      chai.expect(foundProj.org).to.equal(org.id);
+      chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
-        // Verify additional properties
-        chai.expect(foundProj.createdBy).to.equal(adminUser.username);
-        chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
-        chai.expect(foundProj.createdOn).to.not.equal(null);
-        chai.expect(foundProj.updatedOn).to.not.equal(null);
+      // Verify additional properties
+      chai.expect(foundProj.createdBy).to.equal(adminUser.username);
+      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundProj.createdOn).to.not.equal(null);
+      chai.expect(foundProj.updatedOn).to.not.equal(null);
 
-        // Verify specific fields not returned
-        chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
-      });
-      done();
+      // Verify specific fields not returned
+      chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
     });
+    done();
+  });
 }
 
 /**
@@ -340,7 +340,7 @@ function postProjectMember(done) {
     chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
     chai.expect(foundPermissions[nonAdminUser.username]).to.have.members(['read', 'write']);
     done();
-  })
+  });
 }
 
 /**
@@ -350,23 +350,22 @@ function postProjectMember(done) {
 function getProjectMember(done) {
   const projData = testData.projects[0];
   request({
-      url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}/members/${nonAdminUser.username}`,
-      headers: testUtils.getHeaders(),
-      ca: testUtils.readCaFile(),
-      method: 'GET'
-    },
-    (err, response, body) => {
-      // Expect no error
-      chai.expect(err).to.equal(null);
-      // Expect response status: 200 OK
-      chai.expect(response.statusCode).to.equal(200);
-      // Verify response body
-      const foundPermissions = JSON.parse(body);
+    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}/members/${nonAdminUser.username}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundPermissions = JSON.parse(body);
 
-      // Expect response to be an array
-      chai.expect(Array.isArray(foundPermissions)).to.equal(true);
-      chai.expect(foundPermissions).to.have.members(['read', 'write']);
-      done();
-    })
+    // Expect response to be an array
+    chai.expect(Array.isArray(foundPermissions)).to.equal(true);
+    chai.expect(foundPermissions).to.have.members(['read', 'write']);
+    done();
+  });
 }
-

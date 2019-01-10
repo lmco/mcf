@@ -961,7 +961,7 @@ function getProject(req, res) {
   ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
   .then((projects) => {
     // If no projects returned, return a 404 error
-    if (projects.length === 0)  {
+    if (projects.length === 0) {
       return res.status(404).send('Project not found.');
     }
 
@@ -970,7 +970,10 @@ function getProject(req, res) {
     return res.status(200).send(formatJSON(projects[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    return res.status(error.status || 500).send(error);
+  });
 }
 
 /**
@@ -1035,7 +1038,7 @@ function postProject(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    return res.status(error.status).send(error)
+    return res.status(error.status).send(error);
   });
 }
 

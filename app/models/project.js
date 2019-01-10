@@ -126,36 +126,37 @@ ProjectSchema.methods.getPublicData = function() {
   // If this.createdBy is defined
   if (this.createdBy) {
     // If this.createdBy is populated
-    if (this.createdBy.hasOwnProperty('_id')) {
+    if (typeof this.createdBy === 'object') {
       // Get the public data of createdBy
+      console.log('Gonna call get public data');
       createdBy = this.createdBy.getPublicData();
     }
     else {
-      createdBy = this.createdBy
+      createdBy = this.createdBy;
     }
   }
 
   // If this.lastModifiedBy is defined
   if (this.lastModifiedBy) {
     // If this.lastModifiedBy is populated
-    if (this.lastModifiedBy.hasOwnProperty('_id')) {
+    if (typeof this.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
       lastModifiedBy = this.lastModifiedBy.getPublicData();
     }
     else {
-      lastModifiedBy = this.lastModifiedBy
+      lastModifiedBy = this.lastModifiedBy;
     }
   }
 
   // If this.archivedBy is defined
   if (this.archivedBy) {
     // If this.archivedBy is populated
-    if (this.archivedBy.hasOwnProperty('_id')) {
+    if (typeof this.archivedBy === 'object') {
       // Get the public data of archivedBy
       archivedBy = this.archivedBy.getPublicData();
     }
     else {
-      archivedBy = this.archivedBy
+      archivedBy = this.archivedBy;
     }
   }
 

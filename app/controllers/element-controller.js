@@ -801,6 +801,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 /**
  * @description This function removes one or many elements as well as the
  * subtree under those elements.
+ * // TODO: Mention system admin only
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {String} organizationID - The ID of the owning organization.
