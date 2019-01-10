@@ -142,7 +142,7 @@ api.route('/version')
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: orgs
+ *       - name: orgIDs
  *         description: Comma separated list of IDs to search for. If both the
  *                      query parameter and body are not provided, all objects
  *                      the user has access to are found.
@@ -479,7 +479,7 @@ api.route('/orgs/:orgid')
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: projects
+ *       - name: projectIDs
  *         description: Comma separated list of IDs to search for. If both the
  *                      query parameter and body are not provided, all objects
  *                      the user has access to are found.
@@ -1290,7 +1290,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: elements
+ *       - name: elementIDs
  *         description: Comma separated list of IDs to search for. If both the
  *                      query parameter and body are not provided, all objects
  *                      the user has access to are found.
@@ -1790,7 +1790,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: users
+ *       - name: usernames
  *         description: Comma separated list of IDs to search for. If both the
  *                      query parameter and body are not provided, all objects
  *                      the user has access to are found.

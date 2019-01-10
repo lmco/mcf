@@ -687,12 +687,11 @@ function getProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // TODO: Figure out the query parameter 'populate'
   // Check if invalid key passed into the query
   if (req.query) {
     Object.keys(req.query).forEach((key) => {
       // If invalid key, reject
-      if (!['archived', 'projectIDs'].includes(key)) {
+      if (!['archived', 'projectIDs', 'populate'].includes(key)) {
         const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
         return res.status(error.status).send(error);
       }
@@ -711,10 +710,15 @@ function getProjects(req, res) {
     options.archived = (req.query.archived === 'true');
   }
 
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
+  }
+
   // Check if projectIDs was provided in the request query
   if (req.query && req.query.hasOwnProperty('projectIDs')) {
     // Split the string by comma, add strings to projectIDs
-    projectIDs = req.query.projects.split(',');
+    projectIDs = req.query.projectIDs.split(',');
   }
   // If project ids provided in array in request body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
@@ -772,7 +776,7 @@ function postProjects(req, res) {
   if (req.query) {
     Object.keys(req.query).forEach((key) => {
       // If invalid key, reject
-      if (![].includes(key)) {
+      if (!['populate'].includes(key)) {
         const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
         return res.status(error.status).send(error);
       }
@@ -783,6 +787,12 @@ function postProjects(req, res) {
   const options = {
     populate: []
   };
+
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
+  }
 
   // Create the specified projects
   // NOTE: create() sanitizes req.params.orgid and the projects
@@ -823,7 +833,7 @@ function patchProjects(req, res) {
   if (req.query) {
     Object.keys(req.query).forEach((key) => {
       // If invalid key, reject
-      if (![].includes(key)) {
+      if (!['populate'].includes(key)) {
         const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
         return res.status(error.status).send(error);
       }
@@ -834,6 +844,12 @@ function patchProjects(req, res) {
   const options = {
     populate: []
   };
+
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
+  }
 
   // Update the specified projects
   // NOTE: update() sanitizes req.params.orgid
@@ -916,7 +932,7 @@ function getProject(req, res) {
   if (req.query) {
     Object.keys(req.query).forEach((key) => {
       // If invalid key, reject
-      if (!['archived'].includes(key)) {
+      if (!['archived', 'populate'].includes(key)) {
         const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
         return res.status(error.status).send(error);
       }
@@ -934,12 +950,22 @@ function getProject(req, res) {
     options.archived = (req.query.archived === 'true');
   }
 
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
+  }
+
   // Find the project from it's project.id and org.id
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
   ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
   .then((projects) => {
-    // TODO: Address situation where no projects are found
-    // Return a 200: OK and the project's public data
+    // If no projects returned, return a 404 error
+    if (projects.length === 0)  {
+      return res.status(404).send('Project not found.');
+    }
+
+    // Return a 200: OK and the found project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(projects[0].getPublicData()));
   })
@@ -980,7 +1006,7 @@ function postProject(req, res) {
   if (req.query) {
     Object.keys(req.query).forEach((key) => {
       // If invalid key, reject
-      if (![].includes(key)) {
+      if (!['populate'].includes(key)) {
         const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
         return res.status(error.status).send(error);
       }
@@ -992,6 +1018,12 @@ function postProject(req, res) {
     populate: []
   };
 
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
+  }
+
   // Create project with provided parameters
   // NOTE: create() sanitizes req.params.projectid, req.params.orgid and req.body.name
   ProjectController.create(req.user, req.params.orgid, req.body, options)
@@ -1001,7 +1033,10 @@ function postProject(req, res) {
     return res.status(200).send(formatJSON(projects[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    return res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -1036,7 +1071,7 @@ function patchProject(req, res) {
   if (req.query) {
     Object.keys(req.query).forEach((key) => {
       // If invalid key, reject
-      if (![].includes(key)) {
+      if (!['populate'].includes(key)) {
         const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
         return res.status(error.status).send(error);
       }
@@ -1047,6 +1082,12 @@ function patchProject(req, res) {
   const options = {
     populate: []
   };
+
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
+  }
 
   // Update the specified project
   // NOTE: update() sanitizes req.params.orgid and req.params.projectid
