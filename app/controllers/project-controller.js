@@ -494,7 +494,7 @@ function update(requestingUser, organizationID, projects, options) {
               const validPermissions = Project.getPermissionLevels();
 
               // Loop through each user provided
-              updateProj[key].keys().forEach((user) => {
+              Object.keys(updateProj[key]).forEach((user) => {
                 let permValue = updateProj[key][user];
                 // Value must be an string containing highest permissions
                 if (typeof permValue !== 'string') {

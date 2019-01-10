@@ -143,7 +143,7 @@ ProjectSchema.methods.getPublicData = function() {
  * @memberof ProjectSchema
  */
 ProjectSchema.methods.getPermissionLevels = function() {
-  return ['REMOVE_ALL', 'read', 'write', 'admin'];
+  return ['remove_all', 'read', 'write', 'admin'];
 };
 ProjectSchema.statics.getPermissionLevels = function() {
   return ProjectSchema.methods.getPermissionLevels();

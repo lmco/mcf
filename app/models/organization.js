@@ -122,7 +122,7 @@ OrganizationSchema.methods.getPublicData = function() {
  * @memberof OrganizationSchema
  */
 OrganizationSchema.methods.getPermissionLevels = function() {
-  return ['REMOVE_ALL', 'read', 'write', 'admin'];
+  return ['remove_all', 'read', 'write', 'admin'];
 };
 OrganizationSchema.statics.getPermissionLevels = function() {
   return OrganizationSchema.methods.getPermissionLevels();

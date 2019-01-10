@@ -1108,7 +1108,7 @@ function deleteProject(req, res) {
 /**
  * GET /orgs/:orgid/members/
  *
- * @description Takes an orgid in the URI and returns all
+ * @description Takes an orgid and projectid in the URI and returns all
  * members of a given project and their permissions.
  *
  * @param {Object} req - request express object
@@ -1124,12 +1124,12 @@ function getAllProjMemRoles(req, res) {
   }
 
   // Get permissions of all users in given org
-  // NOTE: findAllPermissions() sanitizes req.params.orgid
-  ProjectController.findAllPermissions(req.user, req.params.orgid, req.params.projectid)
-  .then((permissions) => {
+  // NOTE: find() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.find(req.user, req.params.orgid, req.params.projectid)
+  .then((foundProjects) => {
     // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(permissions));
+    return res.status(200).send(formatJSON(foundProjects[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1154,13 +1154,16 @@ function getProjMemRole(req, res) {
   }
 
   // Find the permissions the foundUser has within the project
-  // NOTE: findPermissions() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.findPermissions(req.user, req.params.username,
-    req.params.orgid, req.params.projectid)
-  .then((permissions) => {
-    // Return 200: OK and updated org
+  // NOTE: find() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.find(req.user, req.params.orgid, req.params.projectid)
+  .then((projects) => {
+    const project = projects[0];
+    if (!project.permissions[req.params.username]) {
+      return res.status(404).send('User not on project.');
+    }
+    // Return 200: OK and users permissions
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(permissions));
+    return res.status(200).send(formatJSON(project.permissions[req.params.username]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1189,31 +1192,25 @@ function postProjectRole(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check that role was passed into the request body
-  try {
-    assert.ok(req.body.hasOwnProperty('role'), 'A role was not specified in the request body.');
-  }
-  catch (error) {
-    res.status(400).send(new M.CustomError(error.message, 400, 'warn'));
+  // Ensure request body is a string
+  if (typeof req.body !== 'string') {
+    return res.status(400).send('Request body is not a string.');
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['role'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  // Create update object
+  const update = {
+    id: req.params.projectid,
+    permissions: {}
+  };
+  update.permissions[req.params.username] = req.body;
 
-  // Set permissions of given user
-  // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.setPermissions(req.user, req.params.orgid,
-    req.params.projectid, req.params.username, req.body.role)
-  .then((project) => {
-    // Return 200: Ok and updated project
+  // Add user to project
+  // NOTE: update() sanitizes req.params.orgid and update
+  ProjectController.update(req.user, req.params.orgid, update)
+  .then((projects) => {
+    // Return 200: Ok and permissions
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project.getPublicData()));
+    return res.status(200).send(formatJSON(projects[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1237,14 +1234,20 @@ function deleteProjectRole(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Create update object
+  const update = {
+    id: req.params.projectid,
+    permissions: {}
+  };
+  update.permissions[req.params.username] = 'remove_all';
+
   // Remove permissions of given user
-  // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.setPermissions(req.user, req.params.orgid,
-    req.params.projectid, req.params.username, 'REMOVE_ALL')
-  .then((project) => {
-    // Return 200: OK and updated project
+  // NOTE: update() sanitizes req.params.orgid and update
+  ProjectController.update(req.user, req.params.orgid, update)
+  .then((projects) => {
+    // Return 200: OK and updated permissions
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(projects[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));

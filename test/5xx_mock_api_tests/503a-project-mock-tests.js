@@ -36,6 +36,7 @@ const utils = M.require('lib.utils');
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
 const testData = testUtils.importTestData('data.json');
 let adminUser = null;
+let nonAdminUser = null;
 let org = null;
 
 /* --------------------( Main )-------------------- */
@@ -58,6 +59,13 @@ describe(M.getModuleName(module.filename), () => {
       // Set global admin user
       adminUser = _adminUser;
 
+      // Create non-admin user
+      return testUtils.createNonAdminUser();
+    })
+    .then((_nonAdminUser) => {
+      nonAdminUser = _nonAdminUser;
+
+      // Create tes org
       return testUtils.createTestOrg(adminUser);
     })
     .then((retOrg) => {
@@ -79,6 +87,7 @@ describe(M.getModuleName(module.filename), () => {
     // Removing the test organization
     testUtils.removeTestOrg(adminUser)
     .then(() => testUtils.removeTestAdmin())
+    .then(() => testUtils.removeNonAdminUser())
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -94,14 +103,14 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple projects', postProjects);
   it('should GET a project', getProject);
   it('should GET multiple projects', getProjects);
+  it('should POST a project member', postProjectMember);
+  it('should GET a project role', getProjectMember);
+  it('should GET all project members', getProjectMembers);
+  it('should DELETE a project member', deleteProjectMember);
   it('should PATCH a project', patchProject);
   it('should PATCH multiple projects', patchProjects);
   it('should DELETE a project', deleteProject);
   it('should DELETE multiple projects', deleteProjects);
-  // it('should POST a project role', postProjectRole);
-  // it('should GET a project role', getProjectRole);
-  // it('should GET all project roles', getProjectRoles);
-  // it('should DELETE a project role', deleteProjectRole);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -327,6 +336,146 @@ function getProjects(done) {
 
   // GETs multiple projects
   APIController.getProjects(req, res);
+}
+
+/**
+ * @description Verifies a mock POST request to add a user to a project.
+ */
+function postProjectMember(done) {
+  // Create request object
+  const projData = testData.projects[0];
+  const params = {
+    orgid: org.id,
+    projectid: projData.id,
+    username: nonAdminUser.username
+  };
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, 'write', method);
+
+  // Set response as empty object
+  const res = {};
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundPermissions = JSON.parse(_data);
+
+    // Expect there to be two users on the project
+    chai.expect(Object.keys(foundPermissions).length).to.equal(2);
+    chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
+    chai.expect(foundPermissions[nonAdminUser.username]).to.have.members(['read', 'write']);
+    done();
+  };
+
+  // POSTs a member to a project
+  APIController.postProjectRole(req, res);
+}
+
+/**
+ * @description Verifies a mock GET request to find a single member on a project.
+ */
+function getProjectMember(done) {
+  // Create request object
+  const projData = testData.projects[0];
+  const params = {
+    orgid: org.id,
+    projectid: projData.id,
+    username: nonAdminUser.username
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
+
+  // Set response as empty object
+  const res = {};
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundPermissions = JSON.parse(_data);
+
+    // Expect response to be an array
+    chai.expect(Array.isArray(foundPermissions)).to.equal(true);
+    chai.expect(foundPermissions).to.have.members(['read', 'write']);
+
+    done();
+  };
+
+  // GETs a members role in a project
+  APIController.getProjMemRole(req, res);
+}
+
+/**
+ * @description Verifies a mock GET request to find all members on a project.
+ */
+function getProjectMembers(done) {
+  // Create request object
+  const projData = testData.projects[0];
+  const params = {
+    orgid: org.id,
+    projectid: projData.id
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
+
+  // Set response as empty object
+  const res = {};
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundPermissions = JSON.parse(_data);
+
+    // Expect there to be two users on the project
+    chai.expect(Object.keys(foundPermissions).length).to.equal(2);
+    chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
+    chai.expect(foundPermissions[nonAdminUser.username]).to.have.members(['read', 'write']);
+
+    done();
+  };
+
+  // GETs a projects members
+  APIController.getAllProjMemRoles(req, res);
+}
+
+/**
+ * @description Verifies a mock DELETE request to remove a member from a project.
+ */
+function deleteProjectMember(done) {
+  // Create request object
+  const projData = testData.projects[0];
+  const params = {
+    orgid: org.id,
+    projectid: projData.id,
+    username: nonAdminUser.username
+  };
+  const method = 'DELETE';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
+
+  // Set response as empty object
+  const res = {};
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundPermissions = JSON.parse(_data);
+
+    // Expect there to be two users on the project
+    chai.expect(Object.keys(foundPermissions).length).to.equal(1);
+    chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
+
+    done();
+  };
+
+  // DELETEs a member on a project
+  APIController.deleteProjectRole(req, res);
 }
 
 /**
