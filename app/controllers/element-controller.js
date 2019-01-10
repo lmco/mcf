@@ -969,6 +969,8 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
   });
 }
 
+// TODO: Add helper function to find parents to root
+
 /**
  * @description A non-exposed helper function that throws an error if an
  * elements parent is in the given elements subtree.
