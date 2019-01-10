@@ -228,18 +228,45 @@ function getOrgs(req, res) {
   // Check if invalid key passed in
   Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['archived', 'populate'].includes(key)) {
+    if (!['archived', 'populate', 'orgIDs'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
+  // Define array ID
+  // Note: Intended to be undefined if not set
+  let arrOrgID;
+
+  // Check query for orgIDs
+  if (req.query && req.query.hasOwnProperty('orgIDs')) {
+    if (req.query.orgIDs.includes(',')) {
+      arrOrgID = req.query.orgIDs.split(',');
+    }
+    else {
+      // Set array ID
+      arrOrgID = req.query.orgIDs;
+    }
+  }
+  // No IDs include in query, check body
+  else if (Array.isArray(req.body) && req.body.length > 0)
+  {
+    // Check for more than 1 ID
+    if (req.body.includes(',')) {
+      // Multiple IDs, split into array
+      arrOrgID = req.body.split(',');
+    }
+    else {
+      // Set array ID
+      arrOrgID = req.body;
+    }
+  }
 
   // Extract options from request query
   const options = utils.parseOptions(req.query, validOptions);
 
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes req.user.
-  OrgController.find(req.user, options)
+  OrgController.find(req.user, arrOrgID, options)
   .then((orgs) => {
     // Return only public organization data
     const orgsPublicData = orgs.map(o => o.getPublicData());
@@ -344,18 +371,6 @@ function deleteOrgs(req, res) {
     err = new M.CustomError(msg, 500, 'critical');
     return res.status(err.status).send(err);
   }
-  // Error check: body must be an array
-  if (!Array.isArray(req.body)) {
-    msg = 'Body is not an array.';
-    err = new M.CustomError(err, 400, 'warn');
-    return res.status(err.status).send(err);
-  }
-  // Error check, each item in the array must be an object
-  if (!req.body.every(o => typeof o === 'object')) {
-    msg = 'One or more items in the array is not an object';
-    err = new M.CustomError(msg, 400, 'warn');
-    return res.status(err.status).send(err);
-  }
 
   // Remove the specified orgs
   OrgController.remove(req.user, req.body)
@@ -388,30 +403,33 @@ function getOrg(req, res) {
   // Check if invalid key passed in
   Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['archived'].includes(key)) {
+    if (!['archived', 'populate'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional archived flag
-  let archived = false;
-
-  // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
-  }
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, validOptions);
 
   // Find the org from it's id
   // NOTE: findOrg() sanitizes req.params.orgid
-  OrgController.find(req.user, req.params.orgid, archived)
+  OrgController.find(req.user, req.params.orgid, options)
   .then((org) => {
+    // Check if orgs are found
+    if (org.length == 0) {
+      // Return error
+      return res.status(404).send('No organization found.')
+    }
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -443,13 +461,16 @@ function postOrg(req, res) {
   // Set id in request body
   req.body.id = req.params.orgid;
 
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, validOptions);
+
   // Create the organization with provided parameters
   // NOTE: create() sanitizes req.params.org.id and req.body.name
-  OrgController.create(req.user, req.body)
+  OrgController.create(req.user, req.body, options)
   .then((org) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -481,13 +502,16 @@ function patchOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, validOptions);
+
   // Update the specified organization
-  // NOTE: update() sanitizes req.params.orgid
-  OrgController.update(req.user, req.params.orgid, req.body)
+  // NOTE: update() sanitizes req.body
+  OrgController.update(req.user, req.body, options)
   .then((org) => {
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -513,14 +537,17 @@ function deleteOrg(req, res) {
 
   // Remove the specified organization
   // NOTE: remove() sanitizes req.params.orgid
-  OrgController.remove(req.user, req.params.orgid)
+  OrgController.remove(req.user, [req.params.orgid])
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(org);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
