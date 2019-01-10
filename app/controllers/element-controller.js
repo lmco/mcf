@@ -53,6 +53,7 @@ const utils = M.require('lib.utils');
  * @param {Array/String} elements - The elements to find. Can either be an array
  * of element ids, a single element id, or not provided, which defaults to every
  * element in a project being found.
+ * // TODO: Add default behavior for options
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the booleans 'archived'
  * and 'subtree' and the array of strings 'populate'
@@ -71,6 +72,8 @@ const utils = M.require('lib.utils');
  */
 function find(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
+    // TODO: Ensure parameters are of correct type
+
     // Ensure user is on the master branch
     if (branch !== 'master') {
       throw new M.CustomError('User must be on the master branch.', 400, 'warn');
@@ -239,7 +242,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  *
  * @return {Promise} resolve - Array of created element objects
  *                   reject - error
- *
+ * // TODO: List valid and required parameters for the element object somewhere...
  * @example
  * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: 'parent' })
  * .then(function(elements) {
@@ -540,6 +543,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 }
 
 /**
+ * // TODO: Add to all descriptions. Explain custom data. Talk about limitations of functions
  * @description This function updates one or many elements.
  *
  * @param {User} requestingUser - The object containing the requesting user.
@@ -553,7 +557,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  *
  * @return {Promise} resolve - Array of updated element objects
  *                   reject - error
- *
+ * // TODO: List valid/required element parameters.
  * @example
  * update({User}, 'orgID', 'projID', branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
  * .then(function(elements) {

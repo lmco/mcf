@@ -191,8 +191,7 @@ function postProjects(done) {
   res.send = function send(_data) {
     // Parse the JSON response
     const createdProjects = JSON.parse(_data);
-    chai.expect(Array.isArray(createdProjects)).to.equal(true);
-    chai.expect(createdProjects.length).to.equal(4);
+    chai.expect(createdProjects.length).to.equal(projData.length);
 
     // Convert createdProjects to JMI type 2 for easier lookup
     const jmi2Projects = utils.convertJMI(1, 2, createdProjects, 'id');

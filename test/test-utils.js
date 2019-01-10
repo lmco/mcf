@@ -26,6 +26,7 @@
 // Node modules
 const path = require('path');
 const chai = require('chai');
+const fs = require('fs');
 
 // MBEE modules
 const Element = M.require('models.element');
@@ -332,11 +333,20 @@ module.exports.createResponse = function(res) {
 /**
  * @description Helper function for setting the request headers.
  */
-function getHeaders() {
-  const formattedCreds = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
+module.exports.getHeaders = function() {
+  const formattedCreds = `${testData.adminUser.username}:${testData.adminUser.password}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
     'Content-Type': 'application/json',
     authorization: basicAuthHeader
   };
-}
+};
+
+/**
+ * @description Helper function for setting the certificate authorities for each request.
+ */
+module.exports.readCaFile = function() {
+  if (M.config.test.hasOwnProperty('ca')) {
+    return fs.readFileSync(`${M.root}/${M.config.test.ca}`);
+  }
+};
