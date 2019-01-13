@@ -112,7 +112,7 @@ OrganizationSchema.methods.getPublicData = function() {
       createdBy = this.createdBy.getPublicData();
     }
     else {
-      createdBy = this.createdBy
+      createdBy = this.createdBy;
     }
   }
 
@@ -124,7 +124,7 @@ OrganizationSchema.methods.getPublicData = function() {
       lastModifiedBy = this.lastModifiedBy.getPublicData();
     }
     else {
-      lastModifiedBy = this.lastModifiedBy
+      lastModifiedBy = this.lastModifiedBy;
     }
   }
 
@@ -136,7 +136,7 @@ OrganizationSchema.methods.getPublicData = function() {
       archivedBy = this.archivedBy.getPublicData();
     }
     else {
-      archivedBy = this.archivedBy
+      archivedBy = this.archivedBy;
     }
   }
 

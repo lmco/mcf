@@ -943,7 +943,7 @@ api.route('/orgs/:orgid/members')
  *         required: true
  *         type: string
  *       - name: body
- *         description: The string role of the user.
+ *         description: The string role of the user. ['remove_all', 'read', 'write', 'admin']
  *         in: body
  *         required: true
  *         schema:
