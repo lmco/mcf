@@ -887,7 +887,7 @@ api.route('/orgs/:orgid/members')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getAllOrgMemRoles
+  APIController.getOrgMembers
 );
 
 
@@ -1034,24 +1034,24 @@ api.route('/orgs/:orgid/members/:username')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getOrgRole
+  APIController.getOrgMember
 )
 // NOTE: POST and PATCH have the same functionality in this case,
 // thus they map to the same route.
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postOrgRole
+  APIController.postOrgMember
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postOrgRole
+  APIController.postOrgMember
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteOrgRole
+  APIController.deleteOrgMember
 );
 
 

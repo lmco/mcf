@@ -89,10 +89,10 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   it('should POST an org', postOrg);
-  it('should POST an org role', postOrgRole);
-  it('should GET an org role', getOrgRole);
-  it('should GET all org roles', getAllOrgRoles);
-  it('should DELETE an org role', deleteOrgRole);
+  it('should POST an org member', postOrgMember);
+  it('should GET an org member', getOrgMember);
+  it('should GET all org members', getOrgMembers);
+  it('should DELETE an org member', deleteOrgMember);
   it('should GET the posted org', getOrg);
   it('should PATCH an org', patchOrg);
   it('should GET all orgs user has access to', getOrgs);
@@ -138,7 +138,7 @@ function postOrg(done) {
 /**
  * @description Verifies mock POST request to add a user to an organization.
  */
-function postOrgRole(done) {
+function postOrgMember(done) {
   // Create request object
   const body = testData.roles[0].role;
   const params = {
@@ -162,13 +162,13 @@ function postOrgRole(done) {
   };
 
   // POSTs an org role
-  apiController.postOrgRole(req, res);
+  apiController.postOrgMember(req, res);
 }
 
 /**
  * @description Verifies mock GET a users role within an organization.
  */
-function getOrgRole(done) {
+function getOrgMember(done) {
   // Create request object
   const body = {};
   const params = {
@@ -192,13 +192,13 @@ function getOrgRole(done) {
   };
 
   // GETs an org member role
-  apiController.getOrgRole(req, res);
+  apiController.getOrgMember(req, res);
 }
 
 /**
  * @description Verifies mock GET request to get all organization roles.
  */
-function getAllOrgRoles(done) {
+function getOrgMembers(done) {
   // Create request object
   const body = {};
   const params = { orgid: testData.orgs[0].id };
@@ -224,14 +224,14 @@ function getAllOrgRoles(done) {
   };
 
   // GETs all org member roles
-  apiController.getAllOrgMemRoles(req, res);
+  apiController.getOrgMembers(req, res);
 }
 
 /**
  * @description Verifies mock DELETE request to remove a user from an
  * organization.
  */
-function deleteOrgRole(done) {
+function deleteOrgMember(done) {
   // Create request object
   const body = {};
   const params = {
@@ -255,7 +255,7 @@ function deleteOrgRole(done) {
   };
 
   // DELETEs an org role
-  apiController.deleteOrgRole(req, res);
+  apiController.deleteOrgMember(req, res);
 }
 
 /**
