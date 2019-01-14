@@ -48,10 +48,10 @@ module.exports = {
   postOrg,
   patchOrg,
   deleteOrg,
-  getOrgRole,
-  postOrgRole,
-  deleteOrgRole,
-  getAllOrgMemRoles,
+  getOrgMember,
+  postOrgMember,
+  deleteOrgMember,
+  getOrgMembers,
   getProjects,
   postProjects,
   patchProjects,
@@ -622,7 +622,7 @@ function deleteOrg(req, res) {
  *
  * @return {Object} res response object with searched org and roles
  */
-function getOrgRole(req, res) {
+function getOrgMember(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -663,7 +663,7 @@ function getOrgRole(req, res) {
  * thing as updating a users role, thus both POST and PATCH map to this
  * function.
  */
-function postOrgRole(req, res) {
+function postOrgMember(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -705,7 +705,7 @@ function postOrgRole(req, res) {
  *
  * @return {Object} res response object with updated org
  */
-function deleteOrgRole(req, res) {
+function deleteOrgMember(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -745,7 +745,7 @@ function deleteOrgRole(req, res) {
  *
  * @return {Object} res response object with roles of members on search org
  */
-function getAllOrgMemRoles(req, res) {
+function getOrgMembers(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
