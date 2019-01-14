@@ -46,14 +46,13 @@ const utils = M.require('lib.utils');
  * @description This function finds one or many users.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {Array/String} users - The users to find. Can either be an array of
- * user ids, a single user id, or not provided, which defaults to every user
- * being found.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {(string|string[])} [users] - The users to find. Can either be an
+ * array of user ids, a single user id, or not provided, which defaults to every
+ * user being found.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} options.archived - If true, find results will include
+ * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
  * @return {Promise} resolve - Array of found user objects
@@ -153,11 +152,10 @@ function find(requestingUser, users, options) {
  * @description This functions creates one or many users.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {Array/Object} users - Either an array of objects containing user data
- * or a single object containing user data to create.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {(Object|Object[])} users - Either an array of objects containing user
+ * data or a single object containing user data to create.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created user objects
@@ -317,11 +315,10 @@ function create(requestingUser, users, options) {
  * @description This function updates one or many users.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {Array/Object} users - Either an array of objects containing updates
- * to users, or a single object containing updates.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {(Object|Object[])} users - Either an array of objects containing
+ * updates to users, or a single object containing updates.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated user objects
@@ -520,10 +517,10 @@ function update(requestingUser, users, options) {
  * @description This function removes one or many users.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {Array/String} users - The users to remove. Can either be an array of
- * user ids or a single user id.
- * @param {Object} options - An optional parameter that provides supported
- * options. Currently there are no supported options.
+ * @param {(string|string[])} users - The users to remove. Can either be an
+ * array of user ids or a single user id.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * Currently there are no supported options.
  *
  * @return {Promise} resolve - Array of deleted users usernames
  *                   reject - error

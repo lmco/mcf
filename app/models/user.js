@@ -37,14 +37,14 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description Defines the User Schema
  *
- * @property {String} _id - The Users unique name.
- * @property {String} password - The Users password.
- * @property {String} email - The Users email.
- * @property {String} fname - The Users first name.
- * @property {String} preferredName - The Users preferred first name.
- * @property {String} lname - The Users last name.
+ * @property {string} _id - The Users unique name.
+ * @property {string} password - The Users password.
+ * @property {string} email - The Users email.
+ * @property {string} fname - The Users first name.
+ * @property {string} preferredName - The Users preferred first name.
+ * @property {string} lname - The Users last name.
  * @property {Boolean} admin - Indicates if the User is a global admin.
- * @property {String} provider - Defines the authentication provider for the
+ * @property {string} provider - Defines the authentication provider for the
  * User.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
  * @property {virtual} name - The users full name.
@@ -151,7 +151,7 @@ UserSchema.pre('save', function(next) {
 /**
  * @description Verifies a password matches the stored hashed password.
  *
- * @param {String} pass  The password to be compared with the stored password.
+ * @param {string} pass  The password to be compared with the stored password.
  * @memberOf UserSchema
  */
 UserSchema.methods.verifyPassword = function(pass) {

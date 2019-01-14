@@ -40,8 +40,8 @@ const User = M.require('models.user');
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} username - Username authenticate via locally or LDAP AD
- * @param {String} password - Password to authenticate via locally or LDAP AD
+ * @param {string} username - Username authenticate via locally or LDAP AD
+ * @param {string} password - Password to authenticate via locally or LDAP AD
  * @return {Promise} resolve - authenticated user object
  *                   reject - an error
  */
@@ -89,7 +89,7 @@ function handleBasicAuth(req, res, username, password) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {String} _token -  Token user is attempting to authenticate with.
+ * @param {string} _token -  Token user is attempting to authenticate with.
  * @returns {Promise} resolve - token authenticated user object
  *                    reject - an error
  *
@@ -127,7 +127,7 @@ function doLogin(req, res, next) {
 /**
  * @description Validates a users password with set rules.
  *
- * @param {String} password - Password to verify
+ * @param {string} password - Password to verify
  * @returns {Boolean} - If password is correctly validated
  */
 function validatePassword(password) {

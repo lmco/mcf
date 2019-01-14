@@ -48,15 +48,14 @@ const utils = M.require('lib.utils');
  * @description This function finds one or many projects.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {Array/String} projects - The projects to find. Can either be an array
- * of project ids, a single project id, or not provided, which defaults to every
- * project being found.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {(string|string[])} [projects] - The projects to find. Can either be
+ * an array of project ids, a single project id, or not provided, which defaults
+ * to every project being found.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} options.archived - If true, find results will include
+ * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
  * @return {Promise} resolve - Array of found project objects
@@ -161,12 +160,11 @@ function find(requestingUser, organizationID, projects, options) {
  * @description This functions creates one or many projects.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {Array/Object} projects - Either an array of objects containing
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {(Object|Object[])} projects - Either an array of objects containing
  * project data or a single object containing project data to create.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created project objects
@@ -341,12 +339,11 @@ function create(requestingUser, organizationID, projects, options) {
  * @description This function updates one or many projects.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {Array/Object} projects - Either an array of objects containing
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {(Object|Object[])} projects - Either an array of objects containing
  * updates to projects, or a single object containing updates.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated project objects
@@ -589,11 +586,11 @@ function update(requestingUser, organizationID, projects, options) {
  * elements, webhooks and artifacts that belong to them.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {Array/String} projects - The projects to remove. Can either be an
- * array of project ids or a single project id.
- * @param {Object} options - An optional parameter that provides supported
- * options. Currently there are no supported options.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {(string|string[])} projects - The projects to remove. Can either be
+ * an array of project ids or a single project id.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * Currently there are no supported options.
  *
  * @return {Promise} resolve - Array of deleted project ids
  *                   reject - error

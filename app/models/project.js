@@ -34,14 +34,14 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description Defines the Project Schema
  *
- * @property {String} _id - The project's non-unique id.
+ * @property {string} _id - The project's non-unique id.
  * @property {Organization} org - A reference to the project's organization.
- * @property {String} name - The project's non-unique project name.
+ * @property {string} name - The project's non-unique project name.
  * @property {Schema.Types.Mixed} permissions - An object whose keys identify a
  * projects's roles. The keys are the users username, and values are arrays of
  * given permissions.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
- * @property {String} visibility - The visibility level of a project defining
+ * @property {string} visibility - The visibility level of a project defining
  * its permissions behaviour.
  *
  */

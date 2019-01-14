@@ -55,16 +55,16 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description The base schema definition inherited by all other element types.
  *
- * @property {String} _id - The elements non-unique element ID.
+ * @property {string} _id - The elements non-unique element ID.
  * or taken from another source if imported.
- * @property {String} name - THe elements non-unique name.
+ * @property {string} name - THe elements non-unique name.
  * @property {Project} project - A reference to an element's project.
  * @property {Element} parent - The parent element which contains the element
  * @property {Element} source - A reference to the source element if the base
  * element is a relationship. NOTE: If source is provided, target is required.
  * @property {Element} target - A reference to the target element if the base
  * element is a relationship. NOTE: If target is provided, source is required.
- * @property {String} documentation - The element documentation.
+ * @property {string} documentation - The element documentation.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
  * @property {virtual} contains - A list of elements whose parent is the base
  * element.

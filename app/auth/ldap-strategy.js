@@ -49,8 +49,8 @@ const ldapConfig = M.config.auth.ldap;
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} username - Username to authenticate via LDAP AD
- * @param {String} password - Password to authenticate via LDAP AD
+ * @param {string} username - Username to authenticate via LDAP AD
+ * @param {string} password - Password to authenticate via LDAP AD
  * @returns {Promise} resolve - authenticated user object
  *                    reject - an error
  *
@@ -94,7 +94,7 @@ function handleBasicAuth(req, res, username, password) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} token - Token user authentication token, encrypted
+ * @param {string} token - Token user authentication token, encrypted
  * @returns {Promise} resolve - local user object
  *                    reject - an error
  *
@@ -197,7 +197,7 @@ function ldapConnect() {
  * @description Searches for and resolve a user from LDAP server.
  *
  * @param {Object} ldapClient - LDAP client
- * @param {String} username - Username to find LDAP user
+ * @param {string} username - Username to find LDAP user
  * @returns {Promise} resolve - LDAP user information
  *                    reject - an error
  */
@@ -278,7 +278,7 @@ function ldapSearch(ldapClient, username) {
  *
  * @param {Object} ldapClient - LDAP client
  * @param {Object} user - LDAP user
- * @param {String} password - Password to verify LDAP user
+ * @param {string} password - Password to verify LDAP user
  * @returns {Promise} resolve - authenticated user's information
  *                    reject - an error
  */

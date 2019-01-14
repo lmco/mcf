@@ -46,8 +46,8 @@ const ProjController = M.require('controllers.project-controller');
  * @description This function creates an Artifact.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {String} orgID - The organization ID for the org the project belongs to.
- * @param {String} projID - The project ID of the Project which is being searched for.
+ * @param {string} orgID - The organization ID for the org the project belongs to.
+ * @param {string} projID - The project ID of the Project which is being searched for.
  * @param {Object} artData - The JSON object containing the Artifact data
  * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  *ƒ
@@ -160,9 +160,9 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
  * @description This function updates an existing Artifact.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {String} orgID - The organization ID for the org the project belongs to.
- * @param {String} projID - The project ID of the Project which is being searched for.
- * @param {String} artifactID - The Artifact ID
+ * @param {string} orgID - The organization ID for the org the project belongs to.
+ * @param {string} projID - The project ID of the Project which is being searched for.
+ * @param {string} artifactID - The Artifact ID
  * @param {Object} artToUpdate - JSON object containing updated Artifact data
  * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  *
@@ -299,9 +299,9 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate, artifac
  * @description This function removes an Artifact.
  *
  * @param {User} reqUser  The user object of the requesting user.
- * @param {String} orgID - The organization ID for the org the project belongs to.
- * @param {String} projID - The project ID of the Project which is being searched for.
- * @param {String} artifactID - The Artifact ID
+ * @param {string} orgID - The organization ID for the org the project belongs to.
+ * @param {string} projID - The project ID of the Project which is being searched for.
+ * @param {string} artifactID - The Artifact ID
  *
  * @return {Promise} resolve
  *                   reject - error
@@ -378,9 +378,9 @@ function removeArtifact(reqUser, orgID, projID, artifactID) {
  * @description This function finds an artifact based on artifact full id.
  *
  * @param {User} reqUser - The requesting user
- * @param {String} orgID - The organization ID for the org the project belongs to.
- * @param {String} projID - The project ID of the Project which is being searched for.
- * @param {String} artifactID - The Artifact ID
+ * @param {string} orgID - The organization ID for the org the project belongs to.
+ * @param {string} projID - The project ID of the Project which is being searched for.
+ * @param {string} artifactID - The Artifact ID
  * @param {Boolean} archived - A boolean value indicating whether to also search
  *                             for archived artifacts.
  *
@@ -472,8 +472,8 @@ function findArtifactsQuery(artifactQuery) {
  * @description This function returns all artifacts attached to the project.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {String} organizationID - The organization ID.
- * @param {String} projectID - The project ID.
+ * @param {string} organizationID - The organization ID.
+ * @param {string} projectID - The project ID.
  * @param {Boolean} archived - A boolean value indicating whether to archived.
  *
  * @return {Promise} resolve - artifact
@@ -531,7 +531,7 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
 /**
  * @description This function adds the artifact blob file to the file system.
  *
- * @param {String} hashedName - hash name of the file
+ * @param {string} hashedName - hash name of the file
  * @param {Binary} artifactBlob - A binary large object artifact
  */
 function addArtifactOS(hashedName, artifactBlob) {
@@ -599,7 +599,7 @@ function addArtifactOS(hashedName, artifactBlob) {
  * @description This function removes the artifact blob file and sub folder
  * from the file system.
  *
- * @param {String} hashName - folder's hash name
+ * @param {string} hashName - folder's hash name
  */
 function removeArtifactOS(hashName) {
   return new Promise((resolve) => {

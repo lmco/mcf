@@ -45,7 +45,7 @@ module.exports.ID_DELIMITER = ':';
  *
  * @param {Object} req - Request object
  * @param {Object} res - Response object
- * @param {String} name - Name of the template to render
+ * @param {string} name - Name of the template to render
  * @param {Object} params - List of parameters to render
  */
 module.exports.render = function(req, res, name, params) {
@@ -65,7 +65,7 @@ module.exports.render = function(req, res, name, params) {
  * the array is empty an error is thrown.
  *
  * @param {Object} arrItems - An array of values to check.
- * @param {String} assertType - The type to check. Options: ['string', 'object',
+ * @param {string} assertType - The type to check. Options: ['string', 'object',
  *                            'number', 'undefined', 'boolean', 'symbol'].
  */
 module.exports.assertType = function(arrItems, assertType) {
@@ -104,7 +104,7 @@ module.exports.assertType = function(arrItems, assertType) {
  * assertType throws an error.
  *
  * @param {Object} arrItems - An array of values to check.
- * @param {String} checkType - The type to check. Options: ['string', 'object',
+ * @param {string} checkType - The type to check. Options: ['string', 'object',
  *                            'number', 'undefined', 'boolean', 'symbol'].
  * @return {Boolean} true - type is correct
  *                   false - error
@@ -178,8 +178,8 @@ module.exports.assertAdmin = function(user) {
  * @description Creates a colon delimited string from any number of arguments.
  * If any items are not strings or other failure occurs, an error is thrown.
  *
- * @param {String} args - An arbitrary number of strings to be appended.
- * @return {String} args with uid delimiter
+ * @param {string} args - An arbitrary number of strings to be appended.
+ * @param {string} args with uid delimiter
  */
 module.exports.createID = function(...args) {
   this.assertType(args, 'string');
@@ -190,8 +190,8 @@ module.exports.createID = function(...args) {
  * @description Splits a UID on the UID delimiter up and returns an array of
  * UID components.
  *
- * @param {String} uid - The uid.
- * @return {String} uid with delimiter
+ * @param {string} uid - The uid.
+ * @param {string} uid with delimiter
  */
 module.exports.parseID = function(uid) {
   if (!uid.includes(this.ID_DELIMITER)) {
@@ -203,9 +203,9 @@ module.exports.parseID = function(uid) {
 /**
  * @description Title-cases a string.
  *
- * @param {String} s - The string to be title-cased
+ * @param {string} s - The string to be title-cased
  *  @param {boolean} keepUpper- Boolean indicating wither or not keep uppercase characters as is
- * @return {String} the word with upper case
+ * @param {string} the word with upper case
  */
 module.exports.toTitleCase = function(s, keepUpper = false) {
   // Check if s NOT string or contains whitespace
@@ -289,7 +289,7 @@ module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
  * @param {Number} from - The current JMI version of the data.
  * @param {Number} to - The JMI version to convert the data to.
  * @param {Object} data - The data to convert between JMI versions.
- * @param {String} field - The field to parse type 1 on
+ * @param {string} field - The field to parse type 1 on
  *
  */
 module.exports.convertJMI = function(from, to, data, field = '_id') {

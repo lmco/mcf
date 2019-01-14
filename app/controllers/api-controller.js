@@ -100,7 +100,7 @@ module.exports = {
  *
  * @param {Object} obj - An object to convert to JSON-formatted string.
  *
- * @return {String} JSON string of object parameter
+ * @param {string} JSON string of object parameter
  */
 function formatJSON(obj) {
   return JSON.stringify(obj, null, M.config.server.api.json.indent);

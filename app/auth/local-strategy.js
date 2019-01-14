@@ -44,8 +44,8 @@ const utils = M.require('lib.utils');
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} username - Username to authenticate
- * @param {String} password - Password to authenticate
+ * @param {string} username - Username to authenticate
+ * @param {string} password - Password to authenticate
  * @returns {Promise} resolve - authenticated user object
  *                    reject - an error
  *
@@ -94,7 +94,7 @@ function handleBasicAuth(req, res, username, password) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} token - User authentication token, encrypted
+ * @param {string} token - User authentication token, encrypted
  * @returns {Promise} resolve - local user object
  *                    reject - an error
  *
@@ -181,7 +181,7 @@ function doLogin(req, res, next) {
 /**
  * @description Validates a users password with set rules.
  *
- * @param {String} password - Password to verify
+ * @param {string} password - Password to verify
  * @returns {Boolean} - If password is correctly validated
  */
 function validatePassword(password) {

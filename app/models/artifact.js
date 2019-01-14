@@ -34,15 +34,15 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description Defines the Artifact Schema
  *
- * @property {String} id - The elements unique id name-spaced by its project
+ * @property {string} id - The elements unique id name-spaced by its project
  * and organization.
  * @property {Object} history - An array of object that tracks artifact's
  * history.
- * @property {String} hash - [Within History] Hash string of the stored artifact.
+ * @property {string} hash - [Within History] Hash string of the stored artifact.
  * @property {Date} updatedOn - [Within History] Updated time for specific hash.
  * @property {User} user - [Within History] User that updated specific hash.
- * @property {String} filename - The filename of the artifact.
- * @property {String} contentType - The file extension. E.g: 'png', 'dat'
+ * @property {string} filename - The filename of the artifact.
+ * @property {string} contentType - The file extension. E.g: 'png', 'dat'
  * @property {Project} project - A reference to an artifact's project.
  * @property {Date} createdOn - The date which an artifact was created.
  * @property {Date} updatedOn - The date which an artifact was updated.
