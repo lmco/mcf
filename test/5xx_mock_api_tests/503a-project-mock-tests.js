@@ -469,7 +469,6 @@ function deleteProjectMember(done) {
     // Expect there to be two users on the project
     chai.expect(Object.keys(foundPermissions).length).to.equal(1);
     chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
-
     done();
   };
 
