@@ -304,7 +304,7 @@ module.exports.createRequest = function(user, params, body, method) {
   }
 
   return {
-    headers: getHeaders(),
+    headers: this.getHeaders(),
     method: method,
     params: params,
     body: body,
