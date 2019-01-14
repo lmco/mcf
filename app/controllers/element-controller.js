@@ -240,7 +240,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {string} branch - The ID of the branch to add elements to.
  * @param {(Object|Object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
- * @param {string} elements.id - The element ID.
+ * @param {string} elements.id - The ID of the element being created.
  * @param {string} [elements.name] - The name of the element.
  * @param {string} [elements.parent = 'model'] - The ID of the parent of the
  * element. The default value is 'model'
@@ -250,17 +250,16 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * provided, the parameter source is required.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
- * @param {Object} [elements.custom] - Any additional key/value pairs
- * for an element. Must be proper JSON form.
+ * @param {Object} [elements.custom] - Any additional key/value pairs for an
+ * object. Must be proper JSON form.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of created element objects
- *                   reject - error
- * // TODO: List valid and required parameters for the element object somewhere...
+ * @return {Promise} Array of created element objects
+ *
  * @example
- * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: 'parent' })
+ * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: ['parent'] })
  * .then(function(elements) {
  *   // Do something with the newly created elements
  * })
@@ -568,8 +567,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} branch - The ID of the branch to update elements on.
  * @param {(Object|Object[])} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
- * @param {string} elements.id - The ID of the element being updated. Cannot be
- * updated, but required to find element.
+ * @param {string} elements.id - The ID of the element being updated. Field
+ * cannot be updated but is required to find element.
  * @param {string} [elements.name] - The updated name of the element.
  * @param {string} [elements.parent] - The ID of the new elements parent. Cannot
  * update element parents in bulk.
@@ -578,15 +577,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Object} [elements.custom] - The additions or changes to existing
  * custom data. If the key/value pair already exists, the value will be changed.
  * If the key/value pair does not exist, it will be added.
- * @param {boolean} [elements.archived] - The updated archive field. If true,
+ * @param {boolean} [elements.archived] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of updated element objects
- *                   reject - error
- * // TODO: List valid/required element parameters.
+ * @return {Promise} Array of updated element objects
+ *
  * @example
  * update({User}, 'orgID', 'projID', branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
  * .then(function(elements) {

@@ -154,6 +154,19 @@ function find(requestingUser, users, options) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} users - Either an array of objects containing user
  * data or a single object containing user data to create.
+ * @param {string} users.username - The username of the user being created.
+ * @param {string} [users.password] - The password of the user being created.
+ * Depending on the authentication module, the password may be required.
+ * @param {string} [users.fname] - The first name of the user.
+ * @param {string} [users.lname] - The last name of the user.
+ * @param {string} [users.preferredName] - The preferred first name of the user.
+ * @param {string} [users.email] - The email of the user.
+ * @param {boolean} [users.admin = false] - A boolean denoting whether or not
+ * the user will be a system admin.
+ * @param {string} [users.provider = 'local'] - The provider which the user is
+ * retrieved from.
+ * @param {Object} [users.custom] - Any additional key/value pairs for an
+ * object. Must be proper JSON form.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -317,12 +330,23 @@ function create(requestingUser, users, options) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} users - Either an array of objects containing
  * updates to users, or a single object containing updates.
+ * @param {string} users.id - The ID of the user being updated. Field cannot be
+ * updated but is required to find user.
+ * @param {string} [users.fname] - The updated first name of the user.
+ * @param {string} [users.lname] - The updated last name of the user.
+ * @param {string} [users.preferredName] - The updated preferred first name of
+ * the user.
+ * @param {string} [users.email] - The updated email of the user.
+ * @param {Object} [users.custom] - The additions or changes to existing custom
+ * data. If the key/value pair already exists, the value will be changed. If the
+ * key/value pair does not exist, it will be added.
+ * @param {boolean} [users.archived] - The updated archived field. If true, the
+ * user will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of updated user objects
- *                   reject - error
+ * @return {Promise} Array of updated user objects
  *
  * @example
  * update({User}, [{Updated User 1}, {Updated User 2}...], { populate: 'createdBy' })

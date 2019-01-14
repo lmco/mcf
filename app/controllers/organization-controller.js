@@ -156,6 +156,10 @@ function find(requestingUser, orgs, options) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} orgs - Either an array of objects containing org
  * data or a single object containing org data to create.
+ * @param {string} orgs.id - The ID of the org being created.
+ * @param {string} orgs.name - The organization name.
+ * @param {Object} [orgs.custom] - Any additional key/value pairs for an object.
+ * Must be proper JSON form.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -297,6 +301,17 @@ function create(requestingUser, orgs, options) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} orgs - Either an array of objects containing
  * updates to organizations, or a single object containing updates.
+ * @param {string} orgs.id - The ID of the org being updated. Field cannot be
+ * updated but is required to find org.
+ * @param {string} [orgs.name] - The updated name of the organization.
+ * @param {Object} [orgs.permissions] - An object of key value pairs, where the
+ * key is the username, and the value is the role which the user is to have in
+ * the org. To remove a user from an org, the value must be 'remove_all'.
+ * @param {Object} [orgs.custom] - The additions or changes to existing custom
+ * data. If the key/value pair already exists, the value will be changed. If the
+ * key/value pair does not exist, it will be added.
+ * @param {boolean} [orgs.archived] - The updated archived field. If true, the
+ * org will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {Array} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
