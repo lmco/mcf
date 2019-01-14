@@ -67,6 +67,7 @@ function initApp() {
 
     // for parsing application/json
     app.use(bodyParser.json({ limit: '50mb' }));
+    app.use(bodyParser.text());
 
     // for parsing application/xwww-form-urlencoded
     app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));

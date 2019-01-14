@@ -100,6 +100,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple orgs', postOrgs);
   it('should PATCH multiple orgs', patchOrgs);
   it('should DELETE orgs', deleteOrgs);
+
 });
 
 /* --------------------( Tests )-------------------- */
@@ -111,19 +112,23 @@ function postOrg(done) {
   const body = testData.orgs[0];
   const params = { orgid: testData.orgs[0].id };
   const method = 'POST';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
     chai.expect(json.id).to.equal(testData.orgs[0].id);
     chai.expect(json.name).to.equal(testData.orgs[0].name);
+    chai.expect(json.permissions.read).to.include(adminUser.username);
+    chai.expect(json.permissions.write).to.include(adminUser.username);
+    chai.expect(json.permissions.admin).to.include(adminUser.username);
+    chai.expect(json.custom.leader).to.equal(testData.orgs[0].custom.leader);
     done();
   };
 
@@ -136,18 +141,18 @@ function postOrg(done) {
  */
 function postOrgRole(done) {
   // Create request object
-  const body = testData.roles[0];
+  const body = testData.roles[0].role;
   const params = {
     orgid: testData.orgs[0].id,
     username: testData.users[1].username };
   const method = 'POST';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -172,20 +177,18 @@ function getOrgRole(done) {
     username: testData.users[1].username
   };
   const method = 'GET';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.write).to.equal(true);
-    chai.expect(json.read).to.equal(true);
-    chai.expect(json.admin).to.equal(false);
+    const foundPermissions = JSON.parse(_data);
+    chai.expect(foundPermissions).to.have.members(['read', 'write']);
     done();
   };
 
@@ -201,18 +204,23 @@ function getAllOrgRoles(done) {
   const body = {};
   const params = { orgid: testData.orgs[0].id };
   const method = 'GET';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(Object.keys(json).length).to.equal(2);
+    // Parse the JSON response
+    const foundPermissions = JSON.parse(_data);
+    // Expect there to be two users on the project
+    chai.expect(Object.keys(foundPermissions).length).to.equal(2);
+    chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
+    chai.expect(foundPermissions[testData.users[1].username]).to.have.members(['read', 'write']);
+
     done();
   };
 
@@ -232,18 +240,18 @@ function deleteOrgRole(done) {
     username: testData.users[1].username
   };
   const method = 'DELETE';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
-
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.permissions.read.length).to.equal(1);
+    const deletedPermissions = JSON.parse(_data);
+    chai.expect(Object.keys(deletedPermissions).length).to.equal(1);
+    chai.expect(deletedPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
     done();
   };
 
@@ -259,13 +267,13 @@ function getOrg(done) {
   const body = {};
   const params = { orgid: testData.orgs[0].id };
   const method = 'GET';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -287,13 +295,13 @@ function patchOrg(done) {
   const body = testData.names[10];
   const params = { orgid: testData.orgs[0].id };
   const method = 'PATCH';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -315,13 +323,13 @@ function getOrgs(done) {
   const body = {};
   const params = {};
   const method = 'GET';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -342,18 +350,17 @@ function deleteOrg(done) {
   const body = {};
   const params = { orgid: testData.orgs[0].id };
   const method = 'DELETE';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.orgs[0].id);
+    chai.expect(_data[0]).to.equal(testData.orgs[0].id);
     done();
   };
 
@@ -366,21 +373,19 @@ function deleteOrg(done) {
  */
 function postOrgs(done) {
   // Create request object
-  const body = {
-    orgs: [
-      testData.orgs[1],
-      testData.orgs[2]
-    ]
-  };
+  const arrOrgs = [
+    testData.orgs[1],
+    testData.orgs[2]
+  ];
   const params = {};
   const method = 'POST';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, arrOrgs, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -398,22 +403,24 @@ function postOrgs(done) {
  */
 function patchOrgs(done) {
   // Create request object
-  const body = {
-    orgs: [
-      testData.orgs[1],
-      testData.orgs[2]
-    ],
-    update: { custom: { department: 'Space', location: { country: 'USA' } } }
-  };
+  const arrOrgData = [
+    testData.orgs[1],
+    testData.orgs[2]
+  ];
+  const arrUpdateOrg = arrOrgData.map((p) => ({
+    id: p.id,
+    custom: { department: 'Space', location: { country: 'USA' } }
+  }));
+
   const params = {};
   const method = 'PATCH';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, arrUpdateOrg, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -439,18 +446,18 @@ function patchOrgs(done) {
 function deleteOrgs(done) {
   // Create request object
   const body = [
-    testData.orgs[1],
-    testData.orgs[2]
+    testData.orgs[1].id,
+    testData.orgs[2].id
   ];
   const params = {};
   const method = 'DELETE';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -464,54 +471,6 @@ function deleteOrgs(done) {
 }
 
 /* ----------( Helper Functions )----------*/
-/**
- * @description Helper function for setting the request parameters.
- *
- * @param {Object} params - Parameters for API req
- * @param {Object} body - Body for API req
- * @param {String} method - API method of req
- * @param {Object} query - Object containing query parameters
- *
- * @returns {Object} req - Request Object
- */
-function getReq(params, body, method, query = {}) {
-  // Error-Check
-  if (typeof params !== 'object') {
-    throw M.CustomError('params is not of type object.');
-  }
-  if (typeof params !== 'object') {
-    throw M.CustomError('body is not of type object.');
-  }
-
-  return {
-    headers: getHeaders(),
-    method: method,
-    params: params,
-    body: body,
-    query: query,
-    user: adminUser,
-    session: {}
-  };
-}
-
-/**
- * @description This is a common function used in every test to verify the
- * status code of the api request and provide the headers.
- *
- * @param {Object} res - Response Object
- */
-function resFunctions(res) {
-  // Verifies the response code: 200 OK
-  res.status = function status(code) {
-    chai.expect(code).to.equal(200);
-    return this;
-  };
-  // Provides headers to response object
-  res.header = function header(a, b) {
-    return this;
-  };
-}
-
 /**
  * @description Helper function for setting the request header.
  */

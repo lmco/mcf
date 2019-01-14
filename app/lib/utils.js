@@ -351,9 +351,6 @@ module.exports.parseOptions = function(options, validOptions) {
         parsedOptions[option] = [options[option]];
       }
     }
-    else {
-      parsedOptions[option] = options[option];
-    }
   });
   return parsedOptions;
 };

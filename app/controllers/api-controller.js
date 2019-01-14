@@ -34,13 +34,6 @@ const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
-// Define option expected type
-const validOptions = {
-  populate: 'array',
-  subtree: 'boolean',
-  archived: 'boolean'
-};
-
 // Expose `ElementController`
 module.exports = {
   swaggerJSON,
@@ -219,27 +212,48 @@ function version(req, res) {
  * access to at least this organization.
  */
 function getOrgs(req, res) {
+  // Define array ID
+  // Note: Intended to be undefined if not set
+  let arrOrgID;
+  let options;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived', 'populate'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
+  if (req.query ) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate', 'orgIDs'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+    // Check query for orgIDs
+    if (req.query.hasOwnProperty('orgIDs')) {
+      arrOrgID = req.query.orgIDs.split(',');
     }
-  });
+    // No IDs include in query, check body
+    else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
+      arrOrgID = req.body;
+    }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, validOptions);
+    // Extract options from request query
+    const options = utils.parseOptions(req.query, validOptions);
+  }
 
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes req.user.
-  OrgController.find(req.user, options)
+  OrgController.find(req.user, arrOrgID, options)
   .then((orgs) => {
     // Return only public organization data
     const orgsPublicData = orgs.map(o => o.getPublicData());
@@ -255,9 +269,7 @@ function getOrgs(req, res) {
     return res.status(200).send(formatJSON(orgsPublicData));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -271,14 +283,32 @@ function getOrgs(req, res) {
  * @return {Object} res - Response object with orgs' public data
  */
 function postOrgs(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, validOptions);
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
 
   // Create organizations in request body
   // NOTE: createOrgs() sanitizes req.body.orgs
@@ -303,14 +333,31 @@ function postOrgs(req, res) {
  * @return {Object} res - Response object with orgs' public data
  */
 function patchOrgs(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, validOptions);
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
 
   // Update the specified orgs
   // NOTE: updateOrgs() sanitizes req.body.update
@@ -344,25 +391,13 @@ function deleteOrgs(req, res) {
     err = new M.CustomError(msg, 500, 'critical');
     return res.status(err.status).send(err);
   }
-  // Error check: body must be an array
-  if (!Array.isArray(req.body)) {
-    msg = 'Body is not an array.';
-    err = new M.CustomError(err, 400, 'warn');
-    return res.status(err.status).send(err);
-  }
-  // Error check, each item in the array must be an object
-  if (!req.body.every(o => typeof o === 'object')) {
-    msg = 'One or more items in the array is not an object';
-    err = new M.CustomError(msg, 400, 'warn');
-    return res.status(err.status).send(err);
-  }
 
   // Remove the specified orgs
   OrgController.remove(req.user, req.body)
   // Return 200: OK and the deleted orgs
-  .then((orgs) => {
+  .then((orgIDs) => {
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
+    return res.status(200).send(formatJSON(orgIDs));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -379,36 +414,45 @@ function deleteOrgs(req, res) {
  * @return {Object} res response object with search org's public data
  */
 function getOrg(req, res) {
+  // Define valid option type
+  let options;
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
 
-  // Define the optional archived flag
-  let archived = false;
-
-  // Check if archived was provided in the request query
-  if (req.query && req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
   }
 
   // Find the org from it's id
   // NOTE: findOrg() sanitizes req.params.orgid
-  OrgController.find(req.user, req.params.orgid, archived)
+  OrgController.find(req.user, req.params.orgid, options)
   .then((org) => {
+    // Check if orgs are found
+    if (org.length == 0) {
+      // Return error
+      return res.status(404).send('No organization found.')
+    }
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -426,6 +470,13 @@ function getOrg(req, res) {
  * @return {Object} res response object with created org
  */
 function postOrg(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -443,13 +494,27 @@ function postOrg(req, res) {
   // Set id in request body
   req.body.id = req.params.orgid;
 
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+
   // Create the organization with provided parameters
   // NOTE: create() sanitizes req.params.org.id and req.body.name
-  OrgController.create(req.user, req.body)
+  OrgController.create(req.user, req.body, options)
   .then((org) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -467,6 +532,12 @@ function postOrg(req, res) {
  * @return {Object} res response object with updated org
  */
 function patchOrg(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -481,13 +552,30 @@ function patchOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+
+  // Set body org id
+  req.body.id = req.params.orgid
+
   // Update the specified organization
-  // NOTE: update() sanitizes req.params.orgid
-  OrgController.update(req.user, req.params.orgid, req.body)
+  // NOTE: update() sanitizes req.body
+  OrgController.update(req.user, req.body, options)
   .then((org) => {
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -513,11 +601,11 @@ function deleteOrg(req, res) {
 
   // Remove the specified organization
   // NOTE: remove() sanitizes req.params.orgid
-  OrgController.remove(req.user, req.params.orgid)
+  OrgController.remove(req.user, [req.params.orgid])
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(org);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -541,15 +629,19 @@ function getOrgRole(req, res) {
     return res.status(error.status).send(error);
   }
 
-
   // Find the permissions the foundUser has within the organization
   // NOTE: findPermissions() sanitizes req.params.orgid
   // OrgController.findPermissions(req.user, req.params.username, req.params.orgid)
-  OrgController.find(req.user, req.params.username, req.params.orgid)
-  .then((org) => {
+  OrgController.find(req.user, req.params.orgid)
+  .then((orgs) => {
+    const org = orgs[0];
+    if (!org.permissions[req.params.username]) {
+      return res.status(404).send('User not on organization.');
+    }
+
     // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(roles));
+    return res.status(200).send(formatJSON(org.permissions[req.params.username]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -578,31 +670,25 @@ function postOrgRole(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check that role was passed into the request body
-  try {
-    assert.ok(req.body.hasOwnProperty('role'), 'A role was not specified in the request body.');
-  }
-  catch (error) {
-    res.status(400).send(new M.CustomError(error.message, 400, 'warn'));
+  // Ensure request body is a string
+  if (typeof req.body !== 'string') {
+    return res.status(400).send('Request body is not a string.');
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['role'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  // Create update object
+  const update = {
+    id: req.params.orgid,
+    permissions: {}
+  };
+  update.permissions[req.params.username] = req.body;
 
   // Set permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid and req.params.username
-  OrgController.setPermissions(req.user, req.params.orgid,
-    req.params.username, req.body.role)
+  OrgController.update(req.user, update)
   .then((org) => {
     // Return 200: Ok and updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -626,17 +712,26 @@ function deleteOrgRole(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Create update object
+  const update = {
+    id: req.params.orgid,
+    permissions: {}
+  };
+  update.permissions[req.params.username] = 'remove_all';
+
   // Remove permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid
-  OrgController.setPermissions(req.user, req.params.orgid,
-    req.params.username, 'REMOVE_ALL')
-  .then((org) => {
+  OrgController.update(req.user, update)
+  .then((orgs) => {
     // Return 200: OK and updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+
+    return res.status(200).send(formatJSON(orgs[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -659,11 +754,11 @@ function getAllOrgMemRoles(req, res) {
 
   // Get permissions of all users in given org
   // NOTE: findAllPermissions() sanitizes req.params.orgid
-  OrgController.findAllPermissions(req.user, req.params.orgid)
+  OrgController.find(req.user, req.params.orgid)
   .then((members) => {
     // Return 200: OK and permissions of all members in given org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(members));
+    return res.status(200).send(formatJSON(members[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
