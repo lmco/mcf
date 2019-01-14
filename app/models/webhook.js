@@ -30,8 +30,8 @@ const validators = M.require('lib.validators');
  *
  * @description Defines the Webhook Schema
  *
- * @property {String} id - The webhooks unique ID.
- * @property {String} name - The webhooks name.
+ * @property {string} id - The webhooks unique ID.
+ * @property {string} name - The webhooks name.
  * @property {Project} project - A reference to a webhook's project.
  * @property {Array} triggers - The events that trigger this webhook.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
@@ -117,8 +117,8 @@ const OutgoingWebhookSchema = new mongoose.Schema({
  * extends webhooks by adding a token and token location used to authorize
  * incoming requests.
  *
- * @property {String} token - The token to validate incoming requests against.
- * @property {String} tokenLocation - The location of the incoming requests
+ * @property {string} token - The token to validate incoming requests against.
+ * @property {string} tokenLocation - The location of the incoming requests
  * token to validate against.
  *
  */

@@ -242,7 +242,7 @@ function deleteWebhook(done) {
  *
  * @param {Object} params - Parameters for API req
  * @param {Object} body - Body for API req
- * @param {String} method - API method of req
+ * @param {string} method - API method of req
  * @param {Object} query - Object containing query parameters
  *
  * @returns {Object} req - Request Object

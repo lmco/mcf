@@ -321,7 +321,7 @@ function postProjectMember(done) {
   const projData = testData.projects[0];
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}/members/${nonAdminUser.username}`,
-    headers: testUtils.getHeaders('text/html'),
+    headers: testUtils.getHeaders('text/plain'),
     ca: testUtils.readCaFile(),
     method: 'POST',
     body: 'write'

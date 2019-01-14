@@ -44,16 +44,15 @@ const utils = M.require('lib.utils');
  * @description This function finds one or many webhooks.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project.
- * @param {Array/String} webhooks - The webhooks to find. Can either be an array
- * of webhook ids, a single webhook id, or not provided, which defaults to every
- * webhook being found.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {(string|string[])} [webhooks] - The webhooks to find. Can either be
+ * an array of webhook ids, a single webhook id, or not provided, which defaults
+ * to every webhook being found.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} options.archived - If true, find results will include
+ * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
  * @return {Promise} resolve - Array of found webhook objects
@@ -176,13 +175,34 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
  * @description This functions creates one or many webhooks.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project.
- * @param {Array/Object} webhooks - Either an array of objects containing
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {(Object|Object[])} webhooks - Either an array of objects containing
  * webhook data or a single object containing webhook data to create.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {string} webhooks.id - The ID of the webhook being created.
+ * @param {string} webhooks.name - The name of the webhook.
+ * @param {string[]} webhooks.triggers - An array of events that trigger the
+ * webhook.
+ * @param {string} webhooks.type - The type of the webhook, either 'incoming' or
+ * 'outgoing'.
+ * @param {Object} [webhooks.custom] - Any additional key/value pairs for an
+ * object. Must be proper JSON form
+ * @param {Object[]} [webhooks.responses] - If an outgoing webhook, a required
+ * array of objects containing response info.
+ * @param {string} [webhooks.responses.url] - The url to send a request to on
+ * triggering of a webhook.
+ * @param {string} [webhooks.responses.method = 'GET'] - The HTTP request
+ * method.
+ * @param {Object} [webhooks.responses.headers] - The request headers.
+ * @param {string} [webhooks.responses.ca] - The request certificate if needed.
+ * @param {string} [webhooks.responses.data] - Custom data to send via the
+ * request instead of the data provided from the triggered event.
+ * @param {string} [webhooks.token] - If an incoming webhook, a token that can
+ * be used to validate incoming requests.
+ * @param {string} [webhooks.tokenLocation] - The location of the token in an
+ * incoming request. Example: 'req.headers.token'.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created webhook objects
@@ -346,13 +366,20 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
  * @description This function updates one or many webhooks.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project.
- * @param {Array/Object} webhooks - Either an array of objects containing
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {(Object|Object[])} webhooks - Either an array of objects containing
  * updates to webhooks, or a single object containing updates.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {string} webhooks.id - The ID of the webhook being updated. Field
+ * cannot be updated but is required to find webhook.
+ * @param {string} [webhooks.name] - The updated name of the webhook.
+ * @param {Object} [webhooks.custom] - The additions or changes to existing
+ * custom data. If the key/value pair already exists, the value will be changed.
+ * If the key/value pair does not exist, it will be added.
+ * @param {boolean} [webhooks.archived] - The updated archived field. If true,
+ * the webhook will not be able to be found until unarchived.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated webhook objects
@@ -570,15 +597,14 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
  * @description This function removes one or many webhooks.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project
- * @param {Array/String} webhooks - The webhooks to remove. Can either be an
- * array of webhook ids or a single webhook id.
- * @param {Object} options - An optional parameter that provides supported
- * options. Currently there are no supported options.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project
+ * @param {(string|string[])} webhooks - The webhooks to remove. Can either be
+ * an array of webhook ids or a single webhook id.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted webhook ids
- *                   reject - error
+ * @return {Promise} Array of deleted webhook ids
  *
  * @example
  * remove({User}, 'orgID', 'projID', ['web1', 'web2'])

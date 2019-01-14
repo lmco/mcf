@@ -47,19 +47,18 @@ const utils = M.require('lib.utils');
  * @description This function finds one or many elements.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project.
- * @param {String} branch - The ID of the branch to find.
- * @param {Array/String} elements - The elements to find. Can either be an array
- * of element ids, a single element id, or not provided, which defaults to every
- * element in a project being found.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to find.
+ * @param {(string|string[])} [elements] - The elements to find. Can either be
+ * an array of element ids, a single element id, or not provided, which defaults
+ * to every element in a project being found.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} options.archived - If true, find results will include
+ * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
- * @param {boolean} options.subtree - If true, all elements in the subtree of
+ * @param {boolean} [options.subtree] - If true, all elements in the subtree of
  * the found elements will also be returned. The default value is false.
  *
  * @return {Promise} resolve - Array of found element objects
@@ -236,21 +235,31 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @description This functions creates one or many elements.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project.
- * @param {String} branch - The ID of the branch to add elements to.
- * @param {Array/Object} elements - Either an array of objects containing
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to add elements to.
+ * @param {(Object|Object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {string} elements.id - The ID of the element being created.
+ * @param {string} [elements.name] - The name of the element.
+ * @param {string} [elements.parent = 'model'] - The ID of the parent of the
+ * element. The default value is 'model'
+ * @param {string} [elements.source] - The ID of the source element. If
+ * provided, the parameter target is required.
+ * @param {string} [elements.target] - The ID of the target element. If
+ * provided, the parameter source is required.
+ * @param {string} [elements.documentation] - Any additional text
+ * documentation about an element.
+ * @param {Object} [elements.custom] - Any additional key/value pairs for an
+ * object. Must be proper JSON form.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of created element objects
- *                   reject - error
- * // TODO: List valid and required parameters for the element object somewhere...
+ * @return {Promise} Array of created element objects
+ *
  * @example
- * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: 'parent' })
+ * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: ['parent'] })
  * .then(function(elements) {
  *   // Do something with the newly created elements
  * })
@@ -553,19 +562,29 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @description This function updates one or many elements.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project.
- * @param {String} branch - The ID of the branch to update elements on.
- * @param {Array/Object} elements - Either an array of objects containing
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to update elements on.
+ * @param {(Object|Object[])} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {string} elements.id - The ID of the element being updated. Field
+ * cannot be updated but is required to find element.
+ * @param {string} [elements.name] - The updated name of the element.
+ * @param {string} [elements.parent] - The ID of the new elements parent. Cannot
+ * update element parents in bulk.
+ * @param {string} [elements.documentation] - The updated documentation of the
+ * element.
+ * @param {Object} [elements.custom] - The additions or changes to existing
+ * custom data. If the key/value pair already exists, the value will be changed.
+ * If the key/value pair does not exist, it will be added.
+ * @param {boolean} [elements.archived] - The updated archived field. If true,
+ * the element will not be able to be found until unarchived.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of updated element objects
- *                   reject - error
- * // TODO: List valid/required element parameters.
+ * @return {Promise} Array of updated element objects
+ *
  * @example
  * update({User}, 'orgID', 'projID', branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
  * .then(function(elements) {
@@ -834,13 +853,13 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * // TODO: Mention system admin only
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project.
- * @param {String} branch - The ID of the branch to remove elements from.
- * @param {Array/String} elements - The elements to remove. Can either be an
- * array of element ids or a single element id.
- * @param {Object} options - An optional parameter that provides supported
- * options. Currently there are no supported options.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to remove elements from.
+ * @param {(string|string[])} elements - The elements to remove. Can either be
+ * an array of element ids or a single element id.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * Currently there are no supported options.
  *
  * @return {Promise} resolve - Array of deleted element ids
  *                   reject - error
@@ -933,10 +952,10 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
  * @description A non-exposed helper function which finds the subtree of given
  * elements.
  *
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project.
- * @param {String} branch - The ID of the branch to find elements from.
- * @param {Array} elementIDs - The elements whose subtrees are being found.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string[]} elementIDs - The elements whose subtrees are being found.
  *
  * @return {Promise} resolve - Array of found element ids
  *                   reject - error

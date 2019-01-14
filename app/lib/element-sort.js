@@ -27,7 +27,7 @@ module.exports = {
 /**
  * @description Takes an array of elements and sorts them so they appear in
  * depth first order according to package hiearchy.
- * @param {Array} elementArr - An array of unsorted elements
+ * @param {Object[]} elementArr - An array of unsorted elements
  * @return {Array} sortedElementArr - The sorted array according to package
  * hierarchy.
  */

@@ -47,14 +47,13 @@ const utils = M.require('lib.utils');
  * @description This function finds one or many organizations.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {Array/String} orgs - The organizations to find. Can either be an
- * array of org ids, a single org id, or not provided, which defaults to every
- * org being found.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {(string|string[])} [orgs] - The organizations to find. Can either be
+ * an array of org ids, a single org id, or not provided, which defaults to
+ * every org being found.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} options.archived - If true, find results will include
+ * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
  * @return {Promise} resolve - Array of found organization objects
@@ -155,11 +154,14 @@ function find(requestingUser, orgs, options) {
  * @description This functions creates one or many orgs.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {Array/Object} orgs - Either an array of objects containing org data
- * or a single object containing org data to create.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {(Object|Object[])} orgs - Either an array of objects containing org
+ * data or a single object containing org data to create.
+ * @param {string} orgs.id - The ID of the org being created.
+ * @param {string} orgs.name - The organization name.
+ * @param {Object} [orgs.custom] - Any additional key/value pairs for an object.
+ * Must be proper JSON form.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created organization objects
@@ -297,11 +299,21 @@ function create(requestingUser, orgs, options) {
  * @description This function updates one or many orgs.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {Array/Object} orgs - Either an array of objects containing updates to
- * organizations, or a single object containing updates.
- * @param {Object} options - An optional parameter that provides supported
- * options.
- * @param {Array} options.populate - A list of fields to populate on return of
+ * @param {(Object|Object[])} orgs - Either an array of objects containing
+ * updates to organizations, or a single object containing updates.
+ * @param {string} orgs.id - The ID of the org being updated. Field cannot be
+ * updated but is required to find org.
+ * @param {string} [orgs.name] - The updated name of the organization.
+ * @param {Object} [orgs.permissions] - An object of key value pairs, where the
+ * key is the username, and the value is the role which the user is to have in
+ * the org. To remove a user from an org, the value must be 'remove_all'.
+ * @param {Object} [orgs.custom] - The additions or changes to existing custom
+ * data. If the key/value pair already exists, the value will be changed. If the
+ * key/value pair does not exist, it will be added.
+ * @param {boolean} [orgs.archived] - The updated archived field. If true, the
+ * org will not be able to be found until unarchived.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated organization objects
@@ -548,10 +560,10 @@ function update(requestingUser, orgs, options) {
  * projects, elements, webhooks and artifacts that belong to them.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {Array/String} orgs - The organizations to remove. Can either be an
- * array of org ids or a single org id.
- * @param {Object} options - An optional parameter that provides supported
- * options. Currently there are no supported options.
+ * @param {(string|string[])} orgs - The organizations to remove. Can either be
+ * an array of org ids or a single org id.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * Currently there are no supported options.
  *
  * @return {Promise} resolve - Array of deleted organization ids
  *                   reject - error

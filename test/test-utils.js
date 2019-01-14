@@ -291,7 +291,7 @@ module.exports.importTestData = function(filename) {
  * @param {Object} user - The user making the request
  * @param {Object} params - Parameters for API req
  * @param {Object} body - Body for API req
- * @param {String} method - API method of req
+ * @param {string} method - API method of req
  * @param {Object} query - query options for API req
  *
  * @returns {Object} req - Request Object
@@ -336,7 +336,7 @@ module.exports.createResponse = function(res) {
 /**
  * @description Helper function for setting the request headers.
  *
- * @param {String} contentType - The content type. Defaults to application/json.
+ * @param {string} contentType - The content type. Defaults to application/json.
  */
 module.exports.getHeaders = function(contentType = 'application/json') {
   const formattedCreds = `${testData.adminUser.username}:${testData.adminUser.password}`;

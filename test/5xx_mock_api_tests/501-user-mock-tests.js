@@ -367,7 +367,7 @@ function deleteUsers(done) {
  *
  * @param {Object} params - Parameters for API req
  * @param {Object} body - Body for API req
- * @param {String} method - API method of req
+ * @param {string} method - API method of req
  *
  * @returns {Object} req - Request Object
  */

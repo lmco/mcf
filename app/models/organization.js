@@ -32,8 +32,8 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description Defines the Organization Schema
  *
- * @property {String} _id - The organization's unique ID.
- * @property {String} name - The organization's name.
+ * @property {string} _id - The organization's unique ID.
+ * @property {string} name - The organization's name.
  * @property {Schema.Types.Mixed} permissions - An object whose keys identify an
  * organization's roles. The keys are usernames and the values are arrays
  * containing the users permissions.

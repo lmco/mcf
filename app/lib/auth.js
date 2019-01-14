@@ -280,7 +280,7 @@ function authenticate(req, res, next) {
 /**
  * @description Validates a users password with set rules.
  *
- * @param {String} password - Password to verify
+ * @param {string} password - Password to verify
  * @returns {Boolean} - If password is correctly validated
  */
 function validatePassword(password) {
