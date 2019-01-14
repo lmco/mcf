@@ -53,7 +53,7 @@ const utils = M.require('lib.utils');
  * an array of project ids, a single project id, or not provided, which defaults
  * to every project being found.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
@@ -172,7 +172,7 @@ function find(requestingUser, organizationID, projects, options) {
  * project being created. If 'internal', users not in the project but in the
  * owning org will be able to view the project.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created project objects
@@ -363,7 +363,7 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {boolean} [projects.archived] - The updated archived field. If true,
  * the project will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated project objects

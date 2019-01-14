@@ -54,7 +54,7 @@ const utils = M.require('lib.utils');
  * an array of element ids, a single element id, or not provided, which defaults
  * to every element in a project being found.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
@@ -253,7 +253,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {Object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} Array of created element objects
@@ -580,7 +580,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {boolean} [elements.archived] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} Array of updated element objects
@@ -955,7 +955,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branch - The ID of the branch to find elements from.
- * @param {Array} elementIDs - The elements whose subtrees are being found.
+ * @param {string[]} elementIDs - The elements whose subtrees are being found.
  *
  * @return {Promise} resolve - Array of found element ids
  *                   reject - error

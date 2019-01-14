@@ -51,7 +51,7 @@ const utils = M.require('lib.utils');
  * an array of org ids, a single org id, or not provided, which defaults to
  * every org being found.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
@@ -161,7 +161,7 @@ function find(requestingUser, orgs, options) {
  * @param {Object} [orgs.custom] - Any additional key/value pairs for an object.
  * Must be proper JSON form.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created organization objects
@@ -313,7 +313,7 @@ function create(requestingUser, orgs, options) {
  * @param {boolean} [orgs.archived] - The updated archived field. If true, the
  * org will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated organization objects

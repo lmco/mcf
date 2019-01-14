@@ -50,7 +50,7 @@ const utils = M.require('lib.utils');
  * an array of webhook ids, a single webhook id, or not provided, which defaults
  * to every webhook being found.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
@@ -202,7 +202,7 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {string} [webhooks.tokenLocation] - The location of the token in an
  * incoming request. Example: 'req.headers.token'.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created webhook objects
@@ -379,7 +379,7 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {boolean} [webhooks.archived] - The updated archived field. If true,
  * the webhook will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {Array} [options.populate] - A list of fields to populate on return of
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated webhook objects
