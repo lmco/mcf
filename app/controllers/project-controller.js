@@ -53,8 +53,11 @@ const utils = M.require('lib.utils');
  * of project ids, a single project id, or not provided, which defaults to every
  * project being found.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported options are the boolean 'archived' and
- * the array of strings 'populate'
+ * options.
+ * @param {Array} options.populate - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ * @param {boolean} options.archived - If true, find results will include
+ * archived objects. The default value is false.
  *
  * @return {Promise} resolve - Array of found project objects
  *                   reject - error
@@ -162,7 +165,9 @@ function find(requestingUser, organizationID, projects, options) {
  * @param {Array/Object} projects - Either an array of objects containing
  * project data or a single object containing project data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the array of strings 'populate'.
+ * options.
+ * @param {Array} options.populate - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created project objects
  *                   reject - error
@@ -340,7 +345,9 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {Array/Object} projects - Either an array of objects containing
  * updates to projects, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the array of strings 'populate'.
+ * options.
+ * @param {Array} options.populate - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated project objects
  *                   reject - error
