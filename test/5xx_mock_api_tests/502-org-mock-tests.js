@@ -100,7 +100,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple orgs', postOrgs);
   it('should PATCH multiple orgs', patchOrgs);
   it('should DELETE orgs', deleteOrgs);
-
 });
 
 /* --------------------( Tests )-------------------- */

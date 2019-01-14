@@ -229,7 +229,7 @@ function getOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query ) {
+  if (req.query) {
     // Check if invalid key passed in
     Object.keys(req.query).forEach((key) => {
       // If invalid key, reject
@@ -448,7 +448,7 @@ function getOrg(req, res) {
     // Check if orgs are found
     if (org.length == 0) {
       // Return error
-      return res.status(404).send('No organization found.')
+      return res.status(404).send('No organization found.');
     }
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
@@ -567,7 +567,7 @@ function patchOrg(req, res) {
   }
 
   // Set body org id
-  req.body.id = req.params.orgid
+  req.body.id = req.params.orgid;
 
   // Update the specified organization
   // NOTE: update() sanitizes req.body
@@ -730,7 +730,7 @@ function deleteOrgRole(req, res) {
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 

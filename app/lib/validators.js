@@ -116,7 +116,7 @@ module.exports.user = {
   username: '^([a-z])([a-z0-9_]){0,}$',
   password: function(password, AuthModule) {
     // Error check - Make sure password is a string
-    if ( (password) !== typeof ('')) {
+    if ((password) !== typeof ('')) {
       return false;
     }
 
