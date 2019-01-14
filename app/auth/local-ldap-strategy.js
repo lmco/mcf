@@ -52,7 +52,6 @@ function handleBasicAuth(req, res, username, password) {
       _id: username,
       archivedOn: null
     })
-    .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
     .exec((findUserErr, users) => {
       // Check for errors
       if (findUserErr) {

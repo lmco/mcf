@@ -289,9 +289,10 @@ module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
  * @param {Number} from - The current JMI version of the data.
  * @param {Number} to - The JMI version to convert the data to.
  * @param {Object} data - The data to convert between JMI versions.
+ * @param {String} field - The field to parse type 1 on
  *
  */
-module.exports.convertJMI = function(from, to, data) {
+module.exports.convertJMI = function(from, to, data, field = '_id') {
   // Convert JMI type 1 to type 2
   if (from === 1 && to === 2) {
     // Error Check: Ensure data is in JMI type 1
@@ -304,10 +305,52 @@ module.exports.convertJMI = function(from, to, data) {
 
     const returnObj = {};
     data.forEach((object) => {
-      returnObj[object._id] = object;
+      returnObj[object[field]] = object;
     });
     return returnObj;
   }
 
   throw new M.CustomError('JMI conversion not yet implemented.', 501, 'warn');
+};
+
+/**
+ * @description Parse option string into option objects.
+ * Note: Boolean strings are converted to booleans
+ *          ex. "true" => true
+ *       string seperated commas are converted to arrays
+ *          ex. "createdBy, modifiedBy" => {["createdBy", "modifiedBy"]}
+ *
+ * @param {options} - An optional parameter that provides supported
+ * options.
+ * @param {validOptions} - An object containing valid option as keys and
+ * the object's data type as values. ex. populate: 'array'
+ */
+module.exports.parseOptions = function(options, validOptions) {
+  // Define parsed option object
+  const parsedOptions = {};
+  // Loop through all options
+  Object.keys(options).forEach((option) => {
+    // Check option of boolean type
+    if (validOptions[option] === 'boolean') {
+      // Check and convert string to boolean
+      if (options[option] === 'true') {
+        parsedOptions[option] = true;
+      }
+      else if (options[option] === 'false') {
+        parsedOptions[option] = false;
+      }
+    }
+    // Check array type
+    else if (validOptions[option] === 'array') {
+      if (options[option].includes(',')) {
+        // Multiple options, split into array
+        parsedOptions[option] = options[option].split(',');
+      }
+      else {
+        // Set single option within array
+        parsedOptions[option] = [options[option]];
+      }
+    }
+  });
+  return parsedOptions;
 };

@@ -227,7 +227,7 @@ function ldapSearch(ldapClient, username) {
         ldapConfig.attributes.username,
         ldapConfig.attributes.firstName,
         ldapConfig.attributes.lastName,
-        ldapConfig.attributes.eMail
+        ldapConfig.attributes.email
       ]
     };
 
@@ -314,32 +314,25 @@ function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');
   // Define and return promise
   return new Promise((resolve, reject) => {
-    // If user is created, store object function-wide
-    let newUserObj = {};
+    // Store user object function-wide
+    let userObject = {};
 
     // Search for user in database
     User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] })
     .then(foundUser => {
-      // User exists, update database with LDAP information
-      foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
-      foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
-      foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
-      foundUser.email = ldapUserObj[ldapConfig.attributes.email];
+      // If the user was found, update with LDAP info
+      if (foundUser) {
+        // User exists, update database with LDAP information
+        foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
+        foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
+        foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
+        foundUser.email = ldapUserObj[ldapConfig.attributes.email];
 
-      // Save updated user to database
-      foundUser.save()
-      // Save successful, resolve user model object
-      .then(userSaveUpdate => resolve(userSaveUpdate))
-      // Save failed, reject error
-      .catch(saveErr => reject(saveErr));
-    })
-    .catch(findUserErr => {
-      // Find user failed, check error message NOT 'Not Found'
-      if (findUserErr.message !== 'Not Found') {
-        // Error message NOT 'Not Found', reject error
-        return reject(findUserErr);
+        // Save updated user to database
+        return foundUser.save();
       }
-      // Error message 'Not Found', create user in database
+      // User not found, create a new one
+
       // Initialize userData with LDAP information
       const initData = new User({
         _id: ldapUserObj[ldapConfig.attributes.username],
@@ -350,26 +343,29 @@ function ldapSync(ldapUserObj) {
         provider: 'ldap'
       });
 
-      // Save ldap user
-      return initData.save()
-      .then(userSaveNew => {
-        // Save user to function-wide variable
-        newUserObj = userSaveNew;
+        // Save ldap user
+      return initData.save();
+    })
+    .then(savedUser => {
+      // Save user to function-wide variable
+      userObject = savedUser;
 
-        // Find the default org
-        return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
-      })
-      .then((defaultOrg) => {
-        // Add the user to the default org
-        defaultOrg.permissions[newUserObj._id] = ['read', 'write'];
+      // Find the default org
+      return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+    })
+    .then((defaultOrg) => {
+      // Add the user to the default org
+      defaultOrg.permissions[userObject._id] = ['read', 'write'];
 
-        // Save the updated default org
-        return defaultOrg.save();
-      })
-      // Return the new user
-      .then(() => resolve(newUserObj))
-      // Save failed, reject error
-      .catch(saveErr => reject(saveErr));
-    });
+      // Mark permissions as modified, required for 'mixed' fields
+      defaultOrg.markModified('permissions');
+
+      // Save the updated default org
+      return defaultOrg.save();
+    })
+    // Return the new user
+    .then(() => resolve(userObject))
+    // Save failed, reject error
+    .catch(saveErr => reject(saveErr));
   });
 }

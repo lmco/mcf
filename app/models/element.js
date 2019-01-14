@@ -169,6 +169,18 @@ ElementSchema.statics.getValidBulkUpdateFields = function() {
 };
 
 /**
+ * @description Returns a list of fields a requesting user can populate
+ * @memberOf ElementSchema
+ */
+ElementSchema.methods.getValidPopulateFields = function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source', 'target', 'project'];
+};
+
+ElementSchema.statics.getValidPopulateFields = function() {
+  return ElementSchema.methods.getValidPopulateFields();
+};
+
+/**
  * @description Returns the element public data
  * @memberOf ElementSchema
  */

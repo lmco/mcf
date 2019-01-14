@@ -53,6 +53,7 @@ const utils = M.require('lib.utils');
  * @param {Array/String} elements - The elements to find. Can either be an array
  * of element ids, a single element id, or not provided, which defaults to every
  * element in a project being found.
+ * // TODO: Add default behavior for options
  * @param {Object} options - An optional parameter that provides supported
  * options. Currently the only supported options are the booleans 'archived'
  * and 'subtree' and the array of strings 'populate'
@@ -71,6 +72,8 @@ const utils = M.require('lib.utils');
  */
 function find(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
+    // TODO: Ensure parameters are of correct type
+
     // Ensure user is on the master branch
     if (branch !== 'master') {
       throw new M.CustomError('User must be on the master branch.', 400, 'warn');
@@ -118,6 +121,14 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
             + ' is not an array.');
           assert.ok(options.populate.every(o => typeof o === 'string'),
             'Every value in the populate array must be a string.');
+
+          // Ensure each field is able to be populated
+          const validPopulateFields = Element.getValidPopulateFields();
+          options.populate.forEach((p) => {
+            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
+              + ' be populated.');
+          });
+
           populateString = options.populate.join(' ');
         }
 
@@ -231,7 +242,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  *
  * @return {Promise} resolve - Array of created element objects
  *                   reject - error
- *
+ * // TODO: List valid and required parameters for the element object somewhere...
  * @example
  * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: 'parent' })
  * .then(function(elements) {
@@ -274,6 +285,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
             + ' is not an array.');
           assert.ok(options.populate.every(o => typeof o === 'string'),
             'Every value in the populate array must be a string.');
+
+          // Ensure each field is able to be populated
+          const validPopulateFields = Element.getValidPopulateFields();
+          options.populate.forEach((p) => {
+            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
+              + ' be populated.');
+          });
+
           populateString = options.populate.join(' ');
           populate = true;
         }
@@ -524,6 +543,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 }
 
 /**
+ * // TODO: Add to all descriptions. Explain custom data. Talk about limitations of functions
  * @description This function updates one or many elements.
  *
  * @param {User} requestingUser - The object containing the requesting user.
@@ -537,7 +557,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  *
  * @return {Promise} resolve - Array of updated element objects
  *                   reject - error
- *
+ * // TODO: List valid/required element parameters.
  * @example
  * update({User}, 'orgID', 'projID', branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
  * .then(function(elements) {
@@ -585,6 +605,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             + ' is not an array.');
           assert.ok(options.populate.every(o => typeof o === 'string'),
             'Every value in the populate array must be a string.');
+
+          // Ensure each field is able to be populated
+          const validPopulateFields = Element.getValidPopulateFields();
+          options.populate.forEach((p) => {
+            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
+              + ' be populated.');
+          });
+
           populateString = options.populate.join(' ');
         }
       }
@@ -725,7 +753,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           }
 
           // If the type of field is mixed
-          if (Element.schema.obj[key].type.schemaName === 'Mixed') {
+          if (Element.schema.obj[key]
+            && Element.schema.obj[key].type.schemaName === 'Mixed') {
             // Only objects should be passed into mixed data
             if (typeof updateElement !== 'object') {
               throw new M.CustomError(`${key} must be an object`, 400, 'warn');
@@ -794,6 +823,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 /**
  * @description This function removes one or many elements as well as the
  * subtree under those elements.
+ * // TODO: Mention system admin only
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {String} organizationID - The ID of the owning organization.

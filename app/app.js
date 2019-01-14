@@ -67,6 +67,7 @@ function initApp() {
 
     // for parsing application/json
     app.use(bodyParser.json({ limit: '50mb' }));
+    app.use(bodyParser.text());
 
     // for parsing application/xwww-form-urlencoded
     app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
@@ -145,6 +146,9 @@ function createDefaultOrganization() {
           }
         });
 
+        // Mark the permissions field modified, require for 'mixed' fields
+        org.markModified('permissions');
+
         // Save the update organization
         return org.save();
       }
@@ -207,6 +211,8 @@ function createDefaultAdmin() {
     .then((defaultOrg) => {
       // Add default admin to default org
       defaultOrg.permissions[M.config.server.defaultAdminUsername] = ['read', 'write'];
+
+      defaultOrg.markModified('permissions');
 
       // Save the updated default org
       return defaultOrg.save();

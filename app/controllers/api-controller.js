@@ -212,32 +212,48 @@ function version(req, res) {
  * access to at least this organization.
  */
 function getOrgs(req, res) {
+  // Define array ID
+  // Note: Intended to be undefined if not set
+  let arrOrgID;
+  let options;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Define the optional archived flag
-  let archived = false;
-
-  // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
+  if (req.query ) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate', 'orgIDs'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+    // Check query for orgIDs
+    if (req.query.hasOwnProperty('orgIDs')) {
+      arrOrgID = req.query.orgIDs.split(',');
     }
-  });
+    // No IDs include in query, check body
+    else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
+      arrOrgID = req.body;
+    }
 
-  // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
+    // Extract options from request query
+    const options = utils.parseOptions(req.query, validOptions);
   }
 
   // Get all organizations the requesting user has access to
-  // NOTE: findOrgs() sanitizes req.user.
-  OrgController.findOrgs(req.user, archived)
+  // NOTE: find() sanitizes req.user.
+  OrgController.find(req.user, arrOrgID, options)
   .then((orgs) => {
     // Return only public organization data
     const orgsPublicData = orgs.map(o => o.getPublicData());
@@ -267,21 +283,36 @@ function getOrgs(req, res) {
  * @return {Object} res - Response object with orgs' public data
  */
 function postOrgs(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Error Check: ensure org data array is provided in the body
-  if (!req.body.hasOwnProperty('orgs')) {
-    const error = new M.CustomError('Orgs array not in request body.', 400, 'warn');
-    return res.status(error.status).send(error);
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
   }
 
   // Create organizations in request body
   // NOTE: createOrgs() sanitizes req.body.orgs
-  OrgController.createOrgs(req.user, req.body.orgs)
+  OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
@@ -302,45 +333,35 @@ function postOrgs(req, res) {
  * @return {Object} res - Response object with orgs' public data
  */
 function patchOrgs(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Initialize the delete query object
-  let updateQuery = {};
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
 
-  // Error Check: ensure update was provided in body
-  if (!req.body.hasOwnProperty('update')) {
-    const error = new M.CustomError('Update object was not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
-  // No orgs provided, return an error
-  if (!req.body.hasOwnProperty('orgs')) {
-    const error = new M.CustomError('Array of orgs not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-  // Org objects provided, delete all
-  if (req.body.orgs.every(o => typeof o === 'object')) {
-    // Query finds all orgs by their id
-    updateQuery = { _id: { $in: sani.sanitize(req.body.orgs.map(o => o.id)) } };
-  }
-  // Org IDs provided, delete all
-  else if (req.body.orgs.every(o => typeof o === 'string')) {
-    // Query finds all orgs by their id
-    updateQuery = { _id: { $in: sani.sanitize(req.body.orgs) } };
-  }
-  // No valid org data was provided, reject
-  else {
-    const error = new M.CustomError('Orgs array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
   }
 
   // Update the specified orgs
   // NOTE: updateOrgs() sanitizes req.body.update
-  OrgController.updateOrgs(req.user, updateQuery, req.body.update)
+  OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
@@ -370,25 +391,13 @@ function deleteOrgs(req, res) {
     err = new M.CustomError(msg, 500, 'critical');
     return res.status(err.status).send(err);
   }
-  // Error check: body must be an array
-  if (!Array.isArray(req.body)) {
-    msg = 'Body is not an array.';
-    err = new M.CustomError(err, 400, 'warn');
-    return res.status(err.status).send(err);
-  }
-  // Error check, each item in the array must be an object
-  if (!req.body.every(o => typeof o === 'object')) {
-    msg = 'One or more items in the array is not an object';
-    err = new M.CustomError(msg, 400, 'warn');
-    return res.status(err.status).send(err);
-  }
 
   // Remove the specified orgs
-  OrgController.removeOrgs(req.user, req.body)
+  OrgController.remove(req.user, req.body)
   // Return 200: OK and the deleted orgs
-  .then((orgs) => {
+  .then((orgIDs) => {
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
+    return res.status(200).send(formatJSON(orgIDs));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -405,36 +414,45 @@ function deleteOrgs(req, res) {
  * @return {Object} res response object with search org's public data
  */
 function getOrg(req, res) {
+  // Define valid option type
+  let options;
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
 
-  // Define the optional archived flag
-  let archived = false;
-
-  // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
   }
 
   // Find the org from it's id
   // NOTE: findOrg() sanitizes req.params.orgid
-  OrgController.findOrg(req.user, req.params.orgid, archived)
+  OrgController.find(req.user, req.params.orgid, options)
   .then((org) => {
+    // Check if orgs are found
+    if (org.length == 0) {
+      // Return error
+      return res.status(404).send('No organization found.')
+    }
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -452,6 +470,13 @@ function getOrg(req, res) {
  * @return {Object} res response object with created org
  */
 function postOrg(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -469,13 +494,27 @@ function postOrg(req, res) {
   // Set id in request body
   req.body.id = req.params.orgid;
 
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+
   // Create the organization with provided parameters
-  // NOTE: createOrg() sanitizes req.params.org.id and req.body.name
-  OrgController.createOrg(req.user, req.body)
+  // NOTE: create() sanitizes req.params.org.id and req.body.name
+  OrgController.create(req.user, req.body, options)
   .then((org) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -493,6 +532,12 @@ function postOrg(req, res) {
  * @return {Object} res response object with updated org
  */
 function patchOrg(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -507,13 +552,30 @@ function patchOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+
+  // Set body org id
+  req.body.id = req.params.orgid
+
   // Update the specified organization
-  // NOTE: updateOrg() sanitizes req.params.orgid
-  OrgController.updateOrg(req.user, req.params.orgid, req.body)
+  // NOTE: update() sanitizes req.body
+  OrgController.update(req.user, req.body, options)
   .then((org) => {
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -538,12 +600,12 @@ function deleteOrg(req, res) {
   }
 
   // Remove the specified organization
-  // NOTE: removeOrg() sanitizes req.params.orgid
-  OrgController.removeOrg(req.user, req.params.orgid)
+  // NOTE: remove() sanitizes req.params.orgid
+  OrgController.remove(req.user, [req.params.orgid])
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(org);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -569,11 +631,17 @@ function getOrgRole(req, res) {
 
   // Find the permissions the foundUser has within the organization
   // NOTE: findPermissions() sanitizes req.params.orgid
-  OrgController.findPermissions(req.user, req.params.username, req.params.orgid)
-  .then((roles) => {
+  // OrgController.findPermissions(req.user, req.params.username, req.params.orgid)
+  OrgController.find(req.user, req.params.orgid)
+  .then((orgs) => {
+    const org = orgs[0];
+    if (!org.permissions[req.params.username]) {
+      return res.status(404).send('User not on organization.');
+    }
+
     // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(roles));
+    return res.status(200).send(formatJSON(org.permissions[req.params.username]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -602,31 +670,25 @@ function postOrgRole(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check that role was passed into the request body
-  try {
-    assert.ok(req.body.hasOwnProperty('role'), 'A role was not specified in the request body.');
-  }
-  catch (error) {
-    res.status(400).send(new M.CustomError(error.message, 400, 'warn'));
+  // Ensure request body is a string
+  if (typeof req.body !== 'string') {
+    return res.status(400).send('Request body is not a string.');
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['role'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  // Create update object
+  const update = {
+    id: req.params.orgid,
+    permissions: {}
+  };
+  update.permissions[req.params.username] = req.body;
 
   // Set permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid and req.params.username
-  OrgController.setPermissions(req.user, req.params.orgid,
-    req.params.username, req.body.role)
+  OrgController.update(req.user, update)
   .then((org) => {
     // Return 200: Ok and updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+    return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -650,17 +712,26 @@ function deleteOrgRole(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Create update object
+  const update = {
+    id: req.params.orgid,
+    permissions: {}
+  };
+  update.permissions[req.params.username] = 'remove_all';
+
   // Remove permissions of given user
   // NOTE: setPermissions() sanitizes req.params.orgid
-  OrgController.setPermissions(req.user, req.params.orgid,
-    req.params.username, 'REMOVE_ALL')
-  .then((org) => {
+  OrgController.update(req.user, update)
+  .then((orgs) => {
     // Return 200: OK and updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.getPublicData()));
+
+    return res.status(200).send(formatJSON(orgs[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -683,11 +754,11 @@ function getAllOrgMemRoles(req, res) {
 
   // Get permissions of all users in given org
   // NOTE: findAllPermissions() sanitizes req.params.orgid
-  OrgController.findAllPermissions(req.user, req.params.orgid)
+  OrgController.find(req.user, req.params.orgid)
   .then((members) => {
     // Return 200: OK and permissions of all members in given org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(members));
+    return res.status(200).send(formatJSON(members[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -698,7 +769,6 @@ function getAllOrgMemRoles(req, res) {
  * GET /api/org/:orgid/projects
  *
  * @description Gets an array of all projects that a user has access to.
- * Returns an empty array if the user has access to none.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -712,26 +782,47 @@ function getProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Define the optional archived flag
-  let archived = false;
-
-  // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
+  // Check if invalid key passed into the query
+  if (req.query) {
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'projectIDs', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
   }
 
-  // Get all projects the requesting user has access to
-  // NOTE: findProjects() sanitizes req.user and org.id.
-  ProjectController.findProjects(req.user, req.params.orgid, archived)
+  // Define the options object and projectIDs array
+  const options = {
+    archived: false,
+    populate: []
+  };
+  let projectIDs;
+
+  // Check if archived was provided in the request query
+  if (req.query && req.query.hasOwnProperty('archived')) {
+    options.archived = (req.query.archived === 'true');
+  }
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
+  }
+
+  // Check if projectIDs was provided in the request query
+  if (req.query && req.query.hasOwnProperty('projectIDs')) {
+    // Split the string by comma, add strings to projectIDs
+    projectIDs = req.query.projectIDs.split(',');
+  }
+  // If project ids provided in array in request body
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
+    projectIDs = req.body;
+  }
+
+  // Get all projectIDs the requesting user has access to
+  // NOTE: find() sanitizes req.user and org.id.
+  ProjectController.find(req.user, req.params.orgid, projectIDs, options)
   .then((projects) => {
     // Return only public project data
     const projectPublicData = [];
@@ -741,7 +832,7 @@ function getProjects(req, res) {
 
     // Verify project public data array is not empty
     if (projectPublicData.length === 0) {
-      const error = new M.CustomError('No projects found.', 404, 'warn');
+      const error = new M.CustomError('No projectIDs found.', 404, 'warn');
       return res.status(error.status).send(error);
     }
 
@@ -776,9 +867,31 @@ function postProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed into the query
+  if (req.query) {
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+  }
+
+  // Define the options object
+  const options = {
+    populate: []
+  };
+
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
+  }
+
   // Create the specified projects
-  // NOTE: createProjects() sanitizes req.params.orgid and the projects
-  ProjectController.createProjects(req.user, req.params.orgid, req.body)
+  // NOTE: create() sanitizes req.params.orgid and the projects
+  ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     // Return 200: OK and the new projects
     res.header('Content-Type', 'application/json');
@@ -811,23 +924,31 @@ function patchProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: ensure req.params.orgid was provided
-  if (!req.params.hasOwnProperty('orgid')) {
-    // orgid not provided, reject
-    const error = new M.CustomError('orgid was not provided in params.', 400, 'warn');
-    return res.status(error.status).send(error);
+  // Check if invalid key passed into the query
+  if (req.query) {
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
   }
 
-  // Error Check: ensure req.params.orgid is a string
-  if (typeof req.params.orgid !== 'string') {
-    // orgid not a string, reject
-    const error = new M.CustomError('orgid in request params is not a string.', 400, 'warn');
-    return res.status(error.status).send(error);
+  // Define the options object
+  const options = {
+    populate: []
+  };
+
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
   }
 
   // Update the specified projects
-  // NOTE: updateProjects() sanitizes req.params.orgid
-  ProjectController.updateProjects(req.user, req.params.orgid, req.body)
+  // NOTE: update() sanitizes req.params.orgid
+  ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     // Return 200: OK and the updated projects
     res.header('Content-Type', 'application/json');
@@ -854,13 +975,32 @@ function deleteProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Error Check: ensure update was provided in body
+  if (!Array.isArray(req.body)) {
+    const error = new M.CustomError('Request body is not an array.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Check if invalid key passed into the query
+  if (req.query) {
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (![].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+  }
+
+  // Define the options object
+  const options = {};
+
   // Remove the specified projects
-  ProjectController.removeProjects(req.user, req.params.orgid, req.body)
-  .then((projects) => {
-    // Return 200: OK and the deleted projects
+  ProjectController.remove(req.user, req.params.orgid, req.body, options)
+  .then((projectIDs) => {
+    // Return 200: OK and the deleted project IDs
     res.header('Content-Type', 'application/json');
-    return res.status(200)
-    .send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(projectIDs.map(p => utils.parseID(p).pop())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -869,7 +1009,7 @@ function deleteProjects(req, res) {
 /**
  * GET /api/org/:orgid/projects/:projectid
  *
- * @description Gets a project by its project.id, and org.id.
+ * @description Gets a project by its project ID.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
@@ -884,32 +1024,51 @@ function getProject(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  if (req.query) {
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+  }
 
-  // Define the optional archived flag
-  let archived = false;
+  // Define the options object
+  const options = {
+    archived: false,
+    populate: []
+  };
 
   // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
+  if (req.query && req.query.hasOwnProperty('archived')) {
+    options.archived = (req.query.archived === 'true');
+  }
+
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
   }
 
   // Find the project from it's project.id and org.id
-  // NOTE: findProject() sanitizes req.params.projectid and req.params.orgid
-  ProjectController.findProject(req.user, req.params.orgid, req.params.projectid, archived)
-  .then((project) => {
-    // Return a 200: OK and the project's public data
+  // NOTE: find() sanitizes req.params.projectid and req.params.orgid
+  ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
+  .then((projects) => {
+    // If no projects returned, return a 404 error
+    if (projects.length === 0) {
+      return res.status(404).send('Project not found.');
+    }
+
+    // Return a 200: OK and the found project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project.getPublicData()));
+    return res.status(200).send(formatJSON(projects[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    return res.status(error.status || 500).send(error);
+  });
 }
 
 /**
@@ -930,11 +1089,68 @@ function postProject(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // If org ID was provided in the body, ensure it matches org ID in params
-  if (req.body.hasOwnProperty('orgid') && (req.params.orgid !== req.body.orgid)) {
+  // If project ID was provided in the body, ensure it matches project ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
     const error = new M.CustomError(
-      'Org ID in the body does not match ID in the params.', 400, 'warn'
+      'Project ID in the body does not match ID in the params.', 400, 'warn'
     );
+    return res.status(error.status).send(error);
+  }
+
+  // Set the orgid in req.body in case it wasn't provided
+  req.body.id = req.params.projectid;
+
+  // Check if invalid key passed in
+  if (req.query) {
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+  }
+
+  // Define the options object
+  const options = {
+    populate: []
+  };
+
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
+  }
+
+  // Create project with provided parameters
+  // NOTE: create() sanitizes req.params.projectid, req.params.orgid and req.body.name
+  ProjectController.create(req.user, req.params.orgid, req.body, options)
+  .then((projects) => {
+    // Return 200: OK and created project
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(projects[0].getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => {
+    console.log(error);
+    return res.status(error.status).send(error);
+  });
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid
+ *
+ * @description Updates the project specified in the URI.
+ *
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} res response object with updated project
+ */
+function patchProject(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
@@ -949,43 +1165,35 @@ function postProject(req, res) {
   // Set the orgid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
 
-  // Create project with provided parameters
-  // NOTE: createProject() sanitizes req.params.projectid, req.params.orgid and req.body.name
-  ProjectController.createProject(req.user, req.params.orgid, req.body)
-  .then((project) => {
-    // Return 200: OK and created project
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project.getPublicData()));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
-}
+  // Check if invalid key passed in
+  if (req.query) {
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+  }
 
-/**
- * PATCH /api/orgs/:orgid/projects/:projectid
- *
- * @description Updates the project specified in the URI. Takes an org id and
- * project id in the URI and updated properties of the project in the request body.
- *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
- *
- * @return {Object} res response object with updated project
- */
-function patchProject(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+  // Define the options object
+  const options = {
+    populate: []
+  };
+
+
+  // Check if populate was provided in the request query
+  if (req.query && req.query.hasOwnProperty('populate')) {
+    options.populate = req.query.populate.split(',');
   }
 
   // Update the specified project
-  // NOTE: updateProject() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.updateProject(req.user, req.params.orgid, req.params.projectid, req.body)
-  .then((project) => {
+  // NOTE: update() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.update(req.user, req.params.orgid, req.body, options)
+  .then((projects) => {
     // Return 200: OK and the updated project
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project.getPublicData()));
+    return res.status(200).send(formatJSON(projects[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -994,8 +1202,7 @@ function patchProject(req, res) {
 /**
  * DELETE /api/orgs/:orgid/projects:projectid
  *
- * @description Takes an orgid and projectid in the URI along with delete
- * options in the body and deletes the corresponding project.
+ * @description Takes an orgid and projectid in the URI and deletes a project.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
@@ -1009,13 +1216,29 @@ function deleteProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check if invalid key passed in
+  if (req.query) {
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (![].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+  }
+
+  // Define the options object
+  const options = {
+    populate: []
+  };
+
   // Remove the specified project
-  // NOTE: removeProject() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid)
-  .then((project) => {
-    // Return 200: OK and the deleted project
+  // NOTE: remove() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.remove(req.user, req.params.orgid, req.params.projectid, options)
+  .then((projectIDs) => {
+    // Return 200: OK and the deleted project ID
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project.getPublicData()));
+    return res.status(200).send(formatJSON(utils.parseID(projectIDs[0]).pop()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1024,7 +1247,7 @@ function deleteProject(req, res) {
 /**
  * GET /orgs/:orgid/members/
  *
- * @description Takes an orgid in the URI and returns all
+ * @description Takes an orgid and projectid in the URI and returns all
  * members of a given project and their permissions.
  *
  * @param {Object} req - request express object
@@ -1040,12 +1263,12 @@ function getAllProjMemRoles(req, res) {
   }
 
   // Get permissions of all users in given org
-  // NOTE: findAllPermissions() sanitizes req.params.orgid
-  ProjectController.findAllPermissions(req.user, req.params.orgid, req.params.projectid)
-  .then((permissions) => {
+  // NOTE: find() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.find(req.user, req.params.orgid, req.params.projectid)
+  .then((foundProjects) => {
     // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(permissions));
+    return res.status(200).send(formatJSON(foundProjects[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1070,13 +1293,16 @@ function getProjMemRole(req, res) {
   }
 
   // Find the permissions the foundUser has within the project
-  // NOTE: findPermissions() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.findPermissions(req.user, req.params.username,
-    req.params.orgid, req.params.projectid)
-  .then((permissions) => {
-    // Return 200: OK and updated org
+  // NOTE: find() sanitizes req.params.orgid and req.params.projectid
+  ProjectController.find(req.user, req.params.orgid, req.params.projectid)
+  .then((projects) => {
+    const project = projects[0];
+    if (!project.permissions[req.params.username]) {
+      return res.status(404).send('User not on project.');
+    }
+    // Return 200: OK and users permissions
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(permissions));
+    return res.status(200).send(formatJSON(project.permissions[req.params.username]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1105,31 +1331,27 @@ function postProjectRole(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check that role was passed into the request body
-  try {
-    assert.ok(req.body.hasOwnProperty('role'), 'A role was not specified in the request body.');
-  }
-  catch (error) {
-    res.status(400).send(new M.CustomError(error.message, 400, 'warn'));
+  // Ensure request body is a string
+  console.log(req);
+  console.log(typeof req.body);
+  if (typeof req.body !== 'string') {
+    return res.status(400).send('Request body is not a string.');
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['role'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  // Create update object
+  const update = {
+    id: req.params.projectid,
+    permissions: {}
+  };
+  update.permissions[req.params.username] = req.body;
 
-  // Set permissions of given user
-  // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.setPermissions(req.user, req.params.orgid,
-    req.params.projectid, req.params.username, req.body.role)
-  .then((project) => {
-    // Return 200: Ok and updated project
+  // Add user to project
+  // NOTE: update() sanitizes req.params.orgid and update
+  ProjectController.update(req.user, req.params.orgid, update)
+  .then((projects) => {
+    // Return 200: Ok and permissions
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project.getPublicData()));
+    return res.status(200).send(formatJSON(projects[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1153,14 +1375,20 @@ function deleteProjectRole(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Create update object
+  const update = {
+    id: req.params.projectid,
+    permissions: {}
+  };
+  update.permissions[req.params.username] = 'remove_all';
+
   // Remove permissions of given user
-  // NOTE: setPermissions() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.setPermissions(req.user, req.params.orgid,
-    req.params.projectid, req.params.username, 'REMOVE_ALL')
-  .then((project) => {
-    // Return 200: OK and updated project
+  // NOTE: update() sanitizes req.params.orgid and update
+  ProjectController.update(req.user, req.params.orgid, update)
+  .then((projects) => {
+    // Return 200: OK and updated permissions
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project));
+    return res.status(200).send(formatJSON(projects[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1191,7 +1419,7 @@ function getUsers(req, res) {
   }
 
   // Get all users in MBEE
-  UserController.findUsers(req.user)
+  UserController.find(req.user)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -1228,8 +1456,8 @@ function postUsers(req, res) {
   }
 
   // Create users
-  // NOTE: createUsers() sanitizes req.body.users
-  UserController.createUsers(req.user, req.body.users)
+  // NOTE: create() sanitizes req.body.users
+  UserController.create(req.user, req.body.users)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -1289,14 +1517,17 @@ function patchUsers(req, res) {
     const error = new M.CustomError('Users array contains invalid types.', 400, 'warn');
     return res.status(error.status).send(error);
   }
+  // Extract options from request query
+  const options = req.query;
 
   // Update the specified users
-  // NOTE: updateUsers() sanitizes req.body.update
-  UserController.updateUsers(req.user, updateQuery, req.body.update)
+  // NOTE: update() sanitizes req.body.update
+  UserController.update(req.user, updateQuery, req.body.update)
   .then((users) => {
     // Return 200: OK and the updated users
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(users));
+    const publicUsers = users.map(u => u.getPublicData());
+    return res.status(200).send(formatJSON(publicUsers));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1319,9 +1550,11 @@ function deleteUsers(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+  // Extract options from request query
+  const options = req.query;
 
   // Remove the specified users
-  UserController.removeUsers(req.user, req.body)
+  UserController.remove(req.user, req.body, options)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -1349,14 +1582,16 @@ function getUser(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, validOptions);
 
   // Find the member from it's username
-  // NOTE: findUser() sanitizes req.params.username
-  UserController.findUser(req.user, req.params.username)
+  // NOTE: find() sanitizes req.params.username
+  UserController.find(req.user, req.params.username, options)
   .then((user) => {
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user.getPublicData()));
+    return res.status(200).send(formatJSON(user[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1391,12 +1626,12 @@ function postUser(req, res) {
   req.body.username = req.params.username;
 
   // Create user with provided parameters
-  // NOTE: createUser() sanitizes req.body
-  UserController.createUser(req.user, req.body)
+  // NOTE: create() sanitizes req.body
+  UserController.create(req.user, req.body)
   .then((user) => {
     // Return 200: OK and created user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user.getPublicData()));
+    return res.status(200).send(formatJSON(user[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1420,15 +1655,28 @@ function patchUser(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If username was provided in the body, ensure it matches username in params
+  if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
+    const error = new M.CustomError(
+      'Username in body does not match username in params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+  // Set body username
+  req.body.username = req.params.username;
+
   // Update the specified user
-  // NOTE: updateUser() sanitizes req.params.username and req.body
-  UserController.updateUser(req.user, req.params.username, req.body)
+  // NOTE: update() sanitizes req.params.username and req.body
+  UserController.update(req.user, req.body.req.body.option)
   .then((user) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and updated user
-    return res.status(200).send(formatJSON(user.getPublicData()));
+    return res.status(200).send(formatJSON(user[0].getPublicData()));
   })
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error);
+  });
 }
 
 /**
@@ -1450,12 +1698,12 @@ function deleteUser(req, res) {
   }
 
   // Remove the specified user
-  // NOTE: removeUser() sanitizes req.params.username
-  UserController.removeUser(req.user, req.params.username)
+  // NOTE: remove() sanitizes req.params.username
+  UserController.remove(req.user, req.params.username)
   .then((user) => {
     // Return 200: OK and the deleted user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user.getPublicData()));
+    return res.status(200).send(formatJSON(user[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1515,13 +1763,13 @@ function getElements(req, res) {
   let archived = false;
 
   // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
+  if (req.query && req.query.hasOwnProperty('archived')) {
     archived = (req.query.archived === 'true');
   }
 
   // Find all elements from it's org.id and project.id
-  // NOTE: findElements() sanitizes req.params.orgid and req.params.projectid
-  ElementController.findElements(req.user, req.params.orgid, req.params.projectid, archived)
+  // NOTE: find() sanitizes req.params.orgid and req.params.projectid
+  ElementController.find(req.user, req.params.orgid, req.params.projectid, archived)
   .then((elements) => {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
@@ -1558,8 +1806,8 @@ function postElements(req, res) {
   }
 
   // Create the specified elements
-  // NOTE: createElements() sanitizes req.params.orgid, req.params.projectid and the elements
-  ElementController.createElements(req.user, req.params.orgid,
+  // NOTE: create() sanitizes req.params.orgid, req.params.projectid and the elements
+  ElementController.create(req.user, req.params.orgid,
     req.params.projectid, req.body)
   .then((elements) => {
     const data = [];
@@ -1640,8 +1888,8 @@ function patchElements(req, res) {
   }
 
   // Update the specified projects
-  // NOTE: updateElements() sanitizes req.body.update
-  ElementController.updateElements(req.user, updateQuery, req.body.update)
+  // NOTE: update() sanitizes req.body.update
+  ElementController.update(req.user, updateQuery, req.body.update)
   .then((elements) => {
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
@@ -1710,7 +1958,7 @@ function deleteElements(req, res) {
   }
 
   // Remove the specified elements
-  ElementController.removeElements(req.user, deleteQuery)
+  ElementController.remove(req.user, deleteQuery)
   .then((elements) => {
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
@@ -1750,13 +1998,13 @@ function getElement(req, res) {
   let archived = false;
 
   // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
+  if (req.query && req.query.hasOwnProperty('archived')) {
     archived = (req.query.archived === 'true');
   }
 
   // Find the element from it's element.id, project.id, and org.id
-  // NOTE: findElement() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
-  ElementController.findElement(req.user, req.params.orgid,
+  // NOTE: find() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
+  ElementController.find(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid, archived)
   .then((element) => {
     // Return a 200: OK and the element
@@ -1806,8 +2054,8 @@ function postElement(req, res) {
   req.body.projectUID = projUID;
 
   // Create element with provided parameters
-  // NOTE: createElement() sanitizes req.body.name
-  ElementController.createElement(req.user, req.body)
+  // NOTE: create() sanitizes req.body.name
+  ElementController.create(req.user, req.body)
   .then((element) => {
     // Return 200: OK and created element
     res.header('Content-Type', 'application/json');
@@ -1839,7 +2087,7 @@ function patchElement(req, res) {
   // Update the specified element
   // NOTE: updateElement() sanitizes req.params.orgid, req.params.projectid,
   // and req.params.elementid
-  ElementController.updateElement(req.user, req.params.orgid,
+  ElementController.update(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid, req.body)
   .then((element) => {
     // Return 200: OK and the updated element
@@ -1871,7 +2119,7 @@ function deleteElement(req, res) {
   // Remove the specified element
   // NOTE: removeElement() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.elementid
-  ElementController.removeElement(req.user, req.params.orgid,
+  ElementController.remove(req.user, req.params.orgid,
     req.params.projectid, req.params.elementid)
   .then((element) => {
     res.header('Content-Type', 'application/json');
@@ -1912,13 +2160,13 @@ function getWebhook(req, res) {
   let archived = false;
 
   // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
+  if (req.query && req.query.hasOwnProperty('archived')) {
     archived = (req.query.archived === 'true');
   }
 
   // Find the webhook from it's webhook.id, project.id, and org.id
-  // NOTE: findWebhook() sanitizes req.params.webhookid, req.params.projectid, req.params.orgid
-  WebhookController.findWebhook(req.user, req.params.orgid,
+  // NOTE: find() sanitizes req.params.webhookid, req.params.projectid, req.params.orgid
+  WebhookController.find(req.user, req.params.orgid,
     req.params.projectid, req.params.webhookid, archived)
   .then((webhook) => {
     // Return a 200: OK and the webhook
@@ -1957,8 +2205,8 @@ function postWebhook(req, res) {
   req.body.id = req.params.webhookid;
 
   // Create webhook with provided parameters
-  // NOTE: createWebhook() sanitizes req.body
-  WebhookController.createWebhook(req.user, req.params.orgid, req.params.projectid, req.body)
+  // NOTE: creat() sanitizes req.body
+  WebhookController.create(req.user, req.params.orgid, req.params.projectid, req.body)
   .then((webhook) => {
     // Return 200: OK and created webhook
     res.header('Content-Type', 'application/json');
@@ -1990,7 +2238,7 @@ function patchWebhook(req, res) {
   // Update the specified webhook
   // NOTE: updateWebhook() sanitizes req.params.orgid, req.params.projectid,
   // and req.params.webhookid
-  WebhookController.updateWebhook(req.user, req.params.orgid,
+  WebhookController.update(req.user, req.params.orgid,
     req.params.projectid, req.params.webhookid, req.body)
   .then((webhook) => {
     // Return 200: OK and the updated webhook
@@ -2022,7 +2270,7 @@ function deleteWebhook(req, res) {
   // Remove the specified webhook
   // NOTE: removeWebhook() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.webhookid
-  WebhookController.removeWebhook(req.user, req.params.orgid,
+  WebhookController.remove(req.user, req.params.orgid,
     req.params.projectid, req.params.webhookid)
   .then((success) => {
     res.header('Content-Type', 'application/json');
@@ -2105,7 +2353,7 @@ function getArtifact(req, res) {
   let archived = false;
 
   // Check if archived was provided in the request query
-  if (req.query.hasOwnProperty('archived')) {
+  if (req.query && req.query.hasOwnProperty('archived')) {
     archived = (req.query.archived === 'true');
   }
 

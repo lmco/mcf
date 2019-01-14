@@ -107,7 +107,7 @@ ProjectSchema.methods.getPublicData = function() {
   };
 
   // Map read, write, and admin permissions to arrays
-  this.permissions.forEach(u => {
+  Object.keys(this.permissions).forEach(u => {
     if (this.permissions[u].includes('read')) {
       permissions.read.push(u);
     }
@@ -119,14 +119,62 @@ ProjectSchema.methods.getPublicData = function() {
     }
   });
 
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
+
+  // If this.createdBy is defined
+  if (this.createdBy) {
+    // If this.createdBy is populated
+    if (typeof this.createdBy === 'object') {
+      // Get the public data of createdBy
+      console.log('Gonna call get public data');
+      createdBy = this.createdBy.getPublicData();
+    }
+    else {
+      createdBy = this.createdBy;
+    }
+  }
+
+  // If this.lastModifiedBy is defined
+  if (this.lastModifiedBy) {
+    // If this.lastModifiedBy is populated
+    if (typeof this.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = this.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = this.lastModifiedBy;
+    }
+  }
+
+  // If this.archivedBy is defined
+  if (this.archivedBy) {
+    // If this.archivedBy is populated
+    if (typeof this.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = this.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = this.archivedBy;
+    }
+  }
+
   // Return the projects public fields
   return {
     id: utils.parseID(this._id).pop(),
-    org: this.org._id || this.org,
+    org: (this.org.hasOwnProperty('_id')) ? this.org.getPublicData() : this.org,
     name: this.name,
     permissions: permissions,
     custom: this.custom,
-    visibility: this.visibility
+    visibility: this.visibility,
+    createdOn: this.createdOn,
+    createdBy: createdBy,
+    updatedOn: this.updatedOn,
+    lastModifiedBy: lastModifiedBy,
+    archived: (this.archived) ? true : undefined,
+    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
+    archivedBy: archivedBy
   };
 };
 
@@ -135,7 +183,7 @@ ProjectSchema.methods.getPublicData = function() {
  * @memberof ProjectSchema
  */
 ProjectSchema.methods.getPermissionLevels = function() {
-  return ['REMOVE_ALL', 'read', 'write', 'admin'];
+  return ['remove_all', 'read', 'write', 'admin'];
 };
 ProjectSchema.statics.getPermissionLevels = function() {
   return ProjectSchema.methods.getPermissionLevels();
@@ -161,6 +209,18 @@ ProjectSchema.methods.getVisibilityLevels = function() {
 };
 ProjectSchema.statics.getVisibilityLevels = function() {
   return ProjectSchema.methods.getVisibilityLevels();
+};
+
+/**
+ * @description Returns a list of fields a requesting user can populate
+ * @memberOf ProjectSchema
+ */
+ProjectSchema.methods.getValidPopulateFields = function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
+};
+
+ProjectSchema.statics.getValidPopulateFields = function() {
+  return ProjectSchema.methods.getValidPopulateFields();
 };
 
 
