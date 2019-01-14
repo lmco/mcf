@@ -50,8 +50,11 @@ const utils = M.require('lib.utils');
  * of webhook ids, a single webhook id, or not provided, which defaults to every
  * webhook being found.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported options are the boolean 'archived' and
- * the array of strings 'populate'.
+ * options.
+ * @param {Array} options.populate - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ * @param {boolean} options.archived - If true, find results will include
+ * archived objects. The default value is false.
  *
  * @return {Promise} resolve - Array of found webhook objects
  *                   reject - error
@@ -178,7 +181,9 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Array/Object} webhooks - Either an array of objects containing
  * webhook data or a single object containing webhook data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the array of strings 'populate'.
+ * options.
+ * @param {Array} options.populate - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created webhook objects
  *                   reject - error
@@ -346,7 +351,9 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Array/Object} webhooks - Either an array of objects containing
  * updates to webhooks, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the array of strings 'populate'.
+ * options.
+ * @param {Array} options.populate - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated webhook objects
  *                   reject - error

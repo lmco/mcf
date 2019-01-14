@@ -53,10 +53,14 @@ const utils = M.require('lib.utils');
  * @param {Array/String} elements - The elements to find. Can either be an array
  * of element ids, a single element id, or not provided, which defaults to every
  * element in a project being found.
- * // TODO: Add default behavior for options
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported options are the booleans 'archived'
- * and 'subtree' and the array of strings 'populate'
+ * options.
+ * @param {Array} options.populate - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ * @param {boolean} options.archived - If true, find results will include
+ * archived objects. The default value is false.
+ * @param {boolean} options.subtree - If true, all elements in the subtree of
+ * the found elements will also be returned. The default value is false.
  *
  * @return {Promise} resolve - Array of found element objects
  *                   reject - error
@@ -238,7 +242,9 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {Array/Object} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the array of strings 'populate'.
+ * options.
+ * @param {Array} options.populate - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of created element objects
  *                   reject - error
@@ -553,7 +559,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Array/Object} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
  * @param {Object} options - An optional parameter that provides supported
- * options. Currently the only supported option is the array of strings 'populate'.
+ * options.
+ * @param {Array} options.populate - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
  *
  * @return {Promise} resolve - Array of updated element objects
  *                   reject - error
