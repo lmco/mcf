@@ -128,7 +128,6 @@ ProjectSchema.methods.getPublicData = function() {
     // If this.createdBy is populated
     if (typeof this.createdBy === 'object') {
       // Get the public data of createdBy
-      console.log('Gonna call get public data');
       createdBy = this.createdBy.getPublicData();
     }
     else {

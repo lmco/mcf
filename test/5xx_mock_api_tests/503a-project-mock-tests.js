@@ -369,7 +369,7 @@ function postProjectMember(done) {
   };
 
   // POSTs a member to a project
-  APIController.postProjectRole(req, res);
+  APIController.postProjMember(req, res);
 }
 
 /**
@@ -396,15 +396,14 @@ function getProjectMember(done) {
     // Parse the JSON response
     const foundPermissions = JSON.parse(_data);
 
-    // Expect response to be an array
-    chai.expect(Array.isArray(foundPermissions)).to.equal(true);
-    chai.expect(foundPermissions).to.have.members(['read', 'write']);
-
+    // Expect response to contain only requested user
+    chai.expect(Object.keys(foundPermissions).length).to.equal(1);
+    chai.expect(foundPermissions[nonAdminUser.username]).to.have.members(['read', 'write']);
     done();
   };
 
   // GETs a members role in a project
-  APIController.getProjMemRole(req, res);
+  APIController.getProjMember(req, res);
 }
 
 /**
@@ -439,7 +438,7 @@ function getProjectMembers(done) {
   };
 
   // GETs a projects members
-  APIController.getAllProjMemRoles(req, res);
+  APIController.getProjMembers(req, res);
 }
 
 /**
@@ -466,14 +465,14 @@ function deleteProjectMember(done) {
     // Parse the JSON response
     const foundPermissions = JSON.parse(_data);
 
-    // Expect there to be two users on the project
+    // Expect there to be one user on the project
     chai.expect(Object.keys(foundPermissions).length).to.equal(1);
     chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
     done();
   };
 
   // DELETEs a member on a project
-  APIController.deleteProjectRole(req, res);
+  APIController.deleteProjMember(req, res);
 }
 
 /**

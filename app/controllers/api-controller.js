@@ -60,10 +60,10 @@ module.exports = {
   postProject,
   patchProject,
   deleteProject,
-  getAllProjMemRoles,
-  getProjMemRole,
-  postProjectRole,
-  deleteProjectRole,
+  getProjMembers,
+  getProjMember,
+  postProjMember,
+  deleteProjMember,
   getUsers,
   postUsers,
   patchUsers,
@@ -1255,7 +1255,7 @@ function deleteProject(req, res) {
  *
  * @return {Object} res response object with roles of members in a project
  */
-function getAllProjMemRoles(req, res) {
+function getProjMembers(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -1285,7 +1285,7 @@ function getAllProjMemRoles(req, res) {
  *
  * @return {Object} res response object with project member roles
  */
-function getProjMemRole(req, res) {
+function getProjMember(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -1300,9 +1300,13 @@ function getProjMemRole(req, res) {
     if (!project.permissions[req.params.username]) {
       return res.status(404).send('User not on project.');
     }
+    // Create object with just the user requested and their roles.
+    const retObj = {};
+    retObj[req.params.username] = project.permissions[req.params.username];
+
     // Return 200: OK and users permissions
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(project.permissions[req.params.username]));
+    return res.status(200).send(formatJSON(retObj));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1324,7 +1328,7 @@ function getProjMemRole(req, res) {
  * thing as updating a users role, thus both POST and PATCH map to this
  * function.
  */
-function postProjectRole(req, res) {
+function postProjMember(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -1366,7 +1370,7 @@ function postProjectRole(req, res) {
  *
  * @return {Object} res response object with updated project
  */
-function deleteProjectRole(req, res) {
+function deleteProjMember(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -1460,7 +1464,7 @@ function postUsers(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
@@ -1703,7 +1707,7 @@ function deleteUser(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 

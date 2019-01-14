@@ -1030,9 +1030,9 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
  * @description A non-exposed helper function that throws an error if the new
  * elements parent is in the given elements subtree.
  *
- * @param {String} organizationID - The ID of the owning organization.
- * @param {String} projectID - The ID of the owning project.
- * @param {String} branch - The ID of the branch to find elements from.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to find elements from.
  * @param {Object} element - The element whose parent is being checked. The
  * .parent parameter should be the new, desired parent.
  *

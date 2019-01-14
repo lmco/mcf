@@ -1093,7 +1093,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getAllProjMemRoles
+  APIController.getProjMembers
 );
 
 
@@ -1261,24 +1261,24 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjMemRole
+  APIController.getProjMember
 )
 // NOTE: POST and PATCH have the same functionality in this case,
 // thus they map to the same route.
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postProjectRole
+  APIController.postProjMember
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postProjectRole
+  APIController.postProjMember
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteProjectRole
+  APIController.deleteProjMember
 );
 
 /**

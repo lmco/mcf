@@ -292,11 +292,11 @@ module.exports.importTestData = function(filename) {
  * @param {Object} params - Parameters for API req
  * @param {Object} body - Body for API req
  * @param {string} method - API method of req
- * @param {Object} query - query options for API req
+ * @param {Object} [query] - query options for API req
  *
  * @returns {Object} req - Request Object
  */
-module.exports.createRequest = function(user, params, body, method, query) {
+module.exports.createRequest = function(user, params, body, method, query = {}) {
   // Error-Check
   if (typeof params !== 'object') {
     throw M.CustomError('params is not of type object.');
@@ -310,7 +310,7 @@ module.exports.createRequest = function(user, params, body, method, query) {
     method: method,
     params: params,
     body: body,
-    query: query || {},
+    query: query,
     user: user,
     session: {}
   };

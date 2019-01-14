@@ -362,9 +362,9 @@ function getProjectMember(done) {
     // Verify response body
     const foundPermissions = JSON.parse(body);
 
-    // Expect response to be an array
-    chai.expect(Array.isArray(foundPermissions)).to.equal(true);
-    chai.expect(foundPermissions).to.have.members(['read', 'write']);
+    // Expect response to contain only requested user
+    chai.expect(Object.keys(foundPermissions).length).to.equal(1);
+    chai.expect(foundPermissions[nonAdminUser.username]).to.have.members(['read', 'write']);
     done();
   });
 }
