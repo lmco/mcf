@@ -1237,6 +1237,8 @@ function postProjectRole(req, res) {
   }
 
   // Ensure request body is a string
+  console.log(req);
+  console.log(typeof req.body);
   if (typeof req.body !== 'string') {
     return res.status(400).send('Request body is not a string.');
   }

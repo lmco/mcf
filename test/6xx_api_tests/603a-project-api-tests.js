@@ -104,10 +104,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple projects', postProjects);
   it('should GET a project', getProject);
   it('should GET multiple projects', getProjects);
-  // it('should POST a project member', postProjectMember);
-  // it('should GET a project role', getProjectMember);
-  // it('should GET all project members', getProjectMembers);
-  // it('should DELETE a project member', deleteProjectMember);
+  it('should POST a project member', postProjectMember);
+  it('should GET a project role', getProjectMember);
+  it('should GET all project members', getProjectMembers);
+  it('should DELETE a project member', deleteProjectMember);
   it('should PATCH a project', patchProject);
   it('should PATCH multiple projects', patchProjects);
   it('should DELETE a project', deleteProject);
@@ -321,10 +321,10 @@ function postProjectMember(done) {
   const projData = testData.projects[0];
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}/members/${nonAdminUser.username}`,
-    headers: testUtils.getHeaders(),
+    headers: testUtils.getHeaders('text/html'),
     ca: testUtils.readCaFile(),
     method: 'POST',
-    body: JSON.stringify('write')
+    body: 'write'
   },
   (err, response, body) => {
     // Expect no error

@@ -1142,6 +1142,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     description: Sets or updates a users permissions on a project.
  *     produces:
  *       - application/json
+ *     accepts:
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
