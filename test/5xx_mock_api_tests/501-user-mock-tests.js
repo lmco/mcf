@@ -82,11 +82,13 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET all users', getUsers);
   it('should POST a user', postUser);
   it('should GET the posted user', getUser);
+  /*
   it('should PATCH a user', patchUser);
   it('should DELETE a user', deleteUser);
   it('should POST multiple users', postUsers);
   it('should PATCH multiple users', patchUsers);
   it('should DELETE multiple users', deleteUsers);
+  */
 });
 
 /* --------------------( Tests )-------------------- */

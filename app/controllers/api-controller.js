@@ -1332,8 +1332,6 @@ function postProjectRole(req, res) {
   }
 
   // Ensure request body is a string
-  console.log(req);
-  console.log(typeof req.body);
   if (typeof req.body !== 'string') {
     return res.status(400).send('Request body is not a string.');
   }
@@ -1449,12 +1447,6 @@ function postUsers(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: check if users list included in req.body
-  if (!req.body.hasOwnProperty('users')) {
-    const error = new M.CustomError('Users array not in request body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
   // Create users
   // NOTE: create() sanitizes req.body.users
   UserController.create(req.user, req.body.users)
@@ -1466,7 +1458,10 @@ function postUsers(req, res) {
     return res.status(200).send(formatJSON(publicUsers));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -1703,10 +1698,13 @@ function deleteUser(req, res) {
   .then((user) => {
     // Return 200: OK and the deleted user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user[0].getPublicData()));
+    return res.status(200).send(user);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**

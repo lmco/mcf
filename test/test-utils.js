@@ -35,6 +35,7 @@ const Project = M.require('models.project');
 const User = M.require('models.user');
 const Webhook = M.require('models.webhook');
 const utils = M.require('lib.utils');
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
 const testData = require(path.join(M.root, 'test', 'data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
 /**
@@ -291,10 +292,11 @@ module.exports.importTestData = function(filename) {
  * @param {Object} params - Parameters for API req
  * @param {Object} body - Body for API req
  * @param {string} method - API method of req
+ * @param {Object} query - query options for API req
  *
  * @returns {Object} req - Request Object
  */
-module.exports.createRequest = function(user, params, body, method) {
+module.exports.createRequest = function(user, params, body, method, query) {
   // Error-Check
   if (typeof params !== 'object') {
     throw M.CustomError('params is not of type object.');
@@ -304,10 +306,11 @@ module.exports.createRequest = function(user, params, body, method) {
   }
 
   return {
-    headers: getHeaders(),
+    headers: this.getHeaders(),
     method: method,
     params: params,
     body: body,
+    query: query || {},
     user: user,
     session: {}
   };

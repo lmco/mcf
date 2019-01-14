@@ -149,11 +149,23 @@ ElementSchema.plugin(extensions);
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'documentation', 'custom', 'archived'];
+  return ['name', 'documentation', 'custom', 'archived', 'parent'];
 };
 
 ElementSchema.statics.getValidUpdateFields = function() {
+  return ElementSchema.methods.getValidUpdateFields();
+};
+
+/**
+ * @description Returns element fields that can be changed in bulk
+ * @memberof ElementSchema
+ */
+ElementSchema.methods.getValidBulkUpdateFields = function() {
   return ['name', 'documentation', 'custom', 'archived'];
+};
+
+ElementSchema.statics.getValidBulkUpdateFields = function() {
+  return ElementSchema.methods.getValidBulkUpdateFields();
 };
 
 /**
