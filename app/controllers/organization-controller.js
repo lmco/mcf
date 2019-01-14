@@ -72,6 +72,27 @@ const utils = M.require('lib.utils');
  */
 function find(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+
+      const orgTypes = ['undefined', 'object', 'string'];
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(orgTypes.includes(typeof orgs), 'Orgs parameter is an invalid type.');
+      // If orgs is an object, ensure it's an array of strings
+      if (typeof orgs === 'object') {
+        assert.ok(Array.isArray(orgs), 'Orgs is an object, but not an array.');
+        assert.ok(orgs.every(o => typeof o === 'string'), 'Orgs is not an array of strings.');
+      }
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = (orgs !== undefined)
@@ -87,39 +108,37 @@ function find(requestingUser, orgs, options) {
     let archived = false;
     let populateString = '';
 
-    // Ensure parameters are valid
-    try {
-      // Ensure that requesting user has an _id field
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-
-      if (options) {
-        // If the option 'archived' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('archived')) {
-          assert.ok(typeof options.archived === 'boolean', 'The option \'archived\''
-            + ' is not a boolean.');
-          archived = options.archived;
+    // Ensure options are valid
+    if (options) {
+      // If the option 'archived' is supplied, ensure it's a boolean
+      if (options.hasOwnProperty('archived')) {
+        if (typeof options.archived !== 'boolean') {
+          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
         }
-
-        // If the option 'populate' is supplied, ensure it's a string
-        if (options.hasOwnProperty('populate')) {
-          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
-            + ' is not an array.');
-          assert.ok(options.populate.every(o => typeof o === 'string'),
-            'Every value in the populate array must be a string.');
-
-          // Ensure each field is able to be populated
-          const validPopulateFields = Organization.getValidPopulateFields();
-          options.populate.forEach((p) => {
-            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
-              + ' be populated.');
-          });
-
-          populateString = options.populate.join(' ');
-        }
+        archived = options.archived;
       }
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
+        }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = Organization.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
+      }
     }
 
     // Define searchQuery
@@ -182,6 +201,28 @@ function find(requestingUser, orgs, options) {
  */
 function create(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions to create orgs.');
+      assert.ok(typeof orgs === 'object', 'Orgs parameter is not an object.');
+      assert.ok(orgs !== null, 'Orgs parameter cannot be null.');
+      // If orgs is an array, ensure each item inside is an object
+      if (Array.isArray(orgs)) {
+        assert.ok(orgs.every(o => typeof o === 'object'), 'Every item in orgs is not an'
+          + ' object.');
+        assert.ok(orgs.every(o => o !== null), 'One or more items in orgs is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
@@ -190,34 +231,30 @@ function create(requestingUser, orgs, options) {
     let populateString = '';
     let populate = false;
 
-    // Ensure parameters are valid
-    try {
-      // Ensure that requesting user has an _id field and is a system admin
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      assert.ok(reqUser.admin, 'User does not have permissions to create orgs.');
-
-      if (options) {
-        // If the option 'populate' is supplied, ensure it's a string
-        if (options.hasOwnProperty('populate')) {
-          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
-            + ' is not an array.');
-          assert.ok(options.populate.every(o => typeof o === 'string'),
-            'Every value in the populate array must be a string.');
-
-          // Ensure each field is able to be populated
-          const validPopulateFields = Organization.getValidPopulateFields();
-          options.populate.forEach((p) => {
-            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
-              + ' be populated.');
-          });
-
-          populateString = options.populate.join(' ');
-          populate = true;
+    // Ensure options are valid
+    if (options) {
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
         }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = Organization.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
+        populate = true;
       }
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
     }
 
     // Define array to store org data
@@ -343,6 +380,27 @@ function create(requestingUser, orgs, options) {
  */
 function update(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(typeof orgs === 'object', 'Orgs parameter is not an object.');
+      assert.ok(orgs !== null, 'Orgs parameter cannot be null.');
+      // If orgs is an array, ensure each item inside is an object
+      if (Array.isArray(orgs)) {
+        assert.ok(orgs.every(o => typeof o === 'object'), 'Every item in orgs is not an'
+          + ' object.');
+        assert.ok(orgs.every(o => o !== null), 'One or more items in orgs is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters and function-wide variables
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -353,32 +411,29 @@ function update(requestingUser, orgs, options) {
     // Initialize valid options
     let populateString = '';
 
-    // Ensure parameters are valid
-    try {
-      // Ensure that requesting user has an _id field
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-
-      if (options) {
-        // If the option 'populate' is supplied, ensure it's a string
-        if (options.hasOwnProperty('populate')) {
-          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
-            + ' is not an array.');
-          assert.ok(options.populate.every(o => typeof o === 'string'),
-            'Every value in the populate array must be a string.');
-
-          // Ensure each field is able to be populated
-          const validPopulateFields = Organization.getValidPopulateFields();
-          options.populate.forEach((p) => {
-            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
-              + ' be populated.');
-          });
-
-          populateString = options.populate.join(' ');
+    // Ensure options are valid
+    if (options) {
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
         }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = Organization.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
       }
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
     }
 
     // Check the type of the orgs parameter
@@ -571,7 +626,7 @@ function update(requestingUser, orgs, options) {
 /**
  * @description This function removes one or many organizations as well as the
  * projects, elements, and webhooks that belong to them. This function can be
- * used by system-wide admins ONLY.
+ * used by system-wide admins ONLY. NOTE: Cannot delete the default org.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} orgs - The organizations to remove. Can either be
@@ -592,21 +647,30 @@ function update(requestingUser, orgs, options) {
  */
 function remove(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
-    // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
-    const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    let foundOrgs = [];
-
-
-    // Ensure parameters are valid
+    // Ensure input parameters are correct type
     try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      assert.ok(reqUser.admin, 'User does not have permissions to delete orgs.');
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions to delete orgs.');
+      const orgTypes = ['object', 'string'];
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(orgTypes.includes(typeof orgs), 'Orgs parameter is an invalid type.');
+      // If orgs is an object, ensure it's an array of strings
+      if (typeof orgs === 'object') {
+        assert.ok(Array.isArray(orgs), 'Orgs is an object, but not an array.');
+        assert.ok(orgs.every(o => typeof o === 'string'), 'Orgs is not an array of strings.');
+      }
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+      throw new M.CustomError(msg, 400, 'warn');
     }
+
+    // Sanitize input parameters and function-wide variables
+    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    let foundOrgs = [];
 
     // Define searchQuery and ownedQuery
     const searchQuery = {};
