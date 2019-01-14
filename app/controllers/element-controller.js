@@ -44,7 +44,10 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 /**
- * @description This function finds one or many elements.
+ * @description This function finds one or many elements. Depending on the
+ * parameters provided, this function will find a single element by ID, multiple
+ * elements by ID, or all elements within a project. The user making the request
+ * must be part of the specified project or be a system-wide admin.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -61,8 +64,7 @@ const utils = M.require('lib.utils');
  * @param {boolean} [options.subtree] - If true, all elements in the subtree of
  * the found elements will also be returned. The default value is false.
  *
- * @return {Promise} resolve - Array of found element objects
- *                   reject - error
+ * @return {Promise} Array of found element objects
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID', ['elem1', 'elem2'], { populate: 'parent' })
@@ -232,7 +234,11 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 }
 
 /**
- * @description This functions creates one or many elements.
+ * @description This functions creates one or many elements. In addition to
+ * creating the elements from the data supplied, this function also checks for
+ * elements with duplicate IDs, ensures the user has write permissions on the
+ * provided project, ensures existence of specified parents, sources and
+ * targets, and then returns the elements which were created.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -558,8 +564,15 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 }
 
 /**
- * // TODO: Add to all descriptions. Explain custom data. Talk about limitations of functions
- * @description This function updates one or many elements.
+ * @description This function updates one or many elements. Multiple fields on
+ * multiple elements can be updated as long as they are valid. If changing an
+ * elements parent, only one element can be updated at a time. If updating the
+ * custom data on an element, and key/value pairs that exist in the update
+ * object don't exist in the current custom data, the key/value pair will be
+ * added. If the key/value pairs do exist, the value will be changed. If an
+ * element is archived, it must first be unarchived before any other updates
+ * occur. The user must have write permissions on a project or be a system-wide
+ * admin to update elements.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -849,8 +862,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
 /**
  * @description This function removes one or many elements as well as the
- * subtree under those elements.
- * // TODO: Mention system admin only
+ * subtree under those elements. This function can be used by system-wide admins
+ * ONLY. Once the elements are deleted, the IDs of the deleted elements are
+ * returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -861,8 +875,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted element ids
- *                   reject - error
+ * @return {Promise} Array of deleted element ids
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'])

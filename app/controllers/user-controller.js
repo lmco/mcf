@@ -43,7 +43,9 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 /**
- * @description This function finds one or many users.
+ * @description This function finds one or many users. Depending on the given
+ * parameters, this function can find a single user by username, multiple users
+ * by username, or all users in the system.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} [users] - The users to find. Can either be an
@@ -55,8 +57,7 @@ const utils = M.require('lib.utils');
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
- * @return {Promise} resolve - Array of found user objects
- *                   reject - error
+ * @return {Promise} Array of found user objects.
  *
  * @example
  * find({User}, ['user1', 'user2'], { populate: 'createdBy' })
@@ -149,7 +150,10 @@ function find(requestingUser, users, options) {
 }
 
 /**
- * @description This functions creates one or many users.
+ * @description This functions creates one or many users from the provided data.
+ * This function is restricted to system-wide admin ONLY. The database is
+ * searched for existing users with duplicate usernames and the users are added
+ * to the default org prior to being created and returned from this function.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} users - Either an array of objects containing user
@@ -171,8 +175,7 @@ function find(requestingUser, users, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of created user objects
- *                   reject - error
+ * @return {Promise} Array of created user objects
  *
  * @example
  * create({User}, [{User1}, {User2}, ...], { populate: 'createdBy' })
@@ -325,7 +328,14 @@ function create(requestingUser, users, options) {
 }
 
 /**
- * @description This function updates one or many users.
+ * @description This function updates one or many users. Multiple fields in
+ * multiple users can be updated at once, provided that the fields are allowed
+ * to be updated. If updating the custom data on a user, and key/value pairs
+ * exist in the update object that don't exist in the current custom data,
+ * the key/value pair will be added. If the key/value pairs do exist, the value
+ * will be changed. If a user is archived, they must first be unarchived before
+ * any other updates occur. NOTE: A user cannot archive or unarchive themselves.
+ * This function is restricted to system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} users - Either an array of objects containing
@@ -530,15 +540,16 @@ function update(requestingUser, users, options) {
       // Update all users through a bulk write to the database
       return User.bulkWrite(bulkArray);
     })
-    .then(() => User.find(searchQuery)
-    .populate(populateString))
+    .then(() => User.find(searchQuery).populate(populateString))
     .then((foundUpdatedUsers) => resolve(foundUpdatedUsers))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
 /**
- * @description This function removes one or many users.
+ * @description This function removes one or many users. It additionally removes
+ * the user from permissions lists on any org or project that the user was apart
+ * of. This function can be used by system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} users - The users to remove. Can either be an
@@ -546,8 +557,7 @@ function update(requestingUser, users, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted users usernames
- *                   reject - error
+ * @return {Promise} Array of deleted users usernames
  *
  * @example
  * remove({User}, ['user1', 'user2'])

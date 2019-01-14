@@ -44,7 +44,10 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 /**
- * @description This function finds one or many organizations.
+ * @description This function finds one or many organizations. Depending on the
+ * given parameters, this function can find a single org by ID, multiple orgs by
+ * ID, or all orgs in the system. Only organizations which a user has read
+ * access to will be returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} [orgs] - The organizations to find. Can either be
@@ -56,8 +59,7 @@ const utils = M.require('lib.utils');
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
- * @return {Promise} resolve - Array of found organization objects
- *                   reject - error
+ * @return {Promise} Array of found organization objects
  *
  * @example
  * find({User}, ['org1', 'org2'], { populate: 'createdBy' })
@@ -151,7 +153,10 @@ function find(requestingUser, orgs, options) {
 }
 
 /**
- * @description This functions creates one or many orgs.
+ * @description This functions creates one or many orgs from the provided data.
+ * This function is restricted to system-wide admins ONLY. This function checks
+ * for any existing orgs with duplicate IDs before creating and returning the
+ * given orgs.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} orgs - Either an array of objects containing org
@@ -164,8 +169,7 @@ function find(requestingUser, orgs, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of created organization objects
- *                   reject - error
+ * @return {Promise} Array of created organization objects
  *
  * @example
  * create({User}, [{Org1}, {Org2}, ...], { populate: 'createdBy' })
@@ -296,7 +300,17 @@ function create(requestingUser, orgs, options) {
 }
 
 /**
- * @description This function updates one or many orgs.
+ * @description This function updates one or many orgs. Multiple fields in
+ * multiple orgs can be updated at once, provided that the fields are allowed to
+ * be updated. If updating org permissions, to add one or more users, provide
+ * a permissions object containing key/value pairs where the username of the
+ * user is the key, and the value is the role the user is given. To remove a
+ * user, the value should be 'remove_all'. If updating the custom data on an
+ * org, and key/value pairs that exist in the update object that don't exist in
+ * the current custom data, the key/value pair will be added. If the key/value
+ * pairs do exist, the value will be changed. If an org is archived, it
+ * must first be unarchived before any other updates occur. This function is
+ * restricted to admins of orgs and system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} orgs - Either an array of objects containing
@@ -316,8 +330,7 @@ function create(requestingUser, orgs, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of updated organization objects
- *                   reject - error
+ * @return {Promise} Array of updated organization objects
  *
  * @example
  * update({User}, [{Updated Org 1}, {Updated Org 2}...], { populate: 'createdBy' })
@@ -557,7 +570,8 @@ function update(requestingUser, orgs, options) {
 
 /**
  * @description This function removes one or many organizations as well as the
- * projects, elements, webhooks and artifacts that belong to them.
+ * projects, elements, and webhooks that belong to them. This function can be
+ * used by system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} orgs - The organizations to remove. Can either be
@@ -565,8 +579,7 @@ function update(requestingUser, orgs, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted organization ids
- *                   reject - error
+ * @return {Promise} Array of deleted organization ids.
  *
  * @example
  * remove({User}, ['org1', 'org2'])

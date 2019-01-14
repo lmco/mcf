@@ -41,7 +41,10 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 /**
- * @description This function finds one or many webhooks.
+ * @description This function finds one or many webhooks. Depending on the given
+ * parameters, this functions can find a single webhook by ID, multiple webhooks
+ * by ID, or all webhooks in the given project. The user making the request must
+ * be part of the specified project or be a system-wide admin.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -55,8 +58,7 @@ const utils = M.require('lib.utils');
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
- * @return {Promise} resolve - Array of found webhook objects
- *                   reject - error
+ * @return {Promise} Array of found webhook objects
  *
  * @example
  * find({User}, 'orgID', 'projID', ['web1', 'web2'], { populate: 'project' })
@@ -172,7 +174,10 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
 }
 
 /**
- * @description This functions creates one or many webhooks.
+ * @description This functions creates one or many webhooks from the given data.
+ * This function is restricted to project writers or system-wide admins ONLY.
+ * This function checks for existing webhooks with duplicate IDs before creating
+ * the supplied webhooks.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -205,8 +210,7 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of created webhook objects
- *                   reject - error
+ * @return {Promise} Array of created webhook objects
  *
  * @example
  * create({User}, 'orgID', 'projID', [{Web1}, {Web2}, ...], { populate: 'project })
@@ -363,7 +367,14 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
 }
 
 /**
- * @description This function updates one or many webhooks.
+ * @description This function updates one or many webhooks. Multiple fields in
+ * multiple webhooks can be updated at once, provided that the fields are
+ * allowed to be updated. If updating the custom data on a webhook, and
+ * key/value pairs that exist in the update object don't exist in the current
+ * custom data, the key/value pair will be added. If the key/value pairs do
+ * exist, the value will be changed. If a webhook is archived, it must first be
+ * unarchived before any other updates occur. This function is restricted to
+ * project writers and system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -382,8 +393,7 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of updated webhook objects
- *                   reject - error
+ * @return {Promise} Array of updated webhook objects.
  *
  * @example
  * update({User}, 'orgID', 'projID', [{Updated Web 1}, {Updated Web 2}...], { populate: 'project' })
@@ -594,7 +604,8 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
 }
 
 /**
- * @description This function removes one or many webhooks.
+ * @description This function removes one or many webhooks. This function can
+ * be used by system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -604,7 +615,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted webhook ids
+ * @return {Promise} Array of deleted webhook ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', ['web1', 'web2'])

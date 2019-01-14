@@ -45,7 +45,10 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 /**
- * @description This function finds one or many projects.
+ * @description This function finds one or many projects. Depending on the given
+ * parameters, this function can find a single project by ID, multiple projects
+ * by ID, or all projects in the given org. This function will return only the
+ * projects a user has read access to.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -58,8 +61,7 @@ const utils = M.require('lib.utils');
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
- * @return {Promise} resolve - Array of found project objects
- *                   reject - error
+ * @return {Promise} Array of found project objects
  *
  * @example
  * find({User}, 'orgID', ['proj1', 'proj2'], { populate: 'org' })
@@ -157,7 +159,10 @@ function find(requestingUser, organizationID, projects, options) {
 }
 
 /**
- * @description This functions creates one or many projects.
+ * @description This functions creates one or many projects from the provided
+ * data. This function is restricted to org writers or system-wide admins ONLY.
+ * This function checks for any existing projects with duplicate IDs and creates
+ * the root model element for each project that is created.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -175,8 +180,7 @@ function find(requestingUser, organizationID, projects, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of created project objects
- *                   reject - error
+ * @return {Promise} Array of created project objects
  *
  * @example
  * create({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
@@ -344,7 +348,17 @@ function create(requestingUser, organizationID, projects, options) {
 }
 
 /**
- * @description This function updates one or many projects.
+ * @description This function updates one or many projects. Multiple fields in
+ * multiple projects can be updated at once, provided that the fields are
+ * allowed to be updated. If updating project permissions, to add one or more
+ * users, provide a permissions object containing key/value pairs where the
+ * username of the user is the key, and the value is the role the user is given.
+ * To remove a user, the value should be 'remove_all'. If updating the custom
+ * data on a project, and key/value pairs that exist in the update object that
+ * don't exist in the current custom data, the key/value pair will be added. If
+ * the key/value pairs do exist, the value will be changed. If a project is
+ * archived, it must first be unarchived before any other updates occur. This
+ * function is restricted to admins of projects and system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -366,8 +380,7 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of updated project objects
- *                   reject - error
+ * @return {Promise} Array of updated project objects
  *
  * @example
  * update({User}, 'orgID', [{Updated Proj 1}, {Updated Proj 2}...], { populate: 'org' })
@@ -546,9 +559,14 @@ function update(requestingUser, organizationID, projects, options) {
                   case 'admin':
                     proj.permissions[user] = ['read', 'write', 'admin'];
                     break;
-                  // Default case, delete user from project
-                  default:
+                  case 'remove_all':
                     delete proj.permissions[user];
+                    break;
+                  // Default case, unknown permission, throw an error
+                  default:
+                    throw new M.CustomError(
+                      `${permValue} is not a valid permission`, 400, 'warn'
+                    );
                 }
 
                 // Copy permissions from proj to update object
@@ -603,7 +621,8 @@ function update(requestingUser, organizationID, projects, options) {
 
 /**
  * @description This function removes one or many projects as well as the
- * elements, webhooks and artifacts that belong to them.
+ * elements and webhooks that belong to them. This function can be used by
+ * system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -612,8 +631,7 @@ function update(requestingUser, organizationID, projects, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted project ids
- *                   reject - error
+ * @return {Promise} Array of deleted project ids.
  *
  * @example
  * remove({User}, 'orgID', ['proj1', 'proj2'])
