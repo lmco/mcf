@@ -389,8 +389,10 @@ function postOrgs(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(2);
+    const arrPostedOrgs = JSON.parse(_data);
+    chai.expect(arrPostedOrgs.length).to.equal(2);
+    chai.expect(arrPostedOrgs.map(p => p.id)).to.have.members(arrOrgs.map(p => p.id));
+    chai.expect(arrPostedOrgs.map(p => p.name)).to.have.members(arrOrgs.map(p => p.name));
     done();
   };
 
@@ -445,13 +447,13 @@ function patchOrgs(done) {
  */
 function deleteOrgs(done) {
   // Create request object
-  const body = [
+  const arrOrgData = [
     testData.orgs[1].id,
     testData.orgs[2].id
   ];
   const params = {};
   const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method);
+  const req = testUtils.createRequest(adminUser, params, arrOrgData, method);
 
   // Set response as empty object
   const res = {};
@@ -461,8 +463,9 @@ function deleteOrgs(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(2);
+    const deletedIDs = JSON.parse(_data);
+    chai.expect(deletedIDs.length).to.equal(2);
+    chai.expect(deletedIDs).to.have.members(arrOrgData);
     done();
   };
 

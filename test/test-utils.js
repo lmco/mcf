@@ -35,6 +35,7 @@ const Project = M.require('models.project');
 const User = M.require('models.user');
 const Webhook = M.require('models.webhook');
 const utils = M.require('lib.utils');
+const testUtils = require(path.join(M.root, 'test', 'test-utils'));
 const testData = require(path.join(M.root, 'test', 'data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
 /**
@@ -304,7 +305,7 @@ module.exports.createRequest = function(user, params, body, method) {
   }
 
   return {
-    headers: getHeaders(),
+    headers: testUtils.getHeaders(),
     method: method,
     params: params,
     body: body,
