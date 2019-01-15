@@ -370,7 +370,7 @@ function getAllUsers(done) {
       }
     });
     done();
-  })
+  });
 }
 
 /**
