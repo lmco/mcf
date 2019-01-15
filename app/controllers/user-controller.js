@@ -158,7 +158,7 @@ function find(requestingUser, users, options) {
       // Invalid parameter, throw an error
       throw new M.CustomError('Invalid input for finding users.', 400, 'warn');
     }
-    // TODO: Find users in batches (possibility of more than 100,000 users)
+
     // Find the users
     User.find(searchQuery)
     .populate(populateString)
@@ -615,8 +615,8 @@ function update(requestingUser, users, options) {
  *
  * @example
  * remove({User}, ['user1', 'user2'])
- * .then(function(users) {
- *   // Do something with the deleted users
+ * .then(function(usernames) {
+ *   // Do something with the deleted users usernames
  * })
  * .catch(function(error) {
  *   M.log.error(error);

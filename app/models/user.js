@@ -244,6 +244,7 @@ UserSchema.methods.getPublicData = function() {
     preferredName: this.preferredName,
     lname: this.lname,
     email: this.email,
+    custom: this.custom,
     createdOn: this.createdOn,
     createdBy: createdBy,
     updatedOn: this.updatedOn,
