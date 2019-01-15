@@ -87,6 +87,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple users', postUsers);
   it('should GET a user', getUser);
   it('should GET multiple users', getUsers);
+  it('should GET all users', getAllUsers);
   it('should PATCH a user', patchUser);
   it('should PATCH multiple users', patchUsers);
   it('should DELETE a user', deleteUser);
@@ -314,6 +315,72 @@ function getUsers(done) {
   };
 
   // GETs multiple users
+  APIController.getUsers(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to find all users.
+ */
+function getAllUsers(done) {
+  // Create request object
+  const userData = [
+    testData.adminUser,
+    testData.users[0],
+    testData.users[1],
+    testData.users[2],
+    testData.users[3]
+  ];
+  const params = {};
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
+
+  // Create response object
+  const res = {};
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Convert response to JSON
+    const foundUsers = JSON.parse(_data);
+    // Expect correct number of users to be found
+    chai.expect(foundUsers.length).to.be.at.least(userData.length);
+
+    // Convert foundUsers to JMI type 2 for easier lookup
+    const jmi2Users = utils.convertJMI(1, 2, foundUsers, 'username');
+    // Loops through each user data object
+    userData.forEach((userDataObject) => {
+      const foundUser = jmi2Users[userDataObject.username];
+      // Ensure user was found
+      chai.expect(foundUser).to.not.equal(undefined);
+
+      if (foundUser.username !== adminUser.username) {
+        // Verify expected response
+        chai.expect(foundUser.username).to.equal(userDataObject.username);
+        chai.expect(foundUser.fname).to.equal(userDataObject.fname);
+        chai.expect(foundUser.lname).to.equal(userDataObject.lname);
+        chai.expect(foundUser.preferredName).to.equal(userDataObject.preferredName);
+        chai.expect(foundUser.email).to.equal(userDataObject.email);
+        chai.expect(foundUser.custom).to.deep.equal(userDataObject.custom);
+        chai.expect(foundUser.admin).to.equal(userDataObject.admin);
+        chai.expect(foundUser).to.not.have.any.keys('password', '_id', '__v');
+
+        // Verify extra properties
+        chai.expect(foundUser.createdOn).to.not.equal(null);
+        chai.expect(foundUser.updatedOn).to.not.equal(null);
+        chai.expect(foundUser.createdBy).to.equal(adminUser.username);
+        chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+        chai.expect(foundUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+      }
+      // Admin user special cases
+      else {
+        chai.expect(foundUser.username).to.equal(userDataObject.username);
+        chai.expect(foundUser).to.not.have.any.keys('password', '_id', '__v');
+      }
+    });
+    done();
+  };
+
+  // GETs all users
   APIController.getUsers(req, res);
 }
 

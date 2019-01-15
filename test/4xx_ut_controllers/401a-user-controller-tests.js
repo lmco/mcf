@@ -323,14 +323,16 @@ function findAllUsers(done) {
   // Find users via controller
   UserController.find(adminUser)
   .then((foundUsers) => {
-    // Expect foundUsers not to be empty
-    chai.expect(foundUsers.length).to.not.equal(0);
+    // Expect to find at least the same number of users as in userDataObjects
+    chai.expect(foundUsers.length).to.be.at.least(userDataObjects.length);
 
     // Convert foundUsers to JMI type 2 for easier lookup
     const jmi2Users = utils.convertJMI(1, 2, foundUsers);
     // Loop through each user data object
     userDataObjects.forEach((userDataObject) => {
       const foundUser = jmi2Users[userDataObject.username];
+      // Ensure user was found
+      chai.expect(foundUser).to.not.equal(undefined);
 
       if (foundUser.username !== adminUser.username) {
         // Verify user created properly
