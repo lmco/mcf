@@ -68,12 +68,12 @@ describe(M.getModuleName(module.filename), () => {
       const projData = testData.projects[0];
 
       // Create project
-      return ProjController.createProject(adminUser, org.id, projData);
+      return ProjController.create(adminUser, org.id, projData);
     })
     .then((retProj) => {
       // Set global project
       proj = retProj;
-      projID = utils.parseID(proj.id).pop();
+      projID = utils.parseID(proj[0].id).pop();
       done();
     })
     .catch((error) => {
@@ -134,12 +134,16 @@ function postElement(done) {
 
   // Verifies status code and headers
   resFunctions(res);
-
+  req.query = {
+    populate: 'contains'
+  }
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.elements[0].id);
-    chai.expect(json.name).to.equal(testData.elements[0].name);
+    const postedElem = JSON.parse(_data);
+    chai.expect(postedElem.id).to.equal(testData.elements[0].id);
+    chai.expect(postedElem.name).to.equal(testData.elements[0].name);
+    chai.expect(postedElem.project).to.equal(projID);
+    chai.expect(postedElem.org).to.equal(org.id);
     done();
   };
 
@@ -185,7 +189,11 @@ function getElement(done) {
  */
 function patchElement(done) {
   // Create request object
-  const body = testData.names[10];
+  const body = {
+    id: testData.elements[0].id,
+    name: testData.names[10].name
+  };
+
   const params = {
     orgid: org.id,
     projectid: projID,
@@ -234,8 +242,8 @@ function deleteElement(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.elements[0].id);
+    const elementid = JSON.parse(_data);
+    chai.expect(elementid).to.equal(testData.elements[0].id);
     done();
   };
 
@@ -286,18 +294,22 @@ function postElements(done) {
  */
 function patchElements(done) {
   // Create request object
-  const body = {
-    elements: [
-      testData.elements[0],
-      testData.elements[1],
-      testData.elements[2],
-      testData.elements[3]
-    ],
-    update: { name: 'Updated Elements' }
-  };
+  const arrElemData = [
+    testData.elements[0],
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3]
+  ]
+
+  // Create objects to update elements
+  const arrUpdateObjects = arrElemData.map(p => ({
+    name: `${p.name}_edit`,
+    id: p.id
+  }));
+
   const params = { orgid: org.id, projectid: projID };
   const method = 'PATCH';
-  const req = getReq(params, body, method);
+  const req = getReq(params, arrUpdateObjects, method);
 
   // Set response as empty object
   const res = {};
@@ -307,9 +319,9 @@ function patchElements(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(4);
-    chai.expect(json[2].name).to.equal('Updated Elements');
+    const arrPatchedElem = JSON.parse(_data);
+    chai.expect(arrPatchedElem.map(e => e.name)).to.have.members(
+      arrUpdateObjects.map(e => e.name));
     done();
   };
 
@@ -335,8 +347,8 @@ function getElements(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(11);
+    const arrElem = JSON.parse(_data);
+    chai.expect(arrElem.length).to.equal(11);
     done();
   };
 
@@ -349,20 +361,19 @@ function getElements(done) {
  */
 function deleteElements(done) {
   // Create request object
-  const body = {
-    elements: [
-      testData.elements[0],
-      testData.elements[1],
-      testData.elements[2],
-      testData.elements[3],
-      testData.elements[7],
-      testData.elements[6],
-      testData.elements[8],
-      testData.elements[9],
-      testData.elements[11],
-      testData.elements[10]
-    ]
-  };
+  const body = [
+    testData.elements[0].id,
+    testData.elements[1].id,
+    testData.elements[2].id,
+    testData.elements[3].id,
+    testData.elements[7].id,
+    testData.elements[6].id,
+    testData.elements[8].id,
+    testData.elements[9].id,
+    testData.elements[11].id,
+    testData.elements[10].id
+  ]
+
   const params = { orgid: org.id, projectid: projID };
   const method = 'DELETE';
   const req = getReq(params, body, method);
@@ -375,8 +386,10 @@ function deleteElements(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(10);
+    const arrDeletedElem = JSON.parse(_data);
+    chai.expect(arrDeletedElem.length).to.equal(body.length);
+    chai.expect(arrDeletedElem.map(e => e.id)).to.have.members(
+      body.map(e => e.id));
     done();
   };
 

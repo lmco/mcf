@@ -173,7 +173,7 @@ ElementSchema.statics.getValidBulkUpdateFields = function() {
  * @memberOf ElementSchema
  */
 ElementSchema.methods.getValidPopulateFields = function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source', 'target', 'project'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source', 'target', 'project', 'contains'];
 };
 
 ElementSchema.statics.getValidPopulateFields = function() {
@@ -223,10 +223,12 @@ ElementSchema.methods.getPublicData = function() {
       : utils.parseID(this.target).pop();
   }
 
-  // Handle the virtual contains field
-  data.contains = (this.contains.every(e => typeof e === 'object'))
-    ? this.contains.map(e => utils.parseID(e._id).pop())
-    : this.contains.map(e => utils.parseID(e).pop());
+  if (this.contains) {
+    // Handle the virtual contains field
+    data.contains = (this.contains.every(e => typeof e === 'object'))
+      ? this.contains.map(e => utils.parseID(e._id).pop())
+      : this.contains.map(e => utils.parseID(e).pop());
+  }
 
   return data;
 };

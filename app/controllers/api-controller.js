@@ -220,7 +220,8 @@ function getOrgs(req, res) {
   // Define valid option type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    subtree: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -286,8 +287,7 @@ function postOrgs(req, res) {
   let options;
   // Define valid option type
   const validOptions = {
-    populate: 'array',
-    archived: 'boolean'
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -311,7 +311,7 @@ function postOrgs(req, res) {
   }
 
   // Create organizations in request body
-  // NOTE: createOrgs() sanitizes req.body.orgs
+  // NOTE: create() sanitizes req.body.orgs
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and created orgs
@@ -360,7 +360,7 @@ function patchOrgs(req, res) {
   }
 
   // Update the specified orgs
-  // NOTE: updateOrgs() sanitizes req.body.update
+  // NOTE: update() sanitizes req.body.update
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and the updated orgs
@@ -418,7 +418,6 @@ function getOrg(req, res) {
   let options;
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -442,7 +441,7 @@ function getOrg(req, res) {
   }
 
   // Find the org from it's id
-  // NOTE: findOrg() sanitizes req.params.orgid
+  // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid, options)
   .then((org) => {
     // Check if orgs are found
@@ -473,8 +472,7 @@ function postOrg(req, res) {
   let options;
   // Define valid option type
   const validOptions = {
-    populate: 'array',
-    archived: 'boolean'
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -556,7 +554,7 @@ function patchOrg(req, res) {
     // Check if invalid key passed in
     Object.keys(req.query).forEach((key) => {
       // If invalid key, reject
-      if (!['archived', 'populate'].includes(key)) {
+      if (!['populate'].includes(key)) {
         const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
         return res.status(error.status).send(error);
       }
@@ -630,21 +628,25 @@ function getOrgMember(req, res) {
   }
 
   // Find the permissions the foundUser has within the organization
-  // NOTE: findPermissions() sanitizes req.params.orgid
-  // OrgController.findPermissions(req.user, req.params.username, req.params.orgid)
+  // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid)
   .then((orgs) => {
     const org = orgs[0];
-    if (!org.permissions[req.params.username]) {
+    if (!org || !org.permissions[req.params.username]) {
       return res.status(404).send('User not on organization.');
     }
 
     // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org.permissions[req.params.username]));
+    const userPermissionObj = {};
+    userPermissionObj[req.params.username] = org.permissions[req.params.username]
+    return res.status(200).send(formatJSON(userPermissionObj));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error)
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -683,7 +685,7 @@ function postOrgMember(req, res) {
   update.permissions[req.params.username] = req.body;
 
   // Set permissions of given user
-  // NOTE: setPermissions() sanitizes req.params.orgid and req.params.username
+  // NOTE: update() sanitizes req.params.orgid and req.params.username
   OrgController.update(req.user, update)
   .then((org) => {
     // Return 200: Ok and updated org
@@ -720,7 +722,7 @@ function deleteOrgMember(req, res) {
   update.permissions[req.params.username] = 'remove_all';
 
   // Remove permissions of given user
-  // NOTE: setPermissions() sanitizes req.params.orgid
+  // NOTE: update() sanitizes req.params.orgid
   OrgController.update(req.user, update)
   .then((orgs) => {
     // Return 200: OK and updated org
@@ -753,7 +755,7 @@ function getOrgMembers(req, res) {
   }
 
   // Get permissions of all users in given org
-  // NOTE: findAllPermissions() sanitizes req.params.orgid
+  // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid)
   .then((members) => {
     // Return 200: OK and permissions of all members in given org
@@ -1742,32 +1744,41 @@ function whoami(req, res) {
  * @return {Object} res response object with elements
  */
 function getElements(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    subtree: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate', 'subtree'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
 
-  // Define the optional archived flag
-  let archived = false;
-
-  // Check if archived was provided in the request query
-  if (req.query && req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
   }
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Find all elements from it's org.id and project.id
   // NOTE: find() sanitizes req.params.orgid and req.params.projectid
-  ElementController.find(req.user, req.params.orgid, req.params.projectid, archived)
+  ElementController.find(req.user, req.params.orgid, req.params.projectid,
+    branchid, req.params.elementid, options)
   .then((elements) => {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
@@ -1797,16 +1808,39 @@ function getElements(req, res) {
  * @return {Object} res response object with created elements
  */
 function postElements(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
   // Create the specified elements
   // NOTE: create() sanitizes req.params.orgid, req.params.projectid and the elements
-  ElementController.create(req.user, req.params.orgid,
-    req.params.projectid, req.body)
+  ElementController.create(req.user, req.params.orgid, req.params.projectid,
+    branchid, req.body, options)
   .then((elements) => {
     const data = [];
     for (let i = 0; i < elements.length; i++) {
@@ -1832,69 +1866,49 @@ function postElements(req, res) {
  * @return {Object} res response object with updated elements
  */
 function patchElements(req, res) {
-  // Ensure request parameters and body are properly formatted
-  try {
-    assert.ok(req.hasOwnProperty('user'), 'Request Failed');
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  if (req.query) {
     // Check if invalid key passed in
-    Object.keys(req.body).forEach((key) => {
+    Object.keys(req.query).forEach((key) => {
       // If invalid key, reject
-      assert.ok(['elements', 'update'].includes(key), `Invalid parameter: ${key}`);
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
     });
-    assert.ok(req.body.hasOwnProperty('update'), 'Update object was not provided in body.');
-  }
-  catch (message) {
-    // If req.user is not provided, set status code to 500
-    let status = 400;
-    if (message === 'Request Failed') status = 500;
 
-    // Create and return error
-    const error = new M.CustomError(message, status, 'warn');
-    return res.status(error.status).send(error);
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
   }
 
-  // Initialize the update query object
-  let updateQuery = {};
-
-  // No elements provided, update all elements in the project
-  if (!req.body.hasOwnProperty('elements')) {
-    // Query finds all elements that start with 'orgid:projectid:'
-    updateQuery = { _id: { $regex: `^${sani.sanitize(utils.createID(
-      req.params.orgid, req.params.projectid
-    ))}:` } };
-  }
-  // Element objects provided, update all
-  else if (req.body.elements.every(e => typeof e === 'object')) {
-    // Query finds all element by their id
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
-      req.params.orgid, req.params.projectid, e.id
-    )));
-    updateQuery = { _id: { $in: uids } };
-  }
-  // Element IDs provided, update all
-  else if (req.body.elements.every(e => typeof e === 'string')) {
-    // Query finds all elements by their id, generated from orgid and projectid
-    // in the request parameters
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
-      req.params.orgid, req.params.projectid, e
-    )));
-    updateQuery = { _id: { $in: uids } };
-  }
-  // No valid element data was provided, reject
-  else {
-    const error = new M.CustomError('Elements array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Update the specified projects
   // NOTE: update() sanitizes req.body.update
-  ElementController.update(req.user, updateQuery, req.body.update)
+  ElementController.update(req.user, req.params.orgid, req.params.projectid,
+    branchid, req.body, options)
   .then((elements) => {
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /*
@@ -1913,54 +1927,16 @@ function deleteElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['elements'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize the delete query object
-  let deleteQuery = {};
-
-  // No elements provided, delete all elements in the project
-  if (!req.body.hasOwnProperty('elements')) {
-    // Query finds all elements that start with 'orgid:projectid:'
-    deleteQuery = { _id: { $regex: `^${sani.sanitize(utils.createID(
-      req.params.orgid, req.params.projectid
-    ))}:` } };
-  }
-  // Element objects provided, delete all
-  else if (req.body.elements.every(e => typeof e === 'object')) {
-    // Query finds all element by their id
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
-      req.params.orgid, req.params.projectid, e.id
-    )));
-    deleteQuery = { _id: { $in: uids } };
-  }
-  // Element IDs provided, delete all
-  else if (req.body.elements.every(e => typeof e === 'string')) {
-    // Query finds all elements by their id, generated from orgid and projectid
-    // in the request parameters
-    const uids = req.body.elements.map(e => sani.sanitize(utils.createID(
-      req.params.orgid, req.params.projectid, e
-    )));
-    deleteQuery = { _id: { $in: uids } };
-  }
-  // No valid element data was provided, reject
-  else {
-    const error = new M.CustomError('Elements array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Remove the specified elements
-  ElementController.remove(req.user, deleteQuery)
+  ElementController.remove(req.user, req.params.orgid, req.params.projectid,
+    branchid, req.body)
   .then((elements) => {
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(formatJSON(elements));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1977,37 +1953,45 @@ function deleteElements(req, res) {
  * @return {Object} res response object with searched element
  */
 function getElement(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    subtree: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate', 'subtree'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
 
-  // Define the optional archived flag
-  let archived = false;
-
-  // Check if archived was provided in the request query
-  if (req.query && req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
   }
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Find the element from it's element.id, project.id, and org.id
   // NOTE: find() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
-  ElementController.find(req.user, req.params.orgid,
-    req.params.projectid, req.params.elementid, archived)
+  ElementController.find(req.user, req.params.orgid, req.params.projectid,
+    branchid, req.params.elementid, options)
   .then((element) => {
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element.getPublicData()));
+    return res.status(200).send(formatJSON(element[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -2025,6 +2009,12 @@ function getElement(req, res) {
  * @return {Object} res response object with created element
  */
 function postElement(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -2037,30 +2027,38 @@ function postElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Generate the project UID from url parameters
-  const projUID = utils.createID(req.params.orgid, req.params.projectid);
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['archived', 'populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
 
-  // If project UID was provided in the body, ensure it matches project UID from params
-  if (req.body.hasOwnProperty('projectUID') && (projUID !== req.body.projectUID)) {
-    const error = new M.CustomError('Project UID in the body does not match params.', 400);
-    return res.status(error.status).send(error);
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
   }
 
-  // Set id in request body
-  req.body.id = req.params.elementid;
-  // Set projectUID in request body
-  req.body.projectUID = projUID;
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Create element with provided parameters
   // NOTE: create() sanitizes req.body.name
-  ElementController.create(req.user, req.body)
+  // function create(requestingUser, organizationID, projectID, branch, elements, options) {
+  ElementController.create(req.user, req.params.orgid, req.params.projectid,
+    branchid, req.body, options)
   .then((element) => {
     // Return 200: OK and created element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element.getPublicData()));
+    return res.status(200).send(formatJSON(element[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -2076,24 +2074,56 @@ function postElement(req, res) {
  * @return {Object} res response object with updated element
  */
 function patchElement(req, res) {
+  let options;
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
+  // If element ID was provided in the body, ensure it matches element ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.elementid !== req.body.id)) {
+    const error = new M.CustomError('Element ID in the body does not match ID in the params.', 400);
+    return res.status(error.status).send(error);
+  }
+
+  if (req.query) {
+    // Check if invalid key passed in
+    Object.keys(req.query).forEach((key) => {
+      // If invalid key, reject
+      if (!['populate'].includes(key)) {
+        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+        return res.status(error.status).send(error);
+      }
+    });
+
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
   // Update the specified element
   // NOTE: updateElement() sanitizes req.params.orgid, req.params.projectid,
   // and req.params.elementid
-  ElementController.update(req.user, req.params.orgid,
-    req.params.projectid, req.params.elementid, req.body)
+  ElementController.update(req.user, req.params.orgid, req.params.projectid,
+    branchid, req.body, options)
   .then((element) => {
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element.getPublicData()));
+    return res.status(200).send(formatJSON(element[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -2114,17 +2144,23 @@ function deleteElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
   // Remove the specified element
   // NOTE: removeElement() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.elementid
-  ElementController.remove(req.user, req.params.orgid,
-    req.params.projectid, req.params.elementid)
+  ElementController.remove(req.user, req.params.orgid, req.params.projectid,
+    branchid, [req.params.elementid])
   .then((element) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element
-    return res.status(200).send(formatJSON(element.getPublicData()));
+    return res.status(200).send(formatJSON(utils.parseID(element[0]).pop()));
   })
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error)
+    res.status(error.status).send(error)
+  });
 }
 
 /* -----------------------( Webhooks API Endpoints )------------------------- */
