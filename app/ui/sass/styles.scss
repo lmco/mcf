@@ -400,22 +400,18 @@ body {
     height: 100vh;
     width: 400px;
     overflow-y: scroll;
-
     &.tree-sidebar-active {
         right: 0;
         transition: right .2s;
     }
-
     background: lighten($mbee-background, 5);
     color: inherit;
-
     .close-tree-sidebar {
         position: absolute;
         left: 10px;
         color: #ffc700;
         cursor: pointer;
     }
-
     .element-header {
         display: flex;
         justify-content: center;
@@ -427,11 +423,9 @@ body {
             margin: 0;
         }
     }
-
     .tree-sidebar-form {
         padding: 15px
     }
-
     .element-content {
         .element-item {
             display: flex;
@@ -439,7 +433,6 @@ body {
             padding: 15px;
             padding-top: 5px;
             padding-bottom: 5px;
-
             .element-key {
                 color: darken($mbee-color,20);
                 display: flex;

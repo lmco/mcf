@@ -107,6 +107,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should POST an artifact', postArtifact);
   it('should GET an artifact', getArtifact);
+  it('should GET an artifacts blob', getArtifactBlob);
   it('should PATCH an artifact', patchArtifact);
   it('should DELETE an artifact', deleteArtifact);
 });
@@ -121,7 +122,6 @@ function postArtifact(done) {
   );
   // Define new artifact
   const body = {
-    id: testData.artifacts[0].id,
     contentType: path.extname(testData.artifacts[0].filename)
   };
 
@@ -262,6 +262,36 @@ function deleteArtifact(done) {
 
   // DELETES an artifact
   apiController.deleteArtifact(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get an artifact's binaries.
+ */
+function getArtifactBlob(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    artifactid: testData.artifacts[0].id
+  };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
+    done();
+  };
+
+  // GETs an artifact
+  apiController.getArtifactBlob(req, res);
 }
 
 /* ----------( Helper Functions )----------*/

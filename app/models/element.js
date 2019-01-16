@@ -284,7 +284,7 @@ ElementSchema.methods.getPublicData = function() {
     lastModifiedBy: lastModifiedBy,
     archived: (this.archived) ? true : undefined,
     archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
-    archivedBy: archivedBy,
+    archivedBy: archivedBy
   };
 
 

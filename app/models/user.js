@@ -126,7 +126,7 @@ UserSchema.pre('save', function(next) {
   const AuthController = M.require('lib.auth');
 
   // Check validation status NOT successful
-  if (!AuthController.validatePassword(this.password)) {
+  if (!AuthController.validatePassword(this.password, this.provider)) {
     // Failed validation, throw error
     throw new M.CustomError('Password validation failed.', 400, 'warn');
   }

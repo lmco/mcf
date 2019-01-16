@@ -17,6 +17,16 @@
  *
  * @description This implements the behavior and logic for artifacts.
  * It also provides function for interacting with artifacts.
+ *
+ * An Artifact represents arbitrary data or binary file. Example: PDFs, docx, dat,
+ * png, and any other binary file.
+ *
+ * There are basically two parts to Artifacts. The artifact metadata and the binary blob.
+ * Artifact Metadata: This controller directs and stores any metadata of artifacts in the
+ * mongo database via mongoose calls. Examples of metadata are artifact IDs, user, and filename.
+ *
+ * Artifact Blob: The actual binary file. This controller stores blobs on the filesystem utilizing
+ * the fs library.
  */
 
 // Expose artifact controller functions
@@ -27,7 +37,8 @@ module.exports = {
   removeArtifact,
   updateArtifact,
   findArtifact,
-  findArtifacts
+  findArtifacts,
+  getArtifactBlob
 };
 
 // Node.js Modules
@@ -54,13 +65,13 @@ const ProjController = M.require('controllers.project-controller');
  * @return {Promise} resolve - new Artifact
  *                   reject - error
  */
-function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
+function createArtifact(reqUser, orgID, projID, artID, artData, artifactBlob) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof artData.id === 'string', 'Artifact ID is not a string.');
+      assert.ok(typeof artID === 'string', 'Artifact ID is not a string.');
       assert.ok(Artifact.validateObjectKeys(artData),
         'Artifact metadata contains invalid keys.');
 
@@ -76,11 +87,11 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
     // Sanitize query inputs
     const organizationID = sani.sanitize(orgID);
     const projectID = sani.sanitize(projID);
-    const artID = sani.sanitize(artData.id);
+    const artifactID = sani.sanitize(artID);
 
     // Define function-wide variables
     // Create the full artifact id
-    const artifactFullId = utils.createID(organizationID, projectID, artID);
+    const artifactFullId = utils.createID(organizationID, projectID, artifactID);
     let createdArtifact = null;
     let hashedName = '';
 
@@ -107,6 +118,7 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
         throw new M.CustomError('Artifact already exists.', 400, 'warn');
       }
 
+      // Verify artifactBlob defined
       if (artifactBlob) {
         // Generate hash
         hashedName = mbeeCrypto.sha256Hash(artifactBlob);
@@ -115,7 +127,6 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
         // No artifact binary provided, set null
         hashedName = null;
       }
-
 
       // Define new hash history data
       const historyData = {
@@ -127,7 +138,7 @@ function createArtifact(reqUser, orgID, projID, artData, artifactBlob) {
       const artifact = new Artifact({
         _id: artifactFullId,
         filename: artData.filename,
-        contentType: path.extname(artData.filename),
+        contentType: artData.contentType,
         history: historyData,
         project: foundProj,
         lastModifiedBy: reqUser,
@@ -374,7 +385,7 @@ function removeArtifact(reqUser, orgID, projID, artifactID) {
   });
 }
 
-/** //TODO: Create a function that returns artifact binary
+/**
  * @description This function finds an artifact based on artifact full id.
  *
  * @param {User} reqUser - The requesting user
@@ -462,7 +473,7 @@ function findArtifactsQuery(artifactQuery) {
   return new Promise((resolve, reject) => {
     // Find artifact
     Artifact.find(artifactQuery)
-    .populate('project archivedBy lastModifiedBy')
+    .populate('history.user project archivedBy lastModifiedBy')
     .then((arrArtifact) => resolve(arrArtifact))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -529,6 +540,43 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
 }
 
 /**
+ * @description This function returns the artifact binary file.
+ *
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {String} organizationID - The organization ID.
+ * @param {String} projectID - The project ID.
+ * @param {String} artifactID - The artifact ID.
+ *
+ * @return {Promise} resolve - artifact
+ *                   reject - error
+ @example
+ * getArtifactBlob({User}, 'orgID', 'projectID', 'artifactID')
+ * .then(function(artifact) {
+ *   // Do something with the found artifact binary
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function getArtifactBlob(reqUser, organizationID, projectID, artifactID) {
+  return new Promise((resolve, reject) => {
+    let artifactMeta;
+    findArtifact(reqUser, organizationID, projectID, artifactID)
+    .then((foundArtifact) => {
+      // Artifact metadata found, save it
+      artifactMeta = foundArtifact;
+
+      // Get the Artifact Blob
+      return getArtifactOS(artifactMeta.history[artifactMeta.history.length - 1].hash);
+    })
+    .then((ArtifactBlob) => resolve({ artifactBlob: ArtifactBlob, artifactMeta: artifactMeta }))
+    .catch((error) => {
+      reject(M.CustomError.parseCustomError(error));
+    });
+  });
+}
+
+/**
  * @description This function adds the artifact blob file to the file system.
  *
  * @param {string} hashedName - hash name of the file
@@ -536,6 +584,11 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
  */
 function addArtifactOS(hashedName, artifactBlob) {
   return new Promise((resolve, reject) => {
+    // Check hashname for null
+    if (hashedName === null) {
+      // Remote link, return resolve
+      return resolve();
+    }
     // Creates main artifact directory if not exist
     createStorageDirectory()
     .then(() => {
@@ -546,50 +599,31 @@ function addArtifactOS(hashedName, artifactBlob) {
       const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
       const filePath = path.join(folderPath, hashedName);
 
-      // Check sub folder exist
-      fs.exists(folderPath, (foldExists) => {
-        // Check results
-        if (!foldExists) {
-          // Directory does NOT exist, create it
-          // Note: Use sync to ensure directory created before advancing
-          fs.mkdirSync(folderPath, (makeDirectoryError) => {
-            if (makeDirectoryError) {
-              throw M.CustomError.parseCustomError(makeDirectoryError);
-            }
-          });
-          // Check if file already exist
-          fs.exists(filePath, (fileExist) => {
-            if (!fileExist) {
-              try {
-                // Write out artifact file, defaults to 666 permission.
-                fs.writeFileSync(filePath, artifactBlob);
-              }
-              catch (error) {
-                // Error occurred, log it
-                throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
-              }
-            }
-          });
+      // Check results
+      if (!fs.existsSync(folderPath)) {
+        // Directory does NOT exist, create it
+        // Note: Use sync to ensure directory created before advancing
+        fs.mkdirSync(folderPath, (makeDirectoryError) => {
+          if (makeDirectoryError) {
+            throw M.CustomError.parseCustomError(makeDirectoryError);
+          }
+        });
+      }
+      // Check if file already exist
+      if (!fs.existsSync(filePath)) {
+        try {
+          // Write out artifact file, defaults to 666 permission.
+          fs.writeFileSync(filePath, artifactBlob);
         }
-        else {
-          // TODO: Code repeated again, rewrite
-          // Check if file already exist
-          fs.exists(filePath, (fileExist) => {
-            if (!fileExist) {
-              try {
-                // Write out artifact file, defaults to 666 permission.
-                fs.writeFileSync(filePath, artifactBlob);
-              }
-              catch (error) {
-                // Error occurred, log it
-                throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
-              }
-            }
-          });
+        catch (error) {
+          // Error occurred, log it
+          throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
         }
         // Return resolve
         return resolve();
-      });
+      }
+      // Return resolve
+      return resolve();
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -599,16 +633,21 @@ function addArtifactOS(hashedName, artifactBlob) {
  * @description This function removes the artifact blob file and sub folder
  * from the file system.
  *
- * @param {string} hashName - folder's hash name
+ * @param {string} hashedName - hash name of the file
  */
-function removeArtifactOS(hashName) {
+function removeArtifactOS(hashedName) {
   return new Promise((resolve) => {
+    // Check hashname for null
+    if (hashedName === null) {
+      // Remote link, return resolve
+      return resolve();
+    }
     // Create the main artifact path
     const artifactPath = path.join(M.root, M.config.artifact.path);
     // Create sub folder path and artifact path
     // Note: Folder name is the first 2 characters from the generated hash
-    const folderPath = path.join(artifactPath, hashName.substring(0, 2));
-    const filePath = path.join(folderPath, hashName);
+    const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
+    const filePath = path.join(folderPath, hashedName);
 
     // Remove the artifact file
     // Note: Use sync to ensure file is removed before advancing
@@ -640,6 +679,31 @@ function removeArtifactOS(hashName) {
 }
 
 /**
+ * @description This function get the artifact blob file
+ * from the file system.
+ *
+ * @param {String} hashedName - hash name of the file
+ */
+function getArtifactOS(hashName) {
+  return new Promise((resolve, reject) => {
+    // Create the main artifact path
+    const artifactPath = path.join(M.root, M.config.artifact.path);
+    // Create sub folder path and artifact path
+    // Note: Folder name is the first 2 characters from the generated hash
+    const folderPath = path.join(artifactPath, hashName.substring(0, 2));
+    const filePath = path.join(folderPath, hashName);
+    try {
+      // Read the artifact file
+      // Note: Use sync to ensure file is read before advancing
+      return resolve(fs.readFileSync(filePath));
+    }
+    catch (err) {
+      return reject(new M.CustomError('Artifact binary not found.', 404, 'warn'));
+    }
+  });
+}
+
+/**
  * @description This function creates the artifact storage directory if
  * it doesn't exist.
  */
@@ -648,19 +712,16 @@ function createStorageDirectory() {
     // Create the main artifact path
     const artifactPath = path.join(M.root, M.config.artifact.path);
 
-    // Check file exist
-    fs.exists(artifactPath, (exists) => {
-      // Check directory NOT exist
-      if (!exists) {
-        // Directory does NOT exist, create it
-        fs.mkdirSync(artifactPath, (error) => {
-          // Check for errors
-          if (error) {
-            throw new M.CustomError(error.message, 500, 'warn');
-          }
-        });
-      }
-      return resolve();
-    });
+    // Check directory NOT exist
+    if (!fs.existsSync(artifactPath)) {
+      // Directory does NOT exist, create it
+      fs.mkdirSync(artifactPath, (error) => {
+        // Check for errors
+        if (error) {
+          throw new M.CustomError(error.message, 500, 'warn');
+        }
+      });
+    }
+    return resolve();
   });
 }

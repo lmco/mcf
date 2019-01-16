@@ -164,31 +164,66 @@ IncomingWebhookSchema.methods.verifyAuthority = function(value) {
 };
 
 /**
- * @description Returns an outgoing webhooks's public data.
- * @memberOf OutgoingWebhookSchema
+ * @description Returns a webhooks's public data.
+ * @memberOf WebhookSchema
  */
-OutgoingWebhookSchema.methods.getPublicData = function() {
-  return {
-    id: utils.parseID(this._id)[2],
-    name: this.name,
-    triggers: this.triggers,
-    responses: this.responses,
-    custom: this.custom
-  };
-};
+WebhookSchema.methods.getPublicData = function() {
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
 
-/**
- * @description Returns an incoming webhooks's public data.
- * @memberOf IncomingWebhookSchema
- */
-IncomingWebhookSchema.methods.getPublicData = function() {
+  // If this.createdBy is defined
+  if (this.createdBy) {
+    // If this.createdBy is populated
+    if (typeof this.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = this.createdBy.getPublicData();
+    }
+    else {
+      createdBy = this.createdBy;
+    }
+  }
+
+  // If this.lastModifiedBy is defined
+  if (this.lastModifiedBy) {
+    // If this.lastModifiedBy is populated
+    if (typeof this.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = this.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = this.lastModifiedBy;
+    }
+  }
+
+  // If this.archivedBy is defined
+  if (this.archivedBy) {
+    // If this.archivedBy is populated
+    if (typeof this.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = this.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = this.archivedBy;
+    }
+  }
+
   return {
-    id: utils.parseID(this._id)[2],
+    id: utils.parseID(this._id).pop(),
     name: this.name,
+    project: utils.parseID(this.project).pop(),
     triggers: this.triggers,
-    token: this.token,
-    tokenLocation: this.tokenLocation,
-    custom: this.custom
+    responses: (this.responses) ? this.responses : undefined,
+    token: (this.token) ? this.token : undefined,
+    tokenLocation: (this.tokenLocation) ? this.tokenLocation : undefined,
+    custom: this.custom,
+    createdOn: this.createdOn,
+    createdBy: createdBy,
+    updatedOn: this.updatedOn,
+    lastModifiedBy: lastModifiedBy,
+    archived: (this.archived) ? true : undefined,
+    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
+    archivedBy: archivedBy
   };
 };
 
