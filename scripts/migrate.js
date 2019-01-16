@@ -36,6 +36,13 @@ function migrate(args) {
   // Get args
   const currentVersion = args[0];
   const toVersion = args[1] || M.version;
+  const force = args[2];
+
+  if (force !== '--force') {
+    M.log.warn('Please backup any critical data before proceeding. Once '
+      + 'finished, please add the command \'--force\'.');
+    return;
+  }
 
   const validVersions = ['0.5.0', '0.6.0', '0.7.0'];
 
