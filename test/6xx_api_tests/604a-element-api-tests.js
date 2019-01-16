@@ -33,7 +33,7 @@ const utils = M.require('lib.utils');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData('data.json');
+const testData = testUtils.importTestData('test_data.json');
 const test = M.config.test;
 let org = null;
 let adminUser = null;
@@ -175,12 +175,12 @@ function postElement(done) {
  */
 function postElements(done) {
   const elemData = [
-    testData.elements[6],
-    testData.elements[7],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[10],
-    testData.elements[11]
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,
@@ -305,12 +305,12 @@ function getElement(done) {
  */
 function getElements(done) {
   const elemData = [
-    testData.elements[6],
-    testData.elements[7],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[10],
-    testData.elements[11]
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,
@@ -441,12 +441,12 @@ function patchElement(done) {
  */
 function patchElements(done) {
   const elemData = [
-    testData.elements[6],
-    testData.elements[7],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[10],
-    testData.elements[11]
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
   const updateObj = elemData.map(e => ({
     id: e.id,
@@ -546,12 +546,12 @@ function deleteElement(done) {
  */
 function deleteElements(done) {
   const elemData = [
-    testData.elements[6],
-    testData.elements[7],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[10],
-    testData.elements[11]
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,

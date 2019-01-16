@@ -35,8 +35,8 @@ const Project = M.require('models.project');
 const User = M.require('models.user');
 const Webhook = M.require('models.webhook');
 const utils = M.require('lib.utils');
-const testData = require(path.join(M.root, 'test', 'data.json'));
-delete require.cache[require.resolve(path.join(M.root, 'test', 'data.json'))];
+const testData = require(path.join(M.root, 'test', 'test_data.json'));
+delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json'))];
 /**
  * @description Helper function to create test non-admin user in
  * MBEE tests.

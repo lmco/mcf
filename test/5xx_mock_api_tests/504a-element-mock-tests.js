@@ -31,7 +31,7 @@ const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData('data.json');
+const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -127,13 +127,13 @@ function postElement(done) {
     elementid: testData.elements[0].id
   };
   const method = 'POST';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
   req.query = {
     populate: 'contains'
   };
@@ -164,13 +164,13 @@ function getElement(done) {
     elementid: testData.elements[0].id
   };
   const method = 'GET';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -200,13 +200,13 @@ function patchElement(done) {
     elementid: testData.elements[0].id
   };
   const method = 'PATCH';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -232,13 +232,13 @@ function deleteElement(done) {
     elementid: testData.elements[0].id
   };
   const method = 'DELETE';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -257,31 +257,27 @@ function deleteElement(done) {
 function postElements(done) {
   // Create request object
   const body = [
-    testData.elements[0],
     testData.elements[1],
     testData.elements[2],
     testData.elements[3],
-    testData.elements[7],
-    testData.elements[6],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[11],
-    testData.elements[10]
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
   const params = { orgid: org.id, projectid: projID };
   const method = 'POST';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.length).to.equal(10);
+    chai.expect(json.length).to.equal(body.length);
     done();
   };
 
@@ -295,10 +291,12 @@ function postElements(done) {
 function patchElements(done) {
   // Create request object
   const arrElemData = [
-    testData.elements[0],
     testData.elements[1],
     testData.elements[2],
-    testData.elements[3]
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
 
   // Create objects to update elements
@@ -309,13 +307,13 @@ function patchElements(done) {
 
   const params = { orgid: org.id, projectid: projID };
   const method = 'PATCH';
-  const req = getReq(params, arrUpdateObjects, method);
+  const req = testUtils.createRequest(adminUser, params, arrUpdateObjects, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -338,13 +336,13 @@ function getElements(done) {
   const body = {};
   const params = { orgid: org.id, projectid: projID };
   const method = 'GET';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
@@ -363,99 +361,33 @@ function getElements(done) {
 function deleteElements(done) {
   // Create request object
   const body = [
-    testData.elements[0].id,
-    testData.elements[1].id,
-    testData.elements[2].id,
-    testData.elements[3].id,
-    testData.elements[7].id,
-    testData.elements[6].id,
-    testData.elements[8].id,
-    testData.elements[9].id,
-    testData.elements[11].id,
-    testData.elements[10].id
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
+  const elemIDs = body.map(e => e.id);
 
   const params = { orgid: org.id, projectid: projID };
   const method = 'DELETE';
-  const req = getReq(params, body, method);
+  const req = testUtils.createRequest(adminUser, params, elemIDs, method);
 
   // Set response as empty object
   const res = {};
 
   // Verifies status code and headers
-  resFunctions(res);
+  testUtils.createResponse(res);
 
   // Verifies the response data
   res.send = function send(_data) {
-    const arrDeletedElem = JSON.parse(_data);
-    chai.expect(arrDeletedElem.length).to.equal(body.length);
-    chai.expect(arrDeletedElem.map(e => e.id)).to.have.members(
-      body.map(e => e.id)
-    );
+    const arrDeletedElemIDs = JSON.parse(_data);
+    chai.expect(arrDeletedElemIDs.length).to.equal(body.length);
+    chai.expect(arrDeletedElemIDs).to.have.members(elemIDs);
     done();
   };
 
   // DELETEs multiple elements
   apiController.deleteElements(req, res);
-}
-
-/* ----------( Helper Functions )----------*/
-/**
- * @description Helper function for setting the request parameters.
- *
- * @param {Object} params - Parameters for API req
- * @param {Object} body - Body for API req
- * @param {string} method - API method of req
- * @param {Object} query - Object containing query parameters
- *
- * @returns {Object} req - Request Object
- */
-function getReq(params, body, method, query = {}) {
-  // Error-Check
-  if (typeof params !== 'object') {
-    throw M.CustomError('params is not of type object.');
-  }
-  if (typeof params !== 'object') {
-    throw M.CustomError('body is not of type object.');
-  }
-
-  return {
-    headers: getHeaders(),
-    method: method,
-    params: params,
-    body: body,
-    query: query,
-    user: adminUser,
-    session: {}
-  };
-}
-
-/**
- * @description This is a common function used in every test to verify the
- * status code of the api request and provide the headers.
- *
- * @param {Object} res - Response Object
- */
-function resFunctions(res) {
-  // Verifies the response code: 200 OK
-  res.status = function status(code) {
-    chai.expect(code).to.equal(200);
-    return this;
-  };
-  // Provides headers to response object
-  res.header = function header(a, b) {
-    return this;
-  };
-}
-
-/**
- * @description Helper function for setting the request header.
- */
-function getHeaders() {
-  const formattedCreds = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
-  const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
-  return {
-    'Content-Type': 'application/json',
-    authorization: basicAuthHeader
-  };
 }

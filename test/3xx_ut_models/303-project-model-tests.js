@@ -34,7 +34,7 @@ const utils = M.require('lib.utils');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData('data.json');
+const testData = testUtils.importTestData('test_data.json');
 let org = null;
 
 /* --------------------( Main )-------------------- */
@@ -95,7 +95,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should find a project', findProject);
   it('should update a project', updateProject);
   it('should delete a project', deleteProject);
-  it('should fail creating a project with a long ID', verifyProjectFieldMaxChar);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -169,7 +168,7 @@ function updateProject(done) {
  * @description Deletes the project previously created in createProject test.
  */
 function deleteProject(done) {
-  // Find and remove the project previously created in createproject test.
+  // Find and remove the project previously created in createProject test.
   Project.findOneAndRemove({ _id: utils.createID(org._id, testData.projects[0].id) })
   .then(() => Project.find({ _id: utils.createID(org._id, testData.projects[0].id) }))
   .then((projects) => {
@@ -181,32 +180,6 @@ function deleteProject(done) {
     M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies invalid field string with over 36 characters when creating a project.
- * Expected error thrown: 'Project validation failed: id: Too many characters in username'
- */
-function verifyProjectFieldMaxChar(done) {
-  // Create a new model project
-  const newProject = new Project({
-    _id: utils.createID(org._id, testData.invalidProjects[4].id),
-    name: testData.invalidProjects[4].name,
-    org: org._id
-  });
-
-  // Save project model object to database
-  newProject.save()
-  .then(() => {
-    chai.assert(true === false, 'Fail, project should not have been created.');
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Project validation failed: _id: Too many characters in username'
-    chai.expect(error.message).to.equal('Project validation failed: _id: Too many characters in'
-      + ' username');
     done();
   });
 }
