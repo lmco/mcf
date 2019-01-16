@@ -81,24 +81,23 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should POST an organization', postOrg);
-  it('should reject a POST with multiple invalid orgs', postInvalidOrgs);
   it('should POST multiple orgs', postOrgs);
   it('should GET posted organization', getOrg);
   it('should PATCH an update to posted organization', patchOrg);
   it('should PATCH an update to multiple orgs', patchMultipleOrgs);
   it('should GET a user\'s roles in an organization', getMemberRoles);
   it('should GET existing organizations', getOrgs);
-  it('should reject a PATCH with invalid name', rejectPatchInvalidName);
-  it('should reject a PATCH to the org ID', rejectPatchIdMismatch);
-  it('should reject a PATCH of unique field to multiple orgs', rejectPatchUniqueFieldOrgs);
-  it('should reject a POST with ID mismatch', rejectPostIdMismatch);
-  it('should reject a POST with invalid org id', rejectPostInvalidId);
-  it('should reject a POST with missing org name', rejectPostMissingName);
-  it('should reject a POST with an empty name', rejectPostEmptyName);
-  it('should reject a POST of an existing org', rejectPostExistingOrg);
-  it('should reject a DELETE of a non-existing org', rejectDeleteNonExistingOrg);
+  /*
+  it('should GET all existing organizations', getAllOrgs);
+  it('should POST member role', postMemberRole);
+
+  it('should GET member role', getMemberRole);
+  it('should DELETE member role', deleteMemberRole);
   it('should DELETE organization', deleteOrg);
   it('should DELETE multiple organizations', deleteOrgs);
+  */
+
+
 });
 
 /* --------------------( Tests )-------------------- */
@@ -108,8 +107,8 @@ describe(M.getModuleName(module.filename), () => {
 function postOrg(done) {
   request({
     url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
     method: 'POST',
     body: JSON.stringify(testData.orgs[0])
   },
@@ -127,38 +126,19 @@ function postOrg(done) {
 }
 
 /**
- * @description Verifies POST /api/orgs rejects when an invalid org is supplied.
- */
-function postInvalidOrgs(done) {
-  request({
-    url: `${test.url}/api/orgs`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    body: JSON.stringify({ orgs: [testData.orgs[0], testData.orgs[2]] })
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 403 Forbidden
-    chai.expect(response.statusCode).to.equal(403);
-    // Verify error message in response body
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Forbidden');
-    done();
-  });
-}
-
-/**
  * @description Verifies POST /api/orgs creates multiple organizations.
  */
 function postOrgs(done) {
+  const orgData = [
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
   request({
     url: `${test.url}/api/orgs`,
-    headers: getHeaders(),
-    ca: readCaFile(),
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
     method: 'POST',
-    body: JSON.stringify({ orgs: [testData.orgs[2], testData.orgs[3]] })
+    body: JSON.stringify(orgData)
   },
   (err, response, body) => {
     // Expect no error
@@ -167,7 +147,7 @@ function postOrgs(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(2);
+    chai.expect(json.length).to.equal(orgData.length);
     done();
   });
 }
@@ -179,8 +159,8 @@ function postOrgs(done) {
 function getOrg(done) {
   request({
     url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
-    ca: readCaFile(),
-    headers: getHeaders()
+    ca: testUtils.readCaFile(),
+    headers: testUtils.getHeaders()
   },
   (err, response, body) => {
     // Expect no error
@@ -201,8 +181,8 @@ function getOrg(done) {
 function patchOrg(done) {
   request({
     url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
     method: 'PATCH',
     body: JSON.stringify({ name: testData.orgs[1].name })
   },
@@ -223,15 +203,20 @@ function patchOrg(done) {
  * @description Verifies PATCH /api/orgs updates multiple orgs at the same time.
  */
 function patchMultipleOrgs(done) {
+  const orgData = [
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
+  const arrUpdateOrg = orgData.map((p) => ({
+    id: p.id,
+    custom: { department: 'Space', location: { country: 'USA' } }
+  }));
   request({
     url: `${test.url}/api/orgs`,
-    headers: getHeaders(),
-    ca: readCaFile(),
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify({
-      orgs: [testData.orgs[2], testData.orgs[3]],
-      update: { custom: { department: 'Space', location: { country: 'USA' } } }
-    })
+    body: JSON.stringify(arrUpdateOrg)
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -254,87 +239,14 @@ function patchMultipleOrgs(done) {
 }
 
 /**
- * @description Verifies PATCH of org fails when invalid org name provided.
- */
-function rejectPatchInvalidName(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'PATCH',
-    body: JSON.stringify({ name: testData.invalidOrgs[1].name })
-  },
-  (err, response, body) => {
-    // Expect no error (request succeeds)
-    chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Verify error message in response body
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-/**
- * @description Verifies PATCH /api/orgs/:orgid fails when ID in body does not
- * match the ID in the URL parameters.
- */
-function rejectPatchIdMismatch(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.orgs[1].name}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'PATCH',
-    body: JSON.stringify(testData.ids[3])
-  },
-  (err, response, body) => {
-    // Expect no error (request succeeds)
-    chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Verify error message in response body
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-/**
- * @description Verifies PATCH /api/orgs fails when updating a unique field.
- */
-function rejectPatchUniqueFieldOrgs(done) {
-  request({
-    url: `${test.url}/api/orgs`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'PATCH',
-    body: JSON.stringify({
-      orgs: [testData.orgs[2], testData.orgs[3]],
-      update: { name: 'Same org' }
-    })
-  },
-  (err, response, body) => {
-    // Expect no error (request succeeds)
-    chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Verify error message in response body
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-/**
  * @description Verifies GET /api/orgs/:orgid/members/:username returns an
  * object containing that user's roles in the organization.
  */
 function getMemberRoles(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.users[0].adminUsername}`,
-    ca: readCaFile(),
-    headers: getHeaders()
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
+    ca: testUtils.readCaFile(),
+    headers: testUtils.getHeaders()
   },
   (err, response, body) => {
     // Expect no error
@@ -343,9 +255,8 @@ function getMemberRoles(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify the response body
     const json = JSON.parse(body);
-    chai.expect(json.write).to.equal(true);
-    chai.expect(json.read).to.equal(true);
-    chai.expect(json.admin).to.equal(true);
+    chai.expect(json[testData.adminUser.username]).to.have.members(
+      ['read', 'write', 'admin']);
     done();
   });
 }
@@ -355,10 +266,39 @@ function getMemberRoles(done) {
  * the user belongs.
  */
 function getOrgs(done) {
+  const orgData = [
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
+  const orgIDs = orgData.map(p => p.id).join(',');
   request({
     url: `${test.url}/api/orgs`,
-    ca: readCaFile(),
-    headers: getHeaders()
+    ca: testUtils.readCaFile(),
+    headers: testUtils.getHeaders(),
+    body: JSON.stringify(orgIDs)
+  },
+  (err, response, body) => {
+    // Expect no error (request succeeds)
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verifies length of response body
+    const foundOrgs = JSON.parse(body);
+    console.log(foundOrgs);
+    chai.expect(foundOrgs.length).to.equal(orgData.length);
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/orgs returns all organizations
+ * the user belongs to.
+ */
+function getAllOrgs(done) {
+  request({
+    url: `${test.url}/api/orgs`,
+    ca: testUtils.readCaFile(),
+    headers: testUtils.getHeaders()
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -367,162 +307,45 @@ function getOrgs(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verifies length of response body
     const json = JSON.parse(body);
+    //console.log(json);
     chai.expect(json.length).to.equal(4);
     done();
   });
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid fails when ID is body does not
- * match the ID in the URL parameters.
+ * @description Verifies POST /api/orgs/:orgid/members/:username
+ * Sets or updates a users permissions on an organization.
  */
-function rejectPostIdMismatch(done) {
+function postMemberRole(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.ids[3].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(testData.orgs[0])
-  },
-  (err, response, body) => {
-    // Expect no error (request succeeds)
-    chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Verify error message in response
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
+      url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
+      headers: testUtils.getHeaders(),
+      ca: testUtils.readCaFile(),
+      method: 'POST',
+      body: JSON.stringify(testData.orgs[0])
+    },
+    (err, response, body) => {
+      console.log(body);
+      // Expect no error
+      chai.expect(err).to.equal(null);
+      // Expect response status: 200 OK
+      chai.expect(response.statusCode).to.equal(200);
+      // Verify response body
+      const json = JSON.parse(body);
+      chai.expect(json.id).to.equal(testData.orgs[0].id);
+      chai.expect(json.name).to.equal(testData.orgs[0].name);
+      done();
+    });
 }
-
-/**
- * @description Verifies POST /api/orgs/:orgid fails when invalid ID provided.
- */
-function rejectPostInvalidId(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.ids[4].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(testData.names[6])
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Verify error message in response
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-/**
- * @description Verifies POST /api/orgs/:orgid fails when no name field in body.
- */
-function rejectPostMissingName(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.invalidOrgs[0].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(testData.invalidOrgs[0])
-  },
-  (err, response, body) => {
-    // Expect no error (request succeeds)
-    chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Verify the error message in the response body
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-
-/**
- * @description Verifies POST /api/orgs/:orgid fails when given an empty/invalid
- * name field.
- */
-function rejectPostEmptyName(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.invalidOrgs[1].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(testData.invalidOrgs[1])
-  },
-  (err, response, body) => {
-    // Expect no error (request succeeds)
-    chai.expect(err).to.equal(null);
-    // Expect response status: 400 Bad Request
-    chai.expect(response.statusCode).to.equal(400);
-    // Verify error message in response body
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Bad Request');
-    done();
-  });
-}
-
-
-/**
- * @description Verifies POST /api/orgs/:orgid fails when attempting to create
- * an org that already exists.
- */
-function rejectPostExistingOrg(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'POST',
-    body: JSON.stringify({ name: testData.orgs[0].name })
-  },
-  (err, response, body) => {
-    // Expect no error (request succeeds)
-    chai.expect(err).to.equal(null);
-    // Expect response status: 403 Forbidden
-    chai.expect(response.statusCode).to.equal(403);
-    // Verify error message in response
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Forbidden');
-    done();
-  });
-}
-
-/**
- * @description Verifies DELETE /api/orgs/orgid fails when attempting to delete
- * a non-existing organization.
- */
-function rejectDeleteNonExistingOrg(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.ids[5].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
-    method: 'DELETE'
-  },
-  function(err, response, body) {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 404 Not Found
-    chai.expect(response.statusCode).to.equal(404);
-    // Verify error message in response
-    const json = JSON.parse(body);
-    chai.expect(json.message).to.equal('Not Found');
-    done();
-  });
-}
-
 /**
  * @description Verifies DELETE /api/orgs/:orgid deletes an organization.
  */
 function deleteOrg(done) {
   request({
     url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
-    headers: getHeaders(),
-    ca: readCaFile(),
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
     method: 'DELETE'
   },
   function(err, response) {
@@ -540,8 +363,8 @@ function deleteOrg(done) {
 function deleteOrgs(done) {
   request({
     url: `${test.url}/api/orgs`,
-    headers: getHeaders(),
-    ca: readCaFile(),
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
     method: 'DELETE',
     body: JSON.stringify([testData.orgs[2], testData.orgs[3]])
   },
@@ -552,26 +375,4 @@ function deleteOrgs(done) {
     chai.expect(response.statusCode).to.equal(200);
     done();
   });
-}
-
-/* ----------( Helper Functions )----------*/
-/**
- * @description Produces and returns an object containing common request headers.
- */
-function getHeaders() {
-  const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
-  const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
-  return {
-    'Content-Type': 'application/json',
-    authorization: s
-  };
-}
-
-/**
- * @description Helper function for setting the certificate authorities for each request.
- */
-function readCaFile() {
-  if (test.hasOwnProperty('ca')) {
-    return fs.readFileSync(`${M.root}/${test.ca}`);
-  }
 }

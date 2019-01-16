@@ -776,6 +776,9 @@ function getProjects(req, res) {
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     projectIDs = req.body;
   }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    projectIDs = req.body.map(p => p.id);
+  }
 
   // Get all projectIDs the requesting user has access to
   // NOTE: find() sanitizes req.user and org.id.
@@ -1753,7 +1756,6 @@ function deleteElements(req, res) {
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body)
   .then((elements) => {
-    console.log(elements);
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(elements.map(p => utils.parseID(p).pop())));

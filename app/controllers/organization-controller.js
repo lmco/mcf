@@ -71,6 +71,7 @@ const utils = M.require('lib.utils');
  * });
  */
 function find(requestingUser, orgs, options) {
+  console.log(orgs);
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {

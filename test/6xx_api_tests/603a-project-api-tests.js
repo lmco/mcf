@@ -270,16 +270,23 @@ function getProjects(done) {
     testData.projects[1],
     testData.projects[2],
     testData.projects[3],
-    testData.projects[4]
+    testData.projects[4],
+    {
+      name: 'broken'
+    }
+
   ];
   const projIDs = projData.map(p => p.id).join(',');
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects?projectIDs=${projIDs}`,
+    //url: `${test.url}/api/orgs/${org.id}/projects?projectIDs=${projIDs}`,
+    url: `${test.url}/api/orgs/${org.id}/projects`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: 'GET'
+    method: 'GET',
+    body: JSON.stringify(projData)
   },
   (err, response, body) => {
+    console.log(body);
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
