@@ -219,11 +219,12 @@ function getOrgs(req, res) {
   let arrOrgID;
   let options;
 
-  // Define valid option type
+  // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    subtree: 'boolean'
+    subtree: 'boolean',
+    orgIDs: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -232,26 +233,24 @@ function getOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate', 'orgIDs'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-    // Check query for orgIDs
-    if (req.query.hasOwnProperty('orgIDs')) {
-      arrOrgID = req.query.orgIDs.split(',');
-    }
-    // No IDs include in query, check body
-    else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
-      arrOrgID = req.body;
-    }
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
-    const options = utils.parseOptions(req.query, validOptions);
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check query for orgIDs
+  if (options.orgIDs){
+    arrOrgID = options.orgID;
+    delete options['orgIDs'];
+  }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')){
+    // No IDs include in options, check body
+    arrOrgID = req.body;
   }
 
   // Get all organizations the requesting user has access to
@@ -298,18 +297,14 @@ function postOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Create organizations in request body
@@ -347,18 +342,14 @@ function patchOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Update the specified orgs
@@ -419,7 +410,8 @@ function getOrg(req, res) {
   // Define valid option type
   let options;
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    archived: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -428,18 +420,14 @@ function getOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Find the org from it's id
@@ -456,7 +444,9 @@ function getOrg(req, res) {
     return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -491,21 +481,14 @@ function postOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Set id in request body
-  req.body.id = req.params.orgid;
-
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Create the organization with provided parameters
@@ -544,28 +527,15 @@ function patchOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // If an ID was provided in the body, ensure it matches the ID in params
-  if (req.body.hasOwnProperty('id') && req.body.id !== req.params.orgid) {
-    const error = new M.CustomError(
-      'Organization ID in the body does not match ID in the params.', 400, 'warn'
-    );
-    return res.status(error.status).send(error);
-  }
-
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
   // Set body org id
   req.body.id = req.params.orgid;
 
@@ -578,7 +548,10 @@ function patchOrg(req, res) {
     return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -645,7 +618,10 @@ function getOrgMember(req, res) {
     return res.status(200).send(formatJSON(userPermissionObj));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -1589,12 +1565,17 @@ function whoami(req, res) {
  * @return {Object} res response object with elements
  */
 function getElements(req, res) {
+  // Define array ID
+  // Note: Intended to be undefined if not set
+  let arrElemID;
   let options;
-  // Define valid option type
+
+  // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    subtree: 'boolean'
+    subtree: 'boolean',
+    elementIDs: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1603,18 +1584,24 @@ function getElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate', 'subtree'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check query for orgIDs
+  if (options.elementIDs){
+    arrElemID = options.elementIDs;
+    delete options['elementIDs'];
+  }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')){
+    // No IDs include in options, check body
+    arrElemID = req.body;
   }
 
   // Default branch to master
@@ -1623,7 +1610,7 @@ function getElements(req, res) {
   // Find all elements from it's org.id and project.id
   // NOTE: find() sanitizes req.params.orgid and req.params.projectid
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.params.elementid, options)
+    branchid, arrElemID, options)
   .then((elements) => {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
@@ -1665,18 +1652,14 @@ function postElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Default branch to master
@@ -1723,18 +1706,14 @@ function patchElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Default branch to master
@@ -1776,9 +1755,10 @@ function deleteElements(req, res) {
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body)
   .then((elements) => {
+    console.log(elements);
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements));
+    return res.status(200).send(formatJSON(elements.map(p => utils.parseID(p).pop())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -1809,18 +1789,14 @@ function getElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate', 'subtree'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Default branch to master
@@ -1863,24 +1839,14 @@ function postElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // If element ID was provided in the body, ensure it matches element ID in params
-  if (req.body.hasOwnProperty('id') && (req.params.elementid !== req.body.id)) {
-    const error = new M.CustomError('Element ID in the body does not match ID in the params.', 400);
-    return res.status(error.status).send(error);
-  }
-
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Default branch to master
@@ -1925,24 +1891,14 @@ function patchElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // If element ID was provided in the body, ensure it matches element ID in params
-  if (req.body.hasOwnProperty('id') && (req.params.elementid !== req.body.id)) {
-    const error = new M.CustomError('Element ID in the body does not match ID in the params.', 400);
-    return res.status(error.status).send(error);
-  }
-
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Default branch to master
