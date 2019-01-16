@@ -32,7 +32,7 @@ let userAdmin = null;
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData('data.json');
+const testData = testUtils.importTestData('test_data.json');
 
 /* --------------------( Main )-------------------- */
 /**

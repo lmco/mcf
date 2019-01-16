@@ -31,7 +31,7 @@ const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData('data.json');
+const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -172,12 +172,12 @@ function createElement(done) {
  */
 function createElements(done) {
   const elemDataObjects = [
-    testData.elements[6],
-    testData.elements[7],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[10],
-    testData.elements[11]
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
 
   // Create elements via controller
@@ -294,12 +294,12 @@ function findElement(done) {
  */
 function findElements(done) {
   const elemDataObjects = [
-    testData.elements[6],
-    testData.elements[7],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[10],
-    testData.elements[11]
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
 
   // Create list of element ids to find
@@ -366,12 +366,12 @@ function findElements(done) {
 function findAllElements(done) {
   const elemDataObjects = [
     testData.elements[0],
-    testData.elements[6],
-    testData.elements[7],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[10],
-    testData.elements[11]
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
 
   // Find elements via controller
@@ -494,12 +494,12 @@ function updateElement(done) {
  */
 function updateElements(done) {
   const elemDataObjects = [
-    testData.elements[6],
-    testData.elements[7],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[10],
-    testData.elements[11]
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
 
   // Create objects to update elements
@@ -599,12 +599,12 @@ function deleteElement(done) {
  */
 function deleteElements(done) {
   const elemDataObjects = [
-    testData.elements[6],
-    testData.elements[7],
-    testData.elements[8],
-    testData.elements[9],
-    testData.elements[10],
-    testData.elements[11]
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
   ];
 
   // Create list of element ids to delete

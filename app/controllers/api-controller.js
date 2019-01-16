@@ -1257,15 +1257,17 @@ function getUsers(req, res) {
   // Extract options from request query
   const options = utils.parseOptions(req.query, { populate: 'array',
     archived: 'boolean',
-    usernames: 'string' });
+    usernames: 'array' });
 
   // Set usernames to undefined
   let usernames;
 
+  // Usernames provided in query
   if (options.usernames) {
     usernames = options.usernames;
     delete options.usernames;
   }
+  // Usernames provided in body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     usernames = req.body;
   }

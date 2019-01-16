@@ -30,7 +30,7 @@ const apiController = M.require('controllers.api-controller');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData('data.json');
+const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let newUser = null;
 
@@ -145,7 +145,7 @@ function postOrg(done) {
  */
 function postOrgMember(done) {
   // Create request object
-  const body = testData.roles[0].role;
+  const body = 'write';
   const params = {
     orgid: testData.orgs[0].id,
     username: testData.users[1].username };
@@ -476,17 +476,4 @@ function deleteOrgs(done) {
 
   // DELETEs multiple orgs
   apiController.deleteOrgs(req, res);
-}
-
-/* ----------( Helper Functions )----------*/
-/**
- * @description Helper function for setting the request header.
- */
-function getHeaders() {
-  const formattedCreds = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
-  const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
-  return {
-    'Content-Type': 'application/json',
-    authorization: basicAuthHeader
-  };
 }
