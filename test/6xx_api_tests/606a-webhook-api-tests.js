@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.506-webhook-mock-tests
+ * @module  test.606a-webhook-api-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -13,26 +13,28 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE webhooks.
+ * @description This tests the webhook API controller functionality:
+ * GET, POST, PATCH, and DELETE of a webhook.
  */
 
-// NPM modules
+// Node modules
 const chai = require('chai');
+const request = require('request');
 const path = require('path');
 
 // MBEE modules
-const APIController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
+// Variables used across test functions
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
 const testData = testUtils.importTestData('data.json');
+const test = M.config.test;
 let adminUser = null;
 let org = null;
 let projID = null;
@@ -46,47 +48,43 @@ let projID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * Before: Create admin, organization, and project.
    */
   before((done) => {
     // Open the database connection
     db.connect()
     // Create test admin
     .then(() => testUtils.createTestAdmin())
-    .then((_adminUser) => {
-      // Set global admin user
-      adminUser = _adminUser;
+    .then((user) => {
+      // Set admin global user
+      adminUser = user;
 
-      // Create organization
+      // Create org
       return testUtils.createTestOrg(adminUser);
     })
     .then((retOrg) => {
-      // Set global organization
       org = retOrg;
 
       // Create project
       return testUtils.createTestProject(adminUser, org.id);
     })
     .then((retProj) => {
-      // Set global project ID
       projID = utils.parseID(retProj.id).pop();
       done();
     })
     .catch((error) => {
       M.log.error(error);
       // Expect no error
-      chai.expect(error).to.equal(null);
+      chai.expect(error.message).to.equal(null);
       done();
     });
   });
 
   /**
-   * After: Remove Organization and project.
-   * Close database connection.
+   * After: Delete organization and admin user
    */
   after((done) => {
-    // Remove organization
-    // Note: Projects under organization will also be removed
+    // Delete organization
     testUtils.removeTestOrg(adminUser)
     .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())
@@ -108,29 +106,25 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies mock POST request to create a webhook.
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * creates an webhook.
  */
 function postWebhook(done) {
-  // Create request object
   const webhookData = testData.webhooks[0];
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    webhookid: webhookData.id
-  };
-  const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, webhookData, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Parse the JSON response
-    const createdWebhook = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${webhookData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(webhookData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const createdWebhook = JSON.parse(body);
 
     // Verify webhook created properly
     chai.expect(createdWebhook.id).to.equal(webhookData.id);
@@ -164,36 +158,28 @@ function postWebhook(done) {
     chai.expect(createdWebhook).to.not.have.keys(['archived', 'archivedOn',
       'archivedBy', '__v', '_id']);
     done();
-  };
-
-  // POSTs a webhook
-  APIController.postWebhook(req, res);
+  });
 }
 
 /**
- * @description Verifies mock GET request to find a webhook.
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * finds an webhook.
  */
 function getWebhook(done) {
-  // Create request object
   const webhookData = testData.webhooks[0];
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    webhookid: webhookData.id
-  };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, {}, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Parse the JSON response
-    const foundWebhook = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${webhookData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundWebhook = JSON.parse(body);
 
     // Verify correct webhook found
     chai.expect(foundWebhook.id).to.equal(webhookData.id);
@@ -227,42 +213,35 @@ function getWebhook(done) {
     chai.expect(foundWebhook).to.not.have.keys(['archived', 'archivedOn',
       'archivedBy', '__v', '_id']);
     done();
-  };
-
-  // GETs a webhook
-  APIController.getWebhook(req, res);
+  });
 }
 
 /**
- * @description Verifies mock PATCH request to update a webhook.
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * updates an webhook.
  */
 function patchWebhook(done) {
-  // Create request object
   const webhookData = testData.webhooks[0];
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    webhookid: webhookData.id
-  };
   const updateObj = {
     id: webhookData.id,
     name: 'Updated Name'
   };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, updateObj, method);
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${webhookData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify(updateObj)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const updatedWebhook = JSON.parse(body);
 
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Parse the JSON response
-    const updatedWebhook = JSON.parse(_data);
-
-    // Verify webhook updated correctly
+    // Verify webhook updated properly
     chai.expect(updatedWebhook.id).to.equal(webhookData.id);
     chai.expect(updatedWebhook.name).to.equal(updateObj.name);
     chai.expect(updatedWebhook.custom).to.deep.equal(webhookData.custom);
@@ -294,42 +273,31 @@ function patchWebhook(done) {
     chai.expect(updatedWebhook).to.not.have.keys(['archived', 'archivedOn',
       'archivedBy', '__v', '_id']);
     done();
-  };
-
-  // PATCHs a webhook
-  APIController.patchWebhook(req, res);
+  });
 }
 
 /**
- * @description Verifies mock DELETE request to delete a webhook.
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * deletes an webhook.
  */
 function deleteWebhook(done) {
-  // Create request object
   const webhookData = testData.webhooks[0];
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    webhookid: webhookData.id
-  };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, {}, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Parse the JSON response
-    const deletedWebhookID = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/webhooks/${webhookData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'DELETE'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const deletedWebhookID = JSON.parse(body);
 
     // Verify correct webhook deleted
     chai.expect(deletedWebhookID).to.equal(webhookData.id);
     done();
-  };
-
-  // DELETEs a webhook
-  APIController.deleteWebhook(req, res);
+  });
 }
