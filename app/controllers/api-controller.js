@@ -783,9 +783,9 @@ function getProjects(req, res) {
   }
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string',
+  const options = utils.parseOptions(req.query, { populate: 'array',
     archived: 'boolean',
-    projectIDs: 'string' });
+    projectIDs: 'array' });
 
   let projectIDs;
 
@@ -848,7 +848,7 @@ function postProjects(req, res) {
   }
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string', archived: 'boolean' });
+  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
 
   // Create the specified projects
   // NOTE: create() sanitizes req.params.orgid and the projects
@@ -886,7 +886,7 @@ function patchProjects(req, res) {
   }
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string', archived: 'boolean' });
+  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
 
   // Update the specified projects
   // NOTE: update() sanitizes req.params.orgid
@@ -955,7 +955,7 @@ function getProject(req, res) {
   }
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string', archived: 'boolean' });
+  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
 
   // Find the project from it's project.id and org.id
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
@@ -1004,7 +1004,7 @@ function postProject(req, res) {
   req.body.id = req.params.projectid;
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string' });
+  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Create project with provided parameters
   // NOTE: create() sanitizes req.params.projectid, req.params.orgid and req.body.name
@@ -1047,7 +1047,7 @@ function patchProject(req, res) {
   req.body.id = req.params.projectid;
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string' });
+  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Update the specified project
   // NOTE: update() sanitizes req.params.orgid and req.params.projectid
@@ -1275,7 +1275,7 @@ function getUsers(req, res) {
   }
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string',
+  const options = utils.parseOptions(req.query, { populate: 'array',
     archived: 'boolean',
     usernames: 'string' });
 
@@ -1320,7 +1320,7 @@ function postUsers(req, res) {
   }
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string' });
+  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Create users
   // NOTE: create() sanitizes req.body
@@ -1354,7 +1354,7 @@ function patchUsers(req, res) {
   }
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string' });
+  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Update the specified users
   // NOTE: update() sanitizes req.body.update
@@ -1419,7 +1419,7 @@ function getUser(req, res) {
   }
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string', archived: 'boolean' });
+  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
 
   // Find the member from it's username
   // NOTE: find() sanitizes req.params.username
@@ -1462,7 +1462,7 @@ function postUser(req, res) {
   req.body.username = req.params.username;
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string' });
+  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Create user with provided parameters
   // NOTE: create() sanitizes req.body
@@ -1505,7 +1505,7 @@ function patchUser(req, res) {
   req.body.username = req.params.username;
 
   // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'string' });
+  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Update the specified user
   // NOTE: update() sanitizes req.body

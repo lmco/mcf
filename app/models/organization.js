@@ -70,14 +70,11 @@ OrganizationSchema.virtual('projects', {
   justOne: false
 });
 
-{ this._id; }
-
 /* ---------------------------( Model Plugin )---------------------------- */
 // Use extensions model plugin;
 OrganizationSchema.plugin(extensions);
 
 /* -------------------------( Organization Methods )------------------------- */
-
 /**
  * @description Returns an organization's public data.
  * @memberof OrganizationSchema
