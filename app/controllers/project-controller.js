@@ -93,8 +93,8 @@ function find(requestingUser, organizationID, projects, options) {
       }
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters
@@ -229,8 +229,8 @@ function create(requestingUser, organizationID, projects, options) {
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and function-wide variables
@@ -302,8 +302,8 @@ function create(requestingUser, organizationID, projects, options) {
         index++;
       });
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
     }
 
     // Create searchQuery to search for any existing, conflicting projects
@@ -448,8 +448,8 @@ function update(requestingUser, organizationID, projects, options) {
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -523,8 +523,8 @@ function update(requestingUser, organizationID, projects, options) {
         index++;
       });
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
     }
 
     // Create searchQuery
@@ -720,8 +720,8 @@ function remove(requestingUser, organizationID, projects, options) {
       }
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and function-wide variables
@@ -737,8 +737,8 @@ function remove(requestingUser, organizationID, projects, options) {
       assert.ok(reqUser.admin, 'User does not have permissions to delete projects.');
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
     }
 
     // Define searchQuery and ownedQuery
