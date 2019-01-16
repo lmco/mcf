@@ -187,7 +187,8 @@ function getOrgMember(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const foundPermissions = JSON.parse(_data);
-    chai.expect(foundPermissions).to.have.members(['read', 'write']);
+    chai.expect(foundPermissions[testData.users[1].username]).to.have.members(
+      ['read', 'write']);
     done();
   };
 

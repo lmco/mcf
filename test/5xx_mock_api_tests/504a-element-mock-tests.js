@@ -389,8 +389,8 @@ function deleteElements(done) {
   res.send = function send(_data) {
     const arrDeletedElem = JSON.parse(_data);
     chai.expect(arrDeletedElem.length).to.equal(body.length);
-    chai.expect(arrDeletedElem.map(e => e.id)).to.have.members(
-      body.map(e => e.id)
+    chai.expect(arrDeletedElem.map(e => e)).to.have.members(
+      body.map(e => e)
     );
     done();
   };
