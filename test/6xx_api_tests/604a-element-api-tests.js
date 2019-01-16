@@ -131,6 +131,8 @@ function postElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const createdElement = JSON.parse(body);
+    console.log(createdElement)
+
 
     // Verify element created properly
     chai.expect(createdElement.id).to.equal(elemData.id);
@@ -158,10 +160,12 @@ function postElement(done) {
     // Verify additional properties
     chai.expect(createdElement.createdBy).to.equal(adminUser.username);
     chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(createdElement.archivedBy).to.equal(null);
     chai.expect(createdElement.createdOn).to.not.equal(null);
     chai.expect(createdElement.updatedOn).to.not.equal(null);
-    chai.expect(createdElement.archivedOn).to.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy',  '__v', '_id']);
     done();
   });
 }
@@ -196,9 +200,8 @@ function postElements(done) {
 
     // Expect createdElements not to be empty
     chai.expect(createdElements.length).to.equal(elemData.length);
-
     // Convert createdElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, createdElements);
+    const jmi2Elements = utils.convertJMI(1, 2, createdElements, 'id');
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const createdElement = jmi2Elements[elemObj.id];
@@ -229,10 +232,12 @@ function postElements(done) {
       // Verify additional properties
       chai.expect(createdElement.createdBy).to.equal(adminUser.username);
       chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(createdElement.archivedBy).to.equal(null);
       chai.expect(createdElement.createdOn).to.not.equal(null);
       chai.expect(createdElement.updatedOn).to.not.equal(null);
-      chai.expect(createdElement.archivedOn).to.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy',  '__v', '_id']);
     });
     done();
   });
@@ -285,10 +290,12 @@ function getElement(done) {
     // Verify additional properties
     chai.expect(foundElement.createdBy).to.equal(adminUser.username);
     chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(foundElement.archivedBy).to.equal(null);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
-    chai.expect(foundElement.archivedOn).to.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy',  '__v', '_id']);
     done();
   });
 }
@@ -325,7 +332,7 @@ function getElements(done) {
     chai.expect(foundElements.length).to.equal(elemData.length);
 
     // Convert foundElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, foundElements);
+    const jmi2Elements = utils.convertJMI(1, 2, foundElements, 'id');
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const foundElement = jmi2Elements[elemObj.id];
@@ -356,10 +363,12 @@ function getElements(done) {
       // Verify additional properties
       chai.expect(foundElement.createdBy).to.equal(adminUser.username);
       chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundElement.archivedBy).to.equal(null);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
-      chai.expect(foundElement.archivedOn).to.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy',  '__v', '_id']);
     });
     done();
   });
@@ -417,10 +426,12 @@ function patchElement(done) {
     // Verify additional properties
     chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
     chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(updatedElement.archivedBy).to.equal(null);
     chai.expect(updatedElement.createdOn).to.not.equal(null);
     chai.expect(updatedElement.updatedOn).to.not.equal(null);
-    chai.expect(updatedElement.archivedOn).to.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy',  '__v', '_id']);
     done();
   });
 }
@@ -461,7 +472,7 @@ function patchElements(done) {
     chai.expect(updatedElements.length).to.equal(elemData.length);
 
     // Convert updatedElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, updatedElements);
+    const jmi2Elements = utils.convertJMI(1, 2, updatedElements, 'id');
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const updatedElement = jmi2Elements[elemObj.id];
@@ -492,10 +503,12 @@ function patchElements(done) {
       // Verify additional properties
       chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
       chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(updatedElement.archivedBy).to.equal(null);
       chai.expect(updatedElement.createdOn).to.not.equal(null);
       chai.expect(updatedElement.updatedOn).to.not.equal(null);
-      chai.expect(updatedElement.archivedOn).to.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy',  '__v', '_id']);
     });
     done();
   });

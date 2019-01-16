@@ -156,7 +156,8 @@ function postProject(done) {
     chai.expect(createdProj.updatedOn).to.not.equal(null);
 
     // Verify specific fields not returned
-    chai.expect(createdProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
+    chai.expect(createdProj).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
     done();
   };
 
@@ -216,7 +217,8 @@ function postProjects(done) {
       chai.expect(createdProj.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(createdProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
+      chai.expect(createdProj).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
     });
     done();
   };
@@ -266,7 +268,8 @@ function getProject(done) {
     chai.expect(foundProj.updatedOn).to.not.equal(null);
 
     // Verify specific fields not returned
-    chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
+    chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
     done();
   };
 
@@ -327,7 +330,8 @@ function getProjects(done) {
       chai.expect(foundProject.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(foundProject).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
+      chai.expect(foundProject).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
     });
     done();
   };
@@ -390,7 +394,8 @@ function getAllProjects(done) {
       chai.expect(foundProject.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(foundProject).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
+      chai.expect(foundProject).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
     });
     done();
   };
@@ -582,7 +587,8 @@ function patchProject(done) {
     chai.expect(updatedProj.updatedOn).to.not.equal(null);
 
     // Verify specific fields not returned
-    chai.expect(updatedProj).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
+    chai.expect(updatedProj).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
     done();
   };
 
@@ -647,7 +653,8 @@ function patchProjects(done) {
       chai.expect(updatedProject.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(updatedProject).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
+      chai.expect(updatedProject).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
     });
     done();
   };

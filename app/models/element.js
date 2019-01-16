@@ -189,40 +189,104 @@ ElementSchema.methods.getPublicData = function() {
   // Parse the element ID
   const idParts = utils.parseID(this._id);
 
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
+  let parent;
+  let source;
+  let target;
+
+  // If this.createdBy is defined
+  if (this.createdBy) {
+    // If this.createdBy is populated
+    if (typeof this.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = this.createdBy.getPublicData();
+    }
+    else {
+      createdBy = this.createdBy;
+    }
+  }
+
+  // If this.lastModifiedBy is defined
+  if (this.lastModifiedBy) {
+    // If this.lastModifiedBy is populated
+    if (typeof this.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = this.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = this.lastModifiedBy;
+    }
+  }
+
+  // If this.archivedBy is defined
+  if (this.archivedBy) {
+    // If this.archivedBy is populated
+    if (typeof this.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = this.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = this.archivedBy;
+    }
+  }
+
+  // If this.parent is defined
+  if (this.parent) {
+    // If this.parent is populated
+    if (typeof this.parent === 'object') {
+      // Get the public data of parent
+      parent = this.parent.getPublicData();
+    }
+    else {
+      parent = utils.parseID(this.parent).pop();
+    }
+  }
+
+  // If this.source is defined
+  if (this.source) {
+    // If this.source is populated
+    if (typeof this.source === 'object') {
+      // Get the public data of source
+      source = this.source.getPublicData();
+    }
+    else {
+      source = utils.parseID(this.source).pop();
+    }
+  }
+
+  // If this.target is defined
+  if (this.target) {
+    // If this.target is populated
+    if (typeof this.target === 'object') {
+      // Get the public data of target
+      target = this.target.getPublicData();
+    }
+    else {
+      target = utils.parseID(this.target).pop();
+    }
+  }
+
   const data = {
     id: idParts.pop(),
     name: this.name,
     project: idParts[1],
     org: idParts[0],
-    createdOn: this.createdOn,
-    updatedOn: this.updatedOn,
+    parent: parent,
+    source: source,
+    target: target,
     documentation: this.documentation,
-    custom: this.custom
+    custom: this.custom,
+    createdOn: this.createdOn,
+    createdBy: createdBy,
+    updatedOn: this.updatedOn,
+    lastModifiedBy: lastModifiedBy,
+    archived: (this.archived) ? true : undefined,
+    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
+    archivedBy: archivedBy,
   };
 
-  // Handle parent element
-  if (this.parent) {
-    this.parent = (this.parent._id)
-      ? utils.parseID(this.parent._id).pop()
-      : utils.parseID(this.parent).pop();
-  }
-  else {
-    data.parent = null;
-  }
-
-  // Handle source element
-  if (this.source) {
-    this.source = (this.source._id)
-      ? utils.parseID(this.source._id).pop()
-      : utils.parseID(this.source).pop();
-  }
-
-  // Handle target element
-  if (this.target) {
-    this.target = (this.target._id)
-      ? utils.parseID(this.target._id).pop()
-      : utils.parseID(this.target).pop();
-  }
 
   if (this.contains) {
     // Handle the virtual contains field
