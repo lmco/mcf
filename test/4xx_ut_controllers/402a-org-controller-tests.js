@@ -294,7 +294,7 @@ function findAllOrgs(done) {
   OrgController.find(adminUser)
   .then((foundOrgs) => {
     // Expect foundOrgs not to be empty. Cannot know true number in DB
-    chai.expect(foundOrgs.length).to.not.equal(0);
+    chai.expect(foundOrgs.length).to.equal(orgDataObjects.length);
 
     // Convert foundOrgs to JMI type 2 for easier lookup
     const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs);

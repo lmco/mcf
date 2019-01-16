@@ -41,7 +41,10 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 /**
- * @description This function finds one or many webhooks.
+ * @description This function finds one or many webhooks. Depending on the given
+ * parameters, this functions can find a single webhook by ID, multiple webhooks
+ * by ID, or all webhooks in the given project. The user making the request must
+ * be part of the specified project or be a system-wide admin.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -55,8 +58,7 @@ const utils = M.require('lib.utils');
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
- * @return {Promise} resolve - Array of found webhook objects
- *                   reject - error
+ * @return {Promise} Array of found webhook objects
  *
  * @example
  * find({User}, 'orgID', 'projID', ['web1', 'web2'], { populate: 'project' })
@@ -69,6 +71,30 @@ const utils = M.require('lib.utils');
  */
 function find(requestingUser, organizationID, projectID, webhooks, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+
+      const webhookTypes = ['undefined', 'object', 'string'];
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(webhookTypes.includes(typeof webhooks), 'Webhooks parameter is an invalid type.');
+      // If webhooks is an object, ensure it's an array of strings
+      if (typeof webhooks === 'object') {
+        assert.ok(Array.isArray(webhooks), 'Webhooks is an object, but not an array.');
+        assert.ok(webhooks.every(w => typeof w === 'string'), 'Webhooks is not an array of'
+          + ' strings.');
+      }
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
@@ -86,43 +112,37 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
     let archived = false;
     let populateString = '';
 
-    // Ensure parameters are valid
-    try {
-      // Ensure that requesting user has an _id field
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-
-      // Ensure orgID and projID are strings
-      assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-
-      if (options) {
-        // If the option 'archived' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('archived')) {
-          assert.ok(typeof options.archived === 'boolean', 'The option \'archived\''
-            + ' is not a boolean.');
-          archived = options.archived;
+    // Ensure options are valid
+    if (options) {
+      // If the option 'archived' is supplied, ensure it's a boolean
+      if (options.hasOwnProperty('archived')) {
+        if (typeof options.archived !== 'boolean') {
+          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
         }
-
-        // If the option 'populate' is supplied, ensure it's a string
-        if (options.hasOwnProperty('populate')) {
-          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
-            + ' is not an array.');
-          assert.ok(options.populate.every(o => typeof o === 'string'),
-            'Every value in the populate array must be a string.');
-
-          // Ensure each field is able to be populated
-          const validPopulateFields = Webhook.Webhook.getValidPopulateFields();
-          options.populate.forEach((p) => {
-            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
-              + ' be populated.');
-          });
-
-          populateString = options.populate.join(' ');
-        }
+        archived = options.archived;
       }
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
+        }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = Webhook.Webhook.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
+      }
     }
 
     // Find the project
@@ -172,7 +192,10 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
 }
 
 /**
- * @description This functions creates one or many webhooks.
+ * @description This functions creates one or many webhooks from the given data.
+ * This function is restricted to project writers or system-wide admins ONLY.
+ * This function checks for existing webhooks with duplicate IDs before creating
+ * the supplied webhooks.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -205,8 +228,7 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of created webhook objects
- *                   reject - error
+ * @return {Promise} Array of created webhook objects
  *
  * @example
  * create({User}, 'orgID', 'projID', [{Web1}, {Web2}, ...], { populate: 'project })
@@ -219,6 +241,29 @@ function find(requestingUser, organizationID, projectID, webhooks, options) {
  */
 function create(requestingUser, organizationID, projectID, webhooks, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof webhooks === 'object', 'Webhooks parameter is not an object.');
+      assert.ok(webhooks !== null, 'Webhooks parameter cannot be null.');
+      // If webhooks is an array, ensure each item inside is an object
+      if (Array.isArray(webhooks)) {
+        assert.ok(webhooks.every(w => typeof w === 'object'), 'Every item in webhooks is not an'
+          + ' object.');
+        assert.ok(webhooks.every(w => w !== null), 'One or more items in webhooks is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
@@ -230,34 +275,30 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
     let populateString = '';
     let populate = false;
 
-    // Ensure parameters are valid
-    try {
-      assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-
-      if (options) {
-        // If the option 'populate' is supplied, ensure it's a string
-        if (options.hasOwnProperty('populate')) {
-          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
-            + ' is not an array.');
-          assert.ok(options.populate.every(o => typeof o === 'string'),
-            'Every value in the populate array must be a string.');
-
-          // Ensure each field is able to be populated
-          const validPopulateFields = Webhook.Webhook.getValidPopulateFields();
-          options.populate.forEach((p) => {
-            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
-              + ' be populated.');
-          });
-
-          populateString = options.populate.join(' ');
-          populate = true;
+    // Ensure options are valid
+    if (options) {
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
         }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = Webhook.Webhook.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
+        populate = true;
       }
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
     }
 
     // Check the type of the webhooks parameter
@@ -363,7 +404,14 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
 }
 
 /**
- * @description This function updates one or many webhooks.
+ * @description This function updates one or many webhooks. Multiple fields in
+ * multiple webhooks can be updated at once, provided that the fields are
+ * allowed to be updated. If updating the custom data on a webhook, and
+ * key/value pairs that exist in the update object don't exist in the current
+ * custom data, the key/value pair will be added. If the key/value pairs do
+ * exist, the value will be changed. If a webhook is archived, it must first be
+ * unarchived before any other updates occur. This function is restricted to
+ * project writers and system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -382,8 +430,7 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of updated webhook objects
- *                   reject - error
+ * @return {Promise} Array of updated webhook objects.
  *
  * @example
  * update({User}, 'orgID', 'projID', [{Updated Web 1}, {Updated Web 2}...], { populate: 'project' })
@@ -396,6 +443,29 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
  */
 function update(requestingUser, organizationID, projectID, webhooks, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof webhooks === 'object', 'Webhooks parameter is not an object.');
+      assert.ok(webhooks !== null, 'Webhooks parameter cannot be null.');
+      // If webhooks is an array, ensure each item inside is an object
+      if (Array.isArray(webhooks)) {
+        assert.ok(webhooks.every(w => typeof w === 'object'), 'Every item in webhooks is not an'
+          + ' object.');
+        assert.ok(webhooks.every(w => w !== null), 'One or more items in webhooks is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
@@ -410,36 +480,29 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
     // Initialize valid options
     let populateString = '';
 
-    // Ensure parameters are valid
-    try {
-      // Ensure that requesting user has an _id field
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-
-      // Ensure orgID and projID are strings
-      assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-
-      if (options) {
-        // If the option 'populate' is supplied, ensure it's a string
-        if (options.hasOwnProperty('populate')) {
-          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
-            + ' is not an array.');
-          assert.ok(options.populate.every(o => typeof o === 'string'),
-            'Every value in the populate array must be a string.');
-
-          // Ensure each field is able to be populated
-          const validPopulateFields = Webhook.Webhook.getValidPopulateFields();
-          options.populate.forEach((p) => {
-            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
-              + ' be populated.');
-          });
-
-          populateString = options.populate.join(' ');
+    // Ensure options are valid
+    if (options) {
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
         }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = Webhook.Webhook.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
       }
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
     }
 
     // Find the project
@@ -594,7 +657,8 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
 }
 
 /**
- * @description This function removes one or many webhooks.
+ * @description This function removes one or many webhooks. This function can
+ * be used by system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -604,7 +668,7 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted webhook ids
+ * @return {Promise} Array of deleted webhook ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', ['web1', 'web2'])
@@ -617,26 +681,37 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
  */
 function remove(requestingUser, organizationID, projectID, webhooks, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions to delete'
+        + ' webhooks.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+
+      const webhookTypes = ['object', 'string'];
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(webhookTypes.includes(typeof webhooks), 'Webhooks parameter is an invalid type.');
+      // If webhooks is an object, ensure it's an array of strings
+      if (typeof webhooks === 'object') {
+        assert.ok(Array.isArray(webhooks), 'Webhooks is an object, but not an array.');
+        assert.ok(webhooks.every(w => typeof w === 'string'), 'Webhooks is not an array of'
+          + ' strings.');
+      }
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters and create function-wide variables
-    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     const saniWebhooks = sani.sanitize(JSON.parse(JSON.stringify(webhooks)));
     let foundWebhooks = [];
-
-    // Ensure parameters are valid
-    try {
-      // Ensure that requesting user has an _id field and is a system admin
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      assert.ok(reqUser.admin, 'User does not have permissions to delete webhooks.');
-
-      // Ensure orgID and projID are strings
-      assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projID === 'string', 'Project ID is not a string.');
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
-    }
 
     // Define searchQuery
     const searchQuery = {};

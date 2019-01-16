@@ -173,7 +173,8 @@ ElementSchema.statics.getValidBulkUpdateFields = function() {
  * @memberOf ElementSchema
  */
 ElementSchema.methods.getValidPopulateFields = function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source', 'target', 'project', 'contains'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source',
+    'target', 'project', 'contains'];
 };
 
 ElementSchema.statics.getValidPopulateFields = function() {

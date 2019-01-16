@@ -43,7 +43,9 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
 /**
- * @description This function finds one or many users.
+ * @description This function finds one or many users. Depending on the given
+ * parameters, this function can find a single user by username, multiple users
+ * by username, or all users in the system.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} [users] - The users to find. Can either be an
@@ -55,8 +57,7 @@ const utils = M.require('lib.utils');
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  *
- * @return {Promise} resolve - Array of found user objects
- *                   reject - error
+ * @return {Promise} Array of found user objects.
  *
  * @example
  * find({User}, ['user1', 'user2'], { populate: 'createdBy' })
@@ -69,8 +70,28 @@ const utils = M.require('lib.utils');
  */
 function find(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+
+      const userTypes = ['undefined', 'object', 'string'];
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(userTypes.includes(typeof users), 'Users parameter is an invalid type.');
+      // If users is an object, ensure it's an array of strings
+      if (typeof users === 'object') {
+        assert.ok(Array.isArray(users), 'Users is an object, but not an array.');
+        assert.ok(users.every(u => typeof u === 'string'), 'Users is not an array of strings.');
+      }
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters
-    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniUsers = (users !== undefined)
       ? sani.sanitize(JSON.parse(JSON.stringify(users)))
       : undefined;
@@ -84,39 +105,37 @@ function find(requestingUser, users, options) {
     let archived = false;
     let populateString = '';
 
-    // Ensure parameters are valid
-    try {
-      // Ensure that requesting user has an _id field
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-
-      if (options) {
-        // If the option 'archived' is supplied, ensure it's a boolean
-        if (options.hasOwnProperty('archived')) {
-          assert.ok(typeof options.archived === 'boolean', 'The option \'archived\''
-            + ' is not a boolean.');
-          archived = options.archived;
+    // Ensure options are valid
+    if (options) {
+      // If the option 'archived' is supplied, ensure it's a boolean
+      if (options.hasOwnProperty('archived')) {
+        if (typeof options.archived !== 'boolean') {
+          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
         }
-
-        // If the option 'populate' is supplied, ensure it's a string
-        if (options.hasOwnProperty('populate')) {
-          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
-            + ' is not an array.');
-          assert.ok(options.populate.every(o => typeof o === 'string'),
-            'Every value in the populate array must be a string.');
-
-          // Ensure each field is able to be populated
-          const validPopulateFields = User.getValidPopulateFields();
-          options.populate.forEach((p) => {
-            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
-            + ' be populated.');
-          });
-
-          populateString = options.populate.join(' ');
-        }
+        archived = options.archived;
       }
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
+        }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = User.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
+      }
     }
 
     // Define searchQuery
@@ -139,7 +158,7 @@ function find(requestingUser, users, options) {
       // Invalid parameter, throw an error
       throw new M.CustomError('Invalid input for finding users.', 400, 'warn');
     }
-    // TODO: Find users in batches (possibility of more than 100,000 users)
+
     // Find the users
     User.find(searchQuery)
     .populate(populateString)
@@ -149,7 +168,10 @@ function find(requestingUser, users, options) {
 }
 
 /**
- * @description This functions creates one or many users.
+ * @description This functions creates one or many users from the provided data.
+ * This function is restricted to system-wide admin ONLY. The database is
+ * searched for existing users with duplicate usernames and the users are added
+ * to the default org prior to being created and returned from this function.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} users - Either an array of objects containing user
@@ -171,8 +193,7 @@ function find(requestingUser, users, options) {
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  *
- * @return {Promise} resolve - Array of created user objects
- *                   reject - error
+ * @return {Promise} Array of created user objects
  *
  * @example
  * create({User}, [{User1}, {User2}, ...], { populate: 'createdBy' })
@@ -185,6 +206,28 @@ function find(requestingUser, users, options) {
  */
 function create(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions to create users.');
+      assert.ok(typeof users === 'object', 'Users parameter is not an object.');
+      assert.ok(users !== null, 'Users parameter cannot be null.');
+      // If users is an array, ensure each item inside is an object
+      if (Array.isArray(users)) {
+        assert.ok(users.every(u => typeof u === 'object'), 'Every item in users is not an'
+          + ' object.');
+        assert.ok(users.every(u => u !== null), 'One or more items in users is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
@@ -194,34 +237,30 @@ function create(requestingUser, users, options) {
     let populateString = '';
     let populate = false;
 
-    // Ensure parameters are valid
-    try {
-      // Ensure that requesting user has an _id field and is a system admin
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      assert.ok(reqUser.admin, 'User does not have permissions to create users.');
-
-      if (options) {
-        // If the option 'populate' is supplied, ensure it's a string
-        if (options.hasOwnProperty('populate')) {
-          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
-            + ' is not an array.');
-          assert.ok(options.populate.every(o => typeof o === 'string'),
-            'Every value in the populate array must be a string.');
-
-          // Ensure each field is able to be populated
-          const validPopulateFields = User.getValidPopulateFields();
-          options.populate.forEach((p) => {
-            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
-              + ' be populated.');
-          });
-
-          populateString = options.populate.join(' ');
-          populate = true;
+    // Ensure options are valid
+    if (options) {
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
         }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = User.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
+        populate = true;
       }
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
     }
 
     // Define array to store user data
@@ -325,7 +364,14 @@ function create(requestingUser, users, options) {
 }
 
 /**
- * @description This function updates one or many users.
+ * @description This function updates one or many users. Multiple fields in
+ * multiple users can be updated at once, provided that the fields are allowed
+ * to be updated. If updating the custom data on a user, and key/value pairs
+ * exist in the update object that don't exist in the current custom data,
+ * the key/value pair will be added. If the key/value pairs do exist, the value
+ * will be changed. If a user is archived, they must first be unarchived before
+ * any other updates occur. NOTE: A user cannot archive or unarchive themselves.
+ * This function is restricted to system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} users - Either an array of objects containing
@@ -359,6 +405,27 @@ function create(requestingUser, users, options) {
  */
 function update(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(typeof users === 'object', 'Users parameter is not an object.');
+      assert.ok(users !== null, 'Users parameter cannot be null.');
+      // If users is an array, ensure each item inside is an object
+      if (Array.isArray(users)) {
+        assert.ok(users.every(u => typeof u === 'object'), 'Every item in users is not an'
+          + ' object.');
+        assert.ok(users.every(u => u !== null), 'One or more items in users is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (msg) {
+      throw new M.CustomError(msg, 400, 'warn');
+    }
+
     // Sanitize input parameters and create function-wide variables
     const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -369,32 +436,29 @@ function update(requestingUser, users, options) {
     // Initialize valid options
     let populateString = '';
 
-    // Ensure parameters are valid
-    try {
-      // Ensure that requesting user has an _id field
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-
-      if (options) {
-        // If the option 'populate' is supplied, ensure it's a string
-        if (options.hasOwnProperty('populate')) {
-          assert.ok(Array.isArray(options.populate), 'The option \'populate\''
-            + ' is not an array.');
-          assert.ok(options.populate.every(o => typeof o === 'string'),
-            'Every value in the populate array must be a string.');
-
-          // Ensure each field is able to be populated
-          const validPopulateFields = User.getValidPopulateFields();
-          options.populate.forEach((p) => {
-            assert.ok(validPopulateFields.includes(p), `The field ${p} cannot`
-              + ' be populated.');
-          });
-
-          populateString = options.populate.join(' ');
+    // Ensure options are valid
+    if (options) {
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
         }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = User.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
       }
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
     }
 
     // Check the type of the users parameter
@@ -530,15 +594,16 @@ function update(requestingUser, users, options) {
       // Update all users through a bulk write to the database
       return User.bulkWrite(bulkArray);
     })
-    .then(() => User.find(searchQuery)
-    .populate(populateString))
+    .then(() => User.find(searchQuery).populate(populateString))
     .then((foundUpdatedUsers) => resolve(foundUpdatedUsers))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
 /**
- * @description This function removes one or many users.
+ * @description This function removes one or many users. It additionally removes
+ * the user from permissions lists on any org or project that the user was apart
+ * of. This function can be used by system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} users - The users to remove. Can either be an
@@ -546,13 +611,12 @@ function update(requestingUser, users, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} resolve - Array of deleted users usernames
- *                   reject - error
+ * @return {Promise} Array of deleted users usernames
  *
  * @example
  * remove({User}, ['user1', 'user2'])
- * .then(function(users) {
- *   // Do something with the deleted users
+ * .then(function(usernames) {
+ *   // Do something with the deleted users usernames
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -560,21 +624,32 @@ function update(requestingUser, users, options) {
  */
 function remove(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
-    // Sanitize input parameters and create function-wide variables
-    const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
-    let foundUsers = [];
-    let foundUsernames = [];
-
-    // Ensure parameters are valid
+    // Ensure input parameters are correct type
     try {
-      // Ensure the requesting user has an _id and is a system admin
-      assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      assert.ok(reqUser.admin, 'User does not have permissions to delete users.');
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions to delete users.');
+      const userTypes = ['object', 'string'];
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(userTypes.includes(typeof users), 'Users parameter is an invalid type.');
+      // If users is an object, ensure it's an array of strings
+      if (typeof users === 'object') {
+        assert.ok(Array.isArray(users), 'Users is an object, but not an array.');
+        assert.ok(users.every(u => typeof u === 'string'), 'Users is not an array of strings.');
+      }
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+      throw new M.CustomError(msg, 400, 'warn');
     }
+
+    // Sanitize input parameters and create function-wide variables
+    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    let foundUsers = [];
+    let foundUsernames = [];
 
     // Define searchQuery and memberQuery
     const searchQuery = {};

@@ -75,7 +75,6 @@ OrganizationSchema.virtual('projects', {
 OrganizationSchema.plugin(extensions);
 
 /* -------------------------( Organization Methods )------------------------- */
-
 /**
  * @description Returns an organization's public data.
  * @memberof OrganizationSchema
@@ -152,7 +151,8 @@ OrganizationSchema.methods.getPublicData = function() {
     lastModifiedBy: lastModifiedBy,
     archived: (this.archived) ? true : undefined,
     archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
-    archivedBy: archivedBy
+    archivedBy: archivedBy,
+    projects: (this.projects) ? this.projects.map(p => p.getPublicData()) : undefined
   };
 };
 
@@ -183,7 +183,7 @@ OrganizationSchema.statics.getValidUpdateFields = function() {
  * @memberOf OrganizationSchema
  */
 OrganizationSchema.methods.getValidPopulateFields = function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'projects'];
 };
 
 OrganizationSchema.statics.getValidPopulateFields = function() {

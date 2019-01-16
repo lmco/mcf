@@ -103,6 +103,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple projects', postProjects);
   it('should GET a project', getProject);
   it('should GET multiple projects', getProjects);
+  it('should GET all projects', getAllProjects);
   it('should POST a project member', postProjectMember);
   it('should GET a project role', getProjectMember);
   it('should GET all project members', getProjectMembers);
@@ -175,8 +176,7 @@ function postProjects(done) {
     testData.projects[4]
   ];
   const params = {
-    orgid: org.id,
-    projectid: testData.projects[0].id
+    orgid: org.id
   };
   const method = 'POST';
   const req = testUtils.createRequest(adminUser, params, projData, method);
@@ -286,8 +286,7 @@ function getProjects(done) {
     testData.projects[4]
   ];
   const params = {
-    orgid: org.id,
-    projectid: testData.projects[0].id
+    orgid: org.id
   };
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, projData.map(p => p.id), method);
@@ -303,7 +302,70 @@ function getProjects(done) {
     // Parse the JSON response
     const foundProjects = JSON.parse(_data);
     chai.expect(Array.isArray(foundProjects)).to.equal(true);
-    chai.expect(foundProjects.length).to.equal(4);
+    chai.expect(foundProjects.length).to.equal(projData.length);
+
+    // Convert foundProjects to JMI type 2 for easier lookup
+    const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
+    // Loop through each project data object
+    projData.forEach((projDataObject) => {
+      const foundProject = jmi2Projects[projDataObject.id];
+
+      // Verify correct project found
+      chai.expect(foundProject.id).to.equal(projDataObject.id);
+      chai.expect(foundProject.name).to.equal(projDataObject.name);
+      chai.expect(foundProject.custom).to.deep.equal(projDataObject.custom || {});
+      chai.expect(foundProject.permissions.read).to.include(adminUser.username);
+      chai.expect(foundProject.permissions.write).to.include(adminUser.username);
+      chai.expect(foundProject.permissions.admin).to.include(adminUser.username);
+      chai.expect(foundProject.org).to.equal(org.id);
+      chai.expect(foundProject.visibility).to.equal(projDataObject.visibility || 'private');
+
+      // Verify additional properties
+      chai.expect(foundProject.createdBy).to.equal(adminUser.username);
+      chai.expect(foundProject.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundProject.createdOn).to.not.equal(null);
+      chai.expect(foundProject.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundProject).to.not.have.keys(['archived', 'archivedOn', '__v', '_id']);
+    });
+    done();
+  };
+
+  // GETs multiple projects
+  APIController.getProjects(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to find all projects in an org.
+ */
+function getAllProjects(done) {
+  // Create request object
+  const projData = [
+    testData.projects[0],
+    testData.projects[1],
+    testData.projects[2],
+    testData.projects[3],
+    testData.projects[4]
+  ];
+  const params = {
+    orgid: org.id
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundProjects = JSON.parse(_data);
+    chai.expect(Array.isArray(foundProjects)).to.equal(true);
+    chai.expect(foundProjects.length).to.equal(projData.length);
 
     // Convert foundProjects to JMI type 2 for easier lookup
     const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
@@ -369,7 +431,7 @@ function postProjectMember(done) {
   };
 
   // POSTs a member to a project
-  APIController.postProjectRole(req, res);
+  APIController.postProjMember(req, res);
 }
 
 /**
@@ -396,15 +458,14 @@ function getProjectMember(done) {
     // Parse the JSON response
     const foundPermissions = JSON.parse(_data);
 
-    // Expect response to be an array
-    chai.expect(Array.isArray(foundPermissions)).to.equal(true);
-    chai.expect(foundPermissions).to.have.members(['read', 'write']);
-
+    // Expect response to contain only requested user
+    chai.expect(Object.keys(foundPermissions).length).to.equal(1);
+    chai.expect(foundPermissions[nonAdminUser.username]).to.have.members(['read', 'write']);
     done();
   };
 
   // GETs a members role in a project
-  APIController.getProjMemRole(req, res);
+  APIController.getProjMember(req, res);
 }
 
 /**
@@ -439,7 +500,7 @@ function getProjectMembers(done) {
   };
 
   // GETs a projects members
-  APIController.getAllProjMemRoles(req, res);
+  APIController.getProjMembers(req, res);
 }
 
 /**
@@ -466,14 +527,14 @@ function deleteProjectMember(done) {
     // Parse the JSON response
     const foundPermissions = JSON.parse(_data);
 
-    // Expect there to be two users on the project
+    // Expect there to be one user on the project
     chai.expect(Object.keys(foundPermissions).length).to.equal(1);
     chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
     done();
   };
 
   // DELETEs a member on a project
-  APIController.deleteProjectRole(req, res);
+  APIController.deleteProjMember(req, res);
 }
 
 /**
@@ -541,8 +602,7 @@ function patchProjects(done) {
     testData.projects[4]
   ];
   const params = {
-    orgid: org.id,
-    projectid: testData.projects[0].id
+    orgid: org.id
   };
   const method = 'PATCH';
   const updateObj = projData.map((p) => ({
@@ -562,7 +622,7 @@ function patchProjects(done) {
     // Parse the JSON response
     const updateProjects = JSON.parse(_data);
     chai.expect(Array.isArray(updateProjects)).to.equal(true);
-    chai.expect(updateProjects.length).to.equal(4);
+    chai.expect(updateProjects.length).to.equal(projData.length);
 
     // Convert updateProjects to JMI type 2 for easier lookup
     const jmi2Projects = utils.convertJMI(1, 2, updateProjects, 'id');
@@ -641,8 +701,7 @@ function deleteProjects(done) {
     testData.projects[4]
   ];
   const params = {
-    orgid: org.id,
-    projectid: testData.projects[0].id
+    orgid: org.id
   };
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, params, projData.map(p => p.id), method);
