@@ -103,11 +103,14 @@ ArtifactSchema.methods.getPublicData = function() {
   return {
     id: utils.parseID(this._id)[2],
     filename: this.filename,
-    history: this.history,
     contentType: this.contentType,
-    createdBy: this.createdBy,
-    lastModified: this.lastModified
-
+    createdBy: this.createdBy.username,
+    lastModified: this.lastModified,
+    history: this.history.map(h => ({
+      hash: h.hash,
+      user: h.user.username,
+      updatedOn: h.updatedOn
+    }))
   };
 };
 

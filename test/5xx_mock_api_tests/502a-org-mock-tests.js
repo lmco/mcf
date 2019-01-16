@@ -13,7 +13,7 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
  * GET, POST, PATCH, and DELETE organizations.
